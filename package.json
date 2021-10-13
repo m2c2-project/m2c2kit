@@ -4,18 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json && npm run bundle:esm",
-    "bundle:esm": "rollup -c",
+    "build": "npm run build:full && npm run build:minified",
+    "build:full": "rollup -c",
+    "build:full+watch": "rollup -c --watch --verbose",    
+    "build:minified": "rollup -c rollup.config.min.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve --config ./webpack.config.js --mode development"
+    "XXbuild": "tsc --project tsconfig.json && npm run bundle:esm",
+    "XXbundle:esm": "rollup -c",
+    "XXstart": "webpack serve --config ./webpack.config.js --mode development"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.5",
     "@rollup/plugin-commonjs": "^21.0.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
+    "@rollup/plugin-typescript": "^8.2.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.0",
@@ -24,12 +28,10 @@
     "rollup-plugin-serve": "^1.1.0",
     "rollup-plugin-shim": "^1.0.0",
     "terser": "^5.9.0",
-    "typescript": "^4.4.4",
-    "webpack": "^5.58.1",
-    "webpack-cli": "^4.9.0",
-    "webpack-dev-server": "^4.3.1"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
-    "canvaskit-wasm": "^0.30.0"
+    "canvaskit-wasm": "^0.30.0",
+    "rollup-plugin-terser": "^7.0.2"
   }
 }

@@ -1,4 +1,4 @@
-import { Game, Action, Timer, Transition, TransitionDirection, Scene, Rectangle, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity } from "./m2c2kit.esm.js";
+import { Game, Action, Timer, Transition, TransitionDirection, Scene, Rectangle, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity, WebColors } from "./m2c2kit.js";
 
 const game = new Game();
 window.game = game;
@@ -29,7 +29,7 @@ game.init({
     const page1NextButton = new Rectangle({
         size: new Size(300, 50), rx: 9, ry: 9,
         position: new Point(180, 500),
-        fillColor: [44, 90, 255, 1]
+        fillColor: WebColors.RoyalBlue
       })
       // page1NextButton is the child of scene1
       page1.addChild(page1NextButton);

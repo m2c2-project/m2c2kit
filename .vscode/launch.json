@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Chrome port 3000",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/example"
+            "webRoot": "${workspaceFolder}/examples/javascript"
         }
     ]
 }

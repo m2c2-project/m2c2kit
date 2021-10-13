@@ -1,7 +1,9 @@
-import { WebColors } from './WebColors';
+import { WebColors } from './webColors';
 import { CanvasKitInit } from './canvaskit';
 import { CanvasKit, Canvas, Surface, Font, FontMgr, Typeface, Image, Paragraph, Paint, EmbindEnumEntity, ParagraphStyle } from 'canvaskit-wasm';
 import ttfInfo from './ttfInfo.js';
+
+export { WebColors } from './webColors';
 
 /**
  * Reasonable defaults to use if values are not specified.
@@ -1606,7 +1608,7 @@ export abstract class Entity {
     let dest: Entity;
 
     switch (source.type) {
-      case EntityType.scene:
+      case EntityType.scene: {
         const scene = source as unknown as Scene;
         const options: SceneOptions = {
           ...this.getEntityOptions(scene),
@@ -1614,6 +1616,7 @@ export abstract class Entity {
         };
         dest = new Scene(options);
         break;
+      }
       case EntityType.sprite: {
         const sprite = source as unknown as Sprite;
         const options: SpriteOptions = {

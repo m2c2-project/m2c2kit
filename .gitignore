@@ -1,3 +1,6 @@
+# type declarations in examples
+examples/**/*.d.ts
+
 # Logs
 logs
 *.log
