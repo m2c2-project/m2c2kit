@@ -1,5 +1,0 @@
-{
-  "eslint.options": {
-    "ignorePattern": "webpack.config.js",
-  }
-}
