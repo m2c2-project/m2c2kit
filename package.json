@@ -7,9 +7,10 @@
     "build m2c2kit": "rollup -c --watch",
     "serve javascript example": "webpack serve --config ./webpack.config.js --mode development",
     "build typescript example": "tsc --project examples/typescript --watch",
-    "serve typescript example": "webpack serve --config ./webpack.config.typescript-example.js --mode development",    
+    "serve typescript example": "webpack serve --config ./webpack.config.typescript-example.js --mode development",
     "build m2c2kit:minified": "rollup -c rollup.config.min.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "ts-patch install -s"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +26,9 @@
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-shim": "^1.0.0",
     "terser": "^5.9.0",
+    "ts-patch": "^1.4.4",
     "typescript": "^4.4.4",
+    "typescript-transform-paths": "^3.3.1",
     "webpack-cli": "^4.9.0"
   },
   "dependencies": {

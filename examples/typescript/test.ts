@@ -1,3 +1,4 @@
+// @transform-path ./m2c2kit.js
 import { Game, Action, Timer, Transition, TransitionDirection, Scene, Rectangle, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity, WebColors } from "m2c2kit";
 
 const game = new Game();
