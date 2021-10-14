@@ -2,7 +2,6 @@ import typescript from '@rollup/plugin-typescript';
 import shim from 'rollup-plugin-shim';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import serve from 'rollup-plugin-serve'
 import copy from 'rollup-plugin-copy'
 
 export default {
@@ -32,14 +31,6 @@ export default {
       ],
       // hook must be set to writeBundle, because declaration files don't exist until this stage
       hook: 'writeBundle'
-    }), 
-    serve({
-      open: false,
-      verbose: true,
-      contentBase: ['examples/javascript', 'dist'],
-      historyApiFallback: true,
-      host: 'localhost',
-      port: 3000,
     })
   ],
 };
