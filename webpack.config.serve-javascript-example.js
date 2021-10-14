@@ -6,13 +6,14 @@ module.exports = {
     // IgnorePlugin will prevent any bundling
     plugins: [
         new IgnorePlugin({
-            resourceRegExp: /src|node_modules/,
+            resourceRegExp: /.*/,
         }),
     ],
     devServer: {
         static: [
             { directory: path.join(__dirname, 'examples/javascript') },
-            { directory: path.join(__dirname, 'dist') }
+            { directory: path.join(__dirname, 'dist') },
+            { directory: path.join(__dirname, 'assets') }
         ],
     },
 };
