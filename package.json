@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build m2c2kit": "rollup -c --watch",
-    "serve example-javascript": "webpack serve --config ./webpack.config.js --mode development",
+    "serve javascript example": "webpack serve --config ./webpack.config.js --mode development",
+    "build typescript example": "tsc --project examples/typescript --watch",
+    "serve typescript example": "webpack serve --config ./webpack.config.typescript-example.js --mode development",    
     "build m2c2kit:minified": "rollup -c rollup.config.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,5 +1,9 @@
-# type declarations in examples
-examples/**/*.d.ts
+# type declarations in javascript example
+examples/javascript/*.d.ts
+
+# compiled typescript in typescript examples
+examples/typescript/*.js
+examples/typescript/*.js.map
 
 # Logs
 logs

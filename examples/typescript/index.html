@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Typescript Hello m2c2kit</title>
+</head>
+
+<body>
+  <div>
+    Typescript Hello m2c2kit
+  </div>
+  <div>
+    <canvas id="mainCanvas"></canvas>
+  </div>
+  <div>
+    <button id="startButton" onclick="{
+        document.getElementById('startButton').disabled = true
+        window.game.start();
+    }">Start</button>
+  </div>
+  <script type="module" src="./m2c2kit.js"></script>
+  <script type="module" src="./test.js"></script>
+</body>
+
+</html>

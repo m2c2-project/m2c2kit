@@ -7,9 +7,16 @@
         {
             "type": "pwa-chrome",
             "request": "launch",
-            "name": "Example Javascript Chrome port 8080",
+            "name": "Javascript Example Chrome port 8080",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}/examples/javascript"
-        }
+        },
+        {
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Typescript Example Chrome port 8080",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}/examples/typescript"
+        }        
     ]
 }
