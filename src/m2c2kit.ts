@@ -2,7 +2,6 @@ import { WebColors } from './webColors';
 import { CanvasKitInit } from './canvaskit';
 import { CanvasKit, Canvas, Surface, Font, FontMgr, Typeface, Image, Paragraph, Paint, EmbindEnumEntity, ParagraphStyle } from 'canvaskit-wasm';
 import ttfInfo from './ttfInfo.js';
-
 export { WebColors } from './webColors';
 
 /**
@@ -13,6 +12,7 @@ class Constants {
   public static readonly FPS_DISPLAY_TEXT_COLOR: rgbaColor = [0, 0, 0, .50];
   public static readonly FPS_DISPLAY_UPDATE_INTERVAL = 500;
   public static readonly DEFAULT_SCENE_BACKGROUND_COLOR = WebColors.WhiteSmoke;
+  public static readonly DEFAULT_SHAPE_FILL_COLOR = WebColors.Red;
   public static readonly DEFAULT_FONT_COLOR = WebColors.Black;
   public static readonly DEFAULT_FONT_SIZE = 16;
   public static readonly LIMITED_FPS_RATE = 5;
@@ -1701,7 +1701,7 @@ export class Scene extends Entity implements IDrawable {
   anchorPoint = new Point(0, 0);
   zPosition = 0;
   // Scene options
-  backgroundColor = Constants.DEFAULT_SCENE_BACKGROUND_COLOR;
+  private _backgroundColor = Constants.DEFAULT_SCENE_BACKGROUND_COLOR;
 
   _active = false;
   _transitioning = false;
@@ -1725,7 +1725,7 @@ export class Scene extends Entity implements IDrawable {
     }
   }
 
-  initialize(): void {
+  override initialize(): void {
     this.backgroundPaint = new Game._canvasKit.Paint();
     this.backgroundPaint.setColor(Game._canvasKit.Color(this.backgroundColor[0], this.backgroundColor[1],
       this.backgroundColor[2],this.backgroundColor[3]));
@@ -1741,6 +1741,13 @@ export class Scene extends Entity implements IDrawable {
     }
     return this._game;
   }
+  get backgroundColor(): rgbaColor {
+    return this._backgroundColor;
+  }
+  set backgroundColor(backgroundColor: rgbaColor) {
+    this._backgroundColor = backgroundColor;
+    this.needsInitialization = true;
+  }  
 
   /**
    * Code that will be called every time the screen is shown.
@@ -1795,7 +1802,8 @@ export class Sprite extends Entity implements IDrawable {
     }
   }
 
-  initialize(): void {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  override initialize(): void {
   }
 
   set imageName(imageName: string) {
@@ -1882,7 +1890,7 @@ export class Label extends Entity implements IDrawable, IText {
     }
   }
 
-  initialize(): void {
+  override initialize(): void {
 
     let ckTextAlign: EmbindEnumEntity = Game._canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
@@ -2087,7 +2095,7 @@ export class TextLine extends Entity implements IDrawable, IText {
     super.update();
   }
 
-  initialize(): void {
+  override initialize(): void {
     this.paint = new Game._canvasKit.Paint();
     this.paint.setColor(Game._canvasKit.Color(this.fontColor[0], this.fontColor[1],
       this.fontColor[2], this.fontColor[3]));
@@ -2161,12 +2169,12 @@ export class Shape extends Entity implements IDrawable {
   anchorPoint = new Point(.5, .5);
   zPosition = 0;
   // Shape options
-  // TODO: fix the Size issue; should be readonly in all entities, but Rectangle
+  // TODO: fix the Size issue; should be readonly (calculated value) in all entities, but Rectangle
   shapeType = ShapeType.undefined;
   circleOfRadius?: number;
   rect?: Rect;
   cornerRadius = 0;
-  private _fillColor = WebColors.Red; // public getter/setter is below
+  private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR; // public getter/setter is below
   private _strokeColor?: rgbaColor | undefined; // public getter/setter is below
   lineWidth? : number;
 
@@ -2220,7 +2228,7 @@ export class Shape extends Entity implements IDrawable {
     }    
   }
 
-  initialize(): void {
+  override initialize(): void {
     if (this.fillColor) {
       const canvasKit = Game._canvasKit;
       this.fillColorPaint = new canvasKit.Paint();
@@ -2330,7 +2338,8 @@ export abstract class Composite extends Entity implements IDrawable {
     handleInterfaceOptions(this, options);
   }
 
-  initialize(): void {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  override initialize(): void {
   }
 
   update(): void {

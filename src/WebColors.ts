@@ -143,4 +143,5 @@ export class WebColors {
   public static Silver: rgbaColor = [192, 192, 192, 1];
   public static LightGray: rgbaColor = [211, 211, 211, 1];
   public static Gainsboro: rgbaColor = [220, 220, 220, 1];
+  public static RebeccaPurple: rgbaColor = [102, 51, 153, 1];
 }

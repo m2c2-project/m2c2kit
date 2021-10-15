@@ -7,16 +7,16 @@
         {
             "type": "pwa-chrome",
             "request": "launch",
-            "name": "Javascript Example Chrome port 3000",
+            "name": "Typescript Example Chrome port 3000",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/examples/javascript"
+            "webRoot": "${workspaceFolder}/examples/typescript"
         },
         {
             "type": "pwa-chrome",
             "request": "launch",
-            "name": "Typescript Example Chrome port 3000",
+            "name": "Javascript Example Chrome port 3000",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/examples/typescript"
-        }        
+            "webRoot": "${workspaceFolder}/examples/javascript"
+        }
     ]
 }

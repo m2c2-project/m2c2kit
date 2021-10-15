@@ -1,5 +1,7 @@
 import { Game, Action, Timer, Transition, TransitionDirection, Scene, Shape, RectOptions, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity, WebColors, Rect } from "../../src/m2c2kit";
 
+import { Grid } from "../../src/composites";
+
 const game = new Game();
 (window as unknown as any).game = game;
 
@@ -27,9 +29,8 @@ game.init({
     game.addScene(page1);
 
     const page1NextButton = new Shape({
-      //rect: new Rect({ size: new Size(300,50), origin: new Point(180,500) }),
       rect: new Rect( { width: 300, height: 50, x: 180, y: 500}),
-        cornerRadius: 9, fillColor: WebColors.Green 
+        cornerRadius: 9, fillColor: WebColors.RebeccaPurple 
       })
       // page1NextButton is the child of scene1
     page1.addChild(page1NextButton);
@@ -38,6 +39,10 @@ game.init({
         strokeColor: WebColors.Red, lineWidth: 4,
         position: new Point( 180, 300)});
     page1.addChild(circle);
+
+    const grid1 = new Grid({ size: new Size(300,300), position: new Point(180,275), rows: 5, columns: 5,
+      backgroundColor: WebColors.Silver, gridLineColor: WebColors.Black, gridLineWidth: 4});
+    page1.addChild(grid1);
 
     game.presentScene(page1);
   });
