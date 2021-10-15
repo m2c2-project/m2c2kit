@@ -1261,12 +1261,6 @@ export interface DrawableOptions {
   zPosition?: number;
 }
 
-export interface ShapeOptions {
-  fillColor?: rgbaColor;
-  strokeColor?: rgbaColor
-  lineWidth?: number;
-}
-
 interface TextOptions {
   text? :string;
   fontName?: string;
@@ -1287,10 +1281,14 @@ export interface LabelOptions extends EntityOptions, DrawableOptions, TextOption
 export interface SpriteOptions extends EntityOptions, DrawableOptions {
   imageName?: string;
 }
-export interface RectangleOptions extends EntityOptions, DrawableOptions, ShapeOptions {
-  size?: Size;
-  rx?: number;
-  ry?: number;
+
+export interface ShapeOptions extends EntityOptions, DrawableOptions {
+  circleOfRadius?: number;
+  rect?: Rect;
+  cornerRadius?: number;
+  fillColor?: rgbaColor;
+  strokeColor?: rgbaColor
+  lineWidth?: number;
 }
 
 function handleDrawableOptions(drawable: IDrawable, options: DrawableOptions): void {
@@ -1299,26 +1297,6 @@ function handleDrawableOptions(drawable: IDrawable, options: DrawableOptions): v
   }
   if (options.zPosition) {
     drawable.zPosition = options.zPosition;
-  }
-}
-
-function handleShapeOptions(shape: IShape, options: ShapeOptions): void {
-  if (options.fillColor) {
-    shape.fillColor = options.fillColor;
-  }
-  if (options.strokeColor) {
-    shape.strokeColor = options.strokeColor;
-  }
-  if (options.lineWidth) {
-    shape.lineWidth = options.lineWidth;
-  }
-  if (options.strokeColor && options.lineWidth === undefined) {
-    const entity = shape as unknown as Entity;
-    console.warn(`warning: for entity ${entity}, strokeColor = ${options.strokeColor} but lineWidth is undefined. In normal usage, both would be set or both would be undefined.`);
-  }
-  if (options.strokeColor === undefined && options.lineWidth) {
-    const entity = shape as unknown as Entity;
-    console.warn(`warning: for entity ${entity}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`);
   }
 }
 
@@ -1338,9 +1316,6 @@ function handleTextOptions(text: IText, options: TextOptions): void {
 }
 
 function handleInterfaceOptions(entity: Entity, options: EntityOptions): void {
-  if (entity.isShape) {
-    handleShapeOptions(entity as unknown as IShape, options as ShapeOptions);
-  }
   if (entity.isDrawable) {
     handleDrawableOptions(entity as unknown as IDrawable, options as DrawableOptions);
   }
@@ -1355,12 +1330,6 @@ export interface IDrawable {
   draw(canvas: Canvas): void;
   anchorPoint: Point;
   zPosition: number;
-}
-
-export interface IShape {
-  fillColor?: rgbaColor;
-  strokeColor?: rgbaColor
-  lineWidth?: number;
 }
 
 export interface IText {
@@ -1379,7 +1348,7 @@ export enum EntityType {
   sprite = "Sprite",
   label = "Label",
   textline = "TextLine",
-  rectangle = "Rectangle",
+  shape = "Shape",
   composite = "Composite"
 }
 
@@ -1651,15 +1620,17 @@ export abstract class Entity {
         dest = new TextLine(options);
         break;
       }
-      case EntityType.rectangle: {
-        const rectangle = source as unknown as Rectangle;
-        const options: RectangleOptions = {
-          ...this.getEntityOptions(rectangle),
-          ...this.getDrawableOptions(rectangle),
-          ...this.getShapeOptions(rectangle),
-          size: rectangle.size, rx: rectangle.rx, ry: rectangle.ry
+      case EntityType.shape: {
+        const shape = source as unknown as Shape;
+        const options: ShapeOptions = {
+          ...this.getEntityOptions(shape),
+          ...this.getDrawableOptions(shape),
+          circleOfRadius: shape.circleOfRadius,
+          rect: shape.rect, cornerRadius: shape.cornerRadius,
+          fillColor: shape.fillColor, strokeColor: shape.strokeColor,
+          lineWidth: shape.lineWidth
         };
-        dest = new Rectangle(options);
+        dest = new Shape(options);
         break;
       }
       default:
@@ -1696,12 +1667,6 @@ export abstract class Entity {
   private static getDrawableOptions(drawable: IDrawable): DrawableOptions {
     const drawableOptions = { anchorPoint: drawable.anchorPoint, zPosition: drawable.zPosition};
     return drawableOptions;
-  }
-
-  private static getShapeOptions(shape: IShape): ShapeOptions {
-    const shapeOptions = { fillColor: shape.fillColor, strokeColor: shape.strokeColor,
-      lineWidth: shape.lineWidth};
-    return shapeOptions;
   }
 
   private static getTextOptions(text: IText): TextOptions {
@@ -2156,21 +2121,54 @@ export class TextLine extends Entity implements IDrawable, IText {
   }
 }
 
-export class Rectangle extends Entity implements IDrawable, IShape {
-  readonly type = EntityType.rectangle;
+enum ShapeType {
+  undefined = "Undefined",
+  rectangle = "Rectangle",
+  circle = "Circle"
+}
+
+export interface RectOptions {
+  origin?: Point;
+  size?: Size;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+}
+
+export class Rect implements RectOptions {
+  origin?: Point;
+  size?: Size;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+
+  constructor(options: RectOptions) {
+    this.origin = options.origin;
+    this.size = options.size;
+    this.x = options.x;
+    this.y = options.y;
+    this.width = options.width;
+    this.height = options.height;
+  }
+}
+export class Shape extends Entity implements IDrawable {
+  readonly type = EntityType.shape;
   isDrawable = true;
   isShape = true;
   // Drawable options
   anchorPoint = new Point(.5, .5);
   zPosition = 0;
   // Shape options
+  // TODO: fix the Size issue; should be readonly in all entities, but Rectangle
+  shapeType = ShapeType.undefined;
+  circleOfRadius?: number;
+  rect?: Rect;
+  cornerRadius = 0;
   private _fillColor = WebColors.Red; // public getter/setter is below
   private _strokeColor?: rgbaColor | undefined; // public getter/setter is below
   lineWidth? : number;
-  // Rectangle options
-  // TODO: fix the Size issue; should be readonly in all entities, but Rectangle
-  rx = 0;
-  ry = 0;
 
   private fillColorPaint?: Paint;
   private strokeColorPaint?: Paint;
@@ -2180,18 +2178,46 @@ export class Rectangle extends Entity implements IDrawable, IShape {
    *
    * @param options
    */
-  constructor(options: RectangleOptions = {} ) {
+  constructor(options: ShapeOptions = {} ) {
     super(options);
     handleInterfaceOptions(this, options);
-    if (options.size) {
-      this.size = options.size;
+    if (options.circleOfRadius !== undefined) {
+      this.circleOfRadius = options.circleOfRadius;
+      this.shapeType = ShapeType.circle;
     }
-    if (options.rx) {
-      this.rx = options.rx;
+    if (options.rect) {
+      if (options.rect.size) {
+        this.size.width = options.rect.size.width;
+        this.size.height = options.rect.size.height;        
+      } else if (options.rect.width !== undefined && options.rect.height !== undefined) {
+        this.size.width = options.rect.width;
+        this.size.height = options.rect.height;
+      }
+      if (options.rect.origin) {
+        this.position = options.rect.origin;
+      } else if (options.rect.x !== undefined && options.rect.y !== undefined) {
+        this.position = new Point(options.rect.x, options.rect.y)
+      }
+      this.shapeType = ShapeType.rectangle;
     }
-    if (options.ry) {
-      this.ry = options.ry;
+    if (options.cornerRadius) {
+      this.cornerRadius = options.cornerRadius;
     }
+    if (options.fillColor) {
+      this.fillColor = options.fillColor;
+    }
+    if (options.strokeColor) {
+      this.strokeColor = options.strokeColor;
+    }
+    if (options.lineWidth) {
+      this.lineWidth = options.lineWidth;
+    }
+    if (options.strokeColor && options.lineWidth === undefined) {
+      console.warn(`warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is undefined. In normal usage, both would be set or both would be undefined.`);
+    }
+    if (options.strokeColor === undefined && options.lineWidth) {
+      console.warn(`warning: for entity ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`);
+    }    
   }
 
   initialize(): void {
@@ -2236,19 +2262,35 @@ export class Rectangle extends Entity implements IDrawable, IShape {
 
   draw(canvas: Canvas): void {
 
-    if (this.parent && (this.size.width != 0 && this.size.height != 0)) {
-      canvas.save();
-      const drawScale = Game._canvasScale / this.absoluteScale;
-      canvas.scale(1 / drawScale, 1 / drawScale);
+    canvas.save();
+    const drawScale = Game._canvasScale / this.absoluteScale;
+    canvas.scale(1 / drawScale, 1 / drawScale);
 
-      const canvasKit = Game._canvasKit;
+    const canvasKit = Game._canvasKit;
 
+    if (this.shapeType === ShapeType.circle && this.circleOfRadius !== undefined) {
+      const cx = this.absolutePosition.x * drawScale;
+      const cy = this.absolutePosition.y * drawScale;
+      const radius = this.circleOfRadius * this.absoluteScale * drawScale;
+
+      if (this.fillColor && this.fillColorPaint) {
+        canvas.drawCircle(cx, cy, radius, this.fillColorPaint);
+      }
+
+      if (this.strokeColor && this.strokeColorPaint && this.lineWidth) {
+        // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
+        this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
+        canvas.drawCircle(cx, cy, radius, this.strokeColorPaint);
+      }
+    }
+
+    if (this.shapeType === ShapeType.rectangle) {
       const rr = canvasKit.RRectXY(canvasKit.LTRBRect(
         (this.absolutePosition.x - (this.anchorPoint.x) * this.size.width * this.absoluteScale) * drawScale,
         (this.absolutePosition.y - (this.anchorPoint.y) * this.size.height * this.absoluteScale) * drawScale,
         (this.absolutePosition.x + this.size.width * this.absoluteScale - (this.anchorPoint.x) * this.size.width * this.absoluteScale) * drawScale,
         (this.absolutePosition.y + this.size.height * this.absoluteScale - (this.anchorPoint.y) * this.size.height * this.absoluteScale) * drawScale),
-        this.rx * drawScale, this.ry * drawScale
+        this.cornerRadius * drawScale, this.cornerRadius * drawScale
       );
 
       if (this.fillColor && this.fillColorPaint) {
@@ -2260,10 +2302,9 @@ export class Rectangle extends Entity implements IDrawable, IShape {
         this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
         canvas.drawRRect(rr, this.strokeColorPaint);
       }
-
-      canvas.restore();
     }
 
+    canvas.restore();
     super.drawChildren(canvas);
   }
 }
