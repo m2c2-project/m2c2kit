@@ -17,5 +17,5 @@ module.exports = {
     ],
     "rules": {
     },
-    "ignorePatterns" : [".eslintrc.js", "webpack.config.*"]
+    "ignorePatterns" : [".eslintrc.js"]
 };

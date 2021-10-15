@@ -1,5 +1,4 @@
-// @transform-path ./m2c2kit.js
-import { Game, Action, Timer, Transition, TransitionDirection, Scene, Shape, RectOptions, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity, WebColors, Rect } from "m2c2kit";
+import { Game, Action, Timer, Transition, TransitionDirection, Scene, Shape, RectOptions, Size, Point, Label, LabelHorizontalAlignmentMode, Sprite, Entity, WebColors, Rect } from "../../src/m2c2kit";
 
 const game = new Game();
 (window as unknown as any).game = game;
@@ -36,7 +35,7 @@ game.init({
     page1.addChild(page1NextButton);
 
     const circle = new Shape( { circleOfRadius: 100, fillColor: WebColors.LightBlue,
-        strokeColor: WebColors.Yellow, lineWidth: 4,
+        strokeColor: WebColors.Red, lineWidth: 4,
         position: new Point( 180, 300)});
     page1.addChild(circle);
 

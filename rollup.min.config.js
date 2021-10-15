@@ -7,10 +7,10 @@ import commonjs from '@rollup/plugin-commonjs';
 export default {
   input: './src/m2c2kit.ts',
   output: [
-    { dir: './dist', format: 'esm', entryFileNames: '[name].min.js', sourcemap: false, plugins: [terser()] },
+    { file: './dist/m2c2kit.min.js', format: 'esm', sourcemap: false, plugins: [terser()] },
   ],
   plugins: [
-    typescript({inlineSourceMap: false, inlineSources: false, declaration: false}),
+    typescript({inlineSourceMap: false, inlineSources: false, declaration: false, target: 'es6' }),
     // canvaskit-wasm references these node.js functions
     // shim them to empty functions for browser usage
     shim({

@@ -1,9 +1,9 @@
-# type declarations in javascript example
-examples/javascript/*.d.ts
+# javascript bundles
+*.bundle.js
+*.bundle.js.map
 
-# compiled typescript in typescript examples
-examples/typescript/*.js
-examples/typescript/*.js.map
+# wasm binaries
+*.wasm
 
 # Logs
 logs

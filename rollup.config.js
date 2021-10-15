@@ -10,7 +10,7 @@ export default {
     { dir: './dist', format: 'esm', name: 'm2c2kit', sourcemap: true },
   ],
   plugins: [
-    typescript({inlineSourceMap: true, inlineSources: true}),
+    typescript({ tsconfig: './src/tsconfig.json' }),
     // canvaskit-wasm references these node.js functions
     // shim them to empty functions for browser usage
     shim({
@@ -25,11 +25,7 @@ export default {
       targets: [
         // copy the wasm bundle out of node_modules so it can be served
         { src: 'node_modules/canvaskit-wasm/bin/canvaskit.wasm', dest: 'dist' },
-        // copy declaration files to examples folders so we get VS Code intellisense
-        { src: 'dist/m2c2kit.d.ts', dest: 'examples/javascript' },
-        { src: 'dist/webColors.d.ts', dest: 'examples/javascript' }        
       ],
-      // hook must be set to writeBundle, because declaration files don't exist until this stage
       hook: 'writeBundle'
     })
   ],
