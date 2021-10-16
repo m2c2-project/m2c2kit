@@ -8,7 +8,8 @@
     "start-typescript-example": "rollup -c rollup.typescript-example.config.js --watch",
     "start-javascript-example": "rollup -c rollup.javascript-example.config.js --watch",
     "build-m2c2kit": "rollup -c && rollup -c rollup.min.config.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
+    "husky": "^7.0.2",
+    "lint-staged": "^11.2.3",
     "prettier": "2.4.1",
     "rollup": "^2.58.0",
     "rollup-plugin-copy": "^3.4.0",
@@ -33,5 +36,8 @@
   },
   "dependencies": {
     "canvaskit-wasm": "^0.30.0"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
