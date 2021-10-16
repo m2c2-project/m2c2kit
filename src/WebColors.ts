@@ -1,5 +1,4 @@
-// Note: don't export rgbaColor; we'll export an identical type declaration from the main engine file
-type rgbaColor = [number, number, number, number];
+import { rgbaColor } from "./m2c2kit";
 
 export class WebColors {
   public static Transparent: rgbaColor = [0, 0, 0, 0];

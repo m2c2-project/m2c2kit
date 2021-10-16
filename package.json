@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start-test-dot-memory": "rollup -c rollup.test-dot-memory.config.js --watch",
     "start-typescript-example": "rollup -c rollup.typescript-example.config.js --watch",
     "start-javascript-example": "rollup -c rollup.javascript-example.config.js --watch",
     "build-m2c2kit": "rollup -c && rollup -c rollup.min.config.js",

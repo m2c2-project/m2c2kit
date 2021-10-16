@@ -1,8 +1,8 @@
-import { WebColors } from './webColors';
+import { WebColors } from './WebColors';
 import { CanvasKitInit } from './canvaskit';
 import { CanvasKit, Canvas, Surface, Font, FontMgr, Typeface, Image, Paragraph, Paint, EmbindEnumEntity, ParagraphStyle } from 'canvaskit-wasm';
 import ttfInfo from './ttfInfo.js';
-export { WebColors } from './webColors';
+export { WebColors } from './WebColors';
 
 /**
  * Reasonable defaults to use if values are not specified.
@@ -1261,7 +1261,7 @@ export interface DrawableOptions {
   zPosition?: number;
 }
 
-interface TextOptions {
+export interface TextOptions {
   text? :string;
   fontName?: string;
   fontColor?: rgbaColor;
