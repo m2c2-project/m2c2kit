@@ -1,26 +1,16 @@
 import {
   Game,
   Action,
-  Timer,
   Transition,
   TransitionDirection,
   Scene,
   Shape,
-  RectOptions,
   Size,
   Point,
   Label,
-  LabelHorizontalAlignmentMode,
-  Sprite,
-  Entity,
   WebColors,
   Rect,
   RandomDraws,
-  CompositeOptions,
-  rgbaColor,
-  EntityType,
-  Composite,
-  TextOptions,
 } from "../../src/m2c2kit";
 
 import { Button, Grid } from "../../src/composites";
@@ -44,11 +34,6 @@ game
     const previousScreenTransition = Transition.push(
       TransitionDirection.right,
       500
-    );
-    // going to next trial is shorter duration (250ms)
-    const nextTrialScreenTransition = Transition.push(
-      TransitionDirection.left,
-      250
     );
 
     const page00 = new Scene({ backgroundColor: WebColors.WhiteSmoke });
@@ -309,14 +294,30 @@ game
       } else {
         gridMemoryTrialCount++;
         if (gridMemoryTrialCount == gridMemoryTrials) {
-          game.presentScene(page1, nextScreenTransition);
+          game.presentScene(endPage, nextScreenTransition);
         } else {
           game.presentScene(gridMemoryPage0, nextScreenTransition);
         }
       }
     });
 
-    const page1 = new Scene();
-    //game.presentScene(gridMemoryPage0);
+    const endPage = new Scene();
+    game.addScene(endPage);
+    const doneLabel = new Label({
+      text: "You're done!",
+      position: new Point(180, 300),
+    });
+    endPage.addChild(doneLabel);
+
+    const againButton = new Button({
+      text: "Start over",
+      position: new Point(180, 400),
+    });
+    againButton.isUserInteractionEnabled = true;
+    againButton.onTap(() => {
+      gridMemoryTrialCount = 0;
+      game.presentScene(gridMemoryPage0);
+    });
+    endPage.addChild(againButton);
     game.presentScene(page00);
   });
