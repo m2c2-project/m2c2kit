@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Dot memory</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
 
-<head>
-  <title>Dot memory</title>
-</head>
-
-<body>
-  <div>
-    Dot memory
-  </div>
-  <div>
-    <canvas id="mainCanvas"></canvas>
-  </div>
-  <div>
-    <button id="startButton" onclick="{
+  <body>
+    <div>Dot memory</div>
+    <div>
+      <canvas id="mainCanvas"></canvas>
+    </div>
+    <div>
+      <button
+        id="startButton"
+        onclick="{
         document.getElementById('startButton').disabled = true
         window.game.start();
-    }">Start</button>
-  </div>
-  <script type="module" src="./dot-memory.bundle.js"></script>
-</body>
-
+    }"
+      >
+        Start
+      </button>
+    </div>
+    <script type="module" src="./dot-memory.bundle.js"></script>
+  </body>
 </html>
