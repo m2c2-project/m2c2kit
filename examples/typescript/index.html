@@ -11,19 +11,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
 
-  <body>
-    <div>Typescript Hello m2c2kit</div>
-    <div>
-      <canvas id="mainCanvas"></canvas>
-    </div>
-    <div>
-      <button
+  <body style="background: white">
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+      "
+    >
+      <canvas style="height: 100vh; width: 100vw"></canvas>
+      <!-- If you don't want the game to start immediately, remove game.start()
+           from the code and call game.start() somehow else, such as with
+           the button shown below or a programmatic call -->
+      <!-- <button
+        style="position: absolute; bottom: 8px; left: 8px"
         id="startButton"
-        onclick="{ document.getElementById('startButton').disabled = true;
-          window.game.start(); }"
+        onclick="{
+          document.getElementById('startButton').disabled = true;
+          window.game.start();
+        }"
       >
         Start
-      </button>
+      </button> -->
     </div>
     <script type="module" src="./typescript-example.bundle.js"></script>
   </body>

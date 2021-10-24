@@ -20,7 +20,6 @@ const game = new Game();
 
 game
   .init({
-    canvasId: "mainCanvas",
     showFps: true,
     width: 360,
     height: 600,
@@ -133,7 +132,7 @@ game
     gridMemoryPage2.addChild(grid);
 
     gridMemoryPage2.setup(() => {
-      console.log("beginning setup" + window.performance.now());
+      console.log("beginning setup " + window.performance.now());
       grid.removeAllChildren();
       let tappedFCount = 0;
 
@@ -191,7 +190,7 @@ game
         }
       }
 
-      console.log("setup done" + window.performance.now());
+      console.log("setup done " + window.performance.now());
     });
 
     const gridMemoryPage3 = new Scene({ backgroundColor: WebColors.White });
@@ -319,5 +318,7 @@ game
       game.presentScene(gridMemoryPage0);
     });
     endPage.addChild(againButton);
-    game.presentScene(page00);
+
+    game.entryScene = page00;
+    game.start();
   });

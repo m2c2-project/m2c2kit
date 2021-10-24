@@ -2,9 +2,9 @@
 // This fixes it.
 // adapted from https://github.com/chengluyu/canvaskit-editor/blob/main/src/canvaskit.ts
 
-import * as all from 'canvaskit-wasm';
-import { CanvasKit } from 'canvaskit-wasm';
-export * from 'canvaskit-wasm';
+import * as all from "canvaskit-wasm";
+import { CanvasKit } from "canvaskit-wasm";
+export * from "canvaskit-wasm";
 
 type CorrectModule = {
   default: typeof all.CanvasKitInit;

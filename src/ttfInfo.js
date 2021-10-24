@@ -27,23 +27,23 @@
 // -------------------- main.js
 //
 
-const TABLE_COUNT_OFFSET  = 4,
-      TABLE_HEAD_OFFSET   = 12,
-      TABLE_HEAD_SIZE     = 16,
-      TAG_OFFSET          = 0,
-      TAG_SIZE            = 4,
-      CHECKSUM_OFFSET     = TAG_OFFSET + TAG_SIZE,
-      CHECKSUM_SIZE       = 4,
-      CONTENTS_PTR_OFFSET = CHECKSUM_OFFSET + CHECKSUM_SIZE,
-      CONTENTS_PTR_SIZE   = 4,
-      LENGTH_OFFSET       = TABLE_HEAD_SIZE + CONTENTS_PTR_OFFSET;
+const TABLE_COUNT_OFFSET = 4,
+  TABLE_HEAD_OFFSET = 12,
+  TABLE_HEAD_SIZE = 16,
+  TAG_OFFSET = 0,
+  TAG_SIZE = 4,
+  CHECKSUM_OFFSET = TAG_OFFSET + TAG_SIZE,
+  CHECKSUM_SIZE = 4,
+  CONTENTS_PTR_OFFSET = CHECKSUM_OFFSET + CHECKSUM_SIZE,
+  CONTENTS_PTR_SIZE = 4,
+  LENGTH_OFFSET = TABLE_HEAD_SIZE + CONTENTS_PTR_OFFSET;
 
 /**
  * org: count
  * @param {*} data
  */
 function offsetCount(data) {
-  return u16(data,TABLE_COUNT_OFFSET);
+  return u16(data, TABLE_COUNT_OFFSET);
 }
 
 /**
@@ -62,11 +62,11 @@ function offsetContent(data, name) {
  */
 function offsetData(data, name) {
   var numTables = offsetCount(data);
-  var header={
-    tag: '',
-    checksum: '',
-    contents: '',
-    length: ''
+  var header = {
+    tag: "",
+    checksum: "",
+    contents: "",
+    length: "",
   };
 
   for (var i = 0; i < numTables; ++i) {
@@ -74,14 +74,14 @@ function offsetData(data, name) {
     var tag = utf8(data.buffer.slice(o, o + CONTENTS_PTR_SIZE));
 
     if (tag === name) {
-      header.tag= tag,
-      header.checksum= u32(data,o + CHECKSUM_OFFSET),
-      header.contents= u32(data,o + CONTENTS_PTR_OFFSET),
-      header.length= u32(data,o + LENGTH_OFFSET)
+      (header.tag = tag),
+        (header.checksum = u32(data, o + CHECKSUM_OFFSET)),
+        (header.contents = u32(data, o + CONTENTS_PTR_OFFSET)),
+        (header.length = u32(data, o + LENGTH_OFFSET));
       return header;
     }
   }
-  return header
+  return header;
 }
 
 /**
@@ -89,9 +89,9 @@ function offsetData(data, name) {
  * @param {*} data
  */
 function name(data) {
-  var ntOffset = offsetContent(data, 'name'),
-      offsetStorage = u16(data,ntOffset+4),
-      numberNameRecords = u16(data,ntOffset+2);
+  var ntOffset = offsetContent(data, "name"),
+    offsetStorage = u16(data, ntOffset + 4),
+    numberNameRecords = u16(data, ntOffset + 2);
 
   var storage = offsetStorage + ntOffset;
 
@@ -101,7 +101,7 @@ function name(data) {
   var info = {};
 
   for (var j = 0; j < numberNameRecords; j++) {
-    var o = ntOffset + 6 + j*12;
+    var o = ntOffset + 6 + j * 12;
 
     /**
      * @type {string}
@@ -111,18 +111,23 @@ function name(data) {
     /**
      * @type {string}
      */
-    var nameId = u16(data,o+6);
+    var nameId = u16(data, o + 6);
     /**
      * @type {number}
      */
-    var stringLength = u16(data,o+8);
+    var stringLength = u16(data, o + 8);
     /**
      * @type {string}
      */
-    var stringOffset = u16(data,o+10);
+    var stringOffset = u16(data, o + 10);
 
     if (!info.hasOwnProperty(nameId)) {
-      info[nameId] = utf8(data.buffer.slice(storage+stringOffset, storage+stringOffset+stringLength));
+      info[nameId] = utf8(
+        data.buffer.slice(
+          storage + stringOffset,
+          storage + stringOffset + stringLength
+        )
+      );
 
       // info[nameId] = '';
       // for (var k = 0; k < stringLength; k++) {
@@ -135,52 +140,54 @@ function name(data) {
   return info;
 }
 
-const VERSION_OFFSET = 0, WEIGHT_CLASS_OFFSET = 4;
+const VERSION_OFFSET = 0,
+  WEIGHT_CLASS_OFFSET = 4;
 
 /**
  * org: tableOS2.js
  * @param {*} data
  */
 function os2(data) {
-  var o = offsetContent(data, 'OS/2');
+  var o = offsetContent(data, "OS/2");
   return {
-    version     : u16(data,o+VERSION_OFFSET),
-    weightClass : u16(data,o+WEIGHT_CLASS_OFFSET)
+    version: u16(data, o + VERSION_OFFSET),
+    weightClass: u16(data, o + WEIGHT_CLASS_OFFSET),
   };
 }
 
-const FORMAT_OFFSET               = 0,
-      ITALIC_ANGLE_OFFSET         = FORMAT_OFFSET + 4,
-      UNDERLINE_POSITION_OFFSET   = ITALIC_ANGLE_OFFSET + 8,
-      UNDERLINE_THICKNESS_OFFSET  = UNDERLINE_POSITION_OFFSET + 2,
-      IS_FIXED_PITCH_OFFSET       = UNDERLINE_THICKNESS_OFFSET + 2;
+const FORMAT_OFFSET = 0,
+  ITALIC_ANGLE_OFFSET = FORMAT_OFFSET + 4,
+  UNDERLINE_POSITION_OFFSET = ITALIC_ANGLE_OFFSET + 8,
+  UNDERLINE_THICKNESS_OFFSET = UNDERLINE_POSITION_OFFSET + 2,
+  IS_FIXED_PITCH_OFFSET = UNDERLINE_THICKNESS_OFFSET + 2;
 
-export const  result              = {
-  meta:{
+export const result = {
+  meta: {
     /**
      * @type {{name:string,text:string}[]}
      */
-    property:[],
+    property: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    description:[],
+    description: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    license:[],
+    license: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    reference:[]
+    reference: [],
   },
   tables: {
     name: {},
     post: {},
     os2: {
-      version:'',weightClass:''
-    }
-  }
+      version: "",
+      weightClass: "",
+    },
+  },
 };
 
 /**
@@ -199,7 +206,7 @@ function f32(fixed) {
  * @param {*} data
  * @param {number} pos
  */
-function i16(data,pos) {
+function i16(data, pos) {
   // return data.readInt16BE(pos);
   return data.getInt16(pos);
 }
@@ -208,7 +215,7 @@ function i16(data,pos) {
  * @param {*} data
  * @param {number} pos
  */
-function u16(data,pos) {
+function u16(data, pos) {
   // return data.readUInt16BE(pos);
   return data.getUint16(pos);
 }
@@ -217,7 +224,7 @@ function u16(data,pos) {
  * @param {*} data
  * @param {number} pos
  */
-function u32(data,pos) {
+function u32(data, pos) {
   // return data.readUInt32BE(pos);
   return data.getUint32(pos);
 }
@@ -236,20 +243,19 @@ function utf8(str) {
  * @param {*} data
  */
 function post(data) {
-  var o = offsetContent(data, 'post');
+  var o = offsetContent(data, "post");
   return {
-    format            : f32(u32(data,o+FORMAT_OFFSET)),
-    italicAngle       : f32(u32(data,o+ITALIC_ANGLE_OFFSET)),
+    format: f32(u32(data, o + FORMAT_OFFSET)),
+    italicAngle: f32(u32(data, o + ITALIC_ANGLE_OFFSET)),
 
-    underlinePosition : i16(data,o+UNDERLINE_POSITION_OFFSET),
-    underlineThickness: i16(data,o+UNDERLINE_THICKNESS_OFFSET),
+    underlinePosition: i16(data, o + UNDERLINE_POSITION_OFFSET),
+    underlineThickness: i16(data, o + UNDERLINE_THICKNESS_OFFSET),
 
-    isFixedPitch      : u32(data,o+IS_FIXED_PITCH_OFFSET),
-    minMemType42      : u32(data,o+7),
-    maxMemType42      : u32(data,o+9),
-    minMemType1       : u32(data,o+11),
-    maxMemType1       : u32(data,o+13)
-
+    isFixedPitch: u32(data, o + IS_FIXED_PITCH_OFFSET),
+    minMemType42: u32(data, o + 7),
+    maxMemType42: u32(data, o + 9),
+    minMemType1: u32(data, o + 11),
+    maxMemType1: u32(data, o + 13),
   };
 }
 
@@ -285,7 +291,7 @@ export default function ttfInfo(data) {
     return result;
     // callback(null,result);
   } catch (error) {
-    throw 'error processing ttf';
+    throw "error processing ttf";
     // callback(error.message || error.toString());
   }
 }
@@ -311,50 +317,55 @@ export default function ttfInfo(data) {
 //
 
 const tpl = {
-  0: 'Copyright',
-  1: 'Font Family',
-  2: 'Font Subfamily',
-  3: 'Unique identifier',
-  4: 'Full name',
-  5: 'Version',
-  6: 'Postscript name',
-  7: 'Note',
-  8: 'Company',
-  9: 'Author',
-  10: 'Description',
-  11: 'URL',
-  12: 'URL',
-  13: 'License',
-  14: 'URL',
+  0: "Copyright",
+  1: "Font Family",
+  2: "Font Subfamily",
+  3: "Unique identifier",
+  4: "Full name",
+  5: "Version",
+  6: "Postscript name",
+  7: "Note",
+  8: "Company",
+  9: "Author",
+  10: "Description",
+  11: "URL",
+  12: "URL",
+  13: "License",
+  14: "URL",
   // 15: '',
-  16: 'Name'
+  16: "Name",
   // 17: ''
 };
 
-const tagName = (text='') => /^[^a-z]*$/.test(text)?text.split(' ').length>4?'paragraph':'title':'paragraph';
+const tagName = (text = "") =>
+  /^[^a-z]*$/.test(text)
+    ? text.split(" ").length > 4
+      ? "paragraph"
+      : "title"
+    : "paragraph";
 /**
  * format meta.tables.name, property description license, reference
  * @param {{[k: string]: string}} e
  */
 
-function property(e){
-  var meta={
+function property(e) {
+  var meta = {
     /**
      * @type {{name:string,text:string}[]}
      */
-    property:[],
+    property: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    description:[],
+    description: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    license:[],
+    license: [],
     /**
      * @type {{name:string,text:string}[]}
      */
-    reference:[]
+    reference: [],
   };
 
   for (const key in e) {
@@ -363,46 +374,55 @@ function property(e){
       /**
        * @type {keyof typeof tpl}
        */
-      var tplId = (i);
+      var tplId = i;
       const context = e[i].trim();
-      var pA = context.replace('~\r\n?~', "\n").split('\n').map(i=>i.trim()).filter( i => i);
+      var pA = context
+        .replace("~\r\n?~", "\n")
+        .split("\n")
+        .map((i) => i.trim())
+        .filter((i) => i);
       if (pA.length > 1) {
         /**
          * @type {keyof typeof meta}
          */
-        var id = (i == 10)?'description':'license';
-        meta[id]=[];
+        var id = i == 10 ? "description" : "license";
+        meta[id] = [];
         for (const eP in pA) {
           if (pA.hasOwnProperty(eP)) {
             var text = pA[eP].trim();
-            meta[id].push({name:tagName(text),text:text});
+            meta[id].push({ name: tagName(text), text: text });
           }
         }
-      } else if(context) {
-        if (/^s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+$/.test(context)){
-          var has = meta.reference.findIndex(a => a.text == context);
+      } else if (context) {
+        if (
+          /^s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+$/.test(context)
+        ) {
+          var has = meta.reference.findIndex((a) => a.text == context);
           if (has < 0) {
-            meta.reference.push({name:'url',text:context});
+            meta.reference.push({ name: "url", text: context });
           }
         } else if (i > 0 && i < 6) {
-          var name = tpl[tplId].replace(' ','-').toLowerCase();
-          meta.property.push({name: name, text: context});
+          var name = tpl[tplId].replace(" ", "-").toLowerCase();
+          meta.property.push({ name: name, text: context });
         } else {
-          if (tpl.hasOwnProperty(i)){
+          if (tpl.hasOwnProperty(i)) {
             if (i == 0 || i == 7) {
-              var pA = context.replace(/---+/, "\n").split('\n').map(i=>i.trim()).filter( i => i);
+              var pA = context
+                .replace(/---+/, "\n")
+                .split("\n")
+                .map((i) => i.trim())
+                .filter((i) => i);
               for (const eP in pA) {
                 if (pA.hasOwnProperty(eP)) {
                   var text = pA[eP].trim();
-                  meta.description.push({name:tagName(text),text:text});
+                  meta.description.push({ name: tagName(text), text: text });
                 }
               }
             } else if (i == 13) {
-              meta.license.push({name:tagName(context), text: context});
+              meta.license.push({ name: tagName(context), text: context });
             } else {
-
-              var name = tpl[tplId].replace(' ','-').toLowerCase();
-              meta.property.push({name:name, text: context});
+              var name = tpl[tplId].replace(" ", "-").toLowerCase();
+              meta.property.push({ name: name, text: context });
             }
           }
         }

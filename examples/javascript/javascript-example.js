@@ -1,4 +1,3 @@
-import { LabelHorizontalAlignmentMode } from "./../../src/m2c2kit";
 import {
   Game,
   Action,
@@ -10,6 +9,7 @@ import {
   Sprite,
   WebColors,
   Rect,
+  LabelHorizontalAlignmentMode,
 } from "../../src/m2c2kit";
 
 import { Grid } from "../../src/composites";
@@ -19,10 +19,10 @@ window.game = game;
 
 game
   .init({
-    canvasId: "mainCanvas",
     showFps: true,
     width: 360,
     height: 600,
+    stretch: false,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
       "https://fonts.cdnfonts.com/s/5244/Quickie.ttf",
@@ -111,5 +111,6 @@ game
     });
     page1.addChild(wrappedLabel2);
 
-    game.presentScene(page1);
+    game.entryScene = page1;
+    game.start();
   });
