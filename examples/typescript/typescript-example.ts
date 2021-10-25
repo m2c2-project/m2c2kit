@@ -1,3 +1,4 @@
+import { Instructions } from "./../../src/stories/instructions";
 import {
   Game,
   Action,
@@ -22,8 +23,9 @@ const game = new Game();
 game
   .init({
     showFps: true,
+    bodyBackgroundColor: WebColors.Red,
     width: 360,
-    height: 600,
+    height: 720,
     stretch: false,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
@@ -42,9 +44,27 @@ game
     ],
   })
   .then(() => {
-    // present simple primitives and show some actions as an example
+    const ins = Instructions.Create({
+      sceneNamePrefix: "instructions",
+      backgroundColor: WebColors.Beige,
+      instructionScenes: [
+        {
+          text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          textVerticalBias: 0.4,
+          title: "Instructions",
+        },
+        { text: "page 2 of instructions!", backgroundColor: WebColors.Wheat },
+        { text: "and this is page 3!!", nextButtonText: "Start" },
+      ],
+      postInstructionsScene: "page1",
+    });
+    game.addScenes(ins);
 
-    const page1 = new Scene({ backgroundColor: WebColors.Cornsilk });
+    // present simple primitives and show some actions as an example
+    const page1 = new Scene({
+      name: "page1",
+      backgroundColor: WebColors.Cornsilk,
+    });
     game.addScene(page1);
 
     // create a button from primitvies (rectangle, label)
@@ -113,6 +133,6 @@ game
     });
     page1.addChild(wrappedLabel2);
 
-    game.entryScene = page1;
-    game.start();
+    //game.entryScene = page1;
+    game.start("instructions-01");
   });

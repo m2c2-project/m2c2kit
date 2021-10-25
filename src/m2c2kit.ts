@@ -48,6 +48,8 @@ export interface GameInitOptions {
   svgImages?: SvgImage[];
   /** Show FPS in upper left corner? Default is false */
   showFps?: boolean;
+  /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */
+  bodyBackgroundColor?: rgbaColor;
 }
 
 /**
@@ -105,6 +107,11 @@ export class Size {
 }
 
 /**
+ * An array of scenes. This is the return type of a StoryCreator
+ */
+export type Story = Array<Scene>;
+
+/**
  * Color in red (0-255), green (0-255), blue (0-255), alpha (0-1) format. Must be numeric array of length 4.
  */
 export type rgbaColor = [number, number, number, number];
@@ -142,6 +149,7 @@ export class Game {
   private scratchHtmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
   private showFps?: boolean;
+  private bodyBackgroundColor?: rgbaColor;
 
   private currentScene?: Scene;
   private priorUpdateTime?: number;
@@ -177,6 +185,7 @@ export class Game {
       gameInitOptions.stretch
     );
     this.showFps = gameInitOptions.showFps ?? false;
+    this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
     const canvasKitPromise = this.loadCanvasKit();
     const fontDataPromises = this.fetchFonts(gameInitOptions.fontUrls);
@@ -217,6 +226,12 @@ export class Game {
     this.scenes.push(scene);
   }
 
+  addScenes(scenes: Array<Scene>): void {
+    scenes.forEach((scene) => {
+      this.addScene(scene);
+    });
+  }
+
   /**
    * Specifies the scene that will be presented upon the next frame draw.
    *
@@ -244,7 +259,11 @@ export class Game {
     const sceneTransition = new SceneTransition(incomingScene, transition);
     this.currentSceneSnapshot = undefined;
     this.incomingSceneTransitions.push(sceneTransition);
-    document.body.style.backgroundColor = `rgb(${incomingScene.backgroundColor[0]},${incomingScene.backgroundColor[1]},${incomingScene.backgroundColor[2]},${incomingScene.backgroundColor[3]})`;
+    if (incomingScene.game.bodyBackgroundColor !== undefined) {
+      document.body.style.backgroundColor = `rgb(${incomingScene.game.bodyBackgroundColor[0]},${incomingScene.game.bodyBackgroundColor[1]},${incomingScene.game.bodyBackgroundColor[2]},${incomingScene.game.bodyBackgroundColor[3]})`;
+    } else {
+      document.body.style.backgroundColor = `rgb(${incomingScene.backgroundColor[0]},${incomingScene.backgroundColor[1]},${incomingScene.backgroundColor[2]},${incomingScene.backgroundColor[3]})`;
+    }
     return;
   }
 
@@ -1603,12 +1622,30 @@ enum ActionType {
 //#endregion Actions
 
 //#region Interface options ------------------------------------------------------------
+export interface Constraints {
+  topToTopOf?: Entity | string;
+  bottomToBottomOf?: Entity | string;
+  startToStartOf?: Entity | string;
+  endToEndOf?: Entity | string;
+  horizontalBias?: number;
+  verticalBias?: number;
+}
+
+export interface Layout {
+  marginStart?: number;
+  marginEnd?: number;
+  marginTop?: number;
+  marginBottom?: number;
+  constraints?: Constraints;
+}
+
 export interface EntityOptions {
   name?: string;
   position?: Point;
   scale?: number;
   isUserInteractionEnabled?: boolean;
   hidden?: boolean;
+  layout?: Layout;
 }
 
 export interface SceneOptions extends EntityOptions, DrawableOptions {
@@ -1734,6 +1771,7 @@ export abstract class Entity {
   scale = 1.0;
   isUserInteractionEnabled = false;
   hidden = false;
+  layout: Layout = {};
 
   parent?: Entity;
   children = new Array<Entity>();
@@ -1747,6 +1785,7 @@ export abstract class Entity {
   uuid = generateUUID();
   needsInitialization = true;
   userData: any = {};
+  loopMessages = new Set<string>();
 
   constructor(options: EntityOptions = {}) {
     if (options.name === undefined) {
@@ -1762,6 +1801,9 @@ export abstract class Entity {
     }
     if (options.isUserInteractionEnabled) {
       this.isUserInteractionEnabled = options.isUserInteractionEnabled;
+    }
+    if (options.layout) {
+      this.layout = options.layout;
     }
   }
 
@@ -1896,13 +1938,93 @@ export abstract class Entity {
     }
 
     if (this.parent) {
-      this.absolutePosition.x =
-        this.parent.absolutePosition.x +
-        this.position.x * this.parent.absoluteScale;
-      this.absolutePosition.y =
-        this.parent.absolutePosition.y +
-        this.position.y * this.parent.absoluteScale;
       this.absoluteScale = this.parent.absoluteScale * this.scale;
+
+      if (this.layout?.constraints === undefined) {
+        // entity sets its position directly
+        this.absolutePosition.x =
+          this.parent.absolutePosition.x +
+          this.position.x * this.parent.absoluteScale;
+        this.absolutePosition.y =
+          this.parent.absolutePosition.y +
+          this.position.y * this.parent.absoluteScale;
+      } else {
+        // entity uses layout approach, with constraints
+        const horizontalBias = this.layout?.constraints?.horizontalBias ?? 0.5;
+        const verticalBias = this.layout?.constraints?.verticalBias ?? 0.5;
+        const topToTopOf = this.layout?.constraints?.topToTopOf;
+        const bottomToBottomOf = this.layout?.constraints?.bottomToBottomOf;
+        const startToStartOf = this.layout?.constraints?.startToStartOf;
+        const endToEndOf = this.layout?.constraints?.endToEndOf;
+        const marginStart = this.layout?.marginStart ?? 0;
+        const marginEnd = this.layout?.marginEnd ?? 0;
+        const marginTop = this.layout?.marginTop ?? 0;
+        const marginBottom = this.layout?.marginBottom ?? 0;
+
+        if (topToTopOf !== undefined && bottomToBottomOf !== undefined) {
+          // top and bottom constraint set, so center vertically
+          this.absolutePosition.y =
+            this.parent.absolutePosition.y +
+            this.parent.size.height * verticalBias * this.parent.absoluteScale;
+        } else if (topToTopOf !== undefined) {
+          // only top constraint set. position to top of parent
+          this.absolutePosition.y =
+            this.parent.absolutePosition.y +
+            (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
+          if (this.layout?.constraints?.verticalBias !== undefined) {
+            const warning = `warning: ${this} has only one vertical constraint. vertical bias ${this.layout?.constraints?.verticalBias} will be ignored`;
+            if (!this.loopMessages.has(warning)) {
+              console.warn(warning);
+              this.loopMessages.add(warning);
+            }
+          }
+        } else if (bottomToBottomOf !== undefined) {
+          // only bottom constraint set. position to bottom of parent
+          this.absolutePosition.y =
+            this.parent.absolutePosition.y +
+            this.parent.size.height * this.parent.absoluteScale -
+            (this.size.height * 0.5 + marginBottom) * this.parent.absoluteScale;
+          if (this.layout?.constraints?.verticalBias !== undefined) {
+            const warning = `warning: ${this} has only one vertical constraint. vertical bias ${this.layout?.constraints?.verticalBias} will be ignored`;
+            if (!this.loopMessages.has(warning)) {
+              console.warn(warning);
+              this.loopMessages.add(warning);
+            }
+          }
+        }
+
+        if (startToStartOf !== undefined && endToEndOf !== undefined) {
+          // start and end constraint set, so center horizontally
+          this.absolutePosition.x =
+            this.parent.absolutePosition.x +
+            this.parent.size.width * horizontalBias * this.parent.absoluteScale;
+        } else if (startToStartOf !== undefined) {
+          // only start constraint set. position to start of parent
+          this.absolutePosition.x =
+            this.parent.absolutePosition.x +
+            (this.size.width * 0.5 + marginStart) * this.parent.absoluteScale;
+          if (this.layout?.constraints?.horizontalBias !== undefined) {
+            const warning = `warning: ${this} has only one horizontal constraint. horizontal bias ${this.layout?.constraints?.horizontalBias} will be ignored`;
+            if (!this.loopMessages.has(warning)) {
+              console.warn(warning);
+              this.loopMessages.add(warning);
+            }
+          }
+        } else if (endToEndOf !== undefined) {
+          // only end constraint set. position to end of parent
+          this.absolutePosition.x =
+            this.parent.absolutePosition.x +
+            this.parent.size.width * this.parent.absoluteScale -
+            (this.size.width * 0.5 + marginEnd) * this.parent.absoluteScale;
+          if (this.layout?.constraints?.horizontalBias !== undefined) {
+            const warning = `warning: ${this} has only one horizontal constraint. horizontal bias ${this.layout?.constraints?.horizontalBias} will be ignored`;
+            if (!this.loopMessages.has(warning)) {
+              console.warn(warning);
+              this.loopMessages.add(warning);
+            }
+          }
+        }
+      }
     } else {
       // if there's no parent, then this entity is a screen
       this.absolutePosition.x = this.position.x * this.scale;
@@ -1944,6 +2066,7 @@ export abstract class Entity {
       );
     }
 
+    // TODO: need to order this for layout processing
     this.children.forEach((child) => child.update());
   }
 
