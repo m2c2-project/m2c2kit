@@ -1629,6 +1629,8 @@ export interface Constraints {
   endToEndOf?: Entity | string;
   horizontalBias?: number;
   verticalBias?: number;
+  // the following allows access to properties using a string key
+  [key: string]: Entity | string | number | undefined;
 }
 
 export interface Layout {
@@ -1968,9 +1970,27 @@ export abstract class Entity {
             this.parent.size.height * verticalBias * this.parent.absoluteScale;
         } else if (topToTopOf !== undefined) {
           // only top constraint set. position to top of parent
-          this.absolutePosition.y =
-            this.parent.absolutePosition.y +
-            (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
+          if (topToTopOf instanceof Entity && topToTopOf !== this.parent) {
+            const sibling = this.parent.children
+              .filter((child) => child === topToTopOf)
+              .find(Boolean)!;
+            let a = sibling;
+            let b = a.uuid + "0";
+            if (!b) {
+              console.log("rr");
+            }
+            this.absolutePosition.y =
+              this.parent.children
+                .filter((child) => child === topToTopOf)
+                .find(Boolean)!.absolutePosition.y +
+              //this.parent.absolutePosition.y + (sibling.size.height * .5 * this.parent.absoluteScale ) +
+              this.parent.absolutePosition.y +
+              (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
+          } else {
+            this.absolutePosition.y =
+              this.parent.absolutePosition.y +
+              (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
+          }
           if (this.layout?.constraints?.verticalBias !== undefined) {
             const warning = `warning: ${this} has only one vertical constraint. vertical bias ${this.layout?.constraints?.verticalBias} will be ignored`;
             if (!this.loopMessages.has(warning)) {
@@ -2066,8 +2086,88 @@ export abstract class Entity {
       );
     }
 
-    // TODO: need to order this for layout processing
-    this.children.forEach((child) => child.update());
+    // Update the entity's children
+    //
+    // If an entity uses positioning based only on the position property,
+    // it does not matter in what order the children are updated. If the
+    // entity uses layout constraints, however, one sibling's position
+    // may depend on another (e.g., the top of entity A is the bottom of
+    // entity B). The update of siblings must be properly ordered so that
+    // dependencies are resolved prior to the positioning calculations (e.g.,
+    // we must update entity B before we update entity A).
+    //
+    // We can solve this by modeling sibling constraint dependencies as a
+    // Directed acyclic graph (DAG) and applying a topological sort.
+    // We then update the siblings in the topolgical sort reverse order
+    // (Why reverse order? The topological sort is ordered so that vertexes
+    // with in degree 0 come first; these are the vertexes whose positions
+    // depend on others, but no other vertexes depend on them for
+    // positioning. We must update these last).
+    //
+
+    /**
+     * Get the uuids of all the sibling entities that this focal
+     * entity's constraints depend on. Ignore parent constraints, because
+     * the parent will have been updated already.
+     *
+     * @param parent - The focal entity's parent
+     * @param constraints - The focal entity's constraints
+     * @returns Array<string> - the uuids of the siblings the focal entity depends on
+     */
+    function getSiblingConstraintUuids(
+      parent: Entity,
+      constraints: Constraints | undefined
+    ): Array<string> {
+      const uuids = new Array<string>();
+      if (constraints === undefined) {
+        return uuids;
+      }
+      const constraintTypes = [
+        "topToTopOf",
+        "bottomToBottomOf",
+        "startToStartOf",
+        "endToEndOf",
+      ];
+      constraintTypes.forEach((constraint) => {
+        if (constraints[constraint] !== undefined) {
+          const siblingConstraint = constraints[constraint] as Entity;
+          if (siblingConstraint !== parent) {
+            uuids.push(siblingConstraint.uuid);
+          }
+        }
+      });
+      return uuids;
+    }
+
+    // Model the DAG in a Map where the key is the uuid of the focal entity,
+    // and the value is an array of other entity uuids that this focal entity
+    // depends on for layout
+    const adjList = new Map<string, string[]>();
+    this.children.forEach((child) => {
+      adjList.set(
+        child.uuid,
+        getSiblingConstraintUuids(this, child.layout?.constraints)
+      );
+    });
+
+    const sortedUuids = findTopologicalSort(adjList);
+    if (sortedUuids.length > 0) {
+      const uuidsInUpdateOrder = sortedUuids.reverse();
+      const childrenInUpdateOrder = new Array<Entity>();
+
+      uuidsInUpdateOrder.forEach((uuid) => {
+        const child = this.children
+          .filter((c) => c.uuid === uuid)
+          .find(Boolean);
+        if (child === undefined) {
+          throw new Error("error in dag topological sort");
+        }
+        childrenInUpdateOrder.push(child);
+      });
+      childrenInUpdateOrder.forEach((child) => child.update());
+    } else {
+      this.children.forEach((child) => child.update());
+    }
   }
 
   /**
@@ -3159,4 +3259,67 @@ const dataURLtoArrayBuffer = (dataUrl: string): ArrayBuffer => {
     u8arr[n] = bstr.charCodeAt(n);
   }
   return u8arr.buffer;
+};
+
+// from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95
+/**
+ * For a given directed acyclic graph, topological ordering of the vertices will be identified using BFS
+ * @param adjList Adjacency List that represent a graph with vertices and edges
+ */
+const findTopologicalSort = (adjList: Map<string, string[]>): string[] => {
+  const tSort: string[] = [];
+  const inDegree: Map<string, number> = new Map();
+
+  // find in-degree for each vertex
+  adjList.forEach((edges, vertex) => {
+    // If vertex is not in the map, add it to the inDegree map
+    if (!inDegree.has(vertex)) {
+      inDegree.set(vertex, 0);
+    }
+
+    edges.forEach((edge) => {
+      // Increase the inDegree for each edge
+      if (inDegree.has(edge)) {
+        inDegree.set(edge, inDegree.get(edge)! + 1);
+      } else {
+        inDegree.set(edge, 1);
+      }
+    });
+  });
+
+  // Queue for holding vertices that has 0 inDegree Value
+  const queue: string[] = [];
+  inDegree.forEach((degree, vertex) => {
+    // Add vertices with inDegree 0 to the queue
+    if (degree == 0) {
+      queue.push(vertex);
+    }
+  });
+
+  // Traverse through the leaf vertices
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current === undefined) {
+      throw "bad";
+    }
+    tSort.push(current);
+    // Mark the current vertex as visited and decrease the inDegree for the edges of the vertex
+    // Imagine we are deleting this current vertex from our graph
+    if (adjList.has(current)) {
+      adjList.get(current)?.forEach((edge) => {
+        if (inDegree.has(edge) && inDegree.get(edge)! > 0) {
+          // Decrease the inDegree for the adjacent vertex
+          const newDegree = inDegree.get(edge)! - 1;
+          inDegree.set(edge, newDegree);
+
+          // if inDegree becomes zero, we found new leaf node.
+          // Add to the queue to traverse through its edges
+          if (newDegree == 0) {
+            queue.push(edge);
+          }
+        }
+      });
+    }
+  }
+  return tSort;
 };

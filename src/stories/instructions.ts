@@ -50,8 +50,9 @@ export class Instructions extends StoryCreator {
 
       const titleMarginTop = s.titleMarginTop ?? 32;
 
+      let title: Label | undefined;
       if (s.title !== undefined) {
-        const title = new Label({
+        title = new Label({
           text: s.title,
           layout: {
             marginTop: titleMarginTop,
@@ -69,9 +70,10 @@ export class Instructions extends StoryCreator {
         const text = new Label({
           text: s.text,
           layout: {
+            marginTop: 0,
             constraints: {
-              topToTopOf: scene,
-              bottomToBottomOf: scene,
+              topToTopOf: title === undefined ? scene : title,
+              bottomToBottomOf: title === undefined ? scene : undefined,
               startToStartOf: scene,
               endToEndOf: scene,
               verticalBias: s.textVerticalBias,
