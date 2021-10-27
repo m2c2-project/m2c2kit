@@ -24,8 +24,8 @@ game
   .init({
     showFps: true,
     bodyBackgroundColor: WebColors.Wheat,
-    width: 360,
-    height: 720,
+    width: 400,
+    height: 800,
     stretch: false,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
@@ -48,17 +48,29 @@ game
     game.addScene(s1);
 
     const rec2 = new Shape({
-      rect: new Rect({ width: 128, height: 128, x: 180, y: 350 }),
+      rect: new Rect({ width: 128, height: 128 }),
+      layout: {
+        marginEnd: 100,
+        constraints: {
+          topToTopOf: s1,
+          bottomToBottomOf: s1,
+          endToEndOf: s1,
+          verticalBias: 0.75,
+        },
+      },
       fillColor: WebColors.RebeccaPurple,
     });
     s1.addChild(rec2);
     const rec = new Shape({
       rect: new Rect({ width: 64, height: 64 }),
       layout: {
-        //marginTop: 6,
-        marginBottom: 12,
+        marginTop: 6,
+        marginBottom: 24,
         constraints: {
           bottomToTopOf: rec2,
+          endToStartOf: rec2,
+          startToStartOf: s1,
+          horizontalBias: 0.5,
         },
       },
     });

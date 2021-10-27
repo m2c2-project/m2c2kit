@@ -2090,7 +2090,7 @@ export abstract class Entity {
       // if the alter is NOT a scene, then to get the top of the alter
       // we have to subtract half of the alter's height because positions
       // are relative to the alter's anchor
-      // (TODO: don't assume .5 ANCHOR)
+      // TODO: don't assume .5 ANCHOR
       // But if the alter IS a scene, there's no need to make this
       // calculate because the scene is the root coordinate system and
       // it's top by definition is 0
@@ -2111,8 +2111,36 @@ export abstract class Entity {
       y = y - this.size.height * 0.5 * scale;
       y = y - marginBottom * scale;
     }
-    this.absolutePosition.y = y;
     return y;
+  }
+
+  private calculateXFromConstraint(
+    constraint: LayoutConstraint,
+    marginStart: number,
+    marginEnd: number,
+    scale: number
+  ): number {
+    let x = constraint.alterEntity.absolutePosition.x;
+
+    if (constraint.alterEntityMinimum) {
+      if (!(constraint.alterEntity instanceof Scene)) {
+        x = x - constraint.alterEntity.size.width * 0.5 * scale;
+      }
+    } else {
+      if (!(constraint.alterEntity instanceof Scene)) {
+        x = x + constraint.alterEntity.size.width * 0.5 * scale;
+      } else {
+        x = x + constraint.alterEntity.size.width * scale;
+      }
+    }
+    if (constraint.focalEntityMinimum) {
+      x = x + this.size.width * 0.5 * scale;
+      x = x + marginStart * scale;
+    } else {
+      x = x - this.size.width * 0.5 * scale;
+      x = x - marginEnd * scale;
+    }
+    return x;
   }
 
   update(): void {
@@ -2123,7 +2151,13 @@ export abstract class Entity {
       this.needsInitialization = false;
     }
 
-    if (this.parent !== undefined) {
+    if (this.parent === undefined) {
+      // if there's no parent, then this entity is a screen
+      this.absolutePosition.x = this.position.x * this.scale;
+      this.absolutePosition.y = this.position.y * this.scale;
+      this.absoluteScale = this.scale;
+    } else {
+      // this entity has a parent; it inherits the parent's scale
       this.absoluteScale = this.parent.absoluteScale * this.scale;
 
       if (this.layout?.constraints === undefined) {
@@ -2143,6 +2177,8 @@ export abstract class Entity {
         const verticalBias = this.layout?.constraints?.verticalBias ?? 0.5;
         const marginTop = this.layout?.marginTop ?? 0;
         const marginBottom = this.layout?.marginBottom ?? 0;
+        const marginStart = this.layout?.marginStart ?? 0;
+        const marginEnd = this.layout?.marginEnd ?? 0;
 
         const layoutConstraints = this.parseLayoutConstraints(
           this.layout?.constraints
@@ -2172,12 +2208,30 @@ export abstract class Entity {
         } else {
           // log a warning of there being too many y constraints
         }
+
+        const xPositions = layoutConstraints
+          .filter((constraint) => !constraint.verticalConstraint)
+          .map((constraint) =>
+            this.calculateXFromConstraint(
+              constraint,
+              marginStart,
+              marginEnd,
+              scale
+            )
+          );
+
+        if (xPositions.length === 0) {
+          // log a warning of there being no x constraint
+        } else if (xPositions.length === 1) {
+          this.absolutePosition.x = xPositions[0];
+        } else if (xPositions.length === 2) {
+          this.absolutePosition.x =
+            Math.min(xPositions[0], xPositions[1]) +
+            horizontalBias * Math.abs(xPositions[0] - xPositions[1]);
+        } else {
+          // log a warning of there being too many x constraints
+        }
       }
-    } else {
-      // if there's no parent, then this entity is a screen
-      this.absolutePosition.x = this.position.x * this.scale;
-      this.absolutePosition.y = this.position.y * this.scale;
-      this.absoluteScale = this.scale;
     }
 
     // We must distinguish actions that run during a scene transition and those that do not.
