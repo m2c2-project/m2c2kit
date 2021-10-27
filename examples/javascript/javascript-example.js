@@ -1,3 +1,5 @@
+import { Button } from "./../../src/composites/button";
+import { Instructions } from "./../../src/stories/instructions";
 import {
   Game,
   Action,
@@ -20,12 +22,15 @@ window.game = game;
 game
   .init({
     showFps: true,
-    width: 360,
-    height: 600,
+    // set this color so we can see the boundaries of the game
+    bodyBackgroundColor: WebColors.Wheat,
+    // note: using 2:1 aspect ratio, because that is closer to modern phones
+    width: 400,
+    height: 800,
+    // set stretch to true if you want to fill the screen
     stretch: false,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
-      "https://fonts.cdnfonts.com/s/5244/Quickie.ttf",
     ],
     // each svgImage below, you specify either a tag of an svg in the property "svgString" (as I do below)
     // or you specify a URL to an svg in the property "url", such as url: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg'
@@ -40,21 +45,74 @@ game
     ],
   })
   .then(() => {
-    // present simple primitives and show some actions as an example
+    const instructionsScenes = Instructions.Create({
+      sceneNamePrefix: "instructions",
+      // the backgroundColor will be applied to all instruction scenes, unless we override
+      backgroundColor: WebColors.Beige,
+      instructionScenes: [
+        {
+          text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+        },
+        {
+          text: "Same text, but shifted up the screen (vertical bias .25)\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          textVerticalBias: 0.25,
+        },
+        {
+          title: "Title goes here",
+          titleMarginTop: 64,
+          text: "Title, text, and image.\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          // override this scene's color to be different
+          backgroundColor: WebColors.WhiteSmoke,
+          image: "star",
+          imageMarginTop: 32,
+        },
+        {
+          title: "Title goes here",
+          titleMarginTop: 64,
+          text: "Shift down the screen (vertical bias .70).\nTitle, text, and image.\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          textVerticalBias: 0.75,
+          // override this scene's color to be different
+          backgroundColor: WebColors.WhiteSmoke,
+          image: "star",
+          imageMarginTop: 32,
+        },
+        {
+          title: "Title goes here",
+          titleMarginTop: 128,
+          text: "Title, text, and image, but this time image on top.\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          image: "star",
+          textAboveImage: false,
+          imageMarginBottom: 8,
+        },
+        {
+          title: "Last screen",
+          text: "We're at the end. We've changed the next button text to \"Start\" for this last screen.",
+          nextButtonText: "Start",
+        },
+      ],
+      postInstructionsScene: "page1",
+    });
+    game.addScenes(instructionsScenes);
 
-    const page1 = new Scene({ backgroundColor: WebColors.Cornsilk });
+    // present simple primitives and show some actions as an example
+    const page1 = new Scene({
+      // give this scene a name so we can refer to it in the postInstructionScene property
+      // when building our instructions
+      name: "page1",
+      backgroundColor: WebColors.Cornsilk,
+    });
     game.addScene(page1);
 
-    // create a button from primitvies (rectangle, label)
+    // create a button from primitives (rectangle, label)
     const page1ButtonRectangle = new Shape({
-      rect: new Rect({ width: 300, height: 50, x: 180, y: 500 }),
+      rect: new Rect({ width: 300, height: 50, x: 200, y: 700 }),
       cornerRadius: 9,
       fillColor: WebColors.RebeccaPurple,
     });
     let clicks = 0;
     page1.addChild(page1ButtonRectangle);
     const buttonLabel = new Label({
-      text: "click me -- see log!",
+      text: "click me -- see console!",
       fontColor: WebColors.White,
     });
     page1ButtonRectangle.addChild(buttonLabel);
@@ -67,12 +125,28 @@ game
       );
     });
 
+    // create a button from a pre-built composite (easy!)
+    const easyButton = new Button({
+      text: "click me!",
+      position: new Point(200, 625),
+    });
+    page1.addChild(easyButton);
+    easyButton.isUserInteractionEnabled = true;
+    let easyClicks = 0;
+    easyButton.onTap(() => {
+      easyClicks++;
+      console.log(`easy button clicked ${easyClicks} times!`);
+      easyButton.run(
+        Action.Sequence(Action.Scale(0.95, 100), Action.Scale(1, 100))
+      );
+    });
+
     const circle = new Shape({
       circleOfRadius: 80,
       fillColor: WebColors.LightBlue,
       strokeColor: WebColors.Red,
       lineWidth: 4,
-      position: new Point(180, 100),
+      position: new Point(200, 200),
     });
     page1.addChild(circle);
 
@@ -80,8 +154,8 @@ game
     circle.addChild(starImage);
 
     const grid1 = new Grid({
-      size: new Size(200, 200),
-      position: new Point(180, 325),
+      size: new Size(250, 250),
+      position: new Point(200, 450),
       rows: 5,
       columns: 5,
       backgroundColor: WebColors.Silver,
@@ -106,11 +180,10 @@ game
     const wrappedLabel2 = new Label({
       text: "right justified: this is a long line of text that has been wrapped so it stays within the bounds we want.",
       preferredMaxLayoutWidth: 60,
-      position: new Point(315, 180),
+      position: new Point(350, 180),
       horizontalAlignmentMode: LabelHorizontalAlignmentMode.right,
     });
     page1.addChild(wrappedLabel2);
 
-    game.entryScene = page1;
-    game.start();
+    game.start("instructions-01");
   });

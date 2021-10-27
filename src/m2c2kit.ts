@@ -107,11 +107,6 @@ export class Size {
 }
 
 /**
- * An array of scenes. This is the return type of a StoryCreator
- */
-export type Story = Array<Scene>;
-
-/**
  * Color in red (0-255), green (0-255), blue (0-255), alpha (0-1) format. Must be numeric array of length 4.
  */
 export type rgbaColor = [number, number, number, number];
