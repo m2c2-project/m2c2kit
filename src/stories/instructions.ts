@@ -70,9 +70,11 @@ export class Instructions extends StoryCreator {
         const text = new Label({
           text: s.text,
           layout: {
-            marginTop: 0,
+            marginTop: 20,
+            marginBottom: 40,
             constraints: {
-              topToTopOf: title === undefined ? scene : title,
+              topToBottomOf: title === undefined ? scene : title,
+              //bottomToTopOf: title === undefined ? scene : title,
               bottomToBottomOf: title === undefined ? scene : undefined,
               startToStartOf: scene,
               endToEndOf: scene,

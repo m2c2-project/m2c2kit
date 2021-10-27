@@ -23,7 +23,7 @@ const game = new Game();
 game
   .init({
     showFps: true,
-    bodyBackgroundColor: WebColors.Red,
+    bodyBackgroundColor: WebColors.Wheat,
     width: 360,
     height: 720,
     stretch: false,
@@ -44,14 +44,35 @@ game
     ],
   })
   .then(() => {
+    const s1 = new Scene();
+    game.addScene(s1);
+
+    const rec2 = new Shape({
+      rect: new Rect({ width: 128, height: 128, x: 180, y: 350 }),
+      fillColor: WebColors.RebeccaPurple,
+    });
+    s1.addChild(rec2);
+    const rec = new Shape({
+      rect: new Rect({ width: 64, height: 64 }),
+      layout: {
+        //marginTop: 6,
+        marginBottom: 12,
+        constraints: {
+          bottomToTopOf: rec2,
+        },
+      },
+    });
+    s1.addChild(rec);
+
     const ins = Instructions.Create({
       sceneNamePrefix: "instructions",
       backgroundColor: WebColors.Beige,
       instructionScenes: [
         {
           text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          //text: "Lorem ipsum",
           title: "Instructions",
-          titleMarginTop: 300,
+          titleMarginTop: 350,
         },
         { text: "page 2 of instructions!", backgroundColor: WebColors.Wheat },
         { text: "and this is page 3!!", nextButtonText: "Start" },
@@ -134,5 +155,7 @@ game
     page1.addChild(wrappedLabel2);
 
     //game.entryScene = page1;
-    game.start("instructions-01");
+    //game.start("instructions-01");
+    game.entryScene = s1;
+    game.start();
   });

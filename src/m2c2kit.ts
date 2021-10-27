@@ -1624,13 +1624,131 @@ enum ActionType {
 //#region Interface options ------------------------------------------------------------
 export interface Constraints {
   topToTopOf?: Entity | string;
+  topToBottomOf?: Entity | string;
+  bottomToTopOf?: Entity | string;
   bottomToBottomOf?: Entity | string;
   startToStartOf?: Entity | string;
+  startToEndOf?: Entity | string;
   endToEndOf?: Entity | string;
+  endToStartOf?: Entity | string;
   horizontalBias?: number;
   verticalBias?: number;
   // the following allows access to properties using a string key
   [key: string]: Entity | string | number | undefined;
+}
+
+/**
+ * This class is used internally for processing layout constraints that
+ * have been defined according to the Contraints interface.
+ *
+ * Imagine we have two entities, A and B. B's position is set
+ * using its position property. A's position is set using the layout
+ * constraint "bottomToTopOf B." A is the focal entity in this example.
+ * What this means is that A's y coordinate will be computed such that
+ * the bottom of A is the top of B. If A and B are squares, then A sits
+ * on top of B with no gap.
+ */
+class LayoutConstraint {
+  // the constraint, e.g., bottomToTopOf
+  type: ConstraintType;
+  // alter is the other entity that the focal entity is contrained to.
+  // in the example above, A is the focal entity, B is the alter
+  // thus the alter entity property is B
+  alterEntity: Entity;
+
+  // the below 3 properties are calculated from the constraint type
+  // (we set them to false by default to avoid undefined warnings, but
+  // they will be definitely assigned in the constructor logic)
+  // the properties are used in the positioning update step
+  //
+  // does the constraint affect the Y or X axis? If not, then it's
+  // a horizontal constraint
+  verticalConstraint = false;
+  // does the constraint apply to the focal entity's "minimum" position
+  // along its axis? That is, does the constraint reference the focal
+  // entity's "top" or "start"? Top and start are considered minimums because
+  // our origin (0, 0) in the upper left.
+  // If not, then the constraint applies to the focal entity's "maximum"
+  // position, e.g., its "bottom" or "end".
+  focalEntityMinimum = false;
+  // does the constraint apply to the alter entity's "minimum" position
+  // along its axis?
+  alterEntityMinimum = false;
+
+  verticalTypes = [
+    ConstraintType.topToTopOf,
+    ConstraintType.topToBottomOf,
+    ConstraintType.bottomToTopOf,
+    ConstraintType.bottomToBottomOf,
+  ];
+
+  // e.g., entity A
+  focalEntityMinimumTypes = [
+    ConstraintType.topToTopOf,
+    ConstraintType.topToBottomOf,
+    ConstraintType.startToStartOf,
+    ConstraintType.startToEndOf,
+  ];
+
+  // e.g., entity B
+  alterEntityMinimumTypes = [
+    ConstraintType.topToTopOf,
+    ConstraintType.bottomToTopOf,
+    ConstraintType.startToStartOf,
+    ConstraintType.endToStartOf,
+  ];
+
+  constructor(type: ConstraintType, alterEntity: Entity) {
+    this.type = type;
+    this.alterEntity = alterEntity;
+
+    // If it's not a vertical constraint, it's a horizontal contraint
+    // similarly, if it's not a focal entitity minimum constraint,
+    // it's a focal entitity maximum constraint. All of these are binary,
+    // so we can use a series of if/else to completely assign values to
+    // verticalConstraint, focalEntityMinimum, and alterEntityMinimum
+    //
+    if (this.verticalTypes.includes(type)) {
+      this.verticalConstraint = true;
+      if (this.focalEntityMinimumTypes.includes(type)) {
+        this.focalEntityMinimum = true;
+      } else {
+        this.focalEntityMinimum = false;
+      }
+      if (this.alterEntityMinimumTypes.includes(type)) {
+        this.alterEntityMinimum = true;
+      } else {
+        this.alterEntityMinimum = false;
+      }
+    } else {
+      this.verticalConstraint = false;
+      if (this.focalEntityMinimumTypes.includes(type)) {
+        this.focalEntityMinimum = true;
+      } else {
+        this.focalEntityMinimum = false;
+      }
+      if (this.alterEntityMinimumTypes.includes(type)) {
+        this.alterEntityMinimum = true;
+      } else {
+        this.alterEntityMinimum = false;
+      }
+    }
+  }
+}
+
+/**
+ * This enum is used interally for processing the layout constraints. We use
+ * an enum to avoid magic strings.
+ */
+enum ConstraintType {
+  topToTopOf = "topToTopOf",
+  topToBottomOf = "topToBottomOf",
+  bottomToTopOf = "bottomToTopOf",
+  bottomToBottomOf = "bottomToBottomOf",
+  startToStartOf = "startToStartOf",
+  startToEndOf = "startToEndOf",
+  endToEndOf = "endToEndOf",
+  endToStartOf = "endToStartOf",
 }
 
 export interface Layout {
@@ -1931,6 +2049,72 @@ export abstract class Entity {
     this.tapListeners.push(listener);
   }
 
+  private parseLayoutConstraints(
+    constraints: Constraints
+  ): Array<LayoutConstraint> {
+    const layoutConstraints = new Array<LayoutConstraint>();
+
+    // create an array of all possible constraintType enum values
+    const constraintTypes = Object.values(ConstraintType);
+
+    // for every possible constraint type, check if the provided
+    // constraints object has that type. If it does, create a
+    // LayoutConstraint object that describes it.
+    // (a layoutConstraint object, which is an instance of the
+    // LayoutConstraintr CLASS, is easier to work with than the values in
+    // the constraints object, which is defined by the Constraints INTERFACE)
+    //
+    constraintTypes.forEach((constraintType) => {
+      if (constraints[constraintType] !== undefined) {
+        const entity = constraints[constraintType] as Entity;
+        const type = constraintType;
+        const layoutConstraint = new LayoutConstraint(type, entity);
+        layoutConstraints.push(layoutConstraint);
+      }
+    });
+
+    return layoutConstraints;
+  }
+
+  private calculateYFromConstraint(
+    constraint: LayoutConstraint,
+    marginTop: number,
+    marginBottom: number,
+    scale: number
+  ): number {
+    // no matter what the constraint, we start with the alter's position
+    let y = constraint.alterEntity.absolutePosition.y;
+
+    if (constraint.alterEntityMinimum) {
+      // we're constraining to the alter's minimum (top)
+      // if the alter is NOT a scene, then to get the top of the alter
+      // we have to subtract half of the alter's height because positions
+      // are relative to the alter's anchor
+      // (TODO: don't assume .5 ANCHOR)
+      // But if the alter IS a scene, there's no need to make this
+      // calculate because the scene is the root coordinate system and
+      // it's top by definition is 0
+      if (!(constraint.alterEntity instanceof Scene)) {
+        y = y - constraint.alterEntity.size.height * 0.5 * scale;
+      }
+    } else {
+      if (!(constraint.alterEntity instanceof Scene)) {
+        y = y + constraint.alterEntity.size.height * 0.5 * scale;
+      } else {
+        y = y + constraint.alterEntity.size.height * scale;
+      }
+    }
+    if (constraint.focalEntityMinimum) {
+      y = y + this.size.height * 0.5 * scale;
+      y = y + marginTop * scale;
+    } else {
+      y = y - this.size.height * 0.5 * scale;
+      y = y - marginBottom * scale;
+    }
+    this.absolutePosition.y = y;
+    return y;
+  }
+
   update(): void {
     if (this.needsInitialization) {
       // note: the below initialize() function will be called on the DERIVED CLASS's initialize(),
@@ -1939,11 +2123,11 @@ export abstract class Entity {
       this.needsInitialization = false;
     }
 
-    if (this.parent) {
+    if (this.parent !== undefined) {
       this.absoluteScale = this.parent.absoluteScale * this.scale;
 
       if (this.layout?.constraints === undefined) {
-        // entity sets its position directly
+        // entity sets its position directly using its position property
         this.absolutePosition.x =
           this.parent.absolutePosition.x +
           this.position.x * this.parent.absoluteScale;
@@ -1951,98 +2135,42 @@ export abstract class Entity {
           this.parent.absolutePosition.y +
           this.position.y * this.parent.absoluteScale;
       } else {
-        // entity uses layout approach, with constraints
+        // entity sets its position using layout approach, with constraints.
+        // this is much more complicated than using only the entity's
+        // position property.
+
         const horizontalBias = this.layout?.constraints?.horizontalBias ?? 0.5;
         const verticalBias = this.layout?.constraints?.verticalBias ?? 0.5;
-        const topToTopOf = this.layout?.constraints?.topToTopOf;
-        const bottomToBottomOf = this.layout?.constraints?.bottomToBottomOf;
-        const startToStartOf = this.layout?.constraints?.startToStartOf;
-        const endToEndOf = this.layout?.constraints?.endToEndOf;
-        const marginStart = this.layout?.marginStart ?? 0;
-        const marginEnd = this.layout?.marginEnd ?? 0;
         const marginTop = this.layout?.marginTop ?? 0;
         const marginBottom = this.layout?.marginBottom ?? 0;
 
-        if (topToTopOf !== undefined && bottomToBottomOf !== undefined) {
-          // top and bottom constraint set, so center vertically
-          this.absolutePosition.y =
-            this.parent.absolutePosition.y +
-            this.parent.size.height * verticalBias * this.parent.absoluteScale;
-        } else if (topToTopOf !== undefined) {
-          // only top constraint set. position to top of parent
-          if (topToTopOf instanceof Entity && topToTopOf !== this.parent) {
-            const sibling = this.parent.children
-              .filter((child) => child === topToTopOf)
-              .find(Boolean)!;
-            let a = sibling;
-            let b = a.uuid + "0";
-            if (!b) {
-              console.log("rr");
-            }
-            this.absolutePosition.y =
-              this.parent.children
-                .filter((child) => child === topToTopOf)
-                .find(Boolean)!.absolutePosition.y +
-              //this.parent.absolutePosition.y + (sibling.size.height * .5 * this.parent.absoluteScale ) +
-              this.parent.absolutePosition.y +
-              (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
-          } else {
-            this.absolutePosition.y =
-              this.parent.absolutePosition.y +
-              (this.size.height * 0.5 + marginTop) * this.parent.absoluteScale;
-          }
-          if (this.layout?.constraints?.verticalBias !== undefined) {
-            const warning = `warning: ${this} has only one vertical constraint. vertical bias ${this.layout?.constraints?.verticalBias} will be ignored`;
-            if (!this.loopMessages.has(warning)) {
-              console.warn(warning);
-              this.loopMessages.add(warning);
-            }
-          }
-        } else if (bottomToBottomOf !== undefined) {
-          // only bottom constraint set. position to bottom of parent
-          this.absolutePosition.y =
-            this.parent.absolutePosition.y +
-            this.parent.size.height * this.parent.absoluteScale -
-            (this.size.height * 0.5 + marginBottom) * this.parent.absoluteScale;
-          if (this.layout?.constraints?.verticalBias !== undefined) {
-            const warning = `warning: ${this} has only one vertical constraint. vertical bias ${this.layout?.constraints?.verticalBias} will be ignored`;
-            if (!this.loopMessages.has(warning)) {
-              console.warn(warning);
-              this.loopMessages.add(warning);
-            }
-          }
-        }
+        const layoutConstraints = this.parseLayoutConstraints(
+          this.layout?.constraints
+        );
 
-        if (startToStartOf !== undefined && endToEndOf !== undefined) {
-          // start and end constraint set, so center horizontally
-          this.absolutePosition.x =
-            this.parent.absolutePosition.x +
-            this.parent.size.width * horizontalBias * this.parent.absoluteScale;
-        } else if (startToStartOf !== undefined) {
-          // only start constraint set. position to start of parent
-          this.absolutePosition.x =
-            this.parent.absolutePosition.x +
-            (this.size.width * 0.5 + marginStart) * this.parent.absoluteScale;
-          if (this.layout?.constraints?.horizontalBias !== undefined) {
-            const warning = `warning: ${this} has only one horizontal constraint. horizontal bias ${this.layout?.constraints?.horizontalBias} will be ignored`;
-            if (!this.loopMessages.has(warning)) {
-              console.warn(warning);
-              this.loopMessages.add(warning);
-            }
-          }
-        } else if (endToEndOf !== undefined) {
-          // only end constraint set. position to end of parent
-          this.absolutePosition.x =
-            this.parent.absolutePosition.x +
-            this.parent.size.width * this.parent.absoluteScale -
-            (this.size.width * 0.5 + marginEnd) * this.parent.absoluteScale;
-          if (this.layout?.constraints?.horizontalBias !== undefined) {
-            const warning = `warning: ${this} has only one horizontal constraint. horizontal bias ${this.layout?.constraints?.horizontalBias} will be ignored`;
-            if (!this.loopMessages.has(warning)) {
-              console.warn(warning);
-              this.loopMessages.add(warning);
-            }
-          }
+        const scale = this.parent.absoluteScale;
+
+        const yPositions = layoutConstraints
+          .filter((constraint) => constraint.verticalConstraint)
+          .map((constraint) =>
+            this.calculateYFromConstraint(
+              constraint,
+              marginTop,
+              marginBottom,
+              scale
+            )
+          );
+
+        if (yPositions.length === 0) {
+          // log a warning of there being no y constraint
+        } else if (yPositions.length === 1) {
+          this.absolutePosition.y = yPositions[0];
+        } else if (yPositions.length === 2) {
+          this.absolutePosition.y =
+            Math.min(yPositions[0], yPositions[1]) +
+            verticalBias * Math.abs(yPositions[0] - yPositions[1]);
+        } else {
+          // log a warning of there being too many y constraints
         }
       }
     } else {
@@ -2124,6 +2252,7 @@ export abstract class Entity {
       }
       const constraintTypes = [
         "topToTopOf",
+        "topToBottomOf",
         "bottomToBottomOf",
         "startToStartOf",
         "endToEndOf",
