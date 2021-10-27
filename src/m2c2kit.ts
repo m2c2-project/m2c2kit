@@ -2050,7 +2050,8 @@ export abstract class Entity {
   }
 
   private parseLayoutConstraints(
-    constraints: Constraints
+    constraints: Constraints,
+    allGameEntities: Array<Entity>
   ): Array<LayoutConstraint> {
     const layoutConstraints = new Array<LayoutConstraint>();
 
@@ -2066,9 +2067,27 @@ export abstract class Entity {
     //
     constraintTypes.forEach((constraintType) => {
       if (constraints[constraintType] !== undefined) {
-        const entity = constraints[constraintType] as Entity;
-        const type = constraintType;
-        const layoutConstraint = new LayoutConstraint(type, entity);
+        let entity: Entity | undefined;
+        let additionalExceptionMessage = "";
+
+        if (constraints[constraintType] instanceof Entity) {
+          entity = constraints[constraintType] as Entity;
+        } else {
+          const entityName = constraints[constraintType] as string;
+          entity = allGameEntities
+            .filter((e) => e.name === entityName)
+            .find(Boolean);
+          additionalExceptionMessage = `. sibling entity named "${entityName}" has not been added to the game object`;
+        }
+
+        if (entity === undefined) {
+          throw new Error(
+            "could not find sibling entity for constraint" +
+              additionalExceptionMessage
+          );
+        }
+
+        const layoutConstraint = new LayoutConstraint(constraintType, entity);
         layoutConstraints.push(layoutConstraint);
       }
     });
@@ -2181,7 +2200,8 @@ export abstract class Entity {
         const marginEnd = this.layout?.marginEnd ?? 0;
 
         const layoutConstraints = this.parseLayoutConstraints(
-          this.layout?.constraints
+          this.layout?.constraints,
+          this.getParentScene().game.entities
         );
 
         const scale = this.parent.absoluteScale;
@@ -2304,16 +2324,40 @@ export abstract class Entity {
       if (constraints === undefined) {
         return uuids;
       }
-      const constraintTypes = [
-        "topToTopOf",
-        "topToBottomOf",
-        "bottomToBottomOf",
-        "startToStartOf",
-        "endToEndOf",
-      ];
+      const constraintTypes = Object.values(ConstraintType);
       constraintTypes.forEach((constraint) => {
         if (constraints[constraint] !== undefined) {
-          const siblingConstraint = constraints[constraint] as Entity;
+          let siblingConstraint: Entity | undefined;
+          let additionalExceptionMessage = "";
+
+          if (constraints[constraint] instanceof Entity) {
+            siblingConstraint = constraints[constraint] as Entity;
+          } else {
+            const entityName = constraints[constraint] as string;
+            let allGameEntities: Array<Entity>;
+            if (parent instanceof Scene) {
+              allGameEntities = (parent as Scene).game.entities;
+            } else {
+              allGameEntities = parent.getParentScene().game.entities;
+            }
+            siblingConstraint = allGameEntities
+              .filter((e) => e.name === entityName)
+              .find(Boolean);
+            if (siblingConstraint === undefined) {
+              additionalExceptionMessage = `. sibling entity named "${entityName}" has not been added to the game object`;
+            }
+          }
+
+          if (siblingConstraint === undefined) {
+            throw new Error(
+              "error getting uuid of sibling contraint" +
+                additionalExceptionMessage
+            );
+          }
+
+          // as of now, we only need to get uuids of siblings because
+          // we don't allow nested layouts
+          // TODO: allow nested layouts.
           if (siblingConstraint !== parent) {
             uuids.push(siblingConstraint.uuid);
           }

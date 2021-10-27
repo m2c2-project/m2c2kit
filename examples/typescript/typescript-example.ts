@@ -44,15 +44,32 @@ game
     ],
   })
   .then(() => {
-    const s1 = new Scene();
+    // const s1 = new Scene( {name: "scene1"});
+    // game.addScene(s1);
+
+    // const rec2 = new Shape({
+    //   rect: new Rect({ width: 128, height: 128 }),
+    //   layout: {
+    //     marginEnd: 100,
+    //     constraints: {
+    //       topToTopOf: "scene1",
+    //       startToStartOf: "scene1"
+    //     },
+    //   },
+    //   fillColor: WebColors.RebeccaPurple,
+    // });
+    // s1.addChild(rec2);
+
+    const s1 = new Scene({ name: "scene1" });
     game.addScene(s1);
 
     const rec2 = new Shape({
+      name: "purpleBox",
       rect: new Rect({ width: 128, height: 128 }),
       layout: {
         marginEnd: 100,
         constraints: {
-          topToTopOf: s1,
+          //topToTopOf: s1,
           bottomToBottomOf: s1,
           endToEndOf: s1,
           verticalBias: 0.75,
@@ -67,9 +84,9 @@ game
         marginTop: 6,
         marginBottom: 24,
         constraints: {
-          bottomToTopOf: rec2,
+          bottomToTopOf: "purpleBox",
           endToStartOf: rec2,
-          startToStartOf: s1,
+          startToStartOf: "scene1",
           horizontalBias: 0.5,
         },
       },
