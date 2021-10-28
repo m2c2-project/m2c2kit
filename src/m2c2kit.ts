@@ -2196,7 +2196,7 @@ export abstract class Entity {
 
         const layoutConstraints = this.parseLayoutConstraints(
           this.layout?.constraints,
-          this.getParentScene().game.entities
+          this.parentScene.game.entities
         );
 
         const scale = this.parent.absoluteScale;
@@ -2333,7 +2333,7 @@ export abstract class Entity {
             if (parent instanceof Scene) {
               allGameEntities = (parent as Scene).game.entities;
             } else {
-              allGameEntities = parent.getParentScene().game.entities;
+              allGameEntities = parent.parentScene.game.entities;
             }
             siblingConstraint = allGameEntities
               .filter((e) => e.name === entityName)
@@ -2544,7 +2544,7 @@ export abstract class Entity {
    *
    * @returns Scene that contains this entity
    */
-  getParentScene(): Scene {
+  get parentScene(): Scene {
     if (this.type === EntityType.scene) {
       throw new Error(
         `Entity ${this} is a scene and cannot have a parent scene`
@@ -2553,8 +2553,7 @@ export abstract class Entity {
     if (this.parent && this.parent.type === EntityType.scene) {
       return this.parent as Scene;
     } else if (this.parent) {
-      // need to use bind() so that the context of 'this' is the parent, when called in recursion
-      return this.getParentScene.bind(this.parent)();
+      return this.parent.parentScene;
     }
     throw new Error(`Entity ${this} has not been added to a scene`);
   }
@@ -2828,7 +2827,7 @@ export class Label extends Entity implements IDrawable, IText {
     }
     this.paragraph = builder.build();
     const preferredWidth =
-      this.preferredMaxLayoutWidth ?? this.getParentScene().game.canvasCssWidth;
+      this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
     this.paragraph.layout(preferredWidth * Game._canvasScale);
     this.size.width = preferredWidth;
     this.size.height = this.paragraph.getHeight() / Game._canvasScale;
