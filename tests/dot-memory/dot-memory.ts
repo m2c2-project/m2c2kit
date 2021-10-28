@@ -57,12 +57,12 @@ game
 
     gridMemoryPage0.setup(() => {
       gridMemoryPage0.run(
-        Action.Sequence(
+        Action.Sequence([
           Action.Wait(2000),
           Action.Code(() => {
             game.presentScene(gridMemoryPage1);
-          })
-        )
+          }),
+        ])
       );
     });
 
@@ -102,12 +102,12 @@ game
       }
 
       gridMemoryPage1.run(
-        Action.Sequence(
+        Action.Sequence([
           Action.Wait(2000),
           Action.Code(() => {
             game.presentScene(gridMemoryPage2, nextScreenTransition);
-          })
-        )
+          }),
+        ])
       );
     });
 
@@ -161,7 +161,10 @@ game
                 tappedFCount++;
                 letter.text = "E";
                 letter.run(
-                  Action.Sequence(Action.Scale(1.25, 125), Action.Scale(1, 125))
+                  Action.Sequence([
+                    Action.Scale(1.25, 125),
+                    Action.Scale(1, 125),
+                  ])
                 );
                 square.userData = 1;
                 if (tappedFCount >= 6) {
@@ -170,15 +173,15 @@ game
                     cell.entity.isUserInteractionEnabled = false;
                   });
                   square.run(
-                    Action.Sequence(
+                    Action.Sequence([
                       Action.Wait(1000),
                       Action.Code(() => {
                         game.presentScene(
                           gridMemoryPage3,
                           previousScreenTransition
                         );
-                      })
-                    )
+                      }),
+                    ])
                   );
                 }
               }
@@ -280,15 +283,15 @@ game
     gridMemoryPage3DoneButton.onTap(() => {
       if (tappedCellCount < 3) {
         youMustSelectAllMessage.run(
-          Action.Sequence(
+          Action.Sequence([
             Action.Code(() => {
               youMustSelectAllMessage.hidden = false;
             }),
             Action.Wait(3000),
             Action.Code(() => {
               youMustSelectAllMessage.hidden = true;
-            })
-          )
+            }),
+          ])
         );
       } else {
         gridMemoryTrialCount++;

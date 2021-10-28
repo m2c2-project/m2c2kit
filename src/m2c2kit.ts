@@ -620,15 +620,15 @@ export class Game {
             // non-transition actions previously set on the scene will then begin.
             // Also, very important to execute currentSceneSnapshot.delete() to prevent memory leaks
             incomingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(new Point(0, 0), duration, true),
                 Action.Code<Scene>((scene) => {
                   scene._transitioning = false;
-                }, true)
-              )
+                }, true),
+              ])
             );
             outgoingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(
                   new Point(-outgoingScene.size.width, 0),
                   duration,
@@ -640,22 +640,22 @@ export class Game {
                   if (scene.game.currentSceneSnapshot) {
                     scene.game.currentSceneSnapshot.delete();
                   }
-                }, true)
-              )
+                }, true),
+              ])
             );
             break;
           case TransitionDirection.right:
             incomingScene.position.x = -incomingScene.size.width;
             incomingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(new Point(0, 0), duration, true),
                 Action.Code<Scene>((scene) => {
                   scene._transitioning = false;
-                }, true)
-              )
+                }, true),
+              ])
             );
             outgoingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(
                   new Point(outgoingScene.size.width, 0),
                   duration,
@@ -667,22 +667,22 @@ export class Game {
                   if (scene.game.currentSceneSnapshot) {
                     scene.game.currentSceneSnapshot.delete();
                   }
-                }, true)
-              )
+                }, true),
+              ])
             );
             break;
           case TransitionDirection.up:
             incomingScene.position.y = incomingScene.size.height;
             incomingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(new Point(0, 0), duration, true),
                 Action.Code<Scene>((scene) => {
                   scene._transitioning = false;
-                }, true)
-              )
+                }, true),
+              ])
             );
             outgoingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(
                   new Point(0, -outgoingScene.size.height),
                   duration,
@@ -694,22 +694,22 @@ export class Game {
                   if (scene.game.currentSceneSnapshot) {
                     scene.game.currentSceneSnapshot.delete();
                   }
-                }, true)
-              )
+                }, true),
+              ])
             );
             break;
           case TransitionDirection.down:
             incomingScene.position.y = -incomingScene.size.height;
             incomingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(new Point(0, 0), duration, true),
                 Action.Code<Scene>((scene) => {
                   scene._transitioning = false;
-                }, true)
-              )
+                }, true),
+              ])
             );
             outgoingScene.run(
-              Action.Sequence(
+              Action.Sequence([
                 Action.Move(
                   new Point(0, outgoingScene.size.height),
                   duration,
@@ -721,8 +721,8 @@ export class Game {
                   if (scene.game.currentSceneSnapshot) {
                     scene.game.currentSceneSnapshot.delete();
                   }
-                }, true)
-              )
+                }, true),
+              ])
             );
             break;
           default:
@@ -1257,8 +1257,8 @@ export abstract class Action {
    * @param actions - One or more actions that form the sequence
    * @returns
    */
-  public static Sequence(...actions: Array<Action>): Action {
-    const sequence = new SequenceAction(...actions);
+  public static Sequence(actions: Array<Action>): Action {
+    const sequence = new SequenceAction(actions);
     sequence.children = actions;
     return sequence;
   }
@@ -1271,8 +1271,8 @@ export abstract class Action {
    * @param actions - One or more actions that form the group
    * @returns
    */
-  public static Group(...actions: Array<Action>): Action {
-    const group = new GroupAction(...actions);
+  public static Group(actions: Array<Action>): Action {
+    const group = new GroupAction(actions);
     group.children = actions;
     return group;
   }
@@ -1314,13 +1314,13 @@ export abstract class Action {
       case ActionType.sequence: {
         const sequence = action as SequenceAction;
         const sequenceChildren = sequence.children.map(Action.cloneAction);
-        cloned = Action.Sequence(...sequenceChildren);
+        cloned = Action.Sequence(sequenceChildren);
         break;
       }
       case ActionType.group: {
         const group = action as SequenceAction;
         const groupChildren = group.children.map(Action.cloneAction);
-        cloned = Action.Sequence(...groupChildren);
+        cloned = Action.Sequence(groupChildren);
         break;
       }
       case ActionType.move: {
@@ -1544,7 +1544,7 @@ interface IActionContainer {
 class SequenceAction extends Action implements IActionContainer {
   type = ActionType.sequence;
   children: Array<Action>;
-  constructor(...actions: Array<Action>) {
+  constructor(actions: Array<Action>) {
     super();
     this.children = actions;
     this.isParent = true;
@@ -1554,7 +1554,7 @@ class SequenceAction extends Action implements IActionContainer {
 class GroupAction extends Action implements IActionContainer {
   type = ActionType.group;
   children = new Array<Action>();
-  constructor(...actions: Array<Action>) {
+  constructor(actions: Array<Action>) {
     super();
     this.children = actions;
     this.isParent = true;

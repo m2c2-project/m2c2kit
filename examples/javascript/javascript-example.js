@@ -121,7 +121,7 @@ game
       clicks++;
       console.log(`clicked ${clicks} times!`);
       page1ButtonRectangle.run(
-        Action.Sequence(Action.Scale(0.95, 100), Action.Scale(1, 100))
+        Action.Sequence([Action.Scale(0.95, 100), Action.Scale(1, 100)])
       );
     });
 
@@ -137,7 +137,7 @@ game
       easyClicks++;
       console.log(`easy button clicked ${easyClicks} times!`);
       easyButton.run(
-        Action.Sequence(Action.Scale(0.95, 100), Action.Scale(1, 100))
+        Action.Sequence([Action.Scale(0.95, 100), Action.Scale(1, 100)])
       );
     });
 

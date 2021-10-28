@@ -16,7 +16,12 @@ export default {
     },
   ],
   plugins: [
-    typescript({ inlineSourceMap: true, inlineSources: true, target: "es6" }),
+    typescript({
+      inlineSourceMap: true,
+      inlineSources: true,
+      target: "es6",
+      include: ["./examples/typescript/*.ts", "./src/**/*.ts"],
+    }),
     // canvaskit-wasm references these node.js functions
     // shim them to empty functions for browser usage
     shim({
