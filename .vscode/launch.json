@@ -7,7 +7,7 @@
     {
       "type": "pwa-chrome",
       "request": "launch",
-      "name": "Dot memory Chrome port 3000",
+      "name": "Cognitive Tests Chrome port 3000",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/tests/dot-memory"
     },

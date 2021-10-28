@@ -7,10 +7,10 @@ import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
 
 export default {
-  input: "./tests/dot-memory/dot-memory.ts",
+  input: "./examples/cognitive-tests/dot-memory.ts",
   output: [
     {
-      file: "./tests/dot-memory/dot-memory.bundle.js",
+      file: "./examples/cognitive-tests/cognitive-tests.bundle.js",
       format: "esm",
       sourcemap: true,
     },
@@ -20,7 +20,7 @@ export default {
       inlineSourceMap: true,
       inlineSources: true,
       target: "es6",
-      include: ["./tests/dot-memory/*.ts", "./src/**/*.ts"],
+      include: ["./examples/cognitive-tests/*.ts", "./src/**/*.ts"],
     }),
     // canvaskit-wasm references these node.js functions
     // shim them to empty functions for browser usage
@@ -37,7 +37,7 @@ export default {
         // copy the wasm binary out of node_modules so it can be served
         {
           src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-          dest: "./tests/dot-memory",
+          dest: "./examples/cognitive-tests",
         },
       ],
       hook: "writeBundle",
@@ -45,7 +45,7 @@ export default {
     serve({
       open: false,
       verbose: true,
-      contentBase: ["tests/dot-memory", "assets"],
+      contentBase: ["examples/cognitive-tests", "assets"],
       historyApiFallback: true,
       host: "localhost",
       port: 3000,
