@@ -1967,6 +1967,7 @@ export abstract class Entity {
    * Removes all children from the entity
    */
   removeAllChildren(): void {
+    return;
     while (this.children.length) {
       this.children.pop();
     }

@@ -1,17 +1,20 @@
 import typescript from "@rollup/plugin-typescript";
-import { terser } from "rollup-plugin-terser";
+//import { terser } from "rollup-plugin-terser";
 import shim from "rollup-plugin-shim";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
+import babel from "@rollup/plugin-babel";
 
 export default {
   input: "./src/m2c2kit.ts",
   output: [
     {
-      file: "./dist/m2c2kit.min.js",
-      format: "esm",
-      sourcemap: false,
-      plugins: [terser()],
+      file: "./dist/m2c2kit.umd.js",
+      format: "umd",
+      name: "m2c2kit",
+      esModule: false,
+      exports: "named",
+      sourcemap: true,
     },
   ],
   plugins: [
@@ -30,6 +33,9 @@ export default {
     nodeResolve(),
     commonjs({
       include: "node_modules/canvaskit-wasm/**",
+    }),
+    babel({
+      babelHelpers: "bundled",
     }),
   ],
 };
