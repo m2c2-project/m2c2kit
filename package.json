@@ -4,11 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start-cognitive-tests": "rollup -c rollup.cognitive-tests.config.js --watch",
-    "start-typescript-example": "rollup -c rollup.typescript-example.config.js --watch",
-    "start-javascript-example": "rollup -c rollup.javascript-example.config.js --watch",
-    "build-m2c2kit": "rollup -c && rollup -c rollup.min.config.js",
-    "test": "jest --coverage",
+    "build": "rollup -c --watch",
+    "test": "jest",
     "prepare": "husky install"
   },
   "keywords": [],
