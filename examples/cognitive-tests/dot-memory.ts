@@ -13,7 +13,7 @@ import {
   RandomDraws,
 } from "../../src/m2c2kit";
 
-import { Button, Grid } from "../../src/composites";
+import { Button, Grid } from "../../src/addons/composites";
 
 const game = new Game();
 (window as unknown as any).game = game;

@@ -6,6 +6,7 @@ import copy from "rollup-plugin-copy";
 import babel from "@rollup/plugin-babel";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
+import multiInput from "rollup-plugin-multi-input";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -22,10 +23,16 @@ let sharedPlugins = [
 
 export default [
   {
-    input: "./src/m2c2kit.ts",
+    input: [
+      "./src/m2c2kit.ts",
+      "./src/addons/composites/button.ts",
+      "./src/addons/composites/grid.ts",
+      "./src/addons/stories/instructions.ts",
+    ],
     output: [{ dir: "./dist/esm", format: "esm", name: "m2c2kit" }],
     plugins: [
       ...sharedPlugins,
+      multiInput(),
       typescript({
         tsconfig: "./tsconfig.json",
         outDir: "./dist/esm",
@@ -38,11 +45,24 @@ export default [
           // copy the wasm bundle out of node_modules so it can be served
           {
             src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-            dest: "dist/esm",
+            dest: ["dist/esm", "examples/javascript"],
           },
         ],
         copyOnce: true,
         hook: "writeBundle",
+      }),
+      copy({
+        targets: [
+          // the javascript example is not using bundling, so copy over
+          // the m2c2 dist modules
+          {
+            src: "dist/esm/**/*",
+            dest: "examples/javascript",
+          },
+        ],
+        copyOnce: true,
+        hook: "writeBundle",
+        flatten: false,
       }),
     ],
   },
@@ -148,39 +168,7 @@ export default [
         copyOnce: true,
         hook: "writeBundle",
       }),
-    ],
-  },
-
-  {
-    input: "./examples/javascript/javascript-example.js",
-    output: [
-      {
-        file: "./examples/javascript/javascript-example.bundle.js",
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      ...sharedPlugins,
-      typescript({
-        inlineSourceMap: true,
-        inlineSources: true,
-        target: "es6",
-        include: ["./src/**/*.[tj]s"],
-        exclude: ["**/__tests__", "**/*.test.ts"],
-        outDir: "../tmp",
-      }),
-      copy({
-        targets: [
-          // copy the wasm binary out of node_modules so it can be served
-          {
-            src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-            dest: "./examples/javascript",
-          },
-        ],
-        copyOnce: true,
-        hook: "writeBundle",
-      }),
+      livereload(),
     ],
   },
 ];

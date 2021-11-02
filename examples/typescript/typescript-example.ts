@@ -1,5 +1,4 @@
-import { Button } from "./../../src/composites/button";
-import { Instructions } from "./../../src/stories/instructions";
+// for typescript, import the module without .js extension
 import {
   Game,
   Action,
@@ -13,11 +12,12 @@ import {
   Rect,
   LabelHorizontalAlignmentMode,
 } from "../../src/m2c2kit";
-
-import { Grid } from "../../src/composites";
+// for typescript, import the parent composites and stories modules
+import { Button, Grid } from "../../src/addons/composites";
+import { Instructions } from "../../src/addons/stories";
 
 const game = new Game();
-// the next two lines is the only difference between this and the javascript example
+// for typescript, we need to caste window to any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).game = game;
 

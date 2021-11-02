@@ -284,7 +284,7 @@ export function view(data) {
  * @param {*} data
  * @param {{(error:string|null,meta?:typeof result):void}} callback
  */
-export default function ttfInfo(data) {
+export function ttfInfo(data) {
   try {
     // let dataview = new DataView(data.buffer, 0, data.length);
     resultTables(data);

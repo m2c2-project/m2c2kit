@@ -12,7 +12,7 @@ import {
   Shape,
   Rect,
   Label,
-} from "../m2c2kit";
+} from "../../m2c2kit";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
   size?: Size;

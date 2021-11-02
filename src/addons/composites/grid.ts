@@ -10,7 +10,7 @@ import {
   Shape,
   Size,
   WebColors,
-} from "../m2c2kit";
+} from "../../m2c2kit";
 
 export interface GridOptions extends CompositeOptions {
   rows: number;

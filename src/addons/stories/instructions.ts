@@ -1,17 +1,13 @@
-import { Button } from "./../composites/button";
-import { Label, rgbaColor, Scene, Size, Sprite } from "./../m2c2kit";
-
-export interface StoryOptions {
-  sceneNamePrefix: string;
-}
-
-export abstract class Story {
-  // We need to include options as argument, because the concrete classes use them
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static Create(options: StoryOptions): Array<Scene> {
-    return new Array<Scene>();
-  }
-}
+import {
+  Label,
+  rgbaColor,
+  Scene,
+  Size,
+  Sprite,
+  Story,
+  StoryOptions,
+} from "../../m2c2kit";
+import { Button } from "../../addons/composites/button";
 
 export interface InstructionScene {
   text?: string;

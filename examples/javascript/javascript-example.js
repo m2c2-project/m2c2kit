@@ -1,5 +1,3 @@
-import { Button } from "./../../src/composites/button";
-import { Instructions } from "./../../src/stories/instructions";
 import {
   Game,
   Action,
@@ -12,9 +10,10 @@ import {
   WebColors,
   Rect,
   LabelHorizontalAlignmentMode,
-} from "../../src/m2c2kit";
-
-import { Grid } from "../../src/composites";
+} from "./esm/m2c2kit.js";
+import { Button } from "./esm/addons/composites/button.js";
+import { Grid } from "./esm/addons/composites/grid.js";
+import { Instructions } from "./esm/addons/stories/instructions.js";
 
 const game = new Game();
 window.game = game;

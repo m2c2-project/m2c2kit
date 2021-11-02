@@ -2,6 +2,9 @@
 *.bundle.js
 *.bundle.js.map
 
+# copied m2c2 dist modules for non-bundled javascript example
+examples/javascript/esm
+
 # wasm binaries
 *.wasm
 

@@ -13,7 +13,7 @@ import {
   EmbindEnumEntity,
   ParagraphStyle,
 } from "canvaskit-wasm";
-import ttfInfo from "./ttfInfo.js";
+import { ttfInfo } from "./ttfInfo.js";
 export { WebColors } from "./WebColors";
 
 /**
@@ -3297,6 +3297,18 @@ export abstract class Composite extends Entity implements IDrawable {
 
   draw(canvas: Canvas): void {
     super.drawChildren(canvas);
+  }
+}
+
+export interface StoryOptions {
+  sceneNamePrefix: string;
+}
+
+export abstract class Story {
+  // We need to include options as argument, because the concrete classes use them
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static Create(options: StoryOptions): Array<Scene> {
+    return new Array<Scene>();
   }
 }
 
