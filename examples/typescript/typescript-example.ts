@@ -15,6 +15,8 @@ import {
 // for typescript, import the parent composites and stories modules
 import { Button, Grid } from "../../src/addons/composites";
 import { Instructions } from "../../src/addons/stories";
+import { Transition } from "../javascript/esm/m2c2kit";
+import { TransitionDirection } from "../javascript/esm/m2c2kit";
 
 const game = new Game();
 // for typescript, we need to caste window to any
@@ -54,18 +56,26 @@ game
       instructionScenes: [
         {
           text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          textFontSize: 24,
         },
         {
           text: "Same text, but shifted up the screen (vertical bias .25)\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          textFontSize: 24,
           textVerticalBias: 0.25,
+          backButtonBackgroundColor: WebColors.RebeccaPurple,
+          nextButtonFontColor: WebColors.Yellow,
+          nextSceneTransition: Transition.push(TransitionDirection.left, 250),
         },
         {
           title: "Title goes here",
+          titleFontSize: 24,
           titleMarginTop: 64,
           text: "Title, text, and image.\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          textAlignmentMode: LabelHorizontalAlignmentMode.center,
           // override this scene's color to be different
           backgroundColor: WebColors.WhiteSmoke,
           image: "star",
+          imageAboveText: false,
           imageMarginTop: 32,
         },
         {
@@ -76,6 +86,7 @@ game
           // override this scene's color to be different
           backgroundColor: WebColors.WhiteSmoke,
           image: "star",
+          imageAboveText: false,
           imageMarginTop: 32,
         },
         {
@@ -83,7 +94,6 @@ game
           titleMarginTop: 128,
           text: "Title, text, and image, but this time image on top.\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
           image: "star",
-          textAboveImage: false,
           imageMarginBottom: 8,
         },
         {

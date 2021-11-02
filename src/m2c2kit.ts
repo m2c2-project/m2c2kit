@@ -1746,12 +1746,23 @@ enum ConstraintType {
   endToStartOf = "endToStartOf",
 }
 
+/**
+ * The Layout allows relative positioning via constraints.
+ * This is not fully implemented yet: DO NOT USE!
+ * We use it internally for instructions.
+ */
 export interface Layout {
+  height?: number;
+  width?: number;
   marginStart?: number;
   marginEnd?: number;
   marginTop?: number;
   marginBottom?: number;
   constraints?: Constraints;
+}
+
+export enum Dimensions {
+  MATCH_CONSTRAINT = 0,
 }
 
 export interface EntityOptions {
@@ -2767,7 +2778,7 @@ export class Label extends Entity implements IDrawable, IText {
     if (options.horizontalAlignmentMode) {
       this.horizontalAlignmentMode = options.horizontalAlignmentMode;
     }
-    if (options.preferredMaxLayoutWidth) {
+    if (options.preferredMaxLayoutWidth !== undefined) {
       this.preferredMaxLayoutWidth = options.preferredMaxLayoutWidth;
     }
     if (options.backgroundColor) {
@@ -2828,8 +2839,23 @@ export class Label extends Entity implements IDrawable, IText {
     this.paragraph = builder.build();
     const preferredWidth =
       this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
-    this.paragraph.layout(preferredWidth * Game._canvasScale);
-    this.size.width = preferredWidth;
+
+    let calculatedWidth = preferredWidth;
+    if (preferredWidth === 0 || this.layout.width === 0) {
+      // match parent
+      // TODO: implement match parent on more properties
+      if (this.parent === undefined) {
+        throw new Error(
+          "width is set to match parent, but entity has no parent"
+        );
+      }
+      const marginStart = this.layout.marginStart ?? 0;
+      const marginEnd = this.layout.marginEnd ?? 0;
+      calculatedWidth = this.parent.size.width - (marginStart + marginEnd);
+    }
+
+    this.paragraph.layout(calculatedWidth * Game._canvasScale);
+    this.size.width = calculatedWidth;
     this.size.height = this.paragraph.getHeight() / Game._canvasScale;
   }
 

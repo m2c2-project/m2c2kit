@@ -1,24 +1,34 @@
+import { WebColors } from "../../WebColors";
 import {
   Label,
   rgbaColor,
   Scene,
   Size,
   Sprite,
+  LabelHorizontalAlignmentMode,
+  Dimensions,
   Story,
   StoryOptions,
+  Transition,
+  TransitionDirection,
 } from "../../m2c2kit";
 import { Button } from "../../addons/composites/button";
 
 export interface InstructionScene {
   text?: string;
+  textMarginStart?: number;
+  textMarginEnd?: number;
+  textAlignmentMode?: LabelHorizontalAlignmentMode;
   textVerticalBias?: number;
+  textFontSize?: number;
   title?: string;
   titleMarginTop?: number;
+  titleFontSize?: number;
   image?: string;
   imageVerticalBias?: number;
   imageMarginTop?: number;
   imageMarginBottom?: number;
-  textAboveImage?: boolean;
+  imageAboveText?: boolean;
   backgroundColor?: rgbaColor;
   backButtonText?: string;
   nextButtonText?: string;
@@ -26,6 +36,12 @@ export interface InstructionScene {
   nextButtonWidth?: number;
   backButtonHeight?: number;
   nextButtonHeight?: number;
+  backButtonBackgroundColor?: rgbaColor;
+  backButtonFontColor?: rgbaColor;
+  nextButtonBackgroundColor?: rgbaColor;
+  nextButtonFontColor?: rgbaColor;
+  nextSceneTransition?: Transition;
+  backSceneTransition?: Transition;
 }
 
 export interface InstructionsOptions extends StoryOptions {
@@ -33,18 +49,32 @@ export interface InstructionsOptions extends StoryOptions {
   instructionScenes: Array<InstructionScene>;
   backgroundColor?: rgbaColor;
   postInstructionsScene?: string;
+  nextSceneTransition?: Transition;
+  backSceneTransition?: Transition;
   backButtonText?: string;
   nextButtonText?: string;
   backButtonWidth?: number;
   nextButtonWidth?: number;
   backButtonHeight?: number;
   nextButtonHeight?: number;
+  backButtonBackgroundColor?: rgbaColor;
+  backButtonFontColor?: rgbaColor;
+  nextButtonBackgroundColor?: rgbaColor;
+  nextButtonFontColor?: rgbaColor;
 }
 
 export class Instructions extends Story {
   static override Create(options: InstructionsOptions): Array<Scene> {
     const scenes = new Array<Scene>();
     options.instructionScenes.forEach((s, i) => {
+      const nextSceneTransition =
+        s.nextSceneTransition ??
+        options.nextSceneTransition ??
+        Transition.push(TransitionDirection.left, 500);
+      const backSceneTransition =
+        s.backSceneTransition ??
+        options.backSceneTransition ??
+        Transition.push(TransitionDirection.right, 500);
       const backButtonText =
         s.backButtonText ?? options.backButtonText ?? "Back";
       const nextButtonText =
@@ -58,9 +88,28 @@ export class Instructions extends Story {
       const nextButtonHeight =
         s.nextButtonHeight ?? options.nextButtonHeight ?? 50;
       const backgroundColor = s.backgroundColor ?? options.backgroundColor;
-      const textAboveImage = s.textAboveImage ?? true;
+      const imageAboveText = s.imageAboveText ?? true;
       const imageMarginTop = s.imageMarginTop ?? 0;
       const imageMarginBottom = s.imageMarginBottom ?? 0;
+      const textMarginStart = s.textMarginStart ?? 48;
+      const textMarginEnd = s.textMarginEnd ?? 48;
+      const textAlignmentMode =
+        s.textAlignmentMode ?? LabelHorizontalAlignmentMode.left;
+      const textFontSize = s.textFontSize ?? 16;
+      const titleFontSize = s.titleFontSize ?? 16;
+      const titleMarginTop = s.titleMarginTop ?? 48;
+      const backButtonBackgroundColor =
+        s.backButtonBackgroundColor ??
+        options.backButtonBackgroundColor ??
+        WebColors.RoyalBlue;
+      const backButtonFontColor =
+        s.backButtonFontColor ?? options.backButtonFontColor ?? WebColors.White;
+      const nextButtonBackgroundColor =
+        s.nextButtonBackgroundColor ??
+        options.nextButtonBackgroundColor ??
+        WebColors.RoyalBlue;
+      const nextButtonFontColor =
+        s.nextButtonFontColor ?? options.nextButtonFontColor ?? WebColors.White;
 
       const scene = new Scene({
         name:
@@ -68,12 +117,11 @@ export class Instructions extends Story {
         backgroundColor: backgroundColor,
       });
 
-      const titleMarginTop = s.titleMarginTop ?? 32;
-
       let titleLabel: Label | undefined;
       if (s.title !== undefined) {
         titleLabel = new Label({
           text: s.title,
+          fontSize: titleFontSize,
           layout: {
             marginTop: titleMarginTop,
             constraints: {
@@ -90,7 +138,12 @@ export class Instructions extends Story {
       if (s.text !== undefined) {
         textLabel = new Label({
           text: s.text,
+          preferredMaxLayoutWidth: Dimensions.MATCH_CONSTRAINT,
+          horizontalAlignmentMode: textAlignmentMode,
+          fontSize: textFontSize,
           layout: {
+            marginStart: textMarginStart,
+            marginEnd: textMarginEnd,
             constraints: {
               topToTopOf: scene,
               bottomToBottomOf: scene,
@@ -106,13 +159,13 @@ export class Instructions extends Story {
       if (s.image !== undefined) {
         let image: Sprite;
         if (textLabel !== undefined) {
-          if (textAboveImage) {
+          if (imageAboveText) {
             image = new Sprite({
               imageName: s.image,
               layout: {
-                marginTop: imageMarginTop,
+                marginBottom: imageMarginBottom,
                 constraints: {
-                  topToBottomOf: textLabel,
+                  bottomToTopOf: textLabel,
                   startToStartOf: scene,
                   endToEndOf: scene,
                 },
@@ -122,9 +175,9 @@ export class Instructions extends Story {
             image = new Sprite({
               imageName: s.image,
               layout: {
-                marginBottom: imageMarginBottom,
+                marginTop: imageMarginTop,
                 constraints: {
-                  bottomToTopOf: textLabel,
+                  topToBottomOf: textLabel,
                   startToStartOf: scene,
                   endToEndOf: scene,
                 },
@@ -151,6 +204,8 @@ export class Instructions extends Story {
       if (i > 0) {
         const backButton = new Button({
           text: backButtonText,
+          fontColor: backButtonFontColor,
+          backgroundColor: backButtonBackgroundColor,
           size: new Size(backButtonWidth, backButtonHeight),
           layout: {
             marginStart: 32,
@@ -163,7 +218,8 @@ export class Instructions extends Story {
           scene.game.presentScene(
             options.sceneNamePrefix +
               "-" +
-              (i + 1 - 1).toString().padStart(2, "0")
+              (i + 1 - 1).toString().padStart(2, "0"),
+            backSceneTransition
           );
         });
         scene.addChild(backButton);
@@ -171,6 +227,8 @@ export class Instructions extends Story {
 
       const nextButton = new Button({
         text: nextButtonText,
+        fontColor: nextButtonFontColor,
+        backgroundColor: nextButtonBackgroundColor,
         size: new Size(nextButtonWidth, nextButtonHeight),
         layout: {
           marginEnd: 32,
@@ -184,12 +242,16 @@ export class Instructions extends Story {
           scene.game.presentScene(
             options.sceneNamePrefix +
               "-" +
-              (i + 1 + 1).toString().padStart(2, "0")
+              (i + 1 + 1).toString().padStart(2, "0"),
+            nextSceneTransition
           );
         });
       } else if (options.postInstructionsScene !== undefined) {
         nextButton.onTap(() => {
-          scene.game.presentScene(options.postInstructionsScene ?? "");
+          scene.game.presentScene(
+            options.postInstructionsScene ?? "",
+            nextSceneTransition
+          );
         });
       }
       scene.addChild(nextButton);
