@@ -11,12 +11,12 @@ import {
   WebColors,
   Rect,
   LabelHorizontalAlignmentMode,
+  Transition,
+  TransitionDirection,
 } from "../../src/m2c2kit";
 // for typescript, import the parent composites and stories modules
 import { Button, Grid } from "../../src/addons/composites";
 import { Instructions } from "../../src/addons/stories";
-import { Transition } from "../javascript/esm/m2c2kit";
-import { TransitionDirection } from "../javascript/esm/m2c2kit";
 
 const game = new Game();
 // for typescript, we need to caste window to any

@@ -246,13 +246,19 @@ export class Instructions extends Story {
             nextSceneTransition
           );
         });
-      } else if (options.postInstructionsScene !== undefined) {
-        nextButton.onTap(() => {
-          scene.game.presentScene(
-            options.postInstructionsScene ?? "",
-            nextSceneTransition
+      } else {
+        if (options.postInstructionsScene !== undefined) {
+          nextButton.onTap(() => {
+            scene.game.presentScene(
+              options.postInstructionsScene ?? "",
+              nextSceneTransition
+            );
+          });
+        } else {
+          console.warn(
+            "warning: instructions postInstructionsScene is not defined"
           );
-        });
+        }
       }
       scene.addChild(nextButton);
 

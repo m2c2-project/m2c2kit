@@ -11,9 +11,10 @@ import {
   WebColors,
   Rect,
   RandomDraws,
+  LabelHorizontalAlignmentMode,
 } from "../../src/m2c2kit";
-
 import { Button, Grid } from "../../src/addons/composites";
+import { Instructions } from "../../src/addons/stories";
 
 const game = new Game();
 (window as unknown as any).game = game;
@@ -21,37 +22,52 @@ const game = new Game();
 game
   .init({
     showFps: true,
-    width: 360,
-    height: 600,
+    width: 400,
+    height: 800,
+    bodyBackgroundColor: WebColors.Wheat,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
     ],
   })
   .then(() => {
-    // instructions screen push left or right when advancing or going back, duration is 500ms
+    // SCENES: instructions
+    const instructionsScenes = Instructions.Create({
+      sceneNamePrefix: "instructions",
+      backgroundColor: WebColors.White,
+      instructionScenes: [
+        {
+          title: "Grid Memory",
+          text: "This is the Grid Memory test. We should have some more instructions with pictures.",
+        },
+        {
+          title: "Grid Memory",
+          text: "Press START to begin!",
+          textFontSize: 24,
+          textAlignmentMode: LabelHorizontalAlignmentMode.center,
+          nextButtonText: "START",
+        },
+      ],
+      postInstructionsScene: "getReadyScene",
+    });
+    game.addScenes(instructionsScenes);
+
     const nextScreenTransition = Transition.push(TransitionDirection.left, 500);
     const previousScreenTransition = Transition.push(
       TransitionDirection.right,
       500
     );
 
-    const page00 = new Scene({ backgroundColor: WebColors.WhiteSmoke });
-    game.addScene(page00);
-
-    const button = new Button({ text: "Start", position: new Point(180, 500) });
-    button.isUserInteractionEnabled = true;
-    button.onTap(() => {
-      console.log("tapped");
-      game.presentScene(gridMemoryPage0, nextScreenTransition);
+    // SCENE: show get ready message, then advance after XXXX
+    // milliseconds (currently, 2000)
+    const gridMemoryPage0 = new Scene({
+      name: "getReadyScene",
+      backgroundColor: WebColors.White,
     });
-    page00.addChild(button);
-
-    const gridMemoryPage0 = new Scene({ backgroundColor: WebColors.White });
     game.addScene(gridMemoryPage0);
 
     const getReadyMessage = new Label({
       text: "Get Ready",
-      position: new Point(180, 360),
+      position: new Point(200, 400),
     });
     gridMemoryPage0.addChild(getReadyMessage);
 
@@ -66,19 +82,20 @@ game
       );
     });
 
+    // SCENE: show the dot placement
     const gridMemoryPage1 = new Scene({ backgroundColor: WebColors.White });
     game.addScene(gridMemoryPage1);
 
     const page1Message = new Label({
       text: "Remember the dot locations!",
       fontSize: 24,
-      position: new Point(180, 60),
+      position: new Point(200, 150),
     });
     gridMemoryPage1.addChild(page1Message);
 
     const grid1 = new Grid({
       size: new Size(300, 300),
-      position: new Point(180, 275),
+      position: new Point(200, 400),
       rows: 5,
       columns: 5,
       backgroundColor: WebColors.Silver,
@@ -90,6 +107,8 @@ game
     gridMemoryPage1.setup(() => {
       grid1.removeAllChildren();
 
+      // randomly choose 3 cells that will have the red dots
+      // on a grid of size 5 rows, 5 columns
       const randomCells = RandomDraws.FromGridWithoutReplacement(3, 5, 5);
       for (let i = 0; i < 3; i++) {
         const circle = new Shape({
@@ -111,18 +130,19 @@ game
       );
     });
 
+    // SCENE: ask participant to the touch the Fs
     const gridMemoryPage2 = new Scene({ backgroundColor: WebColors.White });
     game.addScene(gridMemoryPage2);
 
     const touchTheFs = new Label({
       text: "Touch the F's!",
-      position: new Point(180, 30),
+      position: new Point(200, 100),
     });
     gridMemoryPage2.addChild(touchTheFs);
 
     const grid = new Grid({
       size: new Size(300, 480),
-      position: new Point(180, 275),
+      position: new Point(200, 400),
       rows: 8,
       columns: 5,
       backgroundColor: WebColors.Transparent,
@@ -136,6 +156,8 @@ game
       grid.removeAllChildren();
       let tappedFCount = 0;
 
+      // random choose six cells to have F in them from the grid that
+      // is of size 8 rows and 5 columns
       const FCells = RandomDraws.FromGridWithoutReplacement(6, 8, 5);
       for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 5; j++) {
@@ -196,19 +218,20 @@ game
       console.log("setup done " + window.performance.now());
     });
 
+    // SCENE: ask participant to recall the dot positions
     const gridMemoryPage3 = new Scene({ backgroundColor: WebColors.White });
     game.addScene(gridMemoryPage3);
 
     const page3Message = new Label({
       text: "Where were the dots?",
       fontSize: 24,
-      position: new Point(180, 60),
+      position: new Point(200, 150),
     });
     gridMemoryPage3.addChild(page3Message);
 
     const grid3 = new Grid({
       size: new Size(300, 300),
-      position: new Point(180, 275),
+      position: new Point(200, 400),
       rows: 5,
       columns: 5,
       backgroundColor: WebColors.Silver,
@@ -227,12 +250,21 @@ game
       for (let i = 0; i < 5; i++) {
         for (let j = 0; j < 5; j++) {
           const cell = new Shape({
+            // this rectangle will be the hit area for the cell
+            // it's transparent -- we use it only for its hit
+            // area. Make it 59 x 59 (not 60 x 60) to avoid overlap
+            // of hit area on the borders
             rect: new Rect({ size: new Size(59, 59) }),
             fillColor: WebColors.Transparent,
           });
+          // an entity's userData is a property we can use to store
+          // anything we want. Here, we use it simply to keep track
+          // of whether the cell has been tapped or not.
           cell.userData = 0;
           cell.onTap(() => {
             if (cell.userData === 0 && tappedCellCount < 3) {
+              // cell has not been tapped, and there are not yet
+              // 3 circles placed
               const circle = new Shape({
                 circleOfRadius: 20,
                 fillColor: WebColors.Red,
@@ -243,6 +275,7 @@ game
               cell.userData = 1;
               tappedCellCount++;
             } else if (cell.userData === 1) {
+              // this cell has been tapped. Remove the circle from here
               cell.removeAllChildren();
               cell.userData = 0;
               tappedCellCount--;
@@ -254,24 +287,18 @@ game
       }
     });
 
-    const gridMemoryPage3DoneButton = new Shape({
-      rect: new Rect({ size: new Size(300, 50) }),
-      cornerRadius: 9,
-      position: new Point(180, 500),
-      fillColor: [44, 90, 255, 1],
+    const gridMemoryPage3DoneButton = new Button({
+      text: "Done",
+      position: new Point(200, 700),
+      size: new Size(300, 50),
     });
     gridMemoryPage3.addChild(gridMemoryPage3DoneButton);
 
-    const gridDoneLabel = new Label({
-      text: "Done",
-      fontSize: 20,
-      fontColor: [255, 255, 255, 1],
-    });
-    gridMemoryPage3DoneButton.addChild(gridDoneLabel);
-
+    // place this warning message on the scene, but hide it
+    // we'll unhide it, if needed.
     const youMustSelectAllMessage = new Label({
       text: "You must select all 3 locations!",
-      position: new Point(180, 450),
+      position: new Point(200, 600),
     });
     youMustSelectAllMessage.hidden = true;
     gridMemoryPage3.addChild(youMustSelectAllMessage);
@@ -303,17 +330,18 @@ game
       }
     });
 
+    // SCENE: placeholder end scene, with a button to restart it all again
     const endPage = new Scene();
     game.addScene(endPage);
     const doneLabel = new Label({
       text: "You're done!",
-      position: new Point(180, 300),
+      position: new Point(200, 300),
     });
     endPage.addChild(doneLabel);
 
     const againButton = new Button({
       text: "Start over",
-      position: new Point(180, 400),
+      position: new Point(200, 400),
     });
     againButton.isUserInteractionEnabled = true;
     againButton.onTap(() => {
@@ -322,6 +350,6 @@ game
     });
     endPage.addChild(againButton);
 
-    game.entryScene = page00;
-    game.start();
+    // entry point of game
+    game.start("instructions-01");
   });
