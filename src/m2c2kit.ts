@@ -138,7 +138,13 @@ export class Game {
   // down to fit the device's window while preserving the aspect ratio the
   // game was designed for
   public _rootScale = 1.0;
-  public entryScene?: Scene;
+  public entryScene?: Scene | string;
+  // use "any" type for game parameters because these will be specific to each
+  // game and could be anything; we can't type it now
+  // TODO: is there a common, base structure (e.g., trials?) that should
+  // be common to game parameters? Replace any with a GameParameters type?
+  public parameters: any;
+  public defaultParameters: any;
 
   private htmlCanvas?: HTMLCanvasElement;
   private scratchHtmlCanvas?: HTMLCanvasElement;
@@ -263,6 +269,33 @@ export class Game {
   }
 
   /**
+   * Gets the value of the specified game parameter. If the value was not
+   * provided in the parameters property above, then return the value in
+   * defaultParameters. If the parameterName is still not found, then
+   * throw exception.
+   * @param parameterName - the name of the game parameter whose value is requested
+   * @returns
+   */
+  getParameter<T>(parameterName: string): T {
+    if (
+      this.parameters !== undefined &&
+      Object.keys(this.parameters).includes(parameterName)
+    ) {
+      return this.parameters[parameterName] as T;
+    } else if (this.defaultParameters === undefined) {
+      throw new Error(
+        `game parameter ${parameterName} not found: value and default value were not provided`
+      );
+    } else if (Object.keys(this.defaultParameters).includes(parameterName)) {
+      return this.defaultParameters[parameterName] as T;
+    } else {
+      throw new Error(
+        `game parameter ${parameterName} not found: value and default value were not provided`
+      );
+    }
+  }
+
+  /**
    * Starts the game loop. If entryScene is undefined, the game object's entryScene must be set.
    *
    * @param entryScene - The scene (Scene object or its string name) to display when the game starts
@@ -274,7 +307,7 @@ export class Game {
       if (entryScene instanceof Scene) {
         startingScene = entryScene;
       } else {
-        startingScene = this.scenes
+        startingScene = startingScene = this.scenes
           .filter((scene) => scene.name === entryScene)
           .find(Boolean);
         if (startingScene === undefined) {
@@ -289,7 +322,18 @@ export class Game {
           `cannot start game. the game object's entryScene has not been assigned`
         );
       }
-      startingScene = this.entryScene;
+      if (this.entryScene instanceof Scene) {
+        startingScene = this.entryScene;
+      } else {
+        startingScene = startingScene = this.scenes
+          .filter((scene) => scene.name === this.entryScene)
+          .find(Boolean);
+        if (startingScene === undefined) {
+          throw new Error(
+            `cannot start game. scene named "${entryScene}" has not been added to the game object`
+          );
+        }
+      }
     }
 
     this.presentScene(startingScene);

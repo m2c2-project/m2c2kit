@@ -25,16 +25,18 @@
       <!-- If you don't want the game to start immediately, remove game.start()
            from the code and call game.start() somehow else, such as with
            the button shown below or a programmatic call -->
-      <!-- <button
+      <button
         style="position: absolute; bottom: 8px; left: 8px"
         id="startButton"
         onclick="{
           document.getElementById('startButton').disabled = true;
+          // we can set some game parameters here, or it will use built in defaults
+          window.game.parameters = { ReadyTime: 500, DotPresentTime: 1000, TrialNum: 1}
           window.game.start();
         }"
       >
         Start
-      </button> -->
+      </button>
     </div>
     <script type="module" src="./cognitive-tests.bundle.js"></script>
   </body>

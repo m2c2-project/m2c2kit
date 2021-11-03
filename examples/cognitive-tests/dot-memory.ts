@@ -19,6 +19,13 @@ import { Instructions } from "../../src/addons/stories";
 const game = new Game();
 (window as unknown as any).game = game;
 
+// game parameter defaults to be used if values are not provided
+const defaults = {
+  ReadyTime: 1000,
+  DotPresentTime: 3000,
+  TrialNum: 2,
+};
+
 game
   .init({
     showFps: true,
@@ -30,6 +37,12 @@ game
     ],
   })
   .then(() => {
+    // default parameters are not part of the m2c2kit engine, because parameters
+    // are different for each game that might be written. Thus, we define them
+    // here (defaults object above) and assign it the the defaultParameters
+    // propery of the game object
+    game.defaultParameters = defaults;
+
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
@@ -58,7 +71,7 @@ game
     );
 
     // SCENE: show get ready message, then advance after XXXX
-    // milliseconds (currently, 2000)
+    // milliseconds (as defined in ReadyTime parameter)
     const gridMemoryPage0 = new Scene({
       name: "getReadyScene",
       backgroundColor: WebColors.White,
@@ -74,7 +87,7 @@ game
     gridMemoryPage0.setup(() => {
       gridMemoryPage0.run(
         Action.Sequence([
-          Action.Wait(2000),
+          Action.Wait(game.getParameter("ReadyTime")),
           Action.Code(() => {
             game.presentScene(gridMemoryPage1);
           }),
@@ -122,7 +135,7 @@ game
 
       gridMemoryPage1.run(
         Action.Sequence([
-          Action.Wait(2000),
+          Action.Wait(game.getParameter("DotPresentTime")),
           Action.Code(() => {
             game.presentScene(gridMemoryPage2, nextScreenTransition);
           }),
@@ -152,7 +165,7 @@ game
     gridMemoryPage2.addChild(grid);
 
     gridMemoryPage2.setup(() => {
-      console.log("beginning setup " + window.performance.now());
+      console.log("start gridMemoryPage2.setup() " + window.performance.now());
       grid.removeAllChildren();
       let tappedFCount = 0;
 
@@ -171,7 +184,7 @@ game
           let letter: Label;
           letter = new Label({ text: "E", fontSize: 50 });
           for (let k = 0; k < 6; k++) {
-            if (FCells[k].row == i && FCells[k].column == j) {
+            if (FCells[k].row === i && FCells[k].column === j) {
               letter = new Label({ text: "F", fontSize: 50 });
               letterIsF = true;
             }
@@ -215,7 +228,7 @@ game
         }
       }
 
-      console.log("setup done " + window.performance.now());
+      console.log("end gridMemoryPage2.setup() " + window.performance.now());
     });
 
     // SCENE: ask participant to recall the dot positions
@@ -303,7 +316,6 @@ game
     youMustSelectAllMessage.hidden = true;
     gridMemoryPage3.addChild(youMustSelectAllMessage);
 
-    const gridMemoryTrials = 2;
     let gridMemoryTrialCount = 0;
 
     gridMemoryPage3DoneButton.isUserInteractionEnabled = true;
@@ -322,7 +334,7 @@ game
         );
       } else {
         gridMemoryTrialCount++;
-        if (gridMemoryTrialCount == gridMemoryTrials) {
+        if (gridMemoryTrialCount === game.getParameter("TrialNum")) {
           game.presentScene(endPage, nextScreenTransition);
         } else {
           game.presentScene(gridMemoryPage0, nextScreenTransition);
@@ -334,7 +346,7 @@ game
     const endPage = new Scene();
     game.addScene(endPage);
     const doneLabel = new Label({
-      text: "You're done!",
+      text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
       position: new Point(200, 300),
     });
     endPage.addChild(doneLabel);
@@ -350,6 +362,15 @@ game
     });
     endPage.addChild(againButton);
 
+    endPage.setup(() => {
+      doneLabel.text = `You did ${gridMemoryTrialCount} trials. You're done!`;
+    });
+
+    game.entryScene = "instructions-01";
+
+    // This is commented out, so we can demo how game parameters can be set
+    // outside of this code (this will be the approach when the code is
+    // hosted in a mobile client app)
     // entry point of game
-    game.start("instructions-01");
+    //game.start("instructions-01");
   });
