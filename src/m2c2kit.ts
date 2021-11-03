@@ -536,14 +536,21 @@ export class Game {
         );
         ImageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
 
+        // if this._rootScale is not 1, that means we scaled down everything
+        // because the display is too small, or we stretched to a larger
+        // display. When that happens, the screen shot that was taken of
+        // the outgoing scene needs to be positioned and re-scaled:
+        // the sprite containing the screen shot is scaled, and the sprite's
+        // position is adjusted.
         const spr = new Sprite({
           name: "outgoingSceneSprite",
           imageName: "outgoingSceneSnapshot",
           position: new Point(
-            this.canvasCssWidth / 2,
-            this.canvasCssHeight / 2
+            this.canvasCssWidth / this._rootScale / 2,
+            this.canvasCssHeight / this._rootScale / 2
           ),
         });
+        spr.scale = 1 / this._rootScale;
         outgoingScene.addChild(spr);
         outgoingScene._active = true;
         if (incomingScene !== this.currentScene && this.currentScene) {
