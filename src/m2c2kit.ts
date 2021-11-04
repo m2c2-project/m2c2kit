@@ -43,6 +43,10 @@ export interface GameInitOptions {
   height: number;
   /** Stretch to fill screen? Default is false */
   stretch?: boolean;
+  /** Schema of trial data; JSON object where key is variable name, value is data type */
+  trialSchema?: object;
+  /** Default game parameters; JSON object where key is the game parameter, value is default value */
+  defaultParameters?: object;
   /** String array of urls from which to load fonts. The first element will be the default font */
   fontUrls?: Array<string>;
   /** Array of SvgImage objects to render and load */
@@ -166,8 +170,10 @@ export class Game {
   // game and could be anything; we can't type it now
   // TODO: is there a common, base structure (e.g., trials?) that should
   // be common to game parameters? Replace any with a GameParameters type?
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public parameters: any;
-  public defaultParameters: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private defaultParameters: any;
   public data: GameData = {
     trials: new Array<TrialData>(),
     metadata: {
@@ -179,12 +185,16 @@ export class Game {
   // initialize the lifecycle callbacks to empty functions, in case they are called
   public lifecycle: LifecycleCallbacks = {
     trialComplete: function (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       trialNumber: number,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       data: GameData,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       trialSchema: object
     ): void {
       return;
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     allTrialsComplete: function (data: GameData): void {
       return;
     },
@@ -240,6 +250,9 @@ export class Game {
     );
 
     this.data.metadata.userAgent = navigator.userAgent;
+
+    this.defaultParameters = gameInitOptions.defaultParameters ?? {};
+    this.initData(gameInitOptions.trialSchema ?? {});
 
     return Promise.all([
       canvasKitPromise,
@@ -428,6 +441,7 @@ export class Game {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addTrialData(variableName: string, value: any): void {
     if (this.data.trials.length < this.trialNumber + 1) {
       const emptyTrial: TrialData = {};
@@ -2072,6 +2086,8 @@ export abstract class Entity {
   tapListeners = new Array<tapListener>();
   uuid = generateUUID();
   needsInitialization = true;
+  // library users might put anything in userData property
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   userData: any = {};
   loopMessages = new Set<string>();
 

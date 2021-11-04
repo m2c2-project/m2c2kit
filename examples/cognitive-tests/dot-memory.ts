@@ -17,6 +17,7 @@ import { Button, Grid } from "../../src/addons/composites";
 import { Instructions } from "../../src/addons/stories";
 
 const game = new Game();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).game = game;
 
 // game parameter defaults to be used if values are not provided
@@ -37,13 +38,14 @@ game
     showFps: true,
     width: 400,
     height: 800,
+    trialSchema: gridMemoryTrialSchema,
+    defaultParameters: defaults,
     bodyBackgroundColor: WebColors.Wheat,
     fontUrls: [
       "https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf",
     ],
   })
   .then(() => {
-    game.initData(gridMemoryTrialSchema);
     // game.addTrialData("responseTime", 400);
     // game.addTrialData("correct", true);
     // game.addTrialData("jsondata", { name: "joe", id: 4343242 })
@@ -53,7 +55,6 @@ game
     // are different for each game that might be written. Thus, we define them
     // here (defaults object above) and assign it the the defaultParameters
     // propery of the game object
-    game.defaultParameters = defaults;
 
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
