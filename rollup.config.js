@@ -7,6 +7,7 @@ import babel from "@rollup/plugin-babel";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import multiInput from "rollup-plugin-multi-input";
+import del from "rollup-plugin-delete";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -31,6 +32,7 @@ export default [
     ],
     output: [{ dir: "./dist/esm", format: "esm", name: "m2c2kit" }],
     plugins: [
+      del({ targets: ["dist/esm/*", "examples/javascript/esm/*"] }),
       ...sharedPlugins,
       multiInput(),
       typescript({
@@ -60,8 +62,10 @@ export default [
             dest: "examples/javascript",
           },
         ],
-        copyOnce: true,
-        hook: "writeBundle",
+        copyOnce: false,
+        // I was getting intermittent file permission errors when the
+        // hook was writeBundle
+        hook: "closeBundle",
         flatten: false,
       }),
     ],
@@ -82,6 +86,7 @@ export default [
       },
     ],
     plugins: [
+      del({ targets: "dist/umd/*" }),
       ...sharedPlugins,
       typescript({
         tsconfig: "./tsconfig.json",
