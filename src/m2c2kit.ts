@@ -1,5 +1,6 @@
-import { WebColors } from "./WebColors";
 import { CanvasKitInit } from "./canvaskit";
+import { WebColors } from "./WebColors";
+import { ttfInfo } from "./ttfInfo.js";
 import {
   CanvasKit,
   Canvas,
@@ -13,7 +14,7 @@ import {
   EmbindEnumEntity,
   ParagraphStyle,
 } from "canvaskit-wasm";
-import { ttfInfo } from "./ttfInfo.js";
+
 export { WebColors } from "./WebColors";
 
 /**
@@ -129,7 +130,51 @@ interface BoundingBox {
   yMax: number;
 }
 
+export interface Trial {
+  [key: string]: string | number | boolean | undefined | null;
+}
+
+export interface Metadata {
+  userAgent?: string;
+}
+
+export interface GameData {
+  trials: Array<Trial>;
+  metadata: Metadata;
+}
+
 export class Game {
+  public trialNumber = 0;
+
+  public trialVariableNames = new Array<string>();
+
+  initTrialData<T extends Trial>(dataclass: T, schema: object) {
+    this.data.trials = new Array<T>();
+    // const properties = Object.getOwnPropertyNames(dataclass);
+    // properties.forEach((name) => {
+    //   this.trialVariableNames.push(name);
+    // });
+
+    const properties = Object.getOwnPropertyNames(schema);
+    properties.forEach((name) => {
+      this.trialVariableNames.push(name);
+    });
+  }
+
+  addTrialData(variableName: string, value: any): void {
+    if (this.data.trials.length < this.trialNumber + 1) {
+      const emptyTrial: Trial = {};
+      this.trialVariableNames.forEach((name) => {
+        emptyTrial[name] = null;
+      });
+      this.data.trials.push(emptyTrial);
+    }
+    if (!this.trialVariableNames.includes(variableName)) {
+      throw new Error(`Unrecognized trial variable: ${variableName}`);
+    }
+    this.data.trials[this.trialNumber][variableName] = value;
+  }
+
   public static _canvasKit: CanvasKit;
   public static _now = NaN;
   public static _deltaTime = NaN;
@@ -145,7 +190,12 @@ export class Game {
   // be common to game parameters? Replace any with a GameParameters type?
   public parameters: any;
   public defaultParameters: any;
-
+  public data: GameData = {
+    trials: new Array<Trial>(),
+    metadata: {
+      userAgent: "",
+    },
+  };
   private htmlCanvas?: HTMLCanvasElement;
   private scratchHtmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
@@ -193,6 +243,8 @@ export class Game {
     const renderedSvgImagesPromises = this.renderSvgImages(
       gameInitOptions.svgImages
     );
+
+    this.data.metadata.userAgent = navigator.userAgent;
 
     return Promise.all([
       canvasKitPromise,

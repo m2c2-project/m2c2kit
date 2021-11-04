@@ -1,3 +1,4 @@
+import { Trial } from "./../../src/m2c2kit";
 import {
   Game,
   Action,
@@ -12,6 +13,7 @@ import {
   Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
+  GameData,
 } from "../../src/m2c2kit";
 import { Button, Grid } from "../../src/addons/composites";
 import { Instructions } from "../../src/addons/stories";
@@ -26,6 +28,16 @@ const defaults = {
   TrialNum: 2,
 };
 
+const gridMemoryTrialSchema = {
+  responseTime: "number",
+  correct: "boolean",
+};
+class gridMemoryTrialData implements Trial {
+  responseTime = null;
+  correct = null;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
 game
   .init({
     showFps: true,
@@ -37,6 +49,12 @@ game
     ],
   })
   .then(() => {
+    game.initTrialData(new gridMemoryTrialData(), gridMemoryTrialSchema);
+    //game.addTrialData("haha", 0);
+    game.addTrialData("responseTime", 400);
+    game.addTrialData("correct", 300);
+    console.log(JSON.stringify(game.data));
+
     // default parameters are not part of the m2c2kit engine, because parameters
     // are different for each game that might be written. Thus, we define them
     // here (defaults object above) and assign it the the defaultParameters
@@ -364,6 +382,7 @@ game
 
     endPage.setup(() => {
       doneLabel.text = `You did ${gridMemoryTrialCount} trials. You're done!`;
+      console.log(`data are: ${JSON.stringify(game.data)}`);
     });
 
     game.entryScene = "instructions-01";
