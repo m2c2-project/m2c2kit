@@ -143,6 +143,15 @@ interface GameData {
   metadata: Metadata;
 }
 
+interface LifecycleCallbacks {
+  trialComplete: (
+    trialNumber: number,
+    data: GameData,
+    trialSchema: object
+  ) => void;
+  allTrialsComplete: (data: GameData, trialSchema: object) => void;
+}
+
 export class Game {
   public static _canvasKit: CanvasKit;
   public static _now = NaN;
@@ -166,6 +175,20 @@ export class Game {
     },
   };
   public trialNumber = 0;
+  public trialSchema = {};
+  // initialize the lifecycle callbacks to empty functions, in case they are called
+  public lifecycle: LifecycleCallbacks = {
+    trialComplete: function (
+      trialNumber: number,
+      data: GameData,
+      trialSchema: object
+    ): void {
+      return;
+    },
+    allTrialsComplete: function (data: GameData): void {
+      return;
+    },
+  };
 
   private trialSchemaMap = new Map<string, string>();
   private htmlCanvas?: HTMLCanvasElement;
@@ -235,6 +258,32 @@ export class Game {
         ).toFixed(0)} ms`
       );
     });
+  }
+
+  /**
+   * Provide a callback function to be invoked when a trial has completed.
+   * It is the responsibility of the the game programmer to call this
+   * at the appropriate time. It is not triggered automatically.
+   * @param codeCallback
+   */
+  onTrialComplete(
+    codeCallback: (
+      trialNumber: number,
+      data: GameData,
+      trialSchema: object
+    ) => void
+  ): void {
+    this.lifecycle.trialComplete = codeCallback;
+  }
+
+  /**
+   * Provide a callback function to be invoked when all trials are complete.
+   * It is the responsibility of the the game programmer to call this
+   * at the appropriate time. It is not triggered automatically.
+   * @param codeCallback
+   */
+  onAllTrialsComplete(codeCallback: (data: GameData) => void): void {
+    this.lifecycle.allTrialsComplete = codeCallback;
   }
 
   /**
@@ -366,6 +415,7 @@ export class Game {
   }
 
   initData(trialSchema: object): void {
+    this.trialSchema = trialSchema;
     const variables = Object.entries(trialSchema);
     const validDataTypes = ["number", "string", "boolean", "object"];
     variables.forEach((kvp) => {

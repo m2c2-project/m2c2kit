@@ -31,7 +31,12 @@
         onclick="{
           document.getElementById('startButton').disabled = true;
           // we can set some game parameters here, or it will use built in defaults
-          window.game.parameters = { ReadyTime: 500, DotPresentTime: 1000, TrialNum: 1}
+          window.game.parameters = { ReadyTime: 500, DotPresentTime: 1000, TrialNum: 1};
+          window.game.onTrialComplete((trialNumber, data, trialSchema) => {
+            console.log(trialNumber);
+            console.log(data);
+            console.log(trialSchema);            
+          });
           window.game.start();
         }"
       >

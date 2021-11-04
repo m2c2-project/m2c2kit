@@ -97,6 +97,7 @@ game
     gridMemoryPage0.addChild(getReadyMessage);
 
     gridMemoryPage0.setup(() => {
+      game.trialNumber = 0;
       gridMemoryPage0.run(
         Action.Sequence([
           Action.Wait(game.getParameter("ReadyTime")),
@@ -345,10 +346,15 @@ game
           ])
         );
       } else {
-        gridMemoryTrialCount++;
         game.addTrialData("responseTime", 1000);
         game.addTrialData("correct", false);
         game.addTrialData("jsondata", { x: 1, y: 2, z: [1, 2, 3] });
+        game.lifecycle.trialComplete(
+          game.trialNumber,
+          game.data,
+          game.trialSchema
+        );
+        gridMemoryTrialCount++;
         game.trialNumber++;
         if (gridMemoryTrialCount === game.getParameter("TrialNum")) {
           game.presentScene(endPage, nextScreenTransition);
@@ -381,6 +387,7 @@ game
     endPage.setup(() => {
       doneLabel.text = `You did ${gridMemoryTrialCount} trials. You're done!`;
       console.log(`data are: ${JSON.stringify(game.data)}`);
+      game.lifecycle.allTrialsComplete(game.data, game.trialSchema);
     });
 
     game.entryScene = "instructions-01";
