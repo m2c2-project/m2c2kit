@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Game } from "../../dist/umd/m2c2kit";
+import {
+  Game,
+  Scene,
+  Shape,
+  Size,
+  Action,
+  Point,
+} from "../../dist/umd/m2c2kit";
 import { JSDOM } from "jsdom";
 
 // jest.mock("../../dist/umd/m2c2kit", () => {
@@ -15,18 +22,45 @@ import { JSDOM } from "jsdom";
 // for how to mock part of a module using jest,
 // see https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
 
+let maxRequestedFrames = 180;
+let requestedFrames = 0;
+
+const requestAnimationFrame = (callback: (canvas: object) => void) => {
+  const skiaCanvas = {
+    save: () => undefined,
+    scale: () => undefined,
+    drawRRect: () => undefined,
+    restore: () => undefined,
+  };
+  if (requestedFrames < maxRequestedFrames) {
+    requestedFrames++;
+    callback(skiaCanvas);
+  }
+  return undefined;
+};
+
 jest.mock("../../dist/umd/m2c2kit", () => {
   const m2c2kit = jest.requireActual("../../dist/umd/m2c2kit");
 
   m2c2kit.Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
+      PaintStyle: {
+        Fill: undefined,
+      },
       MakeCanvasSurface: () => {
         return {
           reportBackendTypeIsGPU: () => true,
           getCanvas: () => {
             return {
+              save: () => undefined,
               scale: () => undefined,
             };
+          },
+          makeImageSnapshot: () => {
+            return {};
+          },
+          requestAnimationFrame: (callback: (canvas: object) => void) => {
+            return requestAnimationFrame(callback);
           },
         };
       },
@@ -37,9 +71,16 @@ jest.mock("../../dist/umd/m2c2kit", () => {
         return {
           setColor: () => undefined,
           setAntiAlias: () => undefined,
+          setStyle: () => undefined,
         };
       },
       Color: function () {
+        return {};
+      },
+      LTRBRect: function () {
+        return {};
+      },
+      RRectXY: function () {
         return {};
       },
     })
@@ -48,9 +89,7 @@ jest.mock("../../dist/umd/m2c2kit", () => {
 });
 
 let game: Game;
-let window: any;
-
-//window.performance.now = () => 0;
+let perfCounter: number;
 
 beforeEach(() => {
   game = new Game();
@@ -67,11 +106,73 @@ beforeEach(() => {
     </body>
   </html>`);
 
+  // for how to mock globals,
+  // see https://www.grzegorowski.com/how-to-mock-global-window-with-jest
+
   // @ts-ignore
   global.window = dom.window;
   // @ts-ignore
   global.document = dom.window.document;
   global.navigator = dom.window.navigator;
+
+  perfCounter = 0;
+  global.window.performance.now = () => {
+    perfCounter = perfCounter + 16.66666666666667;
+    return perfCounter - 16.66666666666667;
+  };
+
+  requestedFrames = 0;
+});
+
+describe("actions", () => {
+  it("shape completes move from (200, 200) to (50, 50)", () => {
+    maxRequestedFrames = 63;
+    return game
+      .init({ width: 400, height: 800, _unitTesting: true })
+      .then(() => {
+        const scene1 = new Scene({ name: "myScene1" });
+        game.addScene(scene1);
+        const rect1 = new Shape({
+          rect: { size: new Size(100, 100) },
+          name: "myRect1",
+          position: new Point(200, 200),
+        });
+        scene1.addChild(rect1);
+        game.entryScene = scene1;
+
+        rect1.run(Action.Move(new Point(50, 50), 1000));
+        game.start();
+        console.debug(
+          `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
+        );
+        expect(rect1.position).toEqual(new Point(50, 50));
+      });
+  });
+
+  it("shape is exactly midway during from (200, 200) to (50, 50)", () => {
+    maxRequestedFrames = 32;
+    return game
+      .init({ width: 400, height: 800, _unitTesting: true })
+      .then(() => {
+        const scene1 = new Scene({ name: "myScene1" });
+        game.addScene(scene1);
+        const rect1 = new Shape({
+          rect: { size: new Size(100, 100) },
+          name: "myRect1",
+          position: new Point(200, 200),
+        });
+        scene1.addChild(rect1);
+        game.entryScene = scene1;
+
+        rect1.run(Action.Move(new Point(50, 50), 1000));
+        game.start();
+
+        expect(rect1.position).toEqual(new Point(125, 125));
+        console.debug(
+          `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
+        );
+      });
+  });
 });
 
 describe("test init()", () => {

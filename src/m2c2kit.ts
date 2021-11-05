@@ -55,6 +55,8 @@ export interface GameInitOptions {
   showFps?: boolean;
   /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */
   bodyBackgroundColor?: rgbaColor;
+  /** Adapt execution for unit testing? Default is false */
+  _unitTesting?: boolean;
 }
 
 /**
@@ -217,6 +219,7 @@ export class Game {
   private fps = 0;
   private animationFramesRequested = 0;
   private limitFps = false;
+  private unitTesting = false;
 
   canvasCssWidth = 0;
   canvasCssHeight = 0;
@@ -232,7 +235,12 @@ export class Game {
    * @returns Promise<void>
    */
   init(gameInitOptions: GameInitOptions): Promise<void> {
-    const initStartedTimeStamp = window.performance.now();
+    this.unitTesting = gameInitOptions._unitTesting ?? false;
+
+    let initStartedTimeStamp: number;
+    if (!this.unitTesting) {
+      initStartedTimeStamp = window.performance.now();
+    }
 
     this.setupHtmlCanvases(
       gameInitOptions.canvasId,
@@ -265,11 +273,14 @@ export class Game {
       this.setupCanvasKitSurface();
       this.setupFpsFont();
       this.setupEventHandlers();
-      console.log(
-        `Game.init() took ${(
-          window.performance.now() - initStartedTimeStamp
-        ).toFixed(0)} ms`
-      );
+
+      if (!this.unitTesting) {
+        console.log(
+          `Game.init() took ${(
+            window.performance.now() - initStartedTimeStamp
+          ).toFixed(0)} ms`
+        );
+      }
     });
   }
 
