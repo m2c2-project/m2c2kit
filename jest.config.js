@@ -2,5 +2,10 @@
 module.exports = {
   preset: "ts-jest",
   setupFilesAfterEnv: ["./jestSetupFilesAfterEnv.js"],
-  watchPathIgnorePatterns: ["/examples/", "/dist/", "/node_modules/"],
+  watchPathIgnorePatterns: [
+    "/examples/",
+    "/dist/",
+    "/node_modules/",
+    "/__tests__/",
+  ],
 };
