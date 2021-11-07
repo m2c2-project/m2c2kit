@@ -51,7 +51,9 @@
     // "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
     // "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */
     // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If `declaration` is true, also designates a file that bundles all .d.ts output. */
-    "outDir": "../tmp" /* Specify an output folder for all emitted files. */,
+    // we use @rollup/plugin-typescript, so the outDir below is not used (?), but include it here anyway so that
+    // tsconfig.json is not flagged with errors
+    "outDir": "tmp" /* Specify an output folder for all emitted files. */,
     // "removeComments": true,                           /* Disable emitting comments. */
     // "noEmit": true,                                   /* Disable emitting files from a compilation. */
     // "importHelpers": true,                            /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
@@ -101,12 +103,13 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  // "include": []
+  // "include": [],
+  // these may be not needed, since we define include/exclude in rollup?
   "exclude": [
     "node_modules",
     "dist",
     "**/*.bundle.js",
-    "examples/javascript/javascript-example.js",
+    "examples/src/javascript/**/*",
     "*.js" // exclude setup and config files
   ]
 }

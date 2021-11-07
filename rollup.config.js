@@ -4,8 +4,6 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
 import babel from "@rollup/plugin-babel";
-import serve from "rollup-plugin-serve";
-import livereload from "rollup-plugin-livereload";
 import multiInput from "rollup-plugin-multi-input";
 import del from "rollup-plugin-delete";
 
@@ -25,21 +23,21 @@ let sharedPlugins = [
 export default [
   {
     input: [
-      "./src/m2c2kit.ts",
-      "./src/addons/composites/button.ts",
-      "./src/addons/composites/grid.ts",
-      "./src/addons/stories/instructions.ts",
+      "./lib/src/m2c2kit.ts",
+      "./lib/src/addons/composites/button.ts",
+      "./lib/src/addons/composites/grid.ts",
+      "./lib/src/addons/stories/instructions.ts",
     ],
     output: [{ dir: "./dist/esm", format: "esm", name: "m2c2kit" }],
     plugins: [
-      del({ targets: ["dist/esm/*", "examples/javascript/esm/*"] }),
+      del({ targets: ["dist/esm/*", "examples/src/javascript/esm/*"] }),
       ...sharedPlugins,
-      multiInput(),
+      multiInput({ relative: "lib/src/" }),
       typescript({
         tsconfig: "./tsconfig.json",
         outDir: "./dist/esm",
         declaration: true,
-        include: ["./src/**/*.[tj]s"],
+        include: ["./lib/src/**/*.ts"],
         exclude: ["**/__tests__", "**/*.test.ts"],
       }),
       copy({
@@ -47,7 +45,7 @@ export default [
           // copy the wasm bundle out of node_modules so it can be served
           {
             src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-            dest: ["dist/esm", "examples/javascript"],
+            dest: ["dist/esm", "examples/src/javascript"],
           },
         ],
         copyOnce: true,
@@ -59,7 +57,7 @@ export default [
           // the m2c2 dist modules
           {
             src: "dist/esm/**/*",
-            dest: "examples/javascript",
+            dest: "examples/src/javascript",
           },
         ],
         copyOnce: false,
@@ -74,7 +72,7 @@ export default [
   // Make a UMD bundle only to use for testing (jest), because jest support
   // for esm modules is still incomplete
   {
-    input: "./src/m2c2kit.ts",
+    input: "./lib/src/m2c2kit.ts",
     output: [
       {
         dir: "./dist/umd",
@@ -92,7 +90,7 @@ export default [
         tsconfig: "./tsconfig.json",
         outDir: "./dist/umd",
         declaration: true,
-        include: ["./src/**/*.[tj]s"],
+        include: ["./lib/src/**/*.ts"],
         exclude: ["**/__tests__", "**/*.test.ts"],
       }),
       babel({
@@ -101,79 +99,79 @@ export default [
     ],
   },
 
-  {
-    input: "./examples/cognitive-tests/dot-memory.ts",
-    output: [
-      {
-        file: "./examples/cognitive-tests/cognitive-tests.bundle.js",
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      ...sharedPlugins,
-      typescript({
-        inlineSourceMap: true,
-        inlineSources: true,
-        target: "es6",
-        include: ["./examples/cognitive-tests/*.ts", "./src/**/*.[tj]s"],
-        exclude: ["**/__tests__", "**/*.test.ts"],
-        outDir: "../tmp",
-      }),
-      copy({
-        targets: [
-          // copy the wasm binary out of node_modules so it can be served
-          {
-            src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-            dest: "./examples/cognitive-tests",
-          },
-        ],
-        copyOnce: true,
-        hook: "writeBundle",
-      }),
-      serve({
-        open: false,
-        verbose: true,
-        contentBase: ["examples", "assets"],
-        historyApiFallback: true,
-        host: "localhost",
-        port: 3000,
-      }),
-      livereload(),
-    ],
-  },
+  // {
+  //   input: "./examples/cognitive-tests/dot-memory.ts",
+  //   output: [
+  //     {
+  //       file: "./examples/cognitive-tests/cognitive-tests.bundle.js",
+  //       format: "esm",
+  //       sourcemap: true,
+  //     },
+  //   ],
+  //   plugins: [
+  //     ...sharedPlugins,
+  //     typescript({
+  //       inlineSourceMap: true,
+  //       inlineSources: true,
+  //       target: "es6",
+  //       include: ["./examples/cognitive-tests/*.ts", "./src/**/*.[tj]s"],
+  //       exclude: ["**/__tests__", "**/*.test.ts"],
+  //       outDir: "../tmp",
+  //     }),
+  //     copy({
+  //       targets: [
+  //         // copy the wasm binary out of node_modules so it can be served
+  //         {
+  //           src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
+  //           dest: "./examples/cognitive-tests",
+  //         },
+  //       ],
+  //       copyOnce: true,
+  //       hook: "writeBundle",
+  //     }),
+  //     serve({
+  //       open: false,
+  //       verbose: true,
+  //       contentBase: ["examples", "assets"],
+  //       historyApiFallback: true,
+  //       host: "localhost",
+  //       port: 3000,
+  //     }),
+  //     livereload(),
+  //   ],
+  // },
 
-  {
-    input: "./examples/typescript/typescript-example.ts",
-    output: [
-      {
-        file: "./examples/typescript/typescript-example.bundle.js",
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      ...sharedPlugins,
-      typescript({
-        inlineSourceMap: true,
-        inlineSources: true,
-        target: "es6",
-        include: ["./examples/typescript/*.ts", "./src/**/*.[tj]s"],
-        exclude: ["**/__tests__", "**/*.test.ts"],
-        outDir: "../tmp",
-      }),
-      copy({
-        targets: [
-          // copy the wasm binary out of node_modules so it can be served
-          {
-            src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-            dest: "./examples/typescript",
-          },
-        ],
-        copyOnce: true,
-        hook: "writeBundle",
-      }),
-      livereload(),
-    ],
-  },
+  // {
+  //   input: "./examples/typescript/typescript-example.ts",
+  //   output: [
+  //     {
+  //       file: "./examples/typescript/typescript-example.bundle.js",
+  //       format: "esm",
+  //       sourcemap: true,
+  //     },
+  //   ],
+  //   plugins: [
+  //     ...sharedPlugins,
+  //     typescript({
+  //       inlineSourceMap: true,
+  //       inlineSources: true,
+  //       target: "es6",
+  //       include: ["./examples/typescript/*.ts", "./src/**/*.[tj]s"],
+  //       exclude: ["**/__tests__", "**/*.test.ts"],
+  //       outDir: "../tmp",
+  //     }),
+  //     copy({
+  //       targets: [
+  //         // copy the wasm binary out of node_modules so it can be served
+  //         {
+  //           src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
+  //           dest: "./examples/typescript",
+  //         },
+  //       ],
+  //       copyOnce: true,
+  //       hook: "writeBundle",
+  //     }),
+  //     livereload(),
+  //   ],
+  // },
 ];

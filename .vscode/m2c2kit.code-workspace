@@ -1,0 +1,28 @@
+// for good advice on using multi-root workspaces in vs code see
+// https://medium.com/rewrite-tech/visual-studio-code-tips-for-monorepo-development-with-multi-root-workspaces-and-extension-6b69420ecd12
+{
+  "folders": [
+    {
+      "path": "../examples"
+    },
+    {
+      "path": "../lib"
+    },
+    {
+      // include the root folder itself as a root folder so vs code shows the
+      // root package.json scripts
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "jest.autoRun": "off",
+    "jest.disabledWorkspaceFolders": ["examples", "lib"]
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "orta.vscode-jest",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}

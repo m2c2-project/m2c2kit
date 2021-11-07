@@ -12,9 +12,9 @@ import {
   Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
-} from "../../src/m2c2kit";
-import { Button, Grid } from "../../src/addons/composites";
-import { Instructions } from "../../src/addons/stories";
+} from "../../../lib/src/m2c2kit";
+import { Button, Grid } from "../../../lib/src/addons/composites";
+import { Instructions } from "../../../lib/src/addons/stories";
 
 const game = new Game();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

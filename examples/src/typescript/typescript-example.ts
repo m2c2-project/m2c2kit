@@ -13,10 +13,10 @@ import {
   LabelHorizontalAlignmentMode,
   Transition,
   TransitionDirection,
-} from "../../src/m2c2kit";
+} from "../../../lib/src/m2c2kit";
 // for typescript, import the parent composites and stories modules
-import { Button, Grid } from "../../src/addons/composites";
-import { Instructions } from "../../src/addons/stories";
+import { Button, Grid } from "../../../lib/src/addons/composites";
+import { Instructions } from "../../../lib/src/addons/stories";
 
 const game = new Game();
 // for typescript, we need to caste window to any

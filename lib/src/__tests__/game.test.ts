@@ -6,7 +6,7 @@ import {
   Size,
   Action,
   Point,
-} from "../../dist/umd/m2c2kit";
+} from "../../../dist/umd/m2c2kit";
 import { JSDOM } from "jsdom";
 
 // jest.mock("../../dist/umd/m2c2kit", () => {
@@ -39,8 +39,8 @@ const requestAnimationFrame = (callback: (canvas: object) => void) => {
   return undefined;
 };
 
-jest.mock("../../dist/umd/m2c2kit", () => {
-  const m2c2kit = jest.requireActual("../../dist/umd/m2c2kit");
+jest.mock("../../../dist/umd/m2c2kit", () => {
+  const m2c2kit = jest.requireActual("../../../dist/umd/m2c2kit");
 
   m2c2kit.Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
