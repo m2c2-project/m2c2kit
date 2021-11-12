@@ -187,7 +187,8 @@ game
               game.presentScene(gridMemoryPage3, previousScreenTransition);
             },
           }),
-        ])
+        ]),
+        "advanceAfterInterference"
       );
 
       // the next section of code, which draws the grid of Fs to tap, should
@@ -235,6 +236,9 @@ game
                 );
                 square.userData = 1;
                 if (tappedFCount >= 6) {
+                  // prevent the advance action from happening
+                  gridMemoryPage2.removeAction("advanceAfterInterference");
+
                   // don't allow more grid taps
                   grid.gridChildren.forEach((cell) => {
                     cell.entity.isUserInteractionEnabled = false;

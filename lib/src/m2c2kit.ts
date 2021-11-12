@@ -1440,6 +1440,7 @@ export abstract class Action {
   parent?: Action;
   isParent = false;
   isChild = false;
+  key?: string;
 
   constructor(runDuringTransition = false) {
     this.runDuringTransition = runDuringTransition;
@@ -1529,9 +1530,9 @@ export abstract class Action {
     return group;
   }
 
-  initialize(entity: Entity): Array<Action> {
+  initialize(entity: Entity, key?: string): Array<Action> {
     // entity.runStartTime = -1;
-    this.assignParents(this, this);
+    this.assignParents(this, this, key);
     const actions = this.flattenActions(this);
     actions.forEach(
       (action) => (action.duration = this.calculateDuration(action))
@@ -1553,25 +1554,29 @@ export abstract class Action {
         // to prevent circular references, set parent to defined
         // we needed parent only when calculating durations, we no
         // longer need it when executing the actions
-        return Action.cloneAction(action);
+        return Action.cloneAction(action, key);
       });
 
     return clonedActions;
   }
 
-  static cloneAction(action: Action): Action {
+  static cloneAction(action: Action, key?: string): Action {
     let cloned: Action;
 
     switch (action.type) {
       case ActionType.sequence: {
         const sequence = action as SequenceAction;
-        const sequenceChildren = sequence.children.map(Action.cloneAction);
+        const sequenceChildren = sequence.children.map((child) =>
+          Action.cloneAction(child, key)
+        );
         cloned = Action.Sequence(sequenceChildren);
         break;
       }
       case ActionType.group: {
         const group = action as SequenceAction;
-        const groupChildren = group.children.map(Action.cloneAction);
+        const groupChildren = group.children.map((child) =>
+          Action.cloneAction(child, key)
+        );
         cloned = Action.Sequence(groupChildren);
         break;
       }
@@ -1612,7 +1617,9 @@ export abstract class Action {
       default:
         throw new Error("unknown action");
     }
-
+    if (key !== undefined) {
+      cloned.key = key;
+    }
     cloned.startOffset = action.startOffset;
     cloned.endOffset = action.endOffset;
     return cloned;
@@ -1776,7 +1783,14 @@ export abstract class Action {
     return actions;
   }
 
-  private assignParents(action: Action, rootAction: Action): void {
+  private assignParents(
+    action: Action,
+    rootAction: Action,
+    key?: string
+  ): void {
+    if (key !== undefined) {
+      action.key = key;
+    }
     if (!rootAction) {
       rootAction = action;
       rootAction.parent = undefined;
@@ -1786,11 +1800,10 @@ export abstract class Action {
       const children = parent.children!;
       children.forEach((child) => {
         child.parent = action;
-        // child.entity = rootAction.entity;
       });
       parent
         .children!.filter((child) => child.isParent)
-        .forEach((child: Action) => this.assignParents(child, rootAction));
+        .forEach((child: Action) => this.assignParents(child, rootAction, key));
     }
   }
 }
@@ -2682,13 +2695,32 @@ export abstract class Entity {
    * @remarks If the entity is part of an active scene, the action runs immediately. Otherwise, the action will run when the entity's scene becomes active. Calling run() multiple times on an entity will add to existing actions, not replace them.
    *
    * @param action - The action to run
+   * @param key - key (string identifier) used to identify the action. Only needed if the action will be referred to later
    */
-  run(action: Action): void {
+  run(action: Action, key?: string): void {
     //this.actions = action.initialize(this);
-    this.actions.push(...action.initialize(this));
+    this.actions.push(...action.initialize(this, key));
     this.originalActions = this.actions
       .filter((action) => action.runDuringTransition === false)
-      .map(Action.cloneAction);
+      .map((action) => Action.cloneAction(action, key));
+  }
+
+  /**
+   * Remove an action from this entity. If the action is running, it will be stopped.
+   *
+   * @param key - key (string identifier) of the action to remove
+   */
+  removeAction(key: string): void {
+    this.actions = this.actions.filter((action) => action.key !== key);
+  }
+
+  /**
+   * Remove all actions from this entity. If actions are running, they will be stopped.
+   */
+  removeAllActions(): void {
+    while (this.actions.length) {
+      this.actions.pop();
+    }
   }
 
   // TODO: don't make static!
