@@ -21,8 +21,11 @@ const game = new Game();
 (window as unknown as any).game = game;
 
 // game parameter defaults to be used if values are not provided
+// default parameters are not part of the m2c2kit engine, because parameters
+// are different for each game that might be written. Thus, define them here
 const defaults = {
   ReadyTime: 1000,
+  InterferenceTime: 8000,
   DotPresentTime: 3000,
   TrialNum: 2,
 };
@@ -46,16 +49,6 @@ game
     ],
   })
   .then(() => {
-    // game.addTrialData("responseTime", 400);
-    // game.addTrialData("correct", true);
-    // game.addTrialData("jsondata", { name: "joe", id: 4343242 })
-    // console.log(JSON.stringify(game.data));
-
-    // default parameters are not part of the m2c2kit engine, because parameters
-    // are different for each game that might be written. Thus, we define them
-    // here (defaults object above) and assign it the the defaultParameters
-    // propery of the game object
-
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
@@ -85,6 +78,7 @@ game
 
     // SCENE: show get ready message, then advance after XXXX
     // milliseconds (as defined in ReadyTime parameter)
+    game.trialNumber = 0;
     const gridMemoryPage0 = new Scene({
       name: "getReadyScene",
       backgroundColor: WebColors.White,
@@ -98,12 +92,13 @@ game
     gridMemoryPage0.addChild(getReadyMessage);
 
     gridMemoryPage0.setup(() => {
-      game.trialNumber = 0;
       gridMemoryPage0.run(
         Action.Sequence([
-          Action.Wait(game.getParameter("ReadyTime")),
-          Action.Code(() => {
-            game.presentScene(gridMemoryPage1);
+          Action.Wait({ duration: game.getParameter("ReadyTime") }),
+          Action.Custom({
+            callback: () => {
+              game.presentScene(gridMemoryPage1);
+            },
           }),
         ])
       );
@@ -149,9 +144,11 @@ game
 
       gridMemoryPage1.run(
         Action.Sequence([
-          Action.Wait(game.getParameter("DotPresentTime")),
-          Action.Code(() => {
-            game.presentScene(gridMemoryPage2, nextScreenTransition);
+          Action.Wait({ duration: game.getParameter("DotPresentTime") }),
+          Action.Custom({
+            callback: () => {
+              game.presentScene(gridMemoryPage2, nextScreenTransition);
+            },
           }),
         ])
       );
@@ -180,6 +177,26 @@ game
 
     gridMemoryPage2.setup(() => {
       console.log("start gridMemoryPage2.setup() " + window.performance.now());
+
+      // Advance to the next recall screen after "InterferenceTime" millisseconds
+      gridMemoryPage2.run(
+        Action.Sequence([
+          Action.Wait({ duration: game.getParameter("InterferenceTime") }),
+          Action.Custom({
+            callback: () => {
+              game.presentScene(gridMemoryPage3, previousScreenTransition);
+            },
+          }),
+        ])
+      );
+
+      // the next section of code, which draws the grid of Fs to tap, should
+      // be refactored into a separate function so that we can call it
+      // repeatedly until the "InterferenceTime" is up.
+      // Currently, the game will advance to the recall grid after "InterferenceTime"
+      // OR if all Fs are tapped, WHICHEVER IS FIRST. That is not
+      // desired behavior. It should only advace after "InterferenceTime" has ellapsed
+
       grid.removeAllChildren();
       let tappedFCount = 0;
 
@@ -205,14 +222,15 @@ game
           }
 
           if (letterIsF) {
+            square.isUserInteractionEnabled = true;
             square.onTap(() => {
               if (square.userData === 0) {
                 tappedFCount++;
                 letter.text = "E";
                 letter.run(
                   Action.Sequence([
-                    Action.Scale(1.25, 125),
-                    Action.Scale(1, 125),
+                    Action.Scale({ scale: 1.25, duration: 125 }),
+                    Action.Scale({ scale: 1, duration: 125 }),
                   ])
                 );
                 square.userData = 1;
@@ -223,19 +241,20 @@ game
                   });
                   square.run(
                     Action.Sequence([
-                      Action.Wait(1000),
-                      Action.Code(() => {
-                        game.presentScene(
-                          gridMemoryPage3,
-                          previousScreenTransition
-                        );
+                      Action.Wait({ duration: 1000 }),
+                      Action.Custom({
+                        callback: () => {
+                          game.presentScene(
+                            gridMemoryPage3,
+                            previousScreenTransition
+                          );
+                        },
                       }),
                     ])
                   );
                 }
               }
             });
-            square.isUserInteractionEnabled = true;
           }
           grid.addAtCell(letter, i, j);
           grid.addAtCell(square, i, j);
@@ -244,7 +263,6 @@ game
 
       console.log("end gridMemoryPage2.setup() " + window.performance.now());
     });
-
     // SCENE: ask participant to recall the dot positions
     const gridMemoryPage3 = new Scene({ backgroundColor: WebColors.White });
     game.addScene(gridMemoryPage3);
@@ -337,12 +355,16 @@ game
       if (tappedCellCount < 3) {
         youMustSelectAllMessage.run(
           Action.Sequence([
-            Action.Code(() => {
-              youMustSelectAllMessage.hidden = false;
+            Action.Custom({
+              callback: () => {
+                youMustSelectAllMessage.hidden = false;
+              },
             }),
-            Action.Wait(3000),
-            Action.Code(() => {
-              youMustSelectAllMessage.hidden = true;
+            Action.Wait({ duration: 3000 }),
+            Action.Custom({
+              callback: () => {
+                youMustSelectAllMessage.hidden = true;
+              },
             }),
           ])
         );
@@ -381,6 +403,7 @@ game
     againButton.isUserInteractionEnabled = true;
     againButton.onTap(() => {
       gridMemoryTrialCount = 0;
+      game.trialNumber = 0;
       game.presentScene(gridMemoryPage0);
     });
     endPage.addChild(againButton);

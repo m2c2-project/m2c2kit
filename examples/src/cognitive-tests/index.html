@@ -31,11 +31,30 @@
         onclick="{
           document.getElementById('startButton').disabled = true;
           // we can set some game parameters here, or it will use built in defaults
-          window.game.parameters = { ReadyTime: 500, DotPresentTime: 1000, TrialNum: 1};
+          window.game.parameters = { ReadyTime: 500, DotPresentTime: 1000, TrialNum: 2};
           window.game.onTrialComplete((trialNumber, data, trialSchema) => {
             console.log(trialNumber);
             console.log(data);
-            console.log(trialSchema);            
+            console.log(trialSchema);        
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+            
+                if (xhr.readyState !== 4) {
+                  return;
+                }
+
+                if (xhr.status === 200) {
+                  // we get the returned data
+                  var data = xhr.responseText;
+                  console.log('echo server response: ' + data);            
+                }
+            };
+
+            var yourUrl = 'https://qsxoucw85l.execute-api.us-east-1.amazonaws.com/api/echo';
+            xhr.open('POST', yourUrl, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ value: data }));
           });
           window.game.start();
         }"

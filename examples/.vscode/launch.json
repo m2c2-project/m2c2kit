@@ -9,6 +9,8 @@
       "request": "launch",
       "name": "Examples Chrome port 3000",
       "url": "http://localhost:3000",
+      // to prevent CORS errors
+      "runtimeArgs": ["--disable-web-security"],
       // because we set up a multi-root workspace, we have to modify "webRoot"
       // from its default configuration of "webRoot": "{workspaceFolder}"
       // If we use that default configuration, breakpoints won't be set

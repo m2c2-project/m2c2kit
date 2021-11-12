@@ -801,33 +801,43 @@ export class Game {
           case TransitionDirection.left:
             incomingScene.position.x = incomingScene.size.width;
             // Because these actions are part of the scene transition, it's important to set optional parameter
-            // runDuringTransition to "true" for the Move and Code actions.
+            // runDuringTransition to "true" for the Move and Custom actions.
             // These transitions actions will move the screens and then set the scene's transitioning property
             // to false. It's important to set the transitioning property to false because then the regular,
             // non-transition actions previously set on the scene will then begin.
             // Also, very important to execute currentSceneSnapshot.delete() to prevent memory leaks
             incomingScene.run(
               Action.Sequence([
-                Action.Move(new Point(0, 0), duration, true),
-                Action.Code<Scene>((scene) => {
-                  scene._transitioning = false;
-                }, true),
+                Action.Move({
+                  point: new Point(0, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    incomingScene._transitioning = false;
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             outgoingScene.run(
               Action.Sequence([
-                Action.Move(
-                  new Point(-outgoingScene.size.width, 0),
-                  duration,
-                  true
-                ),
-                Action.Code<Scene>((scene) => {
-                  scene._active = false;
-                  scene._transitioning = false;
-                  if (scene.game.currentSceneSnapshot) {
-                    scene.game.currentSceneSnapshot.delete();
-                  }
-                }, true),
+                Action.Move({
+                  point: new Point(-outgoingScene.size.width, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    outgoingScene._active = false;
+                    outgoingScene._transitioning = false;
+                    if (outgoingScene.game.currentSceneSnapshot) {
+                      outgoingScene.game.currentSceneSnapshot.delete();
+                    }
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             break;
@@ -835,26 +845,36 @@ export class Game {
             incomingScene.position.x = -incomingScene.size.width;
             incomingScene.run(
               Action.Sequence([
-                Action.Move(new Point(0, 0), duration, true),
-                Action.Code<Scene>((scene) => {
-                  scene._transitioning = false;
-                }, true),
+                Action.Move({
+                  point: new Point(0, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    incomingScene._transitioning = false;
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             outgoingScene.run(
               Action.Sequence([
-                Action.Move(
-                  new Point(outgoingScene.size.width, 0),
-                  duration,
-                  true
-                ),
-                Action.Code<Scene>((scene) => {
-                  scene._active = false;
-                  scene._transitioning = false;
-                  if (scene.game.currentSceneSnapshot) {
-                    scene.game.currentSceneSnapshot.delete();
-                  }
-                }, true),
+                Action.Move({
+                  point: new Point(outgoingScene.size.width, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    outgoingScene._active = false;
+                    outgoingScene._transitioning = false;
+                    if (outgoingScene.game.currentSceneSnapshot) {
+                      outgoingScene.game.currentSceneSnapshot.delete();
+                    }
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             break;
@@ -862,26 +882,36 @@ export class Game {
             incomingScene.position.y = incomingScene.size.height;
             incomingScene.run(
               Action.Sequence([
-                Action.Move(new Point(0, 0), duration, true),
-                Action.Code<Scene>((scene) => {
-                  scene._transitioning = false;
-                }, true),
+                Action.Move({
+                  point: new Point(0, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    incomingScene._transitioning = false;
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             outgoingScene.run(
               Action.Sequence([
-                Action.Move(
-                  new Point(0, -outgoingScene.size.height),
-                  duration,
-                  true
-                ),
-                Action.Code<Scene>((scene) => {
-                  scene._active = false;
-                  scene._transitioning = false;
-                  if (scene.game.currentSceneSnapshot) {
-                    scene.game.currentSceneSnapshot.delete();
-                  }
-                }, true),
+                Action.Move({
+                  point: new Point(0, -outgoingScene.size.height),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    outgoingScene._active = false;
+                    outgoingScene._transitioning = false;
+                    if (outgoingScene.game.currentSceneSnapshot) {
+                      outgoingScene.game.currentSceneSnapshot.delete();
+                    }
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             break;
@@ -889,26 +919,36 @@ export class Game {
             incomingScene.position.y = -incomingScene.size.height;
             incomingScene.run(
               Action.Sequence([
-                Action.Move(new Point(0, 0), duration, true),
-                Action.Code<Scene>((scene) => {
-                  scene._transitioning = false;
-                }, true),
+                Action.Move({
+                  point: new Point(0, 0),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    incomingScene._transitioning = false;
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             outgoingScene.run(
               Action.Sequence([
-                Action.Move(
-                  new Point(0, outgoingScene.size.height),
-                  duration,
-                  true
-                ),
-                Action.Code<Scene>((scene) => {
-                  scene._active = false;
-                  scene._transitioning = false;
-                  if (scene.game.currentSceneSnapshot) {
-                    scene.game.currentSceneSnapshot.delete();
-                  }
-                }, true),
+                Action.Move({
+                  point: new Point(0, outgoingScene.size.height),
+                  duration: duration,
+                  runDuringTransition: true,
+                }),
+                Action.Custom({
+                  callback: () => {
+                    outgoingScene._active = false;
+                    outgoingScene._transitioning = false;
+                    if (outgoingScene.game.currentSceneSnapshot) {
+                      outgoingScene.game.currentSceneSnapshot.delete();
+                    }
+                  },
+                  runDuringTransition: true,
+                }),
               ])
             );
             break;
@@ -1352,6 +1392,39 @@ export enum TransitionDirection {
 //#endregion Transitions
 
 //#region Actions ------------------------------------------------------------
+
+export interface MoveActionOptions {
+  /** Destination point. The point is relative to the entity's parent coordinate system */
+  point: Point;
+  /** Duration of move, in milliseconds */
+  duration: number;
+  /** Should the action run during screen transitions? Default is no */
+  runDuringTransition?: boolean;
+}
+
+export interface WaitActionOptions {
+  /** Duration of wait, in milliseconds */
+  duration: number;
+  /** Should the action run during screen transitions? Default is no */
+  runDuringTransition?: boolean;
+}
+
+export interface CustomActionOptions {
+  /** callback - The callback function to be executed  */
+  callback: () => void;
+  /** Should the action run during screen transitions? Default is no */
+  runDuringTransition?: boolean;
+}
+
+export interface ScaleActionOptions {
+  /** The scaling ratio. 1 is no change, greater than 1 is make bigger, less than 1 is make smaller */
+  scale: number;
+  /** Duration of scale, in milliseconds */
+  duration: number;
+  /** Should the action run during screen transitions? Default is no */
+  runDuringTransition?: boolean;
+}
+
 export abstract class Action {
   abstract type: ActionType;
 
@@ -1362,7 +1435,7 @@ export abstract class Action {
   completed = false;
   runStartTime = -1;
   duration = 0;
-  runDuringTransition = false;
+  runDuringTransition: boolean;
 
   parent?: Action;
   isParent = false;
@@ -1375,47 +1448,41 @@ export abstract class Action {
   /**
    * Creates an action that will move an entity to a point on the screen.
    *
-   * @remarks The point is relative to the entity's parent coordinate system.
-   *
-   * @param point - Destination point
-   * @param durationMillis - Duration of move, in milliseconds
-   * @param runDuringTransition - Should the action run during screen transitions? Default is no
+   * @param options - {@link MoveActionOptions}
    * @returns The move action
    */
-  public static Move(
-    point: Point,
-    durationMillis: number,
-    runDuringTransition = false
-  ): Action {
-    return new MoveAction(point, durationMillis, runDuringTransition);
+  public static Move(options: MoveActionOptions): Action {
+    return new MoveAction(
+      options.point,
+      options.duration,
+      options.runDuringTransition ?? false
+    );
   }
 
   /**
    * Creates an action that will wait a given duration before it is considered complete.
    *
-   * @param durationMillis - Duration of wait, in milliseconds
-   * @param runDuringTransition - Should the action run during screen transitions? Default is no
+   * @param options - {@link WaitActionOptions}
    * @returns The wait action
    */
-  public static Wait(
-    durationMillis: number,
-    runDuringTransition = false
-  ): Action {
-    return new WaitAction(durationMillis, runDuringTransition);
+  public static Wait(options: WaitActionOptions): Action {
+    return new WaitAction(
+      options.duration,
+      options.runDuringTransition ?? false
+    );
   }
 
   /**
-   * Creates an action that will execute a code callback function.
+   * Creates an action that will execute a callback function.
    *
-   * @param codeCallback - The callback function to be executed
-   * @param runDuringTransition - Should the action run during screen transitions? Default is no
-   * @returns The code action
+   * @param options - {@link CustomActionOptions}
+   * @returns The custom action
    */
-  public static Code<T>(
-    codeCallback: (entity: T) => void,
-    runDuringTransition = false
-  ): Action {
-    return new CodeAction(codeCallback, runDuringTransition);
+  public static Custom(options: CustomActionOptions): Action {
+    return new CustomAction(
+      options.callback,
+      options.runDuringTransition ?? false
+    );
   }
 
   /**
@@ -1423,17 +1490,15 @@ export abstract class Action {
    *
    * @remarks Scaling is relative to any inherited scaling, which is multiplicative. For example, if the entity's parent is scaled to 2.0 and this entity's action scales to 3.0, then the entity will appear 6 times as large as original.
    *
-   * @param scale - The scaling ratio. 1 is no change, greater than 1 is make bigger, less than 1 is make smaller
-   * @param durationMillis - Duration of scaling, in milliseconds
-   * @param runDuringTransition - Should the action run during screen transitions? Default is no
+   * @param options - {@link ScaleActionOptions}
    * @returns The scale action
    */
-  public static Scale(
-    scale: number,
-    durationMillis: number,
-    runDuringTransition = false
-  ): Action {
-    return new ScaleAction(scale, durationMillis, runDuringTransition);
+  public static Scale(options: ScaleActionOptions): Action {
+    return new ScaleAction(
+      options.scale,
+      options.duration,
+      options.runDuringTransition
+    );
   }
 
   /**
@@ -1512,30 +1577,36 @@ export abstract class Action {
       }
       case ActionType.move: {
         const move = action as MoveAction;
-        cloned = Action.Move(
-          move.point,
-          move.duration,
-          move.runDuringTransition
-        );
+        cloned = Action.Move({
+          point: move.point,
+          duration: move.duration,
+          runDuringTransition: move.runDuringTransition,
+        });
         break;
       }
-      case ActionType.code: {
-        const code = action as CodeAction<Entity>;
-        cloned = Action.Code(code.codeCallback, code.runDuringTransition);
+      case ActionType.custom: {
+        const code = action as CustomAction;
+        cloned = Action.Custom({
+          callback: code.codeCallback,
+          runDuringTransition: code.runDuringTransition,
+        });
         break;
       }
       case ActionType.scale: {
         const scale = action as ScaleAction;
-        cloned = Action.Scale(
-          scale.scale,
-          scale.duration,
-          scale.runDuringTransition
-        );
+        cloned = Action.Scale({
+          scale: scale.scale,
+          duration: scale.duration,
+          runDuringTransition: scale.runDuringTransition,
+        });
         break;
       }
       case ActionType.wait: {
         const wait = action as WaitAction;
-        cloned = Action.Wait(wait.duration, wait.runDuringTransition);
+        cloned = Action.Wait({
+          duration: wait.duration,
+          runDuringTransition: wait.runDuringTransition,
+        });
         break;
       }
       default:
@@ -1573,11 +1644,11 @@ export abstract class Action {
 
     const elapsed = now - (action.runStartTime + action.startOffset);
 
-    if (action.type === ActionType.code) {
-      const codeAction = action as CodeAction<Entity>;
-      codeAction.codeCallback(entity);
-      codeAction.running = false;
-      codeAction.completed = true;
+    if (action.type === ActionType.custom) {
+      const customAction = action as CustomAction;
+      customAction.codeCallback();
+      customAction.running = false;
+      customAction.completed = true;
     }
 
     if (action.type === ActionType.wait) {
@@ -1748,10 +1819,10 @@ class GroupAction extends Action implements IActionContainer {
   }
 }
 
-class CodeAction<T> extends Action {
-  type = ActionType.code;
-  codeCallback: (entity: T) => void;
-  constructor(codeCallback: (entity: T) => void, runDuringTransition = false) {
+class CustomAction extends Action {
+  type = ActionType.custom;
+  codeCallback: () => void;
+  constructor(codeCallback: () => void, runDuringTransition = false) {
     super(runDuringTransition);
     this.codeCallback = codeCallback;
     this.isParent = false;
@@ -1761,7 +1832,7 @@ class CodeAction<T> extends Action {
 
 class WaitAction extends Action {
   type = ActionType.wait;
-  constructor(duration: number, runDuringTransition = false) {
+  constructor(duration: number, runDuringTransition: boolean) {
     super(runDuringTransition);
     this.duration = duration;
     this.isParent = false;
@@ -1785,7 +1856,7 @@ class MoveAction extends Action {
   point: Point;
   dx = 0;
   dy = 0;
-  constructor(point: Point, duration: number, runDuringTransition = false) {
+  constructor(point: Point, duration: number, runDuringTransition: boolean) {
     super(runDuringTransition);
     this.duration = duration;
     this.point = point;
@@ -1797,7 +1868,7 @@ enum ActionType {
   sequence = "Sequence",
   group = "Group",
   wait = "Wait",
-  code = "Code",
+  custom = "Custom",
   move = "Move",
   scale = "Scale",
 }

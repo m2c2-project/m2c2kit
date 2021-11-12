@@ -140,7 +140,7 @@ describe("actions", () => {
         scene1.addChild(rect1);
         game.entryScene = scene1;
 
-        rect1.run(Action.Move(new Point(50, 50), 1000));
+        rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
         game.start();
         console.debug(
           `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
@@ -164,7 +164,7 @@ describe("actions", () => {
         scene1.addChild(rect1);
         game.entryScene = scene1;
 
-        rect1.run(Action.Move(new Point(50, 50), 1000));
+        rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
         game.start();
 
         expect(rect1.position).toEqual(new Point(125, 125));
