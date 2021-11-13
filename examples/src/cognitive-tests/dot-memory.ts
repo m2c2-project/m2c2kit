@@ -30,6 +30,7 @@ const defaults = {
   TrialNum: 2,
 };
 
+// These are the data we will output at the end of each schema
 const gridMemoryTrialSchema = {
   responseTime: "number",
   correct: "boolean",
@@ -191,77 +192,78 @@ game
         "advanceAfterInterference"
       );
 
-      // the next section of code, which draws the grid of Fs to tap, should
-      // be refactored into a separate function so that we can call it
-      // repeatedly until the "InterferenceTime" is up.
-      // Currently, the game will advance to the recall grid after "InterferenceTime"
-      // OR if all Fs are tapped, WHICHEVER IS FIRST. That is not
-      // desired behavior. It should only advace after "InterferenceTime" has ellapsed
+      // While we're waiting until the "InterferenceTime" elapses via
+      // the above action, start another action to show the grid of
+      // E/F to tap
+      gridMemoryPage2.run(
+        Action.Custom({
+          callback: () => {
+            ShowInterferenceActivity();
+          },
+        })
+      );
 
-      grid.removeAllChildren();
-      let tappedFCount = 0;
+      // On repeated showings of the grid, we will slide it into view
+      // and slideGridIntoScene = true
+      function ShowInterferenceActivity(slideGridIntoScene = false) {
+        grid.removeAllChildren();
+        let tappedFCount = 0;
 
-      // random choose six cells to have F in them from the grid that
-      // is of size 8 rows and 5 columns
-      const FCells = RandomDraws.FromGridWithoutReplacement(6, 8, 5);
-      for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 5; j++) {
-          const square = new Shape({
-            rect: new Rect({ size: new Size(59, 59) }),
-            fillColor: WebColors.Transparent,
-          });
-          square.userData = 0;
+        // randomly choose six cells to have F in them from the grid that
+        // is of size 8 rows and 5 columns
+        const FCells = RandomDraws.FromGridWithoutReplacement(6, 8, 5);
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 5; j++) {
+            const square = new Shape({
+              rect: new Rect({ size: new Size(59, 59) }),
+              fillColor: WebColors.Transparent,
+            });
+            square.userData = 0;
 
-          let letterIsF = false;
-          let letter: Label;
-          letter = new Label({ text: "E", fontSize: 50 });
-          for (let k = 0; k < 6; k++) {
-            if (FCells[k].row === i && FCells[k].column === j) {
-              letter = new Label({ text: "F", fontSize: 50 });
-              letterIsF = true;
+            let letterIsF = false;
+            let letter: Label;
+            letter = new Label({ text: "E", fontSize: 50 });
+            for (let k = 0; k < 6; k++) {
+              if (FCells[k].row === i && FCells[k].column === j) {
+                letter = new Label({ text: "F", fontSize: 50 });
+                letterIsF = true;
+              }
             }
-          }
 
-          if (letterIsF) {
-            square.isUserInteractionEnabled = true;
-            square.onTap(() => {
-              if (square.userData === 0) {
-                tappedFCount++;
-                letter.text = "E";
-                letter.run(
-                  Action.Sequence([
-                    Action.Scale({ scale: 1.25, duration: 125 }),
-                    Action.Scale({ scale: 1, duration: 125 }),
-                  ])
-                );
-                square.userData = 1;
-                if (tappedFCount >= 6) {
-                  // prevent the advance action from happening
-                  gridMemoryPage2.removeAction("advanceAfterInterference");
-
-                  // don't allow more grid taps
-                  grid.gridChildren.forEach((cell) => {
-                    cell.entity.isUserInteractionEnabled = false;
-                  });
-                  square.run(
+            if (letterIsF) {
+              square.isUserInteractionEnabled = true;
+              square.onTap(() => {
+                if (square.userData === 0) {
+                  tappedFCount++;
+                  letter.text = "E";
+                  letter.run(
                     Action.Sequence([
-                      Action.Wait({ duration: 1000 }),
-                      Action.Custom({
-                        callback: () => {
-                          game.presentScene(
-                            gridMemoryPage3,
-                            previousScreenTransition
-                          );
-                        },
-                      }),
+                      Action.Scale({ scale: 1.25, duration: 125 }),
+                      Action.Scale({ scale: 1, duration: 125 }),
                     ])
                   );
+                  square.userData = 1;
+                  if (tappedFCount >= 6) {
+                    // don't allow more taps on this current grid
+                    grid.gridChildren.forEach((cell) => {
+                      cell.entity.isUserInteractionEnabled = false;
+                    });
+
+                    // show a new interference grid
+                    // but this time, slide it into view
+                    ShowInterferenceActivity(true);
+                  }
                 }
-              }
-            });
+              });
+            }
+            grid.addAtCell(letter, i, j);
+            grid.addAtCell(square, i, j);
           }
-          grid.addAtCell(letter, i, j);
-          grid.addAtCell(square, i, j);
+        }
+
+        if (slideGridIntoScene) {
+          grid.position = new Point(200, 1040);
+          grid.run(Action.Move({ point: new Point(200, 400), duration: 500 }));
         }
       }
 
