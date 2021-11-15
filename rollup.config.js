@@ -72,7 +72,7 @@ export default [
   // Make a UMD bundle only to use for testing (jest), because jest support
   // for esm modules is still incomplete
   {
-    input: "./lib/src/m2c2kit.ts",
+    input: "./lib/src/m2c2kit-umd.ts",
     output: [
       {
         dir: "./dist/umd",

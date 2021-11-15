@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "examples-start": "rollup -c rollup.examples.config.js --watch",
-    "library-build": "rollup -c",
-    "library-test": "jest",
+    "build": "rollup -c",
+    "test": "jest",
     "prepare": "husky install"
   },
   "keywords": [],
