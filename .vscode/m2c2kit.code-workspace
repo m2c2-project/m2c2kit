@@ -9,6 +9,13 @@
       "path": "../lib"
     },
     {
+      "path": "../tools/file-uploader"
+    },    
+
+    {
+      "path": "../tools/demo-server"
+    },    
+    {
       // include the root folder itself as a root folder so vs code shows the
       // root package.json scripts
       "path": "../"

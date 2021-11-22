@@ -1,0 +1,2 @@
+GET /studies/abcd/pic.jpg HTTP/1.1
+Host: localhost:7071

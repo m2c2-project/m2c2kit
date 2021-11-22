@@ -3,5 +3,6 @@
     // these will show in their own root folders, so hide from this root folder
     "examples": true,
     "lib": true
-  }
+  },
+  "azureFunctions.projectSubpath": "tools\\test-server"
 }

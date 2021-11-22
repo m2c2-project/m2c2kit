@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "Node program",
+      "program": "${workspaceFolder:file-uploader}/upload.js",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node",
+      "console": "integratedTerminal"
+    }
+  ]
+}

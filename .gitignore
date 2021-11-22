@@ -1,3 +1,6 @@
+# m2c2-specific settings files
+*.m2c2-study-code.json
+
 # javascript bundles
 *.bundle.js
 *.bundle.js.map

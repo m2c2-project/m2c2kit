@@ -1,0 +1,16 @@
+{
+  "name": "file-uploader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "upload.js",
+  "scripts": {
+    "upload": "node upload.js",
+    "upload-reset": "node upload.js --reset"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "readline-sync": "^1.4.10"
+  }
+}
