@@ -56,18 +56,138 @@ const uploadFile = async (
   });
 };
 
+// rollup-plugin-livereload injects some change detection code, which is
+// useful for local development, but causes a timeout when deployed to
+// a server. this function will remove it
+const removeLiveReload = (fileBuffer) => {
+  const s = fileBuffer.toString();
+  let lines = s.match(/^.*([\n\r]+|$)/gm);
+  lines = lines.filter(
+    (line) => line.indexOf(`getElementById('livereloadscript')`) === -1
+  );
+  return Buffer.from(lines.join("\n"));
+};
+
 const args = process.argv.slice(2);
 if (args.length > 0 && args[0] === "--reset") {
-  fs.rmSync(
-    path.join(require("os").homedir(), ".m2c2-file-uploader-settings.json"),
-    {
-      force: true,
+  let settings = {};
+  try {
+    settings = JSON.parse(
+      fs.readFileSync(
+        path.join(require("os").homedir(), ".m2c2-file-uploader-settings.json"),
+        {
+          encoding: "utf8",
+          flag: "r",
+        }
+      )
+    );
+    if (settings.rootDirectoryPath) {
+      settings.rootDirectoryPathOld = settings.rootDirectoryPath;
+      delete settings.rootDirectoryPath;
     }
-  );
+
+    if (settings.serverUrl) {
+      settings.serverUrlOld = settings.serverUrl;
+      delete settings.serverUrl;
+    }
+
+    if (settings.userPw) {
+      settings.userPwOld = settings.userPw;
+      delete settings.userPw;
+    }
+
+    fs.writeFileSync(
+      path.join(require("os").homedir(), ".m2c2-file-uploader-settings.json"),
+      JSON.stringify(settings)
+    );
+  } catch (e) {
+    fs.rmSync(
+      path.join(require("os").homedir(), ".m2c2-file-uploader-settings.json"),
+      {
+        force: true,
+      }
+    );
+  }
+
+  console.log("upload settings reset.");
   process.exit(0);
 }
 
+const extractUser = (userPw) => {
+  const pos = userPw?.indexOf(":");
+  if (pos === -1 || !pos) {
+    return undefined;
+  }
+  return userPw.slice(0, pos);
+};
+
+const extractPw = (userPw) => {
+  const pos = userPw?.indexOf(":");
+  if (pos === -1 || !pos) {
+    return undefined;
+  }
+  return userPw.slice(pos + 1);
+};
+
+const getSettingsFromUser = (settings) => {
+  if (!settings.rootDirectoryPath) {
+    let returnMsg = "";
+    if (settings.rootDirectoryPathOld) {
+      returnMsg = ` (return for ${settings.rootDirectoryPathOld})`;
+    }
+    let rootDirectoryPath = readlineSync.question(
+      `full upload path on this computer${returnMsg}: `
+    );
+    if (!rootDirectoryPath && settings.rootDirectoryPathOld) {
+      settings.rootDirectoryPath = settings.rootDirectoryPathOld;
+    } else {
+      settings.rootDirectoryPath = rootDirectoryPath;
+    }
+  } else {
+    console.log(`uploading from ${settings.rootDirectoryPath}`);
+  }
+
+  if (!settings.serverUrl) {
+    let returnMsg = "";
+    if (settings.serverUrlOld) {
+      returnMsg = ` (return for ${settings.serverUrlOld})`;
+    }
+    let serverUrl = readlineSync.question(`demo-server url${returnMsg}: `);
+    if (!serverUrl && settings.serverUrlOld) {
+      settings.serverUrl = settings.serverUrlOld;
+    } else {
+      settings.serverUrl = serverUrl;
+    }
+  } else {
+    console.log(`demo-server url is ${settings.serverUrl}`);
+  }
+
+  if (!extractPw(settings.userPw) || !extractUser(settings.userPw)) {
+    let returnMsg = "";
+    if (extractUser(settings.userPwOld)) {
+      returnMsg = ` (return for ${extractUser(settings.userPwOld)})`;
+    }
+    let username = readlineSync.question(`demo-server username${returnMsg}: `);
+    if (!username && extractUser(settings.userPwOld)) {
+      username = extractUser(settings.userPwOld);
+    }
+
+    returnMsg = "";
+    if (extractPw(settings.userPwOld)) {
+      returnMsg = ` (return for ${extractPw(settings.userPwOld)})`;
+    }
+    let pw = readlineSync.question(`demo-server password${returnMsg}: `);
+    if (!pw && extractPw(settings.userPwOld)) {
+      pw = extractPw(settings.userPwOld);
+    }
+    settings.userPw = `${username}:${pw}`;
+  }
+
+  return settings;
+};
+
 let settings = {};
+let askForSettings = false;
 try {
   settings = JSON.parse(
     fs.readFileSync(
@@ -79,16 +199,25 @@ try {
     )
   );
 } catch (e) {
-  const uploadPath = readlineSync.question(
-    "full upload path on this computer: "
-  );
-  const serverUrl = readlineSync.question("demo-server url: ");
-  const username = readlineSync.question("demo-server username: ");
-  const pw = readlineSync.question("demo-server password: ");
+  askForSettings = true;
+}
+
+if (
+  askForSettings ||
+  !settings.rootDirectoryPath ||
+  !settings.serverUrl ||
+  !extractPw(settings.userPw) ||
+  !extractUser(settings.userPw)
+) {
+  settings = getSettingsFromUser(settings);
+  // const uploadPath = readlineSync.question(
+  //   "full upload path on this computer: "
+  // );
+  // const serverUrl = readlineSync.question("demo-server url: ");
   settings = {
-    rootDirectoryPath: uploadPath.replace(/\\/g, "/"),
-    serverUrl: serverUrl.replace(/\/$/, ""), // no trailing slash
-    userPw: username + ":" + pw,
+    rootDirectoryPath: settings.rootDirectoryPath.replace(/\\/g, "/"),
+    serverUrl: settings.serverUrl.replace(/\/$/, ""), // no trailing slash
+    userPw: settings.userPw,
   };
   fs.writeFileSync(
     path.join(require("os").homedir(), ".m2c2-file-uploader-settings.json"),
@@ -115,13 +244,34 @@ try {
   );
 }
 
+const excludedFromUpload = (file) => {
+  const patterns = [
+    "\\.gitignore$",
+    "\\.m2c2-study-code\\.json$",
+    "rollup\\..*config\\.js$",
+    "serve\\.sh$",
+    "\\.*\\.ts$",
+  ];
+  return patterns
+    .map((pattern) => {
+      const regex = new RegExp(pattern);
+      return regex.test(file);
+    })
+    .some((val) => val === true);
+};
+
 const uploadRequests = [];
 getFilenamesRecursive(settings.rootDirectoryPath).then((files) => {
   files = files
-    .filter((file) => path.basename(file) !== ".m2c2-study-code.json")
+    .filter((file) => !excludedFromUpload(file))
     .map((file) => file.replace(/\\/g, "/"));
   files.forEach((file) => {
-    const fileBuffer = fs.readFileSync(file);
+    let fileBuffer = fs.readFileSync(file);
+
+    if (file.endsWith(".js")) {
+      fileBuffer = removeLiveReload(fileBuffer);
+    }
+
     let filename = file;
     if (file.startsWith(settings.rootDirectoryPath)) {
       filename = file.slice(settings.rootDirectoryPath.length);

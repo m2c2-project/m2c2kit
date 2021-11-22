@@ -1,0 +1,27 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "__FOLDER__ Chrome port 3000",
+      "url": "http://localhost:3000",
+      // to prevent CORS errors
+      "runtimeArgs": ["--disable-web-security"],
+      // because we set up a multi-root workspace, we have to modify "webRoot"
+      // from its default configuration of "webRoot": "{workspaceFolder}"
+      // If we use that default configuration, breakpoints won't be set
+      //
+      // for general syntax of launch.json in multi-root workspaces, see
+      // https://code.visualstudio.com/docs/editor/multi-root-workspaces#_workspace-launch-configurations
+      //
+      // for specific use in launching chrome debug and how "webRoot"
+      // needs to be modified, see
+      // https://github.com/microsoft/vscode/issues/103261#issuecomment-664630465
+      "webRoot": "${workspaceFolder:__FOLDER__}"
+    }
+  ]
+}

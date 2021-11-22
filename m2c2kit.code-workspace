@@ -3,27 +3,26 @@
 {
   "folders": [
     {
-      "path": "../examples"
+      "path": "examples"
     },
     {
-      "path": "../lib"
+      "path": "lib"
     },
     {
-      "path": "../tools/file-uploader"
-    },    
-
+      "name": "file-uploader",
+      "path": "tools/file-uploader"
+    },
     {
-      "path": "../tools/demo-server"
-    },    
+      "name": "demo-server",
+      "path": "tools/demo-server"
+    },
     {
-      // include the root folder itself as a root folder so vs code shows the
-      // root package.json scripts
-      "path": "../"
+      "path": "."
     }
   ],
   "settings": {
     "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["examples", "lib"]
+    "jest.disabledWorkspaceFolders": ["examples", "lib", "tools", "file-uploader", "demo-server"]
   },
   "extensions": {
     "recommendations": [

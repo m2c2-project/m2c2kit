@@ -6,6 +6,7 @@
   "scripts": {
     "examples-start": "rollup -c rollup.examples.config.js --watch",
     "build": "rollup -c",
+    "new": "m2c2kit-new.sh",
     "test": "jest",
     "prepare": "husky install"
   },
