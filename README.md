@@ -24,10 +24,10 @@ npm run build
 ### Visual Studio Code
 
 - Open the workspace (`code m2c2kit.code-workspace`)
-- Under **NPM SCRIPTS**, run `examples-start` by clicking the triangle (play) icon. This transpiles the code and starts a local webserver.
+- Under **NPM SCRIPTS**, run `examples-start` by clicking the triangle (play) icon. This transpiles the code and starts a local webserver
 - Wait for `waiting for changes...`
 - Select the debug icon on the left
-- Select "Examples Chrome port 3000" next to **RUN AND DEBUG** and click the triangle (play) icon. This opens Chrome in debug mode.
+- Select "Examples Chrome port 3000" next to **RUN AND DEBUG** and click the triangle (play) icon. This opens Chrome in debug mode
 - VS Code supports interactive debugging and breakpoints
 
 ## Create and run a new task
@@ -46,10 +46,10 @@ The below procedures will run a simple script to set up a starter template. The 
 ### Visual Studio Code
 
 - Open the workspace (`code m2c2kit.code-workspace`)
-- Under **NPM SCRIPTS**, run `new` by clicking the triangle (play) icon. This transpiles the code and starts a local webserver.
+- Under **NPM SCRIPTS**, run `new` by clicking the triangle (play) icon
 - Choose a name (e.g., `task1`) and press return
-- Open a a new terminal in VS Code under the Terminal menu item, and choose the newly created task (e.g, `task1`)
-- `./serve.sh`
+- Under the "Terminal" menu item, select "New Terminal", and choose the folder for the newly created task (e.g, `task1`)
+- Transpile the code and start a local webserver with `./serve.sh`
 - Wait for `waiting for changes...`
 - Select the debug icon on the left
 - Select "task1 Chrome port 3000" next to **RUN AND DEBUG** and click the triangle (play) icon. This opens Chrome in debug mode.
@@ -76,7 +76,7 @@ The above procedures allow cognitive tasks to be developed, run, and debugged lo
 - Under **NPM SCRIPTS**, run `upload` by clicking the triangle (play) icon
 - Enter the full path to the folder (e.g., `/home/scott/github/m2c2kit/task1`)
 - Enter the demo-server URL (currently `https://m2c2-demo-server.azurewebsites.net`)
-- Enter username and password (ask for these secrets
+- Enter username and password (ask for these secrets)
 - If upload is successful, it will tell you the public URL (e.g., `https://m2c2-demo-server.azurewebsites.net/studies/5JADR`)
 - To upload again, click the play icon again for `upload`, and it will use the previously entered information
 - To upload a different folder, first run `upload-reset` to clear saved information
