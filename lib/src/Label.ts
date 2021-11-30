@@ -13,7 +13,7 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
-import { Game } from "./index";
+import { Game } from "./Game";
 import { FontManager } from "./FontManager";
 import { Globals } from "./Globals";
 

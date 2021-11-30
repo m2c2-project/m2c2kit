@@ -7,7 +7,7 @@ import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
-import { Game } from "./index";
+import { Game } from "./Game";
 
 export class Scene extends Entity implements IDrawable {
   readonly type = EntityType.scene;

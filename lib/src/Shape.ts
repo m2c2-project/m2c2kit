@@ -6,7 +6,7 @@ import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
-import { Game } from "./index";
+import { Game } from "./Game";
 import { Rect } from "./Rect";
 import { ShapeType } from "./ShapeType";
 import { Globals } from "./Globals";

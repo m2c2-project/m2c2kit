@@ -1,10 +1,7 @@
-import {
-  Game,
-  Transition,
-  TransitionDirection,
-  WebColors,
-  RandomDraws,
-} from "../../../lib/src";
+import { WebColors } from "../../../lib/src";
+import { Game } from "../../../lib/src/Game";
+import { Transition, TransitionDirection } from "../../../lib/src/Transition";
+import { RandomDraws } from "../../../lib/src/RandomDraws";
 import { Scene } from "../../../lib/src/Scene";
 import { Action } from "../../../lib/src/Action";
 import { Rect } from "../../../lib/src/Rect";

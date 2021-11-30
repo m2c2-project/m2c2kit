@@ -1,5 +1,7 @@
 import { WebColors } from "../../WebColors";
-import { Story, StoryOptions, Transition, TransitionDirection } from "../..";
+import { Transition, TransitionDirection } from "../../Transition";
+import { Story } from "../../Story";
+import { StoryOptions } from "../../StoryOptions";
 import { Scene } from "../../Scene";
 import { Dimensions } from "../../Dimensions";
 import { Label } from "../../Label";

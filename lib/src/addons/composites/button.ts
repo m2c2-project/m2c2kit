@@ -1,6 +1,7 @@
 import { Paint, Canvas } from "canvaskit-wasm";
 import { EntityType } from "../../EntityType";
-import { WebColors, Game } from "../..";
+import { WebColors } from "../..";
+import { Game } from "../../Game";
 import { Rect } from "../../Rect";
 import { Composite } from "../../Composite";
 import { CompositeOptions } from "../../CompositeOptions";
