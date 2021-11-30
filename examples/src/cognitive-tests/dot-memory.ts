@@ -1,12 +1,12 @@
 import {
   Game,
-  Action,
   Transition,
   TransitionDirection,
   Scene,
   WebColors,
   RandomDraws,
 } from "../../../lib/src";
+import { Action } from "../../../lib/src/Action";
 import { Rect } from "../../../lib/src/Rect";
 import { Shape } from "../../../lib/src/Shape";
 import { Label } from "../../../lib/src/Label";
