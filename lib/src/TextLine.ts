@@ -7,7 +7,8 @@ import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
-import { Game, FontManager } from "./index";
+import { FontManager } from "./index";
+import { Globals } from "./Globals";
 
 export class TextLine extends Entity implements IDrawable, IText {
   readonly type = EntityType.textline;
@@ -83,27 +84,27 @@ export class TextLine extends Entity implements IDrawable, IText {
   }
 
   override initialize(): void {
-    this.paint = new Game._canvasKit.Paint();
+    this.paint = new Globals.canvasKit.Paint();
     this.paint.setColor(
-      Game._canvasKit.Color(
+      Globals.canvasKit.Color(
         this.fontColor[0],
         this.fontColor[1],
         this.fontColor[2],
         this.fontColor[3]
       )
     );
-    this.paint.setStyle(Game._canvasKit.PaintStyle.Fill);
+    this.paint.setStyle(Globals.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
 
     if (this.fontName) {
-      this.font = new Game._canvasKit.Font(
+      this.font = new Globals.canvasKit.Font(
         FontManager._getTypeface(this.fontName),
-        this.fontSize * Game._canvasScale
+        this.fontSize * Globals.canvasScale
       );
     } else {
-      this.font = new Game._canvasKit.Font(
+      this.font = new Globals.canvasKit.Font(
         null,
-        this.fontSize * Game._canvasScale
+        this.fontSize * Globals.canvasScale
       );
     }
   }
@@ -111,7 +112,7 @@ export class TextLine extends Entity implements IDrawable, IText {
   draw(canvas: Canvas): void {
     if (this.parent && this.text) {
       canvas.save();
-      const drawScale = Game._canvasScale / this.absoluteScale;
+      const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
 
       const x = this.absolutePosition.x * drawScale;

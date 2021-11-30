@@ -1,3 +1,4 @@
+import { Globals } from "./Globals";
 import { CanvasKitInit } from "./canvaskit";
 import { ttfInfo } from "./ttfInfo.js";
 import {
@@ -102,14 +103,6 @@ interface LifecycleCallbacks {
 }
 
 export class Game {
-  public static _canvasKit: CanvasKit;
-  public static _now = NaN;
-  public static _deltaTime = NaN;
-  public static _canvasScale: number;
-  // _rootScale is the scaling factor to be applied to scenes to scale up or
-  // down to fit the device's window while preserving the aspect ratio the
-  // game was designed for
-  public _rootScale = 1.0;
   public entryScene?: Scene | string;
   // use "any" type for game parameters because these will be specific to each
   // game and could be anything; we can't type it now
@@ -210,7 +203,7 @@ export class Game {
       Promise.all(fontDataPromises),
       Promise.all(renderedSvgImagesPromises),
     ]).then(([canvasKit, fontData, renderedSvgImages]) => {
-      Game._canvasKit = canvasKit;
+      Globals.canvasKit = canvasKit;
       this.loadFonts(gameInitOptions.fontUrls, fontData);
       ImageManager.LoadRenderedSvgImages(renderedSvgImages);
       this.setupCanvasKitSurface();
@@ -440,7 +433,7 @@ export class Game {
     height: number,
     stretch: boolean | undefined
   ): void {
-    Game._canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
+    Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
 
     let htmlCanvas: HTMLCanvasElement | undefined;
     if (canvasId === undefined) {
@@ -467,16 +460,16 @@ export class Game {
       const actualAspectRatio = window.innerHeight / window.innerWidth;
 
       if (actualAspectRatio < requestedAspectRatio) {
-        this._rootScale = window.innerHeight / height;
+        Globals.rootScale = window.innerHeight / height;
       } else {
-        this._rootScale = window.innerWidth / width;
+        Globals.rootScale = window.innerWidth / width;
       }
     }
 
-    htmlCanvas.style.width = this._rootScale * width + "px";
-    htmlCanvas.style.height = this._rootScale * height + "px";
-    htmlCanvas.width = this._rootScale * width * Game._canvasScale;
-    htmlCanvas.height = this._rootScale * height * Game._canvasScale;
+    htmlCanvas.style.width = Globals.rootScale * width + "px";
+    htmlCanvas.style.height = Globals.rootScale * height + "px";
+    htmlCanvas.width = Globals.rootScale * width * Globals.canvasScale;
+    htmlCanvas.height = Globals.rootScale * height * Globals.canvasScale;
     this.htmlCanvas = htmlCanvas;
     this.canvasCssWidth = width;
     this.canvasCssHeight = height;
@@ -537,7 +530,7 @@ export class Game {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
-    const surface = Game._canvasKit.MakeCanvasSurface(this.htmlCanvas);
+    const surface = Globals.canvasKit.MakeCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
         `could not make CanvasKit surface from canvas HTML element`
@@ -549,17 +542,17 @@ export class Game {
         this.surface.reportBackendTypeIsGPU() ? "GPU" : "CPU"
       }`
     );
-    this.surface.getCanvas().scale(Game._canvasScale, Game._canvasScale);
+    this.surface.getCanvas().scale(Globals.canvasScale, Globals.canvasScale);
   }
 
   private setupFpsFont(): void {
-    this.fpsTextFont = new Game._canvasKit.Font(
+    this.fpsTextFont = new Globals.canvasKit.Font(
       null,
-      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Game._canvasScale
+      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale
     );
-    this.fpsTextPaint = new Game._canvasKit.Paint();
+    this.fpsTextPaint = new Globals.canvasKit.Paint();
     this.fpsTextPaint.setColor(
-      Game._canvasKit.Color(
+      Globals.canvasKit.Color(
         Constants.FPS_DISPLAY_TEXT_COLOR[0],
         Constants.FPS_DISPLAY_TEXT_COLOR[1],
         Constants.FPS_DISPLAY_TEXT_COLOR[2],
@@ -612,17 +605,17 @@ export class Game {
       }
     }
 
-    this.priorUpdateTime = Game._now;
+    this.priorUpdateTime = Globals.now;
     // @ts-ignore (because CanvasKit types are incomplete)
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
   private updateGameTime(): void {
-    Game._now = window.performance.now();
+    Globals.now = window.performance.now();
     if (this.priorUpdateTime) {
-      Game._deltaTime = Game._now - this.priorUpdateTime;
+      Globals.deltaTime = Globals.now - this.priorUpdateTime;
     } else {
-      Game._deltaTime = 0;
+      Globals.deltaTime = 0;
     }
   }
 
@@ -669,11 +662,11 @@ export class Game {
           name: "outgoingSceneSprite",
           imageName: "outgoingSceneSnapshot",
           position: new Point(
-            this.canvasCssWidth / this._rootScale / 2,
-            this.canvasCssHeight / this._rootScale / 2
+            this.canvasCssWidth / Globals.rootScale / 2,
+            this.canvasCssHeight / Globals.rootScale / 2
           ),
         });
-        spr.scale = 1 / this._rootScale;
+        spr.scale = 1 / Globals.rootScale;
         outgoingScene.addChild(spr);
         outgoingScene._active = true;
         if (incomingScene !== this.currentScene && this.currentScene) {
@@ -907,18 +900,20 @@ export class Game {
 
   private drawFps(canvas: Canvas): void {
     if (this.lastFpsUpdate === 0) {
-      this.lastFpsUpdate = Game._now;
-      this.nextFpsUpdate = Game._now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+      this.lastFpsUpdate = Globals.now;
+      this.nextFpsUpdate = Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
     } else {
-      if (Game._now >= this.nextFpsUpdate) {
-        this.fps = this.drawnFrames / ((Game._now - this.lastFpsUpdate) / 1000);
+      if (Globals.now >= this.nextFpsUpdate) {
+        this.fps =
+          this.drawnFrames / ((Globals.now - this.lastFpsUpdate) / 1000);
         this.drawnFrames = 0;
-        this.lastFpsUpdate = Game._now;
-        this.nextFpsUpdate = Game._now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+        this.lastFpsUpdate = Globals.now;
+        this.nextFpsUpdate =
+          Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
       }
 
       canvas.save();
-      const drawScale = Game._canvasScale;
+      const drawScale = Globals.canvasScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
       canvas.drawText(
         "FPS: " + this.fps.toFixed(2),
@@ -1204,7 +1199,7 @@ export class ImageManager {
   ): void {
     let img: Image | null = null;
     try {
-      img = Game._canvasKit.MakeImageFromEncoded(
+      img = Globals.canvasKit.MakeImageFromEncoded(
         dataURLtoArrayBuffer(loadedDataUrlImage.dataUrlImage)
       );
     } catch {
@@ -1258,7 +1253,7 @@ export class FontManager {
   }
 
   static LoadFonts(fonts: Array<ArrayBuffer>): void {
-    this._fontMgr = Game._canvasKit.FontMgr.FromData(...fonts) ?? undefined;
+    this._fontMgr = Globals.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
     if (this._fontMgr === undefined) {
       throw new Error("error loading fonts");
     }
@@ -1364,17 +1359,17 @@ export class Scene extends Entity implements IDrawable {
   }
 
   override initialize(): void {
-    this.scale = this.game._rootScale;
-    this.backgroundPaint = new Game._canvasKit.Paint();
+    this.scale = Globals.rootScale;
+    this.backgroundPaint = new Globals.canvasKit.Paint();
     this.backgroundPaint.setColor(
-      Game._canvasKit.Color(
+      Globals.canvasKit.Color(
         this.backgroundColor[0],
         this.backgroundColor[1],
         this.backgroundColor[2],
         this.backgroundColor[3]
       )
     );
-    this.backgroundPaint.setStyle(Game._canvasKit.PaintStyle.Fill);
+    this.backgroundPaint.setStyle(Globals.canvasKit.PaintStyle.Fill);
   }
 
   set game(game: Game) {
@@ -1410,14 +1405,14 @@ export class Scene extends Entity implements IDrawable {
     // Except for its children, a scene itself only draws a background rectangle to "clear" the screen
     // Due to transition animations, this background rectangle may be beyond the viewable canvas bounds
     canvas.save();
-    const drawScale = Game._canvasScale / this.absoluteScale;
+    const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
-    const rr = Game._canvasKit.RRectXY(
-      Game._canvasKit.LTRBRect(
-        this.position.x * drawScale * this.game._rootScale,
-        this.position.y * drawScale * this.game._rootScale,
-        (this.position.x + this.size.width) * drawScale * this.game._rootScale,
-        (this.position.y + this.size.height) * drawScale * this.game._rootScale
+    const rr = Globals.canvasKit.RRectXY(
+      Globals.canvasKit.LTRBRect(
+        this.position.x * drawScale * Globals.rootScale,
+        this.position.y * drawScale * Globals.rootScale,
+        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
+        (this.position.y + this.size.height) * drawScale * Globals.rootScale
       ),
       0,
       0

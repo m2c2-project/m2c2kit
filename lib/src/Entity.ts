@@ -2,7 +2,7 @@ import { Canvas } from "canvaskit-wasm";
 import { TapEvent, TapListener } from "./TapListener";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
-import { Scene, Game } from ".";
+import { Scene } from ".";
 import { Action } from "./Action";
 import { Layout } from "./Layout";
 import { ConstraintType } from "./ConstraintType";
@@ -14,6 +14,7 @@ import { Size } from "./Size";
 import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
+import { Globals } from "./Globals";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -444,22 +445,22 @@ export abstract class Entity {
       uncompletedTransitionActions.forEach((action) => {
         if (action.runStartTime === -1) {
           // if there are any and they have not started yet, set their run time to now
-          action.runStartTime = Game._now;
+          action.runStartTime = Globals.now;
         }
       });
       uncompletedTransitionActions.forEach((action) =>
-        Action.evaluateAction(action, this, Game._now, Game._deltaTime)
+        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime)
       );
     } else if (uncompletedRegularActions.length > 0) {
       // Now that we've completed at the actions that run during a transition,
       // we can set the start time for any uncompleted regular actions
       uncompletedRegularActions.forEach((action) => {
         if (action.runStartTime === -1) {
-          action.runStartTime = Game._now;
+          action.runStartTime = Globals.now;
         }
       });
       uncompletedRegularActions.forEach((action) =>
-        Action.evaluateAction(action, this, Game._now, Game._deltaTime)
+        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime)
       );
     }
 

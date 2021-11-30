@@ -4,7 +4,8 @@ import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
-import { LoadedImage, ImageManager, Game } from "./index";
+import { LoadedImage, ImageManager } from "./index";
+import { Globals } from "./Globals";
 
 export class Sprite extends Entity implements IDrawable {
   readonly type = EntityType.sprite;
@@ -57,7 +58,7 @@ export class Sprite extends Entity implements IDrawable {
     if (!this.hidden) {
       if (this.loadedImage) {
         canvas.save();
-        const drawScale = Game._canvasScale / this.absoluteScale;
+        const drawScale = Globals.canvasScale / this.absoluteScale;
         canvas.scale(1 / drawScale, 1 / drawScale);
 
         const x =

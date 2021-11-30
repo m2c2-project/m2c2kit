@@ -9,6 +9,7 @@ import { ShapeOptions } from "./ShapeOptions";
 import { Game } from "./index";
 import { Rect } from "./Rect";
 import { ShapeType } from "./ShapeType";
+import { Globals } from "./Globals";
 
 export class Shape extends Entity implements IDrawable {
   readonly type = EntityType.shape;
@@ -86,7 +87,7 @@ export class Shape extends Entity implements IDrawable {
 
   override initialize(): void {
     if (this.fillColor) {
-      const canvasKit = Game._canvasKit;
+      const canvasKit = Globals.canvasKit;
       this.fillColorPaint = new canvasKit.Paint();
       this.fillColorPaint.setColor(
         canvasKit.Color(
@@ -101,7 +102,7 @@ export class Shape extends Entity implements IDrawable {
     }
 
     if (this.strokeColor) {
-      const canvasKit = Game._canvasKit;
+      const canvasKit = Globals.canvasKit;
       this.strokeColorPaint = new canvasKit.Paint();
       this.strokeColorPaint.setColor(
         canvasKit.Color(
@@ -138,10 +139,10 @@ export class Shape extends Entity implements IDrawable {
 
   draw(canvas: Canvas): void {
     canvas.save();
-    const drawScale = Game._canvasScale / this.absoluteScale;
+    const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
 
-    const canvasKit = Game._canvasKit;
+    const canvasKit = Globals.canvasKit;
 
     if (
       this.shapeType === ShapeType.circle &&

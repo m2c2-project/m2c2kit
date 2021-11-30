@@ -14,6 +14,7 @@ import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 import { Game, FontManager } from "./index";
+import { Globals } from "./Globals";
 
 export class Label extends Entity implements IDrawable, IText {
   readonly type = EntityType.label;
@@ -58,30 +59,30 @@ export class Label extends Entity implements IDrawable, IText {
   }
 
   override initialize(): void {
-    let ckTextAlign: EmbindEnumEntity = Game._canvasKit.TextAlign.Center;
+    let ckTextAlign: EmbindEnumEntity = Globals.canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
       case LabelHorizontalAlignmentMode.center:
-        ckTextAlign = Game._canvasKit.TextAlign.Center;
+        ckTextAlign = Globals.canvasKit.TextAlign.Center;
         break;
       case LabelHorizontalAlignmentMode.left:
-        ckTextAlign = Game._canvasKit.TextAlign.Left;
+        ckTextAlign = Globals.canvasKit.TextAlign.Left;
         break;
       case LabelHorizontalAlignmentMode.right:
-        ckTextAlign = Game._canvasKit.TextAlign.Right;
+        ckTextAlign = Globals.canvasKit.TextAlign.Right;
         break;
       default:
         throw new Error("unknown horizontalAlignmentMode");
     }
 
-    this.paraStyle = new Game._canvasKit.ParagraphStyle({
+    this.paraStyle = new Globals.canvasKit.ParagraphStyle({
       textStyle: {
-        color: Game._canvasKit.Color(
+        color: Globals.canvasKit.Color(
           this.fontColor[0],
           this.fontColor[1],
           this.fontColor[2],
           this.fontColor[3]
         ),
-        fontSize: this.fontSize * Game._canvasScale,
+        fontSize: this.fontSize * Globals.canvasScale,
       },
       textAlign: ckTextAlign,
     });
@@ -96,7 +97,7 @@ export class Label extends Entity implements IDrawable, IText {
       throw new Error("no fonts loaded");
     }
 
-    const builder = Game._canvasKit.ParagraphBuilder.Make(
+    const builder = Globals.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
       FontManager._fontMgr
     );
@@ -125,9 +126,9 @@ export class Label extends Entity implements IDrawable, IText {
       calculatedWidth = this.parent.size.width - (marginStart + marginEnd);
     }
 
-    this.paragraph.layout(calculatedWidth * Game._canvasScale);
+    this.paragraph.layout(calculatedWidth * Globals.canvasScale);
     this.size.width = calculatedWidth;
-    this.size.height = this.paragraph.getHeight() / Game._canvasScale;
+    this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
   }
 
   get text(): string {
@@ -195,7 +196,7 @@ export class Label extends Entity implements IDrawable, IText {
   draw(canvas: Canvas): void {
     if (this.parent && this.text !== "") {
       canvas.save();
-      const drawScale = Game._canvasScale / this.absoluteScale;
+      const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
 
       const x =

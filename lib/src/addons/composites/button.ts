@@ -10,6 +10,7 @@ import { TextOptions } from "../../TextOptions";
 import { IText } from "../../IText";
 import { RgbaColor } from "../../RgbaColor";
 import { Size } from "../../Size";
+import { Globals } from "../../Globals";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
   size?: Size;
@@ -57,16 +58,16 @@ export class Button extends Composite implements IText {
   override initialize(): void {
     this.removeAllChildren();
 
-    this.backgroundPaint = new Game._canvasKit.Paint();
+    this.backgroundPaint = new Globals.canvasKit.Paint();
     this.backgroundPaint.setColor(
-      Game._canvasKit.Color(
+      Globals.canvasKit.Color(
         this.backgroundColor[0],
         this.backgroundColor[1],
         this.backgroundColor[2],
         this.backgroundColor[3]
       )
     );
-    this.backgroundPaint.setStyle(Game._canvasKit.PaintStyle.Fill);
+    this.backgroundPaint.setStyle(Globals.canvasKit.PaintStyle.Fill);
 
     const buttonRectangle = new Shape({
       rect: new Rect({ size: this.size }),
