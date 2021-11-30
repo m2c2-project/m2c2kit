@@ -111,7 +111,8 @@ export class Label extends Entity implements IDrawable, IText {
     }
     this.paragraph = builder.build();
     const preferredWidth =
-      this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
+      //this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
+      this.preferredMaxLayoutWidth ?? Globals.canvasCssWidth;
 
     let calculatedWidth = preferredWidth;
     if (preferredWidth === 0 || this.layout.width === 0) {

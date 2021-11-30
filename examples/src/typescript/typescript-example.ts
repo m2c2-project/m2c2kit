@@ -1,11 +1,11 @@
 // for typescript, import the module without .js extension
 import {
   Game,
-  Scene,
   WebColors,
   Transition,
   TransitionDirection,
 } from "../../../lib/src";
+import { Scene } from "../../../lib/src/Scene";
 import { Action } from "../../../lib/src/Action";
 import { Rect } from "../../../lib/src/Rect";
 import { Shape } from "../../../lib/src/Shape";

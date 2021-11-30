@@ -9,4 +9,6 @@ export class Globals {
   // down to fit the device's window while preserving the aspect ratio the
   // game was designed for
   public static rootScale = 1.0;
+  public static canvasCssWidth = NaN;
+  public static canvasCssHeight = NaN;
 }

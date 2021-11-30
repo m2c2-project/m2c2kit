@@ -1,11 +1,6 @@
 import { WebColors } from "../../WebColors";
-import {
-  Scene,
-  Story,
-  StoryOptions,
-  Transition,
-  TransitionDirection,
-} from "../..";
+import { Story, StoryOptions, Transition, TransitionDirection } from "../..";
+import { Scene } from "../../Scene";
 import { Dimensions } from "../../Dimensions";
 import { Label } from "../../Label";
 import { LabelHorizontalAlignmentMode } from "../../LabelHorizontalAlignmentMode";
