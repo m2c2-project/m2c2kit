@@ -4,7 +4,8 @@ import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
-import { LoadedImage, ImageManager } from "./index";
+import { ImageManager } from "./ImageManager";
+import { LoadedImage } from "./LoadedImage";
 import { Globals } from "./Globals";
 
 export class Sprite extends Entity implements IDrawable {

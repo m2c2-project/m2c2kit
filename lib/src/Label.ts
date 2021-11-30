@@ -13,7 +13,8 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
-import { Game, FontManager } from "./index";
+import { Game } from "./index";
+import { FontManager } from "./FontManager";
 import { Globals } from "./Globals";
 
 export class Label extends Entity implements IDrawable, IText {

@@ -1,16 +1,6 @@
 import { Globals } from "./Globals";
 import { CanvasKitInit } from "./canvaskit";
-import { ttfInfo } from "./ttfInfo.js";
-import {
-  CanvasKit,
-  Canvas,
-  Surface,
-  Font,
-  FontMgr,
-  Typeface,
-  Image,
-  Paint,
-} from "canvaskit-wasm";
+import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { TapEvent } from "./TapListener";
 import { IDrawable } from "./IDrawable";
@@ -21,6 +11,12 @@ import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Sprite } from "./Sprite";
 import { Action } from "./Action";
+import { FontData } from "./FontData";
+import { FontManager } from "./FontManager";
+import { LoadedImage } from "./LoadedImage";
+import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
+import { ImageManager } from "./ImageManager";
+import { SvgImage } from "./SvgImage";
 
 export { WebColors } from "./WebColors";
 
@@ -50,27 +46,6 @@ export interface GameInitOptions {
   bodyBackgroundColor?: RgbaColor;
   /** Adapt execution for unit testing? Default is false */
   _unitTesting?: boolean;
-}
-
-/**
- * SVG image to be rendered and loaded from a URL or HTML svg tag in string form.
- */
-export interface SvgImage {
-  /** Name that will be used to refer to the SVG image. Must be unique among all images */
-  name: string;
-  /** Width to scale SVG image to */
-  width: number;
-  /** Height to scale SVG image to */
-  height: number;
-  /** The HTML SVG tag, in string form, that will be rendered and loaded. Must begin with &#60;svg> and end with &#60;/svg> */
-  svgString?: string;
-  /** URL of SVG asset to render and load */
-  url?: string;
-}
-
-interface FontData {
-  fontUrl: string;
-  fontArrayBuffer: ArrayBuffer;
 }
 
 interface BoundingBox {
@@ -1120,176 +1095,6 @@ export class Game {
   //#endregion User Interaction
 }
 
-export class ImageManager {
-  // scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render SVGs.
-  private static scratchCanvas: HTMLCanvasElement;
-  private static ctx: CanvasRenderingContext2D;
-  private static scale: number;
-  static _renderedDataUrlImages: Record<string, RenderedDataUrlImage> = {};
-  static _loadedImages: Record<string, LoadedImage> = {};
-
-  static initialize(scratchCanvas: HTMLCanvasElement): void {
-    this.scratchCanvas = scratchCanvas;
-    const context2d = ImageManager.scratchCanvas.getContext("2d");
-    if (context2d === null) {
-      throw new Error("could not get 2d canvas context from scratch canvas");
-    }
-    this.ctx = context2d;
-    this.scale = window.devicePixelRatio;
-  }
-
-  static renderSvgImage(svgImage: SvgImage): Promise<RenderedDataUrlImage> {
-    const image = document.createElement("img");
-    return new Promise((resolve) => {
-      image.width = svgImage.width;
-      image.height = svgImage.height;
-      image.onload = () => {
-        ImageManager.scratchCanvas.width = svgImage.width * ImageManager.scale;
-        ImageManager.scratchCanvas.height =
-          svgImage.height * ImageManager.scale;
-        ImageManager.ctx.scale(ImageManager.scale, ImageManager.scale);
-        ImageManager.ctx.clearRect(0, 0, svgImage.width, svgImage.height);
-        ImageManager.ctx.drawImage(
-          image,
-          0,
-          0,
-          svgImage.width,
-          svgImage.height
-        );
-        const dataUrl = ImageManager.scratchCanvas.toDataURL();
-        this._renderedDataUrlImages[svgImage.name] = new RenderedDataUrlImage(
-          svgImage.name,
-          dataUrl,
-          svgImage.width,
-          svgImage.height
-        );
-        image.remove();
-        resolve(this._renderedDataUrlImages[svgImage.name]);
-      };
-      image.onerror = () => {
-        this._renderedDataUrlImages[svgImage.name] = new RenderedDataUrlImage(
-          svgImage.name,
-          "",
-          0,
-          0
-        );
-        resolve(this._renderedDataUrlImages[svgImage.name]);
-      };
-
-      if (svgImage.svgString && svgImage.url) {
-        throw new Error("provide svg string or url. both were provided");
-      }
-      if (svgImage.svgString) {
-        image.src =
-          "data:image/svg+xml," + encodeURIComponent(svgImage.svgString);
-      } else if (svgImage.url) {
-        image.src = svgImage.url;
-      } else {
-        throw new Error("no svg string or url provided");
-      }
-    });
-  }
-
-  static LoadRenderedSvgImages(urls: RenderedDataUrlImage[]): void {
-    urls.forEach((url) => ImageManager.convertRenderedDataUrlImage(url));
-  }
-
-  private static convertRenderedDataUrlImage(
-    loadedDataUrlImage: RenderedDataUrlImage
-  ): void {
-    let img: Image | null = null;
-    try {
-      img = Globals.canvasKit.MakeImageFromEncoded(
-        dataURLtoArrayBuffer(loadedDataUrlImage.dataUrlImage)
-      );
-    } catch {
-      throw new Error(
-        `could not create image with name "${loadedDataUrlImage.name}"`
-      );
-    }
-    if (img === null) {
-      throw new Error(
-        `could not create image with name "${loadedDataUrlImage.name}"`
-      );
-    }
-    const loadedImage = new LoadedImage(
-      loadedDataUrlImage.name,
-      img,
-      loadedDataUrlImage.width,
-      loadedDataUrlImage.height
-    );
-    if (Object.keys(ImageManager._loadedImages).includes("name")) {
-      throw new Error(
-        `an image with name ${loadedDataUrlImage.name} was already loaded`
-      );
-    }
-    ImageManager._loadedImages[loadedDataUrlImage.name] = loadedImage;
-    console.log(
-      `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`
-    );
-  }
-}
-
-export class FontManager {
-  static _fontMgr?: FontMgr;
-  private static _typefaces: Record<string, Typeface> = {};
-
-  static _getTypeface(name: string): Typeface {
-    return this._typefaces[name];
-  }
-
-  static FetchFontsAsArrayBuffers(
-    fontUrls: Array<string>
-  ): Promise<FontData>[] {
-    const fetchFontsPromises = fontUrls.map((fontUrl) =>
-      fetch(fontUrl)
-        .then((response) => response.arrayBuffer())
-        .then((arrayBuffer) => ({
-          fontUrl: fontUrl,
-          fontArrayBuffer: arrayBuffer,
-        }))
-    );
-    return fetchFontsPromises;
-  }
-
-  static LoadFonts(fonts: Array<ArrayBuffer>): void {
-    this._fontMgr = Globals.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
-    if (this._fontMgr === undefined) {
-      throw new Error("error loading fonts");
-    }
-    fonts.forEach((font) => {
-      const result = ttfInfo(new DataView(font));
-      const fontFamily = result.meta.property
-        .filter((p: { name: string; text: string }) => p.name === "font-family")
-        .find(Boolean)?.text;
-      if (fontFamily === undefined || this._fontMgr === undefined) {
-        throw new Error("error loading fonts");
-      }
-      console.log("font loaded. font family: " + fontFamily);
-      const typeface = this._fontMgr.MakeTypefaceFromData(font);
-      this._typefaces[fontFamily] = typeface;
-    });
-  }
-}
-
-export class LoadedImage {
-  constructor(
-    public name: string,
-    public image: Image,
-    public width: number,
-    public height: number
-  ) {}
-}
-
-class RenderedDataUrlImage {
-  constructor(
-    public name: string,
-    public dataUrlImage: string,
-    public width: number,
-    public height: number
-  ) {}
-}
-
 class SceneTransition {
   constructor(public scene: Scene, public transition?: Transition) {}
 }
@@ -1589,14 +1394,3 @@ export class RandomDraws {
 }
 
 //#endregion Core classes ------------------------------------------------------------
-
-const dataURLtoArrayBuffer = (dataUrl: string): ArrayBuffer => {
-  const arr = dataUrl.split(",");
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return u8arr.buffer;
-};

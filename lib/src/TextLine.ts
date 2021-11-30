@@ -7,7 +7,7 @@ import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
-import { FontManager } from "./index";
+import { FontManager } from "./FontManager";
 import { Globals } from "./Globals";
 
 export class TextLine extends Entity implements IDrawable, IText {
