@@ -7,7 +7,7 @@ import {
   Transition,
   TransitionDirection,
 } from "../../../lib/src";
-import { Rect } from "../../../lib/Rect";
+import { Rect } from "../../../lib/src/Rect";
 import { Shape } from "../../../lib/src/Shape";
 import { Label } from "../../../lib/src/Label";
 import { LabelHorizontalAlignmentMode } from "../../../lib/src/LabelHorizontalAlignmentMode";

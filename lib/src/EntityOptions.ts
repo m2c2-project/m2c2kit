@@ -1,4 +1,4 @@
-import { Layout } from ".";
+import { Layout } from "./Layout";
 import { Point } from "./Point";
 
 export interface EntityOptions {

@@ -2,17 +2,11 @@ import { Canvas } from "canvaskit-wasm";
 import { TapEvent, TapListener } from "./TapListener";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
-import {
-  Layout,
-  Action,
-  generateUUID,
-  Constraints,
-  LayoutConstraint,
-  ConstraintType,
-  Scene,
-  Game,
-  findTopologicalSort,
-} from ".";
+import { Action, Scene, Game } from ".";
+import { Layout } from "./Layout";
+import { ConstraintType } from "./ConstraintType";
+import { LayoutConstraint } from "./LayoutConstraint";
+import { Constraints } from "./Constraints";
 import { TextOptions } from "./TextOptions";
 import { IText } from "./IText";
 import { Size } from "./Size";
@@ -81,7 +75,7 @@ export abstract class Entity {
   queuedAction?: Action;
   originalActions = new Array<Action>();
   tapListeners = new Array<TapListener>();
-  uuid = generateUUID();
+  uuid = this.generateUUID();
   needsInitialization = true;
   // library users might put anything in userData property
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -556,7 +550,7 @@ export abstract class Entity {
       );
     });
 
-    const sortedUuids = findTopologicalSort(adjList);
+    const sortedUuids = this.findTopologicalSort(adjList);
     if (sortedUuids.length > 0) {
       const uuidsInUpdateOrder = sortedUuids.reverse();
       const childrenInUpdateOrder = new Array<Entity>();
@@ -759,5 +753,85 @@ export abstract class Entity {
       return this.parent.parentScene;
     }
     throw new Error(`Entity ${this} has not been added to a scene`);
+  }
+
+  // https://stackoverflow.com/a/8809472
+  private generateUUID(): string {
+    let d = new Date().getTime(),
+      d2 = (performance && performance.now && performance.now() * 1000) || 0;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      let r = Math.random() * 16;
+      if (d > 0) {
+        r = (d + r) % 16 | 0;
+        d = Math.floor(d / 16);
+      } else {
+        r = (d2 + r) % 16 | 0;
+        d2 = Math.floor(d2 / 16);
+      }
+      return (c == "x" ? r : (r & 0x7) | 0x8).toString(16);
+    });
+  }
+
+  // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95
+  /**
+   * For a given directed acyclic graph, topological ordering of the vertices will be identified using BFS
+   * @param adjList Adjacency List that represent a graph with vertices and edges
+   */
+  private findTopologicalSort(adjList: Map<string, string[]>): string[] {
+    const tSort: string[] = [];
+    const inDegree: Map<string, number> = new Map();
+
+    // find in-degree for each vertex
+    adjList.forEach((edges, vertex) => {
+      // If vertex is not in the map, add it to the inDegree map
+      if (!inDegree.has(vertex)) {
+        inDegree.set(vertex, 0);
+      }
+
+      edges.forEach((edge) => {
+        // Increase the inDegree for each edge
+        if (inDegree.has(edge)) {
+          inDegree.set(edge, inDegree.get(edge)! + 1);
+        } else {
+          inDegree.set(edge, 1);
+        }
+      });
+    });
+
+    // Queue for holding vertices that has 0 inDegree Value
+    const queue: string[] = [];
+    inDegree.forEach((degree, vertex) => {
+      // Add vertices with inDegree 0 to the queue
+      if (degree == 0) {
+        queue.push(vertex);
+      }
+    });
+
+    // Traverse through the leaf vertices
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === undefined) {
+        throw "bad";
+      }
+      tSort.push(current);
+      // Mark the current vertex as visited and decrease the inDegree for the edges of the vertex
+      // Imagine we are deleting this current vertex from our graph
+      if (adjList.has(current)) {
+        adjList.get(current)?.forEach((edge) => {
+          if (inDegree.has(edge) && inDegree.get(edge)! > 0) {
+            // Decrease the inDegree for the adjacent vertex
+            const newDegree = inDegree.get(edge)! - 1;
+            inDegree.set(edge, newDegree);
+
+            // if inDegree becomes zero, we found new leaf node.
+            // Add to the queue to traverse through its edges
+            if (newDegree == 0) {
+              queue.push(edge);
+            }
+          }
+        });
+      }
+    }
+    return tSort;
   }
 }
