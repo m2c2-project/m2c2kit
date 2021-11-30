@@ -1,14 +1,14 @@
 import { WebColors } from "../../WebColors";
 import {
-  Label,
   Scene,
-  LabelHorizontalAlignmentMode,
   Dimensions,
   Story,
   StoryOptions,
   Transition,
   TransitionDirection,
 } from "../..";
+import { Label } from "../../Label";
+import { LabelHorizontalAlignmentMode } from "../../LabelHorizontalAlignmentMode";
 import { Sprite } from "../../Sprite";
 import { Button } from "../../addons/composites/button";
 import { RgbaColor } from "../../RgbaColor";

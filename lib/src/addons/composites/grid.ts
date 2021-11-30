@@ -1,10 +1,14 @@
 import { Canvas } from "canvaskit-wasm";
-import { Composite, CompositeOptions, Rect, Shape, WebColors } from "../..";
+import { WebColors } from "../..";
+import { Rect } from "../../Rect";
+import { Composite } from "../../Composite";
+import { CompositeOptions } from "../../CompositeOptions";
 import { RgbaColor } from "../../RgbaColor";
 import { Size } from "../../Size";
 import { Point } from "../../Point";
-import { EntityType } from "../../EntityType";
 import { Entity } from "../../Entity";
+import { Shape } from "../../Shape";
+import { EntityType } from "../../EntityType";
 export interface GridOptions extends CompositeOptions {
   rows: number;
   columns: number;

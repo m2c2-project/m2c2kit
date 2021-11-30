@@ -4,13 +4,13 @@ import {
   Transition,
   TransitionDirection,
   Scene,
-  Shape,
-  Label,
   WebColors,
-  Rect,
   RandomDraws,
-  LabelHorizontalAlignmentMode,
 } from "../../../lib/src";
+import { Rect } from "../../../lib/src/Rect";
+import { Shape } from "../../../lib/src/Shape";
+import { Label } from "../../../lib/src/Label";
+import { LabelHorizontalAlignmentMode } from "../../../lib/src/LabelHorizontalAlignmentMode";
 import { Size } from "../../../lib/src/Size";
 import { Point } from "../../../lib/src/Point";
 import { Button, Grid } from "../../../lib/src/addons/composites";

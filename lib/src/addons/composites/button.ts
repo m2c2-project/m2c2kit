@@ -1,14 +1,11 @@
 import { Paint, Canvas } from "canvaskit-wasm";
 import { EntityType } from "../../EntityType";
-import {
-  CompositeOptions,
-  WebColors,
-  Composite,
-  Game,
-  Shape,
-  Rect,
-  Label,
-} from "../..";
+import { WebColors, Game } from "../..";
+import { Rect } from "../../Rect";
+import { Composite } from "../../Composite";
+import { CompositeOptions } from "../../CompositeOptions";
+import { Shape } from "../../Shape";
+import { Label } from "../../Label";
 import { TextOptions } from "../../TextOptions";
 import { IText } from "../../IText";
 import { RgbaColor } from "../../RgbaColor";

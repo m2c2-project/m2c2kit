@@ -2,7 +2,7 @@ import { DrawableOptions } from "./DrawableOptions";
 import { EntityOptions } from "./EntityOptions";
 import { RgbaColor } from "./RgbaColor";
 import { TextOptions } from "./TextOptions";
-import { LabelHorizontalAlignmentMode } from ".";
+import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 
 export interface LabelOptions
   extends EntityOptions,

@@ -3,14 +3,14 @@ import {
   Game,
   Action,
   Scene,
-  Shape,
-  Label,
   WebColors,
-  Rect,
-  LabelHorizontalAlignmentMode,
   Transition,
   TransitionDirection,
 } from "../../../lib/src";
+import { Rect } from "../../../lib/Rect";
+import { Shape } from "../../../lib/src/Shape";
+import { Label } from "../../../lib/src/Label";
+import { LabelHorizontalAlignmentMode } from "../../../lib/src/LabelHorizontalAlignmentMode";
 import { Sprite } from "../../../lib/src/Sprite";
 import { Size } from "../../../lib/src/Size";
 import { Point } from "../../../lib/src/Point";

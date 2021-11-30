@@ -12,16 +12,7 @@ import {
   Scene,
   Game,
   findTopologicalSort,
-  Label,
-  TextLine,
-  Shape,
 } from ".";
-import { Sprite } from "./Sprite";
-import { SceneOptions } from "./SceneOptions";
-import { SpriteOptions } from "./SpriteOptions";
-import { ShapeOptions } from "./ShapeOptions";
-import { LabelOptions } from "./LabelOptions";
-import { TextLineOptions } from "./TextLineOptions";
 import { TextOptions } from "./TextOptions";
 import { IText } from "./IText";
 import { Size } from "./Size";
@@ -635,92 +626,92 @@ export abstract class Entity {
   // TODO: don't make static!
   // TODO: change uuid for all child elements that are duplicated
   // TODO: add composite
-  static duplicate<T extends Entity>(source: T, newName?: string): T {
-    let dest: Entity;
+  // static duplicate<T extends Entity>(source: T, newName?: string): T {
+  //   let dest: Entity;
 
-    switch (source.type) {
-      case EntityType.scene: {
-        const scene = source as unknown as Scene;
-        const options: SceneOptions = {
-          ...this.getEntityOptions(scene),
-          backgroundColor: scene.backgroundColor,
-        };
-        dest = new Scene(options);
-        break;
-      }
-      case EntityType.sprite: {
-        const sprite = source as unknown as Sprite;
-        const options: SpriteOptions = {
-          ...this.getEntityOptions(sprite),
-          ...this.getDrawableOptions(sprite),
-          imageName: sprite.imageName,
-        };
-        dest = new Sprite(options);
-        break;
-      }
-      case EntityType.label: {
-        const label = source as unknown as Label;
-        const options: LabelOptions = {
-          ...this.getEntityOptions(label),
-          ...this.getDrawableOptions(label),
-          ...this.getTextOptions(label),
-          horizontalAlignmentMode: label.horizontalAlignmentMode,
-          preferredMaxLayoutWidth: label.preferredMaxLayoutWidth,
-          backgroundColor: label.backgroundColor,
-        };
-        dest = new Label(options);
-        break;
-      }
-      case EntityType.textline: {
-        const textline = source as unknown as TextLine;
-        const options: TextLineOptions = {
-          ...this.getEntityOptions(textline),
-          ...this.getDrawableOptions(textline),
-          ...this.getTextOptions(textline),
-          width: textline.size.width,
-        };
-        dest = new TextLine(options);
-        break;
-      }
-      case EntityType.shape: {
-        const shape = source as unknown as Shape;
-        const options: ShapeOptions = {
-          ...this.getEntityOptions(shape),
-          ...this.getDrawableOptions(shape),
-          circleOfRadius: shape.circleOfRadius,
-          rect: shape.rect,
-          cornerRadius: shape.cornerRadius,
-          fillColor: shape.fillColor,
-          strokeColor: shape.strokeColor,
-          lineWidth: shape.lineWidth,
-        };
-        dest = new Shape(options);
-        break;
-      }
-      default:
-        throw new Error("unknown entity type");
-    }
+  //   switch (source.type) {
+  //     case EntityType.scene: {
+  //       const scene = source as unknown as Scene;
+  //       const options: SceneOptions = {
+  //         ...this.getEntityOptions(scene),
+  //         backgroundColor: scene.backgroundColor,
+  //       };
+  //       dest = new Scene(options);
+  //       break;
+  //     }
+  //     case EntityType.sprite: {
+  //       const sprite = source as unknown as Sprite;
+  //       const options: SpriteOptions = {
+  //         ...this.getEntityOptions(sprite),
+  //         ...this.getDrawableOptions(sprite),
+  //         imageName: sprite.imageName,
+  //       };
+  //       dest = new Sprite(options);
+  //       break;
+  //     }
+  //     case EntityType.label: {
+  //       const label = source as unknown as Label;
+  //       const options: LabelOptions = {
+  //         ...this.getEntityOptions(label),
+  //         ...this.getDrawableOptions(label),
+  //         ...this.getTextOptions(label),
+  //         horizontalAlignmentMode: label.horizontalAlignmentMode,
+  //         preferredMaxLayoutWidth: label.preferredMaxLayoutWidth,
+  //         backgroundColor: label.backgroundColor,
+  //       };
+  //       dest = new Label(options);
+  //       break;
+  //     }
+  //     case EntityType.textline: {
+  //       const textline = source as unknown as TextLine;
+  //       const options: TextLineOptions = {
+  //         ...this.getEntityOptions(textline),
+  //         ...this.getDrawableOptions(textline),
+  //         ...this.getTextOptions(textline),
+  //         width: textline.size.width,
+  //       };
+  //       dest = new TextLine(options);
+  //       break;
+  //     }
+  //     case EntityType.shape: {
+  //       const shape = source as unknown as Shape;
+  //       const options: ShapeOptions = {
+  //         ...this.getEntityOptions(shape),
+  //         ...this.getDrawableOptions(shape),
+  //         circleOfRadius: shape.circleOfRadius,
+  //         rect: shape.rect,
+  //         cornerRadius: shape.cornerRadius,
+  //         fillColor: shape.fillColor,
+  //         strokeColor: shape.strokeColor,
+  //         lineWidth: shape.lineWidth,
+  //       };
+  //       dest = new Shape(options);
+  //       break;
+  //     }
+  //     default:
+  //       throw new Error("unknown entity type");
+  //   }
 
-    if (source.type === EntityType.scene) {
-      (dest as Scene).game = (source as unknown as Scene).game;
-    }
+  //   if (source.type === EntityType.scene) {
+  //     (dest as Scene).game = (source as unknown as Scene).game;
+  //   }
 
-    if (source.children.length > 0) {
-      dest.children = source.children.map((child) => {
-        const clonedChild = Entity.duplicate<Entity>(child);
-        clonedChild.parent = dest;
-        return clonedChild;
-      });
-    }
+  //   if (source.children.length > 0) {
+  //     dest.children = source.children.map((child) => {
+  //       const clonedChild = Entity.duplicate<Entity>(child);
+  //       clonedChild.parent = dest;
+  //       return clonedChild;
+  //     });
+  //   }
 
-    if (newName) {
-      dest.name = newName;
-    } else if (source.name === source.uuid) {
-      dest.name = dest.uuid;
-    }
+  //   if (newName) {
+  //     dest.name = newName;
+  //   } else if (source.name === source.uuid) {
+  //     dest.name = dest.uuid;
+  //   }
 
-    return dest as unknown as T;
-  }
+  //   return dest as unknown as T;
+  // }
 
   private static getEntityOptions(entity: Entity): EntityOptions {
     const entityOptions = {
