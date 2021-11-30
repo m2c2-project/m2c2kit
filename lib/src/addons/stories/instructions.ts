@@ -1,18 +1,18 @@
 import { WebColors } from "../../WebColors";
 import {
   Label,
-  rgbaColor,
   Scene,
-  Size,
-  Sprite,
   LabelHorizontalAlignmentMode,
   Dimensions,
   Story,
   StoryOptions,
   Transition,
   TransitionDirection,
-} from "../../m2c2kit";
+} from "../..";
+import { Sprite } from "../../Sprite";
 import { Button } from "../../addons/composites/button";
+import { RgbaColor } from "../../RgbaColor";
+import { Size } from "../../Size";
 
 export interface InstructionScene {
   text?: string;
@@ -29,17 +29,17 @@ export interface InstructionScene {
   imageMarginTop?: number;
   imageMarginBottom?: number;
   imageAboveText?: boolean;
-  backgroundColor?: rgbaColor;
+  backgroundColor?: RgbaColor;
   backButtonText?: string;
   nextButtonText?: string;
   backButtonWidth?: number;
   nextButtonWidth?: number;
   backButtonHeight?: number;
   nextButtonHeight?: number;
-  backButtonBackgroundColor?: rgbaColor;
-  backButtonFontColor?: rgbaColor;
-  nextButtonBackgroundColor?: rgbaColor;
-  nextButtonFontColor?: rgbaColor;
+  backButtonBackgroundColor?: RgbaColor;
+  backButtonFontColor?: RgbaColor;
+  nextButtonBackgroundColor?: RgbaColor;
+  nextButtonFontColor?: RgbaColor;
   nextSceneTransition?: Transition;
   backSceneTransition?: Transition;
 }
@@ -47,7 +47,7 @@ export interface InstructionScene {
 export interface InstructionsOptions extends StoryOptions {
   sceneNamePrefix: string;
   instructionScenes: Array<InstructionScene>;
-  backgroundColor?: rgbaColor;
+  backgroundColor?: RgbaColor;
   postInstructionsScene?: string;
   nextSceneTransition?: Transition;
   backSceneTransition?: Transition;
@@ -57,10 +57,10 @@ export interface InstructionsOptions extends StoryOptions {
   nextButtonWidth?: number;
   backButtonHeight?: number;
   nextButtonHeight?: number;
-  backButtonBackgroundColor?: rgbaColor;
-  backButtonFontColor?: rgbaColor;
-  nextButtonBackgroundColor?: rgbaColor;
-  nextButtonFontColor?: rgbaColor;
+  backButtonBackgroundColor?: RgbaColor;
+  backButtonFontColor?: RgbaColor;
+  nextButtonBackgroundColor?: RgbaColor;
+  nextButtonFontColor?: RgbaColor;
 }
 
 export class Instructions extends Story {

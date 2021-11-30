@@ -1,23 +1,23 @@
 import { Paint, Canvas } from "canvaskit-wasm";
+import { EntityType } from "../../EntityType";
 import {
   CompositeOptions,
   WebColors,
-  TextOptions,
-  Size,
-  rgbaColor,
   Composite,
-  IText,
-  EntityType,
   Game,
   Shape,
   Rect,
   Label,
-} from "../../m2c2kit";
+} from "../..";
+import { TextOptions } from "../../TextOptions";
+import { IText } from "../../IText";
+import { RgbaColor } from "../../RgbaColor";
+import { Size } from "../../Size";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
   size?: Size;
   cornerRadius?: number;
-  backgroundColor?: rgbaColor;
+  backgroundColor?: RgbaColor;
 }
 
 export class Button extends Composite implements IText {
@@ -88,17 +88,17 @@ export class Button extends Composite implements IText {
     this.needsInitialization = false;
   }
 
-  get backgroundColor(): rgbaColor {
+  get backgroundColor(): RgbaColor {
     return this._backgroundColor;
   }
-  set backgroundColor(backgroundColor: rgbaColor) {
+  set backgroundColor(backgroundColor: RgbaColor) {
     this._backgroundColor = backgroundColor;
     this.needsInitialization = true;
   }
-  get fontColor(): rgbaColor {
+  get fontColor(): RgbaColor {
     return this._fontColor;
   }
-  set fontColor(fontColor: rgbaColor) {
+  set fontColor(fontColor: RgbaColor) {
     this._fontColor = fontColor;
     this.needsInitialization = true;
   }

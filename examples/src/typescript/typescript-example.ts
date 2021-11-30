@@ -4,16 +4,16 @@ import {
   Action,
   Scene,
   Shape,
-  Size,
-  Point,
   Label,
-  Sprite,
   WebColors,
   Rect,
   LabelHorizontalAlignmentMode,
   Transition,
   TransitionDirection,
-} from "../../../lib/src/m2c2kit";
+} from "../../../lib/src";
+import { Sprite } from "../../../lib/src/Sprite";
+import { Size } from "../../../lib/src/Size";
+import { Point } from "../../../lib/src/Point";
 // for typescript, import the parent composites and stories modules
 import { Button, Grid } from "../../../lib/src/addons/composites";
 import { Instructions } from "../../../lib/src/addons/stories";

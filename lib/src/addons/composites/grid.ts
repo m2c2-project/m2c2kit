@@ -1,24 +1,17 @@
 import { Canvas } from "canvaskit-wasm";
-import {
-  Composite,
-  CompositeOptions,
-  Entity,
-  EntityType,
-  Point,
-  Rect,
-  rgbaColor,
-  Shape,
-  Size,
-  WebColors,
-} from "../../m2c2kit";
-
+import { Composite, CompositeOptions, Rect, Shape, WebColors } from "../..";
+import { RgbaColor } from "../../RgbaColor";
+import { Size } from "../../Size";
+import { Point } from "../../Point";
+import { EntityType } from "../../EntityType";
+import { Entity } from "../../Entity";
 export interface GridOptions extends CompositeOptions {
   rows: number;
   columns: number;
   size: Size;
-  backgroundColor?: rgbaColor;
+  backgroundColor?: RgbaColor;
   gridLineWidth?: number;
-  gridLineColor?: rgbaColor;
+  gridLineColor?: RgbaColor;
 }
 
 interface GridChild {
@@ -35,7 +28,7 @@ export class Grid extends Composite {
   rows = 0;
   columns = 0;
   // default Grid is: transparent gray, red lines, line width 1
-  gridBackgroundColor: rgbaColor = [0, 0, 233, 0.25];
+  gridBackgroundColor: RgbaColor = [0, 0, 233, 0.25];
   gridLineColor = WebColors.Red;
   gridLineWidth = 1;
 

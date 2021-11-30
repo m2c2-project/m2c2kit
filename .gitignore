@@ -5,6 +5,8 @@
 *.bundle.js
 *.bundle.js.map
 
+build/
+
 # copied m2c2 dist modules for non-bundled javascript example
 examples/src/javascript/esm
 

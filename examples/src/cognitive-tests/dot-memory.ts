@@ -5,14 +5,14 @@ import {
   TransitionDirection,
   Scene,
   Shape,
-  Size,
-  Point,
   Label,
   WebColors,
   Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
-} from "../../../lib/src/m2c2kit";
+} from "../../../lib/src";
+import { Size } from "../../../lib/src/Size";
+import { Point } from "../../../lib/src/Point";
 import { Button, Grid } from "../../../lib/src/addons/composites";
 import { Instructions } from "../../../lib/src/addons/stories";
 

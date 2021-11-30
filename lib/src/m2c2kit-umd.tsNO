@@ -12,7 +12,7 @@ export {
   Point,
   Size,
   rgbaColor,
-  tapListener,
+  TapListener as tapListener,
   Game,
   ImageManager,
   FontManager,

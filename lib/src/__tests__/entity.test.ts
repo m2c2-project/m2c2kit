@@ -1,4 +1,4 @@
-import { Game, Scene, Label, Shape, Size } from "../../../dist/umd/m2c2kit-umd";
+import { Game, Scene, Label, Shape, Size } from "../../../dist/umd";
 
 let game: Game;
 let scene1: Scene;
