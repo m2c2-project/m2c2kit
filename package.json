@@ -2,7 +2,17 @@
   "name": "m2c2kit",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "examples-start": "rollup -c rollup.examples.config.js --watch",
     "build": "rollup -c",

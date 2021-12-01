@@ -1,4 +1,4 @@
-import { Game, Scene, Label, Shape, Size } from "../../../dist/umd";
+import { Game, Scene, Label, Shape, Size } from "../../../build/umd";
 
 let game: Game;
 let scene1: Scene;
