@@ -6,7 +6,8 @@ import {
   Size,
   Action,
   Point,
-} from "../../../dist/umd/m2c2kit-umd";
+  Globals,
+} from "../../../dist/umd/";
 import { JSDOM } from "jsdom";
 
 // jest.mock("../../dist/umd/m2c2kit", () => {
@@ -39,8 +40,8 @@ const requestAnimationFrame = (callback: (canvas: object) => void) => {
   return undefined;
 };
 
-jest.mock("../../../dist/umd/m2c2kit-umd", () => {
-  const m2c2kit = jest.requireActual("../../../dist/umd/m2c2kit-umd");
+jest.mock("../../../dist/umd/", () => {
+  const m2c2kit = jest.requireActual("../../../dist/umd/");
 
   m2c2kit.Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
@@ -196,7 +197,7 @@ describe("test init()", () => {
     // @ts-ignore
     global.window.innerHeight = 400;
     return game.init({ width: 400, height: 800 }).then((_) => {
-      expect(game._rootScale).toBe(0.5);
+      expect(Globals.rootScale).toBe(0.5);
     });
   });
 
@@ -206,7 +207,7 @@ describe("test init()", () => {
     // @ts-ignore
     global.window.innerHeight = 200;
     return game.init({ width: 400, height: 800 }).then((_) => {
-      expect(game._rootScale).toBe(0.25);
+      expect(Globals.rootScale).toBe(0.25);
     });
   });
 
@@ -216,7 +217,7 @@ describe("test init()", () => {
     // @ts-ignore
     global.window.innerHeight = 1600;
     return game.init({ width: 400, height: 800, stretch: true }).then((_) => {
-      expect(game._rootScale).toBe(2);
+      expect(Globals.rootScale).toBe(2);
     });
   });
 
@@ -226,7 +227,7 @@ describe("test init()", () => {
     // @ts-ignore
     global.window.innerHeight = 1200;
     return game.init({ width: 400, height: 800, stretch: true }).then((_) => {
-      expect(game._rootScale).toBe(1.5);
+      expect(Globals.rootScale).toBe(1.5);
     });
   });
 });

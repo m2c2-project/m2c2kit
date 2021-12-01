@@ -91,34 +91,34 @@ export default [
   // Make a UMD bundle only to use for testing (jest), because jest support
   // for esm modules is still incomplete
 
-  // {
-  //   input: "./lib/src/index.ts",
-  //   output: [
-  //     {
-  //       file: "./dist/umd/index.js",
-  //       //dir: "./dist/umd",
-  //       format: "umd",
-  //       name: "m2c2kit",
-  //       esModule: false,
-  //       exports: "named",
-  //       sourcemap: true,
-  //     },
-  //   ],
-  //   plugins: [
-  //     del({ targets: "dist/umd/*" }),
-  //     ...sharedPlugins,
-  //     typescript({
-  //       tsconfig: "./tsconfig.json",
-  //       outDir: "./dist/umd",
-  //       declaration: false,
-  //       include: ["./lib/src/**/*.ts"],
-  //       exclude: ["**/__tests__", "**/*.test.ts"],
-  //     }),
-  //     babel({
-  //       babelHelpers: "bundled",
-  //     }),
-  //   ],
-  // },
+  {
+    input: "./lib/src/index.ts",
+    output: [
+      {
+        file: "./dist/umd/index.js",
+        //dir: "./dist/umd",
+        format: "umd",
+        name: "m2c2kit",
+        esModule: false,
+        exports: "named",
+        sourcemap: true,
+      },
+    ],
+    plugins: [
+      del({ targets: "dist/umd/*" }),
+      ...sharedPlugins,
+      typescript({
+        tsconfig: "./tsconfig.json",
+        outDir: "./dist/umd",
+        declaration: false,
+        include: ["./lib/src/**/*.ts"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
+      }),
+      babel({
+        babelHelpers: "bundled",
+      }),
+    ],
+  },
 
   // {
   //   input: "./examples/cognitive-tests/dot-memory.ts",

@@ -15,25 +15,25 @@ beforeEach(() => {
   label1.addChild(rect1);
 });
 
-describe("test parentScene() method", () => {
-  it("should return scene as parent scene of label", () => {
-    expect(label1.parentScene).toBe(scene1);
-    expect(label1.parentScene.name).toBe("myScene1");
-  });
+// describe("test parentScene() method", () => {
+//   it("should return scene as parent scene of label", () => {
+//     expect(label1.parentScene).toBe(scene1);
+//     expect(label1.parentScene.name).toBe("myScene1");
+//   });
 
-  it("should return scene as parent scene of rect", () => {
-    expect(rect1.parentScene).toBe(scene1);
-    expect(rect1.parentScene.name).toBe("myScene1");
-  });
+//   it("should return scene as parent scene of rect", () => {
+//     expect(rect1.parentScene).toBe(scene1);
+//     expect(rect1.parentScene.name).toBe("myScene1");
+//   });
 
-  it("should throw Error when calling parentScene on a scene", () => {
-    // see https://stackoverflow.com/a/46155381
-    const t = () => {
-      return scene1.parentScene;
-    };
-    expect(t).toThrow(Error);
-  });
-});
+//   it("should throw Error when calling parentScene on a scene", () => {
+//     // see https://stackoverflow.com/a/46155381
+//     const t = () => {
+//       return scene1.parentScene;
+//     };
+//     expect(t).toThrow(Error);
+//   });
+// });
 
 describe("test descendants()", () => {
   it("descendants of scene1 contain label1 and rect1", () => {
