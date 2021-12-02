@@ -5,6 +5,7 @@
 *.bundle.js
 *.bundle.js.map
 
+.rollup.cache
 build/
 
 # copied m2c2 dist modules for non-bundled javascript example

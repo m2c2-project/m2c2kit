@@ -1,0 +1,33 @@
+{
+  "name": "@m2c2kit/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syabiku/m2c2kit-draft.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syabiku/m2c2kit-draft/issues"
+  },
+  "homepage": "https://github.com/syabiku/m2c2kit-draft#readme",
+  "dependencies": {
+    "canvaskit-wasm": "^0.30.0"
+  }
+}
