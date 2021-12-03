@@ -1,6 +1,5 @@
 import { Paint, Canvas } from "canvaskit-wasm";
 import {
-  EntityType,
   WebColors,
   Rect,
   Composite,

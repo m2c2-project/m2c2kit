@@ -1,19 +1,21 @@
 // for typescript, import the module without .js extension
-import { WebColors } from "../../../lib/src";
-import { Game } from "../../../lib/src/Game";
-import { Transition, TransitionDirection } from "../../../lib/src/Transition";
-import { Scene } from "../../../lib/src/Scene";
-import { Action } from "../../../lib/src/Action";
-import { Rect } from "../../../lib/src/Rect";
-import { Shape } from "../../../lib/src/Shape";
-import { Label } from "../../../lib/src/Label";
-import { LabelHorizontalAlignmentMode } from "../../../lib/src/LabelHorizontalAlignmentMode";
-import { Sprite } from "../../../lib/src/Sprite";
-import { Size } from "../../../lib/src/Size";
-import { Point } from "../../../lib/src/Point";
+import {
+  WebColors,
+  Game,
+  Transition,
+  TransitionDirection,
+  Scene,
+  Action,
+  Rect,
+  Shape,
+  Label,
+  LabelHorizontalAlignmentMode,
+  Sprite,
+  Size,
+  Point,
+} from "@m2c2/core";
 // for typescript, import the parent composites and stories modules
-import { Button, Grid } from "../../../lib/src/addons/composites";
-import { Instructions } from "../../../lib/src/addons/stories";
+import { Button, Grid, Instructions } from "@m2c2/addons";
 
 const game = new Game();
 // for typescript, we need to caste window to any
@@ -46,6 +48,7 @@ game
     ],
   })
   .then(() => {
+    debugger;
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
       // the backgroundColor will be applied to all instruction scenes, unless we override

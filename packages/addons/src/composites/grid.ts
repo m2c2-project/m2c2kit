@@ -9,7 +9,6 @@ import {
   Point,
   Entity,
   Shape,
-  EntityType,
 } from "@m2c2kit/core";
 export interface GridOptions extends CompositeOptions {
   rows: number;

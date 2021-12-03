@@ -39,7 +39,12 @@ export class FontManager {
         throw new Error("error loading fonts");
       }
       console.log("font loaded. font family: " + fontFamily);
-      const typeface = this._fontMgr.MakeTypefaceFromData(font);
+      const typeface =
+        Globals.canvasKit.Typeface.MakeFreeTypeFaceFromData(font);
+      if (!typeface) {
+        throw new Error("Can't make typeface");
+      }
+      //const typeface = this._fontMgr.MakeTypefaceFromData(font);
       this._typefaces[fontFamily] = typeface;
     });
   }

@@ -15,9 +15,10 @@ let sharedPlugins = [
     path: `export function path_empty_shim() { }`,
   }),
   nodeResolve(),
-  commonjs({
-    include: "node_modules/canvaskit-wasm/**",
-  }),
+  commonjs(),
+  //   {
+  //   include: "node_modules/canvaskit-wasm/**",
+  // }
 ];
 
 export default [
@@ -25,7 +26,7 @@ export default [
     input: ["./src/index.ts"],
     // the output is build/esm because we need a later step to
     // combine all declaration files
-    output: [{ file: "./build/esm/index.mjs", format: "esm" }],
+    output: [{ file: "./build/esm/index.mjs", format: "esm", sourcemap: true }],
     plugins: [
       del({ targets: ["dist/*", "build/*"] }),
       ...sharedPlugins,
@@ -37,6 +38,7 @@ export default [
         declaration: true,
         rootDir: "src",
         include: ["./**/*.ts", "./**/*.js"],
+        sourceMap: true,
         //include: ["./src/**/*.ts"],
         //exclude: ["**/__tests__", "**/*.test.ts"],
       }),

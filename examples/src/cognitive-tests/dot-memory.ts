@@ -1,17 +1,20 @@
-import { WebColors } from "../../../lib/src";
-import { Game } from "../../../lib/src/Game";
-import { Transition, TransitionDirection } from "../../../lib/src/Transition";
-import { RandomDraws } from "../../../lib/src/RandomDraws";
-import { Scene } from "../../../lib/src/Scene";
-import { Action } from "../../../lib/src/Action";
-import { Rect } from "../../../lib/src/Rect";
-import { Shape } from "../../../lib/src/Shape";
-import { Label } from "../../../lib/src/Label";
-import { LabelHorizontalAlignmentMode } from "../../../lib/src/LabelHorizontalAlignmentMode";
-import { Size } from "../../../lib/src/Size";
-import { Point } from "../../../lib/src/Point";
-import { Button, Grid } from "../../../lib/src/addons/composites";
-import { Instructions } from "../../../lib/src/addons/stories";
+import {
+  WebColors,
+  Game,
+  Transition,
+  TransitionDirection,
+  Scene,
+  Action,
+  Rect,
+  Shape,
+  Label,
+  LabelHorizontalAlignmentMode,
+  RandomDraws,
+  Size,
+  Point,
+} from "@m2c2kit/core";
+import { Button, Grid } from "@m2c2kit/addons";
+import { Instructions } from "@m2c2kit/addons";
 
 const game = new Game();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

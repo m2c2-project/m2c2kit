@@ -111,5 +111,9 @@
     "**/*.bundle.js",
     "examples/src/javascript/**/*",
     "*.js" // exclude setup and config files
+  ],
+  "references": [
+    { "path": "../packages/core" },
+    { "path": "../packages/addons" }
   ]
 }

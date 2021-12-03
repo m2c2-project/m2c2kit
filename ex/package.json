@@ -1,0 +1,24 @@
+{
+  "name": "ex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@m2c2kit/core": "1.0.0",
+    "@m2c2kit/addons": "1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syabiku/m2c2kit-draft.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syabiku/m2c2kit-draft/issues"
+  },
+  "homepage": "https://github.com/syabiku/m2c2kit-draft#readme"
+}

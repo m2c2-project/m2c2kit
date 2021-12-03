@@ -1,4 +1,4 @@
-import { Globals } from "./Globals";
+import "./Globals";
 import { CanvasKitInit } from "./CanvasKitInit";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";

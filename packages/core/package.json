@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/syabiku/m2c2kit-draft#readme",
   "dependencies": {
-    "canvaskit-wasm": "^0.30.0"
+    "canvaskit-wasm": "^0.31.0"
   }
 }
