@@ -1,7 +1,5 @@
 import { Entity } from "./Entity";
 
-//#endregion Actions
-//#region Interface options ------------------------------------------------------------
 export interface Constraints {
   topToTopOf?: Entity | string;
   topToBottomOf?: Entity | string;

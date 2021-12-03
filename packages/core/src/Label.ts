@@ -1,3 +1,4 @@
+import "./Globals";
 import {
   Canvas,
   Paragraph,
@@ -13,9 +14,6 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
-import { Game } from "./Game";
-import { FontManager } from "./FontManager";
-import { Globals } from "./Globals";
 
 export class Label extends Entity implements IDrawable, IText {
   readonly type = EntityType.label;
@@ -94,13 +92,13 @@ export class Label extends Entity implements IDrawable, IText {
       this.paraStyle.textStyle.backgroundColor = this.backgroundColor;
     }
 
-    if (FontManager._fontMgr === undefined) {
+    if (Globals.fontManager._fontMgr === undefined) {
       throw new Error("no fonts loaded");
     }
 
     const builder = Globals.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
-      FontManager._fontMgr
+      Globals.fontManager._fontMgr
     );
     if (!this.text) {
       this.text = "";

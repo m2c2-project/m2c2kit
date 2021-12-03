@@ -1,4 +1,4 @@
-import { Globals } from "./Globals";
+import "./Globals";
 import { Image } from "canvaskit-wasm";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
@@ -6,15 +6,15 @@ import { SvgImage } from "./SvgImage";
 
 export class ImageManager {
   // scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render SVGs.
-  private static scratchCanvas: HTMLCanvasElement;
-  private static ctx: CanvasRenderingContext2D;
-  private static scale: number;
-  static _renderedDataUrlImages: Record<string, RenderedDataUrlImage> = {};
-  static _loadedImages: Record<string, LoadedImage> = {};
+  private scratchCanvas?: HTMLCanvasElement;
+  private ctx?: CanvasRenderingContext2D;
+  private scale?: number;
+  _renderedDataUrlImages: Record<string, RenderedDataUrlImage> = {};
+  _loadedImages: Record<string, LoadedImage> = {};
 
-  static initialize(scratchCanvas: HTMLCanvasElement): void {
+  initialize(scratchCanvas: HTMLCanvasElement): void {
     this.scratchCanvas = scratchCanvas;
-    const context2d = ImageManager.scratchCanvas.getContext("2d");
+    const context2d = this.scratchCanvas.getContext("2d");
     if (context2d === null) {
       throw new Error("could not get 2d canvas context from scratch canvas");
     }
@@ -22,25 +22,22 @@ export class ImageManager {
     this.scale = window.devicePixelRatio;
   }
 
-  static renderSvgImage(svgImage: SvgImage): Promise<RenderedDataUrlImage> {
+  renderSvgImage(svgImage: SvgImage): Promise<RenderedDataUrlImage> {
     const image = document.createElement("img");
     return new Promise((resolve) => {
       image.width = svgImage.width;
       image.height = svgImage.height;
       image.onload = () => {
-        ImageManager.scratchCanvas.width = svgImage.width * ImageManager.scale;
-        ImageManager.scratchCanvas.height =
-          svgImage.height * ImageManager.scale;
-        ImageManager.ctx.scale(ImageManager.scale, ImageManager.scale);
-        ImageManager.ctx.clearRect(0, 0, svgImage.width, svgImage.height);
-        ImageManager.ctx.drawImage(
-          image,
-          0,
-          0,
-          svgImage.width,
-          svgImage.height
-        );
-        const dataUrl = ImageManager.scratchCanvas.toDataURL();
+        if (!this.scratchCanvas || !this.ctx || !this.scale) {
+          throw new Error("image manager not set up");
+        }
+
+        this.scratchCanvas.width = svgImage.width * this.scale;
+        this.scratchCanvas.height = svgImage.height * this.scale;
+        this.ctx.scale(this.scale, this.scale);
+        this.ctx.clearRect(0, 0, svgImage.width, svgImage.height);
+        this.ctx.drawImage(image, 0, 0, svgImage.width, svgImage.height);
+        const dataUrl = this.scratchCanvas.toDataURL();
         this._renderedDataUrlImages[svgImage.name] = new RenderedDataUrlImage(
           svgImage.name,
           dataUrl,
@@ -74,11 +71,11 @@ export class ImageManager {
     });
   }
 
-  static LoadRenderedSvgImages(urls: RenderedDataUrlImage[]): void {
-    urls.forEach((url) => ImageManager.convertRenderedDataUrlImage(url));
+  LoadRenderedSvgImages(urls: RenderedDataUrlImage[]): void {
+    urls.forEach((url) => this.convertRenderedDataUrlImage(url));
   }
 
-  private static convertRenderedDataUrlImage(
+  private convertRenderedDataUrlImage(
     loadedDataUrlImage: RenderedDataUrlImage
   ): void {
     let img: Image | null = null;
@@ -102,18 +99,18 @@ export class ImageManager {
       loadedDataUrlImage.width,
       loadedDataUrlImage.height
     );
-    if (Object.keys(ImageManager._loadedImages).includes("name")) {
+    if (Object.keys(this._loadedImages).includes("name")) {
       throw new Error(
         `an image with name ${loadedDataUrlImage.name} was already loaded`
       );
     }
-    ImageManager._loadedImages[loadedDataUrlImage.name] = loadedImage;
+    this._loadedImages[loadedDataUrlImage.name] = loadedImage;
     console.log(
       `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`
     );
   }
 
-  private static dataURLtoArrayBuffer(dataUrl: string): ArrayBuffer {
+  private dataURLtoArrayBuffer(dataUrl: string): ArrayBuffer {
     const arr = dataUrl.split(",");
     const bstr = atob(arr[1]);
     let n = bstr.length;

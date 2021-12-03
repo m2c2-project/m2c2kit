@@ -15,6 +15,7 @@ export * from "./FontManager";
 export * from "./Game";
 export * from "./GameInitOptions";
 export * from "./Globals";
+export * from "./GlobalVariables";
 export * from "./IDrawable";
 export * from "./ImageManager";
 export * from "./IText";

@@ -1,3 +1,4 @@
+import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -6,10 +7,8 @@ import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
-import { Game } from "./Game";
 import { Rect } from "./Rect";
 import { ShapeType } from "./ShapeType";
-import { Globals } from "./Globals";
 
 export class Shape extends Entity implements IDrawable {
   readonly type = EntityType.shape;

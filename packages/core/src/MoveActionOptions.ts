@@ -1,7 +1,5 @@
 import { Point } from "./Point";
 
-//#endregion Transitions
-//#region Actions ------------------------------------------------------------
 export interface MoveActionOptions {
   /** Destination point. The point is relative to the entity's parent coordinate system */
   point: Point;

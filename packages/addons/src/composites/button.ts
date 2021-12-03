@@ -10,8 +10,8 @@ import {
   IText,
   RgbaColor,
   Size,
-  Globals,
 } from "@m2c2kit/core";
+import "../Globals";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
   size?: Size;

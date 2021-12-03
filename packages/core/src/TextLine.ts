@@ -1,3 +1,4 @@
+import "./Globals";
 import { Canvas, Font, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -7,8 +8,6 @@ import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
-import { FontManager } from "./FontManager";
-import { Globals } from "./Globals";
 
 export class TextLine extends Entity implements IDrawable, IText {
   readonly type = EntityType.textline;
@@ -98,7 +97,7 @@ export class TextLine extends Entity implements IDrawable, IText {
 
     if (this.fontName) {
       this.font = new Globals.canvasKit.Font(
-        FontManager._getTypeface(this.fontName),
+        Globals.fontManager._getTypeface(this.fontName),
         this.fontSize * Globals.canvasScale
       );
     } else {

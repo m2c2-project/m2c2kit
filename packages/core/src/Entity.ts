@@ -1,8 +1,8 @@
+import "./Globals";
 import { Canvas } from "canvaskit-wasm";
 import { TapEvent, TapListener } from "./TapListener";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
-//import { Scene } from "./Scene";
 import { Action } from "./Action";
 import { Layout } from "./Layout";
 import { ConstraintType } from "./ConstraintType";
@@ -14,7 +14,6 @@ import { Size } from "./Size";
 import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
-import { Globals } from "./Globals";
 
 function handleDrawableOptions(
   drawable: IDrawable,

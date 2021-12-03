@@ -1,12 +1,11 @@
+import "./Globals";
 import { Canvas } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
-import { ImageManager } from "./ImageManager";
 import { LoadedImage } from "./LoadedImage";
-import { Globals } from "./Globals";
 
 export class Sprite extends Entity implements IDrawable {
   readonly type = EntityType.sprite;
@@ -38,11 +37,11 @@ export class Sprite extends Entity implements IDrawable {
   override initialize(): void {}
 
   set imageName(imageName: string) {
-    if (!Object.keys(ImageManager._loadedImages).includes(imageName)) {
+    if (!Object.keys(Globals.imageManager._loadedImages).includes(imageName)) {
       throw new Error(`an image with name ${imageName} has not been loaded`);
     }
     this._imageName = imageName;
-    this.loadedImage = ImageManager._loadedImages[this.imageName];
+    this.loadedImage = Globals.imageManager._loadedImages[this.imageName];
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
   }

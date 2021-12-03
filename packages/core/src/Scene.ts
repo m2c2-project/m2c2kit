@@ -1,4 +1,4 @@
-import { Globals } from "./Globals";
+import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";

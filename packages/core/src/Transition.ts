@@ -1,7 +1,5 @@
 import { Scene } from "./Scene";
 
-//#region Transitions ------------------------------------------------------------
-
 export abstract class Transition {
   abstract type: TransitionType;
   duration = 0;

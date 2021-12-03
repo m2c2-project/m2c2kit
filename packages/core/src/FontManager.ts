@@ -1,19 +1,17 @@
-import { Globals } from "./Globals";
+import "./Globals";
 import { ttfInfo } from "./ttfInfo.js";
 import { FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
 
 export class FontManager {
-  static _fontMgr?: FontMgr;
-  private static _typefaces: Record<string, Typeface> = {};
+  _fontMgr?: FontMgr;
+  private _typefaces: Record<string, Typeface> = {};
 
-  static _getTypeface(name: string): Typeface {
+  _getTypeface(name: string): Typeface {
     return this._typefaces[name];
   }
 
-  static FetchFontsAsArrayBuffers(
-    fontUrls: Array<string>
-  ): Promise<FontData>[] {
+  FetchFontsAsArrayBuffers(fontUrls: Array<string>): Promise<FontData>[] {
     const fetchFontsPromises = fontUrls.map((fontUrl) =>
       fetch(fontUrl)
         .then((response) => response.arrayBuffer())
@@ -25,7 +23,7 @@ export class FontManager {
     return fetchFontsPromises;
   }
 
-  static LoadFonts(fonts: Array<ArrayBuffer>): void {
+  LoadFonts(fonts: Array<ArrayBuffer>): void {
     this._fontMgr = Globals.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
     if (this._fontMgr === undefined) {
       throw new Error("error loading fonts");
@@ -44,7 +42,6 @@ export class FontManager {
       if (!typeface) {
         throw new Error("Can't make typeface");
       }
-      //const typeface = this._fontMgr.MakeTypefaceFromData(font);
       this._typefaces[fontFamily] = typeface;
     });
   }

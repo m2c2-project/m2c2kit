@@ -1,5 +1,3 @@
-//#endregion Interfaces
-//#region Core classes ------------------------------------------------------------
 export enum EntityType {
   entity = "Entity",
   scene = "Scene",

@@ -136,6 +136,9 @@ export class Game {
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
+    Globals.fontManager = new FontManager();
+    Globals.imageManager = new ImageManager();
+
     const canvasKitPromise = this.loadCanvasKit();
     const fontDataPromises = this.fetchFonts(gameInitOptions.fontUrls);
     const renderedSvgImagesPromises = this.renderSvgImages(
@@ -154,7 +157,7 @@ export class Game {
     ]).then(([canvasKit, fontData, renderedSvgImages]) => {
       Globals.canvasKit = canvasKit;
       this.loadFonts(gameInitOptions.fontUrls, fontData);
-      ImageManager.LoadRenderedSvgImages(renderedSvgImages);
+      Globals.imageManager.LoadRenderedSvgImages(renderedSvgImages);
       this.setupCanvasKitSurface();
       this.setupFpsFont();
       this.setupEventHandlers();
@@ -319,7 +322,9 @@ export class Game {
     }
 
     this.presentScene(startingScene);
-    // @ts-ignore (because CanvasKit types are incomplete)
+    if (this.surface === undefined) {
+      throw new Error("CanvasKit surface is undefined");
+    }
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -437,7 +442,7 @@ export class Game {
 
   private fetchFonts(fontUrls: string[] | undefined): Promise<FontData>[] {
     if (fontUrls) {
-      return FontManager.FetchFontsAsArrayBuffers(fontUrls);
+      return Globals.fontManager.FetchFontsAsArrayBuffers(fontUrls);
     } else {
       return new Array<Promise<FontData>>();
     }
@@ -449,10 +454,10 @@ export class Game {
     if (this.scratchHtmlCanvas === undefined) {
       throw new Error("scratch html canvas is undefined");
     }
-    ImageManager.initialize(this.scratchHtmlCanvas);
+    Globals.imageManager.initialize(this.scratchHtmlCanvas);
     if (svgImages) {
       return svgImages.map((svg) => {
-        return ImageManager.renderSvgImage(svg);
+        return Globals.imageManager.renderSvgImage(svg);
       });
     } else {
       return new Array<Promise<RenderedDataUrlImage>>();
@@ -475,7 +480,7 @@ export class Game {
         fontData[fontData.findIndex((fd) => fd.fontUrl === url)].fontArrayBuffer
       );
     });
-    FontManager.LoadFonts(fontsArrayBuffers);
+    Globals.fontManager.LoadFonts(fontsArrayBuffers);
   }
 
   private setupCanvasKitSurface(): void {
@@ -558,7 +563,9 @@ export class Game {
     }
 
     this.priorUpdateTime = Globals.now;
-    // @ts-ignore (because CanvasKit types are incomplete)
+    if (this.surface === undefined) {
+      throw new Error("CanvasKit surface is undefined");
+    }
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -585,48 +592,48 @@ export class Game {
       const incomingScene = incomingSceneTransition.scene;
       const transition = incomingSceneTransition.transition;
 
-      let outgoingScene: Scene | undefined;
-      if (true) {
-        //if (incomingScene === this.currentScene || incomingScene.name === 'page5b') {
-        // because the scene is repeated, we have to use an image for the outgoing scene animation
-        const outgoingSceneImage = this.currentSceneSnapshot;
-        if (!outgoingSceneImage) {
-          throw new Error("no outgoing scene image");
-        }
-
-        outgoingScene = new Scene({ name: "outgoingScene" });
-        this.addScene(outgoingScene);
-        const loadedImage = new LoadedImage(
-          "outgoingSceneSnapshot",
-          outgoingSceneImage,
-          this.canvasCssWidth,
-          this.canvasCssHeight
-        );
-        ImageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
-
-        // if this._rootScale is not 1, that means we scaled down everything
-        // because the display is too small, or we stretched to a larger
-        // display. When that happens, the screen shot that was taken of
-        // the outgoing scene needs to be positioned and re-scaled:
-        // the sprite containing the screen shot is scaled, and the sprite's
-        // position is adjusted.
-        const spr = new Sprite({
-          name: "outgoingSceneSprite",
-          imageName: "outgoingSceneSnapshot",
-          position: new Point(
-            this.canvasCssWidth / Globals.rootScale / 2,
-            this.canvasCssHeight / Globals.rootScale / 2
-          ),
-        });
-        spr.scale = 1 / Globals.rootScale;
-        outgoingScene.addChild(spr);
-        outgoingScene._active = true;
-        if (incomingScene !== this.currentScene && this.currentScene) {
-          this.currentScene._active = false;
-        }
-      } else {
-        outgoingScene = this.currentScene;
+      // let outgoingScene: Scene | undefined;
+      //if (true) {
+      //if (incomingScene === this.currentScene || incomingScene.name === 'page5b') {
+      // because the scene is repeated, we have to use an image for the outgoing scene animation
+      const outgoingSceneImage = this.currentSceneSnapshot;
+      if (!outgoingSceneImage) {
+        throw new Error("no outgoing scene image");
       }
+
+      const outgoingScene = new Scene({ name: "outgoingScene" });
+      this.addScene(outgoingScene);
+      const loadedImage = new LoadedImage(
+        "outgoingSceneSnapshot",
+        outgoingSceneImage,
+        this.canvasCssWidth,
+        this.canvasCssHeight
+      );
+      Globals.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
+
+      // if this._rootScale is not 1, that means we scaled down everything
+      // because the display is too small, or we stretched to a larger
+      // display. When that happens, the screen shot that was taken of
+      // the outgoing scene needs to be positioned and re-scaled:
+      // the sprite containing the screen shot is scaled, and the sprite's
+      // position is adjusted.
+      const spr = new Sprite({
+        name: "outgoingSceneSprite",
+        imageName: "outgoingSceneSnapshot",
+        position: new Point(
+          this.canvasCssWidth / Globals.rootScale / 2,
+          this.canvasCssHeight / Globals.rootScale / 2
+        ),
+      });
+      spr.scale = 1 / Globals.rootScale;
+      outgoingScene.addChild(spr);
+      outgoingScene._active = true;
+      if (incomingScene !== this.currentScene && this.currentScene) {
+        this.currentScene._active = false;
+      }
+      // } else {
+      //   outgoingScene = this.currentScene;
+      // }
 
       this.currentScene = incomingScene;
       this.currentScene._active = true;
@@ -867,12 +874,15 @@ export class Game {
       canvas.save();
       const drawScale = Globals.canvasScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
+      if (!this.fpsTextFont || !this.fpsTextPaint) {
+        throw new Error("fps font or paint is undefined");
+      }
       canvas.drawText(
         "FPS: " + this.fps.toFixed(2),
         0,
         0 + Constants.FPS_DISPLAY_TEXT_FONT_SIZE * drawScale,
-        this.fpsTextPaint!,
-        this.fpsTextFont!
+        this.fpsTextPaint,
+        this.fpsTextFont
       );
       canvas.restore();
     }
