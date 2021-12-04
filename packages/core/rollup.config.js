@@ -16,9 +16,6 @@ let sharedPlugins = [
   }),
   nodeResolve(),
   commonjs(),
-  //   {
-  //   include: "node_modules/canvaskit-wasm/**",
-  // }
 ];
 
 export default [
@@ -26,7 +23,7 @@ export default [
     input: ["./src/index.ts"],
     // the output is build/esm because we need a later step to
     // combine all declaration files
-    output: [{ file: "./build/esm/index.mjs", format: "esm", sourcemap: true }],
+    output: [{ file: "./build/index.mjs", format: "esm", sourcemap: true }],
     plugins: [
       del({ targets: ["dist/*", "build/*"] }),
       ...sharedPlugins,
@@ -36,9 +33,9 @@ export default [
         // outDir will be relative to the "output" set above, i.e., ./build/esm
         outDir: ".",
         declaration: true,
-        rootDir: "src",
         include: ["./**/*.ts", "./**/*.js"],
         sourceMap: true,
+        // inlineSourceMap: true,
         //include: ["./src/**/*.ts"],
         //exclude: ["**/__tests__", "**/*.test.ts"],
       }),
@@ -48,7 +45,7 @@ export default [
   {
     // bundle all declaration files and place the declaration
     // bundle in dist
-    input: "./build/esm/index.d.ts",
+    input: "./build/src/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       dts(),
@@ -56,7 +53,7 @@ export default [
         targets: [
           {
             // copy the bundled esm module to dist
-            src: "build/esm/index.mjs",
+            src: "build/index.mjs*",
             dest: ["dist/"],
           },
         ],
@@ -64,15 +61,15 @@ export default [
     ],
   },
 
-  // Make a UMD bundle only to use for testing (jest), because jest support
-  // for esm modules is still incomplete
-  // the UMD bundle for testing is in build, but the one for distribution
-  // will be in dist
+  // // Make a UMD bundle only to use for testing (jest), because jest support
+  // // for esm modules is still incomplete
+  // // the UMD bundle for testing is in build, but the one for distribution
+  // // will be in dist
   {
     input: "./src/index.ts",
     output: [
       {
-        file: "./build/umd/index.js",
+        file: "./build/index.js",
         format: "umd",
         name: "m2c2kit",
         esModule: false,
@@ -85,9 +82,9 @@ export default [
       typescript({
         outputToFilesystem: false,
         tsconfig: "./tsconfig.json",
-        outDir: "./build/umd",
+        outDir: ".",
         //declaration: false,
-        include: ["./src/**/*.ts", "./src/**/*.js"],
+        include: ["./**/*.ts", "./**/*.js"],
         //exclude: ["**/__tests__", "**/*.test.ts"],
       }),
       babel({
@@ -98,7 +95,7 @@ export default [
       copy({
         targets: [
           {
-            src: "build/umd/index.js",
+            src: "build/index.js",
             dest: "dist/",
           },
         ],
