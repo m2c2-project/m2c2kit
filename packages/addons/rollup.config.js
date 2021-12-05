@@ -15,9 +15,7 @@ let sharedPlugins = [
     path: `export function path_empty_shim() { }`,
   }),
   nodeResolve(),
-  commonjs({
-    include: "node_modules/canvaskit-wasm/**",
-  }),
+  commonjs(),
 ];
 
 export default [
@@ -25,20 +23,18 @@ export default [
     input: ["./src/index.ts"],
     // the output is build/esm because we need a later step to
     // combine all declaration files
-    output: [{ file: "./build/esm/index.mjs", format: "esm" }],
+    output: [{ file: "./build/index.mjs", format: "esm", sourcemap: true }],
     plugins: [
-      del({ targets: ["dist/*", "build/*"] }),
+      del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
       ...sharedPlugins,
       typescript({
-        outputToFilesystem: false,
         tsconfig: "./tsconfig.json",
-        // outDir will be relative to the "output" set above, i.e., ./build/esm
+        // outDir will be relative to the "output" set above, i.e., ./build
         outDir: ".",
         declaration: true,
-        rootDir: "src",
-        include: ["./**/*.ts", "./**/*.js"],
-        //include: ["./src/**/*.ts"],
-        //exclude: ["**/__tests__", "**/*.test.ts"],
+        sourceMap: true,
+        include: ["./src/**/*.ts"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
       }),
     ],
   },
@@ -46,7 +42,7 @@ export default [
   {
     // bundle all declaration files and place the declaration
     // bundle in dist
-    input: "./build/esm/index.d.ts",
+    input: "./build/src/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       dts(),
@@ -54,7 +50,8 @@ export default [
         targets: [
           {
             // copy the bundled esm module to dist
-            src: "build/esm/index.mjs",
+            // and build-umd
+            src: "build/index.mjs*",
             dest: ["dist/"],
           },
         ],
@@ -64,13 +61,11 @@ export default [
 
   // Make a UMD bundle only to use for testing (jest), because jest support
   // for esm modules is still incomplete
-  // the UMD bundle for testing is in build, but the one for distribution
-  // will be in dist
   {
     input: "./src/index.ts",
     output: [
       {
-        file: "./build/umd/index.js",
+        dir: "./build-umd",
         format: "umd",
         name: "m2c2kit",
         esModule: false,
@@ -81,135 +76,30 @@ export default [
     plugins: [
       ...sharedPlugins,
       typescript({
-        outputToFilesystem: false,
         tsconfig: "./tsconfig.json",
-        outDir: "./build/umd",
-        //declaration: false,
-        include: ["./src/**/*.ts", "./src/**/*.js"],
-        //exclude: ["**/__tests__", "**/*.test.ts"],
+        outDir: "./build-umd",
+        declaration: true,
+        include: ["./**/*.ts", "./**/*.js"],
+        exclude: [
+          "rollup.config*",
+          "jest.config*",
+          "jestSetup*",
+          "**/__tests__/**/*",
+          "build-umd/**/*",
+        ],
       }),
       babel({
         babelHelpers: "bundled",
       }),
-      // copy only index.js from build/umd to dist
-      // because we don't distribute the sourcemap
       copy({
         targets: [
           {
-            src: "build/umd/index.js",
-            dest: "dist/",
+            // copy the bundled declarations to build-umd
+            src: "dist/index.d.ts",
+            dest: ["build-umd/"],
           },
         ],
-        copyOnce: false,
-        hook: "closeBundle",
       }),
     ],
   },
 ];
-
-// import typescript from "@rollup/plugin-typescript";
-// import shim from "rollup-plugin-shim";
-// import nodeResolve from "@rollup/plugin-node-resolve";
-// import commonjs from "@rollup/plugin-commonjs";
-// import copy from "rollup-plugin-copy";
-// import babel from "@rollup/plugin-babel";
-// import del from "rollup-plugin-delete";
-// import dts from "rollup-plugin-dts";
-
-// let sharedPlugins = [
-//   // canvaskit-wasm references these node.js functions
-//   // shim them to empty functions for browser usage
-//   shim({
-//     fs: `export function fs_empty_shim() { }`,
-//     path: `export function path_empty_shim() { }`,
-//   }),
-//   nodeResolve(),
-//   commonjs({
-//     include: "node_modules/canvaskit-wasm/**"
-//   }),
-// ];
-
-// export default [
-//   {
-//     input: ["./src/index.ts"],
-//     // the output is build/esm because we need a later step to
-//     // combine all declaration files
-//     output: [{ file: "./build/esm/index.mjs", format: "esm" }],
-//     plugins: [
-//       del({ targets: ["dist/*", "build/*"] }),
-//       ...sharedPlugins,
-//       typescript({
-//         tsconfig: "./tsconfig.json",
-//         // outDir will be relative to the "output" set above, i.e., ./build/esm
-//         outDir: ".",
-//         declaration: true,
-//         rootDir: "src",
-//         include: ["./src/**/*.ts"],
-//         //exclude: ["**/__tests__", "**/*.test.ts"],
-//       }),
-//     ],
-//   },
-
-//   {
-//     // bundle all declaration files and place the declaration
-//     // bundle in dist
-//     input: "./build/esm/src/index.d.ts",
-//     output: [{ file: "dist/index.d.ts", format: "es" }],
-//     plugins: [
-//       dts(),
-//       copy({
-//         targets: [
-//           {
-//             // copy the bundled esm module to dist
-//             src: "build/esm/index.mjs",
-//             dest: ["dist/"],
-//           },
-//         ],
-//       }),
-//     ],
-//   },
-
-//   // Make a UMD bundle only to use for testing (jest), because jest support
-//   // for esm modules is still incomplete
-//   // the UMD bundle for testing is in build, but the one for distribution
-//   // will be in dist
-//   {
-//     input: "./src/index.ts",
-//     output: [
-//       {
-//         file: "./build/umd/index.js",
-//         format: "umd",
-//         name: "m2c2kit",
-//         esModule: false,
-//         exports: "named",
-//         sourcemap: true,
-//       },
-//     ],
-//     plugins: [
-//       ...sharedPlugins,
-//       typescript({
-//         tsconfig: "./tsconfig.json",
-//         outDir: "./build/umd",
-//         // declaration: false,
-//         rootDir: "src",
-//         include: ["./src/**/*.ts"],
-//         //exclude: ["**/__tests__", "**/*.test.ts"],
-//       }),
-//       babel({
-//         babelHelpers: "bundled",
-//       }),
-//       // copy only index.js from build/umd to dist
-//       // because we don't distribute the sourcemap
-//       copy({
-//         targets: [
-//           {
-//             src: "build/umd/index.js",
-//             dest: "dist/",
-//           },
-//         ],
-//         copyOnce: false,
-//         hook: "closeBundle",
-//       }),
-//     ],
-//   },
-// ];
