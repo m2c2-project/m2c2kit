@@ -4,7 +4,7 @@
 
     /* Projects */
     // "incremental": true,                              /* Enable incremental compilation */
-    "composite": true /* Enable constraints that allow a TypeScript project to be used with project references. */,
+    //"composite": true /* Enable constraints that allow a TypeScript project to be used with project references. */,
     // "tsBuildInfoFile": "./",                          /* Specify the folder for .tsbuildinfo incremental compilation files. */
     // "disableSourceOfProjectReferenceRedirect": true,  /* Disable preferring source files instead of declaration files when referencing composite projects */
     // "disableSolutionSearching": true,                 /* Opt a project out of multi-project reference checking when editing. */
@@ -103,6 +103,7 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
+  // "include": [],
   // these may be not needed, since we define include/exclude in rollup?
   "exclude": [
     "node_modules",

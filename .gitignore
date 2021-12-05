@@ -7,6 +7,7 @@
 
 .rollup.cache
 build/
+build-umd/
 
 # copied m2c2 dist modules for non-bundled javascript example
 examples/src/javascript/esm

@@ -25,19 +25,16 @@ export default [
     // combine all declaration files
     output: [{ file: "./build/index.mjs", format: "esm", sourcemap: true }],
     plugins: [
-      del({ targets: ["dist/*", "build/*"] }),
+      del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
       ...sharedPlugins,
       typescript({
-        outputToFilesystem: false,
         tsconfig: "./tsconfig.json",
-        // outDir will be relative to the "output" set above, i.e., ./build/esm
+        // outDir will be relative to the "output" set above, i.e., ./build
         outDir: ".",
         declaration: true,
-        include: ["./**/*.ts", "./**/*.js"],
         sourceMap: true,
-        // inlineSourceMap: true,
-        //include: ["./src/**/*.ts"],
-        //exclude: ["**/__tests__", "**/*.test.ts"],
+        include: ["./src/**/*.ts"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
       }),
     ],
   },
@@ -53,6 +50,7 @@ export default [
         targets: [
           {
             // copy the bundled esm module to dist
+            // and build-umd
             src: "build/index.mjs*",
             dest: ["dist/"],
           },
@@ -61,15 +59,13 @@ export default [
     ],
   },
 
-  // // Make a UMD bundle only to use for testing (jest), because jest support
-  // // for esm modules is still incomplete
-  // // the UMD bundle for testing is in build, but the one for distribution
-  // // will be in dist
+  // Make a UMD bundle only to use for testing (jest), because jest support
+  // for esm modules is still incomplete
   {
     input: "./src/index.ts",
     output: [
       {
-        file: "./build/index.js",
+        dir: "./build-umd",
         format: "umd",
         name: "m2c2kit",
         esModule: false,
@@ -80,27 +76,29 @@ export default [
     plugins: [
       ...sharedPlugins,
       typescript({
-        outputToFilesystem: false,
         tsconfig: "./tsconfig.json",
-        outDir: ".",
-        //declaration: false,
+        outDir: "./build-umd",
+        declaration: true,
         include: ["./**/*.ts", "./**/*.js"],
-        //exclude: ["**/__tests__", "**/*.test.ts"],
+        exclude: [
+          "rollup.config*",
+          "jest.config*",
+          "jestSetup*",
+          "**/__tests__/**/*",
+          "build-umd/**/*",
+        ],
       }),
       babel({
         babelHelpers: "bundled",
       }),
-      // copy only index.js from build/umd to dist
-      // because we don't distribute the sourcemap
       copy({
         targets: [
           {
-            src: "build/index.js",
-            dest: "dist/",
+            // copy the bundled declarations to build-umd
+            src: "dist/index.d.ts",
+            dest: ["build-umd/"],
           },
         ],
-        copyOnce: false,
-        hook: "closeBundle",
       }),
     ],
   },
