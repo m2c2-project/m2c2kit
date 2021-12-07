@@ -1,3 +1,5 @@
-# /packages Folder
+# m2c2kit
 
-These are all the NPM packages in this repository.
+This package implements the m2c2kit core functionality.
+
+License: MIT

@@ -6,6 +6,7 @@ import copy from "rollup-plugin-copy";
 import babel from "@rollup/plugin-babel";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
+import { terser } from "rollup-plugin-terser";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -23,7 +24,7 @@ export default [
     input: ["./src/index.ts"],
     // the output is build/esm because we need a later step to
     // combine all declaration files
-    output: [{ file: "./build/index.mjs", format: "esm", sourcemap: true }],
+    output: [{ file: "./build/index.mjs", format: "es", sourcemap: true }],
     plugins: [
       del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
       ...sharedPlugins,
@@ -36,6 +37,7 @@ export default [
         include: ["./src/**/*.ts"],
         exclude: ["**/__tests__", "**/*.test.ts"],
       }),
+      terser(),
     ],
   },
 
@@ -51,7 +53,7 @@ export default [
           {
             // copy the bundled esm module to dist
             // and build-umd
-            src: "build/index.mjs*",
+            src: "build/index.mjs",
             dest: ["dist/"],
           },
         ],

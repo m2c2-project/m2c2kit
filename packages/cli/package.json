@@ -1,0 +1,31 @@
+{
+  "name": "@m2c2kit/cli",
+  "version": "1.0.0",
+  "description": "",
+  "module": "dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "bin": {
+    "m2c2kit": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syabiku/m2c2kit-draft.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syabiku/m2c2kit-draft/issues"
+  },
+  "homepage": "https://github.com/syabiku/m2c2kit-draft#readme",
+  "dependencies": {
+    "yargs": "^17.3.0",
+    "handlebars": "^4.7.7"
+  }
+}
