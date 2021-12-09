@@ -1,31 +1,39 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.2",
+  "description": "m2c2kit command line interface",
   "module": "dist/cli.js",
   "files": [
     "dist"
   ],
   "type": "module",
   "bin": {
-    "m2c2kit": "./dist/cli.js"
+    "m2": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/syabiku/m2c2kit-draft.git"
+    "build": "npm run clean && npm run compile && npm run copy-files && npm run write-dotenv",
+    "compile": "tsc",
+    "clean": "rimraf dist/ && rimraf build/",
+    "copy-files": "copyfiles -f build/src/cli.js dist && copyfiles templates/* fonts/** dist/",
+    "write-dotenv": "node write-dotenv.js"
   },
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/syabiku/m2c2kit-draft/issues"
-  },
-  "homepage": "https://github.com/syabiku/m2c2kit-draft#readme",
+  "license": "MIT",
   "dependencies": {
-    "yargs": "^17.3.0",
-    "handlebars": "^4.7.7"
+    "chalk": "^5.0.0",
+    "handlebars": "^4.7.7",
+    "ora": "^6.0.1",
+    "yargs": "^17.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12",
+    "@types/yargs": "^17.0.7",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^3.0.2",
+    "tslib": "~2.3.1",
+    "typescript": "^4.5.2"
   }
 }

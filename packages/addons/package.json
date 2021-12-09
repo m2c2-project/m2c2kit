@@ -14,7 +14,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@m2c2kit/core": "1.0.0"
+    "@m2c2kit/core": "0.1.0"
   },
   "devDependencies": {},
   "scripts": {
