@@ -1,28 +1,30 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>{{appName}}</title>
-    <style type="text/css">
-      body { margin: 0; }
-    </style>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
 
-  <body style="background: white">
-    <div
-      style="
+<head>
+  <title>{{appName}}</title>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+
+<body style="background: white">
+  <div style="
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         width: 100vw;
-      "
-    >
-      <canvas style="height: 100vh; width: 100vw"></canvas>
-      <!-- If you don't want the game to start immediately, remove game.start()
+      ">
+    <canvas style="height: 100vh; width: 100vw"></canvas>
+    <!-- If you don't want the game to start immediately, remove game.start()
            from the code and call game.start() somehow else, such as with
            the button shown below or a programmatic call -->
-      <!-- <button
+    <!-- <button
         style="position: absolute; bottom: 8px; left: 8px"
         id="startButton"
         onclick="{
@@ -32,7 +34,8 @@
       >
         Start
       </button> -->
-    </div>
-    <script type="module" src="./{{appName}}.bundle.js"></script>
-  </body>
+  </div>
+  <script type="module" src="./{{appName}}.bundle.js"></script>
+</body>
+
 </html>

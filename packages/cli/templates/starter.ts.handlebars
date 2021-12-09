@@ -1,34 +1,99 @@
-import { WebColors, Action, Game, Scene, Rect, Shape, Sprite, Point, Label, }
-from "@m2c2kit/core"; const game = new Game(); // eslint-disable-next-line
-@typescript-eslint/no-explicit-any (window as unknown as any).game = game; game
-.init({ showFps: true, // set this color so we can see the boundaries of the
-game bodyBackgroundColor: WebColors.Wheat, // note: using 2:1 aspect ratio,
-because that is closer to modern phones width: 400, height: 800, // set stretch
-to true if you want to fill the screen stretch: false, fontUrls: [
-"/fonts/roboto/Roboto-Regular.ttf", ], // each svgImage below, you specify
-either a tag of an svg in the property "svgString" (as I do below) // or you
-specify a URL to an svg in the property "url", such as url:
-'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg' svgImages: [
-{ name: "star", height: 60, width: 60, svgString: '<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="304"
-  height="290"
->
-  <path
-    d="M2,111 h300 l-242.7,176.3 92.7,-285.3 92.7,285.3 z"
-    style="fill:#00FF00;stroke:#0000FF;stroke-width:15;stroke-linejoin:round"
-  ></path></svg>', }, ], }) .then(() => { const s = new Scene({ backgroundColor:
-WebColors.SlateBlue, name: "firstScene", }); game.addScene(s); const greeting =
-new Label({ text: "Hello,
-{{appName}}", fontColor: WebColors.WhiteSmoke, position: new Point(200, 200),
-}); s.addChild(greeting); const starImage = new Sprite({ imageName: "star",
-position: new Point(200, 400), }); s.addChild(starImage); const rectangle = new
-Shape({ rect: new Rect({ width: 300, height: 50, x: 200, y: 700 }),
-cornerRadius: 9, fillColor: WebColors.RebeccaPurple, }); const messageLabel =
-new Label({ text: "you tapped the bar!", fontColor: WebColors.Yellow, position:
-new Point(200, 600), }); s.addChild(messageLabel); messageLabel.hidden = true;
-rectangle.isUserInteractionEnabled = true; rectangle.onTap(() => {
-console.log("you tapped it!"); rectangle.run( Action.Sequence([ Action.Custom({
-callback: () => { messageLabel.hidden = false; }, }), Action.Wait({ duration:
-500 }), Action.Custom({ callback: () => { messageLabel.hidden = true; }, }), ])
-); }); s.addChild(rectangle); game.start("firstScene"); });
+import {
+  WebColors,
+  Action,
+  Game,
+  Scene,
+  Rect,
+  Shape,
+  Sprite,
+  Point,
+  Label,
+} from "@m2c2kit/core";
+
+const game = new Game();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as unknown as any).game = game;
+
+game
+  .init({
+    showFps: true,
+    // set this color so we can see the boundaries of the game
+    bodyBackgroundColor: WebColors.Wheat,
+    // note: using 2:1 aspect ratio, because that is closer to modern phones
+    width: 400,
+    height: 800,
+    // set stretch to true if you want to fill the screen
+    stretch: false,
+    fontUrls: [
+      "/fonts/roboto/Roboto-Regular.ttf",
+    ],
+    // each svgImage below, you specify either a tag of an svg in the property "svgString" (as I do below)
+    // or you specify a URL to an svg in the property "url", such as url: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg'
+    svgImages: [
+      {
+        name: "star",
+        height: 60,
+        width: 60,
+        svgString:
+          '<svg xmlns="http://www.w3.org/2000/svg" width="304" height="290"> <path d="M2,111 h300 l-242.7,176.3 92.7,-285.3 92.7,285.3 z" style="fill:#00FF00;stroke:#0000FF;stroke-width:15;stroke-linejoin:round"/></svg>',
+      },
+    ],
+  })
+  .then(() => {
+    const s = new Scene({
+      backgroundColor: WebColors.SlateBlue,
+      name: "firstScene",
+    });
+    game.addScene(s);
+
+    const greeting = new Label({
+      text: "Hello, {{appName}}",
+      fontColor: WebColors.WhiteSmoke,
+      position: new Point(200, 200),
+    });
+    s.addChild(greeting);
+
+    const starImage = new Sprite({
+      imageName: "star",
+      position: new Point(200, 400),
+    });
+    s.addChild(starImage);
+
+    const rectangle = new Shape({
+      rect: new Rect({ width: 300, height: 50, x: 200, y: 700 }),
+      cornerRadius: 9,
+      fillColor: WebColors.RebeccaPurple,
+    });
+
+    const messageLabel = new Label({
+      text: "you tapped the bar!",
+      fontColor: WebColors.Yellow,
+      position: new Point(200, 600),
+    });
+    s.addChild(messageLabel);
+    messageLabel.hidden = true;
+
+    rectangle.isUserInteractionEnabled = true;
+    rectangle.onTap(() => {
+      console.log("you tapped it!");
+      rectangle.run(
+        Action.Sequence([
+          Action.Custom({
+            callback: () => {
+              messageLabel.hidden = false;
+            },
+          }),
+          Action.Wait({ duration: 500 }),
+          Action.Custom({
+            callback: () => {
+              messageLabel.hidden = true;
+            },
+          }),
+        ])
+      );
+    });
+
+    s.addChild(rectangle);
+
+    game.start("firstScene");
+  });
