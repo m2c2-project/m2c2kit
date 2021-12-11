@@ -3,12 +3,14 @@ import {
   Action,
   Game,
   Scene,
-  Rect,
-  Shape,
   Sprite,
   Point,
   Label,
 } from "@m2c2kit/core";
+
+import {
+  Button
+} from "@m2c2kit/addons";
 
 const game = new Game();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,24 +61,19 @@ game
     });
     s.addChild(starImage);
 
-    const rectangle = new Shape({
-      rect: new Rect({ width: 300, height: 50, x: 200, y: 700 }),
-      cornerRadius: 9,
-      fillColor: WebColors.RebeccaPurple,
-    });
-
     const messageLabel = new Label({
-      text: "you tapped the bar!",
+      text: "you clicked the button!",
       fontColor: WebColors.Yellow,
       position: new Point(200, 600),
     });
     s.addChild(messageLabel);
     messageLabel.hidden = true;
 
-    rectangle.isUserInteractionEnabled = true;
-    rectangle.onTap(() => {
+    const button = new Button( { text: "Click me!", position: new Point(200, 700) });
+    button.isUserInteractionEnabled = true;
+    button.onTap(() => {
       console.log("you tapped it!");
-      rectangle.run(
+      button.run(
         Action.Sequence([
           Action.Custom({
             callback: () => {
@@ -93,7 +90,7 @@ game
       );
     });
 
-    s.addChild(rectangle);
+    s.addChild(button);
 
     game.start("firstScene");
   });
