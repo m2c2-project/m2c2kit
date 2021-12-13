@@ -16,5 +16,5 @@ module.exports = {
   plugins: ["@typescript-eslint"],
   rules: {},
   // ignore some config js files in the root folder
-  ignorePatterns: [".eslintrc.js", "/jest*.js", "/dist", "/build"],
+  ignorePatterns: [".eslintrc.js", "jest*.js", "dist", "build", "build-umd"],
 };

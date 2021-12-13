@@ -1,3 +1,3 @@
 # /packages Folder
 
-These are all the NPM packages in this repository.
+These are all the npm packages in this repository.

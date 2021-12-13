@@ -3,29 +3,17 @@
 {
   "folders": [
     {
-      "path": "examples"
-    },
-    {
-      "path": "ex"
-    },    
-    {
-      "path": "lib"
-    },
-    {
-      "name": "file-uploader",
-      "path": "tools/file-uploader"
+      "path": "."
     },
     {
       "name": "demo-server",
       "path": "tools/demo-server"
-    },
-    {
-      "path": "."
     }
   ],
   "settings": {
     "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["examples", "lib", "tools", "file-uploader", "demo-server"]
+    "jest.disabledWorkspaceFolders": ["examples", "lib", "tools", "file-uploader", "demo-server"],
+    "azureFunctions.projectSubpath": "tools/demo-server/bin/Release/net6.0/publish",
   },
   "extensions": {
     "recommendations": [

@@ -71,9 +71,9 @@ export default (commandLineArgs) => {
         }),
         commandLineArgs.configServe &&
         serve({
-          // we can start development server but NOT automatically open browser by running
-          // npm run serve -- --configNoOpen
-          open: !commandLineArgs.configNoOpen && true,
+          // we can start development server and automatically open browser by running
+          // npm run serve -- --configOpen
+          open: commandLineArgs.configOpen && true,
           verbose: true,
           contentBase: [`./${outputFolder}`],
           historyApiFallback: true,

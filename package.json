@@ -3,25 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "workspaces": [
-    "packages/*",
-    "ex"
-  ],
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist/"
+    "packages/*"
   ],
   "scripts": {
-    "examples-start": "rollup -c rollup.examples.config.js --watch",
-    "build": "rollup -c",
-    "new": "m2c2kit-new.sh",
-    "test": "jest",
     "prepare": "husky install"
   },
   "keywords": [],
