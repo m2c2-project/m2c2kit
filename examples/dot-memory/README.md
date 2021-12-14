@@ -1,6 +1,8 @@
 # dot-memory
 
-This project was generated with the m2c2kit CLI version 0.1.2.
+**Important:** _Do not_ copy this entire folder and use this as a template to start a new cognitive task. Because this folder is part of the home repo of m2c2kit, this folder's build configuration files (tsconfig.json, rollup.config.js) have been modified for this purpose. **Use the m2c2kit cli to scaffold a new task.**
+
+Dot memory is an example of a cognitive task.
 
 ## Development server
 
