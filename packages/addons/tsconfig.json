@@ -110,5 +110,6 @@
     "build",
     "build-umd",
     "*.js" // exclude setup and config files
-  ]
+  ],
+  "references": [{ "path": "../core" }]
 }
