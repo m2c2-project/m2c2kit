@@ -3,6 +3,9 @@
 {
   "folders": [
     {
+      "path": "examples/dot-memory"
+    },
+    {
       "path": "."
     },
     {
@@ -12,7 +15,7 @@
   ],
   "settings": {
     "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["examples", "lib", "tools", "file-uploader", "demo-server"],
+    "jest.disabledWorkspaceFolders": ["dot-memory", "tools", "demo-server"],
     "azureFunctions.projectSubpath": "tools/demo-server/bin/Release/net6.0/publish",
   },
   "extensions": {

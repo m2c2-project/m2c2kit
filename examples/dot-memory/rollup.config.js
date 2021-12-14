@@ -21,18 +21,17 @@ let sharedPlugins = [
 ];
 
 export default (commandLineArgs) => {
-
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
-    outputFolder = "dist"
+    outputFolder = "dist";
   }
 
   const finalConfig = [
     {
-      input: "./src/{{appName}}.ts",
+      input: "./src/dot-memory.ts",
       output: [
         {
-          file: `./${outputFolder}/{{appName}}.bundle.js`,
+          file: `./${outputFolder}/dot-memory.bundle.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
         },
@@ -48,7 +47,7 @@ export default (commandLineArgs) => {
           targets: [
             // copy the wasm bundle out of node_modules so it can be served
             {
-              src: "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
+              src: "../../node_modules/canvaskit-wasm/bin/canvaskit.wasm",
               dest: outputFolder,
             },
             {
@@ -58,7 +57,7 @@ export default (commandLineArgs) => {
             {
               src: "img/*",
               dest: `${outputFolder}/img`,
-            },            
+            },
           ],
           copyOnce: false,
           hook: "writeBundle",
@@ -74,18 +73,17 @@ export default (commandLineArgs) => {
           hook: "writeBundle",
         }),
         commandLineArgs.configServe &&
-        serve({
-          // we can start development server and automatically open browser by running
-          // npm run serve -- --configOpen
-          open: commandLineArgs.configOpen && true,
-          verbose: true,
-          contentBase: [`./${outputFolder}`],
-          historyApiFallback: true,
-          host: "localhost",
-          port: 3000,
-        }),
-        commandLineArgs.configServe &&
-        livereload(),
+          serve({
+            // we can start development server and automatically open browser by running
+            // npm run serve -- --configOpen
+            open: commandLineArgs.configOpen && true,
+            verbose: true,
+            contentBase: [`./${outputFolder}`],
+            historyApiFallback: true,
+            host: "localhost",
+            port: 3000,
+          }),
+        commandLineArgs.configServe && livereload(),
       ],
     },
   ];

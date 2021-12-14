@@ -2,7 +2,8 @@
   "name": "m2c2kit",
   "description": "",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "dot-memory"
   ],
   "scripts": {
     "prepare": "husky install"
