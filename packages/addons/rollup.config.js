@@ -6,6 +6,7 @@ import copy from "rollup-plugin-copy";
 import babel from "@rollup/plugin-babel";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
+import { terser } from "rollup-plugin-terser";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -21,37 +22,37 @@ let sharedPlugins = [
 export default [
   {
     input: ["./src/index.ts"],
-    // the output is build/esm because we need a later step to
+    // the output is build because we need a later step to
     // combine all declaration files
-    output: [{ file: "./build/index.mjs", format: "esm", sourcemap: true }],
+    output: [{ dir: "./build", format: "es", sourcemap: true }],
     plugins: [
       del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
       ...sharedPlugins,
       typescript({
-        tsconfig: "./tsconfig.json",
-        // outDir will be relative to the "output" set above, i.e., ./build
-        outDir: ".",
-        declaration: true,
-        sourceMap: true,
-        include: ["./src/**/*.ts"],
+        // I was getting errors when defining include and exclude
+        // only in tsconfig.json, thus defining them here.
+        // note, however, because I specified rootDir below,
+        // the include and exclude now are relative to src
+        include: ["./**/*.[tj]s"],
         exclude: ["**/__tests__", "**/*.test.ts"],
+        rootDir: "src",
       }),
+      terser(),
     ],
   },
 
   {
     // bundle all declaration files and place the declaration
     // bundle in dist
-    input: "./build/src/index.d.ts",
+    input: "./build/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       dts(),
       copy({
         targets: [
           {
-            // copy the bundled esm module to dist
-            // and build-umd
-            src: "build/index.mjs*",
+            // copy the bundled esm module and sourcemap to dist
+            src: "build/index.*",
             dest: ["dist/"],
           },
         ],
@@ -76,17 +77,13 @@ export default [
     plugins: [
       ...sharedPlugins,
       typescript({
-        tsconfig: "./tsconfig.json",
+        // tsconfig.json defined the outDir as build, so we must
+        // use a different one for this umd build
         outDir: "./build-umd",
-        declaration: true,
-        include: ["./**/*.ts", "./**/*.js"],
-        exclude: [
-          "rollup.config*",
-          "jest.config*",
-          "jestSetup*",
-          "**/__tests__/**/*",
-          "build-umd/**/*",
-        ],
+        // I was getting errors when defining include and exclude
+        // only in tsconfig.json, thus defining them here.
+        include: ["./src/**/*.[tj]s"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
       }),
       babel({
         babelHelpers: "bundled",

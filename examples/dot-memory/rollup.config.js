@@ -6,6 +6,8 @@ import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import del from "rollup-plugin-delete";
+import sourcemaps from "rollup-plugin-sourcemaps";
+import path from "path";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -34,15 +36,25 @@ export default (commandLineArgs) => {
           file: `./${outputFolder}/dot-memory.bundle.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
+          sourcemapPathTransform:
+            commandLineArgs.configServe &&
+            ((relativeSourcePath, sourcemapPath) => {
+              // for sourcemaps of our m2c2kit packages, we need to modify
+              // sourcemap paths to point to the correct folder in the repo
+              return relativeSourcePath.replace(
+                "packages",
+                path.join("..", "packages")
+              );
+            }),
         },
       ],
       plugins: [
         del({ targets: [`${outputFolder}/*`] }),
         ...sharedPlugins,
         typescript({
-          inlineSourceMap: commandLineArgs.configServe && true,
-          inlineSources: commandLineArgs.configServe && true,
+          sourceMap: commandLineArgs.configServe && true,
         }),
+        sourcemaps(),
         copy({
           targets: [
             // copy the wasm bundle out of node_modules so it can be served
@@ -83,7 +95,7 @@ export default (commandLineArgs) => {
             host: "localhost",
             port: 3000,
           }),
-        commandLineArgs.configServe && livereload(),
+        commandLineArgs.configServe && livereload({ watch: "build", delay: 0 }),
       ],
     },
   ];

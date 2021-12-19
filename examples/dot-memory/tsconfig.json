@@ -1,4 +1,8 @@
 {
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/addons" }
+  ],
   "compilerOptions": {
     "composite": true,
     "target": "es6",
@@ -18,9 +22,5 @@
     "dist",
     "**/dot-memory.bundle.js",
     "rollup.config.js"
-  ],
-  "references": [
-    { "path": "../../packages/core" },
-    { "path": "../../packages/addons" }
   ]
 }

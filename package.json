@@ -3,7 +3,7 @@
   "description": "",
   "workspaces": [
     "packages/*",
-    "dot-memory"
+    "examples/dot-memory"
   ],
   "scripts": {
     "prepare": "husky install"
@@ -12,7 +12,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^8.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.4.1",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.2",
