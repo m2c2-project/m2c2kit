@@ -545,4 +545,7 @@ await yarg
   )
   .demandCommand()
   .strict()
+  // seems to have problems getting version automatically; thus I explicity
+  // provide
+  .version(cliVersion)
   .showHelpOnFail(true).argv;

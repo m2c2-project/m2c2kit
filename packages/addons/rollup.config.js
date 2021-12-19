@@ -7,6 +7,7 @@ import babel from "@rollup/plugin-babel";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
+import sourcemaps from "rollup-plugin-sourcemaps";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -37,6 +38,7 @@ export default [
         exclude: ["**/__tests__", "**/*.test.ts"],
         rootDir: "src",
       }),
+      sourcemaps(),
       terser(),
     ],
   },

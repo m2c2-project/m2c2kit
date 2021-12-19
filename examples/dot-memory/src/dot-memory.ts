@@ -56,7 +56,8 @@ let randomCells: {
   row: number;
   column: number;
 }[];
-var tapCells = [];
+// TODO: save tapped cell locations
+// var tapCells = [];
 
 // ============================================================================
 

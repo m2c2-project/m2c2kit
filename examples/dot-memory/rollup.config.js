@@ -38,6 +38,7 @@ export default (commandLineArgs) => {
           sourcemap: commandLineArgs.configServe && true,
           sourcemapPathTransform:
             commandLineArgs.configServe &&
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ((relativeSourcePath, sourcemapPath) => {
               // for sourcemaps of our m2c2kit packages, we need to modify
               // sourcemap paths to point to the correct folder in the repo
