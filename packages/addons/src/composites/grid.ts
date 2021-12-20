@@ -10,12 +10,19 @@ import {
   Entity,
   Shape,
 } from "@m2c2kit/core";
+
 export interface GridOptions extends CompositeOptions {
+  /** Number of rows in the grid. Must be 1 or greater */
   rows: number;
+  /** Number of columns in the grid. Must be 1 or greater */
   columns: number;
+  /** Size of the grid in pixels */
   size: Size;
+  /** Background color of the grid. Default is a transparent gray */
   backgroundColor?: RgbaColor;
+  /** Width of the grid lines. Default is 1 */
   gridLineWidth?: number;
+  /** Color of the grid lines. Default is red */
   gridLineColor?: RgbaColor;
 }
 
@@ -41,6 +48,13 @@ export class Grid extends Composite {
   gridChildren = new Array<GridChild>();
   private gridBackground?: Shape;
 
+  /**
+   * A rectangular grid that supports placement of entities within the grid's cells.
+   *
+   * @remarks This composite entity is composed of rectangles and lines. It has convenience functions for placing and clearing entities on the grid by row and column position (zero-based indexing)
+   *
+   * @param options - {@link GridOptions}
+   */
   constructor(options: GridOptions) {
     super(options);
     if (options.size) {
@@ -154,7 +168,11 @@ export class Grid extends Composite {
   // override Entity.RemoveAllChildren() so that when RemoveAllChildren() is called on a Grid,
   // it removes only entities added to the grid cells (what we call grid children), not the grid lines!
   // note: when we upgrade to typescript 4.3+, we can mark this with override keyword to make intention explicit
-  removeAllChildren(): void {
+  /**
+   * Removes all children from the grid, but retains grid lines.
+   *
+   */
+  override removeAllChildren(): void {
     if (this.gridChildren.length === 0) {
       return;
     }
@@ -164,6 +182,13 @@ export class Grid extends Composite {
     this.needsInitialization = true;
   }
 
+  /**
+   * Adds an entity to the grid at the specified row and column position.
+   *
+   * @param entity - entity to add to the grid
+   * @param row  - row position within grid to add entity; zero-based indexing
+   * @param column - column position within grid to add entity; zero-based indexing
+   */
   addAtCell(entity: Entity, row: number, column: number): void {
     if (row < 0 || row >= this.rows || column < 0 || column >= this.columns) {
       console.warn(
@@ -174,6 +199,12 @@ export class Grid extends Composite {
     this.needsInitialization = true;
   }
 
+  /**
+   * Removes all child entities at the specified row and column position.
+   *
+   * @param row - row position within grid at which to remove children; zero-based indexing
+   * @param column - column position within grid at which to remove children; zero-based indexing
+   */
   removeAllAtCell(row: number, column: number): void {
     this.gridChildren = this.gridChildren.filter(
       (gridChild) => gridChild.row != row && gridChild.column != column
@@ -183,7 +214,12 @@ export class Grid extends Composite {
 
   // override Entity.RemoveChild() so that when RemoveChild() is called on a Grid, it removes the
   // entity from the gridBackground rectangle AND our grid's own list of children (in gridChildren)
-  removeChild(entity: Entity): void {
+  /**
+   * Removes the child entity from the grid.
+   *
+   * @param entity - entity to remove
+   */
+  override removeChild(entity: Entity): void {
     if (!this.gridBackground) {
       throw new Error("gridBackground is null or undefined");
     }

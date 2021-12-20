@@ -9,7 +9,10 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
 
-export class TextLine extends Entity implements IDrawable, IText {
+export class TextLine
+  extends Entity
+  implements IDrawable, IText, TextLineOptions
+{
   readonly type = EntityType.textline;
   isDrawable = true;
   isText = true;
@@ -32,7 +35,7 @@ export class TextLine extends Entity implements IDrawable, IText {
    *
    * @remarks TextLine has no paragraph formatting options; Label will be preferred in most use cases.
    *
-   * @param options
+   * @param options - {@link TextLineOptions}
    */
   constructor(options: TextLineOptions = {}) {
     super(options);

@@ -54,7 +54,7 @@ export function handleInterfaceOptions(
     handleTextOptions(entity as unknown as IText, options as TextOptions);
   }
 }
-export abstract class Entity {
+export abstract class Entity implements EntityOptions {
   type = EntityType.entity;
   isDrawable = false;
   isShape = false;
@@ -206,6 +206,12 @@ export abstract class Entity {
     return entities;
   }
 
+  /**
+   * Provides the callback function to be executed when the user taps the entity.
+   *
+   * @param codeCallback - function to execute
+   * @param replaceExistingCodeCallback  - should the provided callback replace any existing callbacks? Usually we want to have only one callback defined, instead of chaining multiple ones. It is strongly recommended not to change this, unless you have a special use case. Default is true.
+   */
   onTap(
     codeCallback: (tapEvent: TapEvent) => void,
     replaceExistingCodeCallback = true

@@ -6,14 +6,17 @@
     "examples/dot-memory"
   ],
   "scripts": {
+    "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "prepare": "husky install"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
+    "chalk": "^5.0.0",
     "eslint": "^8.5.0",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^7.0.4",

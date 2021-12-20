@@ -7,7 +7,7 @@ import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
 
-export class Sprite extends Entity implements IDrawable {
+export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.sprite;
   isDrawable = true;
   // Drawable options
@@ -23,7 +23,7 @@ export class Sprite extends Entity implements IDrawable {
    *
    * @remarks Sprites must be loaded during the Game.init() method prior to their use.
    *
-   * @param options
+   * @param options - {@link SpriteOptions}
    */
   constructor(options: SpriteOptions = {}) {
     super(options);

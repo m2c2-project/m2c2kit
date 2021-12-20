@@ -6,15 +6,31 @@ import {
   Sprite,
   Point,
   Label,
+  LabelHorizontalAlignmentMode,
+  Shape,
+  Rect,
+  GameData,
 } from "@m2c2kit/core";
 
-import {
-  Button
-} from "@m2c2kit/addons";
+import { Button, Instructions } from "@m2c2kit/addons";
 
 const game = new Game();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).game = game;
+
+// game parameter defaults to be used if values are not provided
+// default parameters are not part of the m2c2kit engine, because parameters
+// are different for each game that might be written. Thus, define them here
+const defaults = {
+  ReadyTime: 1000,
+  TrialNum: 3,
+};
+
+// trial data variables names and types must be defined
+// valid types are "number", "string", "boolean", and "object"
+const demoTrialSchema = {
+  correct: "boolean",
+};
 
 game
   .init({
@@ -24,11 +40,12 @@ game
     // note: using 2:1 aspect ratio, because that is closer to modern phones
     width: 400,
     height: 800,
+    defaultParameters: defaults,
+    trialSchema: demoTrialSchema,
     // set stretch to true if you want to fill the screen
     stretch: false,
-    fontUrls: [
-      "./fonts/roboto/Roboto-Regular.ttf",
-    ],
+    // Roboto is included by default. Leave fontUrls unchanged, unless you want to use different font
+    fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
     // each svgImage below, you specify either a tag of an svg in the property "svgString" (as I do below)
     // or you specify a URL to an svg in the property "url", such as url: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg'
     svgImages: [
@@ -42,55 +59,237 @@ game
     ],
   })
   .then(() => {
-    const s = new Scene({
-      backgroundColor: WebColors.SlateBlue,
-      name: "firstScene",
-    });
-    game.addScene(s);
+    // callback provided to onTrialComplete is called when each trial is done
+    game.onTrialComplete(
+      (trialNumber: number, data: GameData, trialSchema: object) => {
+        console.log(`Trial number ${trialNumber} completed.`);
+        console.log(`Current Game data is: ${JSON.stringify(data)}`);
+        console.log(`Trial schema is: ${JSON.stringify(trialSchema)}`);
+      }
+    );
 
-    const greeting = new Label({
-      text: "Hello, {{appName}}",
-      fontColor: WebColors.WhiteSmoke,
-      position: new Point(200, 200),
+    // callback provided to onAllTrialsComplete is called when all game trials are done
+    game.onAllTrialsComplete((data: GameData, trialSchema: object) => {
+      console.log(`All trials completed.`);
+      console.log(`Complete Game data is: ${JSON.stringify(data)}`);
+      console.log(`Trial schema is: ${JSON.stringify(trialSchema)}`);
     });
-    s.addChild(greeting);
 
-    const starImage = new Sprite({
-      imageName: "star",
+    const instructionsScenes = Instructions.Create({
+      sceneNamePrefix: "instructions",
+      backgroundColor: WebColors.White,
+      nextButtonBackgroundColor: WebColors.Black,
+      backButtonBackgroundColor: WebColors.Black,
+      instructionScenes: [
+        {
+          title: "{{appName}} Demo",
+          text: "For this activity, you will click the red rectangle. Open the developer console to see the trial data.",
+          textFontSize: 24,
+          titleFontSize: 30,
+        },
+        {
+          title: "{{appName}} Demo",
+          text: "Press START to begin!",
+          textFontSize: 24,
+          titleFontSize: 30,
+          textAlignmentMode: LabelHorizontalAlignmentMode.center,
+          nextButtonText: "START",
+          nextButtonBackgroundColor: WebColors.Green,
+        },
+      ],
+      // this is the scene to go to after the last instructions scene
+      postInstructionsScene: "getReadyScene",
+    });
+    game.addScenes(instructionsScenes);
+
+    // start at 0
+    game.trialNumber = 0;
+
+    const demoPage0 = new Scene({
+      // Because this is the scene after the instructions, we must give
+      // it a name and provide it to postInstructionsScene, above
+      name: "getReadyScene",
+      backgroundColor: WebColors.White,
+    });
+    game.addScene(demoPage0);
+
+    const getReadyMessage = new Label({
+      text: "Get Ready",
+      fontSize: 24,
       position: new Point(200, 400),
     });
-    s.addChild(starImage);
+    demoPage0.addChild(getReadyMessage);
 
-    const messageLabel = new Label({
-      text: "you clicked the button!",
-      fontColor: WebColors.Yellow,
-      position: new Point(200, 600),
+    // example of how to use an image. The image must be previously loaded
+    const starSprite = new Sprite({
+      imageName: "star",
+      position: new Point(200, 500),
     });
-    s.addChild(messageLabel);
-    messageLabel.hidden = true;
+    demoPage0.addChild(starSprite);
 
-    const button = new Button( { text: "Click me!", position: new Point(200, 700) });
-    button.isUserInteractionEnabled = true;
-    button.onTap(() => {
-      console.log("you tapped it!");
-      button.run(
+    // demoPage0.setup() has a callback that is executed each time this scene is shown
+    demoPage0.setup(() => {
+      demoPage0.run(
         Action.Sequence([
+          // Get the wait duration from the default game parameters, defined above
+          Action.Wait({ duration: game.getParameter("ReadyTime") }),
           Action.Custom({
             callback: () => {
-              messageLabel.hidden = false;
-            },
-          }),
-          Action.Wait({ duration: 500 }),
-          Action.Custom({
-            callback: () => {
-              messageLabel.hidden = true;
+              game.presentScene(demoPage1);
             },
           }),
         ])
       );
     });
 
-    s.addChild(button);
+    // these entities (demoPage1 through wrongMessage) can be defined outside of a setup()
+    // because they exist through multiple trials
+    // Their position and how they respond to interactions may differ across trials,
+    // and that logic will be written within a setup()
+    const demoPage1 = new Scene({ backgroundColor: WebColors.LightGray });
+    game.addScene(demoPage1);
+    const redRect = new Shape({
+      rect: new Rect({ width: 150, height: 100 }),
+      fillColor: WebColors.Red,
+    });
+    demoPage1.addChild(redRect);
+    const blueRect = new Shape({
+      rect: new Rect({ width: 150, height: 100 }),
+      fillColor: WebColors.Blue,
+    });
+    demoPage1.addChild(blueRect);
+    const correctMessage = new Label({
+      text: "CORRECT!",
+      position: new Point(200, 500),
+    });
+    correctMessage.hidden = true;
+    demoPage1.addChild(correctMessage);
+    const wrongMessage = new Label({
+      text: "WRONG!",
+      position: new Point(200, 500),
+    });
+    wrongMessage.hidden = true;
+    demoPage1.addChild(wrongMessage);
 
-    game.start("firstScene");
+    // demoPage1.setup() has a callback that is executed each time this scene is shown
+    // we will randomly decide on what side the red rectangle is shown
+    demoPage1.setup(() => {
+      let redOnLeft = true;
+      if (Math.random() > 0.5) {
+        redOnLeft = false;
+      }
+
+      if (redOnLeft) {
+        redRect.position = new Point(100, 300);
+        blueRect.position = new Point(300, 300);
+      } else {
+        redRect.position = new Point(300, 300);
+        blueRect.position = new Point(100, 300);
+      }
+
+      // helper function to record the user's choice and
+      // decide if we are done
+      function recordUserInput(choseRedRect: boolean) {
+        game.addTrialData("correct", choseRedRect);
+        game.lifecycle.trialComplete(
+          game.trialNumber,
+          game.data,
+          game.trialSchema
+        );
+        game.trialNumber++;
+        // have we finished the number of trials?
+        if (game.trialNumber < game.getParameter<number>("TrialNum")) {
+          game.presentScene(demoPage0);
+        } else {
+          game.presentScene(endPage);
+        }
+      }
+
+      redRect.isUserInteractionEnabled = true;
+      redRect.onTap(() => {
+        redRect.run(
+          Action.Sequence([
+            Action.Custom({
+              callback: () => {
+                // once a choice is made, don't allow additional taps
+                redRect.isUserInteractionEnabled = false;
+                blueRect.isUserInteractionEnabled = false;
+              },
+            }),
+            // short animation to shrink and grow button
+            Action.Scale({ scale: 0.8, duration: 250 }),
+            Action.Scale({ scale: 1, duration: 250 }),
+            // Show the "CORRECT" message
+            Action.Custom({
+              callback: () => {
+                correctMessage.hidden = false;
+              },
+            }),
+            Action.Wait({ duration: 1000 }),
+            // Handle the logic of recording data, and deciding if we should
+            // do another trial in recordUserInput
+            Action.Custom({
+              callback: () => {
+                correctMessage.hidden = true;
+                recordUserInput(true);
+              },
+            }),
+          ])
+        );
+      });
+
+      blueRect.isUserInteractionEnabled = true;
+      blueRect.onTap(() => {
+        blueRect.run(
+          Action.Sequence([
+            Action.Custom({
+              callback: () => {
+                redRect.isUserInteractionEnabled = false;
+                blueRect.isUserInteractionEnabled = false;
+              },
+            }),
+            Action.Scale({ scale: 0.8, duration: 250 }),
+            Action.Scale({ scale: 1, duration: 250 }),
+            Action.Custom({
+              callback: () => {
+                wrongMessage.hidden = false;
+              },
+            }),
+            Action.Wait({ duration: 1000 }),
+            Action.Custom({
+              callback: () => {
+                wrongMessage.hidden = true;
+                recordUserInput(false);
+              },
+            }),
+          ])
+        );
+      });
+    });
+
+    const endPage = new Scene();
+    game.addScene(endPage);
+    const doneLabel = new Label({
+      text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
+      position: new Point(200, 300),
+    });
+    endPage.addChild(doneLabel);
+
+    const againButton = new Button({
+      text: "Start over",
+      position: new Point(200, 400),
+    });
+    againButton.isUserInteractionEnabled = true;
+    againButton.onTap(() => {
+      game.initData(game.trialSchema);
+      game.presentScene(demoPage0);
+    });
+    endPage.addChild(againButton);
+
+    endPage.setup(() => {
+      doneLabel.text = `You did ${game.trialNumber} trials. You're done!`;
+      game.lifecycle.allTrialsComplete(game.data, game.trialSchema);
+    });
+
+    game.start("instructions-01");
   });

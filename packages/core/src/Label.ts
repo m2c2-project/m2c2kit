@@ -15,7 +15,7 @@ import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 
-export class Label extends Entity implements IDrawable, IText {
+export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.label;
   isDrawable = true;
   isText = true;
@@ -39,9 +39,9 @@ export class Label extends Entity implements IDrawable, IText {
   /**
    * Single or multi-line text formatted and rendered on the screen.
    *
-   * @remarks  Label (in contrast to TextLine) has enhanced text support for line wrapping, centering/alignment, and background colors.
+   * @remarks Label (in contrast to TextLine) has enhanced text support for line wrapping, centering/alignment, and background colors.
    *
-   * @param options
+   * @param options - {@link LabelOptions}
    */
   constructor(options: LabelOptions = {}) {
     super(options);

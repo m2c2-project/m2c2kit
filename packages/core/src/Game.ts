@@ -38,7 +38,7 @@ interface TrialData {
 interface Metadata {
   userAgent?: string;
 }
-interface GameData {
+export interface GameData {
   trials: Array<TrialData>;
   metadata: Metadata;
 }
@@ -194,14 +194,16 @@ export class Game {
    * at the appropriate time. It is not triggered automatically.
    * @param codeCallback
    */
-  onAllTrialsComplete(codeCallback: (data: GameData) => void): void {
+  onAllTrialsComplete(
+    codeCallback: (data: GameData, trialSchema: object) => void
+  ): void {
     this.lifecycle.allTrialsComplete = codeCallback;
   }
 
   /**
    * Adds a scene to the game.
    *
-   * @remarks A scene, and its children entities, cannot be preseneted unless it has been added to the game object.
+   * @remarks A scene, and its children entities, cannot be presented unless it has been added to the game object.
    *
    * @param scene
    */
@@ -212,6 +214,11 @@ export class Game {
     this.scenes.push(scene);
   }
 
+  /**
+   * Adds multiple scenes to the game.
+   *
+   * @param scenes
+   */
   addScenes(scenes: Array<Scene>): void {
     scenes.forEach((scene) => {
       this.addScene(scene);
@@ -329,6 +336,7 @@ export class Game {
   }
 
   initData(trialSchema: object): void {
+    this.trialNumber = 0;
     this.trialSchema = trialSchema;
     const variables = Object.entries(trialSchema);
     const validDataTypes = ["number", "string", "boolean", "object"];
@@ -342,6 +350,14 @@ export class Game {
     });
   }
 
+  /**
+   * Adds data to the game's TrialData object.
+   *
+   * @remarks The variableName must be previously defined in the trialSchema object passed in during game initialization. see {@link GameInitOptions.trialSchema}. The type of the value must match what was defined in the trialSchema, otherwise an error is thrown.
+   *
+   * @param variableName - variable to be set
+   * @param value - value of the variable to set
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addTrialData(variableName: string, value: any): void {
     if (this.data.trials.length < this.trialNumber + 1) {

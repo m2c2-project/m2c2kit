@@ -3,7 +3,9 @@
  */
 
 export class Point {
+  /** Horizonal coordinate */
   x: number;
+  /** Vertical coordinate */
   y: number;
 
   constructor(x?: number, y?: number) {

@@ -85,7 +85,7 @@ export default (commandLineArgs) => {
           port: 3000,
         }),
         commandLineArgs.configServe &&
-        livereload(),
+        livereload({ watch: "build", delay: 0 }),
       ],
     },
   ];

@@ -9,7 +9,7 @@ import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
 
-export class Scene extends Entity implements IDrawable {
+export class Scene extends Entity implements IDrawable, SceneOptions {
   readonly type = EntityType.scene;
   isDrawable = true;
   // Drawable options
@@ -29,8 +29,7 @@ export class Scene extends Entity implements IDrawable {
    *
    * @remarks The scene is the game screen or stage, and fills the entire available screen. There are usually multiple screens to contain multiple stages of the game, such as various instruction pages or phases of a game.
    *
-   * @param options
-   * @see {@link SceneOptions}
+   * @param options - {@link SceneOptions}
    */
   constructor(options: SceneOptions = {}) {
     super(options);

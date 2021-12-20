@@ -14,9 +14,14 @@ import {
 import "../Globals";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
+  /** Size of button */
   size?: Size;
+  /** Corner radius of button; can be used to make rounded corners */
   cornerRadius?: number;
+  /** Background color of button. Default is WebColors.RoyalBlue */
   backgroundColor?: RgbaColor;
+  /** Color of button text. Default is WebColors.White */
+  fontColor?: RgbaColor;
 }
 
 export class Button extends Composite implements IText {

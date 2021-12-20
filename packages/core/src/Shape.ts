@@ -10,7 +10,7 @@ import { ShapeOptions } from "./ShapeOptions";
 import { Rect } from "./Rect";
 import { ShapeType } from "./ShapeType";
 
-export class Shape extends Entity implements IDrawable {
+export class Shape extends Entity implements IDrawable, ShapeOptions {
   readonly type = EntityType.shape;
   isDrawable = true;
   isShape = true;
@@ -31,9 +31,9 @@ export class Shape extends Entity implements IDrawable {
   private strokeColorPaint?: Paint;
 
   /**
-   * Rectangular shape
+   * Rectangular or circular shape
    *
-   * @param options
+   * @param options - {@link ShapeOptions}
    */
   constructor(options: ShapeOptions = {}) {
     super(options);

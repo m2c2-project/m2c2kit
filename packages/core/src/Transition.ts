@@ -4,6 +4,13 @@ export abstract class Transition {
   abstract type: TransitionType;
   duration = 0;
 
+  /**
+   * Creates a scene transition in which the outgoing scene slides out and the incoming scene slides in, as if the incoming scene pushes it.
+   *
+   * @param direction - TransitionDirection in which the push action goes
+   * @param duration - Duration, in millis, of the transition
+   * @returns
+   */
   public static push(
     direction: TransitionDirection,
     duration: number
