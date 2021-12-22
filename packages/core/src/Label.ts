@@ -93,16 +93,20 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.paraStyle.textStyle.backgroundColor = this.backgroundColor;
     }
 
-    const fontManager = (this.parentSceneAsEntity as unknown as Scene).game
-      .fontManager;
+    const activity = (this.parentSceneAsEntity as unknown as Scene).game
+      .activity;
+    if (!activity) {
+      throw new Error("activity is undefined");
+    }
+    const fontManager = activity.fontManager;
 
-    if (fontManager._fontMgr === undefined) {
+    if (fontManager.fontMgr === undefined) {
       throw new Error("no fonts loaded");
     }
 
     const builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
-      fontManager._fontMgr
+      fontManager.fontMgr
     );
     if (!this.text) {
       this.text = "";

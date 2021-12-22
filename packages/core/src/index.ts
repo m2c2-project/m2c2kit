@@ -1,4 +1,5 @@
 export * from "./Action";
+export * from "./Activity";
 export * from "./Composite";
 export * from "./CompositeOptions";
 export * from "./Constants";

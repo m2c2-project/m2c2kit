@@ -99,12 +99,19 @@ export class TextLine
     this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
 
-    const fontManager = (this.parentSceneAsEntity as unknown as Scene).game
-      .fontManager;
+    const activity = (this.parentSceneAsEntity as unknown as Scene).game
+      .activity;
+    if (!activity) {
+      throw new Error("activity is undefined");
+    }
+    const fontManager = activity.fontManager;
 
+    const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
     if (this.fontName) {
       this.font = new this.canvasKit.Font(
-        fontManager._getTypeface(this.fontName),
+        fontManager.getTypeface(gameUuid, this.fontName),
+        //fontManager.gameTypefaces[gameUuid][this.fontName],
+        //fontManager._getTypeface(this.fontName),
         this.fontSize * Globals.canvasScale
       );
     } else {

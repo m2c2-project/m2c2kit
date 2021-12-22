@@ -36,8 +36,12 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   override initialize(): void {
-    const imageManager = (this.parentSceneAsEntity as unknown as Scene).game
-      .imageManager;
+    const activity = (this.parentSceneAsEntity as unknown as Scene).game
+      .activity;
+    if (!activity) {
+      throw new Error("activity is undefined");
+    }
+    const imageManager = activity.imageManager;
     if (!Object.keys(imageManager._loadedImages).includes(this._imageName)) {
       throw new Error(
         `an image with name ${this._imageName} has not been loaded`

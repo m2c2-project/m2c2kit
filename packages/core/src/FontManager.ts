@@ -1,44 +1,79 @@
-import "./Globals";
 import { ttfInfo } from "./ttfInfo.js";
 import { CanvasKit, FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
 
+/**
+ * This class contains all the fonts for all the games in the activity.
+ * Fonts have been converted to canvaskit Typeface
+ */
+class GameTypefaces {
+  [gameUuid: string]: {
+    [fontFamily: string]: Typeface;
+  };
+}
+
 export class FontManager {
   canvasKit?: CanvasKit;
-  _fontMgr?: FontMgr;
-  private _typefaces: Record<string, Typeface> = {};
+  fontMgr?: FontMgr;
+  private gameTypefaces = new GameTypefaces();
 
-  _getTypeface(name: string): Typeface {
-    return this._typefaces[name];
+  /**
+   * Gets a typeface that was previously loaded for this game.
+   *
+   * @param gameUuid
+   * @param fontFamily
+   * @returns the requested Typeface
+   */
+  getTypeface(gameUuid: string, fontFamily: string): Typeface {
+    return this.gameTypefaces[gameUuid][fontFamily];
   }
 
-  FetchFontsAsArrayBuffers(fontUrls: Array<string>): Promise<FontData>[] {
+  /**
+   * For the specified game, fetches all fonts in the array of urls and stores fonts as array buffers.
+   *
+   * @param gameUuid
+   * @param fontUrls - array of font urls
+   * @returns
+   */
+  FetchGameFontsAsArrayBuffers(
+    gameUuid: string,
+    fontUrls: Array<string>
+  ): Promise<FontData[]> {
     const fetchFontsPromises = fontUrls.map((fontUrl) =>
       fetch(fontUrl)
         .then((response) => response.arrayBuffer())
         .then((arrayBuffer) => ({
+          gameUuid: gameUuid,
           fontUrl: fontUrl,
           fontArrayBuffer: arrayBuffer,
         }))
     );
-    return fetchFontsPromises;
+    return Promise.all(fetchFontsPromises);
   }
 
-  LoadFonts(fonts: Array<ArrayBuffer>): void {
+  /**
+   * For the specified game, loads all fonts from array buffers and makes fonts available within canvaskit.
+   *
+   * @param gameUuid
+   * @param fonts - array of fonts in array buffer form
+   */
+  LoadGameFonts(gameUuid: string, fonts: Array<ArrayBuffer>): void {
     if (!this.canvasKit) {
       throw new Error("canvasKit undefined");
     }
-    this._fontMgr = this.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
-    if (this._fontMgr === undefined) {
-      throw new Error("error loading fonts");
+    this.fontMgr = this.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
+    if (!this.fontMgr) {
+      throw new Error("error creating FontMgr while loading fonts");
     }
     fonts.forEach((font) => {
       const result = ttfInfo(new DataView(font));
       const fontFamily = result.meta.property
         .filter((p: { name: string; text: string }) => p.name === "font-family")
         .find(Boolean)?.text;
-      if (fontFamily === undefined || this._fontMgr === undefined) {
-        throw new Error("error loading fonts");
+      if (fontFamily === undefined) {
+        throw new Error(
+          "error loading fonts. could not get font-family from font array buffer"
+        );
       }
       console.log("font loaded. font family: " + fontFamily);
       if (!this.canvasKit) {
@@ -46,9 +81,13 @@ export class FontManager {
       }
       const typeface = this.canvasKit.Typeface.MakeFreeTypeFaceFromData(font);
       if (!typeface) {
-        throw new Error("Can't make typeface");
+        throw new Error("cannot make typeface from font array buffer");
       }
-      this._typefaces[fontFamily] = typeface;
+
+      if (!this.gameTypefaces[gameUuid]) {
+        this.gameTypefaces[gameUuid] = {};
+      }
+      this.gameTypefaces[gameUuid][fontFamily] = typeface;
     });
   }
 }

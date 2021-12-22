@@ -10,8 +10,6 @@ import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
 import { Action } from "./Action";
-import { FontData } from "./FontData";
-import { FontManager } from "./FontManager";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { ImageManager } from "./ImageManager";
@@ -25,6 +23,7 @@ import {
   TransitionDirection,
 } from "./Transition";
 import { GameInitOptions } from "./GameInitOptions";
+import { Activity } from "./Activity";
 
 interface BoundingBox {
   xMin: number;
@@ -53,13 +52,12 @@ interface LifecycleCallbacks {
 
 export class Game {
   canvasKit?: CanvasKit;
+  activity?: Activity;
+  uuid = this.generateUUID();
+  options: GameInitOptions;
 
-  imageManager: ImageManager;
-  fontManager: FontManager;
-
-  constructor() {
-    this.imageManager = new ImageManager();
-    this.fontManager = new FontManager();
+  constructor(options: GameInitOptions) {
+    this.options = options;
   }
 
   public entryScene?: Scene | string;
@@ -129,10 +127,11 @@ export class Game {
    * @param gameInitOptions
    * @returns Promise<void>
    */
-  init(gameInitOptions: GameInitOptions): Promise<void> {
+  init(): void {
+    const gameInitOptions = this.options;
     this.unitTesting = gameInitOptions._unitTesting ?? false;
 
-    let initStartedTimeStamp: number;
+    let initStartedTimeStamp: number = 0;
     if (!this.unitTesting) {
       initStartedTimeStamp = window.performance.now();
     }
@@ -146,42 +145,49 @@ export class Game {
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
-    const canvasKitPromise = this.loadCanvasKit();
-    const fontDataPromises = this.fetchFonts(gameInitOptions.fontUrls);
-    const renderedSvgImagesPromises = this.renderSvgImages(
-      gameInitOptions.svgImages
-    );
-
+    //const canvasKitPromise = this.loadCanvasKit();
     this.data.metadata.userAgent = navigator.userAgent;
 
     this.defaultParameters = gameInitOptions.defaultParameters ?? {};
     this.initData(gameInitOptions.trialSchema ?? {});
 
-    return Promise.all([
-      canvasKitPromise,
-      Promise.all(fontDataPromises),
-      Promise.all(renderedSvgImagesPromises),
-    ]).then(([canvasKit, fontData, renderedSvgImages]) => {
-      //Globals.canvasKit = canvasKit;
-      this.canvasKit = canvasKit;
+    this.setupCanvasKitSurface();
+    this.setupFpsFont();
+    this.setupEventHandlers();
 
-      this.fontManager.canvasKit = this.canvasKit;
-      this.imageManager.canvasKit = this.canvasKit;
+    if (!this.unitTesting) {
+      console.log(
+        `Game.init() took ${(
+          window.performance.now() - initStartedTimeStamp
+        ).toFixed(0)} ms`
+      );
+    }
 
-      this.loadFonts(gameInitOptions.fontUrls, fontData);
-      this.imageManager.LoadRenderedSvgImages(renderedSvgImages);
-      this.setupCanvasKitSurface();
-      this.setupFpsFont();
-      this.setupEventHandlers();
+    // return Promise.all([
+    //   canvasKitPromise,
+    //   //Promise.all(fontDataPromises),
+    //   //Promise.all(renderedSvgImagesPromises),
+    // ]).then(([canvasKit, /*fontData, renderedSvgImages*/]) => {
+    //   //Globals.canvasKit = canvasKit;
+    //   this.canvasKit = canvasKit;
 
-      if (!this.unitTesting) {
-        console.log(
-          `Game.init() took ${(
-            window.performance.now() - initStartedTimeStamp
-          ).toFixed(0)} ms`
-        );
-      }
-    });
+    //   //this.fontManager.canvasKit = this.canvasKit;
+    //   //this.imageManager.canvasKit = this.canvasKit;
+
+    //   // this.loadFonts(gameInitOptions.fontUrls, fontData);
+    //   // this.imageManager.LoadRenderedSvgImages(renderedSvgImages);
+    //   this.setupCanvasKitSurface();
+    //   this.setupFpsFont();
+    //   this.setupEventHandlers();
+
+    //   if (!this.unitTesting) {
+    //     console.log(
+    //       `Game.init() took ${(
+    //         window.performance.now() - initStartedTimeStamp
+    //       ).toFixed(0)} ms`
+    //     );
+    //   }
+    // });
   }
 
   /**
@@ -220,9 +226,10 @@ export class Game {
    * @param scene
    */
   addScene(scene: Scene): void {
-    scene.size.width = this.canvasCssWidth;
-    scene.size.height = this.canvasCssHeight;
+    //scene.size.width = this.canvasCssWidth;
+    //scene.size.height = this.canvasCssHeight;
     scene.game = this;
+    scene.needsInitialization = true;
     this.scenes.push(scene);
   }
 
@@ -305,6 +312,41 @@ export class Game {
    * @param entryScene - The scene (Scene object or its string name) to display when the game starts
    */
   start(entryScene?: Scene | string): void {
+    const gameInitOptions = this.options;
+    this.unitTesting = gameInitOptions._unitTesting ?? false;
+
+    let initStartedTimeStamp: number = 0;
+    if (!this.unitTesting) {
+      initStartedTimeStamp = window.performance.now();
+    }
+
+    this.setupHtmlCanvases(
+      gameInitOptions.canvasId,
+      gameInitOptions.width,
+      gameInitOptions.height,
+      gameInitOptions.stretch
+    );
+    this.showFps = gameInitOptions.showFps ?? false;
+    this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
+
+    //const canvasKitPromise = this.loadCanvasKit();
+    this.data.metadata.userAgent = navigator.userAgent;
+
+    this.defaultParameters = gameInitOptions.defaultParameters ?? {};
+    this.initData(gameInitOptions.trialSchema ?? {});
+
+    this.setupCanvasKitSurface();
+    this.setupFpsFont();
+    this.setupEventHandlers();
+
+    if (!this.unitTesting) {
+      console.log(
+        `Game.init() took ${(
+          window.performance.now() - initStartedTimeStamp
+        ).toFixed(0)} ms`
+      );
+    }
+
     let startingScene: Scene | undefined;
 
     if (entryScene !== undefined) {
@@ -419,7 +461,16 @@ export class Game {
 
     let htmlCanvas: HTMLCanvasElement | undefined;
     if (canvasId === undefined) {
-      const canvases = document.getElementsByTagName("canvas");
+      const canvasCollection = document.getElementsByTagName("canvas");
+
+      let canvases = new Array<HTMLCanvasElement>();
+      for (let i = 0; i < canvasCollection.length; i++) {
+        canvases.push(canvasCollection[i]);
+      }
+      canvases = canvases.filter(
+        (canvas) => canvas.id !== "m2c2kitscratchcanvas"
+      );
+
       if (canvases.length === 0) {
         throw new Error("no html canvas tag was found in the html");
       } else if (canvases.length > 1) {
@@ -427,7 +478,7 @@ export class Game {
           "warning: more than one html canvas was found. Using the first one"
         );
       }
-      htmlCanvas = canvases[0];
+      htmlCanvas = canvasCollection[0];
     } else {
       htmlCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (htmlCanvas === undefined) {
@@ -461,55 +512,55 @@ export class Game {
 
     // scratch canvas is hidden. we have it so the browser can render svg elements
     // that we then use in CanvasKit (CanvasKit can not render svgs)
-    const scratchCanvas = document.createElement("canvas");
-    scratchCanvas.id = "m2c2kitscratchcanvas";
-    scratchCanvas.hidden = true;
-    document.body.appendChild(scratchCanvas);
-    this.scratchHtmlCanvas = scratchCanvas;
+    // const scratchCanvas = document.createElement("canvas");
+    // scratchCanvas.id = "m2c2kitscratchcanvas";
+    // scratchCanvas.hidden = true;
+    // document.body.appendChild(scratchCanvas);
+    // this.scratchHtmlCanvas = scratchCanvas;
   }
 
-  private fetchFonts(fontUrls: string[] | undefined): Promise<FontData>[] {
-    if (fontUrls) {
-      return this.fontManager.FetchFontsAsArrayBuffers(fontUrls);
-    } else {
-      return new Array<Promise<FontData>>();
-    }
-  }
+  // private fetchFonts(fontUrls: string[] | undefined): Promise<FontData>[] {
+  //   if (fontUrls) {
+  //     return this.fontManager.FetchGameFontsAsArrayBuffers(fontUrls);
+  //   } else {
+  //     return new Array<Promise<FontData>>();
+  //   }
+  // }
 
-  private renderSvgImages(
-    svgImages: SvgImage[] | undefined
-  ): Promise<RenderedDataUrlImage>[] {
-    if (this.scratchHtmlCanvas === undefined) {
-      throw new Error("scratch html canvas is undefined");
-    }
-    this.imageManager.initialize(this.scratchHtmlCanvas);
-    if (svgImages) {
-      return svgImages.map((svg) => {
-        return this.imageManager.renderSvgImage(svg);
-      });
-    } else {
-      return new Array<Promise<RenderedDataUrlImage>>();
-    }
-  }
+  // private renderSvgImages(
+  //   svgImages: SvgImage[] | undefined
+  // ): Promise<RenderedDataUrlImage>[] {
+  //   if (this.scratchHtmlCanvas === undefined) {
+  //     throw new Error("scratch html canvas is undefined");
+  //   }
+  //   this.imageManager.initialize(this.scratchHtmlCanvas);
+  //   if (svgImages) {
+  //     return svgImages.map((svg) => {
+  //       return this.imageManager.renderSvgImage(svg);
+  //     });
+  //   } else {
+  //     return new Array<Promise<RenderedDataUrlImage>>();
+  //   }
+  // }
 
-  private loadFonts(
-    fontUrls: string[] | undefined,
-    fontData: FontData[] | undefined
-  ): void {
-    if (!fontUrls || !fontData) {
-      return;
-    }
-    // Load the fonts into the font manager in the same order that they were specified in the options.
-    // Font data were fetched asynchronously and thus may be in any order in fontData
-    // Order is important because the first loaded font will become the default font
-    const fontsArrayBuffers = new Array<ArrayBuffer>();
-    fontUrls.forEach((url) => {
-      fontsArrayBuffers.push(
-        fontData[fontData.findIndex((fd) => fd.fontUrl === url)].fontArrayBuffer
-      );
-    });
-    this.fontManager.LoadFonts(fontsArrayBuffers);
-  }
+  // private loadFonts(
+  //   fontUrls: string[] | undefined,
+  //   fontData: FontData[] | undefined
+  // ): void {
+  //   if (!fontUrls || !fontData) {
+  //     return;
+  //   }
+  //   // Load the fonts into the font manager in the same order that they were specified in the options.
+  //   // Font data were fetched asynchronously and thus may be in any order in fontData
+  //   // Order is important because the first loaded font will become the default font
+  //   const fontsArrayBuffers = new Array<ArrayBuffer>();
+  //   fontUrls.forEach((url) => {
+  //     fontsArrayBuffers.push(
+  //       fontData[fontData.findIndex((fd) => fd.fontUrl === url)].fontArrayBuffer
+  //     );
+  //   });
+  //   this.fontManager.LoadGameFonts(fontsArrayBuffers);
+  // }
 
   private setupCanvasKitSurface(): void {
     if (this.htmlCanvas === undefined) {
@@ -644,7 +695,8 @@ export class Game {
         this.canvasCssWidth,
         this.canvasCssHeight
       );
-      this.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
+
+      //this.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
 
       // if this._rootScale is not 1, that means we scaled down everything
       // because the display is too small, or we stretched to a larger
@@ -1112,5 +1164,22 @@ export class Game {
     // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
     // const yMax = entity.absolutePosition.y + entity.size.height * anchorPoint.y * scale;
     return { xMin, xMax, yMin, yMax };
+  }
+
+  // https://stackoverflow.com/a/8809472
+  private generateUUID(): string {
+    let d = new Date().getTime(),
+      d2 = (performance && performance.now && performance.now() * 1000) || 0;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      let r = Math.random() * 16;
+      if (d > 0) {
+        r = (d + r) % 16 | 0;
+        d = Math.floor(d / 16);
+      } else {
+        r = (d2 + r) % 16 | 0;
+        d2 = Math.floor(d2 / 16);
+      }
+      return (c == "x" ? r : (r & 0x7) | 0x8).toString(16);
+    });
   }
 }

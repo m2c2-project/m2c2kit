@@ -41,6 +41,9 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
 
   override initialize(): void {
     this.scale = Globals.rootScale;
+    this.size.width = this.game.canvasCssWidth;
+    this.size.height = this.game.canvasCssHeight;
+
     this.backgroundPaint = new this.canvasKit.Paint();
     this.backgroundPaint.setColor(
       this.canvasKit.Color(
