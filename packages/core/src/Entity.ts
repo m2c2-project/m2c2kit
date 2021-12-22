@@ -1,5 +1,5 @@
 import "./Globals";
-import { Canvas } from "canvaskit-wasm";
+import { Canvas, CanvasKit } from "canvaskit-wasm";
 import { TapEvent, TapListener } from "./TapListener";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
@@ -14,6 +14,7 @@ import { Size } from "./Size";
 import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
+import { Scene } from ".";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -764,6 +765,22 @@ export abstract class Entity implements EntityOptions {
   //   }
   //   throw new Error(`Entity ${this} has not been added to a scene`);
   // }
+
+  get canvasKit(): CanvasKit {
+    let parentScene: Scene;
+    let cavasKit: CanvasKit | undefined;
+
+    if (this.type === EntityType.scene) {
+      parentScene = this as unknown as Scene;
+    } else {
+      parentScene = this.parentSceneAsEntity as Scene;
+    }
+    cavasKit = parentScene.game.canvasKit;
+    if (!cavasKit) {
+      throw new Error("canvasKit is undefined");
+    }
+    return cavasKit;
+  }
 
   get parentSceneAsEntity(): Entity {
     if (this.type === EntityType.scene) {

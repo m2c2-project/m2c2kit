@@ -6,6 +6,7 @@ import { EntityType } from "./EntityType";
 import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
+import { Scene } from ".";
 
 export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.sprite;
@@ -34,16 +35,22 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  override initialize(): void {}
-
-  set imageName(imageName: string) {
-    if (!Object.keys(Globals.imageManager._loadedImages).includes(imageName)) {
-      throw new Error(`an image with name ${imageName} has not been loaded`);
+  override initialize(): void {
+    const imageManager = (this.parentSceneAsEntity as unknown as Scene).game
+      .imageManager;
+    if (!Object.keys(imageManager._loadedImages).includes(this._imageName)) {
+      throw new Error(
+        `an image with name ${this._imageName} has not been loaded`
+      );
     }
-    this._imageName = imageName;
-    this.loadedImage = Globals.imageManager._loadedImages[this.imageName];
+    this.loadedImage = imageManager._loadedImages[this.imageName];
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
+  }
+
+  set imageName(imageName: string) {
+    this._imageName = imageName;
+    this.needsInitialization = true;
   }
 
   get imageName(): string {

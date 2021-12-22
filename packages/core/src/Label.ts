@@ -14,6 +14,7 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
+import { Scene } from ".";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.label;
@@ -58,24 +59,24 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
 
   override initialize(): void {
-    let ckTextAlign: EmbindEnumEntity = Globals.canvasKit.TextAlign.Center;
+    let ckTextAlign: EmbindEnumEntity = this.canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
       case LabelHorizontalAlignmentMode.center:
-        ckTextAlign = Globals.canvasKit.TextAlign.Center;
+        ckTextAlign = this.canvasKit.TextAlign.Center;
         break;
       case LabelHorizontalAlignmentMode.left:
-        ckTextAlign = Globals.canvasKit.TextAlign.Left;
+        ckTextAlign = this.canvasKit.TextAlign.Left;
         break;
       case LabelHorizontalAlignmentMode.right:
-        ckTextAlign = Globals.canvasKit.TextAlign.Right;
+        ckTextAlign = this.canvasKit.TextAlign.Right;
         break;
       default:
         throw new Error("unknown horizontalAlignmentMode");
     }
 
-    this.paraStyle = new Globals.canvasKit.ParagraphStyle({
+    this.paraStyle = new this.canvasKit.ParagraphStyle({
       textStyle: {
-        color: Globals.canvasKit.Color(
+        color: this.canvasKit.Color(
           this.fontColor[0],
           this.fontColor[1],
           this.fontColor[2],
@@ -92,13 +93,16 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.paraStyle.textStyle.backgroundColor = this.backgroundColor;
     }
 
-    if (Globals.fontManager._fontMgr === undefined) {
+    const fontManager = (this.parentSceneAsEntity as unknown as Scene).game
+      .fontManager;
+
+    if (fontManager._fontMgr === undefined) {
       throw new Error("no fonts loaded");
     }
 
-    const builder = Globals.canvasKit.ParagraphBuilder.Make(
+    const builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
-      Globals.fontManager._fontMgr
+      fontManager._fontMgr
     );
     if (!this.text) {
       this.text = "";

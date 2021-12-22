@@ -1,10 +1,11 @@
 import "./Globals";
-import { Image } from "canvaskit-wasm";
+import { CanvasKit, Image } from "canvaskit-wasm";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { SvgImage } from "./SvgImage";
 
 export class ImageManager {
+  canvasKit?: CanvasKit;
   // scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render SVGs.
   private scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -78,9 +79,12 @@ export class ImageManager {
   private convertRenderedDataUrlImage(
     loadedDataUrlImage: RenderedDataUrlImage
   ): void {
+    if (!this.canvasKit) {
+      throw new Error("canvasKit undefined");
+    }
     let img: Image | null = null;
     try {
-      img = Globals.canvasKit.MakeImageFromEncoded(
+      img = this.canvasKit.MakeImageFromEncoded(
         this.dataURLtoArrayBuffer(loadedDataUrlImage.dataUrlImage)
       );
     } catch {

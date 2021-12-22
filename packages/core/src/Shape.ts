@@ -86,7 +86,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
   override initialize(): void {
     if (this.fillColor) {
-      const canvasKit = Globals.canvasKit;
+      const canvasKit = this.canvasKit;
       this.fillColorPaint = new canvasKit.Paint();
       this.fillColorPaint.setColor(
         canvasKit.Color(
@@ -101,7 +101,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     }
 
     if (this.strokeColor) {
-      const canvasKit = Globals.canvasKit;
+      const canvasKit = this.canvasKit;
       this.strokeColorPaint = new canvasKit.Paint();
       this.strokeColorPaint.setColor(
         canvasKit.Color(
@@ -141,8 +141,6 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
 
-    const canvasKit = Globals.canvasKit;
-
     if (
       this.shapeType === ShapeType.circle &&
       this.circleOfRadius !== undefined
@@ -163,8 +161,8 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     }
 
     if (this.shapeType === ShapeType.rectangle) {
-      const rr = canvasKit.RRectXY(
-        canvasKit.LTRBRect(
+      const rr = this.canvasKit.RRectXY(
+        this.canvasKit.LTRBRect(
           (this.absolutePosition.x -
             this.anchorPoint.x * this.size.width * this.absoluteScale) *
             drawScale,

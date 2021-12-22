@@ -52,6 +52,16 @@ interface LifecycleCallbacks {
 }
 
 export class Game {
+  canvasKit?: CanvasKit;
+
+  imageManager: ImageManager;
+  fontManager: FontManager;
+
+  constructor() {
+    this.imageManager = new ImageManager();
+    this.fontManager = new FontManager();
+  }
+
   public entryScene?: Scene | string;
   // use "any" type for game parameters because these will be specific to each
   // game and could be anything; we can't type it now
@@ -136,9 +146,6 @@ export class Game {
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
-    Globals.fontManager = new FontManager();
-    Globals.imageManager = new ImageManager();
-
     const canvasKitPromise = this.loadCanvasKit();
     const fontDataPromises = this.fetchFonts(gameInitOptions.fontUrls);
     const renderedSvgImagesPromises = this.renderSvgImages(
@@ -155,9 +162,14 @@ export class Game {
       Promise.all(fontDataPromises),
       Promise.all(renderedSvgImagesPromises),
     ]).then(([canvasKit, fontData, renderedSvgImages]) => {
-      Globals.canvasKit = canvasKit;
+      //Globals.canvasKit = canvasKit;
+      this.canvasKit = canvasKit;
+
+      this.fontManager.canvasKit = this.canvasKit;
+      this.imageManager.canvasKit = this.canvasKit;
+
       this.loadFonts(gameInitOptions.fontUrls, fontData);
-      Globals.imageManager.LoadRenderedSvgImages(renderedSvgImages);
+      this.imageManager.LoadRenderedSvgImages(renderedSvgImages);
       this.setupCanvasKitSurface();
       this.setupFpsFont();
       this.setupEventHandlers();
@@ -458,7 +470,7 @@ export class Game {
 
   private fetchFonts(fontUrls: string[] | undefined): Promise<FontData>[] {
     if (fontUrls) {
-      return Globals.fontManager.FetchFontsAsArrayBuffers(fontUrls);
+      return this.fontManager.FetchFontsAsArrayBuffers(fontUrls);
     } else {
       return new Array<Promise<FontData>>();
     }
@@ -470,10 +482,10 @@ export class Game {
     if (this.scratchHtmlCanvas === undefined) {
       throw new Error("scratch html canvas is undefined");
     }
-    Globals.imageManager.initialize(this.scratchHtmlCanvas);
+    this.imageManager.initialize(this.scratchHtmlCanvas);
     if (svgImages) {
       return svgImages.map((svg) => {
-        return Globals.imageManager.renderSvgImage(svg);
+        return this.imageManager.renderSvgImage(svg);
       });
     } else {
       return new Array<Promise<RenderedDataUrlImage>>();
@@ -496,14 +508,18 @@ export class Game {
         fontData[fontData.findIndex((fd) => fd.fontUrl === url)].fontArrayBuffer
       );
     });
-    Globals.fontManager.LoadFonts(fontsArrayBuffers);
+    this.fontManager.LoadFonts(fontsArrayBuffers);
   }
 
   private setupCanvasKitSurface(): void {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
-    const surface = Globals.canvasKit.MakeCanvasSurface(this.htmlCanvas);
+    //const surface = Globals.canvasKit.MakeCanvasSurface(this.htmlCanvas);
+    if (!this.canvasKit) {
+      throw new Error("canvaskit is undefined");
+    }
+    const surface = this.canvasKit.MakeCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
         `could not make CanvasKit surface from canvas HTML element`
@@ -519,13 +535,16 @@ export class Game {
   }
 
   private setupFpsFont(): void {
-    this.fpsTextFont = new Globals.canvasKit.Font(
+    if (!this.canvasKit) {
+      throw new Error("canvaskit is undefined");
+    }
+    this.fpsTextFont = new this.canvasKit.Font(
       null,
       Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale
     );
-    this.fpsTextPaint = new Globals.canvasKit.Paint();
+    this.fpsTextPaint = new this.canvasKit.Paint();
     this.fpsTextPaint.setColor(
-      Globals.canvasKit.Color(
+      this.canvasKit.Color(
         Constants.FPS_DISPLAY_TEXT_COLOR[0],
         Constants.FPS_DISPLAY_TEXT_COLOR[1],
         Constants.FPS_DISPLAY_TEXT_COLOR[2],
@@ -625,7 +644,7 @@ export class Game {
         this.canvasCssWidth,
         this.canvasCssHeight
       );
-      Globals.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
+      this.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
 
       // if this._rootScale is not 1, that means we scaled down everything
       // because the display is too small, or we stretched to a larger

@@ -41,16 +41,16 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
 
   override initialize(): void {
     this.scale = Globals.rootScale;
-    this.backgroundPaint = new Globals.canvasKit.Paint();
+    this.backgroundPaint = new this.canvasKit.Paint();
     this.backgroundPaint.setColor(
-      Globals.canvasKit.Color(
+      this.canvasKit.Color(
         this.backgroundColor[0],
         this.backgroundColor[1],
         this.backgroundColor[2],
         this.backgroundColor[3]
       )
     );
-    this.backgroundPaint.setStyle(Globals.canvasKit.PaintStyle.Fill);
+    this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
   }
 
   set game(game: Game) {
@@ -88,8 +88,8 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
-    const rr = Globals.canvasKit.RRectXY(
-      Globals.canvasKit.LTRBRect(
+    const rr = this.canvasKit.RRectXY(
+      this.canvasKit.LTRBRect(
         this.position.x * drawScale * Globals.rootScale,
         this.position.y * drawScale * Globals.rootScale,
         (this.position.x + this.size.width) * drawScale * Globals.rootScale,

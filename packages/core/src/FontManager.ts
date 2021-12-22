@@ -1,9 +1,10 @@
 import "./Globals";
 import { ttfInfo } from "./ttfInfo.js";
-import { FontMgr, Typeface } from "canvaskit-wasm";
+import { CanvasKit, FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
 
 export class FontManager {
+  canvasKit?: CanvasKit;
   _fontMgr?: FontMgr;
   private _typefaces: Record<string, Typeface> = {};
 
@@ -24,7 +25,10 @@ export class FontManager {
   }
 
   LoadFonts(fonts: Array<ArrayBuffer>): void {
-    this._fontMgr = Globals.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
+    if (!this.canvasKit) {
+      throw new Error("canvasKit undefined");
+    }
+    this._fontMgr = this.canvasKit.FontMgr.FromData(...fonts) ?? undefined;
     if (this._fontMgr === undefined) {
       throw new Error("error loading fonts");
     }
@@ -37,8 +41,10 @@ export class FontManager {
         throw new Error("error loading fonts");
       }
       console.log("font loaded. font family: " + fontFamily);
-      const typeface =
-        Globals.canvasKit.Typeface.MakeFreeTypeFaceFromData(font);
+      if (!this.canvasKit) {
+        throw new Error("canvasKit undefined");
+      }
+      const typeface = this.canvasKit.Typeface.MakeFreeTypeFaceFromData(font);
       if (!typeface) {
         throw new Error("Can't make typeface");
       }

@@ -8,6 +8,7 @@ import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
+import { Scene } from ".";
 
 export class TextLine
   extends Entity
@@ -86,25 +87,28 @@ export class TextLine
   }
 
   override initialize(): void {
-    this.paint = new Globals.canvasKit.Paint();
+    this.paint = new this.canvasKit.Paint();
     this.paint.setColor(
-      Globals.canvasKit.Color(
+      this.canvasKit.Color(
         this.fontColor[0],
         this.fontColor[1],
         this.fontColor[2],
         this.fontColor[3]
       )
     );
-    this.paint.setStyle(Globals.canvasKit.PaintStyle.Fill);
+    this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
 
+    const fontManager = (this.parentSceneAsEntity as unknown as Scene).game
+      .fontManager;
+
     if (this.fontName) {
-      this.font = new Globals.canvasKit.Font(
-        Globals.fontManager._getTypeface(this.fontName),
+      this.font = new this.canvasKit.Font(
+        fontManager._getTypeface(this.fontName),
         this.fontSize * Globals.canvasScale
       );
     } else {
-      this.font = new Globals.canvasKit.Font(
+      this.font = new this.canvasKit.Font(
         null,
         this.fontSize * Globals.canvasScale
       );
