@@ -4,14 +4,30 @@ import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { SvgImage } from "./SvgImage";
 
+class RenderedImages {
+  [gameUuid: string]: {
+    [name: string]: RenderedDataUrlImage;
+  };
+}
+
+class LoadedImages {
+  [gameUuid: string]: {
+    [name: string]: LoadedImage;
+  };
+}
+
 export class ImageManager {
+  renderedImages = new RenderedImages();
+  loadedImages = new LoadedImages();
   canvasKit?: CanvasKit;
   // scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render SVGs.
   private scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;
-  _renderedDataUrlImages: Record<string, RenderedDataUrlImage> = {};
-  _loadedImages: Record<string, LoadedImage> = {};
+
+  getLoadedImage(gameUuid: string, imageName: string): LoadedImage {
+    return this.loadedImages[gameUuid][imageName];
+  }
 
   initialize(scratchCanvas: HTMLCanvasElement): void {
     this.scratchCanvas = scratchCanvas;
@@ -23,7 +39,7 @@ export class ImageManager {
     this.scale = window.devicePixelRatio;
   }
 
-  renderSvgImage(svgImage: SvgImage): Promise<RenderedDataUrlImage> {
+  renderSvgImage(gameUuid: string, svgImage: SvgImage): Promise<void> {
     const image = document.createElement("img");
     return new Promise((resolve) => {
       image.width = svgImage.width;
@@ -39,23 +55,28 @@ export class ImageManager {
         this.ctx.clearRect(0, 0, svgImage.width, svgImage.height);
         this.ctx.drawImage(image, 0, 0, svgImage.width, svgImage.height);
         const dataUrl = this.scratchCanvas.toDataURL();
-        this._renderedDataUrlImages[svgImage.name] = new RenderedDataUrlImage(
+
+        const renderedImage = new RenderedDataUrlImage(
           svgImage.name,
           dataUrl,
           svgImage.width,
           svgImage.height
         );
         image.remove();
-        resolve(this._renderedDataUrlImages[svgImage.name]);
+
+        if (!this.renderedImages[gameUuid]) {
+          this.renderedImages[gameUuid] = {};
+        }
+        this.renderedImages[gameUuid][svgImage.name] = renderedImage;
+        resolve();
       };
       image.onerror = () => {
-        this._renderedDataUrlImages[svgImage.name] = new RenderedDataUrlImage(
-          svgImage.name,
-          "",
-          0,
-          0
-        );
-        resolve(this._renderedDataUrlImages[svgImage.name]);
+        const renderedImage = new RenderedDataUrlImage(svgImage.name, "", 0, 0);
+        if (!this.renderedImages[gameUuid]) {
+          this.renderedImages[gameUuid] = {};
+        }
+        this.renderedImages[gameUuid][svgImage.name] = renderedImage;
+        resolve();
       };
 
       if (svgImage.svgString && svgImage.url) {
@@ -72,13 +93,25 @@ export class ImageManager {
     });
   }
 
-  LoadRenderedSvgImages(urls: RenderedDataUrlImage[]): void {
-    urls.forEach((url) => this.convertRenderedDataUrlImage(url));
+  LoadRenderedImages(): void {
+    const gameUuids = Object.keys(this.renderedImages);
+    gameUuids.forEach((gameUuid) => {
+      const imageNames = Object.keys(this.renderedImages[gameUuid]);
+      imageNames.forEach((imageName) => {
+        const loadedImage = this.convertRenderedDataUrlImageToCanvasKitImage(
+          this.renderedImages[gameUuid][imageName]
+        );
+        if (!this.loadedImages[gameUuid]) {
+          this.loadedImages[gameUuid] = {};
+        }
+        this.loadedImages[gameUuid][imageName] = loadedImage;
+      });
+    });
   }
 
-  private convertRenderedDataUrlImage(
+  private convertRenderedDataUrlImageToCanvasKitImage(
     loadedDataUrlImage: RenderedDataUrlImage
-  ): void {
+  ): LoadedImage {
     if (!this.canvasKit) {
       throw new Error("canvasKit undefined");
     }
@@ -103,15 +136,10 @@ export class ImageManager {
       loadedDataUrlImage.width,
       loadedDataUrlImage.height
     );
-    if (Object.keys(this._loadedImages).includes("name")) {
-      throw new Error(
-        `an image with name ${loadedDataUrlImage.name} was already loaded`
-      );
-    }
-    this._loadedImages[loadedDataUrlImage.name] = loadedImage;
     console.log(
       `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`
     );
+    return loadedImage;
   }
 
   private dataURLtoArrayBuffer(dataUrl: string): ArrayBuffer {

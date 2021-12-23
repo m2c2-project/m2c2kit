@@ -6,6 +6,10 @@ import { SvgImage } from "./SvgImage";
  */
 
 export interface GameInitOptions {
+  /** user-friendly name of this game */
+  name: string;
+  /** version of this game */
+  version: string;
   /** Id of the HTML canvas that game will be drawn on. If not provided, the first canvas found will be used */
   canvasId?: string;
   /** Width of game canvas */

@@ -1,3 +1,4 @@
+import { ImageManager } from "./ImageManager";
 import "./Globals";
 import { Canvas } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
@@ -42,12 +43,14 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
       throw new Error("activity is undefined");
     }
     const imageManager = activity.imageManager;
-    if (!Object.keys(imageManager._loadedImages).includes(this._imageName)) {
-      throw new Error(
-        `an image with name ${this._imageName} has not been loaded`
-      );
-    }
-    this.loadedImage = imageManager._loadedImages[this.imageName];
+    const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
+    // if (!Object.keys(imageManager._loadedImages).includes(this._imageName)) {
+    //   throw new Error(
+    //     `an image with name ${this._imageName} has not been loaded`
+    //   );
+    // }
+    // this.loadedImage = imageManager._loadedImages[this.imageName];
+    this.loadedImage = imageManager.getLoadedImage(gameUuid, this._imageName);
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
   }

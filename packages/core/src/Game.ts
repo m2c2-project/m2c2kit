@@ -113,6 +113,7 @@ export class Game {
   private animationFramesRequested = 0;
   private limitFps = false;
   private unitTesting = false;
+  private gameStopRequested = false;
 
   canvasCssWidth = 0;
   canvasCssHeight = 0;
@@ -216,6 +217,13 @@ export class Game {
     codeCallback: (data: GameData, trialSchema: object) => void
   ): void {
     this.lifecycle.allTrialsComplete = codeCallback;
+  }
+
+  nextGame(): void {
+    if (!this.activity) {
+      throw new Error("activity is undefined");
+    }
+    this.activity.nextGame();
   }
 
   /**
@@ -387,6 +395,14 @@ export class Game {
       throw new Error("CanvasKit surface is undefined");
     }
     this.surface.requestAnimationFrame(this.loop.bind(this));
+  }
+
+  stop(): void {
+    this.gameStopRequested = true;
+    // if (this.surface === undefined) {
+    //   throw new Error("CanvasKit surface is undefined");
+    // }
+    // this.surface.deleteLater();
   }
 
   initData(trialSchema: object): void {
@@ -623,6 +639,14 @@ export class Game {
   }
 
   private loop(canvas: Canvas): void {
+    if (this.gameStopRequested) {
+      // not sure if it is necessary/recommended to delete?
+      // if (this.surface === undefined) {
+      //   throw new Error("CanvasKit surface is undefined");
+      // }
+      // this.surface.deleteLater();
+      return;
+    }
     this.animationFramesRequested++;
     if (
       !this.limitFps ||
