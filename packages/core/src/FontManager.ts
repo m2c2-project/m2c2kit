@@ -1,6 +1,7 @@
 import { ttfInfo } from "./ttfInfo.js";
 import { CanvasKit, FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
+import { GameFontUrls } from "./GameFontUrls";
 
 /**
  * This class contains all the fonts for all the games in the activity.
@@ -16,9 +17,10 @@ export class FontManager {
   canvasKit?: CanvasKit;
   fontMgr?: FontMgr;
   private gameTypefaces = new GameTypefaces();
+  private allGamesFontData?: FontData[];
 
   /**
-   * Gets a typeface that was previously loaded for this game.
+   * Gets a typeface that was previously loaded for the specified game.
    *
    * @param gameUuid
    * @param fontFamily
@@ -29,13 +31,57 @@ export class FontManager {
   }
 
   /**
-   * For the specified game, fetches all fonts in the array of urls and stores fonts as array buffers.
+   * Fetches all fonts for all games.
+   *
+   * @param allGamesFontUrls
+   * @returns
+   */
+  fetchFonts(allGamesFontUrls: Array<GameFontUrls>) {
+    const fetchFontsPromises = new Array<Promise<FontData[]>>();
+    allGamesFontUrls.forEach((gameFontUrls) => {
+      const fetchOneGameFontsPromise = this.fetchGameFontsAsArrayBuffers(
+        gameFontUrls.uuid,
+        gameFontUrls.fontUrls
+      );
+      fetchFontsPromises.push(fetchOneGameFontsPromise);
+    });
+    return Promise.all(fetchFontsPromises).then((nestedAllGamesFontData) => {
+      this.allGamesFontData = nestedAllGamesFontData.flat();
+    });
+  }
+
+  /**
+   * Takes the fonts, which have been previously fetched and converted into
+   * Array Buffers using FontManager.fetchFonts(), and makes them available
+   * to our engine
+   */
+  loadAllGamesFontData() {
+    if (!this.allGamesFontData) {
+      throw new Error("allGamesFontData is undefined");
+    }
+    const gameUuids = Array.from(
+      new Set(this.allGamesFontData.map((fd) => fd.gameUuid))
+    );
+    gameUuids.forEach((gameUuid) => {
+      if (!this.allGamesFontData) {
+        throw new Error("allGamesFontData is undefined");
+      }
+      const gameFontData = this.allGamesFontData
+        .filter((fd) => fd.gameUuid === gameUuid)
+        .map((fd) => fd.fontArrayBuffer);
+      this.loadGameFonts(gameUuid, gameFontData);
+    });
+  }
+
+  /**
+   * For the specified game, fetches all fonts in the array of urls and
+   * stores fonts as array buffers.
    *
    * @param gameUuid
    * @param fontUrls - array of font urls
    * @returns
    */
-  FetchGameFontsAsArrayBuffers(
+  private fetchGameFontsAsArrayBuffers(
     gameUuid: string,
     fontUrls: Array<string>
   ): Promise<FontData[]> {
@@ -52,12 +98,13 @@ export class FontManager {
   }
 
   /**
-   * For the specified game, loads all fonts from array buffers and makes fonts available within canvaskit.
+   * For the specified game, loads all fonts from array buffers and makes
+   * fonts available within canvaskit as a Typeface
    *
    * @param gameUuid
    * @param fonts - array of fonts in array buffer form
    */
-  LoadGameFonts(gameUuid: string, fonts: Array<ArrayBuffer>): void {
+  private loadGameFonts(gameUuid: string, fonts: Array<ArrayBuffer>): void {
     if (!this.canvasKit) {
       throw new Error("canvasKit undefined");
     }

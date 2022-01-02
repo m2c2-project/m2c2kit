@@ -1,20 +1,29 @@
 import { ImageManager } from "./ImageManager";
 import { FontManager } from "./FontManager";
 import { CanvasKit, CanvasKitInit } from "./CanvasKitInit";
-import { FontData, Game } from ".";
+import { Game } from "./Game";
+import { GameFontUrls } from "./GameFontUrls";
+import { GameImages } from "./GameImages";
+import { Timer } from "./Timer";
 
 export interface ActivityOptions {
+  /** The games that compose this activity */
   games: Array<Game>;
 }
 
 export class Activity {
-  private canvasKit?: CanvasKit;
-  private games = new Array<Game>();
   fontManager: FontManager;
   imageManager: ImageManager;
-  private scratchHtmlCanvas?: HTMLCanvasElement;
-  private currentGame?: Game;
+  private canvasKit?: CanvasKit;
+  private games = new Array<Game>();
+  currentGame?: Game;
 
+  /**
+   * An Activity contains one or more games; this class
+   * manages the start and stop of games, and progression between games.
+   *
+   * @param options
+   */
   constructor(options: ActivityOptions) {
     this.fontManager = new FontManager();
     this.imageManager = new ImageManager();
@@ -23,117 +32,33 @@ export class Activity {
   }
 
   /**
-   * Asynchronously initializes the m2c2kit engine and load assets
+   * Asynchronously initializes the m2c2kit engine and loads assets
    *
    */
   async init(): Promise<void> {
-    let initStartedTimeStamp: number;
-    initStartedTimeStamp = window.performance.now();
+    Timer.Start("activityInit");
 
-    this.createScratchCanvas();
+    const [canvasKit] = await this.getAsynchronousAssets();
+    this.loadAssets(canvasKit);
 
-    const canvasKitPromise = CanvasKitInit();
-    const fetchFontsPromise = this.fetchFonts();
-    const renderImagesPromise = this.renderImages();
-
-    const [canvasKit, nestedAllGamesFontData, _] = await Promise.all([
-      canvasKitPromise,
-      fetchFontsPromise,
-      renderImagesPromise,
-    ]);
-
-    this.assignCanvasKit(canvasKit);
-
-    const allGamesFontData = nestedAllGamesFontData.flat();
-    this.loadAllGamesFontData(allGamesFontData);
     console.log(
-      `Activity.init() took ${(
-        window.performance.now() - initStartedTimeStamp
-      ).toFixed(0)} ms`
+      `Activity.init() took ${Timer.Elapsed("activityInit").toFixed(0)} ms`
     );
-
-    this.imageManager.LoadRenderedImages();
+    Timer.Remove("activityInit");
   }
 
-  private loadAllGamesFontData(allGamesFontData: FontData[]) {
-    const gameUuids = Array.from(
-      new Set(allGamesFontData.map((fd) => fd.gameUuid))
-    );
-    gameUuids.forEach((gameUuid) => {
-      const gameFontData = allGamesFontData
-        .filter((fd) => fd.gameUuid === gameUuid)
-        .map((fd) => fd.fontArrayBuffer);
-      this.fontManager.LoadGameFonts(gameUuid, gameFontData);
-    });
-  }
-
-  private renderImages() {
-    if (this.scratchHtmlCanvas === undefined) {
-      throw new Error("scratch html canvas is undefined");
-    }
-    this.imageManager.initialize(this.scratchHtmlCanvas);
-
-    const renderImagesPromises = new Array<Promise<void>>();
-    this.games.forEach((game) => {
-      if (game.options.svgImages) {
-        let findDuplicates = (arr: string[]) =>
-          arr.filter((item, index) => arr.indexOf(item) != index);
-        const duplicateImageNames = findDuplicates(
-          game.options.svgImages.map((i) => i.name)
-        );
-        if (duplicateImageNames.length > 0) {
-          throw new Error(
-            "image names must be unique. these image names are duplicated within a game: " +
-              duplicateImageNames.join(", ")
-          );
-        }
-        game.options.svgImages.map((svg) => {
-          renderImagesPromises.push(
-            this.imageManager.renderSvgImage(game.uuid, svg)
-          );
-        });
-      }
-    });
-    return Promise.all(renderImagesPromises);
-  }
-
-  private fetchFonts() {
-    const fetchFontsPromises = new Array<Promise<FontData[]>>();
-    this.games.forEach((game) => {
-      const fetchOneGameFontsPromise =
-        this.fontManager.FetchGameFontsAsArrayBuffers(
-          game.uuid,
-          game.options.fontUrls ?? []
-        );
-      fetchFontsPromises.push(fetchOneGameFontsPromise);
-    });
-    return Promise.all(fetchFontsPromises);
-  }
-
-  private createScratchCanvas() {
-    const scratchCanvas = document.createElement("canvas");
-    scratchCanvas.id = "m2c2kitscratchcanvas";
-    scratchCanvas.hidden = true;
-    document.body.appendChild(scratchCanvas);
-    this.scratchHtmlCanvas = scratchCanvas;
-  }
-
-  private assignCanvasKit(canvasKit: CanvasKit) {
-    this.canvasKit = canvasKit;
-    this.fontManager.canvasKit = this.canvasKit;
-    this.imageManager.canvasKit = this.canvasKit;
-
-    this.games.forEach((game) => {
-      game.canvasKit = canvasKit;
-    });
-  }
-
+  /**
+   * Starts the activity and starts the first game.
+   */
   start(): void {
     this.currentGame = this.games.find(Boolean);
     console.log(`starting game: ${this.currentGame?.options.name}`);
     this.currentGame?.start();
   }
 
+  /**
+   * Advances to the next game in the activity.
+   */
   nextGame(): void {
     if (!this.currentGame) {
       throw new Error("no current game");
@@ -147,5 +72,55 @@ export class Activity {
     this.currentGame = this.games[currentGameIndex + 1];
     console.log(`starting game: ${this.currentGame?.options.name}`);
     this.currentGame.start();
+  }
+
+  /**
+   * Gets asynchronous assets, including initialization of canvaskit wasm,
+   * fetching of fonts from specified urls, and rendering and fetching
+   * of images
+   * @returns
+   */
+  private async getAsynchronousAssets(): Promise<[CanvasKit, void, void[]]> {
+    const canvasKitPromise = CanvasKitInit();
+    const fetchFontsPromise = this.fontManager.fetchFonts(
+      this.getFontsConfigurationFromGames()
+    );
+    const renderImagesPromise = this.imageManager.renderImages(
+      this.getImagesConfigurationFromGames()
+    );
+
+    return await Promise.all([
+      canvasKitPromise,
+      fetchFontsPromise,
+      renderImagesPromise,
+    ]);
+  }
+
+  private loadAssets(canvasKit: CanvasKit) {
+    this.assignCanvasKit(canvasKit);
+    this.fontManager.loadAllGamesFontData();
+    this.imageManager.loadAllGamesRenderedImages();
+  }
+
+  private assignCanvasKit(canvasKit: CanvasKit) {
+    this.canvasKit = canvasKit;
+    this.fontManager.canvasKit = this.canvasKit;
+    this.imageManager.canvasKit = this.canvasKit;
+
+    this.games.forEach((game) => {
+      game.canvasKit = canvasKit;
+    });
+  }
+
+  private getFontsConfigurationFromGames(): GameFontUrls[] {
+    return this.games.map((game) => {
+      return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
+    });
+  }
+
+  private getImagesConfigurationFromGames(): GameImages[] {
+    return this.games.map((game) => {
+      return { uuid: game.uuid, images: game.options.svgImages ?? [] };
+    });
   }
 }

@@ -3,6 +3,7 @@ import { CanvasKit, Image } from "canvaskit-wasm";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { SvgImage } from "./SvgImage";
+import { GameImages } from "./GameImages";
 
 class RenderedImages {
   [gameUuid: string]: {
@@ -17,11 +18,10 @@ class LoadedImages {
 }
 
 export class ImageManager {
-  renderedImages = new RenderedImages();
-  loadedImages = new LoadedImages();
   canvasKit?: CanvasKit;
-  // scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render SVGs.
-  private scratchCanvas?: HTMLCanvasElement;
+  private renderedImages = new RenderedImages();
+  private loadedImages = new LoadedImages();
+  private _scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;
 
@@ -29,17 +29,46 @@ export class ImageManager {
     return this.loadedImages[gameUuid][imageName];
   }
 
-  initialize(scratchCanvas: HTMLCanvasElement): void {
-    this.scratchCanvas = scratchCanvas;
-    const context2d = this.scratchCanvas.getContext("2d");
-    if (context2d === null) {
-      throw new Error("could not get 2d canvas context from scratch canvas");
-    }
-    this.ctx = context2d;
-    this.scale = window.devicePixelRatio;
+  renderImages(allGamesImages: Array<GameImages>) {
+    const renderImagesPromises = new Array<Promise<void>>();
+    allGamesImages.forEach((gameImages) => {
+      if (gameImages.images) {
+        let findDuplicates = (arr: string[]) =>
+          arr.filter((item, index) => arr.indexOf(item) != index);
+        const duplicateImageNames = findDuplicates(
+          gameImages.images.map((i) => i.name)
+        );
+        if (duplicateImageNames.length > 0) {
+          throw new Error(
+            "image names must be unique. these image names are duplicated within a game: " +
+              duplicateImageNames.join(", ")
+          );
+        }
+        gameImages.images.map((svg) => {
+          renderImagesPromises.push(this.renderSvgImage(gameImages.uuid, svg));
+        });
+      }
+    });
+    return Promise.all(renderImagesPromises);
   }
 
-  renderSvgImage(gameUuid: string, svgImage: SvgImage): Promise<void> {
+  loadAllGamesRenderedImages(): void {
+    const gameUuids = Object.keys(this.renderedImages);
+    gameUuids.forEach((gameUuid) => {
+      const imageNames = Object.keys(this.renderedImages[gameUuid]);
+      imageNames.forEach((imageName) => {
+        const loadedImage = this.convertRenderedDataUrlImageToCanvasKitImage(
+          this.renderedImages[gameUuid][imageName]
+        );
+        if (!this.loadedImages[gameUuid]) {
+          this.loadedImages[gameUuid] = {};
+        }
+        this.loadedImages[gameUuid][imageName] = loadedImage;
+      });
+    });
+  }
+
+  private renderSvgImage(gameUuid: string, svgImage: SvgImage): Promise<void> {
     const image = document.createElement("img");
     return new Promise((resolve) => {
       image.width = svgImage.width;
@@ -93,22 +122,6 @@ export class ImageManager {
     });
   }
 
-  LoadRenderedImages(): void {
-    const gameUuids = Object.keys(this.renderedImages);
-    gameUuids.forEach((gameUuid) => {
-      const imageNames = Object.keys(this.renderedImages[gameUuid]);
-      imageNames.forEach((imageName) => {
-        const loadedImage = this.convertRenderedDataUrlImageToCanvasKitImage(
-          this.renderedImages[gameUuid][imageName]
-        );
-        if (!this.loadedImages[gameUuid]) {
-          this.loadedImages[gameUuid] = {};
-        }
-        this.loadedImages[gameUuid][imageName] = loadedImage;
-      });
-    });
-  }
-
   private convertRenderedDataUrlImageToCanvasKitImage(
     loadedDataUrlImage: RenderedDataUrlImage
   ): LoadedImage {
@@ -140,6 +153,26 @@ export class ImageManager {
       `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`
     );
     return loadedImage;
+  }
+
+  /**
+   * scratchCanvas is an extra, non-visible canvas in the DOM we use so the native browser can render images
+   */
+  private get scratchCanvas(): HTMLCanvasElement {
+    if (!this._scratchCanvas) {
+      this._scratchCanvas = document.createElement("canvas");
+      this._scratchCanvas.id = "m2c2kitscratchcanvas";
+      this._scratchCanvas.hidden = true;
+      document.body.appendChild(this._scratchCanvas);
+
+      const context2d = this._scratchCanvas.getContext("2d");
+      if (context2d === null) {
+        throw new Error("could not get 2d canvas context from scratch canvas");
+      }
+      this.ctx = context2d;
+      this.scale = window.devicePixelRatio;
+    }
+    return this._scratchCanvas;
   }
 
   private dataURLtoArrayBuffer(dataUrl: string): ArrayBuffer {

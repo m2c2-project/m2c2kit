@@ -398,11 +398,10 @@ export class Game {
   }
 
   stop(): void {
+    if (this.currentScene) {
+      this.currentScene._active = false;
+    }
     this.gameStopRequested = true;
-    // if (this.surface === undefined) {
-    //   throw new Error("CanvasKit surface is undefined");
-    // }
-    // this.surface.deleteLater();
   }
 
   initData(trialSchema: object): void {
@@ -1055,23 +1054,23 @@ export class Game {
   //#region User Interaction ------------------------------------------------------------
   private htmlCanvasMouseDownHandler(event: MouseEvent): void {
     event.preventDefault();
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+
     const x = event.offsetX;
     const y = event.offsetY;
-    const scene = this.currentScene;
-    if (scene === undefined) {
-      return;
-    }
-    if (scene._transitioning) {
-      // don't allow interaction when scene is transitioning. If, during scene transition,
-      // the user taps a button that starts another scene transition, the scene transition
-      // state will be corrupted. We can have only one active scene transition.
-      return;
-    }
     this.processTaps(scene, x, y);
   }
 
   private htmlCanvasTouchStartHandler(event: TouchEvent): void {
     event.preventDefault();
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+
     const canvas = event.target as HTMLCanvasElement;
     const bounds = canvas.getBoundingClientRect();
     const firstTouch = event.touches.item(0);
@@ -1083,19 +1082,26 @@ export class Game {
     }
     const x = firstTouch.pageX - bounds.x;
     const y = firstTouch.pageY - bounds.y;
-    const scene = this.currentScene;
-    if (scene === undefined) {
-      return;
-    }
-    if (scene._transitioning) {
-      // don't allow interaction when scene is transitioning, for reason described
-      // in htmlCanvasMouseDownHandler()
-      return;
-    }
     this.processTaps(scene, x, y);
   }
 
+  private sceneCanReceiveUserInteraction(scene: Scene): boolean {
+    if (
+      scene.game === scene.game.activity?.currentGame &&
+      scene._transitioning === false
+    ) {
+      // allow interaction only on scene that is part of the activity's
+      // current game
+      // AND don't allow interaction when scene is transitioning. If, during scene transition,
+      // the user taps a button that starts another scene transition, the scene transition
+      // state will be corrupted. We can have only one active scene transition.
+      return true;
+    }
+    return false;
+  }
+
   private processTaps(entity: Entity, x: number, y: number): void {
+    // note: x and y are relative to the HTML canvas element
     if (
       entity.isUserInteractionEnabled &&
       this.tapIsWithinEntityBounds(entity, x, y)
