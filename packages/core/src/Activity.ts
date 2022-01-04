@@ -81,7 +81,7 @@ export class Activity {
    * @returns
    */
   private async getAsynchronousAssets(): Promise<[CanvasKit, void, void[]]> {
-    const canvasKitPromise = CanvasKitInit();
+    const canvasKitPromise = this.loadCanvasKit();
     const fetchFontsPromise = this.fontManager.fetchFonts(
       this.getFontsConfigurationFromGames()
     );
@@ -94,6 +94,12 @@ export class Activity {
       fetchFontsPromise,
       renderImagesPromise,
     ]);
+  }
+
+  // call CanvasKitInit through loadCanvasKit so we can mock
+  // loadCanvasKit using jest
+  private loadCanvasKit(): Promise<CanvasKit> {
+    return CanvasKitInit();
   }
 
   private loadAssets(canvasKit: CanvasKit) {

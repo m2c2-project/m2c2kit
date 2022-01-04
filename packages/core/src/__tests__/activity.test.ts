@@ -2,13 +2,11 @@
 import {
   Activity,
   ActivityOptions,
+  FontManager,
+  ImageManager,
   Game,
   GameOptions,
-  Action,
   Scene,
-  Shape,
-  Size,
-  Point,
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
@@ -37,7 +35,6 @@ const skiaCanvas = {
 };
 
 const requestAnimationFrame = (callback: (canvas: object) => void) => {
-  perfCounter = perfCounter + 16.66666666666667;
   if (requestedFrames < maxRequestedFrames) {
     requestedFrames++;
     callback(skiaCanvas);
@@ -108,13 +105,6 @@ class Game1 extends Game {
     });
     game.addScene(s);
     game.entryScene = s;
-
-    const rect1 = new Shape({
-      rect: { size: new Size(100, 100) },
-      name: "myRect1",
-      position: new Point(200, 200),
-    });
-    s.addChild(rect1);
   }
 }
 
@@ -126,7 +116,6 @@ class Game2 extends Game {
       showFps: true,
       width: 400,
       height: 800,
-      stretch: true,
     };
 
     super(gameOptions, specifiedParameters);
@@ -174,82 +163,58 @@ beforeEach(() => {
 
   perfCounter = 0;
   global.window.performance.now = () => {
-    return perfCounter;
+    perfCounter = perfCounter + 16.66666666666667;
+    return perfCounter - 16.66666666666667;
   };
 
   requestedFrames = 0;
 });
 
-describe("actions", () => {
-  it("shape completes move from 200, 200 to 50, 50", () => {
-    maxRequestedFrames = 63;
+describe("Activity", () => {
+  it("creates a FontManager", () => {
+    expect(activity.fontManager).toBeInstanceOf(FontManager);
+  });
+  it("creates an ImageManager", () => {
+    expect(activity.imageManager).toBeInstanceOf(ImageManager);
+  });
+});
 
-    return activity.init().then(() => {
-      const rect1 = g1.entities
-        .filter((e) => e.name === "myRect1")
-        .find(Boolean)!;
-      rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
-      activity.start();
-      console.debug(
-        `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
-      );
-      expect(rect1.position).toEqual(new Point(50, 50));
-    });
+describe("Activity init", () => {
+  it("executes", () => {
+    return activity.init().then((result) => expect(result).toBe(undefined));
   });
 
-  it("shape is exactly midway halfway through move from 200, 200 to 50, 50", () => {
-    maxRequestedFrames = 31;
-
+  it("assigns canvaskit", () => {
+    // CanvasKit is an interface, so we can't expect an instance of CanvasKit
+    // Instead, expect a property we mocked above
     return activity.init().then(() => {
-      const rect1 = g1.entities
-        .filter((e) => e.name === "myRect1")
-        .find(Boolean)!;
-      rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
-      activity.start();
-      console.debug(
-        `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
+      expect(activity.fontManager.canvasKit).toHaveProperty(
+        "MakeCanvasSurface"
       );
-      expect(rect1.position).toEqual(new Point(125, 125));
+      expect(activity.imageManager.canvasKit).toHaveProperty(
+        "MakeCanvasSurface"
+      );
+      expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
+      expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
     });
   });
 });
 
-describe("Game start", () => {
-  it("scales down on smaller screen that is half the size", () => {
-    global.window.innerWidth = 200;
-    global.window.innerHeight = 400;
+describe("Activity start", () => {
+  it("starts first game", () => {
     return activity.init().then(() => {
       activity.start();
-      expect(Globals.rootScale).toBe(0.5);
+      expect(activity.currentGame).toBe(g1);
     });
   });
+});
 
-  it("scales down on smaller screen with different aspect ratio", () => {
-    global.window.innerWidth = 400;
-    global.window.innerHeight = 200;
-    return activity.init().then(() => {
-      activity.start();
-      expect(Globals.rootScale).toBe(0.25);
-    });
-  });
-
-  it("scales up on larger screen that is double the size when stretch is true", () => {
-    global.window.innerWidth = 800;
-    global.window.innerHeight = 1600;
+describe("Activity nextGame", () => {
+  it("advances to next game", () => {
     return activity.init().then(() => {
       activity.start();
       activity.nextGame();
-      expect(Globals.rootScale).toBe(2);
-    });
-  });
-
-  it("scales up on larger screen with different aspect ratio when stretch is true", () => {
-    global.window.innerWidth = 1200;
-    global.window.innerHeight = 1200;
-    return activity.init().then(() => {
-      activity.start();
-      activity.nextGame();
-      expect(Globals.rootScale).toBe(1.5);
+      expect(activity.currentGame).toBe(g2);
     });
   });
 });
