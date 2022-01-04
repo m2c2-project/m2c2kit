@@ -11,9 +11,6 @@ import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
 import { Action } from "./Action";
 import { LoadedImage } from "./LoadedImage";
-import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
-import { ImageManager } from "./ImageManager";
-import { SvgImage } from "./SvgImage";
 import { Scene } from "./Scene";
 import {
   SceneTransition,
@@ -22,7 +19,7 @@ import {
   PushTransition,
   TransitionDirection,
 } from "./Transition";
-import { GameInitOptions } from "./GameInitOptions";
+import { GameOptions } from "./GameOptions";
 import { Activity } from "./Activity";
 
 interface BoundingBox {
@@ -54,21 +51,20 @@ export class Game {
   canvasKit?: CanvasKit;
   activity?: Activity;
   uuid = this.generateUUID();
-  options: GameInitOptions;
+  options: GameOptions;
 
-  constructor(options: GameInitOptions) {
-    this.options = options;
+  constructor(options: GameOptions, specifiedParameters: any = {}) {
+    const { parameters, ...optionsWithoutGameParameters } = options;
+    this.options = { ...optionsWithoutGameParameters };
+    Object.keys(specifiedParameters).forEach((key) => {
+      if (!parameters || !(key in parameters)) {
+        throw new Error(`game does not have default parameter named ${key}`);
+      }
+    });
+    this.options.parameters = { ...parameters, ...specifiedParameters };
   }
 
   public entryScene?: Scene | string;
-  // use "any" type for game parameters because these will be specific to each
-  // game and could be anything; we can't type it now
-  // TODO: is there a common, base structure (e.g., trials?) that should
-  // be common to game parameters? Replace any with a GameParameters type?
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public parameters: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private defaultParameters: any;
   public data: GameData = {
     trials: new Array<TrialData>(),
     metadata: {
@@ -121,75 +117,6 @@ export class Game {
   private scenes = new Array<Scene>();
   private incomingSceneTransitions = new Array<SceneTransition>();
   private currentSceneSnapshot?: Image;
-
-  /**
-   * Asynchronously initializes the game engine and load assets
-   *
-   * @param gameInitOptions
-   * @returns Promise<void>
-   */
-  init(): void {
-    const gameInitOptions = this.options;
-    this.unitTesting = gameInitOptions._unitTesting ?? false;
-
-    let initStartedTimeStamp: number = 0;
-    if (!this.unitTesting) {
-      initStartedTimeStamp = window.performance.now();
-    }
-
-    this.setupHtmlCanvases(
-      gameInitOptions.canvasId,
-      gameInitOptions.width,
-      gameInitOptions.height,
-      gameInitOptions.stretch
-    );
-    this.showFps = gameInitOptions.showFps ?? false;
-    this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
-
-    //const canvasKitPromise = this.loadCanvasKit();
-    this.data.metadata.userAgent = navigator.userAgent;
-
-    this.defaultParameters = gameInitOptions.defaultParameters ?? {};
-    this.initData(gameInitOptions.trialSchema ?? {});
-
-    this.setupCanvasKitSurface();
-    this.setupFpsFont();
-    this.setupEventHandlers();
-
-    if (!this.unitTesting) {
-      console.log(
-        `Game.init() took ${(
-          window.performance.now() - initStartedTimeStamp
-        ).toFixed(0)} ms`
-      );
-    }
-
-    // return Promise.all([
-    //   canvasKitPromise,
-    //   //Promise.all(fontDataPromises),
-    //   //Promise.all(renderedSvgImagesPromises),
-    // ]).then(([canvasKit, /*fontData, renderedSvgImages*/]) => {
-    //   //Globals.canvasKit = canvasKit;
-    //   this.canvasKit = canvasKit;
-
-    //   //this.fontManager.canvasKit = this.canvasKit;
-    //   //this.imageManager.canvasKit = this.canvasKit;
-
-    //   // this.loadFonts(gameInitOptions.fontUrls, fontData);
-    //   // this.imageManager.LoadRenderedSvgImages(renderedSvgImages);
-    //   this.setupCanvasKitSurface();
-    //   this.setupFpsFont();
-    //   this.setupEventHandlers();
-
-    //   if (!this.unitTesting) {
-    //     console.log(
-    //       `Game.init() took ${(
-    //         window.performance.now() - initStartedTimeStamp
-    //       ).toFixed(0)} ms`
-    //     );
-    //   }
-    // });
-  }
 
   /**
    * Provide a callback function to be invoked when a trial has completed.
@@ -288,29 +215,19 @@ export class Game {
   }
 
   /**
-   * Gets the value of the specified game parameter. If the value was not
-   * provided in the parameters property above, then return the value in
-   * defaultParameters. If the parameterName is still not found, then
-   * throw exception.
+   * Gets the value of the game parameter. If parameterName
+   * is not found, then throw exception.
    * @param parameterName - the name of the game parameter whose value is requested
    * @returns
    */
   getParameter<T>(parameterName: string): T {
     if (
-      this.parameters !== undefined &&
-      Object.keys(this.parameters).includes(parameterName)
+      this.options.parameters !== undefined &&
+      Object.keys(this.options.parameters).includes(parameterName)
     ) {
-      return this.parameters[parameterName] as T;
-    } else if (this.defaultParameters === undefined) {
-      throw new Error(
-        `game parameter ${parameterName} not found: value and default value were not provided`
-      );
-    } else if (Object.keys(this.defaultParameters).includes(parameterName)) {
-      return this.defaultParameters[parameterName] as T;
+      return this.options.parameters[parameterName] as T;
     } else {
-      throw new Error(
-        `game parameter ${parameterName} not found: value and default value were not provided`
-      );
+      throw new Error(`game parameter ${parameterName} not found`);
     }
   }
 
@@ -337,10 +254,8 @@ export class Game {
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
-    //const canvasKitPromise = this.loadCanvasKit();
     this.data.metadata.userAgent = navigator.userAgent;
 
-    this.defaultParameters = gameInitOptions.defaultParameters ?? {};
     this.initData(gameInitOptions.trialSchema ?? {});
 
     this.setupCanvasKitSurface();

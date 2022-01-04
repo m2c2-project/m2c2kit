@@ -14,7 +14,7 @@ export * from "./EntityType";
 export * from "./FontData";
 export * from "./FontManager";
 export * from "./Game";
-export * from "./GameInitOptions";
+export * from "./GameOptions";
 export * from "./Globals";
 export * from "./GlobalVariables";
 export * from "./IDrawable";

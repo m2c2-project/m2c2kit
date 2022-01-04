@@ -5,7 +5,7 @@ import { SvgImage } from "./SvgImage";
  * Options to specify HTML canvas, set game canvas size, and load game assets.
  */
 
-export interface GameInitOptions {
+export interface GameOptions {
   /** user-friendly name of this game */
   name: string;
   /** version of this game */
@@ -21,7 +21,7 @@ export interface GameInitOptions {
   /** Schema of trial data; JSON object where key is variable name, value is data type */
   trialSchema?: object;
   /** Default game parameters; JSON object where key is the game parameter, value is default value */
-  defaultParameters?: object;
+  parameters?: any;
   /** String array of urls from which to load fonts. The first element will be the default font */
   fontUrls?: Array<string>;
   /** Array of SvgImage objects to render and load */
