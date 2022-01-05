@@ -5,35 +5,30 @@ import { Game } from "./Game";
 import { GameFontUrls } from "./GameFontUrls";
 import { GameImages } from "./GameImages";
 import { Timer } from "./Timer";
-
-export interface ActivityOptions {
-  /** The games that compose this activity */
-  games: Array<Game>;
-}
+import { ActivityOptions } from "./ActivityOptions";
 
 export class Activity {
+  options: ActivityOptions;
   fontManager: FontManager;
   imageManager: ImageManager;
-  private canvasKit?: CanvasKit;
-  private games = new Array<Game>();
   currentGame?: Game;
+  private canvasKit?: CanvasKit;
 
   /**
    * An Activity contains one or more games; this class
-   * manages the start and stop of games, and progression between games.
+   * manages the start and stop of games, and advancement to next game.
    *
    * @param options
    */
   constructor(options: ActivityOptions) {
+    this.options = options;
     this.fontManager = new FontManager();
     this.imageManager = new ImageManager();
-    this.games = options.games;
-    this.games.forEach((game) => (game.activity = this));
+    this.options.games.forEach((game) => (game.activity = this));
   }
 
   /**
    * Asynchronously initializes the m2c2kit engine and loads assets
-   *
    */
   async init(): Promise<void> {
     Timer.Start("activityInit");
@@ -51,27 +46,42 @@ export class Activity {
    * Starts the activity and starts the first game.
    */
   start(): void {
-    this.currentGame = this.games.find(Boolean);
+    this.currentGame = this.options.games.find(Boolean);
     console.log(`starting game: ${this.currentGame?.options.name}`);
     this.currentGame?.start();
   }
 
   /**
-   * Advances to the next game in the activity.
+   * Stops the current game and advances and starts the next game in the activity.
+   * If there is no game after the current game, throws error
    */
-  nextGame(): void {
+  advanceToNextGame(): void {
     if (!this.currentGame) {
-      throw new Error("no current game");
+      throw new Error("error in advanceToNextGame(): no current game");
     }
-    const index = this.games.indexOf(this.currentGame);
-    if (index === this.games.length - 1) {
-      throw new Error("no next game");
+    if (!this.nextGame) {
+      throw new Error("error in advanceToNextGame(): no next game");
     }
     this.currentGame.stop();
-    const currentGameIndex = this.games.indexOf(this.currentGame);
-    this.currentGame = this.games[currentGameIndex + 1];
+    this.currentGame = this.nextGame;
     console.log(`starting game: ${this.currentGame?.options.name}`);
     this.currentGame.start();
+  }
+
+  /**
+   * Gets the next game after the current one, or undefined if
+   * this is the last game.
+   */
+  get nextGame(): Game | undefined {
+    if (!this.currentGame) {
+      throw new Error("error in get nextGame(): no current game");
+    }
+    const index = this.options.games.indexOf(this.currentGame);
+    if (index === this.options.games.length - 1) {
+      return undefined;
+    }
+    const currentGameIndex = this.options.games.indexOf(this.currentGame);
+    return this.options.games[currentGameIndex + 1];
   }
 
   /**
@@ -113,19 +123,19 @@ export class Activity {
     this.fontManager.canvasKit = this.canvasKit;
     this.imageManager.canvasKit = this.canvasKit;
 
-    this.games.forEach((game) => {
+    this.options.games.forEach((game) => {
       game.canvasKit = canvasKit;
     });
   }
 
   private getFontsConfigurationFromGames(): GameFontUrls[] {
-    return this.games.map((game) => {
+    return this.options.games.map((game) => {
       return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
     });
   }
 
   private getImagesConfigurationFromGames(): GameImages[] {
-    return this.games.map((game) => {
+    return this.options.games.map((game) => {
       return { uuid: game.uuid, images: game.options.svgImages ?? [] };
     });
   }

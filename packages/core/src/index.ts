@@ -1,5 +1,6 @@
 export * from "./Action";
 export * from "./Activity";
+export * from "./ActivityOptions";
 export * from "./Composite";
 export * from "./CompositeOptions";
 export * from "./Constants";
@@ -45,6 +46,7 @@ export * from "./Story";
 export * from "./StoryOptions";
 export * from "./SvgImage";
 export * from "./TapListener";
+export * from "./TrialSchema";
 export * from "./TextLine";
 export * from "./TextLineOptions";
 export * from "./TextOptions";

@@ -102,6 +102,7 @@ class Game1 extends Game {
     };
 
     super(gameOptions, specifiedParameters);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
       name: "game1FirstScene",
@@ -130,6 +131,7 @@ class Game2 extends Game {
     };
 
     super(gameOptions, specifiedParameters);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
       name: "game2FirstScene",
@@ -238,7 +240,7 @@ describe("Game start", () => {
     global.window.innerHeight = 1600;
     return activity.init().then(() => {
       activity.start();
-      activity.nextGame();
+      activity.advanceToNextGame();
       expect(Globals.rootScale).toBe(2);
     });
   });
@@ -248,7 +250,7 @@ describe("Game start", () => {
     global.window.innerHeight = 1200;
     return activity.init().then(() => {
       activity.start();
-      activity.nextGame();
+      activity.advanceToNextGame();
       expect(Globals.rootScale).toBe(1.5);
     });
   });

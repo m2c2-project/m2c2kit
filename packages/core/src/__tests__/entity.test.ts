@@ -24,7 +24,7 @@ import { JSDOM } from "jsdom";
 // for how to mock part of a module using jest,
 // see https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
 
-let maxRequestedFrames = 180;
+const maxRequestedFrames = 180;
 let requestedFrames = 0;
 
 const skiaCanvas = {
@@ -101,6 +101,7 @@ class Game1 extends Game {
     };
 
     super(gameOptions, specifiedParameters);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
     const scene1 = new Scene({ name: "myScene1" });

@@ -1,6 +1,6 @@
 import { RgbaColor } from "./RgbaColor";
 import { SvgImage } from "./SvgImage";
-
+import { TrialSchema } from ".";
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
  */
@@ -19,7 +19,7 @@ export interface GameOptions {
   /** Stretch to fill screen? Default is false */
   stretch?: boolean;
   /** Schema of trial data; JSON object where key is variable name, value is data type */
-  trialSchema?: object;
+  trialSchema?: TrialSchema;
   /** Default game parameters; JSON object where key is the game parameter, value is default value */
   parameters?: any;
   /** String array of urls from which to load fonts. The first element will be the default font */

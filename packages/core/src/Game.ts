@@ -21,6 +21,8 @@ import {
 } from "./Transition";
 import { GameOptions } from "./GameOptions";
 import { Activity } from "./Activity";
+import { TrialSchema } from "./TrialSchema";
+import { LifecycleCallbacks } from "./LifecycleCallbacks";
 
 interface BoundingBox {
   xMin: number;
@@ -38,18 +40,9 @@ export interface GameData {
   trials: Array<TrialData>;
   metadata: Metadata;
 }
-interface LifecycleCallbacks {
-  trialComplete: (
-    trialNumber: number,
-    data: GameData,
-    trialSchema: object
-  ) => void;
-  allTrialsComplete: (data: GameData, trialSchema: object) => void;
-}
-
 export class Game {
-  canvasKit?: CanvasKit;
-  activity?: Activity;
+  _canvasKit?: CanvasKit;
+  _activity?: Activity;
   uuid = this.generateUUID();
   options: GameOptions;
 
@@ -64,6 +57,28 @@ export class Game {
     this.options.parameters = { ...parameters, ...specifiedParameters };
   }
 
+  get canvasKit(): CanvasKit {
+    if (!this._canvasKit) {
+      throw new Error("canvaskit is undefined");
+    }
+    return this._canvasKit;
+  }
+
+  set canvasKit(canvasKit: CanvasKit) {
+    this._canvasKit = canvasKit;
+  }
+
+  get activity(): Activity {
+    if (!this._activity) {
+      throw new Error("activity is undefined");
+    }
+    return this._activity;
+  }
+
+  set activity(activity: Activity) {
+    this._activity = activity;
+  }
+
   public entryScene?: Scene | string;
   public data: GameData = {
     trials: new Array<TrialData>(),
@@ -72,10 +87,10 @@ export class Game {
     },
   };
   public trialNumber = 0;
-  public trialSchema = {};
+  // public trialSchema = {};
   // initialize the lifecycle callbacks to empty functions, in case they are called
   public lifecycle: LifecycleCallbacks = {
-    trialComplete: function (
+    onTrialCompleted: function (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       trialNumber: number,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,7 +101,7 @@ export class Game {
       return;
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    allTrialsComplete: function (data: GameData): void {
+    onAllTrialsCompleted: function (data: GameData): void {
       return;
     },
   };
@@ -117,41 +132,6 @@ export class Game {
   private scenes = new Array<Scene>();
   private incomingSceneTransitions = new Array<SceneTransition>();
   private currentSceneSnapshot?: Image;
-
-  /**
-   * Provide a callback function to be invoked when a trial has completed.
-   * It is the responsibility of the the game programmer to call this
-   * at the appropriate time. It is not triggered automatically.
-   * @param codeCallback
-   */
-  onTrialComplete(
-    codeCallback: (
-      trialNumber: number,
-      data: GameData,
-      trialSchema: object
-    ) => void
-  ): void {
-    this.lifecycle.trialComplete = codeCallback;
-  }
-
-  /**
-   * Provide a callback function to be invoked when all trials are complete.
-   * It is the responsibility of the the game programmer to call this
-   * at the appropriate time. It is not triggered automatically.
-   * @param codeCallback
-   */
-  onAllTrialsComplete(
-    codeCallback: (data: GameData, trialSchema: object) => void
-  ): void {
-    this.lifecycle.allTrialsComplete = codeCallback;
-  }
-
-  nextGame(): void {
-    if (!this.activity) {
-      throw new Error("activity is undefined");
-    }
-    this.activity.nextGame();
-  }
 
   /**
    * Adds a scene to the game.
@@ -240,7 +220,7 @@ export class Game {
     const gameInitOptions = this.options;
     this.unitTesting = gameInitOptions._unitTesting ?? false;
 
-    let initStartedTimeStamp: number = 0;
+    let initStartedTimeStamp = 0;
     if (!this.unitTesting) {
       initStartedTimeStamp = window.performance.now();
     }
@@ -319,19 +299,17 @@ export class Game {
     this.gameStopRequested = true;
   }
 
-  initData(trialSchema: object): void {
+  initData(trialSchema: TrialSchema): void {
     this.trialNumber = 0;
-    this.trialSchema = trialSchema;
     const variables = Object.entries(trialSchema);
     const validDataTypes = ["number", "string", "boolean", "object"];
-    variables.forEach((kvp) => {
-      if (!validDataTypes.includes(kvp[1])) {
+    for (const [variableName, propertySchema] of variables) {
+      if (!validDataTypes.includes(propertySchema.type)) {
         throw new Error(
-          `invalid schema. variable ${kvp[0]} is type ${kvp[1]}. type must be number, string, boolean, or object`
+          `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, or object`
         );
       }
-      this.trialSchemaMap.set(kvp[0], kvp[1]);
-    });
+    }
   }
 
   /**
@@ -344,27 +322,81 @@ export class Game {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addTrialData(variableName: string, value: any): void {
+    if (!this.options.trialSchema) {
+      throw new Error(
+        "no trial schema were provided in GameOptions. cannot add trial data"
+      );
+    }
+
     if (this.data.trials.length < this.trialNumber + 1) {
       const emptyTrial: TrialData = {};
-
-      this.trialSchemaMap.forEach((_, k) => {
-        // note: when iterating over a Map, the callback function
-        // parameters are (value, key); thus, (_, k)
-        emptyTrial[k] = null;
-      });
+      const variables = Object.entries(this.options.trialSchema);
+      for (const [variableName] of variables) {
+        emptyTrial[variableName] = null;
+      }
       this.data.trials.push(emptyTrial);
     }
-    if (!this.trialSchemaMap.has(variableName)) {
+    if (!(variableName in this.options.trialSchema)) {
       throw new Error(`trial variable ${variableName} not defined in schema`);
     }
-    const expectedDataType = this.trialSchemaMap.get(variableName);
+    const expectedDataType = this.options.trialSchema[variableName].type;
     const providedDataType = typeof value;
-    if (providedDataType != expectedDataType) {
+    if (providedDataType !== expectedDataType) {
       throw new Error(
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataType}"`
       );
     }
     this.data.trials[this.trialNumber][variableName] = value;
+  }
+
+  /**
+   * Should be called when the current trial has ended. This will trigger
+   * the onTrialCompleted callback function, if one was provided in ActivityOptions.
+   * This is how the game communicates trial data to the parent activity, which
+   * can then save or process the data.
+   * It is the responsibility of the the game programmer to call this at
+   * the appropriate time. It is not triggered automatically
+   */
+  trialCompleted(): void {
+    if (this.activity.options.callbacks?.onTrialCompleted) {
+      this.activity.options.callbacks.onTrialCompleted(
+        this.trialNumber,
+        this.data,
+        this.options.trialSchema ?? {}
+      );
+    }
+  }
+
+  /**
+   * Should be called when all trials in the current game have ended.
+   * This will trigger the onAllTrialsCompleted callback function, if one was
+   * provided in ActivityOptions.
+   * This is how the game communicates all trial data to the parent activity,
+   * which can then save or process the full game data.
+   * It is the responsibility of the the game programmer to call this at
+   * the appropriate time. It is not triggered automatically
+   */
+  allTrialsCompleted(): void {
+    if (this.activity.options.callbacks?.onAllTrialsCompleted) {
+      this.activity.options.callbacks.onAllTrialsCompleted(
+        this.data,
+        this.options.trialSchema ?? {}
+      );
+    }
+  }
+
+  /**
+   * Should be called when the current game has ended. This will trigger
+   * the onGameEnded callback function, if one was provided in ActivityOptions.
+   * This is how the game communicates its ended or "finished" state to the
+   * parent activity.
+   * It is the responsibility of the the game programmer to call this at
+   * the appropriate time. It is not triggered automatically
+   */
+  ended(): void {
+    if (this.activity.options.callbacks?.onGameEnded) {
+      this.activity.options.callbacks.onGameEnded();
+    }
   }
 
   private loadCanvasKit(): Promise<CanvasKit> {
@@ -496,10 +528,6 @@ export class Game {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
-    //const surface = Globals.canvasKit.MakeCanvasSurface(this.htmlCanvas);
-    if (!this.canvasKit) {
-      throw new Error("canvaskit is undefined");
-    }
     const surface = this.canvasKit.MakeCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
@@ -516,9 +544,6 @@ export class Game {
   }
 
   private setupFpsFont(): void {
-    if (!this.canvasKit) {
-      throw new Error("canvaskit is undefined");
-    }
     this.fpsTextFont = new this.canvasKit.Font(
       null,
       Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale

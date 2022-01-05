@@ -23,7 +23,7 @@ import { JSDOM } from "jsdom";
 // for how to mock part of a module using jest,
 // see https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
 
-let maxRequestedFrames = 180;
+const maxRequestedFrames = 180;
 let requestedFrames = 0;
 
 const skiaCanvas = {
@@ -99,6 +99,7 @@ class Game1 extends Game {
     };
 
     super(gameOptions, specifiedParameters);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
       name: "game1FirstScene",
@@ -119,6 +120,7 @@ class Game2 extends Game {
     };
 
     super(gameOptions, specifiedParameters);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
       name: "game2FirstScene",
@@ -213,7 +215,7 @@ describe("Activity nextGame", () => {
   it("advances to next game", () => {
     return activity.init().then(() => {
       activity.start();
-      activity.nextGame();
+      activity.advanceToNextGame();
       expect(activity.currentGame).toBe(g2);
     });
   });
