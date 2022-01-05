@@ -22,7 +22,6 @@ import {
 import { GameOptions } from "./GameOptions";
 import { Activity } from "./Activity";
 import { TrialSchema } from "./TrialSchema";
-import { LifecycleCallbacks } from "./LifecycleCallbacks";
 
 interface BoundingBox {
   xMin: number;
@@ -47,14 +46,22 @@ export class Game {
   options: GameOptions;
 
   constructor(options: GameOptions, specifiedParameters: any = {}) {
+    // store the game options, including the game's parameters
+    // but override these default parameters with the specified parameters,
+    // if supplied
     const { parameters, ...optionsWithoutGameParameters } = options;
     this.options = { ...optionsWithoutGameParameters };
+    this.options.parameters = { ...parameters };
     Object.keys(specifiedParameters).forEach((key) => {
       if (!parameters || !(key in parameters)) {
-        throw new Error(`game does not have default parameter named ${key}`);
+        throw new Error(
+          `game ${this.options.name} does not have a parameter named ${key}`
+        );
+      }
+      if (this.options.parameters && this.options.parameters[key]) {
+        this.options.parameters[key].value = specifiedParameters[key];
       }
     });
-    this.options.parameters = { ...parameters, ...specifiedParameters };
   }
 
   get canvasKit(): CanvasKit {
@@ -87,28 +94,7 @@ export class Game {
     },
   };
   public trialNumber = 0;
-  // public trialSchema = {};
-  // initialize the lifecycle callbacks to empty functions, in case they are called
-  public lifecycle: LifecycleCallbacks = {
-    onTrialCompleted: function (
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      trialNumber: number,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      data: GameData,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      trialSchema: object
-    ): void {
-      return;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onAllTrialsCompleted: function (data: GameData): void {
-      return;
-    },
-  };
-
-  private trialSchemaMap = new Map<string, string>();
   private htmlCanvas?: HTMLCanvasElement;
-  private scratchHtmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
   private showFps?: boolean;
   private bodyBackgroundColor?: RgbaColor;
@@ -141,8 +127,6 @@ export class Game {
    * @param scene
    */
   addScene(scene: Scene): void {
-    //scene.size.width = this.canvasCssWidth;
-    //scene.size.height = this.canvasCssHeight;
     scene.game = this;
     scene.needsInitialization = true;
     this.scenes.push(scene);
@@ -205,7 +189,7 @@ export class Game {
       this.options.parameters !== undefined &&
       Object.keys(this.options.parameters).includes(parameterName)
     ) {
-      return this.options.parameters[parameterName] as T;
+      return this.options.parameters[parameterName].value as T;
     } else {
       throw new Error(`game parameter ${parameterName} not found`);
     }
@@ -399,20 +383,6 @@ export class Game {
     }
   }
 
-  private loadCanvasKit(): Promise<CanvasKit> {
-    return CanvasKitInit();
-    // below is what I used when I had this import:
-    // import * as CanvasKitInit from 'canvaskit-wasm';
-    //
-    // // @ts-ignore
-    // return CanvasKitInit({
-    //   locateFile: (file: string) => {
-    //     // console.log(file);
-    //     return file;
-    //   }
-    // })
-  }
-
   private setupHtmlCanvases(
     canvasId: string | undefined,
     width: number,
@@ -471,58 +441,7 @@ export class Game {
 
     Globals.canvasCssWidth = width;
     Globals.canvasCssHeight = height;
-
-    // scratch canvas is hidden. we have it so the browser can render svg elements
-    // that we then use in CanvasKit (CanvasKit can not render svgs)
-    // const scratchCanvas = document.createElement("canvas");
-    // scratchCanvas.id = "m2c2kitscratchcanvas";
-    // scratchCanvas.hidden = true;
-    // document.body.appendChild(scratchCanvas);
-    // this.scratchHtmlCanvas = scratchCanvas;
   }
-
-  // private fetchFonts(fontUrls: string[] | undefined): Promise<FontData>[] {
-  //   if (fontUrls) {
-  //     return this.fontManager.FetchGameFontsAsArrayBuffers(fontUrls);
-  //   } else {
-  //     return new Array<Promise<FontData>>();
-  //   }
-  // }
-
-  // private renderSvgImages(
-  //   svgImages: SvgImage[] | undefined
-  // ): Promise<RenderedDataUrlImage>[] {
-  //   if (this.scratchHtmlCanvas === undefined) {
-  //     throw new Error("scratch html canvas is undefined");
-  //   }
-  //   this.imageManager.initialize(this.scratchHtmlCanvas);
-  //   if (svgImages) {
-  //     return svgImages.map((svg) => {
-  //       return this.imageManager.renderSvgImage(svg);
-  //     });
-  //   } else {
-  //     return new Array<Promise<RenderedDataUrlImage>>();
-  //   }
-  // }
-
-  // private loadFonts(
-  //   fontUrls: string[] | undefined,
-  //   fontData: FontData[] | undefined
-  // ): void {
-  //   if (!fontUrls || !fontData) {
-  //     return;
-  //   }
-  //   // Load the fonts into the font manager in the same order that they were specified in the options.
-  //   // Font data were fetched asynchronously and thus may be in any order in fontData
-  //   // Order is important because the first loaded font will become the default font
-  //   const fontsArrayBuffers = new Array<ArrayBuffer>();
-  //   fontUrls.forEach((url) => {
-  //     fontsArrayBuffers.push(
-  //       fontData[fontData.findIndex((fd) => fd.fontUrl === url)].fontArrayBuffer
-  //     );
-  //   });
-  //   this.fontManager.LoadGameFonts(fontsArrayBuffers);
-  // }
 
   private setupCanvasKitSurface(): void {
     if (this.htmlCanvas === undefined) {
