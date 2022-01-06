@@ -29,11 +29,32 @@ export class ImageManager {
     return this.loadedImages[gameUuid][imageName];
   }
 
+  /**
+   * Adds a CanvasKit image to the images available to a given game.
+   * Typically, this won't be called directly because images will be
+   * automatically rendered and loaded in the Activity async init.
+   * The only time this function is called in-game is to add
+   * screenshot images needed for transitions
+   *
+   * @param loadedImage
+   * @param gameUuid
+   */
+  addLoadedImage(loadedImage: LoadedImage, gameUuid: string): void {
+    // If no images were rendered and loaded during Activity init
+    // (or if we're running Jest tests and we skip all that), then
+    // then this.loadedImages[gameUuid] is undefined. Make an empty
+    // object so it can hold images
+    if (!this.loadedImages[gameUuid]) {
+      this.loadedImages[gameUuid] = {};
+    }
+    this.loadedImages[gameUuid][loadedImage.name] = loadedImage;
+  }
+
   renderImages(allGamesImages: Array<GameImages>) {
     const renderImagesPromises = new Array<Promise<void>>();
     allGamesImages.forEach((gameImages) => {
       if (gameImages.images) {
-        let findDuplicates = (arr: string[]) =>
+        const findDuplicates = (arr: string[]) =>
           arr.filter((item, index) => arr.indexOf(item) != index);
         const duplicateImageNames = findDuplicates(
           gameImages.images.map((i) => i.name)
@@ -63,7 +84,7 @@ export class ImageManager {
         if (!this.loadedImages[gameUuid]) {
           this.loadedImages[gameUuid] = {};
         }
-        this.loadedImages[gameUuid][imageName] = loadedImage;
+        this.addLoadedImage(loadedImage, gameUuid);
       });
     });
   }

@@ -12,82 +12,99 @@ import {
   Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
+  GameParameters,
+  GameOptions,
+  TrialSchema,
+  Activity,
+  GameData,
+  Timer,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
-const game = new Game();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as unknown as any).game = game;
-
-// ============================================================================
-
-// game parameter defaults to be used if values are not provided
-// default parameters are not part of the m2c2kit engine, because parameters
-// are different for each game that might be written. Thus, define them here
-const defaults = {
-  ReadyTime: 1000,
-  InterferenceTime: 4000, // 8000
-  DotPresentTime: 2000, // 3000
-  TrialNum: 2,
-  InstructionType: "short",
-};
-
-const img_default_size = 200;
-
-// ============================================================================
-
-// These are the data we will output at the end of each schema
-const gridMemoryTrialSchema = {
-  timing_dotsdrawn: "number",
-  timing_getready: "number",
-  timing_fs: "number",
-  timing_userresponse: "number",
-  r_cells: "object",
-};
-
-// ============================================================================
-
-// create containers for timing
-let timing_dotsdrawn: number;
-let timing_getready: number;
-let timing_fs: number;
-let timing_userresponse: number;
-let randomCells: {
-  row: number;
-  column: number;
-}[];
-// TODO: save tapped cell locations
-// var tapCells = [];
-
-// ============================================================================
-
-game
-  .init({
-    showFps: true,
-    width: 400,
-    height: 800,
-    trialSchema: gridMemoryTrialSchema,
-    defaultParameters: defaults,
-    bodyBackgroundColor: WebColors.Gray,
-    fontUrls: [
-      "https://storage.googleapis.com/skia-cdn/google-web-fonts/FanwoodText-Regular.ttf",
-    ],
-    svgImages: [
-      {
-        name: "grid",
-        height: img_default_size,
-        width: img_default_size,
-        url: "img/dotmem1_grid.png",
+class GridMemory extends Game {
+  constructor(specifiedParameters?: any) {
+    const defaultParameters: GameParameters = {
+      ReadyTime: {
+        value: 1000,
+        description: "How long the 'get ready' message is shown, milliseconds",
       },
-      {
-        name: "fs",
-        height: img_default_size,
-        width: img_default_size,
-        url: "img/dotmem2_fs.png",
+      InterferenceTime: {
+        value: 8000,
+        description: "How long the grid of E/F is shown, milliseconds",
       },
-    ],
-  })
-  .then(() => {
+      DotPresentTime: {
+        value: 3000,
+        description: "How long the dots are shown, milliseconds",
+      },
+      TrialNum: { value: 2, description: "How many trials to run" },
+      InstructionType: { value: "short" },
+    };
+
+    const gridMemoryTrialSchema: TrialSchema = {
+      timing_dotsdrawn: { type: "number" },
+      timing_getready: { type: "number" },
+      timing_fs: { type: "number" },
+      timing_userresponse: { type: "number" },
+      random_cells: { type: "object" },
+      tapped_cells: { type: "object" },
+    };
+
+    const img_default_size = 200;
+    const options: GameOptions = {
+      name: "Grid Memory",
+      version: "0.0.1",
+      longDescription:
+        'Each trial of the dot memory task consisted of 3 phases: encoding, distraction, and retrieval. During the encoding phase, the participant was asked to remember the location three red dots appear on a 5 x 5 grid. After a 3-second study period, the grid was removed and the distraction phase began, during which the participant wasrequired to locate and touch Fs among an array of Es. After performing the distraction task for 8 seconds, and empty 5 x 5 grid reappeared on the screen and participants were then prompted to recall the locations of the 3 dots presented initially and press a button labeled "Done" after entering their responses to complete the trial. Participants completed 2 trials (encoding, distractor, retrieval) with a 1-second delay between trials. The dependent variable was an error score with partial credit given based on the deviation from the correct positions. If all dots were recalled in their correct location, the participant received a score ofzero. In the case of one or more retrieval errors, Euclidean distance of the location of the incorrect dot to the correct grid location was calculated, with higher scores indicating less accurate placement and poorer performance (Siedlecki, 2007). The rationale for our use of this task as an indicator of working memory has both an empirical and theoreticalbasis. Previous research (Miyake, Friedman, Rettinger, Shah, & Hegarty, 2001) has demonstrated that a similar dotmemory task loaded on a factor representing working memory. The authors of this study reasoned that the spatial dot memory task placed high demands on controlled attention—a hallmark of working memory tasks. Indeed, individual differences in working memory capacity arise "in situations where information needs to be actively maintained or when a controlled search of memory is required" (Unsworth & Engle, 2007, p. 123). The ambulatory dot memory task satisfies this requirement by using an interference task to prevent rehearsal and produce interference with encoded locations, which creates the demand for active maintenance and controlled retrieval of previously encoded location during the recall phase.',
+      showFps: true,
+      width: 400,
+      height: 800,
+      trialSchema: gridMemoryTrialSchema,
+      parameters: defaultParameters,
+      bodyBackgroundColor: WebColors.Gray,
+      fontUrls: [
+        "https://storage.googleapis.com/skia-cdn/google-web-fonts/FanwoodText-Regular.ttf",
+      ],
+      svgImages: [
+        {
+          name: "grid",
+          height: img_default_size,
+          width: img_default_size,
+          url: "img/dotmem1_grid.png",
+        },
+        {
+          name: "fs",
+          height: img_default_size,
+          width: img_default_size,
+          url: "img/dotmem2_fs.png",
+        },
+      ],
+    };
+
+    super(options, specifiedParameters);
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const game = this;
+
+    // ============================================================================
+
+    // ============================================================================
+
+    // ============================================================================
+
+    // create containers for timing
+    let timing_dotsdrawn: number;
+    let timing_getready: number;
+    let timing_fs: number;
+    let timing_userresponse: number;
+    let randomCells: {
+      row: number;
+      column: number;
+    }[];
+    let tappedCells: {
+      row: number;
+      column: number;
+    }[];
+
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
@@ -103,6 +120,7 @@ game
           imageMarginTop: 12,
           textFontSize: 24,
           titleFontSize: 30,
+          textVerticalBias: 0.25,
         },
         {
           title: "Activity: Grid Memory",
@@ -112,6 +130,7 @@ game
           imageMarginTop: 12,
           textFontSize: 24,
           titleFontSize: 30,
+          textVerticalBias: 0.25,
         },
         {
           title: "Activity: Grid Memory",
@@ -135,7 +154,6 @@ game
 
     // SCENE: show get ready message, then advance after XXXX
     // milliseconds (as defined in ReadyTime parameter)
-    game.trialNumber = 0;
     const gridMemoryPage0 = new Scene({
       name: "getReadyScene",
       backgroundColor: WebColors.White,
@@ -236,7 +254,7 @@ game
     gridMemoryPage2.addChild(grid);
 
     gridMemoryPage2.setup(() => {
-      console.log("start gridMemoryPage2.setup() " + window.performance.now());
+      Timer.Start("gridMemoryPage2 setup");
 
       // Advance to the next recall screen after "InterferenceTime" millisseconds
       gridMemoryPage2.run(
@@ -327,7 +345,12 @@ game
         }
       }
 
-      console.log("end gridMemoryPage2.setup() " + window.performance.now());
+      console.log(
+        `gridMemoryPage2.setup() took ${Timer.Elapsed(
+          "gridMemoryPage2 setup"
+        )} ms.`
+      );
+      Timer.Remove("gridMemoryPage2 setup");
     });
     // SCENE: ask participant to recall the dot positions
     const gridMemoryPage3 = new Scene({ backgroundColor: WebColors.White });
@@ -357,6 +380,10 @@ game
       grid3.removeAllChildren();
 
       tappedCellCount = 0;
+      tappedCells = new Array<{
+        row: number;
+        column: number;
+      }>();
 
       for (let i = 0; i < 5; i++) {
         for (let j = 0; j < 5; j++) {
@@ -385,12 +412,16 @@ game
               cell.addChild(circle);
               cell.userData = 1;
               tappedCellCount++;
-              // export i, j
+              tappedCells.push({ row: i, column: j });
             } else if (cell.userData === 1) {
               // this cell has been tapped. Remove the circle from here
               cell.removeAllChildren();
               cell.userData = 0;
               tappedCellCount--;
+              // remove this "untapped" cell from the recorded data of tapped cells
+              tappedCells = tappedCells.filter(
+                (cell) => !(cell.row === i && cell.column === j)
+              );
             }
           });
           cell.isUserInteractionEnabled = true;
@@ -414,8 +445,6 @@ game
     });
     youMustSelectAllMessage.hidden = true;
     gridMemoryPage3.addChild(youMustSelectAllMessage);
-
-    let gridMemoryTrialCount = 0;
 
     gridMemoryPage3DoneButton.isUserInteractionEnabled = true;
     gridMemoryPage3DoneButton.onTap(() => {
@@ -442,15 +471,10 @@ game
         game.addTrialData("timing_getready", timing_getready);
         game.addTrialData("timing_fs", timing_fs);
         game.addTrialData("timing_userresponse", timing_userresponse);
-        game.addTrialData("r_cells", randomCells);
-        game.lifecycle.trialComplete(
-          game.trialNumber,
-          game.data,
-          game.trialSchema
-        );
-        gridMemoryTrialCount++;
-        game.trialNumber++;
-        if (gridMemoryTrialCount === game.getParameter("TrialNum")) {
+        game.addTrialData("random_cells", randomCells);
+        game.addTrialData("tapped_cells", tappedCells);
+        game.trialCompleted();
+        if (game.trialCount === game.getParameter("TrialNum")) {
           game.presentScene(endPage, nextScreenTransition);
         } else {
           game.presentScene(gridMemoryPage0, nextScreenTransition);
@@ -473,23 +497,54 @@ game
     });
     againButton.isUserInteractionEnabled = true;
     againButton.onTap(() => {
-      gridMemoryTrialCount = 0;
-      game.trialNumber = 0;
+      game.initData();
       game.presentScene(gridMemoryPage0);
     });
     endPage.addChild(againButton);
 
     endPage.setup(() => {
-      doneLabel.text = `You did ${gridMemoryTrialCount} trials. You're done!`;
-      console.log(`data are: ${JSON.stringify(game.data)}`);
-      game.lifecycle.allTrialsComplete(game.data, game.trialSchema);
+      doneLabel.text = `You did ${game.trialCount} trials. You're done!`;
+      game.allTrialsCompleted();
+      game.ended();
     });
 
     game.entryScene = "instructions-01";
+  }
+}
 
-    // This is commented out, so we can demo how game parameters can be set
-    // outside of this code (this will be the approach when the code is
-    // hosted in a mobile client app)
-    // entry point of game
-    game.start("instructions-01");
-  });
+// TODO: save tapped cell locations
+// var tapCells = [];
+
+// ============================================================================
+
+const dotMemory = new GridMemory({ InterferenceTime: 4000 });
+
+const activity = new Activity({
+  games: [dotMemory],
+  callbacks: {
+    onTrialCompleted: (
+      trialNumber: number,
+      data: GameData,
+      trialSchema: object
+    ) => {
+      console.log("********** trial complete");
+      console.log(trialNumber);
+      console.log(JSON.stringify(data));
+      console.log(JSON.stringify(trialSchema));
+    },
+    onAllTrialsCompleted: (data: GameData, trialSchema: object): void => {
+      console.log("********** all trials complete");
+      console.log(JSON.stringify(data));
+      console.log(JSON.stringify(trialSchema));
+    },
+    onGameEnded: () => {
+      if (activity.nextGame) {
+        activity.advanceToNextGame();
+      }
+    },
+  },
+});
+
+activity.init().then(() => {
+  activity.start();
+});

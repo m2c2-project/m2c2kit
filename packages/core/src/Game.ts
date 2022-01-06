@@ -1,5 +1,4 @@
 import "./Globals";
-import { CanvasKitInit } from "./CanvasKitInit";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { TapEvent } from "./TapListener";
@@ -93,7 +92,7 @@ export class Game {
       userAgent: "",
     },
   };
-  public trialNumber = 0;
+  public trialCount = 0;
   private htmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
   private showFps?: boolean;
@@ -166,6 +165,8 @@ export class Game {
     } else {
       incomingScene = scene;
     }
+    incomingScene.initialize();
+    incomingScene.needsInitialization = false;
 
     const sceneTransition = new SceneTransition(incomingScene, transition);
     this.currentSceneSnapshot = undefined;
@@ -218,9 +219,7 @@ export class Game {
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
 
-    this.data.metadata.userAgent = navigator.userAgent;
-
-    this.initData(gameInitOptions.trialSchema ?? {});
+    this.initData();
 
     this.setupCanvasKitSurface();
     this.setupFpsFont();
@@ -283,8 +282,16 @@ export class Game {
     this.gameStopRequested = true;
   }
 
-  initData(trialSchema: TrialSchema): void {
-    this.trialNumber = 0;
+  initData(): void {
+    this.trialCount = 0;
+    this.data = {
+      trials: new Array<TrialData>(),
+      metadata: {
+        userAgent: navigator.userAgent,
+      },
+    };
+    const trialSchema = this.options.trialSchema ?? {};
+
     const variables = Object.entries(trialSchema);
     const validDataTypes = ["number", "string", "boolean", "object"];
     for (const [variableName, propertySchema] of variables) {
@@ -312,7 +319,7 @@ export class Game {
       );
     }
 
-    if (this.data.trials.length < this.trialNumber + 1) {
+    if (this.data.trials.length < this.trialCount + 1) {
       const emptyTrial: TrialData = {};
       const variables = Object.entries(this.options.trialSchema);
       for (const [variableName] of variables) {
@@ -330,24 +337,28 @@ export class Game {
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataType}"`
       );
     }
-    this.data.trials[this.trialNumber][variableName] = value;
+    this.data.trials[this.trialCount][variableName] = value;
   }
 
   /**
-   * Should be called when the current trial has ended. This will trigger
-   * the onTrialCompleted callback function, if one was provided in ActivityOptions.
-   * This is how the game communicates trial data to the parent activity, which
-   * can then save or process the data.
+   * Should be called when the current trial has ended. By default, it will
+   * also increment the trial count, but this can be overridden.
+   * Calling this will trigger the onTrialCompleted callback function,
+   * if one was provided in ActivityOptions. This is how the game communicates
+   * trial data to the parent activity, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
    * the appropriate time. It is not triggered automatically
    */
-  trialCompleted(): void {
+  trialCompleted(incrementTrialCount = true): void {
     if (this.activity.options.callbacks?.onTrialCompleted) {
       this.activity.options.callbacks.onTrialCompleted(
-        this.trialNumber,
+        this.trialCount,
         this.data,
         this.options.trialSchema ?? {}
       );
+    }
+    if (incrementTrialCount) {
+      this.trialCount++;
     }
   }
 
@@ -553,32 +564,40 @@ export class Game {
     if (incomingSceneTransitions.length > 0 && this.currentSceneSnapshot) {
       const incomingSceneTransition = incomingSceneTransitions.shift();
       if (incomingSceneTransition === undefined) {
-        // this should not happen, because above we verified (this.incomingSceneTransitions.length > 0)
+        // this should not happen, because above we verified that
+        // this.incomingSceneTransitions.length > 0
         throw new Error("no incoming scene transition");
       }
 
       const incomingScene = incomingSceneTransition.scene;
       const transition = incomingSceneTransition.transition;
 
-      // let outgoingScene: Scene | undefined;
-      //if (true) {
-      //if (incomingScene === this.currentScene || incomingScene.name === 'page5b') {
-      // because the scene is repeated, we have to use an image for the outgoing scene animation
       const outgoingSceneImage = this.currentSceneSnapshot;
       if (!outgoingSceneImage) {
         throw new Error("no outgoing scene image");
       }
 
       const outgoingScene = new Scene({ name: "outgoingScene" });
+      // Typically, a scene's width and height are assigned in its
+      // initialize() function during update(). But that approach will not
+      // work for scene transitions because we need the outgoing scene's width
+      // and height for animateSceneTransition(), which will execute before
+      // update(). Therefore, to properly position the incoming scene
+      // animation, we need to assign the outgoing scene's width and height now.
+      outgoingScene.size.width = this.canvasCssWidth;
+      outgoingScene.size.height = this.canvasCssHeight;
+
       this.addScene(outgoingScene);
+      if (!outgoingSceneImage) {
+        console.log("outgoingSceneImage is undefined/null");
+      }
       const loadedImage = new LoadedImage(
         "outgoingSceneSnapshot",
         outgoingSceneImage,
         this.canvasCssWidth,
         this.canvasCssHeight
       );
-
-      //this.imageManager._loadedImages["outgoingSceneSnapshot"] = loadedImage;
+      this.activity.imageManager.addLoadedImage(loadedImage, this.uuid);
 
       // if this._rootScale is not 1, that means we scaled down everything
       // because the display is too small, or we stretched to a larger
@@ -600,9 +619,6 @@ export class Game {
       if (incomingScene !== this.currentScene && this.currentScene) {
         this.currentScene._active = false;
       }
-      // } else {
-      //   outgoingScene = this.currentScene;
-      // }
 
       this.currentScene = incomingScene;
       this.currentScene._active = true;

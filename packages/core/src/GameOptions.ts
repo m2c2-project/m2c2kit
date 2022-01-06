@@ -7,10 +7,16 @@ import { GameParameters } from "./GameParameters";
  */
 
 export interface GameOptions {
-  /** user-friendly name of this game */
+  /** Human-friendly name of this game */
   name: string;
-  /** version of this game */
-  version: string;
+  /** Version of this game */
+  version?: string;
+  /** Uri (repository, webpage, or other location where full information about the game can be found) */
+  uri?: string;
+  /** Brief description of game */
+  shortDescription?: string;
+  /** Full description of game */
+  longDescription?: string;
   /** Id of the HTML canvas that game will be drawn on. If not provided, the first canvas found will be used */
   canvasId?: string;
   /** Width of game canvas */

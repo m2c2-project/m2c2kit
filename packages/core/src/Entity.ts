@@ -768,18 +768,12 @@ export abstract class Entity implements EntityOptions {
 
   get canvasKit(): CanvasKit {
     let parentScene: Scene;
-    let cavasKit: CanvasKit | undefined;
-
     if (this.type === EntityType.scene) {
       parentScene = this as unknown as Scene;
     } else {
       parentScene = this.parentSceneAsEntity as Scene;
     }
-    cavasKit = parentScene.game.canvasKit;
-    if (!cavasKit) {
-      throw new Error("canvasKit is undefined");
-    }
-    return cavasKit;
+    return parentScene.game.canvasKit;
   }
 
   get parentSceneAsEntity(): Entity {

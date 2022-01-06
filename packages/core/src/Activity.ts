@@ -47,7 +47,7 @@ export class Activity {
    */
   start(): void {
     this.currentGame = this.options.games.find(Boolean);
-    console.log(`starting game: ${this.currentGame?.options.name}`);
+    this.logStartingGame();
     this.currentGame?.start();
   }
 
@@ -64,7 +64,7 @@ export class Activity {
     }
     this.currentGame.stop();
     this.currentGame = this.nextGame;
-    console.log(`starting game: ${this.currentGame?.options.name}`);
+    this.logStartingGame();
     this.currentGame.start();
   }
 
@@ -82,6 +82,13 @@ export class Activity {
     }
     const currentGameIndex = this.options.games.indexOf(this.currentGame);
     return this.options.games[currentGameIndex + 1];
+  }
+
+  private logStartingGame(): void {
+    const version = this.currentGame?.options.version
+      ? `, version ${this.currentGame?.options.version}`
+      : "";
+    console.log(`starting game: ${this.currentGame?.options.name + version}`);
   }
 
   /**

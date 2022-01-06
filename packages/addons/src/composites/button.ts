@@ -63,16 +63,16 @@ export class Button extends Composite implements IText {
   override initialize(): void {
     this.removeAllChildren();
 
-    this.backgroundPaint = new Globals.canvasKit.Paint();
+    this.backgroundPaint = new this.canvasKit.Paint();
     this.backgroundPaint.setColor(
-      Globals.canvasKit.Color(
+      this.canvasKit.Color(
         this.backgroundColor[0],
         this.backgroundColor[1],
         this.backgroundColor[2],
         this.backgroundColor[3]
       )
     );
-    this.backgroundPaint.setStyle(Globals.canvasKit.PaintStyle.Fill);
+    this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
 
     const buttonRectangle = new Shape({
       rect: new Rect({ size: this.size }),

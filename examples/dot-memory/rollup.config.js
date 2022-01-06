@@ -50,7 +50,7 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        del({ targets: [`${outputFolder}/*`] }),
+        // del({ targets: [`${outputFolder}/*`] }),
         ...sharedPlugins,
         typescript({
           sourceMap: commandLineArgs.configServe && true,
