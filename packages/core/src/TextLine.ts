@@ -100,7 +100,7 @@ export class TextLine
     this.paint.setAntiAlias(true);
 
     const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .activity;
+      .session;
     if (!activity) {
       throw new Error("activity is undefined");
     }

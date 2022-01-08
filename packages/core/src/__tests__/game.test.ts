@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-  Activity,
-  ActivityOptions,
+  Session,
+  SessionOptions,
   Game,
   GameOptions,
   Action,
@@ -48,7 +48,7 @@ const requestAnimationFrame = (callback: (canvas: object) => void) => {
 jest.mock("../../build-umd", () => {
   const m2c2kit = jest.requireActual("../../build-umd");
 
-  m2c2kit.Activity.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+  m2c2kit.Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
       PaintStyle: {
         Fill: undefined,
@@ -92,7 +92,7 @@ jest.mock("../../build-umd", () => {
 });
 
 class Game1 extends Game {
-  constructor(specifiedParameters?: any) {
+  constructor(specifiedParameters?: unknown) {
     const gameOptions: GameOptions = {
       name: "game1",
       version: "0.1",
@@ -120,7 +120,7 @@ class Game1 extends Game {
 }
 
 class Game2 extends Game {
-  constructor(specifiedParameters?: any) {
+  constructor(specifiedParameters?: unknown) {
     const gameOptions: GameOptions = {
       name: "game2",
       version: "0.1",
@@ -141,7 +141,7 @@ class Game2 extends Game {
   }
 }
 
-let activity: Activity;
+let session: Session;
 let g1: Game1;
 let g2: Game2;
 let perfCounter: number;
@@ -150,8 +150,8 @@ beforeEach(() => {
   g1 = new Game1();
   g2 = new Game2();
 
-  const options: ActivityOptions = { games: [g1, g2] };
-  activity = new Activity(options);
+  const options: SessionOptions = { activities: [g1, g2] };
+  session = new Session(options);
 
   const dom = new JSDOM(`<!DOCTYPE html>
   <html>
@@ -186,12 +186,15 @@ describe("actions", () => {
   it("shape completes move from 200, 200 to 50, 50", () => {
     maxRequestedFrames = 63;
 
-    return activity.init().then(() => {
+    return session.init().then(() => {
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
-        .find(Boolean)!;
+        .find(Boolean);
+      if (!rect1) {
+        throw new Error("rect1 undefined");
+      }
       rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
-      activity.start();
+      session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
       );
@@ -202,12 +205,16 @@ describe("actions", () => {
   it("shape is exactly midway halfway through move from 200, 200 to 50, 50", () => {
     maxRequestedFrames = 31;
 
-    return activity.init().then(() => {
+    return session.init().then(() => {
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
-        .find(Boolean)!;
+        .find(Boolean);
+      if (!rect1) {
+        throw new Error("rect1 undefined");
+      }
+
       rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
-      activity.start();
+      session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
       );
@@ -220,8 +227,8 @@ describe("Game start", () => {
   it("scales down on smaller screen that is half the size", () => {
     global.window.innerWidth = 200;
     global.window.innerHeight = 400;
-    return activity.init().then(() => {
-      activity.start();
+    return session.init().then(() => {
+      session.start();
       expect(Globals.rootScale).toBe(0.5);
     });
   });
@@ -229,8 +236,8 @@ describe("Game start", () => {
   it("scales down on smaller screen with different aspect ratio", () => {
     global.window.innerWidth = 400;
     global.window.innerHeight = 200;
-    return activity.init().then(() => {
-      activity.start();
+    return session.init().then(() => {
+      session.start();
       expect(Globals.rootScale).toBe(0.25);
     });
   });
@@ -238,9 +245,9 @@ describe("Game start", () => {
   it("scales up on larger screen that is double the size when stretch is true", () => {
     global.window.innerWidth = 800;
     global.window.innerHeight = 1600;
-    return activity.init().then(() => {
-      activity.start();
-      activity.advanceToNextGame();
+    return session.init().then(() => {
+      session.start();
+      session.advanceToNextActivity();
       expect(Globals.rootScale).toBe(2);
     });
   });
@@ -248,9 +255,9 @@ describe("Game start", () => {
   it("scales up on larger screen with different aspect ratio when stretch is true", () => {
     global.window.innerWidth = 1200;
     global.window.innerHeight = 1200;
-    return activity.init().then(() => {
-      activity.start();
-      activity.advanceToNextGame();
+    return session.init().then(() => {
+      session.start();
+      session.advanceToNextActivity();
       expect(Globals.rootScale).toBe(1.5);
     });
   });

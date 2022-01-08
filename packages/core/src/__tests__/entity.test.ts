@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-  Activity,
-  ActivityOptions,
+  Session,
+  SessionOptions,
   Game,
   GameOptions,
   Scene,
@@ -47,7 +47,7 @@ const requestAnimationFrame = (callback: (canvas: object) => void) => {
 jest.mock("../../build-umd", () => {
   const m2c2kit = jest.requireActual("../../build-umd");
 
-  m2c2kit.Activity.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+  m2c2kit.Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
       PaintStyle: {
         Fill: undefined,
@@ -91,7 +91,7 @@ jest.mock("../../build-umd", () => {
 });
 
 class Game1 extends Game {
-  constructor(specifiedParameters?: any) {
+  constructor(specifiedParameters?: unknown) {
     const gameOptions: GameOptions = {
       name: "game1",
       version: "0.1",
@@ -119,7 +119,7 @@ class Game1 extends Game {
   }
 }
 
-let activity: Activity;
+let session: Session;
 let g1: Game1;
 let perfCounter: number;
 let scene1: Scene;
@@ -130,18 +130,27 @@ beforeEach(() => {
   g1 = new Game1();
   rect1 = g1.entities
     .filter((e) => e.name === "myRect1")
-    .find(Boolean)! as Shape;
+    .find(Boolean) as Shape;
+  if (!rect1) {
+    throw new Error("myRect1 undefined");
+  }
 
   scene1 = g1.entities
     .filter((e) => e.name === "myScene1")
-    .find(Boolean)! as Scene;
+    .find(Boolean) as Scene;
+  if (!scene1) {
+    throw new Error("myScene1 undefined");
+  }
 
   label1 = g1.entities
     .filter((e) => e.name === "myLabel1")
-    .find(Boolean)! as Label;
+    .find(Boolean) as Label;
+  if (!label1) {
+    throw new Error("myLabel1 undefined");
+  }
 
-  const options: ActivityOptions = { games: [g1] };
-  activity = new Activity(options);
+  const options: SessionOptions = { activities: [g1] };
+  session = new Session(options);
 
   const dom = new JSDOM(`<!DOCTYPE html>
   <html>
@@ -174,7 +183,7 @@ beforeEach(() => {
 
 describe("test descendants", () => {
   it("descendants of scene1 contain label1 and rect1", () => {
-    return activity.init().then(() => {
+    return session.init().then(() => {
       expect(scene1.descendants).toContain(label1);
       expect(scene1.descendants).toContain(rect1);
     });

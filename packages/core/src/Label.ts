@@ -94,7 +94,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
 
     const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .activity;
+      .session;
     if (!activity) {
       throw new Error("activity is undefined");
     }

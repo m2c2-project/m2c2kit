@@ -1,4 +1,5 @@
 import "./Globals";
+import { Activity } from "./Activity";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { TapEvent } from "./TapListener";
@@ -19,8 +20,9 @@ import {
   TransitionDirection,
 } from "./Transition";
 import { GameOptions } from "./GameOptions";
-import { Activity } from "./Activity";
-import { TrialSchema } from "./TrialSchema";
+import { Session } from "./Session";
+import { GameData } from "./GameData";
+import { Uuid } from "./Uuid";
 
 interface BoundingBox {
   xMin: number;
@@ -28,22 +30,19 @@ interface BoundingBox {
   yMin: number;
   yMax: number;
 }
-interface TrialData {
+export interface TrialData {
   [key: string]: string | number | boolean | undefined | null;
 }
-interface Metadata {
+export interface Metadata {
   userAgent?: string;
 }
-export interface GameData {
-  trials: Array<TrialData>;
-  metadata: Metadata;
-}
-export class Game {
+export class Game implements Activity {
   _canvasKit?: CanvasKit;
-  _activity?: Activity;
-  uuid = this.generateUUID();
+  _session?: Session;
+  uuid = Uuid.generate();
   options: GameOptions;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(options: GameOptions, specifiedParameters: any = {}) {
     // store the game options, including the game's parameters
     // but override these default parameters with the specified parameters,
@@ -74,15 +73,15 @@ export class Game {
     this._canvasKit = canvasKit;
   }
 
-  get activity(): Activity {
-    if (!this._activity) {
-      throw new Error("activity is undefined");
+  get session(): Session {
+    if (!this._session) {
+      throw new Error("session is undefined");
     }
-    return this._activity;
+    return this._session;
   }
 
-  set activity(activity: Activity) {
-    this._activity = activity;
+  set session(session: Session) {
+    this._session = session;
   }
 
   public entryScene?: Scene | string;
@@ -92,7 +91,7 @@ export class Game {
       userAgent: "",
     },
   };
-  public trialCount = 0;
+  public trialIndex = 0;
   private htmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
   private showFps?: boolean;
@@ -283,7 +282,7 @@ export class Game {
   }
 
   initData(): void {
-    this.trialCount = 0;
+    this.trialIndex = 0;
     this.data = {
       trials: new Array<TrialData>(),
       metadata: {
@@ -319,7 +318,7 @@ export class Game {
       );
     }
 
-    if (this.data.trials.length < this.trialCount + 1) {
+    if (this.data.trials.length < this.trialIndex + 1) {
       const emptyTrial: TrialData = {};
       const variables = Object.entries(this.options.trialSchema);
       for (const [variableName] of variables) {
@@ -337,60 +336,49 @@ export class Game {
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataType}"`
       );
     }
-    this.data.trials[this.trialCount][variableName] = value;
+    this.data.trials[this.trialIndex][variableName] = value;
   }
 
   /**
-   * Should be called when the current trial has ended. By default, it will
-   * also increment the trial count, but this can be overridden.
-   * Calling this will trigger the onTrialCompleted callback function,
-   * if one was provided in ActivityOptions. This is how the game communicates
-   * trial data to the parent activity, which can then save or process the data.
+   * Should be called when the current trial has completed. It will
+   * also increment the trial index.
+   * Calling this will trigger the onTrialComplete callback function,
+   * if one was provided in SessionOptions. This is how the game communicates
+   * trial data to the parent session, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
-   * the appropriate time. It is not triggered automatically
+   * the appropriate time. It is not triggered automatically.
    */
-  trialCompleted(incrementTrialCount = true): void {
-    if (this.activity.options.callbacks?.onTrialCompleted) {
-      this.activity.options.callbacks.onTrialCompleted(
-        this.trialCount,
-        this.data,
-        this.options.trialSchema ?? {}
-      );
-    }
-    if (incrementTrialCount) {
-      this.trialCount++;
-    }
-  }
-
-  /**
-   * Should be called when all trials in the current game have ended.
-   * This will trigger the onAllTrialsCompleted callback function, if one was
-   * provided in ActivityOptions.
-   * This is how the game communicates all trial data to the parent activity,
-   * which can then save or process the full game data.
-   * It is the responsibility of the the game programmer to call this at
-   * the appropriate time. It is not triggered automatically
-   */
-  allTrialsCompleted(): void {
-    if (this.activity.options.callbacks?.onAllTrialsCompleted) {
-      this.activity.options.callbacks.onAllTrialsCompleted(
-        this.data,
-        this.options.trialSchema ?? {}
-      );
+  trialComplete(): void {
+    this.trialIndex++;
+    if (this.session.options.gameCallbacks?.onGameTrialComplete) {
+      this.session.options.gameCallbacks.onGameTrialComplete({
+        // above, we just incremented the trialIndex by 1, so this
+        // completed trial index is trialIndex - 1
+        trialIndex: this.trialIndex - 1,
+        gameParameters: this.options.parameters ?? {},
+        gameData: this.data,
+        trialSchema: this.options.trialSchema ?? {},
+        gameUuid: this.uuid,
+        gameName: this.options.name,
+      });
     }
   }
 
   /**
    * Should be called when the current game has ended. This will trigger
-   * the onGameEnded callback function, if one was provided in ActivityOptions.
+   * the onGameEnd callback function, if one was provided in SessionOptions.
    * This is how the game communicates its ended or "finished" state to the
-   * parent activity.
+   * parent session.
    * It is the responsibility of the the game programmer to call this at
-   * the appropriate time. It is not triggered automatically
+   * the appropriate time. It is not triggered automatically.
    */
-  ended(): void {
-    if (this.activity.options.callbacks?.onGameEnded) {
-      this.activity.options.callbacks.onGameEnded();
+  end(): void {
+    if (this.session.options.gameCallbacks?.onGameEnd) {
+      this.session.options.gameCallbacks.onGameEnd({
+        ended: true,
+        gameUuid: this.uuid,
+        gameName: this.options.name,
+      });
     }
   }
 
@@ -597,7 +585,7 @@ export class Game {
         this.canvasCssWidth,
         this.canvasCssHeight
       );
-      this.activity.imageManager.addLoadedImage(loadedImage, this.uuid);
+      this.session.imageManager.addLoadedImage(loadedImage, this.uuid);
 
       // if this._rootScale is not 1, that means we scaled down everything
       // because the display is too small, or we stretched to a larger
@@ -962,10 +950,10 @@ export class Game {
 
   private sceneCanReceiveUserInteraction(scene: Scene): boolean {
     if (
-      scene.game === scene.game.activity?.currentGame &&
+      scene.game === scene.game.session?.currentActivity &&
       scene._transitioning === false
     ) {
-      // allow interaction only on scene that is part of the activity's
+      // allow interaction only on scene that is part of the session's
       // current game
       // AND don't allow interaction when scene is transitioning. If, during scene transition,
       // the user taps a button that starts another scene transition, the scene transition
@@ -984,7 +972,11 @@ export class Game {
       this.handleEntityTapped(entity, x, y);
     }
     if (entity.children) {
-      entity.children.forEach((entity) => this.processTaps(entity, x, y));
+      entity.children
+        // a hidden entity (and its children) can't receive taps,
+        // even if isUserInteractionEnabled is true
+        .filter((entity) => !entity.hidden)
+        .forEach((entity) => this.processTaps(entity, x, y));
     }
   }
 
@@ -1069,22 +1061,5 @@ export class Game {
     // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
     // const yMax = entity.absolutePosition.y + entity.size.height * anchorPoint.y * scale;
     return { xMin, xMax, yMin, yMax };
-  }
-
-  // https://stackoverflow.com/a/8809472
-  private generateUUID(): string {
-    let d = new Date().getTime(),
-      d2 = (performance && performance.now && performance.now() * 1000) || 0;
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      let r = Math.random() * 16;
-      if (d > 0) {
-        r = (d + r) % 16 | 0;
-        d = Math.floor(d / 16);
-      } else {
-        r = (d2 + r) % 16 | 0;
-        d2 = Math.floor(d2 / 16);
-      }
-      return (c == "x" ? r : (r & 0x7) | 0x8).toString(16);
-    });
   }
 }

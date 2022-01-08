@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-  Activity,
-  ActivityOptions,
+  Session,
+  SessionOptions,
   FontManager,
   ImageManager,
   Game,
@@ -45,7 +45,7 @@ const requestAnimationFrame = (callback: (canvas: object) => void) => {
 jest.mock("../../build-umd", () => {
   const m2c2kit = jest.requireActual("../../build-umd");
 
-  m2c2kit.Activity.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+  m2c2kit.Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
     Promise.resolve({
       PaintStyle: {
         Fill: undefined,
@@ -89,7 +89,7 @@ jest.mock("../../build-umd", () => {
 });
 
 class Game1 extends Game {
-  constructor(specifiedParameters?: any) {
+  constructor(specifiedParameters?: unknown) {
     const gameOptions: GameOptions = {
       name: "game1",
       version: "0.1",
@@ -110,7 +110,7 @@ class Game1 extends Game {
 }
 
 class Game2 extends Game {
-  constructor(specifiedParameters?: any) {
+  constructor(specifiedParameters?: unknown) {
     const gameOptions: GameOptions = {
       name: "game2",
       version: "0.1",
@@ -130,7 +130,7 @@ class Game2 extends Game {
   }
 }
 
-let activity: Activity;
+let session: Session;
 let g1: Game1;
 let g2: Game2;
 let perfCounter: number;
@@ -139,8 +139,8 @@ beforeEach(() => {
   g1 = new Game1();
   g2 = new Game2();
 
-  const options: ActivityOptions = { games: [g1, g2] };
-  activity = new Activity(options);
+  const options: SessionOptions = { activities: [g1, g2] };
+  session = new Session(options);
 
   const dom = new JSDOM(`<!DOCTYPE html>
   <html>
@@ -172,28 +172,26 @@ beforeEach(() => {
   requestedFrames = 0;
 });
 
-describe("Activity", () => {
+describe("Session", () => {
   it("creates a FontManager", () => {
-    expect(activity.fontManager).toBeInstanceOf(FontManager);
+    expect(session.fontManager).toBeInstanceOf(FontManager);
   });
   it("creates an ImageManager", () => {
-    expect(activity.imageManager).toBeInstanceOf(ImageManager);
+    expect(session.imageManager).toBeInstanceOf(ImageManager);
   });
 });
 
-describe("Activity init", () => {
+describe("Session init", () => {
   it("executes", () => {
-    return activity.init().then((result) => expect(result).toBe(undefined));
+    return session.init().then((result) => expect(result).toBe(undefined));
   });
 
   it("assigns canvaskit", () => {
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
-    return activity.init().then(() => {
-      expect(activity.fontManager.canvasKit).toHaveProperty(
-        "MakeCanvasSurface"
-      );
-      expect(activity.imageManager.canvasKit).toHaveProperty(
+    return session.init().then(() => {
+      expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
+      expect(session.imageManager.canvasKit).toHaveProperty(
         "MakeCanvasSurface"
       );
       expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
@@ -202,21 +200,21 @@ describe("Activity init", () => {
   });
 });
 
-describe("Activity start", () => {
-  it("starts first game", () => {
-    return activity.init().then(() => {
-      activity.start();
-      expect(activity.currentGame).toBe(g1);
+describe("Session start", () => {
+  it("starts first activity", () => {
+    return session.init().then(() => {
+      session.start();
+      expect(session.currentActivity).toBe(g1);
     });
   });
 });
 
-describe("Activity nextGame", () => {
-  it("advances to next game", () => {
-    return activity.init().then(() => {
-      activity.start();
-      activity.advanceToNextGame();
-      expect(activity.currentGame).toBe(g2);
+describe("Session advanceToNextActivity", () => {
+  it("advances to next activity", () => {
+    return session.init().then(() => {
+      session.start();
+      session.advanceToNextActivity();
+      expect(session.currentActivity).toBe(g2);
     });
   });
 });

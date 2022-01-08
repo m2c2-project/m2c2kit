@@ -2,7 +2,7 @@ import "./Globals";
 import { CanvasKit, Image } from "canvaskit-wasm";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
-import { SvgImage } from "./SvgImage";
+import { BrowserImage } from "./BrowserImage";
 import { GameImages } from "./GameImages";
 
 class RenderedImages {
@@ -65,8 +65,10 @@ export class ImageManager {
               duplicateImageNames.join(", ")
           );
         }
-        gameImages.images.map((svg) => {
-          renderImagesPromises.push(this.renderSvgImage(gameImages.uuid, svg));
+        gameImages.images.map((browserImage) => {
+          renderImagesPromises.push(
+            this.renderBrowserImage(gameImages.uuid, browserImage)
+          );
         });
       }
     });
@@ -89,54 +91,69 @@ export class ImageManager {
     });
   }
 
-  private renderSvgImage(gameUuid: string, svgImage: SvgImage): Promise<void> {
+  private renderBrowserImage(
+    gameUuid: string,
+    browserImage: BrowserImage
+  ): Promise<void> {
     const image = document.createElement("img");
     return new Promise((resolve) => {
-      image.width = svgImage.width;
-      image.height = svgImage.height;
+      image.width = browserImage.width;
+      image.height = browserImage.height;
+      image.crossOrigin = "Anonymous";
       image.onload = () => {
         if (!this.scratchCanvas || !this.ctx || !this.scale) {
           throw new Error("image manager not set up");
         }
 
-        this.scratchCanvas.width = svgImage.width * this.scale;
-        this.scratchCanvas.height = svgImage.height * this.scale;
+        this.scratchCanvas.width = browserImage.width * this.scale;
+        this.scratchCanvas.height = browserImage.height * this.scale;
         this.ctx.scale(this.scale, this.scale);
-        this.ctx.clearRect(0, 0, svgImage.width, svgImage.height);
-        this.ctx.drawImage(image, 0, 0, svgImage.width, svgImage.height);
+        this.ctx.clearRect(0, 0, browserImage.width, browserImage.height);
+        this.ctx.drawImage(
+          image,
+          0,
+          0,
+          browserImage.width,
+          browserImage.height
+        );
         const dataUrl = this.scratchCanvas.toDataURL();
 
         const renderedImage = new RenderedDataUrlImage(
-          svgImage.name,
+          browserImage.name,
           dataUrl,
-          svgImage.width,
-          svgImage.height
+          browserImage.width,
+          browserImage.height
         );
         image.remove();
 
         if (!this.renderedImages[gameUuid]) {
           this.renderedImages[gameUuid] = {};
         }
-        this.renderedImages[gameUuid][svgImage.name] = renderedImage;
+        this.renderedImages[gameUuid][browserImage.name] = renderedImage;
         resolve();
       };
       image.onerror = () => {
-        const renderedImage = new RenderedDataUrlImage(svgImage.name, "", 0, 0);
+        const renderedImage = new RenderedDataUrlImage(
+          browserImage.name,
+          "",
+          0,
+          0
+        );
         if (!this.renderedImages[gameUuid]) {
           this.renderedImages[gameUuid] = {};
         }
-        this.renderedImages[gameUuid][svgImage.name] = renderedImage;
+        this.renderedImages[gameUuid][browserImage.name] = renderedImage;
         resolve();
       };
 
-      if (svgImage.svgString && svgImage.url) {
+      if (browserImage.svgString && browserImage.url) {
         throw new Error("provide svg string or url. both were provided");
       }
-      if (svgImage.svgString) {
+      if (browserImage.svgString) {
         image.src =
-          "data:image/svg+xml," + encodeURIComponent(svgImage.svgString);
-      } else if (svgImage.url) {
-        image.src = svgImage.url;
+          "data:image/svg+xml," + encodeURIComponent(browserImage.svgString);
+      } else if (browserImage.url) {
+        image.src = browserImage.url;
       } else {
         throw new Error("no svg string or url provided");
       }

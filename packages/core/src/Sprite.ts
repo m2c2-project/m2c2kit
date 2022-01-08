@@ -36,7 +36,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
   override initialize(): void {
     const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .activity;
+      .session;
     if (!activity) {
       throw new Error("activity is undefined");
     }

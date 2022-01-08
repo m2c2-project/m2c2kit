@@ -15,6 +15,7 @@ import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
 import { Scene } from ".";
+import { Uuid } from "./Uuid";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -77,7 +78,7 @@ export abstract class Entity implements EntityOptions {
   queuedAction?: Action;
   originalActions = new Array<Action>();
   tapListeners = new Array<TapListener>();
-  uuid = this.generateUUID();
+  uuid = Uuid.generate();
   needsInitialization = true;
   // library users might put anything in userData property
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -788,23 +789,6 @@ export abstract class Entity implements EntityOptions {
       return this.parent.parentSceneAsEntity;
     }
     throw new Error(`Entity ${this} has not been added to a scene`);
-  }
-
-  // https://stackoverflow.com/a/8809472
-  private generateUUID(): string {
-    let d = new Date().getTime(),
-      d2 = (performance && performance.now && performance.now() * 1000) || 0;
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      let r = Math.random() * 16;
-      if (d > 0) {
-        r = (d + r) % 16 | 0;
-        d = Math.floor(d / 16);
-      } else {
-        r = (d2 + r) % 16 | 0;
-        d2 = Math.floor(d2 / 16);
-      }
-      return (c == "x" ? r : (r & 0x7) | 0x8).toString(16);
-    });
   }
 
   // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95

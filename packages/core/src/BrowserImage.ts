@@ -1,8 +1,8 @@
 /**
- * SVG image to be rendered and loaded from a URL or HTML svg tag in string form.
+ * Image that can be rendered by a browser and loaded from a URL or HTML svg tag in string form.
  */
 
-export interface SvgImage {
+export interface BrowserImage {
   /** Name that will be used to refer to the SVG image. Must be unique among all images */
   name: string;
   /** Width to scale SVG image to */

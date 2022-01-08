@@ -1,5 +1,5 @@
 import { RgbaColor } from "./RgbaColor";
-import { SvgImage } from "./SvgImage";
+import { BrowserImage } from "./BrowserImage";
 import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
 /**
@@ -31,8 +31,8 @@ export interface GameOptions {
   parameters?: GameParameters;
   /** String array of urls from which to load fonts. The first element will be the default font */
   fontUrls?: Array<string>;
-  /** Array of SvgImage objects to render and load */
-  svgImages?: SvgImage[];
+  /** Array of BrowserImage objects to render and load */
+  images?: Array<BrowserImage>;
   /** Show FPS in upper left corner? Default is false */
   showFps?: boolean;
   /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */

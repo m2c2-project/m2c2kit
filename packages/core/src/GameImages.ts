@@ -1,6 +1,6 @@
-import { SvgImage } from "./SvgImage";
+import { BrowserImage } from "./BrowserImage";
 
 export interface GameImages {
   uuid: string;
-  images: Array<SvgImage>;
+  images: Array<BrowserImage>;
 }
