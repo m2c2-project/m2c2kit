@@ -263,7 +263,7 @@ export class Instructions extends Story {
           },
         });
         backButton.isUserInteractionEnabled = true;
-        backButton.onTap(() => {
+        backButton.onTapDown(() => {
           scene.game.presentScene(
             options.sceneNamePrefix +
               "-" +
@@ -287,7 +287,7 @@ export class Instructions extends Story {
       });
       nextButton.isUserInteractionEnabled = true;
       if (i !== options.instructionScenes.length - 1) {
-        nextButton.onTap(() => {
+        nextButton.onTapDown(() => {
           scene.game.presentScene(
             options.sceneNamePrefix +
               "-" +
@@ -297,7 +297,7 @@ export class Instructions extends Story {
         });
       } else {
         if (options.postInstructionsScene !== undefined) {
-          nextButton.onTap(() => {
+          nextButton.onTapDown(() => {
             scene.game.presentScene(
               options.postInstructionsScene ?? "",
               nextSceneTransition

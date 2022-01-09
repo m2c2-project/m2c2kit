@@ -51,7 +51,7 @@ export * from "./SpriteOptions";
 export * from "./Story";
 export * from "./StoryOptions";
 export * from "./BrowserImage";
-export * from "./TapListener";
+export * from "./EntityEventListener";
 export * from "./TrialSchema";
 export * from "./TextLine";
 export * from "./TextLineOptions";

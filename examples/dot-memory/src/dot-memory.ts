@@ -317,7 +317,7 @@ class GridMemory extends Game {
 
             if (letterIsF) {
               square.isUserInteractionEnabled = true;
-              square.onTap(() => {
+              square.onTapDown(() => {
                 if (square.userData === 0) {
                   tappedFCount++;
                   letter.text = "E";
@@ -408,7 +408,7 @@ class GridMemory extends Game {
           // anything we want. Here, we use it simply to keep track
           // of whether the cell has been tapped or not.
           cell.userData = 0;
-          cell.onTap(() => {
+          cell.onTapDown(() => {
             if (cell.userData === 0 && tappedCellCount < 3) {
               // cell has not been tapped, and there are not yet
               // 3 circles placed
@@ -456,7 +456,7 @@ class GridMemory extends Game {
     gridMemoryPage3.addChild(youMustSelectAllMessage);
 
     gridMemoryPage3DoneButton.isUserInteractionEnabled = true;
-    gridMemoryPage3DoneButton.onTap(() => {
+    gridMemoryPage3DoneButton.onTapDown(() => {
       if (tappedCellCount < 3) {
         youMustSelectAllMessage.run(
           Action.Sequence([
@@ -505,7 +505,7 @@ class GridMemory extends Game {
       position: new Point(200, 400),
     });
     againButton.isUserInteractionEnabled = true;
-    againButton.onTap(() => {
+    againButton.onTapDown(() => {
       game.initData();
       game.presentScene(gridMemoryPage0);
     });
@@ -516,7 +516,7 @@ class GridMemory extends Game {
       position: new Point(200, 475),
     });
     exitButton.isUserInteractionEnabled = true;
-    exitButton.onTap(() => {
+    exitButton.onTapDown(() => {
       // hide the start over button
       againButton.hidden = true;
       // don't allow repeat taps of exit button
@@ -535,7 +535,7 @@ class GridMemory extends Game {
 
 // ============================================================================
 
-const gridMemory = new GridMemory({ InterferenceTime: 1000 });
+const gridMemory = new GridMemory({ InterferenceTime: 4000 });
 
 const session = new Session({
   activities: [gridMemory],

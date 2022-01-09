@@ -2,7 +2,8 @@ import "./Globals";
 import { Activity } from "./Activity";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
-import { TapEvent } from "./TapListener";
+import { TapEvent } from "./TapEvent";
+import { EntityEvent } from "./EntityEvent";
 import { IDrawable } from "./IDrawable";
 import { Entity } from "./Entity";
 import { EntityType } from "./EntityType";
@@ -862,25 +863,27 @@ export class Game implements Activity {
   }
 
   /**
-   * Creates a tap listener for an entity based on the entity name
+   * Creates an event listener for an entity based on the entity name
    *
-   * @remarks Typically, tap listeners will be created using the onTap() method of each entity. This alternative allows creation with entity name.
+   * @remarks Typically, event listeners will be created using a method specific to the event, such as onTapDown(). This alternative allows creation with entity name.
    *
-   * @param entityName
-   * @param codeCallback
-   * @param replaceExistingCodeCallback
+   * @param eventType - the type of event to listen for, e.g., "tapdown"
+   * @param entityName - the entity name for which an event will be listened
+   * @param callback
+   * @param replaceExistingCallback
    */
-  createTapListener(
+  createEventListener(
+    eventType: string,
     entityName: string,
-    codeCallback: (tapEvent: TapEvent) => void,
-    replaceExistingCodeCallback = true
+    callback: (event: EntityEvent) => void,
+    replaceExistingCallback = true
   ): void {
     const entities = this.entities.filter(
       (entity) => entity.name === entityName
     );
     if (entities.length > 1) {
       console.warn(
-        `warning: CreateTapListener() found more than one entity with name ${entityName}. Tap listener will be attached to first entity found. All entities that receive tap events should be uniquely named`
+        `warning: createEventListener() found more than one entity with name ${entityName}. Event listener will be attached to first entity found. All entities that receive tap events should be uniquely named`
       );
     }
     const entity = entities
@@ -888,11 +891,21 @@ export class Game implements Activity {
       .find(Boolean);
     if (entity === undefined) {
       throw new Error(
-        `could not add taplistener. entity with name ${entityName} could not be found in the game entity tree`
+        `could not create event listener. entity with name ${entityName} could not be found in the game entity tree`
       );
     }
 
-    entity.onTap(codeCallback, replaceExistingCodeCallback);
+    switch (eventType) {
+      case "tapdown": {
+        entity.onTapDown(callback, replaceExistingCallback);
+        break;
+      }
+      default: {
+        throw new Error(
+          `could not create event listener: event type ${eventType} is not known`
+        );
+      }
+    }
   }
 
   /**
@@ -981,25 +994,22 @@ export class Game implements Activity {
   }
 
   private handleEntityTapped(entity: Entity, x: number, y: number): void {
-    entity.tapListeners.forEach((listener) => {
-      if (listener.entityName === entity.name) {
-        if (listener.codeCallback) {
+    entity.eventListeners
+      .filter((listener) => listener.eventType === "tapdown")
+      .forEach((listener) => {
+        if (listener.entityName === entity.name) {
           const bb = this.calculateEntityAbsoluteBoundingBox(entity);
           const relativeX =
             ((x - bb.xMin) / (bb.xMax - bb.xMin)) * entity.size.width;
           const relativeY =
             ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
-          listener.codeCallback({
-            tappedEntity: entity,
+          const tapEvent: TapEvent = {
+            target: entity,
             point: new Point(relativeX, relativeY),
-          });
-        } else {
-          throw new Error(
-            `tap listener codeCallback for ${entity.name} is undefined`
-          );
+          };
+          listener.callback(tapEvent);
         }
-      }
-    });
+      });
   }
 
   private tapIsWithinEntityBounds(

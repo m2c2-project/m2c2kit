@@ -1,6 +1,8 @@
 import "./Globals";
 import { Canvas, CanvasKit } from "canvaskit-wasm";
-import { TapEvent, TapListener } from "./TapListener";
+import { EntityEventListener } from "./EntityEventListener";
+import { EntityEvent } from "./EntityEvent";
+import { TapEvent } from "./TapEvent";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
 import { Action } from "./Action";
@@ -77,7 +79,7 @@ export abstract class Entity implements EntityOptions {
   actions = new Array<Action>();
   queuedAction?: Action;
   originalActions = new Array<Action>();
-  tapListeners = new Array<TapListener>();
+  eventListeners = new Array<EntityEventListener>();
   uuid = Uuid.generate();
   needsInitialization = true;
   // library users might put anything in userData property
@@ -209,28 +211,35 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Provides the callback function to be executed when the user taps the entity.
+   * Takes the callback function to be executed when the user taps down on the entity. A TapDown is either a mouse click within the bounds of an entity OR the beginning of touches within the bounds of an entity.
    *
-   * @param codeCallback - function to execute
-   * @param replaceExistingCodeCallback  - should the provided callback replace any existing callbacks? Usually we want to have only one callback defined, instead of chaining multiple ones. It is strongly recommended not to change this, unless you have a special use case. Default is true.
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace any existing callbacks? Usually we want to have only one callback defined, instead of chaining multiple ones. It is strongly recommended not to change this, unless you have a special use case. Default is true.
    */
-  onTap(
-    codeCallback: (tapEvent: TapEvent) => void,
-    replaceExistingCodeCallback = true
+  onTapDown(
+    callback: (tapEvent: TapEvent) => void,
+    replaceExistingCallback = true
   ): void {
     // By default, we'll replace the existing callback if there is one
     // Why? If the same setup code is called more than once for a scene that repeats, it could
     // add the same callback again. Usually, this is not the intent.
-    const listener = new TapListener();
-    listener.entityName = this.name;
 
-    listener.codeCallback = codeCallback;
-    if (replaceExistingCodeCallback) {
-      this.tapListeners = this.tapListeners.filter(
-        (tapListener) => tapListener.entityName !== listener.entityName
+    // cast <(ev: EntityEvent) => void> is needed because callback parameter
+    // in this onTapDown method has argument of type TapEvent, but
+    // in the EntityEventListener type, the callback property expects a
+    // callback with argument of type EntityEvent
+    const eventListener: EntityEventListener = {
+      eventType: "tapdown",
+      entityName: this.name,
+      callback: <(ev: EntityEvent) => void>callback,
+    };
+
+    if (replaceExistingCallback) {
+      this.eventListeners = this.eventListeners.filter(
+        (listener) => listener.entityName !== eventListener.entityName
       );
     }
-    this.tapListeners.push(listener);
+    this.eventListeners.push(eventListener);
   }
 
   private parseLayoutConstraints(
