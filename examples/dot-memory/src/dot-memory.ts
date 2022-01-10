@@ -535,6 +535,16 @@ class GridMemory extends Game {
 
 // ============================================================================
 
+// When running within an Android webview, the below defines how the session
+// can communicate events to the Android app. Note: the names of this Android
+// namespace and its functions must match the corresponding Android code
+// in addJavascriptInterface() and @JavascriptInterface
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace Android {
+  function onGameTrialComplete(gameTrialEventAsString: string): void;
+  function onGameLifecycleChange(gameLifecycleEventAsString: string): void;
+}
+
 const gridMemory = new GridMemory({ InterferenceTime: 4000 });
 
 const session = new Session({
@@ -545,11 +555,23 @@ const session = new Session({
       console.log("data: " + JSON.stringify(e.gameData));
       console.log("trial schema: " + JSON.stringify(e.trialSchema));
       console.log("game parameters: " + JSON.stringify(e.gameParameters));
+
+      // callback to native Android app, if running in that context
+      if (typeof Android !== "undefined") {
+        Android.onGameTrialComplete(JSON.stringify(e));
+      }
     },
-    onGameEnd: (e: GameLifecycleEvent) => {
-      console.log(`ended game ${e.gameName}`);
-      if (session.nextActivity) {
-        session.advanceToNextActivity();
+    onGameLifecycleChange: (e: GameLifecycleEvent) => {
+      if (e.ended) {
+        console.log(`ended game ${e.gameName}`);
+        if (session.nextActivity) {
+          session.advanceToNextActivity();
+        }
+
+        // callback to native Android app, if running in that context
+        if (typeof Android !== "undefined") {
+          Android.onGameLifecycleChange(JSON.stringify(e));
+        }
       }
     },
   },

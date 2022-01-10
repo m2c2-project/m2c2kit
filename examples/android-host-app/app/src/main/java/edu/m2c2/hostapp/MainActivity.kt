@@ -7,10 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.webkit.*
 import androidx.webkit.WebViewAssetLoader
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -23,12 +22,8 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.security.MessageDigest
 import kotlin.coroutines.CoroutineContext
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.widget.*
 import androidx.annotation.RequiresApi
-
-const val demoServerUrl = "https://m2c2-demo-server.azurewebsites.net"
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
@@ -49,6 +44,33 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         webView.settings.apply {
             javaScriptEnabled = true
         }
+
+        /** Instantiate the JavaScript WebView-to-native interop interface and set the context
+         * This is how the native android app can
+         * 1) receive data from the WebView
+         * 2) know when the m2c2kit game is done
+         * see https://developer.android.com/guide/webapps/webview#BindingJavaScript
+         * */
+        class M2c2Interface(private val mContext: Context) {
+
+            @JavascriptInterface
+            fun onGameTrialComplete(gameTrialEventAsString: String) {
+                Log.i(
+                    tag,
+                    "onGameTrialComplete callback from JavaScript received data: $gameTrialEventAsString"
+                )
+            }
+
+            @JavascriptInterface
+            fun onGameLifecycleChange(gameLifecycleEventAsString: String) {
+                Log.i(
+                    tag,
+                    "onGameLifecycleChange callback from JavaScript received data: $gameLifecycleEventAsString"
+                )
+            }
+        }
+
+        webView.addJavascriptInterface(M2c2Interface(this), "Android")
 
         val urlEditText = findViewById<EditText>(R.id.urlEditText)
         val loadButton = findViewById<Button>(R.id.loadButton)
@@ -103,7 +125,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             try {
                 resources = getResourcesList(this@MainActivity,serverUrl, studyCode).fileResources.toMutableList()
             } catch (e: Exception) {
-                Log.d(
+                Log.e(
                     tag,
                     "Exception getting study resources list: " + e.message
                 )
@@ -114,9 +136,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             val totalResources = resources.size
-            Log.d(
+            Log.i(
                 tag,
-                "Retrieved list of ${totalResources} file resources for study $studyCode."
+                "Retrieved list of $totalResources file resources for study $studyCode."
             )
             val folder = filesDir
             val studyFolder = File(folder, studyCode)
@@ -142,7 +164,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
             }).filter { it.filename != "" } as MutableList<FileResource>
 
-            Log.d(
+            Log.i(
                 tag,
                 "${resources.size} file resources have been changed and need to be downloaded."
             )
@@ -157,30 +179,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
                         .awaitAll() zip resources.map { it.filename }
                 downloadRequests.forEach {
-                    val folder: File
+                    val destFolder: File
                     val filename: String
                     if (it.second.contains("/")) {
-                        var nestedFolderName = it.second.replace("\\/(?!.*\\/).*".toRegex(), "")
+                        val nestedFolderName = it.second.replace("/(?!.*/).*".toRegex(), "")
                         val nestedFolder = File(studyFolder, nestedFolderName)
                         nestedFolder.mkdirs()
-                        folder = nestedFolder
-                        filename = it.second.replace(nestedFolderName + "/" , "")
+                        destFolder = nestedFolder
+                        filename = it.second.replace("$nestedFolderName/", "")
                     } else {
-                        folder = studyFolder
+                        destFolder = studyFolder
                         filename = it.second
                     }
 
-                    val file = File(folder, filename)
+                    val file = File(destFolder, filename)
                     //val file = File(studyFolder, it.second)
                     val bytes = it.first.readBytes()
                     file.writeBytes(bytes)
-                    Log.d(
+                    Log.i(
                         tag,
                         "Downloaded " + bytes.size + " bytes and wrote to " + it.second
                     )
                 }
             } catch (e: Exception) {
-                Log.d(
+                Log.e(
                     tag,
                     "Exception downloading resources: " + e.message
                 )
@@ -211,21 +233,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun getServerUrlFromUrl(url: String): String {
-        var serverUrl = "^.*\\/".toRegex().find(url)?.value
+        var serverUrl = "^.*/".toRegex().find(url)?.value
         if (serverUrl == null) {
-            return "";
+            return ""
         }
-        serverUrl = serverUrl.replace("\\/\$".toRegex(), "")
+        serverUrl = serverUrl.replace("/\$".toRegex(), "")
         if (!serverUrl.startsWith("http")) {
-            serverUrl = "https://" + serverUrl;
+            serverUrl = "https://$serverUrl"
         }
         return serverUrl
     }
 
     private fun getStudyCodeFromUrl(url: String): String {
-        var studyCode = "\\/.*\$".toRegex().find(url)?.value
+        var studyCode = "/.*\$".toRegex().find(url)?.value
         if (studyCode == null) {
-            return "";
+            return ""
         }
         //var studyCode = url.replace("/$".toRegex(), "")
         studyCode = studyCode.replace("/", "")

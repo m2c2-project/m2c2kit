@@ -343,7 +343,7 @@ export class Game implements Activity {
   /**
    * Should be called when the current trial has completed. It will
    * also increment the trial index.
-   * Calling this will trigger the onTrialComplete callback function,
+   * Calling this will trigger the onGameTrialComplete callback function,
    * if one was provided in SessionOptions. This is how the game communicates
    * trial data to the parent session, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
@@ -367,15 +367,15 @@ export class Game implements Activity {
 
   /**
    * Should be called when the current game has ended. This will trigger
-   * the onGameEnd callback function, if one was provided in SessionOptions.
-   * This is how the game communicates its ended or "finished" state to the
-   * parent session.
+   * the onGameLifecycleChange callback function, if one was provided in
+   * SessionOptions. This is how the game can communicate its ended or
+   * "finished" state to the parent session.
    * It is the responsibility of the the game programmer to call this at
    * the appropriate time. It is not triggered automatically.
    */
   end(): void {
-    if (this.session.options.gameCallbacks?.onGameEnd) {
-      this.session.options.gameCallbacks.onGameEnd({
+    if (this.session.options.gameCallbacks?.onGameLifecycleChange) {
+      this.session.options.gameCallbacks.onGameLifecycleChange({
         ended: true,
         gameUuid: this.uuid,
         gameName: this.options.name,

@@ -384,27 +384,11 @@ await yarg
         yarg.exit(1, new Error("user aborted"));
       }
 
-      // get study code first from command line, then from config file, then assign blank
-      let studyCode =
+      // get study code first from command line, then from config file, then generate new one
+      const studyCode =
         (argv["studyCode"] as unknown as string) ??
         serverConfig?.studyCode ??
-        "";
-      if (studyCode === "") {
-        const response = await prompts({
-          type: "text",
-          name: "studyCode",
-          message: "study code?",
-          validate: (text) =>
-            (text as unknown as string).length > 0
-              ? true
-              : "provide a study code (5 random alphanumeric digits, e.g., R5T7A)",
-          onState: (state) => (abort = state.aborted === true),
-        });
-        studyCode = response.studyCode;
-      }
-      if (abort) {
-        yarg.exit(1, new Error("user aborted"));
-      }
+        generateStudyCode();
 
       // if new url or study code was provided, save these
       if (url !== serverConfig?.url || studyCode !== serverConfig?.studyCode) {
