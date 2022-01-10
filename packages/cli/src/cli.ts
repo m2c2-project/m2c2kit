@@ -95,6 +95,17 @@ await yarg
     },
     (argv) => {
       const appName = argv["name"] as string;
+
+      if (!isValidAppName(appName)) {
+        console.error(
+          `${chalk.red(
+            "ERROR"
+          )}: the name ${appName} is not valid. The name must be a valid JavaScript identifer (e.g., begin with a letter, $ or _; not contain spaces; not be a reserved word, etc.).`
+        );
+        yarg.exit(1, new Error("invalid name"));
+      }
+      const className = appName.charAt(0).toUpperCase() + appName.slice(1);
+
       const newFolderPath = path.join(path.resolve(), appName);
 
       if (fs.existsSync(newFolderPath)) {
@@ -183,6 +194,7 @@ await yarg
         try {
           const contents = applyValuesToTemplate(t.templateFilePath, {
             appName: appName,
+            className: className,
             cliVersion: cliVersion,
             studyCode: generateStudyCode(),
           });
@@ -549,3 +561,106 @@ await yarg
   // provide
   .version(cliVersion)
   .showHelpOnFail(true).argv;
+
+function isValidAppName(name: string): boolean {
+  const reserved = [
+    "abstract",
+    "arguments",
+    "await",
+    "boolean",
+    "break",
+    "byte",
+    "case",
+    "catch",
+    "char",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "double",
+    "else",
+    "enum",
+    "eval",
+    "export",
+    "extends",
+    "false",
+    "final",
+    "finally",
+    "float",
+    "for",
+    "function",
+    "goto",
+    "if",
+    "implements",
+    "import",
+    "in",
+    "instanceof",
+    "int",
+    "interface",
+    "let",
+    "long",
+    "native",
+    "new",
+    "null",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "short",
+    "static",
+    "super",
+    "switch",
+    "synchronized",
+    "this",
+    "throw",
+    "throws",
+    "transient",
+    "true",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "volatile",
+    "while",
+    "with",
+    "yield",
+  ];
+
+  const builtin = [
+    "Array",
+    "Date",
+    "eval",
+    "function",
+    "hasOwnProperty",
+    "Infinity",
+    "isFinite",
+    "isNaN",
+    "isPrototypeOf",
+    "length",
+    "Math",
+    "name",
+    "NaN",
+    "Number",
+    "Object",
+    "prototype",
+    "String",
+    "toString",
+    "undefined",
+    "valueOf",
+  ];
+
+  if (reserved.includes(name) || builtin.includes(name)) {
+    return false;
+  }
+
+  const re = /^[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*$/;
+  if (!re.test(name)) {
+    return false;
+  }
+
+  return true;
+}

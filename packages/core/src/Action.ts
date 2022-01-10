@@ -174,7 +174,7 @@ export abstract class Action {
       case ActionType.custom: {
         const code = action as CustomAction;
         cloned = Action.Custom({
-          callback: code.codeCallback,
+          callback: code.callback,
           runDuringTransition: code.runDuringTransition,
         });
         break;
@@ -235,7 +235,7 @@ export abstract class Action {
 
     if (action.type === ActionType.custom) {
       const customAction = action as CustomAction;
-      customAction.codeCallback();
+      customAction.callback();
       customAction.running = false;
       customAction.completed = true;
     }
@@ -412,10 +412,10 @@ export class GroupAction extends Action implements IActionContainer {
 
 export class CustomAction extends Action {
   type = ActionType.custom;
-  codeCallback: () => void;
-  constructor(codeCallback: () => void, runDuringTransition = false) {
+  callback: () => void;
+  constructor(callback: () => void, runDuringTransition = false) {
     super(runDuringTransition);
-    this.codeCallback = codeCallback;
+    this.callback = callback;
     this.isParent = false;
     this.duration = 0;
   }

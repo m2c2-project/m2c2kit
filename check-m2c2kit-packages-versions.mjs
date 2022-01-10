@@ -76,7 +76,7 @@ console.log(
   "@m2c2kit/addons version should match version specified as dependency in cli package.json template"
 );
 console.log(
-  "@m2c2kit/cli is versioned indpendently of @m2c2kit/core and @m2c2kit/addons"
+  "@m2c2kit/cli is versioned independently of @m2c2kit/core and @m2c2kit/addons"
 );
 
 console.log();

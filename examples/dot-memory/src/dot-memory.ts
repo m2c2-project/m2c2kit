@@ -555,6 +555,11 @@ const session = new Session({
   },
 });
 
+// make session also available on window in case we want to control
+// the session through another means
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as unknown as any).session = session;
+
 session.init().then(() => {
   session.start();
 });

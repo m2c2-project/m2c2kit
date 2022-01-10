@@ -9,71 +9,78 @@ import {
   LabelHorizontalAlignmentMode,
   Shape,
   Rect,
-  GameData,
+  GameOptions,
+  GameParameters,
+  TrialSchema,
+  Session,
+  GameTrialEvent,
+  GameLifecycleEvent,
 } from "@m2c2kit/core";
-
 import { Button, Instructions } from "@m2c2kit/addons";
 
-const game = new Game();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as unknown as any).game = game;
-
-// game parameter defaults to be used if values are not provided
-// default parameters are not part of the m2c2kit engine, because parameters
-// are different for each game that might be written. Thus, define them here
-const defaults = {
-  ReadyTime: 1000,
-  TrialNum: 3,
-};
-
-// trial data variables names and types must be defined
-// valid types are "number", "string", "boolean", and "object"
-const demoTrialSchema = {
-  correct: "boolean",
-};
-
-game
-  .init({
-    showFps: true,
-    // set this color so we can see the boundaries of the game
-    bodyBackgroundColor: WebColors.Wheat,
-    // note: using 2:1 aspect ratio, because that is closer to modern phones
-    width: 400,
-    height: 800,
-    defaultParameters: defaults,
-    trialSchema: demoTrialSchema,
-    // set stretch to true if you want to fill the screen
-    stretch: false,
-    // Roboto is included by default. Leave fontUrls unchanged, unless you want to use different font
-    fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
-    // each svgImage below, you specify either a tag of an svg in the property "svgString" (as I do below)
-    // or you specify a URL to an svg in the property "url", such as url: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg'
-    svgImages: [
-      {
-        name: "star",
-        height: 60,
-        width: 60,
-        svgString:
-          '<svg xmlns="http://www.w3.org/2000/svg" width="304" height="290"> <path d="M2,111 h300 l-242.7,176.3 92.7,-285.3 92.7,285.3 z" style="fill:#00FF00;stroke:#0000FF;stroke-width:15;stroke-linejoin:round"/></svg>',
+class {{className}} extends Game {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(specifiedParameters?: any) {
+    const defaultParameters: GameParameters = {
+      ReadyTime: {
+        value: 1000,
+        description:
+          "How long the 'get ready' message scene is shown, milliseconds",
       },
-    ],
-  })
-  .then(() => {
-    // callback provided to onTrialComplete is called when each trial is done
-    game.onTrialComplete(
-      (trialNumber: number, data: GameData, trialSchema: object) => {
-        console.log(`Trial number ${trialNumber} completed.`);
-        console.log(`Current Game data is: ${JSON.stringify(data)}`);
-        console.log(`Trial schema is: ${JSON.stringify(trialSchema)}`);
-      }
-    );
+      TrialNum: { value: 3, description: "How many trials to run" },
+    };
 
-    // callback provided to onAllTrialsComplete is called when all game trials are done
-    game.onAllTrialsComplete((data: GameData, trialSchema: object) => {
-      console.log(`All trials completed.`);
-      console.log(`Complete Game data is: ${JSON.stringify(data)}`);
-      console.log(`Trial schema is: ${JSON.stringify(trialSchema)}`);
-    });
+    const demoTrialSchema: TrialSchema = {
+      colorChosen: { type: "string", description: "the color that was picked" },
+      correct: { type: "boolean", description: "was the answer correct?" },
+    };
+
+    const options: GameOptions = {
+      name: "{{appName}}",
+      version: "1.0.0",
+      uri: "https://your-repo-or-webpage-here",
+      shortDescription: "A brief couple sentence description.",
+      longDescription: "An extended, many-sentence description.",
+      showFps: true,
+      trialSchema: demoTrialSchema,
+      parameters: defaultParameters,
+      // set this color so we can see the boundaries of the game during development,
+      // but typically we would not set this
+      bodyBackgroundColor: WebColors.Wheat,
+      // note: using 2:1 aspect ratio, because that is closer to modern phones
+      width: 400,
+      height: 800,
+      // set stretch to true if you want to fill the screen on large windows
+      // (e.g., iPad, desktop browser)
+      stretch: false,
+      // Roboto is included by default. Leave fontUrls unchanged, unless you want to use different font
+      fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
+      // for each image below, you specify either a tag of an svg in the property "svgString"
+      // or you specify a URL to an image in the property "url",
+      // such as url: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg'
+      images: [
+        {
+          name: "star",
+          height: 60,
+          width: 60,
+          svgString:
+            '<svg xmlns="http://www.w3.org/2000/svg" width="304" height="290"> <path d="M2,111 h300 l-242.7,176.3 92.7,-285.3 92.7,285.3 z" style="fill:#00FF00;stroke:#0000FF;stroke-width:15;stroke-linejoin:round"/></svg>',
+        },
+        {
+          name: "smiley",
+          height: 64,
+          width: 64,
+          svgString:
+            '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="451.451 -28.549 1657.098 1657.098" enable-background="new 451.451 -28.549 1657.098 1657.098" xml:space="preserve"><g><g><circle cx="992.682" cy="640.47" r="66.818"/></g><g><circle cx="1558.728" cy="640.47" r="66.818"/></g><g><path d="M1280,1600c-107.984,0-212.756-21.157-311.407-62.883c-95.268-40.295-180.819-97.973-254.279-171.432c-73.459-73.459-131.137-159.01-171.432-254.278C501.157,1012.757,480,907.984,480,800s21.157-212.756,62.883-311.407c40.295-95.268,97.973-180.819,171.432-254.279c73.46-73.459,159.011-131.137,254.279-171.432C1067.244,21.157,1172.016,0,1280,0s212.757,21.157,311.407,62.883c95.268,40.295,180.819,97.973,254.278,171.432c73.459,73.46,131.137,159.011,171.432,254.279C2058.843,587.244,2080,692.016,2080,800s-21.157,212.757-62.883,311.407c-40.295,95.268-97.973,180.819-171.432,254.278s-159.01,131.137-254.278,171.432C1492.757,1578.843,1387.984,1600,1280,1600z M1280,71.591c-401.646,0-728.409,326.763-728.409,728.409S878.354,1528.409,1280,1528.409S2008.409,1201.646,2008.409,800C2008.409,398.354,1681.646,71.591,1280,71.591z"/></g><g><path d="M1665.953,1071.004c-213.156,213.156-558.75,213.156-771.905,0c20.534-20.534,41.068-41.068,61.602-61.602c179.134,179.134,469.567,179.134,648.7,0C1624.884,1029.936,1645.418,1050.47,1665.953,1071.004z"/></g><g><path d="M1167.066,463.279c-96.31-96.31-252.459-96.31-348.768,0c16.971,16.971,33.941,33.941,50.912,50.912c68.192-68.192,178.753-68.192,246.945,0C1133.125,497.22,1150.096,480.249,1167.066,463.279z"/></g><g><path d="M1733.112,463.279c-96.31-96.31-252.459-96.31-348.768,0c16.971,16.971,33.941,33.941,50.912,50.912c68.192-68.192,178.753-68.192,246.945,0C1699.171,497.22,1716.142,480.249,1733.112,463.279z"/></g></g></svg>',
+        },
+      ],
+    };
+
+    super(options, specifiedParameters);
+    // just for convenience, alias the variable game to "this"
+    // (even though eslint doesn't like it)
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const game = this;
 
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
@@ -83,9 +90,10 @@ game
       instructionScenes: [
         {
           title: "{{appName}} Demo",
-          text: "For this activity, you will click the red rectangle. Open the developer console to see the trial data.",
+          text: "For this task, you will click the red rectangle. Open the developer console to see the trial data and other output.",
           textFontSize: 24,
           titleFontSize: 30,
+          image: "smiley",
         },
         {
           title: "{{appName}} Demo",
@@ -93,87 +101,96 @@ game
           textFontSize: 24,
           titleFontSize: 30,
           textAlignmentMode: LabelHorizontalAlignmentMode.center,
+          textVerticalBias: 0.25,
           nextButtonText: "START",
           nextButtonBackgroundColor: WebColors.Green,
         },
       ],
-      // this is the scene to go to after the last instructions scene
-      postInstructionsScene: "getReadyScene",
+      // this is the name of the scene to go to after the last instructions scene
+      postInstructionsScene: "getReady",
     });
     game.addScenes(instructionsScenes);
 
-    // start at 0
-    game.trialNumber = 0;
-
-    const demoPage0 = new Scene({
+    const getReadyScene = new Scene({
       // Because this is the scene after the instructions, we must give
       // it a name and provide it to postInstructionsScene, above
-      name: "getReadyScene",
+      name: "getReady",
       backgroundColor: WebColors.White,
     });
-    game.addScene(demoPage0);
+    game.addScene(getReadyScene);
 
     const getReadyMessage = new Label({
       text: "Get Ready",
       fontSize: 24,
       position: new Point(200, 400),
     });
-    demoPage0.addChild(getReadyMessage);
+    getReadyScene.addChild(getReadyMessage);
 
     // example of how to use an image. The image must be previously loaded
     const starSprite = new Sprite({
       imageName: "star",
       position: new Point(200, 500),
     });
-    demoPage0.addChild(starSprite);
+    getReadyScene.addChild(starSprite);
 
-    // demoPage0.setup() has a callback that is executed each time this scene is shown
-    demoPage0.setup(() => {
-      demoPage0.run(
+    // getReadyScene.setup() has a callback that is executed each time this scene is shown
+    getReadyScene.setup(() => {
+      getReadyScene.run(
         Action.Sequence([
           // Get the wait duration from the default game parameters, defined above
           Action.Wait({ duration: game.getParameter("ReadyTime") }),
           Action.Custom({
             callback: () => {
-              game.presentScene(demoPage1);
+              game.presentScene(chooseRectangleScene);
             },
           }),
         ])
       );
     });
 
-    // these entities (demoPage1 through wrongMessage) can be defined outside of a setup()
+    // these entities before the setup() can be defined outside of a setup()
     // because they exist through multiple trials
     // Their position and how they respond to interactions may differ across trials,
     // and that logic will be written within a setup()
-    const demoPage1 = new Scene({ backgroundColor: WebColors.LightGray });
-    game.addScene(demoPage1);
+    const chooseRectangleScene = new Scene({
+      backgroundColor: WebColors.LightGray,
+    });
+    game.addScene(chooseRectangleScene);
     const redRect = new Shape({
       rect: new Rect({ width: 150, height: 100 }),
       fillColor: WebColors.Red,
     });
-    demoPage1.addChild(redRect);
+    chooseRectangleScene.addChild(redRect);
     const blueRect = new Shape({
       rect: new Rect({ width: 150, height: 100 }),
       fillColor: WebColors.Blue,
     });
-    demoPage1.addChild(blueRect);
+    chooseRectangleScene.addChild(blueRect);
     const correctMessage = new Label({
       text: "CORRECT!",
       position: new Point(200, 500),
     });
+
+    const chooseMessage = new Label({
+      text: "Choose the red rectangle",
+      position: new Point(200, 200),
+    });
+    chooseRectangleScene.addChild(chooseMessage);
+
     correctMessage.hidden = true;
-    demoPage1.addChild(correctMessage);
+    chooseRectangleScene.addChild(correctMessage);
     const wrongMessage = new Label({
       text: "WRONG!",
       position: new Point(200, 500),
     });
-    wrongMessage.hidden = true;
-    demoPage1.addChild(wrongMessage);
 
-    // demoPage1.setup() has a callback that is executed each time this scene is shown
-    // we will randomly decide on what side the red rectangle is shown
-    demoPage1.setup(() => {
+    wrongMessage.hidden = true;
+    chooseRectangleScene.addChild(wrongMessage);
+
+    // chooseRectangleScene.setup() is passed a callback that is executed each
+    // time this scene is shown. Within setup(), We will randomly decide on
+    // what side the red rectangle is shown
+    chooseRectangleScene.setup(() => {
       let redOnLeft = true;
       if (Math.random() > 0.5) {
         redOnLeft = false;
@@ -191,22 +208,22 @@ game
       // decide if we are done
       function recordUserInput(choseRedRect: boolean) {
         game.addTrialData("correct", choseRedRect);
-        game.lifecycle.trialComplete(
-          game.trialNumber,
-          game.data,
-          game.trialSchema
-        );
-        game.trialNumber++;
-        // have we finished the number of trials?
-        if (game.trialNumber < game.getParameter<number>("TrialNum")) {
-          game.presentScene(demoPage0);
+        if (choseRedRect) {
+          game.addTrialData("colorChosen", "red");
         } else {
-          game.presentScene(endPage);
+          game.addTrialData("colorChosen", "blue");
+        }
+        game.trialComplete();
+        // have we finished the number of trials?
+        if (game.trialIndex < game.getParameter<number>("TrialNum")) {
+          game.presentScene(getReadyScene);
+        } else {
+          game.presentScene(endScene);
         }
       }
 
       redRect.isUserInteractionEnabled = true;
-      redRect.onTap(() => {
+      redRect.onTapDown(() => {
         redRect.run(
           Action.Sequence([
             Action.Custom({
@@ -239,7 +256,7 @@ game
       });
 
       blueRect.isUserInteractionEnabled = true;
-      blueRect.onTap(() => {
+      blueRect.onTapDown(() => {
         blueRect.run(
           Action.Sequence([
             Action.Custom({
@@ -267,29 +284,94 @@ game
       });
     });
 
-    const endPage = new Scene();
-    game.addScene(endPage);
+    const endScene = new Scene();
+    game.addScene(endScene);
     const doneLabel = new Label({
       text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
       position: new Point(200, 300),
     });
-    endPage.addChild(doneLabel);
+    endScene.addChild(doneLabel);
 
-    const againButton = new Button({
+    const startOverButton = new Button({
       text: "Start over",
-      position: new Point(200, 400),
+      position: new Point(200, 600),
     });
-    againButton.isUserInteractionEnabled = true;
-    againButton.onTap(() => {
-      game.initData(game.trialSchema);
-      game.presentScene(demoPage0);
+    startOverButton.isUserInteractionEnabled = true;
+    startOverButton.onTapDown(() => {
+      // in the setup() for the end scene, we animate the smiley sprite with
+      // a move action. if the user taps the start over button before the
+      // animation is completed, we should remove it by calling
+      // removeAllActions()
+      smileySprite.removeAllActions();
+      game.initData();
+      game.presentScene(getReadyScene);
     });
-    endPage.addChild(againButton);
+    endScene.addChild(startOverButton);
 
-    endPage.setup(() => {
-      doneLabel.text = `You did ${game.trialNumber} trials. You're done!`;
-      game.lifecycle.allTrialsComplete(game.data, game.trialSchema);
+    const exitButton = new Button({
+      text: "Exit",
+      position: new Point(200, 675),
+    });
+    exitButton.isUserInteractionEnabled = true;
+    exitButton.onTapDown(() => {
+      // hide the start over button
+      startOverButton.hidden = true;
+      // don't allow repeated taps on exit button
+      exitButton.isUserInteractionEnabled = false;
+      game.end();
+    });
+    endScene.addChild(exitButton);
+
+    const smileySprite = new Sprite({ imageName: "smiley" });
+    endScene.addChild(smileySprite);
+
+    endScene.setup(() => {
+      doneLabel.text = `You did ${game.trialIndex} trials. You're done!`;
+
+      // example of how to position a sprite and create an action to move it
+      smileySprite.position = new Point(200, 500);
+      smileySprite.run(
+        Action.Move({ point: new Point(200, 100), duration: 3000 })
+      );
     });
 
-    game.start("instructions-01");
-  });
+    game.entryScene = "instructions-01";
+  }
+}
+
+// default was 3 trials; this is how we can specify a different value
+const game1 = new {{className}}({ TrialNum: 2 });
+
+const session = new Session({
+  activities: [game1],
+  gameCallbacks: {
+    // onGameTrialComplete() is where you insert code to post data to an API
+    // or interop with a native function in the host app, if applicable
+    onGameTrialComplete: (e: GameTrialEvent) => {
+      console.log(`********** trial ${e.trialIndex} complete`);
+      console.log("data: " + JSON.stringify(e.gameData));
+      console.log("trial schema: " + JSON.stringify(e.trialSchema));
+      console.log("game parameters: " + JSON.stringify(e.gameParameters));
+    },
+    // onGameEnd() is called when the user is done
+    onGameEnd: (e: GameLifecycleEvent) => {
+      if (e.ended) {
+        console.log(`user requested exit in game ${e.gameName}`);
+        // this session has only one activity, but this is how it would go to
+        // the next activity
+        if (session.nextActivity) {
+          session.advanceToNextActivity();
+        }
+      }
+    },
+  },
+});
+
+// make session also available on window in case we want to control
+// the session through another means
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as unknown as any).session = session;
+
+session.init().then(() => {
+  session.start();
+});

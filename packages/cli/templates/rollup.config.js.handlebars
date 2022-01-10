@@ -38,7 +38,7 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        del({ targets: [`${outputFolder}/*`] }),
+        commandLineArgs.configProd && del({ targets: [outputFolder] }),
         ...sharedPlugins,
         typescript({
           inlineSourceMap: commandLineArgs.configServe && true,

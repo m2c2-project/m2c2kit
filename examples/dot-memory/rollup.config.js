@@ -5,7 +5,7 @@ import shim from "rollup-plugin-shim";
 import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-import del from "rollup-plugin-delete";
+// import del from "rollup-plugin-delete";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
 
@@ -50,7 +50,6 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        // del({ targets: [`${outputFolder}/*`] }),
         ...sharedPlugins,
         typescript({
           sourceMap: commandLineArgs.configServe && true,

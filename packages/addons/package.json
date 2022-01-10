@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Additions to m2c2kit core functionalty, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -19,17 +19,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.1.3"
+    "@m2c2kit/core": "0.1.5"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "5.3.0",
     "@rollup/plugin-commonjs": "21.0.1",
-    "@rollup/plugin-node-resolve": "13.1.1",
+    "@rollup/plugin-node-resolve": "13.1.3",
     "@rollup/plugin-typescript": "8.3.0",
-    "rollup": "2.61.1",
+    "rollup": "2.63.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",
-    "rollup-plugin-dts": "4.0.1",
+    "rollup-plugin-dts": "4.1.0",
     "rollup-plugin-shim": "1.0.0",
     "rollup-plugin-sourcemaps": "0.6.3",
     "rollup-plugin-terser": "7.0.2"
