@@ -7,8 +7,8 @@
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.1.6",
-    "@m2c2kit/core": "0.1.6"
+    "@m2c2kit/addons": "0.1.7",
+    "@m2c2kit/core": "0.1.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",

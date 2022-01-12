@@ -24,6 +24,7 @@ import { GameOptions } from "./GameOptions";
 import { Session } from "./Session";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
+import { EventType } from "./EventBase";
 
 interface BoundingBox {
   xMin: number;
@@ -43,22 +44,20 @@ export class Game implements Activity {
   uuid = Uuid.generate();
   options: GameOptions;
 
+  constructor(options: GameOptions) {
+    this.options = options;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(options: GameOptions, specifiedParameters: any = {}) {
-    // store the game options, including the game's parameters
-    // but override these default parameters with the specified parameters,
-    // if supplied
-    const { parameters, ...optionsWithoutGameParameters } = options;
-    this.options = { ...optionsWithoutGameParameters };
-    this.options.parameters = { ...parameters };
-    Object.keys(specifiedParameters).forEach((key) => {
+  setParameters(newParameters: any): void {
+    const { parameters } = this.options;
+    Object.keys(newParameters).forEach((key) => {
       if (!parameters || !(key in parameters)) {
-        throw new Error(
-          `game ${this.options.name} does not have a parameter named ${key}`
+        console.warn(
+          `game ${this.options.name} does not have a parameter named ${key}. attempt to set parameter ${key} to value ${newParameters[key]} will be ignored`
         );
-      }
-      if (this.options.parameters && this.options.parameters[key]) {
-        this.options.parameters[key].value = specifiedParameters[key];
+      } else if (this.options.parameters && this.options.parameters[key]) {
+        this.options.parameters[key].value = newParameters[key];
       }
     });
   }
@@ -353,6 +352,7 @@ export class Game implements Activity {
     this.trialIndex++;
     if (this.session.options.gameCallbacks?.onGameTrialComplete) {
       this.session.options.gameCallbacks.onGameTrialComplete({
+        eventType: EventType.gameTrial,
         // above, we just incremented the trialIndex by 1, so this
         // completed trial index is trialIndex - 1
         trialIndex: this.trialIndex - 1,
@@ -376,6 +376,7 @@ export class Game implements Activity {
   end(): void {
     if (this.session.options.gameCallbacks?.onGameLifecycleChange) {
       this.session.options.gameCallbacks.onGameLifecycleChange({
+        eventType: EventType.gameLifecycle,
         ended: true,
         gameUuid: this.uuid,
         gameName: this.options.name,

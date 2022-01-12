@@ -17,6 +17,9 @@ import {
   TrialSchema,
   Timer,
   Session,
+  EventBase,
+  EventType,
+  SessionLifecycleEvent,
   GameTrialEvent,
   GameLifecycleEvent,
 } from "@m2c2kit/core";
@@ -24,7 +27,7 @@ import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
 class GridMemory extends Game {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(specifiedParameters?: any) {
+  constructor() {
     const defaultParameters: GameParameters = {
       ReadyTime: {
         value: 1000,
@@ -86,7 +89,7 @@ class GridMemory extends Game {
       ],
     };
 
-    super(options, specifiedParameters);
+    super(options);
 
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
@@ -533,55 +536,121 @@ class GridMemory extends Game {
   }
 }
 
-// ============================================================================
+// ===========================================================================
 
-// When running within an Android webview, the below defines how the session
-// can communicate events to the Android app. Note: the names of this Android
-// namespace and its functions must match the corresponding Android code
-// in addJavascriptInterface() and @JavascriptInterface
+//#region to support m2c2kit in Android WebView
+/** When running within an Android WebView, the below defines how the session
+ * can communicate events back to the Android app. Note: names of this Android
+ * namespace and its functions must match the corresponding Android code
+ * in addJavascriptInterface() and @JavascriptInterface */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Android {
   function onGameTrialComplete(gameTrialEventAsString: string): void;
   function onGameLifecycleChange(gameLifecycleEventAsString: string): void;
+  function onSessionLifecycleChange(
+    sessionLifecycleEventAsString: string
+  ): void;
+  /** if the Android native app will control the session execution and be
+   * able to set custom game paraemters (which is probably what you want),
+   * be sure that sessionManualStart() in the native code returns true */
+  function sessionManualStart(): boolean;
 }
 
-const gridMemory = new GridMemory({ InterferenceTime: 4000 });
+function contextIsAndroidWebView(): boolean {
+  return typeof Android !== "undefined";
+}
+
+function sendEventToAndroid(event: EventBase) {
+  switch (event.eventType) {
+    case EventType.sessionLifecycle: {
+      Android.onSessionLifecycleChange(JSON.stringify(event));
+      break;
+    }
+    case EventType.gameTrial: {
+      Android.onGameTrialComplete(JSON.stringify(event));
+      break;
+    }
+    case EventType.gameLifecycle: {
+      Android.onGameLifecycleChange(JSON.stringify(event));
+      break;
+    }
+    default:
+      throw new Error(
+        `attempt to send unknown event ${event.eventType} to Android`
+      );
+  }
+}
+//#endregion
+
+const gridMemory = new GridMemory();
+// default InterferenceTime is 8000 ms; this is how we can specify a different value
+gridMemory.setParameters({ InterferenceTime: 4000 });
 
 const session = new Session({
   activities: [gridMemory],
-  gameCallbacks: {
-    onGameTrialComplete: (e: GameTrialEvent) => {
-      console.log(`********** trial (index ${e.trialIndex}) complete`);
-      console.log("data: " + JSON.stringify(e.gameData));
-      console.log("trial schema: " + JSON.stringify(e.trialSchema));
-      console.log("game parameters: " + JSON.stringify(e.gameParameters));
-
-      // callback to native Android app, if running in that context
-      if (typeof Android !== "undefined") {
-        Android.onGameTrialComplete(JSON.stringify(e));
+  sessionCallbacks: {
+    // onSessionLifecycleChange() will be called on events such
+    // as when the session initialization is complete. Once initialized,
+    // the session will automatically start, unless we're running
+    // in an Android WebView and a manual start is desired.
+    onSessionLifecycleChange: (event: SessionLifecycleEvent) => {
+      if (event.initialized) {
+        //#region to support m2c2kit in Android WebView
+        if (contextIsAndroidWebView()) {
+          sendEventToAndroid(event);
+        }
+        if (contextIsAndroidWebView() && Android.sessionManualStart()) {
+          return;
+        }
+        //#endregion
+        session.start();
+      }
+      if (event.ended) {
+        console.log("session ended");
+        //#region to support m2c2kit in Android WebView
+        if (contextIsAndroidWebView()) {
+          sendEventToAndroid(event);
+        }
+        //#endregion
       }
     },
-    onGameLifecycleChange: (e: GameLifecycleEvent) => {
-      if (e.ended) {
-        console.log(`ended game ${e.gameName}`);
+  },
+  gameCallbacks: {
+    // onGameTrialComplete() is where you insert code to post data to an API
+    // or interop with a native function in the host app, if applicable
+    onGameTrialComplete: (event: GameTrialEvent) => {
+      console.log(`********** trial (index ${event.trialIndex}) complete`);
+      console.log("data: " + JSON.stringify(event.gameData));
+      console.log("trial schema: " + JSON.stringify(event.trialSchema));
+      console.log("game parameters: " + JSON.stringify(event.gameParameters));
+
+      //#region to support m2c2kit in Android WebView
+      if (contextIsAndroidWebView()) {
+        sendEventToAndroid(event);
+      }
+      //#endregion
+    },
+    onGameLifecycleChange: (event: GameLifecycleEvent) => {
+      if (event.ended) {
+        console.log(`ended game ${event.gameName}`);
         if (session.nextActivity) {
           session.advanceToNextActivity();
+        } else {
+          session.end();
         }
-
-        // callback to native Android app, if running in that context
-        if (typeof Android !== "undefined") {
-          Android.onGameLifecycleChange(JSON.stringify(e));
+        //#region to support m2c2kit in Android WebView
+        if (contextIsAndroidWebView()) {
+          sendEventToAndroid(event);
         }
+        //#endregion
       }
     },
   },
 });
 
-// make session also available on window in case we want to control
-// the session through another means
+/** make session also available on window in case we want to control
+ * the session through another means, such as other javascript or
+ * browser code, or the Android WebView loadUrl() method */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-
-session.init().then(() => {
-  session.start();
-});
+session.init();

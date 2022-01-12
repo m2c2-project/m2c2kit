@@ -48,10 +48,42 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         /** Instantiate the JavaScript WebView-to-native interop interface and set the context
          * This is how the native android app can
          * 1) receive data from the WebView
-         * 2) know when the m2c2kit game is done
+         * 2) know when the m2c2kit game and session is ended
+         * The methods within this interface are directly called by the javascript code. Look
+         * for these methods in the javascript code to understand how this works:
+         *   Android.onGameTrialComplete(JSON.stringify(event)) or
+         *   Android.onSessionLifecycleChange(JSON.stringify(event))
          * see https://developer.android.com/guide/webapps/webview#BindingJavaScript
          * */
         class M2c2Interface(private val mContext: Context) {
+
+            @JavascriptInterface
+            fun sessionManualStart(): Boolean {
+                // if you want to control execution and custom game parameters, make sure
+                // this returns true. Otherwise, the session will automatically start and
+                // games will run with default parameters.
+                return true;
+            }
+
+            @JavascriptInterface
+            fun onSessionLifecycleChange(sessionLifecycleEventAsString: String) {
+                Log.i(
+                    tag,
+                    "onSessionLifecycleChange callback from JavaScript received data: $sessionLifecycleEventAsString"
+                )
+
+                // the m2c2 session has just initialized; we can set our custom game parameters and start the session.
+                // in our javascript code, we placed session on window, and thus we can control it from here with loadUrl()
+                // (for type safety, we should deserialize this event string into an object, rather than try to parse the raw json string)
+                if (sessionLifecycleEventAsString.contains("\"initialized\":true")) {
+                    webView.post(Runnable {
+                        // use setParameters to override the game's default parameters
+                        // this is how we would take the parameters from a configuration json and insert them into the games
+                        webView.loadUrl("javascript:window.session.options.activities[0].setParameters({ TrialNum: 2 });");
+                        webView.loadUrl("javascript:window.session.start();");
+                    })
+                }
+            }
 
             @JavascriptInterface
             fun onGameTrialComplete(gameTrialEventAsString: String) {

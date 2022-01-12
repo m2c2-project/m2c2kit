@@ -89,7 +89,7 @@ jest.mock("../../build-umd", () => {
 });
 
 class Game1 extends Game {
-  constructor(specifiedParameters?: unknown) {
+  constructor() {
     const gameOptions: GameOptions = {
       name: "game1",
       version: "0.1",
@@ -98,7 +98,7 @@ class Game1 extends Game {
       height: 800,
     };
 
-    super(gameOptions, specifiedParameters);
+    super(gameOptions);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -110,7 +110,7 @@ class Game1 extends Game {
 }
 
 class Game2 extends Game {
-  constructor(specifiedParameters?: unknown) {
+  constructor() {
     const gameOptions: GameOptions = {
       name: "game2",
       version: "0.1",
@@ -119,7 +119,7 @@ class Game2 extends Game {
       height: 800,
     };
 
-    super(gameOptions, specifiedParameters);
+    super(gameOptions);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({

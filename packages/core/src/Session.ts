@@ -1,3 +1,4 @@
+import { EventType } from "./EventBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
 import { FontManager } from "./FontManager";
@@ -36,15 +37,24 @@ export class Session {
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async init(): Promise<void> {
-    Timer.Start("activityInit");
+    Timer.Start("sessionInit");
 
     const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);
 
     console.log(
-      `Activity.init() took ${Timer.Elapsed("activityInit").toFixed(0)} ms`
+      `Session.init() took ${Timer.Elapsed("sessionInit").toFixed(0)} ms`
     );
-    Timer.Remove("activityInit");
+    Timer.Remove("sessionInit");
+    const sessionLifecycleChangeCallback =
+      this.options.sessionCallbacks?.onSessionLifecycleChange;
+    if (sessionLifecycleChangeCallback) {
+      sessionLifecycleChangeCallback({
+        eventType: EventType.sessionLifecycle,
+        initialized: true,
+        ended: false,
+      });
+    }
   }
 
   /**
@@ -54,6 +64,21 @@ export class Session {
     this.currentActivity = this.options.activities.find(Boolean);
     this.logStartingActivity();
     this.currentActivity?.start();
+  }
+
+  /**
+   * Declares the session ended and sends callback.
+   */
+  end(): void {
+    const sessionLifecycleChangeCallback =
+      this.options.sessionCallbacks?.onSessionLifecycleChange;
+    if (sessionLifecycleChangeCallback) {
+      sessionLifecycleChangeCallback({
+        eventType: EventType.sessionLifecycle,
+        initialized: false,
+        ended: true,
+      });
+    }
   }
 
   /**
