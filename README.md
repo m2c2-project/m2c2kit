@@ -13,7 +13,13 @@ cd myapp
 npm run serve
 ```
 
-Note: to install the cli from source rather than npm, clone this repo and then execute `npm install -g .\packages\cli `
+To install the cli from source rather than npm, clone this repo, then:
+
+```
+npm install
+npm run build -w @m2c2kit/cli
+npm install -g ./packages/cli
+```
 
 ## Visual Studio Code
 
