@@ -37,7 +37,25 @@ export interface TrialData {
 }
 export interface Metadata {
   userAgent?: string;
+  devicePixelRatio?: number;
+  screen?: screenMetadata;
 }
+
+/**
+ * screenMetadata is similar to window.Screen, except we don't want the
+ * methods on the window.Screen.ScreenOrientation
+ */
+interface screenMetadata {
+  readonly availHeight: number;
+  readonly availWidth: number;
+  readonly colorDepth: number;
+  readonly height: number;
+  /** ScreenOrientation has some methods on it; we only want these two properties */
+  readonly orientation: Pick<ScreenOrientation, "type" | "angle">;
+  readonly pixelDepth: number;
+  readonly width: number;
+}
+
 export class Game implements Activity {
   _canvasKit?: CanvasKit;
   _session?: Session;
@@ -87,9 +105,7 @@ export class Game implements Activity {
   public entryScene?: Scene | string;
   public data: GameData = {
     trials: new Array<TrialData>(),
-    metadata: {
-      userAgent: "",
-    },
+    metadata: {},
   };
   public trialIndex = 0;
   private htmlCanvas?: HTMLCanvasElement;
@@ -287,6 +303,8 @@ export class Game implements Activity {
       trials: new Array<TrialData>(),
       metadata: {
         userAgent: navigator.userAgent,
+        devicePixelRatio: window.devicePixelRatio,
+        screen: this.getScreenMetadata(),
       },
     };
     const trialSchema = this.options.trialSchema ?? {};
@@ -300,6 +318,22 @@ export class Game implements Activity {
         );
       }
     }
+  }
+
+  private getScreenMetadata(): screenMetadata {
+    const screen = window.screen;
+    return {
+      availHeight: screen.availHeight,
+      availWidth: screen.availWidth,
+      colorDepth: screen.colorDepth,
+      height: screen.height,
+      orientation: {
+        type: screen.orientation.type,
+        angle: screen.orientation.angle,
+      },
+      pixelDepth: screen.pixelDepth,
+      width: screen.width,
+    };
   }
 
   /**
@@ -350,6 +384,14 @@ export class Game implements Activity {
    */
   trialComplete(): void {
     this.trialIndex++;
+    /** some metadata, such as window size (on browsers) or device
+     * orientation (on mobile phones) MIGHT change multiple times
+     * throughout a game. Rather than record all of these values as
+     * they potentially change, update the metadata at the end of
+     * each trial when the trial is complete.
+     */
+    this.data.metadata.screen = this.getScreenMetadata();
+    this.data.metadata.devicePixelRatio = window.devicePixelRatio;
     if (this.session.options.gameCallbacks?.onGameTrialComplete) {
       this.session.options.gameCallbacks.onGameTrialComplete({
         eventType: EventType.gameTrial,

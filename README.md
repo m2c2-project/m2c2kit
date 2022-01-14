@@ -36,7 +36,7 @@ m2 upload      # uploads content from dist/
 
 ## Testing
 
-Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the @m2c2kit/core library. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://github.com/Automattic/node-canvas), and [jsdom](https://github.com/jsdom/jsdom)) so tests can run without invoking this dependency. Tests can be run with `npm run test` from within the `packages/core` folder.
+Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the @m2c2kit/core library. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://github.com/Automattic/node-canvas), and [jsdom](https://github.com/jsdom/jsdom)) so tests can run without invoking this dependency. Within the `packages/core` folder, tests can be run with `npm run test` (provided that the core package has already been built with `npm run build`).
 
 ## Contributing
 

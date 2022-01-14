@@ -584,7 +584,7 @@ function sendEventToAndroid(event: EventBase) {
 
 const gridMemory = new GridMemory();
 // default InterferenceTime is 8000 ms; this is how we can specify a different value
-gridMemory.setParameters({ InterferenceTime: 4000 });
+gridMemory.setParameters({ InterferenceTime: 1000, ReadyTime: 1000 });
 
 const session = new Session({
   activities: [gridMemory],
@@ -593,11 +593,11 @@ const session = new Session({
     // as when the session initialization is complete. Once initialized,
     // the session will automatically start, unless we're running
     // in an Android WebView and a manual start is desired.
-    onSessionLifecycleChange: (event: SessionLifecycleEvent) => {
-      if (event.initialized) {
+    onSessionLifecycleChange: (ev: SessionLifecycleEvent) => {
+      if (ev.initialized) {
         //#region to support m2c2kit in Android WebView
         if (contextIsAndroidWebView()) {
-          sendEventToAndroid(event);
+          sendEventToAndroid(ev);
         }
         if (contextIsAndroidWebView() && Android.sessionManualStart()) {
           return;
@@ -605,11 +605,11 @@ const session = new Session({
         //#endregion
         session.start();
       }
-      if (event.ended) {
+      if (ev.ended) {
         console.log("session ended");
         //#region to support m2c2kit in Android WebView
         if (contextIsAndroidWebView()) {
-          sendEventToAndroid(event);
+          sendEventToAndroid(ev);
         }
         //#endregion
       }
@@ -618,21 +618,21 @@ const session = new Session({
   gameCallbacks: {
     // onGameTrialComplete() is where you insert code to post data to an API
     // or interop with a native function in the host app, if applicable
-    onGameTrialComplete: (event: GameTrialEvent) => {
-      console.log(`********** trial (index ${event.trialIndex}) complete`);
-      console.log("data: " + JSON.stringify(event.gameData));
-      console.log("trial schema: " + JSON.stringify(event.trialSchema));
-      console.log("game parameters: " + JSON.stringify(event.gameParameters));
+    onGameTrialComplete: (ev: GameTrialEvent) => {
+      console.log(`********** trial (index ${ev.trialIndex}) complete`);
+      console.log("data: " + JSON.stringify(ev.gameData));
+      console.log("trial schema: " + JSON.stringify(ev.trialSchema));
+      console.log("game parameters: " + JSON.stringify(ev.gameParameters));
 
       //#region to support m2c2kit in Android WebView
       if (contextIsAndroidWebView()) {
-        sendEventToAndroid(event);
+        sendEventToAndroid(ev);
       }
       //#endregion
     },
-    onGameLifecycleChange: (event: GameLifecycleEvent) => {
-      if (event.ended) {
-        console.log(`ended game ${event.gameName}`);
+    onGameLifecycleChange: (ev: GameLifecycleEvent) => {
+      if (ev.ended) {
+        console.log(`ended game ${ev.gameName}`);
         if (session.nextActivity) {
           session.advanceToNextActivity();
         } else {
@@ -640,7 +640,7 @@ const session = new Session({
         }
         //#region to support m2c2kit in Android WebView
         if (contextIsAndroidWebView()) {
-          sendEventToAndroid(event);
+          sendEventToAndroid(ev);
         }
         //#endregion
       }
