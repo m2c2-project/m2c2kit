@@ -24,6 +24,7 @@ import {
   GameLifecycleEvent,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Survey } from "@m2c2kit/survey";
 
 class GridMemory extends Game {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -586,8 +587,61 @@ const gridMemory = new GridMemory();
 // default InterferenceTime is 8000 ms; this is how we can specify a different value
 gridMemory.setParameters({ InterferenceTime: 1000, ReadyTime: 1000 });
 
+const surveyJson = {
+  pages: [
+    {
+      description: "Welcome to the WAKE UP Survey!",
+      elements: [
+        {
+          name: "FirstName",
+          title: "Enter your first name:",
+          type: "text",
+        },
+        {
+          type: "checkbox",
+          name: "car",
+          title: "What car are you driving?",
+          isRequired: true,
+          hasNone: true,
+          colCount: 2,
+          choices: [
+            {
+              value: 1,
+              text: "Ford",
+            },
+            {
+              value: 2,
+              text: "Honda",
+            },
+            {
+              value: 3,
+              text: "BMW",
+            },
+          ],
+        },
+        {
+          type: "radiogroup",
+          name: "where",
+          title: "Where are you right now?",
+          isRequired: true,
+          hasNone: false,
+          colCount: 2,
+          choices: ["Home", "School", "Work", "Other"],
+        },
+        {
+          type: "nouislider",
+          name: "stressed",
+          title: "How stressed are you right now?",
+        },
+      ],
+    },
+  ],
+};
+
+const s1 = new Survey(surveyJson);
+
 const session = new Session({
-  activities: [gridMemory],
+  activities: [s1, gridMemory],
   sessionCallbacks: {
     // onSessionLifecycleChange() will be called on events such
     // as when the session initialization is complete. Once initialized,

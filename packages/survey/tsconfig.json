@@ -1,0 +1,24 @@
+{
+  // tsconfig.json for m2c2kit/survey is identical to the one for m2c2mit/core,
+  // except survey must also have a reference to core, otherwise intelliense
+  // in vs code won't work
+  "references": [{ "path": "../core" }],
+  "compilerOptions": {
+    "composite": true,
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "outDir": "build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.js"],
+  "exclude": ["**/__tests__", "**/*.test.ts"]
+}

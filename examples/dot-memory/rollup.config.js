@@ -70,6 +70,10 @@ export default (commandLineArgs) => {
               src: "img/*",
               dest: `${outputFolder}/img`,
             },
+            {
+              src: "css/*",
+              dest: `${outputFolder}/css`,
+            },
           ],
           copyOnce: false,
           hook: "writeBundle",
