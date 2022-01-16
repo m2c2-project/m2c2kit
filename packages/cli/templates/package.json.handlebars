@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
-    "build": "rollup -c --configProd"
+    "build": "rollup -c --configProd",
+    "postinstall": "node ./post-install.mjs"
   },
   "private": true,
   "dependencies": {

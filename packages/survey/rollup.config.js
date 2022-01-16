@@ -60,8 +60,16 @@ export default [
           {
             src: [
               "../../node_modules/survey-knockout/modern.css",
+              "../../node_modules/survey-knockout/modern.min.css",
               "../../node_modules/survey-knockout/survey.css",
+              "../../node_modules/survey-knockout/survey.min.css",
               "../../node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.css",
+              "../../node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.min.css",
+              "../../node_modules/select2/dist/css/select2.css",
+              "../../node_modules/select2/dist/css/select2.min.css",
+              "../../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css",
+              "../../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css.map",
+              "../../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.min.css",
             ],
             dest: ["dist/css/"],
           },

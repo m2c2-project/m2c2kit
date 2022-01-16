@@ -245,6 +245,14 @@ await yarg
             "Roboto-Regular.ttf"
           ),
         },
+        {
+          sourceFilePath: path.join(
+            packageHomeFolderPath,
+            "scripts",
+            "post-install.mjs"
+          ),
+          destinationFilePath: path.join(newFolderPath, "post-install.mjs"),
+        },
       ];
 
       let errorCopyingFiles = false;

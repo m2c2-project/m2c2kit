@@ -593,6 +593,42 @@ const surveyJson = {
       description: "Welcome to the WAKE UP Survey!",
       elements: [
         {
+          name: "date",
+          type: "bootstrapdatepicker",
+          inputType: "date",
+          title: "Your favorite date:",
+          dateFormat: "mm/dd/yy",
+          isRequired: true,
+        },
+        {
+          type: "sortablelist",
+          name: "lifepriority",
+          title: "Life Priorities ",
+          isRequired: true,
+          choices: ["family", "work", "pets", "travels", "games"],
+        },
+        {
+          type: "tagbox",
+          isRequired: true,
+          choices: [
+            {
+              value: 1,
+              text: "USA",
+            },
+            {
+              value: 2,
+              text: "Mexico",
+            },
+            {
+              value: 3,
+              text: "Canada",
+            },
+          ],
+          name: "countries",
+          title:
+            "Please select all countries you have been for the last 3 years.",
+        },
+        {
           name: "FirstName",
           title: "Enter your first name:",
           type: "text",

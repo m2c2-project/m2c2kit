@@ -1,6 +1,10 @@
 import { Session, Uuid, Activity, EventType } from "@m2c2kit/core";
+import $ from "jquery";
 import * as SurveyKO from "survey-knockout";
 import widgets from "surveyjs-widgets";
+import select2 from "select2";
+import "bootstrap-datepicker";
+import "sortablejs";
 
 export class Survey implements Activity {
   _session?: Session;
@@ -12,9 +16,18 @@ export class Survey implements Activity {
   }
 
   start(): void {
-    SurveyKO.StylesManager.applyTheme("modern");
-    // nouislider is a custom widget; it needs to be specifically initialized
+    // This modern theme doesn't seem as polished as
+    // survey theme. It has some minor issues with margins and
+    // the bootstrap-datepicker
+    // SurveyKO.StylesManager.applyTheme("modern");
+    SurveyKO.StylesManager.applyTheme("survey");
+
+    // custom widgets need to be separately initialized by widget
     widgets.nouislider(SurveyKO);
+    select2($);
+    widgets.select2tagbox(SurveyKO, $);
+    widgets.sortablejs(SurveyKO);
+    widgets.bootstrapdatepicker(SurveyKO, $);
 
     const survey = new SurveyKO.Survey(this.surveyJson);
     survey.focusFirstQuestionAutomatic = false;
