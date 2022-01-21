@@ -8,11 +8,13 @@ import "sortablejs";
 
 export class Survey implements Activity {
   _session?: Session;
+  name: string;
   uuid = Uuid.generate();
   surveyJson: unknown;
 
   constructor(surveyJson: unknown) {
     this.surveyJson = surveyJson;
+    this.name = (surveyJson as any)?.name ?? "unnamed survey";
   }
 
   start(): void {
@@ -41,12 +43,12 @@ export class Survey implements Activity {
       if (surveyDiv) {
         surveyDiv.hidden = true;
       }
-      if (this.session.options.gameCallbacks?.onGameLifecycleChange) {
-        this.session.options.gameCallbacks.onGameLifecycleChange({
-          eventType: EventType.gameLifecycle,
+      if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
+        this.session.options.activityCallbacks.onActivityLifecycleChange({
+          eventType: EventType.activityLifecycle,
           ended: true,
-          gameUuid: this.uuid,
-          gameName: "survey",
+          uuid: this.uuid,
+          name: this.name,
         });
       }
     });

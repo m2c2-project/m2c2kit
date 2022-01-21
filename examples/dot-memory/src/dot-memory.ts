@@ -20,8 +20,8 @@ import {
   EventBase,
   EventType,
   SessionLifecycleEvent,
-  GameTrialEvent,
-  GameLifecycleEvent,
+  ActivityDataEvent,
+  ActivityLifecycleEvent,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 import { Survey } from "@m2c2kit/survey";
@@ -54,8 +54,8 @@ class GridMemory extends Game {
       timing_getready: { type: "number" },
       timing_fs: { type: "number" },
       timing_userresponse: { type: "number" },
-      random_cells: { type: "object" },
-      tapped_cells: { type: "object" },
+      random_cells: { type: "array" },
+      tapped_cells: { type: "array" },
     };
 
     const img_default_size = 200;
@@ -546,8 +546,10 @@ class GridMemory extends Game {
  * in addJavascriptInterface() and @JavascriptInterface */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Android {
-  function onGameTrialComplete(gameTrialEventAsString: string): void;
-  function onGameLifecycleChange(gameLifecycleEventAsString: string): void;
+  function onActivityDataCreate(activityDataEventAsString: string): void;
+  function onActivityLifecycleChange(
+    activityLifecycleEventAsString: string
+  ): void;
   function onSessionLifecycleChange(
     sessionLifecycleEventAsString: string
   ): void;
@@ -567,12 +569,12 @@ function sendEventToAndroid(event: EventBase) {
       Android.onSessionLifecycleChange(JSON.stringify(event));
       break;
     }
-    case EventType.gameTrial: {
-      Android.onGameTrialComplete(JSON.stringify(event));
+    case EventType.activityData: {
+      Android.onActivityDataCreate(JSON.stringify(event));
       break;
     }
-    case EventType.gameLifecycle: {
-      Android.onGameLifecycleChange(JSON.stringify(event));
+    case EventType.activityLifecycle: {
+      Android.onActivityLifecycleChange(JSON.stringify(event));
       break;
     }
     default:
@@ -585,99 +587,10 @@ function sendEventToAndroid(event: EventBase) {
 
 const gridMemory = new GridMemory();
 // default InterferenceTime is 8000 ms; this is how we can specify a different value
-gridMemory.setParameters({ InterferenceTime: 1000, ReadyTime: 1000 });
-
-const surveyJson = {
-  pages: [
-    {
-      description: "Welcome to the WAKE UP Survey!",
-      elements: [
-        {
-          name: "date",
-          type: "bootstrapdatepicker",
-          inputType: "date",
-          title: "Your favorite date:",
-          dateFormat: "mm/dd/yy",
-          isRequired: true,
-        },
-        {
-          type: "sortablelist",
-          name: "lifepriority",
-          title: "Life Priorities ",
-          isRequired: true,
-          choices: ["family", "work", "pets", "travels", "games"],
-        },
-        {
-          type: "tagbox",
-          isRequired: true,
-          choices: [
-            {
-              value: 1,
-              text: "USA",
-            },
-            {
-              value: 2,
-              text: "Mexico",
-            },
-            {
-              value: 3,
-              text: "Canada",
-            },
-          ],
-          name: "countries",
-          title:
-            "Please select all countries you have been for the last 3 years.",
-        },
-        {
-          name: "FirstName",
-          title: "Enter your first name:",
-          type: "text",
-        },
-        {
-          type: "checkbox",
-          name: "car",
-          title: "What car are you driving?",
-          isRequired: true,
-          hasNone: true,
-          colCount: 2,
-          choices: [
-            {
-              value: 1,
-              text: "Ford",
-            },
-            {
-              value: 2,
-              text: "Honda",
-            },
-            {
-              value: 3,
-              text: "BMW",
-            },
-          ],
-        },
-        {
-          type: "radiogroup",
-          name: "where",
-          title: "Where are you right now?",
-          isRequired: true,
-          hasNone: false,
-          colCount: 2,
-          choices: ["Home", "School", "Work", "Other"],
-        },
-        {
-          type: "nouislider",
-          name: "stressed",
-          title: "How stressed are you right now?",
-        },
-      ],
-    },
-  ],
-};
-
-const s1 = new Survey(surveyJson);
+gridMemory.setParameters({ InterferenceTime: 6000, ReadyTime: 1000 });
 
 const session = new Session({
-  activities: [s1, gridMemory],
+  activities: [gridMemory],
   sessionCallbacks: {
     // onSessionLifecycleChange() will be called on events such
     // as when the session initialization is complete. Once initialized,
@@ -705,14 +618,18 @@ const session = new Session({
       }
     },
   },
-  gameCallbacks: {
-    // onGameTrialComplete() is where you insert code to post data to an API
+  activityCallbacks: {
+    // onActivityDataCreate() is where you insert code to post data to an API
     // or interop with a native function in the host app, if applicable
-    onGameTrialComplete: (ev: GameTrialEvent) => {
-      console.log(`********** trial (index ${ev.trialIndex}) complete`);
-      console.log("data: " + JSON.stringify(ev.gameData));
-      console.log("trial schema: " + JSON.stringify(ev.trialSchema));
-      console.log("game parameters: " + JSON.stringify(ev.gameParameters));
+    onActivityDataCreate: (ev: ActivityDataEvent) => {
+      console.log(`********** trial complete`);
+      console.log("newData: " + JSON.stringify(ev.newData));
+      console.log("newData schema: " + JSON.stringify(ev.newDataSchema));
+      console.log("data: " + JSON.stringify(ev.data));
+      console.log("data schema: " + JSON.stringify(ev.dataSchema));
+      console.log(
+        "activity parameters: " + JSON.stringify(ev.activityConfiguration)
+      );
 
       //#region to support m2c2kit in Android WebView
       if (contextIsAndroidWebView()) {
@@ -720,9 +637,9 @@ const session = new Session({
       }
       //#endregion
     },
-    onGameLifecycleChange: (ev: GameLifecycleEvent) => {
+    onActivityLifecycleChange: (ev: ActivityLifecycleEvent) => {
       if (ev.ended) {
-        console.log(`ended game ${ev.gameName}`);
+        console.log(`ended activity ${ev.name}`);
         if (session.nextActivity) {
           session.advanceToNextActivity();
         } else {

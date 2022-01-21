@@ -7,6 +7,8 @@ import babel from "@rollup/plugin-babel";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
+import sourcemaps from "rollup-plugin-sourcemaps";
+import path from "path";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -72,6 +74,12 @@ export default [
         esModule: false,
         exports: "named",
         sourcemap: true,
+        sourcemapPathTransform:
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          (relativeSourcePath, sourcemapPath) => {
+            // modify sourcemap paths to point to the correct folder in the repo
+            return relativeSourcePath.replace(path.join("..", "src"), "src");
+          },
       },
     ],
     plugins: [
@@ -85,6 +93,7 @@ export default [
         include: ["./src/**/*.[tj]s"],
         exclude: ["**/__tests__", "**/*.test.ts"],
       }),
+      sourcemaps(),
       babel({
         babelHelpers: "bundled",
       }),

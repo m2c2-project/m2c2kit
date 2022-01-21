@@ -169,7 +169,7 @@ export class Session {
     this.options.activities
       .filter((activity) => activity instanceof Game)
       .forEach((activity) => {
-        const game = activity as Game;
+        const game = activity as unknown as Game;
         game.canvasKit = canvasKit;
       });
   }
@@ -178,7 +178,7 @@ export class Session {
     return this.options.activities
       .filter((activity) => activity instanceof Game)
       .map((activity) => {
-        const game = activity as Game;
+        const game = activity as unknown as Game;
         return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
       });
   }
@@ -187,7 +187,7 @@ export class Session {
     return this.options.activities
       .filter((activity) => activity instanceof Game)
       .map((activity) => {
-        const game = activity as Game;
+        const game = activity as unknown as Game;
         return { uuid: game.uuid, images: game.options.images ?? [] };
       });
   }

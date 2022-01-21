@@ -50,8 +50,11 @@ interface screenMetadata {
   readonly availWidth: number;
   readonly colorDepth: number;
   readonly height: number;
-  /** ScreenOrientation has some methods on it; we only want these two properties */
-  readonly orientation: Pick<ScreenOrientation, "type" | "angle">;
+  /** ScreenOrientation has some methods on it; we only want these two properties
+   * However, when unit testing, orientation is not available to us. Thus, make this
+   * property optional
+   */
+  readonly orientation?: Pick<ScreenOrientation, "type" | "angle">;
   readonly pixelDepth: number;
   readonly width: number;
 }
@@ -60,10 +63,12 @@ export class Game implements Activity {
   _canvasKit?: CanvasKit;
   _session?: Session;
   uuid = Uuid.generate();
+  name: string;
   options: GameOptions;
 
   constructor(options: GameOptions) {
     this.options = options;
+    this.name = options.name;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -310,11 +315,11 @@ export class Game implements Activity {
     const trialSchema = this.options.trialSchema ?? {};
 
     const variables = Object.entries(trialSchema);
-    const validDataTypes = ["number", "string", "boolean", "object"];
+    const validDataTypes = ["number", "string", "boolean", "object", "array"];
     for (const [variableName, propertySchema] of variables) {
       if (!validDataTypes.includes(propertySchema.type)) {
         throw new Error(
-          `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, or object`
+          `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`
         );
       }
     }
@@ -322,6 +327,18 @@ export class Game implements Activity {
 
   private getScreenMetadata(): screenMetadata {
     const screen = window.screen;
+    if (!screen.orientation) {
+      // we're likely running unit tests in node, so
+      // screen.orientation was not avaiable and not mocked
+      return {
+        availHeight: screen.availHeight,
+        availWidth: screen.availWidth,
+        colorDepth: screen.colorDepth,
+        height: screen.height,
+        pixelDepth: screen.pixelDepth,
+        width: screen.width,
+      };
+    }
     return {
       availHeight: screen.availHeight,
       availWidth: screen.availWidth,
@@ -364,7 +381,14 @@ export class Game implements Activity {
       throw new Error(`trial variable ${variableName} not defined in schema`);
     }
     const expectedDataType = this.options.trialSchema[variableName].type;
-    const providedDataType = typeof value;
+    let providedDataType = typeof value as string;
+    // in JavaScript, typeof an array returns "object"!
+    // Therefore, do some extra checking to see if we have an array
+    if (providedDataType === "object") {
+      if (Object.prototype.toString.call(value) === "[object Array]") {
+        providedDataType = "array";
+      }
+    }
     if (providedDataType !== expectedDataType) {
       throw new Error(
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataType}"`
@@ -376,7 +400,7 @@ export class Game implements Activity {
   /**
    * Should be called when the current trial has completed. It will
    * also increment the trial index.
-   * Calling this will trigger the onGameTrialComplete callback function,
+   * Calling this will trigger the onActivityDataCreate callback function,
    * if one was provided in SessionOptions. This is how the game communicates
    * trial data to the parent session, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
@@ -392,36 +416,66 @@ export class Game implements Activity {
      */
     this.data.metadata.screen = this.getScreenMetadata();
     this.data.metadata.devicePixelRatio = window.devicePixelRatio;
-    if (this.session.options.gameCallbacks?.onGameTrialComplete) {
-      this.session.options.gameCallbacks.onGameTrialComplete({
-        eventType: EventType.gameTrial,
-        // above, we just incremented the trialIndex by 1, so this
-        // completed trial index is trialIndex - 1
-        trialIndex: this.trialIndex - 1,
-        gameParameters: this.options.parameters ?? {},
-        gameData: this.data,
-        trialSchema: this.options.trialSchema ?? {},
-        gameUuid: this.uuid,
-        gameName: this.options.name,
+    if (this.session.options.activityCallbacks?.onActivityDataCreate) {
+      // newData is only the trial that recently completed
+      // data is all the data collected so far in the game
+
+      // return our easy-to-use schema as JSON Schema Draft-07
+      const newDataSchema = {
+        description: `a single completed trial from the assessment ${this.name}`,
+        type: "object",
+        properties: this.options.trialSchema,
+      };
+
+      const dataSchema = {
+        description: `all trial and metadata from the assessment ${this.name}`,
+        type: "object",
+        required: ["trials", "metadata"],
+        properties: {
+          trials: {
+            type: "array",
+            items: { $ref: "#/$defs/trial" },
+          },
+          metadata: {
+            type: "object",
+          },
+        },
+        $defs: {
+          trial: {
+            type: "object",
+            properties: this.options.trialSchema,
+          },
+        },
+      };
+
+      this.session.options.activityCallbacks.onActivityDataCreate({
+        eventType: EventType.activityData,
+        uuid: this.uuid,
+        name: this.options.name,
+        newData: this.data.trials[this.trialIndex - 1],
+        newDataSchema: newDataSchema,
+        data: this.data,
+        dataSchema: dataSchema,
+        activityConfiguration: this.options.parameters ?? {},
       });
     }
   }
 
   /**
    * Should be called when the current game has ended. This will trigger
-   * the onGameLifecycleChange callback function, if one was provided in
+   * the onActivityLifecycleChange callback function, if one was provided in
    * SessionOptions. This is how the game can communicate its ended or
    * "finished" state to the parent session.
    * It is the responsibility of the the game programmer to call this at
    * the appropriate time. It is not triggered automatically.
    */
   end(): void {
-    if (this.session.options.gameCallbacks?.onGameLifecycleChange) {
-      this.session.options.gameCallbacks.onGameLifecycleChange({
-        eventType: EventType.gameLifecycle,
+    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
+      this.session.options.activityCallbacks.onActivityLifecycleChange({
+        eventType: EventType.activityLifecycle,
         ended: true,
-        gameUuid: this.uuid,
-        gameName: this.options.name,
+        uuid: this.uuid,
+        name: this.options.name,
       });
     }
   }
@@ -970,7 +1024,6 @@ export class Game implements Activity {
     return entities;
   }
 
-  //#region User Interaction ------------------------------------------------------------
   private htmlCanvasMouseDownHandler(event: MouseEvent): void {
     event.preventDefault();
     const scene = this.currentScene;
@@ -1006,7 +1059,7 @@ export class Game implements Activity {
 
   private sceneCanReceiveUserInteraction(scene: Scene): boolean {
     if (
-      scene.game === scene.game.session?.currentActivity &&
+      scene.game === (scene.game.session?.currentActivity as unknown as Game) &&
       scene._transitioning === false
     ) {
       // allow interaction only on scene that is part of the session's

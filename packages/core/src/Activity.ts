@@ -1,4 +1,5 @@
 import { Session } from "./Session";
+
 export interface Activity {
   /** Starts the activity */
   start(): void;
@@ -8,4 +9,6 @@ export interface Activity {
   session: Session;
   /** The activity's unique identifier. NOTE: This is newly generated each session. The uuid for an activity will vary across sessions. */
   uuid: string;
+  /** The activity's human friendly name */
+  name: string;
 }

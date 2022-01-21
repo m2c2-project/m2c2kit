@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
          * 2) know when the m2c2kit game and session is ended
          * The methods within this interface are directly called by the javascript code. Look
          * for these methods in the javascript code to understand how this works:
-         *   Android.onGameTrialComplete(JSON.stringify(event)) or
+         *   Android.onActivityDataCreate(JSON.stringify(event)) or
          *   Android.onSessionLifecycleChange(JSON.stringify(event))
          * see https://developer.android.com/guide/webapps/webview#BindingJavaScript
          * */
@@ -86,18 +86,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             @JavascriptInterface
-            fun onGameTrialComplete(gameTrialEventAsString: String) {
+            fun onActivityDataCreate(activityDataEventAsString: String) {
                 Log.i(
                     tag,
-                    "onGameTrialComplete callback from JavaScript received data: $gameTrialEventAsString"
+                    "onActivityDataCreate callback from JavaScript received data: $activityDataEventAsString"
                 )
             }
 
             @JavascriptInterface
-            fun onGameLifecycleChange(gameLifecycleEventAsString: String) {
+            fun onActivityLifecycleChange(activityLifecycleEventAsString: String) {
                 Log.i(
                     tag,
-                    "onGameLifecycleChange callback from JavaScript received data: $gameLifecycleEventAsString"
+                    "onActivityLifecycleChange callback from JavaScript received data: $activityLifecycleEventAsString"
                 )
             }
         }

@@ -5,7 +5,7 @@ export interface TrialSchema {
 
 export interface PropertySchema {
   // Data type of the variable
-  type: "number" | "string" | "boolean" | "object";
+  type: "number" | "string" | "boolean" | "object" | "array";
   // Optional description of the variable
   description?: string;
 }
