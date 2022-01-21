@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "m2c2kit command line interface",
   "module": "dist/cli.js",
   "files": [
@@ -17,7 +17,7 @@
     "build": "npm run clean && npm run compile && npm run copy-files && npm run write-dotenv",
     "compile": "tsc",
     "clean": "rimraf dist/ && rimraf build/",
-    "copy-files": "copyfiles -f build/src/cli.js dist && copyfiles templates/* fonts/**/* dist/",
+    "copy-files": "copyfiles -f build/src/cli.js dist && copyfiles scripts/* templates/* fonts/**/* dist/",
     "write-dotenv": "node write-dotenv.js"
   },
   "author": "",
