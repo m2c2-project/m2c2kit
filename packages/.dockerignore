@@ -1,0 +1,8 @@
+.rollup.cache
+build
+build-umd
+dist
+node_modules
+scratch
+scratch-build
+tsconfig.tsbuildinfo
