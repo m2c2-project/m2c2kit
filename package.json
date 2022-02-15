@@ -3,7 +3,8 @@
   "description": "",
   "workspaces": [
     "packages/*",
-    "examples/dot-memory"
+    "examples/dot-memory",
+    "integration-tests/*"
   ],
   "scripts": {
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
