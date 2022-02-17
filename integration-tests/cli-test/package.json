@@ -19,7 +19,7 @@
     "wdio-docker-service": "^3.2.0"
   },
   "scripts": {
-    "test": "wdio run ./test/wdio.conf.ts"
+    "test": "wdio run ./wdio.conf.ts"
   },
   "license": "MIT"
 }

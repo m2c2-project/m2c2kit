@@ -1,5 +1,5 @@
 export const config: WebdriverIO.Config = {
-  specs: ["./test/**/*.spec.ts"],
+  specs: ["./**/*.spec.ts"],
   capabilities: [
     {
       browserName: "chrome",

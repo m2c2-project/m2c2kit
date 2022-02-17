@@ -27,7 +27,7 @@ describe("m2c2 cli starter app", () => {
 
   it("should create a scene1 that pixel matches our reference scene1", async () => {
     const canvasPng = await elementToPng(canvasElement);
-    const scene1Png = readPngFromFile("./test/images/testAppScene1.png");
+    const scene1Png = readPngFromFile("./images/testAppScene1.png");
     expect(diffPixelCount(canvasPng, scene1Png)).toBe(0);
   });
 
@@ -41,7 +41,7 @@ describe("m2c2 cli starter app", () => {
     await browser.pause(1000);
 
     const canvasPng = await elementToPng(canvasElement);
-    const scene2Png = readPngFromFile("./test/images/testAppScene2.png");
+    const scene2Png = readPngFromFile("./images/testAppScene2.png");
     expect(diffPixelCount(canvasPng, scene2Png)).toBe(0);
   });
 });
