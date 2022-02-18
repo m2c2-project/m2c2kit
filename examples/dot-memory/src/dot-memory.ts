@@ -63,6 +63,11 @@ class GridMemory extends Game {
       timing_getready: { type: "number" },
       timing_fs: { type: "number" },
       timing_userresponse: { type: "number" },
+      timing_done: {
+        type: "number",
+        description:
+          "time (ms) from when dots are shown until user pressses done",
+      },
       random_cells: { type: "array" },
       tapped_cells: { type: "array" },
     };
@@ -182,7 +187,7 @@ class GridMemory extends Game {
     });
     gridMemoryPage0.addChild(getReadyMessage);
 
-    gridMemoryPage0.setup(() => {
+    gridMemoryPage0.onSetup(() => {
       gridMemoryPage0.run(
         Action.Sequence([
           Action.Wait({ duration: game.getParameter("ReadyTime") }),
@@ -219,7 +224,7 @@ class GridMemory extends Game {
     });
     gridMemoryPage1.addChild(grid1);
 
-    gridMemoryPage1.setup(() => {
+    gridMemoryPage1.onSetup(() => {
       grid1.removeAllChildren();
 
       // randomly choose 3 cells that will have the red dots
@@ -270,8 +275,8 @@ class GridMemory extends Game {
 
     gridMemoryPage2.addChild(grid);
 
-    gridMemoryPage2.setup(() => {
-      Timer.Start("gridMemoryPage2 setup");
+    gridMemoryPage2.onSetup(() => {
+      Timer.start("gridMemoryPage2 setup");
 
       // Advance to the next recall screen after "InterferenceTime" millisseconds
       gridMemoryPage2.run(
@@ -363,11 +368,11 @@ class GridMemory extends Game {
       }
 
       console.log(
-        `gridMemoryPage2.setup() took ${Timer.Elapsed(
+        `gridMemoryPage2.setup() took ${Timer.elapsed(
           "gridMemoryPage2 setup"
         )} ms.`
       );
-      Timer.Remove("gridMemoryPage2 setup");
+      Timer.remove("gridMemoryPage2 setup");
     });
 
     // ============================================================================
@@ -395,7 +400,7 @@ class GridMemory extends Game {
 
     let tappedCellCount = 0;
 
-    gridMemoryPage3.setup(() => {
+    gridMemoryPage3.onSetup(() => {
       grid3.removeAllChildren();
 
       tappedCellCount = 0;
@@ -449,6 +454,10 @@ class GridMemory extends Game {
       }
     });
 
+    gridMemoryPage3.onAppear(() => {
+      Timer.start("responseTime");
+    });
+
     const gridMemoryPage3DoneButton = new Button({
       text: "Done",
       position: new Point(200, 700),
@@ -484,6 +493,10 @@ class GridMemory extends Game {
           ])
         );
       } else {
+        Timer.stop("responseTime");
+        game.addTrialData("timing_done", Timer.elapsed("responseTime"));
+        Timer.remove("responseTime");
+
         timing_userresponse = performance.now();
         game.addTrialData("timing_dotsdrawn", timing_dotsdrawn);
         game.addTrialData("timing_getready", timing_getready);
@@ -535,7 +548,7 @@ class GridMemory extends Game {
     });
     endPage.addChild(exitButton);
 
-    endPage.setup(() => {
+    endPage.onSetup(() => {
       doneLabel.text = `You did ${game.trialIndex} trials. You're done!`;
     });
 

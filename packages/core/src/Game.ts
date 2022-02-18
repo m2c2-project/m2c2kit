@@ -720,6 +720,12 @@ export class Game implements Activity {
           outgoingScene._active = false;
         }
       }
+
+      if (!outgoingScene || !transition) {
+        if (incomingScene._appearCallback) {
+          incomingScene._appearCallback(incomingScene);
+        }
+      }
     }
   }
 
@@ -782,6 +788,9 @@ export class Game implements Activity {
                 Action.Custom({
                   callback: () => {
                     incomingScene._transitioning = false;
+                    if (incomingScene._appearCallback) {
+                      incomingScene._appearCallback(incomingScene);
+                    }
                   },
                   runDuringTransition: true,
                 }),
@@ -819,6 +828,9 @@ export class Game implements Activity {
                 Action.Custom({
                   callback: () => {
                     incomingScene._transitioning = false;
+                    if (incomingScene._appearCallback) {
+                      incomingScene._appearCallback(incomingScene);
+                    }
                   },
                   runDuringTransition: true,
                 }),
@@ -856,6 +868,9 @@ export class Game implements Activity {
                 Action.Custom({
                   callback: () => {
                     incomingScene._transitioning = false;
+                    if (incomingScene._appearCallback) {
+                      incomingScene._appearCallback(incomingScene);
+                    }
                   },
                   runDuringTransition: true,
                 }),
@@ -893,6 +908,9 @@ export class Game implements Activity {
                 Action.Custom({
                   callback: () => {
                     incomingScene._transitioning = false;
+                    if (incomingScene._appearCallback) {
+                      incomingScene._appearCallback(incomingScene);
+                    }
                   },
                   runDuringTransition: true,
                 }),

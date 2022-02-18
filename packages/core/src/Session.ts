@@ -37,15 +37,15 @@ export class Session {
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async init(): Promise<void> {
-    Timer.Start("sessionInit");
+    Timer.start("sessionInit");
 
     const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);
 
     console.log(
-      `Session.init() took ${Timer.Elapsed("sessionInit").toFixed(0)} ms`
+      `Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
     );
-    Timer.Remove("sessionInit");
+    Timer.remove("sessionInit");
     const sessionLifecycleChangeCallback =
       this.options.sessionCallbacks?.onSessionLifecycleChange;
     if (sessionLifecycleChangeCallback) {

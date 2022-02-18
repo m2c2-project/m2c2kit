@@ -16,6 +16,7 @@ import {
   ActivityDataEvent,
   ActivityLifecycleEvent,
   Sprite,
+  Timer,
 } from "@m2c2kit/core";
 import { Button, Instructions } from "@m2c2kit/addons";
 
@@ -44,6 +45,7 @@ class {{className}} extends Game {
     const demoTrialSchema: TrialSchema = {
       colorChosen: { type: "string", description: "the color that was picked" },
       correct: { type: "boolean", description: "was the answer correct?" },
+      responseTime: { type: "number", description: "response time (ms) to choose shape" }
     };
 
     const options: GameOptions = {
@@ -145,8 +147,8 @@ class {{className}} extends Game {
     });
     getReadyScene.addChild(starSprite);
 
-    // getReadyScene.setup() has a callback that is executed each time this scene is shown
-    getReadyScene.setup(() => {
+    // getReadyScene.onSetup() has a callback that is executed each time this scene is shown
+    getReadyScene.onSetup(() => {
       getReadyScene.run(
         Action.Sequence([
           // Get the wait duration from the default game parameters, defined above
@@ -160,10 +162,10 @@ class {{className}} extends Game {
       );
     });
 
-    // these entities before the setup() can be defined outside of a setup()
+    // these entities before the onSetup() can be defined outside of a onSetup()
     // because they exist through multiple trials
     // Their position and how they respond to interactions may differ across trials,
-    // and that logic will be written within a setup()
+    // and that logic will be written within a onSetup()
     const chooseRectangleScene = new Scene({
       backgroundColor: WebColors.LightGray,
     });
@@ -199,10 +201,11 @@ class {{className}} extends Game {
     wrongMessage.hidden = true;
     chooseRectangleScene.addChild(wrongMessage);
 
-    // chooseRectangleScene.setup() is passed a callback that is executed each
-    // time this scene is shown. Within setup(), We will randomly decide on
+    // chooseRectangleScene.onSetup() is passed a callback that is executed each
+    // time this scene is shown. Within onSetup(), We will randomly decide on
     // what side the red rectangle is shown
-    chooseRectangleScene.setup(() => {
+    chooseRectangleScene.onSetup(() => {
+      let responseTime = NaN;
       let redOnLeft = true;
       if (Math.random() > 0.5) {
         redOnLeft = false;
@@ -219,6 +222,7 @@ class {{className}} extends Game {
       // helper function to record the user's choice and
       // decide if we are done
       function recordUserInput(choseRedRect: boolean) {
+        game.addTrialData("responseTime", responseTime);
         game.addTrialData("correct", choseRedRect);
         if (choseRedRect) {
           game.addTrialData("colorChosen", "red");
@@ -240,6 +244,7 @@ class {{className}} extends Game {
           Action.Sequence([
             Action.Custom({
               callback: () => {
+                responseTime = Timer.elapsed("rt");
                 // once a choice is made, don't allow additional taps
                 redRect.isUserInteractionEnabled = false;
                 blueRect.isUserInteractionEnabled = false;
@@ -273,6 +278,7 @@ class {{className}} extends Game {
           Action.Sequence([
             Action.Custom({
               callback: () => {
+                responseTime = Timer.elapsed("rt");        
                 redRect.isUserInteractionEnabled = false;
                 blueRect.isUserInteractionEnabled = false;
               },
@@ -296,10 +302,15 @@ class {{className}} extends Game {
       });
     });
 
+    chooseRectangleScene.onAppear(() => {
+      Timer.removeAll();
+      Timer.start("rt");
+    });
+
     const endScene = new Scene();
     game.addScene(endScene);
     const doneLabel = new Label({
-      text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
+      text: `This will be reassigned in the onSetup() callback. If you see this, something went wrong!`,
       position: new Point(200, 300),
     });
     endScene.addChild(doneLabel);
@@ -329,7 +340,7 @@ class {{className}} extends Game {
     });
     endScene.addChild(exitButton);
 
-    endScene.setup(() => {
+    endScene.onSetup(() => {
       doneLabel.text = `You did ${game.trialIndex} trials. You're done!`;
     });
 

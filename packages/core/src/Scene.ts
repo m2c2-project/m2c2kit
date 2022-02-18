@@ -21,6 +21,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   _active = false;
   _transitioning = false;
   _setupCallback?: (scene: Scene) => void;
+  _appearCallback?: (scene: Scene) => void;
   private _game?: Game;
   private backgroundPaint?: Paint;
 
@@ -74,14 +75,24 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   }
 
   /**
-   * Code that will be called every time the screen is first presented.
+   * Code that will be called every time the screen is presented.
    *
    * @remarks Use this callback to set entities to their initial state, if that state might be changed later. For example, if a scene allows players to place dots on a grid, the setup() method should ensure the grid is clear of any prior dots from previous times this scene may have been displayed. In addition, if entities should vary in each iteration, that should be done here.
    *
    * @param callback
    */
-  setup(callback: (scene: Scene) => void): void {
+  onSetup(callback: (scene: Scene) => void): void {
     this._setupCallback = callback;
+  }
+
+  /**
+   *
+   * Code that will be called after the scene has finished any transitions and has fully appeared on the screen.
+   *
+   * @param callback
+   */
+  onAppear(callback: (scene: Scene) => void): void {
+    this._appearCallback = callback;
   }
 
   draw(canvas: Canvas): void {
