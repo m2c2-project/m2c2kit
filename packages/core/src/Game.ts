@@ -183,6 +183,11 @@ export class Game implements Activity {
         throw new Error(`scene ${scene} not found`);
       }
     } else {
+      if (!this.scenes.some((scene_) => scene_ === scene)) {
+        throw new Error(
+          `scene ${scene} exists, but it has not been added to the game object`
+        );
+      }
       incomingScene = scene;
     }
     incomingScene.initialize();

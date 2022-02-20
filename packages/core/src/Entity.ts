@@ -16,7 +16,18 @@ import { Size } from "./Size";
 import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
-import { Scene } from ".";
+import {
+  Label,
+  LabelOptions,
+  Scene,
+  SceneOptions,
+  Shape,
+  ShapeOptions,
+  Sprite,
+  SpriteOptions,
+  TextLine,
+  TextLineOptions,
+} from ".";
 import { Uuid } from "./Uuid";
 
 function handleDrawableOptions(
@@ -636,6 +647,98 @@ export abstract class Entity implements EntityOptions {
     while (this.actions.length) {
       this.actions.pop();
     }
+  }
+
+  duplicate<T extends Entity>(newName?: string): T {
+    // TODO: don't make static!
+    // TODO: change uuid for all child elements that are duplicated
+    // TODO: add composite
+    // static duplicate<T extends Entity>(source: T, newName?: string): T {
+    let dest: Entity;
+
+    switch (this.type) {
+      case EntityType.scene: {
+        const scene = this as unknown as Scene;
+        const options: SceneOptions = {
+          ...Entity.getEntityOptions(scene),
+          backgroundColor: scene.backgroundColor,
+        };
+        dest = new Scene(options);
+        break;
+      }
+      case EntityType.sprite: {
+        const sprite = this as unknown as Sprite;
+        const options: SpriteOptions = {
+          ...Entity.getEntityOptions(sprite),
+          ...Entity.getDrawableOptions(sprite),
+          imageName: sprite.imageName,
+        };
+        dest = new Sprite(options);
+        break;
+      }
+      case EntityType.label: {
+        const label = this as unknown as Label;
+        const options: LabelOptions = {
+          ...Entity.getEntityOptions(label),
+          ...Entity.getDrawableOptions(label),
+          ...Entity.getTextOptions(label),
+          horizontalAlignmentMode: label.horizontalAlignmentMode,
+          preferredMaxLayoutWidth: label.preferredMaxLayoutWidth,
+          backgroundColor: label.backgroundColor,
+        };
+        dest = new Label(options);
+        break;
+      }
+      case EntityType.textline: {
+        const textline = this as unknown as TextLine;
+        const options: TextLineOptions = {
+          ...Entity.getEntityOptions(textline),
+          ...Entity.getDrawableOptions(textline),
+          ...Entity.getTextOptions(textline),
+          width: textline.size.width,
+        };
+        dest = new TextLine(options);
+        break;
+      }
+      case EntityType.shape: {
+        const shape = this as unknown as Shape;
+        const options: ShapeOptions = {
+          ...Entity.getEntityOptions(shape),
+          ...Entity.getDrawableOptions(shape),
+          shapeType: shape.shapeType,
+          circleOfRadius: shape.circleOfRadius,
+          rect: shape.rect,
+          cornerRadius: shape.cornerRadius,
+          fillColor: shape.fillColor,
+          strokeColor: shape.strokeColor,
+          lineWidth: shape.lineWidth,
+        };
+        dest = new Shape(options);
+        break;
+      }
+      default:
+        throw new Error("unknown entity type");
+    }
+
+    if (this.type === EntityType.scene) {
+      (dest as Scene).game = (this as unknown as Scene).game;
+    }
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    if (newName) {
+      dest.name = newName;
+    } else if (this.name === this.uuid) {
+      dest.name = dest.uuid;
+    }
+
+    return dest as unknown as T;
   }
 
   // TODO: don't make static!

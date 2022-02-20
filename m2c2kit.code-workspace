@@ -3,6 +3,9 @@
 {
   "folders": [
     {
+      "path": "examples/symbol-search"
+    },    
+    {
       "path": "examples/dot-memory"
     },
     {

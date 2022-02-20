@@ -1,0 +1,26 @@
+{
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/addons" }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "build"
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/symbol-search.bundle.js",
+    "rollup.config.js"
+  ]
+}

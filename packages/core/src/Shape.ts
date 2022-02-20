@@ -43,6 +43,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this.shapeType = ShapeType.circle;
     }
     if (options.rect) {
+      this.rect = options.rect;
       if (options.rect.size) {
         this.size.width = options.rect.size.width;
         this.size.height = options.rect.size.height;
