@@ -1,0 +1,25 @@
+{
+  "name": "@m2c2kit/automation-driver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@m2c2kit/core": "0.1.8"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}

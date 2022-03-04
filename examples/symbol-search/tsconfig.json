@@ -1,7 +1,8 @@
 {
   "references": [
     { "path": "../../packages/core" },
-    { "path": "../../packages/addons" }
+    { "path": "../../packages/addons" },
+    { "path": "../../packages/automation-driver" }
   ],
   "compilerOptions": {
     "composite": true,

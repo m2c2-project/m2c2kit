@@ -275,6 +275,7 @@ export class Instructions extends Story {
       }
 
       const nextButton = new Button({
+        name: "nextButton",
         text: nextButtonText,
         fontColor: nextButtonFontColor,
         backgroundColor: nextButtonBackgroundColor,

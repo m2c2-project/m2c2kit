@@ -10,7 +10,7 @@
       "request": "launch",
       "name": "Launch Chrome against localhost",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/dot-memory"
+      "webRoot": "${workspaceFolder}/examples/symbol-search"
     }
   ]
 }

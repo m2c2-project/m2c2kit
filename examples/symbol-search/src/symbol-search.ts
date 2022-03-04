@@ -105,37 +105,25 @@ response was given for a trial if user_response == correct_response.",
     const options: GameOptions = {
       name: "Symbol Search",
       version: "0.0.1",
-      shortDescription: "A short description of Symbol Search goes here...",
+      shortDescription:
+        "Symbol Search is a test of processing speed, where \
+participants see a row of symbol pairs at the top of the screen and match \
+them to symbol pairs at the bottom of the screen.",
       longDescription:
-        'Each trial of the dot memory task consisted of 3 phases: encoding, \
-distraction, and retrieval. During the encoding phase, the participant was \
-asked to remember the location three red dots appear on a 5 x 5 grid. After \
-a 3-second study period, the grid was removed and the distraction phase \
-began, during which the participant wasrequired to locate and touch Fs among \
-an array of Es. After performing the distraction task for 8 seconds, and \
-empty 5 x 5 grid reappeared on the screen and participants were then prompted \
-to recall the locations of the 3 dots presented initially and press a button \
-labeled "Done" after entering their responses to complete the trial. \
-Participants completed 2 trials (encoding, distractor, retrieval) with a \
-1-second delay between trials. The dependent variable was an error score with \
-partial credit given based on the deviation from the correct positions. If \
-all dots were recalled in their correct location, the participant received a \
-score of zero. In the case of one or more retrieval errors, Euclidean distance \
-of the location of the incorrect dot to the correct grid location was \
-calculated, with higher scores indicating less accurate placement and poorer \
-performance (Siedlecki, 2007). The rationale for our use of this task as an \
-indicator of working memory has both an empirical and theoreticalbasis. \
-Previous research (Miyake, Friedman, Rettinger, Shah, & Hegarty, 2001) has \
-demonstrated that a similar dotmemory task loaded on a factor representing \
-working memory. The authors of this study reasoned that the spatial dot memory \
-task placed high demands on controlled attention—a hallmark of working memory \
-tasks. Indeed, individual differences in working memory capacity arise \
-"in situations where information needs to be actively maintained or when a \
-controlled search of memory is required" (Unsworth & Engle, 2007, p. 123). The \
-ambulatory dot memory task satisfies this requirement by using an interference \
-task to prevent rehearsal and produce interference with encoded locations, \
-which creates the demand for active maintenance and controlled retrieval of \
-previously encoded location during the recall phase.',
+        'On each trial of the symbol search task, participants saw a row of \
+three symbol pairs at the top of the screen and were presented with two \
+symbol pairs at the bottom of the screen. Stimuli were presented until a \
+response was provided there was an interval of 200 msec. between each \
+response and the following stimulus. Participants decided, as quickly as \
+possible, which of the two pairs presented at the bottom of the screen was \
+among the pairs at the top of the screen (see Figure 1). Participants \
+completed 12 trials of this task. The dependent variable was median response \
+time of correct trials. Because this task requires speeded comparisons \
+similar to standard laboratory tests, we reasoned it would be a viable \
+indicator of perceptual speed. SOURCE: Sliwinski, Martin J., Jacqueline A. \
+Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton.\
+ "Reliability and validity of ambulatory cognitive assessments." Assessment \
+ 25, no. 1 (2018): 14-30.',
       showFps: true,
       width: 400,
       height: 800,

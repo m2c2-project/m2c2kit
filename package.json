@@ -4,6 +4,7 @@
   "workspaces": [
     "packages/*",
     "examples/dot-memory",
+    "examples/symbol-search",
     "integration-tests/*"
   ],
   "scripts": {
@@ -26,5 +27,8 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "@m2c2kit/automation-driver": "file:packages/automation-driver"
   }
 }

@@ -25,6 +25,7 @@ import { Session } from "./Session";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
+import { PendingScreenshot } from "./PendingScreenshot";
 
 interface BoundingBox {
   xMin: number;
@@ -137,6 +138,7 @@ export class Game implements Activity {
   private scenes = new Array<Scene>();
   private incomingSceneTransitions = new Array<SceneTransition>();
   private currentSceneSnapshot?: Image;
+  private pendingScreenshot?: PendingScreenshot;
 
   /**
    * Adds a scene to the game.
@@ -630,6 +632,11 @@ export class Game implements Activity {
         // in order to do a scene transition, we need an image of the outgoing scene
         this.currentSceneSnapshot = this.takeCurrentSceneSnapshot();
       }
+
+      if (this.pendingScreenshot) {
+        this.handlePendingScreenshot(this.pendingScreenshot);
+        this.pendingScreenshot = undefined;
+      }
     }
 
     this.priorUpdateTime = Globals.now;
@@ -756,6 +763,85 @@ export class Game implements Activity {
       throw new Error("CanvasKit surface is undefined");
     }
     return this.surface.makeImageSnapshot();
+  }
+
+  private handlePendingScreenshot(pendingScreenshot: PendingScreenshot) {
+    if (!this.surface) {
+      throw new Error("no surface");
+    }
+    let image: Image;
+    if (pendingScreenshot.rect.length == 4) {
+      const sx = pendingScreenshot.rect[0] * Globals.canvasScale;
+      const sy = pendingScreenshot.rect[1] * Globals.canvasScale;
+      const sw = pendingScreenshot.rect[2] * Globals.canvasScale;
+      const sh = pendingScreenshot.rect[3] * Globals.canvasScale;
+      const scaledRect = [sx, sy, sx + sw, sy + sh];
+      image = this.surface.makeImageSnapshot(scaledRect);
+    } else {
+      image = this.surface.makeImageSnapshot();
+    }
+
+    const imageAsPngBytes = image.encodeToBytes();
+    pendingScreenshot.promiseResolve(imageAsPngBytes);
+  }
+
+  /**
+   * Takes screenshot of canvas
+   *
+   * @remarks Coordinates should be provided unscaled; that is, the method
+   * will handle any scaling that happened due to device pixel ratios
+   * not equal to 1. This returns a promise because the screenshot request
+   * must be queued and completed once a draw cycle has completed. See
+   * the loop() method.
+   *
+   * @param sx - Upper left coordinate of screenshot
+   * @param sy - Upper right coordinate of screenshot
+   * @param sw - width of area to screenshot
+   * @param sh - hegith of area to screenshot
+   * @returns Promise of Uint8Array of image data
+   */
+  takeScreenshot(
+    sx?: number,
+    sy?: number,
+    sw?: number,
+    sh?: number
+  ): Promise<Uint8Array | null> {
+    if (!this.surface) {
+      throw new Error("no canvaskit surface. unable to take screenshot.");
+    }
+
+    const missingParametersCount = [sx, sy, sw, sh]
+      .map((x) => (x ? 0 : 1) as number)
+      .reduce((a, b) => a + b);
+
+    return new Promise((resolve, reject) => {
+      switch (missingParametersCount) {
+        case 0: {
+          if (!sx || !sy || !sw || !sh) {
+            // should never get here because case is 0 missing parameters
+            reject("missing values in arguments for takeScreenshot()");
+            return;
+          }
+          this.pendingScreenshot = {
+            rect: [sx, sy, sw, sh],
+            promiseResolve: resolve,
+          };
+          break;
+        }
+        case 4: {
+          this.pendingScreenshot = {
+            rect: [],
+            promiseResolve: resolve,
+          };
+          break;
+        }
+        default: {
+          reject(
+            "Exactly 0 or 4 arguments must be supplied to takeScreenshot()"
+          );
+        }
+      }
+    });
   }
 
   private animateSceneTransition(

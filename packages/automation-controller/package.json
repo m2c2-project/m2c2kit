@@ -1,0 +1,29 @@
+{
+  "name": "@m2c2kit/automation-controller",
+  "version": "0.1.10",
+  "description": "m2c2kit automation controller",
+  "module": "dist/automation-controller.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "bin": {
+    "m2ac": "./dist/automation-controller.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run compile && npm run copy-files",
+    "compile": "tsc",
+    "clean": "rimraf dist/ && rimraf build/",
+    "copy-files": "copyfiles -f build/src/*.js dist"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ws": "8.5.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.2.3"
+  }
+}

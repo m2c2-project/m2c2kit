@@ -1,0 +1,21 @@
+{
+  "references": [{ "path": "../core" }],
+  "compilerOptions": {
+    "composite": true,
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "outDir": "build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.js"],
+  "exclude": ["**/__tests__", "**/*.test.ts"]
+}
