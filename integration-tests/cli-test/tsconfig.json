@@ -1,4 +1,5 @@
 {
+  "references": [{ "path": "../../packages/automation-driver" }],
   "compilerOptions": {
     "types": [
       "node",

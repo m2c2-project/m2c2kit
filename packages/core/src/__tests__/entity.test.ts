@@ -103,6 +103,7 @@ class Game1 extends Game {
     super(gameOptions);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
+    game.init();
 
     const scene1 = new Scene({ name: "myScene1" });
     game.addScene(scene1);
@@ -217,7 +218,9 @@ describe("test descendant", () => {
 describe("test removeAllChildren", () => {
   it("scene1 children should have length 0", () => {
     scene1.removeAllChildren();
+    expect(scene1.children);
     expect(scene1.children).toHaveLength(0);
+    //expect(scene1.children).toHaveSize(0);
   });
 });
 

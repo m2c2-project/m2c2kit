@@ -30,7 +30,7 @@ RUN m2 new testApp
 WORKDIR /usr/testApp
 # localhost did not work in container on windows host, but 0.0.0.0 did
 RUN sed -i 's|host: "localhost"|host: "0.0.0.0"|' rollup.config.js
-# Because we used local pacakge of @m2c2kit/core, canvaskit-wasm was installed there
+# Because we used local package of @m2c2kit/core, canvaskit-wasm was installed there
 # Copy it to where it is expected by our rollup configuration
 RUN cp -r /usr/src/packages/core/node_modules/canvaskit-wasm /usr/testApp/node_modules
 

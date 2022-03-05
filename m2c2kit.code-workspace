@@ -6,7 +6,7 @@
       "path": "examples/symbol-search"
     },    
     {
-      "path": "examples/dot-memory"
+      "path": "examples/grid-memory"
     },
     {
       "path": "."

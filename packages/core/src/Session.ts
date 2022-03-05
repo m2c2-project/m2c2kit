@@ -39,6 +39,8 @@ export class Session {
   async init(): Promise<void> {
     Timer.start("sessionInit");
 
+    this.options.activities.forEach((activity) => activity.init());
+
     const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);
 

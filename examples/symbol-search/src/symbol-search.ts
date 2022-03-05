@@ -121,9 +121,9 @@ completed 12 trials of this task. The dependent variable was median response \
 time of correct trials. Because this task requires speeded comparisons \
 similar to standard laboratory tests, we reasoned it would be a viable \
 indicator of perceptual speed. SOURCE: Sliwinski, Martin J., Jacqueline A. \
-Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton.\
- "Reliability and validity of ambulatory cognitive assessments." Assessment \
- 25, no. 1 (2018): 14-30.',
+Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
+"Reliability and validity of ambulatory cognitive assessments." Assessment \
+25, no. 1 (2018): 14-30.',
       showFps: true,
       width: 400,
       height: 800,
@@ -304,7 +304,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton.\
     };
 
     super(options);
+  }
 
+  override init() {
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -916,4 +918,5 @@ const session = new Session({
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
+session.options.activities[0].setParameters({ match_pairs_top: 4 });
 session.init();

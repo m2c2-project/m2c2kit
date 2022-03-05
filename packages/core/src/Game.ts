@@ -72,6 +72,9 @@ export class Game implements Activity {
     this.name = options.name;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  init() {}
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setParameters(newParameters: any): void {
     const { parameters } = this.options;
@@ -232,11 +235,6 @@ export class Game implements Activity {
     const gameInitOptions = this.options;
     this.unitTesting = gameInitOptions._unitTesting ?? false;
 
-    let initStartedTimeStamp = 0;
-    if (!this.unitTesting) {
-      initStartedTimeStamp = window.performance.now();
-    }
-
     this.setupHtmlCanvases(
       gameInitOptions.canvasId,
       gameInitOptions.width,
@@ -251,14 +249,6 @@ export class Game implements Activity {
     this.setupCanvasKitSurface();
     this.setupFpsFont();
     this.setupEventHandlers();
-
-    if (!this.unitTesting) {
-      console.log(
-        `Game.init() took ${(
-          window.performance.now() - initStartedTimeStamp
-        ).toFixed(0)} ms`
-      );
-    }
 
     let startingScene: Scene | undefined;
 

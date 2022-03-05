@@ -17,6 +17,14 @@ export class Survey implements Activity {
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  init() {}
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setParameters(): void {
+    throw new Error("setParameters not supported for survey activites");
+  }
+
   start(): void {
     // This modern theme doesn't seem as polished as
     // survey theme. It has some minor issues with margins and

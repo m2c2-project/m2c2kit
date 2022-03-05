@@ -9,4 +9,14 @@ module.exports = {
     "/__tests__/",
   ],
   testPathIgnorePatterns: [".rollup.cache", "build"],
+  /**
+   * I added a separate tsconfig for jest because typescript was also adding
+   * types for jasmine. see tsconfig.jest.json, where I explicitly include
+   * types only for jest and node
+   */
+  globals: {
+    "ts-jest": {
+      tsconfig: `tsconfig.jest.json`,
+    },
+  },
 };

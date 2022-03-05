@@ -1,7 +1,7 @@
 {
   "files.exclude": {
     // these will show in their own root folders, so hide from this root folder
-    "examples/dot-memory": true,
+    "examples/grid-memory": true,
     "tools": true
   },
   "jest.jestCommandLine": "npm run test -w @m2c2kit/core --"

@@ -26,7 +26,6 @@ import {
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
 class GridMemory extends Game {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
@@ -78,7 +77,38 @@ class GridMemory extends Game {
       version: "0.0.1",
       shortDescription: "A short description of Grid Memory goes here...",
       longDescription:
-        'Each trial of the dot memory task consisted of 3 phases: encoding, distraction, and retrieval. During the encoding phase, the participant was asked to remember the location three red dots appear on a 5 x 5 grid. After a 3-second study period, the grid was removed and the distraction phase began, during which the participant wasrequired to locate and touch Fs among an array of Es. After performing the distraction task for 8 seconds, and empty 5 x 5 grid reappeared on the screen and participants were then prompted to recall the locations of the 3 dots presented initially and press a button labeled "Done" after entering their responses to complete the trial. Participants completed 2 trials (encoding, distractor, retrieval) with a 1-second delay between trials. The dependent variable was an error score with partial credit given based on the deviation from the correct positions. If all dots were recalled in their correct location, the participant received a score ofzero. In the case of one or more retrieval errors, Euclidean distance of the location of the incorrect dot to the correct grid location was calculated, with higher scores indicating less accurate placement and poorer performance (Siedlecki, 2007). The rationale for our use of this task as an indicator of working memory has both an empirical and theoreticalbasis. Previous research (Miyake, Friedman, Rettinger, Shah, & Hegarty, 2001) has demonstrated that a similar dotmemory task loaded on a factor representing working memory. The authors of this study reasoned that the spatial dot memory task placed high demands on controlled attention—a hallmark of working memory tasks. Indeed, individual differences in working memory capacity arise "in situations where information needs to be actively maintained or when a controlled search of memory is required" (Unsworth & Engle, 2007, p. 123). The ambulatory dot memory task satisfies this requirement by using an interference task to prevent rehearsal and produce interference with encoded locations, which creates the demand for active maintenance and controlled retrieval of previously encoded location during the recall phase.',
+        'Each trial of the dot memory task consisted of 3 phases: encoding, \
+distraction, and retrieval. During the encoding phase, the participant was \
+asked to remember the location three red dots appear on a 5 x 5 grid. After \
+a 3-second study period, the grid was removed and the distraction phase \
+began, during which the participant wasrequired to locate and touch Fs among \
+an array of Es. After performing the distraction task for 8 seconds, and \
+empty 5 x 5 grid reappeared on the screen and participants were then \
+prompted to recall the locations of the 3 dots presented initially and press \
+a button labeled "Done" after entering their responses to complete the trial. \
+Participants completed 2 trials (encoding, distractor, retrieval) with a \
+1-second delay between trials. The dependent variable was an error score with \
+partial credit given based on the deviation from the correct positions. If \
+all dots were recalled in their correct location, the participant received a \
+score ofzero. In the case of one or more retrieval errors, Euclidean distance \
+of the location of the incorrect dot to the correct grid location was \
+calculated, with higher scores indicating less accurate placement and poorer \
+performance (Siedlecki, 2007). The rationale for our use of this task as an \
+indicator of working memory has both an empirical and theoreticalbasis. \
+Previous research (Miyake, Friedman, Rettinger, Shah, & Hegarty, 2001) has \
+demonstrated that a similar dotmemory task loaded on a factor representing \
+working memory. The authors of this study reasoned that the spatial dot \
+memory task placed high demands on controlled attention—a hallmark of working \
+memory tasks. Indeed, individual differences in working memory capacity arise \
+"in situations where information needs to be actively maintained or when a \
+controlled search of memory is required" (Unsworth & Engle, 2007, p. 123). \
+The ambulatory dot memory task satisfies this requirement by using an \
+interference task to prevent rehearsal and produce interference with encoded \
+locations, which creates the demand for active maintenance and controlled \
+retrieval of previously encoded location during the recall phase. \
+SOURCE: Sliwinski, Martin J., Jacqueline A. Mogle, Jinshil Hyun, Elizabeth \
+Munoz, Joshua M. Smyth, and Richard B. Lipton. "Reliability and validity of \
+ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       showFps: true,
       width: 400,
       height: 800,
@@ -102,7 +132,9 @@ class GridMemory extends Game {
     };
 
     super(options);
+  }
 
+  init(): void {
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias

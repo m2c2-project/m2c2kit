@@ -30,10 +30,10 @@ export default (commandLineArgs) => {
 
   const finalConfig = [
     {
-      input: "./src/dot-memory.ts",
+      input: "./src/grid-memory.ts",
       output: [
         {
-          file: `./${outputFolder}/dot-memory.bundle.js`,
+          file: `./${outputFolder}/grid-memory.bundle.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
           sourcemapPathTransform:
