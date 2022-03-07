@@ -1,0 +1,23 @@
+{
+  "references": [
+    { "path": "../../core" },
+    { "path": "../../addons" },
+    { "path": ".." }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "build"
+  }
+}

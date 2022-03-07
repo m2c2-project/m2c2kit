@@ -2,6 +2,7 @@ export * from "./Action";
 export * from "./Activity";
 export * from "./ActivityLifecycleEvent";
 export * from "./ActivityDataEvent";
+export * from "./ActivityType";
 export * from "./Session";
 export * from "./SessionOptions";
 export * from "./SessionLifecycleEvent";

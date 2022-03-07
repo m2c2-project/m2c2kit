@@ -2,19 +2,9 @@
 // https://medium.com/rewrite-tech/visual-studio-code-tips-for-monorepo-development-with-multi-root-workspaces-and-extension-6b69420ecd12
 {
   "folders": [
-    {
-      "path": "examples/symbol-search"
-    },    
-    {
-      "path": "examples/grid-memory"
-    },
-    {
-      "path": "."
-    },
-    {
-      "name": "demo-server",
-      "path": "tools/demo-server"
-    }
+     {
+       "path": "."
+     },
   ],
   "settings": {
     "jest.autoRun": "off",

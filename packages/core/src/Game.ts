@@ -1,5 +1,6 @@
 import "./Globals";
 import { Activity } from "./Activity";
+import { ActivityType } from "./ActivityType";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { TapEvent } from "./TapEvent";
@@ -61,6 +62,7 @@ interface screenMetadata {
 }
 
 export class Game implements Activity {
+  readonly type = ActivityType.game;
   _canvasKit?: CanvasKit;
   _session?: Session;
   uuid = Uuid.generate();

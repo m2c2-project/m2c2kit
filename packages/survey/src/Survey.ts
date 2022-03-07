@@ -1,4 +1,10 @@
-import { Session, Uuid, Activity, EventType } from "@m2c2kit/core";
+import {
+  Session,
+  Uuid,
+  Activity,
+  ActivityType,
+  EventType,
+} from "@m2c2kit/core";
 import $ from "jquery";
 import * as SurveyKO from "survey-knockout";
 import widgets from "surveyjs-widgets";
@@ -7,6 +13,7 @@ import "bootstrap-datepicker";
 import "sortablejs";
 
 export class Survey implements Activity {
+  readonly type = ActivityType.survey;
   _session?: Session;
   name: string;
   uuid = Uuid.generate();

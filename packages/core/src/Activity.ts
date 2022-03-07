@@ -1,6 +1,8 @@
+import { ActivityType } from "./ActivityType";
 import { Session } from "./Session";
-
 export interface Activity {
+  /** The type of activity: Game or Survey */
+  type: ActivityType;
   /** Initializes the activity. */
   init(): void;
   /** Starts the activity */

@@ -9,6 +9,7 @@ import { GameImages } from "./GameImages";
 import { Timer } from "./Timer";
 import { SessionOptions } from "./SessionOptions";
 import { Uuid } from "./Uuid";
+import { ActivityType } from "./ActivityType";
 
 export class Session {
   options: SessionOptions;
@@ -119,13 +120,15 @@ export class Session {
   }
 
   private logStartingActivity(): void {
-    if (this.currentActivity instanceof Game) {
-      const version = this.currentActivity?.options.version
-        ? `, version ${this.currentActivity?.options.version}`
+    if (
+      this.currentActivity &&
+      this.currentActivity.type == ActivityType.game
+    ) {
+      const currentGame = this.currentActivity as Game;
+      const version = currentGame.options.version
+        ? `, version ${currentGame.options.version}`
         : "";
-      console.log(
-        `starting game: ${this.currentActivity?.options.name + version}`
-      );
+      console.log(`starting game: ${currentGame.options.name + version}`);
     }
   }
 
@@ -169,7 +172,7 @@ export class Session {
     this.imageManager.canvasKit = this.canvasKit;
 
     this.options.activities
-      .filter((activity) => activity instanceof Game)
+      .filter((activity) => activity.type == ActivityType.game)
       .forEach((activity) => {
         const game = activity as unknown as Game;
         game.canvasKit = canvasKit;
@@ -178,7 +181,7 @@ export class Session {
 
   private getFontsConfigurationFromGames(): GameFontUrls[] {
     return this.options.activities
-      .filter((activity) => activity instanceof Game)
+      .filter((activity) => activity.type == ActivityType.game)
       .map((activity) => {
         const game = activity as unknown as Game;
         return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
@@ -187,7 +190,7 @@ export class Session {
 
   private getImagesConfigurationFromGames(): GameImages[] {
     return this.options.activities
-      .filter((activity) => activity instanceof Game)
+      .filter((activity) => activity.type == ActivityType.game)
       .map((activity) => {
         const game = activity as unknown as Game;
         return { uuid: game.uuid, images: game.options.images ?? [] };
