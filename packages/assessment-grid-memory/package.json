@@ -4,8 +4,7 @@
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build-watch": "rollup -c --watch --configProd ",
-    "build": "rollup -c --configProd",
-    "postinstall": "node post-install.mjs"
+    "build": "rollup -c --configProd"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
