@@ -4,7 +4,8 @@
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build-watch": "rollup -c --watch --configProd ",
-    "build": "rollup -c --configProd"
+    "build": "rollup -c --configProd",
+    "postinstall": "node post-install.mjs"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -17,7 +18,8 @@
     "post-install.mjs",
     "dist/index.js",
     "dist/index.d.ts",
-    "dist/*"
+    "img/*",
+    "fonts/*"
   ],
   "dependencies": {
     "@m2c2kit/addons": "0.1.8",

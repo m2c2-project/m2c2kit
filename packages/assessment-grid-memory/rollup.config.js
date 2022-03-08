@@ -39,7 +39,7 @@ export default [
         exclude: ["**/__tests__", "**/*.test.ts"],
         rootDir: "src",
       }),
-      //terser(),
+      terser(),
     ],
   },
 
@@ -55,14 +55,6 @@ export default [
           {
             // copy the bundled esm module and sourcemap to dist
             src: "build/index.*",
-            dest: ["dist/"],
-          },
-          {
-            src: "img/",
-            dest: ["dist/"],
-          },
-          {
-            src: "fonts/",
             dest: ["dist/"],
           },
         ],
