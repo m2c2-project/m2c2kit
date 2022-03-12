@@ -7,7 +7,6 @@ import {
   Scene,
   Label,
   Shape,
-  Size,
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
@@ -110,7 +109,7 @@ class Game1 extends Game {
     const label1 = new Label({ text: "Hello", name: "myLabel1" });
     scene1.addChild(label1);
     const rect1 = new Shape({
-      rect: { size: new Size(100, 100) },
+      rect: { size: { width: 100, height: 100 } },
       name: "myRect1",
     });
     label1.addChild(rect1);

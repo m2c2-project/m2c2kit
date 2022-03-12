@@ -3,7 +3,6 @@ import { Canvas } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
 import { Scene } from ".";
@@ -12,7 +11,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.sprite;
   isDrawable = true;
   // Drawable options
-  anchorPoint = new Point(0.5, 0.5);
+  anchorPoint = { x: 0.5, y: 0.5 };
   zPosition = 0;
   // Sprite options
   private _imageName = ""; // public getter/setter is below

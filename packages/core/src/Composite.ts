@@ -10,7 +10,7 @@ export abstract class Composite extends Entity implements IDrawable {
   compositeType = "<compositeType>";
   isDrawable = true;
   // Drawable options
-  anchorPoint = new Point(0.5, 0.5);
+  anchorPoint: Point = { x: 0.5, y: 0.5 };
   zPosition = 0;
 
   /**

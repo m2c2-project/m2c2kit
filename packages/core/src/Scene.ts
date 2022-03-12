@@ -4,7 +4,6 @@ import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
@@ -13,7 +12,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   readonly type = EntityType.scene;
   isDrawable = true;
   // Drawable options
-  anchorPoint = new Point(0, 0);
+  anchorPoint = { x: 0, y: 0 };
   zPosition = 0;
   // Scene options
   private _backgroundColor = Constants.DEFAULT_SCENE_BACKGROUND_COLOR;

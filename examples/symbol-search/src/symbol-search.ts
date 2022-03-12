@@ -3,13 +3,10 @@ import {
   Action,
   Scene,
   Shape,
-  Size,
-  Point,
   Label,
   Transition,
   TransitionDirection,
   WebColors,
-  Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
   GameParameters,
@@ -382,7 +379,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     const countdownCircle = new Shape({
       circleOfRadius: 100,
-      position: new Point(200, 350),
+      position: { x: 200, y: 350 },
       fillColor: [44, 90, 255, 1],
     });
 
@@ -406,7 +403,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       fontSize: 50,
       preferredMaxLayoutWidth: 300,
       horizontalAlignmentMode: LabelHorizontalAlignmentMode.center,
-      position: new Point(200, 500),
+      position: { x: 200, y: 500 },
     });
     countdownScene.addChild(getreadyLabel);
 
@@ -475,9 +472,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     game.addScene(chooseCardScene);
 
     const bottomBackground = new Shape({
-      rect: new Rect({ size: new Size(400, 400) }),
+      rect: { size: { width: 400, height: 400 } },
       fillColor: [166, 177, 181, 1],
-      position: new Point(200, 600),
+      position: { x: 200, y: 600 },
     });
     chooseCardScene.addChild(bottomBackground);
 
@@ -487,7 +484,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       preferredMaxLayoutWidth: 240,
     });
     chooseCardScene.addChild(questionLabel);
-    questionLabel.position = new Point(200, 460);
+    questionLabel.position = { x: 200, y: 460 };
 
     const orLabel = new Label({
       text: "or",
@@ -495,7 +492,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       preferredMaxLayoutWidth: 240,
     });
     chooseCardScene.addChild(orLabel);
-    orLabel.position = new Point(200, 580);
+    orLabel.position = { x: 200, y: 580 };
 
     chooseCardScene.onSetup(() => {
       const matchPairsTop = game.getParameter<number>("match_pairs_top");
@@ -524,8 +521,8 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       const topCardGrid = new Grid({
         rows: 1,
         columns: matchPairsTop,
-        size: new Size(80 * matchPairsTop + topInterCardMargin, 160),
-        position: new Point(200, 200),
+        size: { width: 80 * matchPairsTop + topInterCardMargin, height: 160 },
+        position: { x: 200, y: 200 },
         backgroundColor: WebColors.Transparent,
         gridLineColor: WebColors.Transparent,
       });
@@ -534,8 +531,8 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       const bottomCardGrid = new Grid({
         rows: 1,
         columns: 2,
-        size: new Size(80 * 2 + 200, 160),
-        position: new Point(200, 600),
+        size: { width: 80 * 2 + 200, height: 160 },
+        position: { x: 200, y: 600 },
         backgroundColor: WebColors.Transparent,
         gridLineColor: WebColors.Transparent,
       });
@@ -569,7 +566,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         bottomSymbolImageNumber: number
       ): Shape {
         const card = new Shape({
-          rect: { size: new Size(80, 160) },
+          rect: { size: { width: 80, height: 160 } },
           fillColor: WebColors.White,
           strokeColor: WebColors.Black,
           lineWidth: 2,
@@ -577,13 +574,13 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
         const topSymbol = new Sprite({
           imageName: "ss-" + topSymbolImageNumber.toString().padStart(2, "0"),
-          position: new Point(0, -36),
+          position: { x: 0, y: -36 },
         });
         card.addChild(topSymbol);
         const bottomSymbol = new Sprite({
           imageName:
             "ss-" + bottomSymbolImageNumber.toString().padStart(2, "0"),
-          position: new Point(0, 36),
+          position: { x: 0, y: 36 },
         });
         card.addChild(bottomSymbol);
         return card;
@@ -704,7 +701,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     const exitButton = new Button({
       text: "Done",
-      position: new Point(200, 600),
+      position: { x: 200, y: 600 },
       backgroundColor: WebColors.Black,
     });
     exitButton.isUserInteractionEnabled = true;

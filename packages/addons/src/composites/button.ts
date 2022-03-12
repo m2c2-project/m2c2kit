@@ -1,7 +1,6 @@
 import { Paint, Canvas } from "canvaskit-wasm";
 import {
   WebColors,
-  Rect,
   Composite,
   CompositeOptions,
   Shape,
@@ -28,7 +27,7 @@ export class Button extends Composite implements IText {
   compositeType = "button";
   // Button options
   private _backgroundColor = WebColors.RoyalBlue;
-  size = new Size(200, 50);
+  size = { width: 200, height: 50 };
   cornerRadius = 9;
   fontSize = 20;
   text = "";
@@ -75,7 +74,7 @@ export class Button extends Composite implements IText {
     this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
 
     const buttonRectangle = new Shape({
-      rect: new Rect({ size: this.size }),
+      rect: { size: this.size },
       cornerRadius: this.cornerRadius,
       fillColor: this._backgroundColor,
     });

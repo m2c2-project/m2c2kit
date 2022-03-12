@@ -76,7 +76,7 @@ export abstract class Entity implements EntityOptions {
   isText = false;
   // Entity Options
   name: string;
-  position = new Point(0, 0); // position of the entity in the parent coordinate system
+  position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
   scale = 1.0;
   isUserInteractionEnabled = false;
   hidden = false;
@@ -84,8 +84,8 @@ export abstract class Entity implements EntityOptions {
 
   parent?: Entity;
   children = new Array<Entity>();
-  absolutePosition = new Point(0, 0); // position within the root coordinate system
-  size = new Size(0, 0);
+  absolutePosition: Point = { x: 0, y: 0 }; // position within the root coordinate system
+  size: Size = { width: 0, height: 0 };
   absoluteScale = 1.0;
   actions = new Array<Action>();
   queuedAction?: Action;

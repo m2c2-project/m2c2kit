@@ -4,10 +4,9 @@ import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
-import { Rect } from "./Rect";
+import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 
 export class Shape extends Entity implements IDrawable, ShapeOptions {
@@ -15,13 +14,13 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   isDrawable = true;
   isShape = true;
   // Drawable options
-  anchorPoint = new Point(0.5, 0.5);
+  anchorPoint = { x: 0.5, y: 0.5 };
   zPosition = 0;
   // Shape options
   // TODO: fix the Size issue; should be readonly (calculated value) in all entities, but Rectangle
   shapeType = ShapeType.undefined;
   circleOfRadius?: number;
-  rect?: Rect;
+  rect?: RectOptions;
   cornerRadius = 0;
   private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR; // public getter/setter is below
   private _strokeColor?: RgbaColor | undefined; // public getter/setter is below
@@ -57,7 +56,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       if (options.rect.origin) {
         this.position = options.rect.origin;
       } else if (options.rect.x !== undefined && options.rect.y !== undefined) {
-        this.position = new Point(options.rect.x, options.rect.y);
+        this.position = { x: options.rect.x, y: options.rect.y };
       }
       this.shapeType = ShapeType.rectangle;
     }

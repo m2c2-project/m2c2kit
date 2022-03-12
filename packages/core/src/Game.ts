@@ -698,10 +698,10 @@ export class Game implements Activity {
       const spr = new Sprite({
         name: "outgoingSceneSprite",
         imageName: "outgoingSceneSnapshot",
-        position: new Point(
-          this.canvasCssWidth / Globals.rootScale / 2,
-          this.canvasCssHeight / Globals.rootScale / 2
-        ),
+        position: {
+          x: this.canvasCssWidth / Globals.rootScale / 2,
+          y: this.canvasCssHeight / Globals.rootScale / 2,
+        },
       });
       spr.scale = 1 / Globals.rootScale;
       outgoingScene.addChild(spr);
@@ -864,7 +864,7 @@ export class Game implements Activity {
             incomingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, 0),
+                  point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -882,7 +882,7 @@ export class Game implements Activity {
             outgoingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(-outgoingScene.size.width, 0),
+                  point: { x: -outgoingScene.size.width, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -904,7 +904,7 @@ export class Game implements Activity {
             incomingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, 0),
+                  point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -922,7 +922,7 @@ export class Game implements Activity {
             outgoingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(outgoingScene.size.width, 0),
+                  point: { x: outgoingScene.size.width, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -944,7 +944,7 @@ export class Game implements Activity {
             incomingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, 0),
+                  point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -962,7 +962,7 @@ export class Game implements Activity {
             outgoingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, -outgoingScene.size.height),
+                  point: { x: 0, y: -outgoingScene.size.height },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -984,7 +984,7 @@ export class Game implements Activity {
             incomingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, 0),
+                  point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -1002,7 +1002,7 @@ export class Game implements Activity {
             outgoingScene.run(
               Action.Sequence([
                 Action.Move({
-                  point: new Point(0, outgoingScene.size.height),
+                  point: { x: 0, y: outgoingScene.size.height },
                   duration: duration,
                   runDuringTransition: true,
                 }),
@@ -1202,7 +1202,7 @@ export class Game implements Activity {
             ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
           const tapEvent: TapEvent = {
             target: entity,
-            point: new Point(relativeX, relativeY),
+            point: { x: relativeX, y: relativeY },
           };
           listener.callback(tapEvent);
         }

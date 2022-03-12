@@ -11,7 +11,6 @@ import {
   LabelHorizontalAlignmentMode,
   Sprite,
   RgbaColor,
-  Size,
 } from "@m2c2kit/core";
 
 export interface InstructionScene {
@@ -255,7 +254,7 @@ export class Instructions extends Story {
           text: backButtonText,
           fontColor: backButtonFontColor,
           backgroundColor: backButtonBackgroundColor,
-          size: new Size(backButtonWidth, backButtonHeight),
+          size: { width: backButtonWidth, height: backButtonHeight },
           layout: {
             marginStart: 32,
             marginBottom: 32,
@@ -279,7 +278,7 @@ export class Instructions extends Story {
         text: nextButtonText,
         fontColor: nextButtonFontColor,
         backgroundColor: nextButtonBackgroundColor,
-        size: new Size(nextButtonWidth, nextButtonHeight),
+        size: { width: nextButtonWidth, height: nextButtonHeight },
         layout: {
           marginEnd: 32,
           marginBottom: 32,

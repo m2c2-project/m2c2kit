@@ -1,12 +1,10 @@
 import { Canvas } from "canvaskit-wasm";
 import {
   WebColors,
-  Rect,
   Composite,
   CompositeOptions,
   RgbaColor,
   Size,
-  Point,
   Entity,
   Shape,
 } from "@m2c2kit/core";
@@ -100,7 +98,7 @@ export class Grid extends Composite {
     super.removeAllChildren();
     this.gridBackground = new Shape({
       name: "_" + this.name + "-gridBackground",
-      rect: new Rect({ size: this.size }),
+      rect: { size: this.size },
       //size: this.size,
       fillColor: this.gridBackgroundColor,
       strokeColor: this.gridLineColor,
@@ -114,10 +112,10 @@ export class Grid extends Composite {
     for (let col = 1; col < this.columns; col++) {
       const verticalLine = new Shape({
         name: "_" + this.name + "-gridVerticalLine-" + col,
-        rect: new Rect({
-          size: new Size(this.gridLineWidth, this.size.height),
-          origin: new Point(-this.size.width / 2 + this.cellWidth * col, 0),
-        }),
+        rect: {
+          size: { width: this.gridLineWidth, height: this.size.height },
+          origin: { x: -this.size.width / 2 + this.cellWidth * col, y: 0 },
+        },
         fillColor: this.gridLineColor,
       });
       this.gridBackground.addChild(verticalLine);
@@ -126,10 +124,10 @@ export class Grid extends Composite {
     for (let row = 1; row < this.rows; row++) {
       const horizontalLine = new Shape({
         name: "_" + this.name + "-gridHorizontalLine-" + row,
-        rect: new Rect({
-          size: new Size(this.size.width, this.gridLineWidth),
-          origin: new Point(0, -this.size.height / 2 + this.cellHeight * row),
-        }),
+        rect: {
+          size: { width: this.size.width, height: this.gridLineWidth },
+          origin: { x: 0, y: -this.size.height / 2 + this.cellHeight * row },
+        },
         fillColor: this.gridLineColor,
       });
       this.gridBackground.addChild(horizontalLine);
@@ -150,7 +148,7 @@ export class Grid extends Composite {
           -this.size.height / 2 +
           this.cellHeight / 2 +
           gridChild.row * this.cellHeight;
-        gridChild.entity.position = new Point(x, y);
+        gridChild.entity.position = { x: x, y: y };
         this.gridBackground.addChild(gridChild.entity);
       });
     }

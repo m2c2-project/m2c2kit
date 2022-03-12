@@ -9,7 +9,6 @@ import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
@@ -21,7 +20,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   isDrawable = true;
   isText = true;
   // Drawable options
-  anchorPoint = new Point(0.5, 0.5);
+  anchorPoint = { x: 0.5, y: 0.5 };
   zPosition = 0;
   // Text options
   private _text = ""; // public getter/setter is below

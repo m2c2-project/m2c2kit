@@ -7,8 +7,6 @@ import {
   Action,
   Scene,
   Shape,
-  Size,
-  Point,
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
@@ -111,9 +109,9 @@ class Game1 extends Game {
     game.entryScene = s;
 
     const rect1 = new Shape({
-      rect: { size: new Size(100, 100) },
+      rect: { size: { width: 100, height: 100 } },
       name: "myRect1",
-      position: new Point(200, 200),
+      position: { x: 200, y: 200 },
     });
     s.addChild(rect1);
   }
@@ -193,12 +191,12 @@ describe("actions", () => {
       if (!rect1) {
         throw new Error("rect1 undefined");
       }
-      rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
+      rect1.run(Action.Move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
       );
-      expect(rect1.position).toEqual(new Point(50, 50));
+      expect(rect1.position).toEqual({ x: 50, y: 50 });
     });
   });
 
@@ -213,12 +211,12 @@ describe("actions", () => {
         throw new Error("rect1 undefined");
       }
 
-      rect1.run(Action.Move({ point: new Point(50, 50), duration: 1000 }));
+      rect1.run(Action.Move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
       );
-      expect(rect1.position).toEqual(new Point(125, 125));
+      expect(rect1.position).toEqual({ x: 125, y: 125 });
     });
   });
 });

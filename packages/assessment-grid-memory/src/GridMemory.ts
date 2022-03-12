@@ -3,13 +3,10 @@ import {
   Action,
   Scene,
   Shape,
-  Size,
-  Point,
   Label,
   Transition,
   TransitionDirection,
   WebColors,
-  Rect,
   RandomDraws,
   LabelHorizontalAlignmentMode,
   GameParameters,
@@ -211,7 +208,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     const getReadyMessage = new Label({
       text: "Get Ready",
       fontSize: 24,
-      position: new Point(200, 400),
+      position: { x: 200, y: 400 },
     });
     gridMemoryPage0.addChild(getReadyMessage);
 
@@ -237,13 +234,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     const page1Message = new Label({
       text: "Remember the dot locations!",
       fontSize: 24,
-      position: new Point(200, 150),
+      position: { x: 200, y: 150 },
     });
     gridMemoryPage1.addChild(page1Message);
 
     const grid1 = new Grid({
-      size: new Size(300, 300),
-      position: new Point(200, 400),
+      size: { width: 300, height: 300 },
+      position: { x: 200, y: 400 },
       rows: 5,
       columns: 5,
       backgroundColor: WebColors.Silver,
@@ -288,13 +285,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     const touchTheFs = new Label({
       text: "Touch the F's!",
-      position: new Point(200, 100),
+      position: { x: 200, y: 100 },
     });
     gridMemoryPage2.addChild(touchTheFs);
 
     const grid = new Grid({
-      size: new Size(300, 480),
-      position: new Point(200, 400),
+      size: { width: 300, height: 480 },
+      position: { x: 200, y: 400 },
       rows: 8,
       columns: 5,
       backgroundColor: WebColors.Transparent,
@@ -343,7 +340,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         for (let i = 0; i < 8; i++) {
           for (let j = 0; j < 5; j++) {
             const square = new Shape({
-              rect: new Rect({ size: new Size(59, 59) }),
+              rect: { size: { width: 59, height: 59 } },
               fillColor: WebColors.Transparent,
             });
             square.userData = 0;
@@ -390,8 +387,8 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         }
 
         if (slideGridIntoScene) {
-          grid.position = new Point(200, 1040);
-          grid.run(Action.Move({ point: new Point(200, 400), duration: 500 }));
+          grid.position = { x: 200, y: 1040 };
+          grid.run(Action.Move({ point: { x: 200, y: 400 }, duration: 500 }));
         }
       }
 
@@ -411,13 +408,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     const page3Message = new Label({
       text: "Where were the dots?",
       fontSize: 24,
-      position: new Point(200, 150),
+      position: { x: 200, y: 150 },
     });
     gridMemoryPage3.addChild(page3Message);
 
     const grid3 = new Grid({
-      size: new Size(300, 300),
-      position: new Point(200, 400),
+      size: { width: 300, height: 300 },
+      position: { x: 200, y: 400 },
       rows: 5,
       columns: 5,
       backgroundColor: WebColors.Silver,
@@ -444,7 +441,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
             // it's transparent -- we use it only for its hit
             // area. Make it 59 x 59 (not 60 x 60) to avoid overlap
             // of hit area on the borders
-            rect: new Rect({ size: new Size(59, 59) }),
+            rect: { size: { width: 59, height: 59 } },
             fillColor: WebColors.Transparent,
           });
           // an entity's userData is a property we can use to store
@@ -488,8 +485,8 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     const gridMemoryPage3DoneButton = new Button({
       text: "Done",
-      position: new Point(200, 700),
-      size: new Size(300, 50),
+      position: { x: 200, y: 700 },
+      size: { width: 300, height: 50 },
     });
     gridMemoryPage3.addChild(gridMemoryPage3DoneButton);
 
@@ -497,7 +494,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     // we'll unhide it, if needed.
     const youMustSelectAllMessage = new Label({
       text: "You must select all 3 locations!",
-      position: new Point(200, 600),
+      position: { x: 200, y: 600 },
     });
     youMustSelectAllMessage.hidden = true;
     gridMemoryPage3.addChild(youMustSelectAllMessage);
@@ -547,13 +544,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     game.addScene(endPage);
     const doneLabel = new Label({
       text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
-      position: new Point(200, 300),
+      position: { x: 200, y: 300 },
     });
     endPage.addChild(doneLabel);
 
     const againButton = new Button({
       text: "Start over",
-      position: new Point(200, 400),
+      position: { x: 200, y: 400 },
     });
     againButton.isUserInteractionEnabled = true;
     againButton.onTapDown(() => {
@@ -564,7 +561,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     const exitButton = new Button({
       text: "Exit",
-      position: new Point(200, 475),
+      position: { x: 200, y: 475 },
     });
     exitButton.isUserInteractionEnabled = true;
     exitButton.onTapDown(() => {

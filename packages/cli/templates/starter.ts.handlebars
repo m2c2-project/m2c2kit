@@ -3,10 +3,8 @@ import {
   Action,
   Scene,
   Shape,
-  Point,
   Label,
   WebColors,
-  Rect,
   LabelHorizontalAlignmentMode,
   GameParameters,
   GameOptions,
@@ -139,14 +137,14 @@ class {{className}} extends Game {
     const getReadyMessage = new Label({
       text: "Get Ready",
       fontSize: 24,
-      position: new Point(200, 400),
+      position: { x: 200, y: 400 },
     });
     getReadyScene.addChild(getReadyMessage);
 
     // example of how to use an image. The image must be previously loaded
     const starSprite = new Sprite({
       imageName: "star",
-      position: new Point(200, 500),
+      position: { x: 200, y: 500 },
     });
     getReadyScene.addChild(starSprite);
 
@@ -174,23 +172,23 @@ class {{className}} extends Game {
     });
     game.addScene(chooseRectangleScene);
     const redRect = new Shape({
-      rect: new Rect({ width: 150, height: 100 }),
+      rect: { width: 150, height: 100 },
       fillColor: WebColors.Red,
     });
     chooseRectangleScene.addChild(redRect);
     const blueRect = new Shape({
-      rect: new Rect({ width: 150, height: 100 }),
+      rect: { width: 150, height: 100 },
       fillColor: WebColors.Blue,
     });
     chooseRectangleScene.addChild(blueRect);
     const correctMessage = new Label({
       text: "CORRECT!",
-      position: new Point(200, 500),
+      position: { x: 200, y: 500 },
     });
 
     const chooseMessage = new Label({
       text: "Choose the red rectangle",
-      position: new Point(200, 200),
+      position: { x: 200, y: 200 },
     });
     chooseRectangleScene.addChild(chooseMessage);
 
@@ -198,7 +196,7 @@ class {{className}} extends Game {
     chooseRectangleScene.addChild(correctMessage);
     const wrongMessage = new Label({
       text: "WRONG!",
-      position: new Point(200, 500),
+      position: {x: 200, y: 500 },
     });
 
     wrongMessage.hidden = true;
@@ -215,11 +213,11 @@ class {{className}} extends Game {
       }
 
       if (redOnLeft) {
-        redRect.position = new Point(100, 300);
-        blueRect.position = new Point(300, 300);
+        redRect.position = { x: 100, y: 300 };
+        blueRect.position = { x: 300, y: 300 };
       } else {
-        redRect.position = new Point(300, 300);
-        blueRect.position = new Point(100, 300);
+        redRect.position = { x: 300, y: 300 };
+        blueRect.position = { x: 100, y: 300 };;
       }
 
       // helper function to record the user's choice and
@@ -314,13 +312,13 @@ class {{className}} extends Game {
     game.addScene(endScene);
     const doneLabel = new Label({
       text: `This will be reassigned in the onSetup() callback. If you see this, something went wrong!`,
-      position: new Point(200, 300),
+      position: { x: 200, y: 300},
     });
     endScene.addChild(doneLabel);
 
     const startOverButton = new Button({
       text: "Start over",
-      position: new Point(200, 600),
+      position: { x: 200, y: 600 },
     });
     startOverButton.isUserInteractionEnabled = true;
     startOverButton.onTapDown(() => {
@@ -331,7 +329,7 @@ class {{className}} extends Game {
 
     const exitButton = new Button({
       text: "Exit",
-      position: new Point(200, 675),
+      position: { x: 200, y: 675 },
     });
     exitButton.isUserInteractionEnabled = true;
     exitButton.onTapDown(() => {

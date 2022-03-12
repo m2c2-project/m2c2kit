@@ -4,7 +4,6 @@ import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
@@ -21,7 +20,7 @@ export class TextLine
   zPosition = 0;
   //   We don't know TextLine width in advance, so we must text align left,
   //   and so anchorPoint is (0, .5). (we do know height, which is fontSize)
-  anchorPoint = new Point(0, 0.5);
+  anchorPoint = { x: 0, y: 0.5 };
   // Text options
   private _text = ""; // public getter/setter is below
   private _fontName: string | undefined; // public getter/setter is below
