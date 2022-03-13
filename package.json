@@ -18,10 +18,10 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "chalk": "^5.0.0",
-    "eslint": "^8.6.0",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "chalk": "^5.0.1",
+    "eslint": "^8.11.0",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.7",
@@ -31,6 +31,8 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@m2c2kit/automation-driver": "file:packages/automation-driver"
+    "@m2c2kit/automation-driver": "file:packages/automation-driver",
+    "grid-memory-demo": "file:packages/assessment-grid-memory/demo",
+    "rollup": "2.70.0"
   }
 }
