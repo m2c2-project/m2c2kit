@@ -74,6 +74,36 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   }
 
   /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  override duplicate(newName?: string): Scene {
+    const dest = new Scene({
+      ...this.getEntityOptions(),
+      ...this.getDrawableOptions(),
+      backgroundColor: this.backgroundColor,
+      name: newName,
+    });
+    dest.game = this.game;
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    return dest;
+  }
+
+  /**
    * Code that will be called every time the screen is presented.
    *
    * @remarks Use this callback to set entities to their initial state, if that state might be changed later. For example, if a scene allows players to place dots on a grid, the setup() method should ensure the grid is clear of any prior dots from previous times this scene may have been displayed. In addition, if entities should vary in each iteration, that should be done here.

@@ -155,6 +155,40 @@ export class Grid extends Composite {
     this.needsInitialization = false;
   }
 
+  /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  override duplicate(newName?: string): Grid {
+    const dest = new Grid({
+      ...this.getEntityOptions(),
+      ...this.getDrawableOptions(),
+      rows: this.rows,
+      columns: this.columns,
+      size: this.size,
+      backgroundColor: this.gridBackgroundColor,
+      gridLineWidth: this.gridLineWidth,
+      gridLineColor: this.gridLineColor,
+      name: newName,
+    });
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    return dest;
+  }
+
   update(): void {
     super.update();
   }

@@ -196,6 +196,38 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     this.needsInitialization = true;
   }
 
+  /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  override duplicate(newName?: string): Label {
+    const dest = new Label({
+      ...this.getEntityOptions(),
+      ...this.getDrawableOptions(),
+      ...this.getTextOptions(),
+      horizontalAlignmentMode: this.horizontalAlignmentMode,
+      preferredMaxLayoutWidth: this.preferredMaxLayoutWidth,
+      backgroundColor: this.backgroundColor,
+      name: newName,
+    });
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    return dest;
+  }
+
   update(): void {
     super.update();
   }

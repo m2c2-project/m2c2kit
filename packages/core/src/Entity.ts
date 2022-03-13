@@ -16,18 +16,7 @@ import { Size } from "./Size";
 import { Point } from "./Point";
 import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
-import {
-  Label,
-  LabelOptions,
-  Scene,
-  SceneOptions,
-  Shape,
-  ShapeOptions,
-  Sprite,
-  SpriteOptions,
-  TextLine,
-  TextLineOptions,
-} from ".";
+import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
 
 function handleDrawableOptions(
@@ -91,7 +80,7 @@ export abstract class Entity implements EntityOptions {
   queuedAction?: Action;
   originalActions = new Array<Action>();
   eventListeners = new Array<EntityEventListener>();
-  uuid = Uuid.generate();
+  readonly uuid = Uuid.generate();
   needsInitialization = true;
   // library users might put anything in userData property
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -649,213 +638,52 @@ export abstract class Entity implements EntityOptions {
     }
   }
 
-  duplicate<T extends Entity>(newName?: string): T {
-    // TODO: don't make static!
-    // TODO: change uuid for all child elements that are duplicated
-    // TODO: add composite
-    // static duplicate<T extends Entity>(source: T, newName?: string): T {
-    let dest: Entity;
+  /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  abstract duplicate(newName?: string): Entity;
 
-    switch (this.type) {
-      case EntityType.scene: {
-        const scene = this as unknown as Scene;
-        const options: SceneOptions = {
-          ...Entity.getEntityOptions(scene),
-          backgroundColor: scene.backgroundColor,
-        };
-        dest = new Scene(options);
-        break;
-      }
-      case EntityType.sprite: {
-        const sprite = this as unknown as Sprite;
-        const options: SpriteOptions = {
-          ...Entity.getEntityOptions(sprite),
-          ...Entity.getDrawableOptions(sprite),
-          imageName: sprite.imageName,
-        };
-        dest = new Sprite(options);
-        break;
-      }
-      case EntityType.label: {
-        const label = this as unknown as Label;
-        const options: LabelOptions = {
-          ...Entity.getEntityOptions(label),
-          ...Entity.getDrawableOptions(label),
-          ...Entity.getTextOptions(label),
-          horizontalAlignmentMode: label.horizontalAlignmentMode,
-          preferredMaxLayoutWidth: label.preferredMaxLayoutWidth,
-          backgroundColor: label.backgroundColor,
-        };
-        dest = new Label(options);
-        break;
-      }
-      case EntityType.textline: {
-        const textline = this as unknown as TextLine;
-        const options: TextLineOptions = {
-          ...Entity.getEntityOptions(textline),
-          ...Entity.getDrawableOptions(textline),
-          ...Entity.getTextOptions(textline),
-          width: textline.size.width,
-        };
-        dest = new TextLine(options);
-        break;
-      }
-      case EntityType.shape: {
-        const shape = this as unknown as Shape;
-        const options: ShapeOptions = {
-          ...Entity.getEntityOptions(shape),
-          ...Entity.getDrawableOptions(shape),
-          shapeType: shape.shapeType,
-          circleOfRadius: shape.circleOfRadius,
-          rect: shape.rect,
-          cornerRadius: shape.cornerRadius,
-          fillColor: shape.fillColor,
-          strokeColor: shape.strokeColor,
-          lineWidth: shape.lineWidth,
-        };
-        dest = new Shape(options);
-        break;
-      }
-      default:
-        throw new Error("unknown entity type");
-    }
-
-    if (this.type === EntityType.scene) {
-      (dest as Scene).game = (this as unknown as Scene).game;
-    }
-
-    if (this.children.length > 0) {
-      dest.children = this.children.map((child) => {
-        const clonedChild = child.duplicate();
-        clonedChild.parent = dest;
-        return clonedChild;
-      });
-    }
-
-    if (newName) {
-      dest.name = newName;
-    } else if (this.name === this.uuid) {
-      dest.name = dest.uuid;
-    }
-
-    return dest as unknown as T;
-  }
-
-  // TODO: don't make static!
-  // TODO: change uuid for all child elements that are duplicated
-  // TODO: add composite
-  // static duplicate<T extends Entity>(source: T, newName?: string): T {
-  //   let dest: Entity;
-
-  //   switch (source.type) {
-  //     case EntityType.scene: {
-  //       const scene = source as unknown as Scene;
-  //       const options: SceneOptions = {
-  //         ...this.getEntityOptions(scene),
-  //         backgroundColor: scene.backgroundColor,
-  //       };
-  //       dest = new Scene(options);
-  //       break;
-  //     }
-  //     case EntityType.sprite: {
-  //       const sprite = source as unknown as Sprite;
-  //       const options: SpriteOptions = {
-  //         ...this.getEntityOptions(sprite),
-  //         ...this.getDrawableOptions(sprite),
-  //         imageName: sprite.imageName,
-  //       };
-  //       dest = new Sprite(options);
-  //       break;
-  //     }
-  //     case EntityType.label: {
-  //       const label = source as unknown as Label;
-  //       const options: LabelOptions = {
-  //         ...this.getEntityOptions(label),
-  //         ...this.getDrawableOptions(label),
-  //         ...this.getTextOptions(label),
-  //         horizontalAlignmentMode: label.horizontalAlignmentMode,
-  //         preferredMaxLayoutWidth: label.preferredMaxLayoutWidth,
-  //         backgroundColor: label.backgroundColor,
-  //       };
-  //       dest = new Label(options);
-  //       break;
-  //     }
-  //     case EntityType.textline: {
-  //       const textline = source as unknown as TextLine;
-  //       const options: TextLineOptions = {
-  //         ...this.getEntityOptions(textline),
-  //         ...this.getDrawableOptions(textline),
-  //         ...this.getTextOptions(textline),
-  //         width: textline.size.width,
-  //       };
-  //       dest = new TextLine(options);
-  //       break;
-  //     }
-  //     case EntityType.shape: {
-  //       const shape = source as unknown as Shape;
-  //       const options: ShapeOptions = {
-  //         ...this.getEntityOptions(shape),
-  //         ...this.getDrawableOptions(shape),
-  //         circleOfRadius: shape.circleOfRadius,
-  //         rect: shape.rect,
-  //         cornerRadius: shape.cornerRadius,
-  //         fillColor: shape.fillColor,
-  //         strokeColor: shape.strokeColor,
-  //         lineWidth: shape.lineWidth,
-  //       };
-  //       dest = new Shape(options);
-  //       break;
-  //     }
-  //     default:
-  //       throw new Error("unknown entity type");
-  //   }
-
-  //   if (source.type === EntityType.scene) {
-  //     (dest as Scene).game = (source as unknown as Scene).game;
-  //   }
-
-  //   if (source.children.length > 0) {
-  //     dest.children = source.children.map((child) => {
-  //       const clonedChild = Entity.duplicate<Entity>(child);
-  //       clonedChild.parent = dest;
-  //       return clonedChild;
-  //     });
-  //   }
-
-  //   if (newName) {
-  //     dest.name = newName;
-  //   } else if (source.name === source.uuid) {
-  //     dest.name = dest.uuid;
-  //   }
-
-  //   return dest as unknown as T;
-  // }
-
-  private static getEntityOptions(entity: Entity): EntityOptions {
+  protected getEntityOptions(): EntityOptions {
     const entityOptions = {
-      name: entity.name,
-      position: entity.position,
-      scale: entity.scale,
-      isUserInteractionEnabled: entity.isUserInteractionEnabled,
-      hidden: entity.hidden,
+      name: this.name,
+      position: this.position,
+      scale: this.scale,
+      isUserInteractionEnabled: this.isUserInteractionEnabled,
+      hidden: this.hidden,
     };
     return entityOptions;
   }
 
-  private static getDrawableOptions(drawable: IDrawable): DrawableOptions {
+  protected getDrawableOptions(): DrawableOptions {
+    if (!this.isDrawable) {
+      throw new Error(
+        "getDrawableOptions() called object that is not IDrawable"
+      );
+    }
     const drawableOptions = {
-      anchorPoint: drawable.anchorPoint,
-      zPosition: drawable.zPosition,
+      anchorPoint: (this as unknown as IDrawable).anchorPoint,
+      zPosition: (this as unknown as IDrawable).zPosition,
     };
     return drawableOptions;
   }
 
-  private static getTextOptions(text: IText): TextOptions {
+  protected getTextOptions(): TextOptions {
+    if (!this.isText) {
+      throw new Error("getTextOptions() called object that is not IText");
+    }
+
     const textOptions = {
-      text: text.text,
-      fontName: text.fontName,
-      fontColor: text.fontColor,
-      fontSize: text.fontSize,
+      text: (this as unknown as IText).text,
+      fontName: (this as unknown as IText).fontName,
+      fontColor: (this as unknown as IText).fontColor,
+      fontSize: (this as unknown as IText).fontSize,
     };
     return textOptions;
   }

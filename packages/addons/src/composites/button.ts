@@ -105,6 +105,39 @@ export class Button extends Composite implements IText {
     this.needsInitialization = true;
   }
 
+  /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  override duplicate(newName?: string): Button {
+    const dest = new Button({
+      ...this.getEntityOptions(),
+      ...this.getDrawableOptions(),
+      ...this.getTextOptions(),
+      size: this.size,
+      cornerRadius: this.cornerRadius,
+      backgroundColor: this.backgroundColor,
+      fontColor: this.fontColor,
+      name: newName,
+    });
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    return dest;
+  }
+
   update(): void {
     super.update();
   }

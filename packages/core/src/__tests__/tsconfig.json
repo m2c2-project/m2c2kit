@@ -18,5 +18,5 @@
     // and a separate tsconfig for jest
     "types": ["jest", "node"]
   },
-  "include": ["**/__tests__", "**/*.test.ts"]
+  "include": ["**/__tests__", "**/*.test.ts", "TestHelpers.ts"]
 }

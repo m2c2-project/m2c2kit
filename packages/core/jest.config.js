@@ -8,7 +8,7 @@ module.exports = {
     "/node_modules/",
     "/__tests__/",
   ],
-  testPathIgnorePatterns: [".rollup.cache", "build"],
+  testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
   /**
    * I added a separate tsconfig for jest because typescript was also adding
    * types for jasmine. see tsconfig.jest.json, where I explicitly include
@@ -16,7 +16,7 @@ module.exports = {
    */
   globals: {
     "ts-jest": {
-      tsconfig: `tsconfig.jest.json`,
+      tsconfig: `./src/__tests__/tsconfig.json`,
     },
   },
 };

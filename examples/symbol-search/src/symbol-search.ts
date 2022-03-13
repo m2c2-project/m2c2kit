@@ -628,7 +628,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         0,
         matchPairsTop - 1
       );
-      const correctCard = topCards[correctCardIndex].duplicate<Shape>();
+      const correctCard = topCards[correctCardIndex].duplicate();
 
       const isLeftCardCorrect =
         Math.random() < game.getParameter<number>("left_correct_percent");

@@ -60,6 +60,35 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     return this._imageName;
   }
 
+  /**
+   * Duplicates an entity using deep copy.
+   *
+   * @remarks This is a deep recursive clone (entity and children).
+   * The uuid property of all duplicated entities will be newly created,
+   * because uuid must be unique.
+   *
+   * @param newName - optional name of the new, duplicated entity. If not
+   * provided, name will be the new uuid
+   */
+  override duplicate(newName?: string): Sprite {
+    const dest = new Sprite({
+      ...this.getEntityOptions(),
+      ...this.getDrawableOptions(),
+      imageName: this.imageName,
+      name: newName,
+    });
+
+    if (this.children.length > 0) {
+      dest.children = this.children.map((child) => {
+        const clonedChild = child.duplicate();
+        clonedChild.parent = dest;
+        return clonedChild;
+      });
+    }
+
+    return dest;
+  }
+
   update(): void {
     super.update();
   }
