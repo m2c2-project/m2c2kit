@@ -7,8 +7,8 @@
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.1.8",
-    "@m2c2kit/core": "0.1.8",
+    "@m2c2kit/addons": "0.1.9",
+    "@m2c2kit/core": "0.1.9",
     "@m2c2kit/assessment-grid-memory": "1.0.0"
   },
   "devDependencies": {

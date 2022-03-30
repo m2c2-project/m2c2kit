@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
