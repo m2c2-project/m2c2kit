@@ -36,15 +36,28 @@ export default (commandLineArgs) => {
           file: `./${outputFolder}/symbol-search.bundle.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
+          /**
+           * In the tsconfig.json, we have "rootDir": "../.." to fix an issue
+           * where sourcemaps for @m2c2kit/core and addons were not getting
+           * the correct path. However, that made the sourcemap for the main
+           * entry typescript file not have the correct path.
+           * The below fixes it.
+           */
           sourcemapPathTransform:
             commandLineArgs.configServe &&
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ((relativeSourcePath, sourcemapPath) => {
-              // for sourcemaps of our m2c2kit packages, we need to modify
-              // sourcemap paths to point to the correct folder in the repo
               return relativeSourcePath.replace(
-                "packages",
-                path.join("..", "packages")
+                ".." +
+                  path.sep +
+                  ".." +
+                  path.sep +
+                  ".." +
+                  path.sep +
+                  "src" +
+                  path.sep +
+                  "symbol-search.ts",
+                "src" + path.sep + "symbol-search.ts"
               );
             }),
         },

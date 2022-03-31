@@ -9,14 +9,14 @@
       "request": "launch",
       "name": "Chrome grid-memory",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/grid-memory"
+      "webRoot": "${workspaceFolder}/examples/grid-memory/build"
     },
     {
       "type": "pwa-chrome",
       "request": "launch",
       "name": "Chrome symbol-search",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/symbol-search"
+      "webRoot": "${workspaceFolder}/examples/symbol-search/build"
     },
     {
       "type": "pwa-chrome",

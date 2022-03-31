@@ -134,7 +134,21 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
 
     this.paragraph.layout(calculatedWidth * Globals.canvasScale);
-    this.size.width = calculatedWidth;
+
+    /**
+     * if label has a relative layout, then use the calculated width as the
+     * label's size. Otherwise, use the max width of the just completed
+     * paragraph.layout() call to layout the paragraph again, this time
+     * using the max width.
+     */
+    if (preferredWidth === 0 || this.layout.width === 0) {
+      this.size.width = calculatedWidth;
+    } else {
+      this.paragraph.layout(Math.ceil(this.paragraph.getMaxIntrinsicWidth()));
+      this.size.width =
+        this.paragraph.getMaxIntrinsicWidth() / Globals.canvasScale;
+    }
+
     this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
   }
 

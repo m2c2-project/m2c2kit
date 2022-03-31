@@ -102,6 +102,9 @@ export abstract class Entity implements EntityOptions {
     if (options.isUserInteractionEnabled) {
       this.isUserInteractionEnabled = options.isUserInteractionEnabled;
     }
+    if (options.hidden) {
+      this.hidden = options.hidden;
+    }
     if (options.layout) {
       this.layout = options.layout;
     }
