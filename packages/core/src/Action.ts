@@ -6,6 +6,8 @@ import { ScaleActionOptions } from "./ScaleActionOptions";
 import { IActionContainer } from "./IActionContainer";
 import { ActionType } from "./ActionType";
 import { Point } from "./Point";
+import { EasingFunction } from "./Easings";
+import { Easings } from "./Easings";
 
 export abstract class Action {
   abstract type: ActionType;
@@ -38,6 +40,7 @@ export abstract class Action {
     return new MoveAction(
       options.point,
       options.duration,
+      options.easing ?? Easings.linear,
       options.runDuringTransition ?? false
     );
   }
@@ -167,6 +170,7 @@ export abstract class Action {
         cloned = Action.Move({
           point: move.point,
           duration: move.duration,
+          easing: move.easing,
           runDuringTransition: move.runDuringTransition,
         });
         break;
@@ -254,14 +258,24 @@ export abstract class Action {
       if (!moveAction.started) {
         moveAction.dx = moveAction.point.x - entity.position.x;
         moveAction.dy = moveAction.point.y - entity.position.y;
+        moveAction.startPoint.x = entity.position.x;
+        moveAction.startPoint.y = entity.position.y;
         moveAction.started = true;
       }
 
       if (elapsed < moveAction.duration) {
-        entity.position.x =
-          entity.position.x + moveAction.dx * (dt / moveAction.duration);
-        entity.position.y =
-          entity.position.y + moveAction.dy * (dt / moveAction.duration);
+        entity.position.x = moveAction.easing(
+          elapsed,
+          moveAction.startPoint.x,
+          moveAction.dx,
+          moveAction.duration
+        );
+        entity.position.y = moveAction.easing(
+          elapsed,
+          moveAction.startPoint.y,
+          moveAction.dy,
+          moveAction.duration
+        );
       } else {
         entity.position.x = moveAction.point.x;
         entity.position.y = moveAction.point.y;
@@ -433,13 +447,22 @@ export class WaitAction extends Action {
 export class MoveAction extends Action {
   type = ActionType.move;
   point: Point;
+  startPoint: Point;
   dx = 0;
   dy = 0;
-  constructor(point: Point, duration: number, runDuringTransition: boolean) {
+  easing: EasingFunction;
+  constructor(
+    point: Point,
+    duration: number,
+    easing: EasingFunction,
+    runDuringTransition: boolean
+  ) {
     super(runDuringTransition);
     this.duration = duration;
     this.point = point;
     this.isParent = false;
+    this.startPoint = { x: NaN, y: NaN };
+    this.easing = easing;
   }
 }
 

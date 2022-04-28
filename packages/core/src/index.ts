@@ -14,6 +14,7 @@ export * from "./ConstraintType";
 export * from "./CustomActionOptions";
 export * from "./Dimensions";
 export * from "./DrawableOptions";
+export * from "./Easings";
 export * from "./Entity";
 export * from "./EntityOptions";
 export * from "./EntityType";

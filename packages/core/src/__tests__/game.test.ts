@@ -201,7 +201,7 @@ describe("actions", () => {
   });
 
   it("shape is exactly midway halfway through move from 200, 200 to 50, 50", () => {
-    maxRequestedFrames = 31;
+    maxRequestedFrames = 32;
 
     return session.init().then(() => {
       const rect1 = g1.entities
@@ -216,7 +216,8 @@ describe("actions", () => {
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
       );
-      expect(rect1.position).toEqual({ x: 125, y: 125 });
+      expect(Math.round(rect1.position.x)).toEqual(125);
+      expect(Math.round(rect1.position.y)).toEqual(125);
     });
   });
 });
