@@ -36,8 +36,8 @@ export abstract class Action {
    * @param options - {@link MoveActionOptions}
    * @returns The move action
    */
-  public static Move(options: MoveActionOptions): Action {
-    return new MoveAction(
+  public static move(options: MoveActionOptions): Action {
+    return new moveAction(
       options.point,
       options.duration,
       options.easing ?? Easings.linear,
@@ -51,8 +51,8 @@ export abstract class Action {
    * @param options - {@link WaitActionOptions}
    * @returns The wait action
    */
-  public static Wait(options: WaitActionOptions): Action {
-    return new WaitAction(
+  public static wait(options: WaitActionOptions): Action {
+    return new waitAction(
       options.duration,
       options.runDuringTransition ?? false
     );
@@ -64,8 +64,8 @@ export abstract class Action {
    * @param options - {@link CustomActionOptions}
    * @returns The custom action
    */
-  public static Custom(options: CustomActionOptions): Action {
-    return new CustomAction(
+  public static custom(options: CustomActionOptions): Action {
+    return new customAction(
       options.callback,
       options.runDuringTransition ?? false
     );
@@ -79,8 +79,8 @@ export abstract class Action {
    * @param options - {@link ScaleActionOptions}
    * @returns The scale action
    */
-  public static Scale(options: ScaleActionOptions): Action {
-    return new ScaleAction(
+  public static scale(options: ScaleActionOptions): Action {
+    return new scaleAction(
       options.scale,
       options.duration,
       options.runDuringTransition
@@ -95,8 +95,8 @@ export abstract class Action {
    * @param actions - One or more actions that form the sequence
    * @returns
    */
-  public static Sequence(actions: Array<Action>): Action {
-    const sequence = new SequenceAction(actions);
+  public static sequence(actions: Array<Action>): Action {
+    const sequence = new sequenceAction(actions);
     sequence.children = actions;
     return sequence;
   }
@@ -109,8 +109,8 @@ export abstract class Action {
    * @param actions - One or more actions that form the group
    * @returns
    */
-  public static Group(actions: Array<Action>): Action {
-    const group = new GroupAction(actions);
+  public static group(actions: Array<Action>): Action {
+    const group = new groupAction(actions);
     group.children = actions;
     return group;
   }
@@ -150,24 +150,24 @@ export abstract class Action {
 
     switch (action.type) {
       case ActionType.sequence: {
-        const sequence = action as SequenceAction;
+        const sequence = action as sequenceAction;
         const sequenceChildren = sequence.children.map((child) =>
           Action.cloneAction(child, key)
         );
-        cloned = Action.Sequence(sequenceChildren);
+        cloned = Action.sequence(sequenceChildren);
         break;
       }
       case ActionType.group: {
-        const group = action as SequenceAction;
+        const group = action as sequenceAction;
         const groupChildren = group.children.map((child) =>
           Action.cloneAction(child, key)
         );
-        cloned = Action.Sequence(groupChildren);
+        cloned = Action.sequence(groupChildren);
         break;
       }
       case ActionType.move: {
-        const move = action as MoveAction;
-        cloned = Action.Move({
+        const move = action as moveAction;
+        cloned = Action.move({
           point: move.point,
           duration: move.duration,
           easing: move.easing,
@@ -176,16 +176,16 @@ export abstract class Action {
         break;
       }
       case ActionType.custom: {
-        const code = action as CustomAction;
-        cloned = Action.Custom({
+        const code = action as customAction;
+        cloned = Action.custom({
           callback: code.callback,
           runDuringTransition: code.runDuringTransition,
         });
         break;
       }
       case ActionType.scale: {
-        const scale = action as ScaleAction;
-        cloned = Action.Scale({
+        const scale = action as scaleAction;
+        cloned = Action.scale({
           scale: scale.scale,
           duration: scale.duration,
           runDuringTransition: scale.runDuringTransition,
@@ -193,8 +193,8 @@ export abstract class Action {
         break;
       }
       case ActionType.wait: {
-        const wait = action as WaitAction;
-        cloned = Action.Wait({
+        const wait = action as waitAction;
+        cloned = Action.wait({
           duration: wait.duration,
           runDuringTransition: wait.runDuringTransition,
         });
@@ -238,14 +238,14 @@ export abstract class Action {
     const elapsed = now - (action.runStartTime + action.startOffset);
 
     if (action.type === ActionType.custom) {
-      const customAction = action as CustomAction;
+      const customAction = action as customAction;
       customAction.callback();
       customAction.running = false;
       customAction.completed = true;
     }
 
     if (action.type === ActionType.wait) {
-      const waitAction = action as WaitAction;
+      const waitAction = action as waitAction;
       if (now > action.runStartTime + action.startOffset + action.duration) {
         waitAction.running = false;
         waitAction.completed = true;
@@ -253,7 +253,7 @@ export abstract class Action {
     }
 
     if (action.type === ActionType.move) {
-      const moveAction = action as MoveAction;
+      const moveAction = action as moveAction;
 
       if (!moveAction.started) {
         moveAction.dx = moveAction.point.x - entity.position.x;
@@ -285,7 +285,7 @@ export abstract class Action {
     }
 
     if (action.type === ActionType.scale) {
-      const scaleAction = action as ScaleAction;
+      const scaleAction = action as scaleAction;
 
       if (!scaleAction.started) {
         scaleAction.delta = scaleAction.scale - entity.scale;
@@ -305,7 +305,7 @@ export abstract class Action {
 
   private calculateDuration(action: Action): number {
     if (action.type === ActionType.group) {
-      const groupAction = action as GroupAction;
+      const groupAction = action as groupAction;
       const duration = groupAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((max, dur) => {
@@ -315,7 +315,7 @@ export abstract class Action {
     }
 
     if (action.type === ActionType.sequence) {
-      const groupAction = action as GroupAction;
+      const groupAction = action as groupAction;
       const duration = groupAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((sum, dur) => {
@@ -404,7 +404,7 @@ export abstract class Action {
   }
 }
 
-export class SequenceAction extends Action implements IActionContainer {
+export class sequenceAction extends Action implements IActionContainer {
   type = ActionType.sequence;
   children: Array<Action>;
   constructor(actions: Array<Action>) {
@@ -414,7 +414,7 @@ export class SequenceAction extends Action implements IActionContainer {
   }
 }
 
-export class GroupAction extends Action implements IActionContainer {
+export class groupAction extends Action implements IActionContainer {
   type = ActionType.group;
   children = new Array<Action>();
   constructor(actions: Array<Action>) {
@@ -424,7 +424,7 @@ export class GroupAction extends Action implements IActionContainer {
   }
 }
 
-export class CustomAction extends Action {
+export class customAction extends Action {
   type = ActionType.custom;
   callback: () => void;
   constructor(callback: () => void, runDuringTransition = false) {
@@ -435,7 +435,7 @@ export class CustomAction extends Action {
   }
 }
 
-export class WaitAction extends Action {
+export class waitAction extends Action {
   type = ActionType.wait;
   constructor(duration: number, runDuringTransition: boolean) {
     super(runDuringTransition);
@@ -444,7 +444,7 @@ export class WaitAction extends Action {
   }
 }
 
-export class MoveAction extends Action {
+export class moveAction extends Action {
   type = ActionType.move;
   point: Point;
   startPoint: Point;
@@ -466,7 +466,7 @@ export class MoveAction extends Action {
   }
 }
 
-export class ScaleAction extends Action {
+export class scaleAction extends Action {
   type = ActionType.scale;
   scale: number;
   delta = 0;

@@ -411,9 +411,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       const countdownSequence = new Array<Action>();
 
       for (let i = countdownInitialNumber - 1; i > 0; i--) {
-        countdownSequence.push(Action.Wait({ duration: 1000 }));
+        countdownSequence.push(Action.wait({ duration: 1000 }));
         countdownSequence.push(
-          Action.Custom({
+          Action.custom({
             callback: () => {
               countdownNumber.text = i.toString();
             },
@@ -421,9 +421,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         );
       }
 
-      countdownSequence.push(Action.Wait({ duration: 1000 }));
+      countdownSequence.push(Action.wait({ duration: 1000 }));
       countdownSequence.push(
-        Action.Custom({
+        Action.custom({
           callback: () => {
             game.presentScene(
               chooseCardScene,
@@ -432,7 +432,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           },
         })
       );
-      countdownScene.run(Action.Sequence(countdownSequence));
+      countdownScene.run(Action.sequence(countdownSequence));
 
       // below is the original code, showing hard-coded countdown
       // countdownScene.run(

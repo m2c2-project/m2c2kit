@@ -8,7 +8,6 @@ import { EntityEvent } from "./EntityEvent";
 import { IDrawable } from "./IDrawable";
 import { Entity } from "./Entity";
 import { EntityType } from "./EntityType";
-import { Point } from "./Point";
 import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
 import { Action } from "./Action";
@@ -862,13 +861,13 @@ export class Game implements Activity {
             // non-transition actions previously set on the scene will then begin.
             // Also, very important to execute currentSceneSnapshot.delete() to prevent memory leaks
             incomingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
                     if (incomingScene._appearCallback) {
@@ -880,13 +879,13 @@ export class Game implements Activity {
               ])
             );
             outgoingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: -outgoingScene.size.width, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
@@ -902,13 +901,13 @@ export class Game implements Activity {
           case TransitionDirection.right:
             incomingScene.position.x = -incomingScene.size.width;
             incomingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
                     if (incomingScene._appearCallback) {
@@ -920,13 +919,13 @@ export class Game implements Activity {
               ])
             );
             outgoingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: outgoingScene.size.width, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
@@ -942,13 +941,13 @@ export class Game implements Activity {
           case TransitionDirection.up:
             incomingScene.position.y = incomingScene.size.height;
             incomingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
                     if (incomingScene._appearCallback) {
@@ -960,13 +959,13 @@ export class Game implements Activity {
               ])
             );
             outgoingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: -outgoingScene.size.height },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
@@ -982,13 +981,13 @@ export class Game implements Activity {
           case TransitionDirection.down:
             incomingScene.position.y = -incomingScene.size.height;
             incomingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
                     if (incomingScene._appearCallback) {
@@ -1000,13 +999,13 @@ export class Game implements Activity {
               ])
             );
             outgoingScene.run(
-              Action.Sequence([
-                Action.Move({
+              Action.sequence([
+                Action.move({
                   point: { x: 0, y: outgoingScene.size.height },
                   duration: duration,
                   runDuringTransition: true,
                 }),
-                Action.Custom({
+                Action.custom({
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;

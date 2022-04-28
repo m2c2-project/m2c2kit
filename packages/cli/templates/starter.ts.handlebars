@@ -151,10 +151,10 @@ class {{className}} extends Game {
     // getReadyScene.onSetup() has a callback that is executed each time this scene is shown
     getReadyScene.onSetup(() => {
       getReadyScene.run(
-        Action.Sequence([
+        Action.sequence([
           // Get the wait duration from the default game parameters, defined above
-          Action.Wait({ duration: game.getParameter("ReadyTime") }),
-          Action.Custom({
+          Action.wait({ duration: game.getParameter("ReadyTime") }),
+          Action.custom({
             callback: () => {
               game.presentScene(chooseRectangleScene);
             },
@@ -242,8 +242,8 @@ class {{className}} extends Game {
       redRect.isUserInteractionEnabled = true;
       redRect.onTapDown(() => {
         redRect.run(
-          Action.Sequence([
-            Action.Custom({
+          Action.sequence([
+            Action.custom({
               callback: () => {
                 responseTime = Timer.elapsed("rt");
                 // once a choice is made, don't allow additional taps
@@ -252,18 +252,18 @@ class {{className}} extends Game {
               },
             }),
             // short animation to shrink and grow button
-            Action.Scale({ scale: 0.8, duration: 250 }),
-            Action.Scale({ scale: 1, duration: 250 }),
+            Action.scale({ scale: 0.8, duration: 250 }),
+            Action.scale({ scale: 1, duration: 250 }),
             // Show the "CORRECT" message
-            Action.Custom({
+            Action.custom({
               callback: () => {
                 correctMessage.hidden = false;
               },
             }),
-            Action.Wait({ duration: 1000 }),
+            Action.wait({ duration: 1000 }),
             // Handle the logic of recording data, and deciding if we should
             // do another trial in recordUserInput
-            Action.Custom({
+            Action.custom({
               callback: () => {
                 correctMessage.hidden = true;
                 recordUserInput(true);
@@ -276,23 +276,23 @@ class {{className}} extends Game {
       blueRect.isUserInteractionEnabled = true;
       blueRect.onTapDown(() => {
         blueRect.run(
-          Action.Sequence([
-            Action.Custom({
+          Action.sequence([
+            Action.custom({
               callback: () => {
                 responseTime = Timer.elapsed("rt");        
                 redRect.isUserInteractionEnabled = false;
                 blueRect.isUserInteractionEnabled = false;
               },
             }),
-            Action.Scale({ scale: 0.8, duration: 250 }),
-            Action.Scale({ scale: 1, duration: 250 }),
-            Action.Custom({
+            Action.scale({ scale: 0.8, duration: 250 }),
+            Action.scale({ scale: 1, duration: 250 }),
+            Action.custom({
               callback: () => {
                 wrongMessage.hidden = false;
               },
             }),
-            Action.Wait({ duration: 1000 }),
-            Action.Custom({
+            Action.wait({ duration: 1000 }),
+            Action.custom({
               callback: () => {
                 wrongMessage.hidden = true;
                 recordUserInput(false);

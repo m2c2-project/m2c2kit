@@ -214,9 +214,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     gridMemoryPage0.onSetup(() => {
       gridMemoryPage0.run(
-        Action.Sequence([
-          Action.Wait({ duration: game.getParameter("ReadyTime") }),
-          Action.Custom({
+        Action.sequence([
+          Action.wait({ duration: game.getParameter("ReadyTime") }),
+          Action.custom({
             callback: () => {
               timing_getready = performance.now();
               game.presentScene(gridMemoryPage1);
@@ -266,9 +266,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       }
 
       gridMemoryPage1.run(
-        Action.Sequence([
-          Action.Wait({ duration: game.getParameter("DotPresentTime") }),
-          Action.Custom({
+        Action.sequence([
+          Action.wait({ duration: game.getParameter("DotPresentTime") }),
+          Action.custom({
             callback: () => {
               game.presentScene(gridMemoryPage2, nextScreenTransition);
               timing_dotsdrawn = performance.now();
@@ -305,9 +305,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
       // Advance to the next recall screen after "InterferenceTime" millisseconds
       gridMemoryPage2.run(
-        Action.Sequence([
-          Action.Wait({ duration: game.getParameter("InterferenceTime") }),
-          Action.Custom({
+        Action.sequence([
+          Action.wait({ duration: game.getParameter("InterferenceTime") }),
+          Action.custom({
             callback: () => {
               game.presentScene(gridMemoryPage3, previousScreenTransition);
             },
@@ -320,7 +320,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       // the above action, start another action to show the grid of
       // E/F to tap
       gridMemoryPage2.run(
-        Action.Custom({
+        Action.custom({
           callback: () => {
             timing_fs = performance.now();
             ShowInterferenceActivity();
@@ -362,9 +362,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
                   tappedFCount++;
                   letter.text = "E";
                   letter.run(
-                    Action.Sequence([
-                      Action.Scale({ scale: 1.25, duration: 125 }),
-                      Action.Scale({ scale: 1, duration: 125 }),
+                    Action.sequence([
+                      Action.scale({ scale: 1.25, duration: 125 }),
+                      Action.scale({ scale: 1, duration: 125 }),
                     ])
                   );
                   square.userData = 1;
@@ -388,7 +388,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
         if (slideGridIntoScene) {
           grid.position = { x: 200, y: 1040 };
-          grid.run(Action.Move({ point: { x: 200, y: 400 }, duration: 500 }));
+          grid.run(Action.move({ point: { x: 200, y: 400 }, duration: 500 }));
         }
       }
 
@@ -503,14 +503,14 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     gridMemoryPage3DoneButton.onTapDown(() => {
       if (tappedCellCount < 3) {
         youMustSelectAllMessage.run(
-          Action.Sequence([
-            Action.Custom({
+          Action.sequence([
+            Action.custom({
               callback: () => {
                 youMustSelectAllMessage.hidden = false;
               },
             }),
-            Action.Wait({ duration: 3000 }),
-            Action.Custom({
+            Action.wait({ duration: 3000 }),
+            Action.custom({
               callback: () => {
                 youMustSelectAllMessage.hidden = true;
               },
