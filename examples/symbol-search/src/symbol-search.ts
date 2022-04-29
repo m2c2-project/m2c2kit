@@ -366,7 +366,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
     game.addScenes(instructionsScenes);
 
-    const nextScreenTransition = Transition.push(TransitionDirection.left, 500);
+    const nextScreenTransition = Transition.slide({
+      direction: TransitionDirection.left,
+      duration: 500,
+    });
 
     // ==================================================
     // SCENE: countdownScene
@@ -427,7 +430,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           callback: () => {
             game.presentScene(
               chooseCardScene,
-              Transition.push(TransitionDirection.left, 500)
+              Transition.slide({
+                direction: TransitionDirection.left,
+                duration: 500,
+              })
             );
           },
         })

@@ -17,7 +17,7 @@ import {
   SceneTransition,
   Transition,
   TransitionType,
-  PushTransition,
+  SlideTransition,
   TransitionDirection,
 } from "./Transition";
 import { GameOptions } from "./GameOptions";
@@ -849,8 +849,8 @@ export class Game implements Activity {
     outgoingScene._transitioning = true;
 
     switch (transition.type) {
-      case TransitionType.push: {
-        const direction = (transition as PushTransition).direction;
+      case TransitionType.slide: {
+        const direction = (transition as SlideTransition).direction;
         switch (direction) {
           case TransitionDirection.left:
             incomingScene.position.x = incomingScene.size.width;
@@ -865,6 +865,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -883,6 +884,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: -outgoingScene.size.width, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -905,6 +907,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -923,6 +926,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: outgoingScene.size.width, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -945,6 +949,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -963,6 +968,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: -outgoingScene.size.height },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -985,6 +991,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: 0 },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({
@@ -1003,6 +1010,7 @@ export class Game implements Activity {
                 Action.move({
                   point: { x: 0, y: outgoingScene.size.height },
                   duration: duration,
+                  easing: transition.easing,
                   runDuringTransition: true,
                 }),
                 Action.custom({

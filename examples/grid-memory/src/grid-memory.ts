@@ -194,11 +194,14 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     });
     game.addScenes(instructionsScenes);
 
-    const nextScreenTransition = Transition.push(TransitionDirection.left, 500);
-    const previousScreenTransition = Transition.push(
-      TransitionDirection.right,
-      500
-    );
+    const nextScreenTransition = Transition.slide({
+      direction: TransitionDirection.left,
+      duration: 500,
+    });
+    const previousScreenTransition = Transition.slide({
+      direction: TransitionDirection.right,
+      duration: 500,
+    });
 
     // ============================================================================
     // SCENE: show get ready message, then advance after XXXX

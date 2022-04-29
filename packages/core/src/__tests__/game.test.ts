@@ -191,7 +191,7 @@ describe("actions", () => {
       if (!rect1) {
         throw new Error("rect1 undefined");
       }
-      rect1.run(Action.Move({ point: { x: 50, y: 50 }, duration: 1000 }));
+      rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
@@ -211,7 +211,7 @@ describe("actions", () => {
         throw new Error("rect1 undefined");
       }
 
-      rect1.run(Action.Move({ point: { x: 50, y: 50 }, duration: 1000 }));
+      rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
         `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`

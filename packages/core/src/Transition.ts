@@ -1,36 +1,55 @@
+import { Easings } from "./Easings";
+import { EasingFunction } from "./Easings";
 import { Scene } from "./Scene";
+
+export interface SlideTransitionOptions {
+  /** Direction in which the slide action goes */
+  direction: TransitionDirection;
+  /** Duration, in millis, of the transition */
+  duration: number;
+  /** Easing function for movement; default is linear */
+  easing?: EasingFunction;
+}
 
 export abstract class Transition {
   abstract type: TransitionType;
-  duration = 0;
+  abstract easing: EasingFunction;
+  abstract duration: number;
 
   /**
    * Creates a scene transition in which the outgoing scene slides out and the incoming scene slides in, as if the incoming scene pushes it.
    *
-   * @param direction - TransitionDirection in which the push action goes
-   * @param duration - Duration, in millis, of the transition
+   * @param options - {@link SlideTransitionOptions}
    * @returns
    */
-  public static push(
-    direction: TransitionDirection,
-    duration: number
-  ): PushTransition {
-    return new PushTransition(direction, duration);
+  public static slide(options: SlideTransitionOptions): SlideTransition {
+    return new SlideTransition(
+      options.direction,
+      options.duration,
+      options.easing ?? Easings.linear
+    );
   }
 }
 
-export class PushTransition extends Transition {
-  type = TransitionType.push;
+export class SlideTransition extends Transition {
+  type = TransitionType.slide;
+  easing: EasingFunction;
+  duration: number;
   direction: TransitionDirection;
-  constructor(direction: TransitionDirection, duration: number) {
+  constructor(
+    direction: TransitionDirection,
+    duration: number,
+    easing: EasingFunction
+  ) {
     super();
     this.direction = direction;
     this.duration = duration;
+    this.easing = easing;
   }
 }
 
 export enum TransitionType {
-  push = "Push",
+  slide = "Slide",
 }
 
 export enum TransitionDirection {

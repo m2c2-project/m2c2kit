@@ -118,11 +118,17 @@ export class Instructions extends Story {
       const nextSceneTransition =
         s.nextSceneTransition ??
         options.nextSceneTransition ??
-        Transition.push(TransitionDirection.left, 500);
+        Transition.slide({
+          direction: TransitionDirection.left,
+          duration: 500,
+        });
       const backSceneTransition =
         s.backSceneTransition ??
         options.backSceneTransition ??
-        Transition.push(TransitionDirection.right, 500);
+        Transition.slide({
+          direction: TransitionDirection.right,
+          duration: 500,
+        });
       const backButtonText =
         s.backButtonText ?? options.backButtonText ?? "Back";
       const nextButtonText =
