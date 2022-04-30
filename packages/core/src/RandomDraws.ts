@@ -12,7 +12,7 @@ export class RandomDraws {
     maximumInclusive: number
   ): number {
     const sampledNumber =
-      Math.floor(Math.random() * (maximumInclusive - minimumInclusive)) +
+      Math.floor(Math.random() * (maximumInclusive - minimumInclusive + 1)) +
       minimumInclusive;
     return sampledNumber;
   }
@@ -31,11 +31,17 @@ export class RandomDraws {
     minimumInclusive: number,
     maximumInclusive: number
   ): Array<number> {
+    if (n > maximumInclusive - minimumInclusive + 1) {
+      throw new Error(
+        `number of requested draws (n = ${n}) is greater than number of integers in range [ ${minimumInclusive}, ${maximumInclusive}]`
+      );
+    }
     const result = new Array<number>();
     for (let i = 0; i < n; i++) {
-      const sampledNumber =
-        Math.floor(Math.random() * (maximumInclusive - minimumInclusive)) +
-        minimumInclusive;
+      const sampledNumber = RandomDraws.SingleFromRange(
+        minimumInclusive,
+        maximumInclusive
+      );
       result.includes(sampledNumber) ? n++ : result.push(sampledNumber);
     }
     return result;
