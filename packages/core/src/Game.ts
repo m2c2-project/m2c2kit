@@ -71,6 +71,8 @@ export class Game implements Activity {
   constructor(options: GameOptions) {
     this.options = options;
     this.name = options.name;
+    this.freeEntitiesScene.game = this;
+    this.freeEntitiesScene.needsInitialization = true;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -140,9 +142,65 @@ export class Game implements Activity {
   canvasCssHeight = 0;
 
   private scenes = new Array<Scene>();
+  private freeEntitiesScene = new Scene({
+    name: "freeEntitiesScene",
+    backgroundColor: [255, 255, 255, 0],
+  });
   private incomingSceneTransitions = new Array<SceneTransition>();
   private currentSceneSnapshot?: Image;
   private pendingScreenshot?: PendingScreenshot;
+
+  /**
+   * Adds an entity as a free entity (an entity that is not part of a scene)
+   * to the game.
+   *
+   * @remarks Once added to the game, a free entity will always be drawn,
+   * and it will not be part of any scene transitions. This is useful if
+   * an entity must persisently be drawn and not move with scene
+   * transitions. The appearance of the free entity must be managed
+   * by the programmer. Note: internally, the free entities are part of a
+   * special scene (named "freeEntitiesScene"), but this scene is handled
+   * apart from regular scenes in order to achieve the free entity behavior.
+   *
+   * @param entity - entity to add as a free entity
+   */
+  addFreeEntity(entity: Entity): void {
+    this.freeEntitiesScene.addChild(entity);
+  }
+
+  /**
+   * Removes a free entity from the game.
+   *
+   * @remarks Throws exception if the entity to remove is not currently added
+   * to the game as a free entity
+   *
+   * @param entity - the free entity to remove or its name as a string
+   */
+  removeFreeEntity(entity: Entity | string): void {
+    if (typeof entity === "string") {
+      if (
+        !this.freeEntitiesScene.children
+          .map((child) => child.name)
+          .includes(entity)
+      ) {
+        throw new Error(
+          `cannot remove free entity named "${entity}" because it is not currently part of the game's free entities. `
+        );
+      }
+      this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
+        (child) => child.name !== entity
+      );
+    } else {
+      if (!this.freeEntitiesScene.children.includes(entity)) {
+        throw new Error(
+          `cannot remove free entity "${entity.toString()}" because it is not currently part of the game's free entities. `
+        );
+      }
+      this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
+        (child) => child !== entity
+      );
+    }
+  }
 
   /**
    * Adds a scene to the game.
@@ -213,6 +271,7 @@ export class Game implements Activity {
   /**
    * Gets the value of the game parameter. If parameterName
    * is not found, then throw exception.
+   *
    * @param parameterName - the name of the game parameter whose value is requested
    * @returns
    */
@@ -624,6 +683,13 @@ export class Game implements Activity {
         this.currentSceneSnapshot = this.takeCurrentSceneSnapshot();
       }
 
+      /**
+       * Free entities should not slide off the screen during transitions.
+       * Thus, draw the free entities AFTER a screen shot may have
+       * taken place.
+       */
+      this.freeEntitiesScene.draw(canvas);
+
       if (this.pendingScreenshot) {
         this.handlePendingScreenshot(this.pendingScreenshot);
         this.pendingScreenshot = undefined;
@@ -736,6 +802,7 @@ export class Game implements Activity {
     this.scenes
       .filter((scene) => scene._active)
       .forEach((scene) => scene.update());
+    this.freeEntitiesScene.update();
   }
 
   private draw(canvas: Canvas): void {
@@ -1128,7 +1195,9 @@ export class Game implements Activity {
     }
 
     const entities = new Array<Entity>();
-    this.scenes.forEach((scene) => getChildEntitiesRecursive(scene, entities));
+    [...this.scenes, this.freeEntitiesScene].forEach((scene) =>
+      getChildEntitiesRecursive(scene, entities)
+    );
     return entities;
   }
 
