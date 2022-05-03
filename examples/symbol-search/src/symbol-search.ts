@@ -19,9 +19,9 @@ import {
   SessionLifecycleEvent,
   ActivityDataEvent,
   ActivityLifecycleEvent,
-  Entity,
   Sprite,
   EntityType,
+  Easings,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -33,13 +33,12 @@ class SymbolSearch extends Game {
      * At run time, they can be changed with the setParameters() method.
      */
     const defaultParameters: GameParameters = {
-      match_pairs_top: {
+      number_of_top_pairs: {
         value: 3,
         description: "Number of pairs to be shown on top. (1-4)",
       },
-      // QUESTION: CAN THE LURE SYMBOL BE PART OF THE CORRECT CARD?
       lure_percent: {
-        value: 0,
+        value: 0.5,
         description:
           "Percentage of lure trials. A lure trial is when the \
 incorrect symbol pair on the bottom contains exactly one symbol that \
@@ -52,18 +51,42 @@ top.(2 unique symbols.)",
         description:
           "Percentage of trials where the left pair is the correct answer. Number from 0 to 1.",
       },
-      countdown_time: {
+      preparation_wait_ms: {
         value: 3000,
         description:
-          "How long is the 'get ready' countdown, milliseconds. Multiples of 1000 recommended",
+          "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
+      },
+      after_preparation_transition_duration_ms: {
+        value: 500,
+        description:
+          "Duration, in milliseconds, of the slide in animation after the preparation phase.",
       },
       number_of_trials: {
         value: 5,
-        description: "How many trials to run. Integer.",
+        description: "How many trials to run.",
+      },
+      interstimulus_animation: {
+        value: true,
+        description: "Should new trials slide in from right to left?",
+      },
+      interstimulus_interval_ms: {
+        value: 500,
+        description:
+          "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears. ",
       },
       instruction_type: {
         value: "long",
         description: "Type of intructions to show, 'short' or 'long'.",
+      },
+      trials_complete_scene_text: {
+        value: "You have completed all the symbol search trials",
+        description:
+          "Button text for scene displayed after all trials are complete",
+      },
+      trials_complete_scene_button_text: {
+        value: "OK",
+        description:
+          "Button text for scene displayed after all trials are complete",
       },
     };
 
@@ -78,21 +101,25 @@ top.(2 unique symbols.)",
         type: "string",
         description: "possible values are 'normal' or 'lure'",
       },
-      response_time: {
+      trial_configuration: {
+        type: "object",
+        description:
+          "JSON extended description of the trial configuration, including array describing the symbols used for the cards, starting at 0 for leftmost card and incrementing by 1 moving right",
+      },
+      response_time_ms: {
         type: "number",
         description:
           "milliseconds from the beginning of the trial until a user taps a response",
       },
-      user_response: {
-        type: "number",
-        description: "user selected response, 0 = left side, 1 = right side",
-      },
-      correct_response: {
+      user_response_index: {
         type: "number",
         description:
-          "correct response, 0 = left side, 1 = right side. \
-The selection the user should have made in order to be correct. The correct \
-response was given for a trial if user_response == correct_response.",
+          "index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right",
+      },
+      correct_response_index: {
+        type: "number",
+        description:
+          "index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right",
       },
     };
 
@@ -152,6 +179,8 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           width: 360,
           url: "img/ssintroImage.svg",
         },
+        // NOTE: names of symbols must be in form of ss-01, starting
+        // at ss-01, not ss-00.
         {
           name: "ss-01",
           height: symbol_image_size,
@@ -318,9 +347,19 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       backgroundColor: WebColors.White,
       nextButtonBackgroundColor: WebColors.Black,
       backButtonBackgroundColor: WebColors.Black,
+      nextSceneTransition: Transition.slide({
+        direction: TransitionDirection.left,
+        duration: 500,
+        easing: Easings.sinusoidalInOut,
+      }),
+      backSceneTransition: Transition.slide({
+        direction: TransitionDirection.right,
+        duration: 500,
+        easing: Easings.sinusoidalInOut,
+      }),
       instructionScenes: [
         {
-          title: "Activity: Symbol Search",
+          title: "Symbol Search",
           text: "You will see sets of symbols on the top and bottom of the screen.",
           image: "gameImage",
           imageAboveText: false,
@@ -330,7 +369,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           textVerticalBias: 0.25,
         },
         {
-          title: "Activity: Symbol Search",
+          title: "Symbol Search",
           text: "When prompted, touch the set on the bottom that is exactly the same as a set above.",
           image: "gameImageOutlinedCards",
           imageAboveText: false,
@@ -340,7 +379,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           textVerticalBias: 0.25,
         },
         {
-          title: "Activity: Symbol Search",
+          title: "Symbol Search",
           text: "Please be as fast and accurate as you can",
           image: "stopwatchImage",
           imageAboveText: false,
@@ -350,7 +389,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           textVerticalBias: 0.25,
         },
         {
-          title: "Activity: Symbol Search",
+          title: "Symbol Search",
           text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurate as you can.",
           image: "ssintroImage",
           imageAboveText: false,
@@ -366,9 +405,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
     game.addScenes(instructionsScenes);
 
-    const nextScreenTransition = Transition.slide({
+    const afterTrialSceneTransition = Transition.slide({
       direction: TransitionDirection.left,
-      duration: 500,
+      duration: game.getParameter("interstimulus_interval_ms"),
+      easing: Easings.sinusoidalInOut,
     });
 
     // ==================================================
@@ -389,7 +429,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     countdownScene.addChild(countdownCircle);
 
     const countdownInitialNumber = Math.floor(
-      game.getParameter<number>("countdown_time") / 1000
+      game.getParameter<number>("preparation_wait_ms") / 1000
     );
 
     const countdownNumber = new Label({
@@ -428,44 +468,28 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       countdownSequence.push(
         Action.custom({
           callback: () => {
+            countdownNumber.text = "0";
+          },
+        })
+      );
+
+      countdownSequence.push(
+        Action.custom({
+          callback: () => {
             game.presentScene(
               chooseCardScene,
               Transition.slide({
                 direction: TransitionDirection.left,
-                duration: 500,
+                duration: game.getParameter(
+                  "after_preparation_transition_duration_ms"
+                ),
+                easing: Easings.sinusoidalInOut,
               })
             );
           },
         })
       );
       countdownScene.run(Action.sequence(countdownSequence));
-
-      // below is the original code, showing hard-coded countdown
-      // countdownScene.run(
-      //   Action.Sequence([
-      //     Action.Wait({ duration: 1000 }),
-      //     Action.Custom({
-      //       callback: () => {
-      //         countdownNumber.text = "2";
-      //       },
-      //     }),
-      //     Action.Wait({ duration: 1000 }),
-      //     Action.Custom({
-      //       callback: () => {
-      //         countdownNumber.text = "1";
-      //       },
-      //     }),
-      //     Action.Wait({ duration: 1000 }),
-      //     Action.Custom({
-      //       callback: () => {
-      //         game.presentScene(
-      //           chooseCardScene,
-      //           Transition.push(TransitionDirection.left, 500)
-      //         );
-      //       },
-      //     }),
-      //   ])
-      // );
     });
 
     // ==================================================
@@ -496,16 +520,172 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       text: "or",
       fontSize: 22,
       preferredMaxLayoutWidth: 240,
+      // hidden: true,
     });
     chooseCardScene.addChild(orLabel);
     orLabel.position = { x: 200, y: 580 };
 
+    interface SymbolCard {
+      top: number;
+      bottom: number;
+    }
+
+    interface bottomCardUserData {
+      index: number;
+    }
+
+    interface BriefGameParameters {
+      [key: string]: number | string | boolean | object;
+    }
+
+    function getBriefGameParameters(
+      gameParameters?: GameParameters
+    ): BriefGameParameters {
+      const briefParams: BriefGameParameters = {};
+      let parameters: GameParameters;
+      if (gameParameters) {
+        parameters = JSON.parse(JSON.stringify(gameParameters));
+      } else {
+        parameters = {};
+      }
+      const params = Object.keys(parameters);
+      for (const param of params) {
+        briefParams[param] = parameters[param].value;
+      }
+      return briefParams;
+    }
+
+    /**
+     * note: these are in snake_case because we will directly serialize
+     * these into the trial data
+     */
+    interface TrialConfiguration {
+      top_cards_symbols: Array<SymbolCard>;
+      bottom_cards_symbols: Array<SymbolCard>;
+      trial_type: "normal" | "lure";
+      correct_response_index: number;
+      parameters: BriefGameParameters;
+    }
+
+    const trialConfigurations: Array<TrialConfiguration> = [];
+
+    const numberOfTrials = game.getParameter<number>("number_of_trials");
+    const lurePercent = game.getParameter<number>("lure_percent");
+    const leftCorrectPercent = game.getParameter<number>(
+      "left_correct_percent"
+    );
+    const numberOfTopCards = game.getParameter<number>("number_of_top_pairs");
+    // TODO: allow number of bottom cards to be configurable
+    // const numberOfBottomCards = 2;
+    const numberOfLureTrials = Math.round(numberOfTrials * lurePercent);
+    const numberOfLeftCorrectTrials = Math.round(
+      numberOfTrials * leftCorrectPercent
+    );
+    const lureTrialIndexes = RandomDraws.FromRangeWithoutReplacement(
+      numberOfLureTrials,
+      0,
+      numberOfTrials - 1
+    );
+    const leftCorrectTrialIndexes = RandomDraws.FromRangeWithoutReplacement(
+      numberOfLeftCorrectTrials,
+      0,
+      numberOfTrials - 1
+    );
+
+    for (let i = 0; i < numberOfTrials; i++) {
+      const isLure = lureTrialIndexes.includes(i);
+      const isLeftCorrect = leftCorrectTrialIndexes.includes(i);
+      let symbols: Array<number>;
+      if (isLure) {
+        /**
+         * 2 unique random symbols for each top card, plus 1 for the incorrect
+         * bottom card because in a lure, the incorrect card will repeat 1 of
+         * the top symbols. Thus we need just one extra symbol for the bottom
+         * card
+         */
+        symbols = RandomDraws.FromRangeWithoutReplacement(
+          numberOfTopCards * 2 + 1,
+          1,
+          NUMBER_OF_SYMBOLS
+        );
+      } else {
+        /**
+         * 2 unique random symbols for each top card, plus 2 for the incorrect
+         * bottom card
+         */
+        symbols = RandomDraws.FromRangeWithoutReplacement(
+          numberOfTopCards * 2 + 2,
+          1,
+          NUMBER_OF_SYMBOLS
+        );
+      }
+
+      const topCards = new Array<SymbolCard>();
+
+      for (let j = 0; j < numberOfTopCards; j++) {
+        const card: SymbolCard = {
+          top: symbols[2 * j],
+          bottom: symbols[2 * j + 1],
+        };
+        topCards.push(card);
+      }
+
+      const correctCardIndex = RandomDraws.FromRangeWithoutReplacement(
+        1,
+        0,
+        numberOfTopCards - 1
+      )[0];
+      const correctCard = topCards[correctCardIndex];
+
+      let incorrectCard: SymbolCard;
+      if (!isLure) {
+        incorrectCard = {
+          top: symbols[2 * numberOfTopCards],
+          bottom: symbols[2 * numberOfTopCards + 1],
+        };
+      } else {
+        /**
+         * the bottom card lure symbol cannot be part of the correct card
+         */
+        const potentialLureSymbols = topCards
+          .filter((c) => c != correctCard)
+          .map((c) => [c.top, c.bottom])
+          .flat();
+        const lureSymbolIndex = RandomDraws.FromRangeWithoutReplacement(
+          1,
+          0,
+          potentialLureSymbols.length - 1
+        )[0];
+        const lureSymbol = potentialLureSymbols[lureSymbolIndex];
+        incorrectCard = {
+          top: lureSymbol,
+          bottom: symbols[2 * numberOfTopCards],
+        };
+      }
+
+      const trial: TrialConfiguration = {
+        top_cards_symbols: topCards,
+        bottom_cards_symbols: isLeftCorrect
+          ? [correctCard, incorrectCard]
+          : [incorrectCard, correctCard],
+        trial_type: isLure ? "lure" : "normal",
+        correct_response_index: isLeftCorrect ? 0 : 1,
+        parameters: getBriefGameParameters(this.options.parameters),
+      };
+      trialConfigurations.push(trial);
+    }
+
     chooseCardScene.onSetup(() => {
-      const matchPairsTop = game.getParameter<number>("match_pairs_top");
+      orLabel.hidden = false;
+
+      const trialConfiguration = trialConfigurations[game.trialIndex];
+      const topCardsLength = trialConfiguration.top_cards_symbols.length;
+      const bottomCardsLength = trialConfiguration.bottom_cards_symbols.length;
 
       let topInterCardMargin: number;
-      switch (matchPairsTop) {
-        case 2: {
+      switch (topCardsLength) {
+        case 2:
+        case 4: {
           topInterCardMargin = 200;
           break;
         }
@@ -513,25 +693,46 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           topInterCardMargin = 100;
           break;
         }
-        case 4: {
-          topInterCardMargin = 50;
-          break;
-        }
+        // case 4: {
+        //   topInterCardMargin = 50;
+        //   break;
+        // }
         default: {
           throw new Error(
-            "valid values for match_pairs_top are 2, 3, or 4 cards"
+            "valid values for number_of_top_pairs are 2, 3, or 4 cards"
           );
         }
       }
 
-      const topCardGrid = new Grid({
-        rows: 1,
-        columns: matchPairsTop,
-        size: { width: 80 * matchPairsTop + topInterCardMargin, height: 160 },
-        position: { x: 200, y: 200 },
-        backgroundColor: WebColors.Transparent,
-        gridLineColor: WebColors.Transparent,
-      });
+      let topCardGrid: Grid;
+
+      if (topCardsLength >= 1 && topCardsLength <= 3) {
+        topCardGrid = new Grid({
+          rows: 1,
+          columns: topCardsLength,
+          size: {
+            width: 80 * topCardsLength + topInterCardMargin,
+            height: 160,
+          },
+          position: { x: 200, y: 200 },
+          backgroundColor: WebColors.Transparent,
+          gridLineColor: WebColors.Transparent,
+        });
+      } else if (topCardsLength === 4) {
+        topCardGrid = new Grid({
+          rows: 2,
+          columns: 2,
+          size: {
+            width: 80 * 2 + topInterCardMargin,
+            height: 200 + topInterCardMargin,
+          },
+          position: { x: 200, y: 200 },
+          backgroundColor: WebColors.Transparent,
+          gridLineColor: WebColors.Transparent,
+        });
+      } else {
+        throw new Error("invalid number_of_top_pairs");
+      }
       chooseCardScene.addChild(topCardGrid);
 
       const bottomCardGrid = new Grid({
@@ -543,29 +744,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         gridLineColor: WebColors.Transparent,
       });
       chooseCardScene.addChild(bottomCardGrid);
-
-      const isLureTrial = Math.random() < 0.5;
-      let randomSymbolNumbers: number[];
-
-      if (!isLureTrial) {
-        // 2 unique random symbols for each top card, plus 2 for the incorrect
-        // bottom card
-        randomSymbolNumbers = RandomDraws.FromRangeWithoutReplacement(
-          matchPairsTop * 2 + 2,
-          1,
-          NUMBER_OF_SYMBOLS
-        );
-      } else {
-        // 2 unique random symbols for each top card, plus 1 for the incorrect
-        // bottom card because in a lure, the incorrect card will repeat 1 of
-        // the top symbols. Thus we need just one extra symbol for the bottom
-        // card
-        randomSymbolNumbers = RandomDraws.FromRangeWithoutReplacement(
-          matchPairsTop * 2 + 1,
-          1,
-          NUMBER_OF_SYMBOLS
-        );
-      }
 
       function createCardShape(
         topSymbolImageNumber: number,
@@ -592,109 +770,111 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         return card;
       }
 
-      const topCards = new Array<Entity>();
-      for (let i = 0; i < matchPairsTop; i++) {
+      const topCards = new Array<Shape>();
+      for (let i = 0; i < topCardsLength; i++) {
         const card = createCardShape(
-          randomSymbolNumbers[i * 2],
-          randomSymbolNumbers[i * 2 + 1]
+          trialConfiguration.top_cards_symbols[i].top,
+          trialConfiguration.top_cards_symbols[i].bottom
         );
         topCards.push(card);
-        topCardGrid.addAtCell(card, 0, i);
-      }
-
-      let incorrectCard: Shape;
-
-      if (isLureTrial) {
-        // in a lure trial, the "incorrect symbol pair on the bottom contains exactly one symbol that is found on the top"
-        const lureRandomSymbolIndex = RandomDraws.SingleFromRange(
-          1,
-          randomSymbolNumbers.length - 1
-        );
-        const isLureSymbolOnTop = Math.random() < 0.5;
-
-        if (isLureSymbolOnTop) {
-          incorrectCard = createCardShape(
-            randomSymbolNumbers[lureRandomSymbolIndex],
-            randomSymbolNumbers[randomSymbolNumbers.length - 1]
-          );
+        if (topCardsLength === 4) {
+          topCardGrid.addAtCell(card, Math.floor(i / 2), i % 2);
         } else {
-          incorrectCard = createCardShape(
-            randomSymbolNumbers[randomSymbolNumbers.length - 1],
-            randomSymbolNumbers[lureRandomSymbolIndex]
-          );
+          topCardGrid.addAtCell(card, 0, i);
         }
-      } else {
-        incorrectCard = createCardShape(
-          randomSymbolNumbers[randomSymbolNumbers.length - 1],
-          randomSymbolNumbers[randomSymbolNumbers.length - 2]
-        );
       }
 
-      const correctCardIndex = RandomDraws.SingleFromRange(
-        0,
-        matchPairsTop - 1
-      );
-      const correctCard = topCards[correctCardIndex].duplicate();
+      const bottomCards = new Array<Shape>();
+      for (let i = 0; i < bottomCardsLength; i++) {
+        const card = createCardShape(
+          trialConfiguration.bottom_cards_symbols[i].top,
+          trialConfiguration.bottom_cards_symbols[i].bottom
+        );
 
-      const isLeftCardCorrect =
-        Math.random() < game.getParameter<number>("left_correct_percent");
-      if (isLeftCardCorrect) {
-        bottomCardGrid.addAtCell(correctCard, 0, 0);
-        bottomCardGrid.addAtCell(incorrectCard, 0, 1);
-      } else {
-        bottomCardGrid.addAtCell(correctCard, 0, 1);
-        bottomCardGrid.addAtCell(incorrectCard, 0, 0);
+        (card.userData as bottomCardUserData) = {
+          index: i,
+        };
+        bottomCards.push(card);
+        bottomCardGrid.addAtCell(card, 0, i);
       }
 
       function setBottomCardsTappability(tappable: boolean): void {
         if (tappable) {
-          correctCard.isUserInteractionEnabled = true;
-          incorrectCard.isUserInteractionEnabled = true;
+          bottomCards.forEach((card) => (card.isUserInteractionEnabled = true));
         } else {
-          correctCard.isUserInteractionEnabled = false;
-          incorrectCard.isUserInteractionEnabled = false;
+          bottomCards.forEach(
+            (card) => (card.isUserInteractionEnabled = false)
+          );
         }
       }
 
-      correctCard.onTapDown(() => {
-        handleCardChoice(true);
-      });
+      bottomCards.forEach((card) =>
+        card.onTapDown(() => handleCardChoice(card))
+      );
 
-      incorrectCard.onTapDown(() => {
-        handleCardChoice(false);
-      });
+      function handleCardChoice(card: Shape): void {
+        bottomCardGrid.hidden = true;
+        topCardGrid.hidden = true;
+        orLabel.hidden = true;
 
-      function handleCardChoice(correct: boolean): void {
         Timer.stop("rt");
         setBottomCardsTappability(false);
         const response_time = Timer.elapsed("rt");
         Timer.remove("rt");
 
-        game.addTrialData("trial_type", isLureTrial ? "lure" : "normal");
-        game.addTrialData("response_time", response_time);
-        game.addTrialData("correct_response", isLeftCardCorrect ? 0 : 1);
-        if (isLeftCardCorrect) {
-          if (correct) {
-            game.addTrialData("user_response", 0);
-          } else {
-            game.addTrialData("user_response", 1);
-          }
-        } else {
-          if (correct) {
-            game.addTrialData("user_response", 1);
-          } else {
-            game.addTrialData("user_response", 0);
-          }
-        }
+        game.addTrialData("trial_type", trialConfiguration.trial_type);
+        game.addTrialData("response_time_ms", response_time);
+        game.addTrialData(
+          "correct_response_index",
+          trialConfiguration.correct_response_index
+        );
+        game.addTrialData(
+          "user_response_index",
+          (card.userData as bottomCardUserData).index
+        );
+        game.addTrialData("trial_configuration", trialConfiguration);
+
         game.trialComplete();
         if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
-          game.presentScene(chooseCardScene, nextScreenTransition);
+          orLabel.hidden = true;
+          if (game.getParameter("interstimulus_animation")) {
+            game.presentScene(chooseCardScene, afterTrialSceneTransition);
+          } else {
+            chooseCardScene.run(
+              Action.sequence([
+                Action.wait({
+                  duration: game.getParameter("interstimulus_interval_ms"),
+                }),
+                Action.custom({
+                  callback: () => {
+                    game.presentScene(chooseCardScene);
+                  },
+                }),
+              ])
+            );
+          }
         } else {
-          game.presentScene(doneScene, nextScreenTransition);
+          questionLabel.hidden = false;
+          game.removeFreeEntity("questionLabelFree");
+          game.presentScene(doneScene, afterTrialSceneTransition);
         }
       }
 
       chooseCardScene.onAppear(() => {
+        /** Add the question label free entity, only if not added yet */
+        if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
+          questionLabel.hidden = true;
+
+          const questionLabelFree = new Label({
+            name: "questionLabelFree",
+            text: "Which of these matches a pair above?",
+            fontSize: 22,
+            preferredMaxLayoutWidth: 240,
+          });
+          game.addFreeEntity(questionLabelFree);
+          questionLabelFree.position = { x: 200, y: 460 };
+        }
+
         setBottomCardsTappability(true);
         Timer.start("rt");
       });
@@ -705,8 +885,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     const doneScene = new Scene();
     game.addScene(doneScene);
 
+    const doneSceneText = new Label({
+      text: game.getParameter("trials_complete_scene_text"),
+      position: { x: 200, y: 400 },
+    });
+    doneScene.addChild(doneSceneText);
+
     const exitButton = new Button({
-      text: "Done",
+      text: game.getParameter("trials_complete_scene_button_text"),
       position: { x: 200, y: 600 },
       backgroundColor: WebColors.Black,
     });
@@ -714,7 +900,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     exitButton.onTapDown(() => {
       // don't allow repeat taps of exit button
       exitButton.isUserInteractionEnabled = false;
-      exitButton.hidden = true;
+      doneScene.removeAllChildren();
       game.end();
     });
     doneScene.addChild(exitButton);
@@ -738,7 +924,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         if (backButton) {
           backButton.hidden = true;
         }
-        console.log(shortScene);
+        game.entryScene = "instructions-04";
         break;
       }
       case "long": {
@@ -748,11 +934,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       default: {
         throw new Error("invalid value for instruction_type");
       }
-    }
-
-    game.entryScene = "instructions-01";
-    if (game.getParameter("instruction_type") == "short") {
-      game.entryScene = "instructions-04";
     }
   }
 }
@@ -923,5 +1104,7 @@ const session = new Session({
 
 // This is an example of how to change game parameters; default is
 // 3 pairs on top, but I'm setting it to 4.
-session.options.activities[0].setParameters({ match_pairs_top: 4 });
+session.options.activities[0].setParameters({
+  number_of_top_pairs: 4,
+});
 session.init();
