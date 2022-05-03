@@ -37,7 +37,7 @@ export abstract class Action {
    * @returns The move action
    */
   public static move(options: MoveActionOptions): Action {
-    return new moveAction(
+    return new MoveAction(
       options.point,
       options.duration,
       options.easing ?? Easings.linear,
@@ -52,7 +52,7 @@ export abstract class Action {
    * @returns The wait action
    */
   public static wait(options: WaitActionOptions): Action {
-    return new waitAction(
+    return new WaitAction(
       options.duration,
       options.runDuringTransition ?? false
     );
@@ -65,7 +65,7 @@ export abstract class Action {
    * @returns The custom action
    */
   public static custom(options: CustomActionOptions): Action {
-    return new customAction(
+    return new CustomAction(
       options.callback,
       options.runDuringTransition ?? false
     );
@@ -80,7 +80,7 @@ export abstract class Action {
    * @returns The scale action
    */
   public static scale(options: ScaleActionOptions): Action {
-    return new scaleAction(
+    return new ScaleAction(
       options.scale,
       options.duration,
       options.runDuringTransition
@@ -96,7 +96,7 @@ export abstract class Action {
    * @returns
    */
   public static sequence(actions: Array<Action>): Action {
-    const sequence = new sequenceAction(actions);
+    const sequence = new SequenceAction(actions);
     sequence.children = actions;
     return sequence;
   }
@@ -110,7 +110,7 @@ export abstract class Action {
    * @returns
    */
   public static group(actions: Array<Action>): Action {
-    const group = new groupAction(actions);
+    const group = new GroupAction(actions);
     group.children = actions;
     return group;
   }
@@ -150,7 +150,7 @@ export abstract class Action {
 
     switch (action.type) {
       case ActionType.sequence: {
-        const sequence = action as sequenceAction;
+        const sequence = action as SequenceAction;
         const sequenceChildren = sequence.children.map((child) =>
           Action.cloneAction(child, key)
         );
@@ -158,7 +158,7 @@ export abstract class Action {
         break;
       }
       case ActionType.group: {
-        const group = action as sequenceAction;
+        const group = action as SequenceAction;
         const groupChildren = group.children.map((child) =>
           Action.cloneAction(child, key)
         );
@@ -166,7 +166,7 @@ export abstract class Action {
         break;
       }
       case ActionType.move: {
-        const move = action as moveAction;
+        const move = action as MoveAction;
         cloned = Action.move({
           point: move.point,
           duration: move.duration,
@@ -176,7 +176,7 @@ export abstract class Action {
         break;
       }
       case ActionType.custom: {
-        const code = action as customAction;
+        const code = action as CustomAction;
         cloned = Action.custom({
           callback: code.callback,
           runDuringTransition: code.runDuringTransition,
@@ -184,7 +184,7 @@ export abstract class Action {
         break;
       }
       case ActionType.scale: {
-        const scale = action as scaleAction;
+        const scale = action as ScaleAction;
         cloned = Action.scale({
           scale: scale.scale,
           duration: scale.duration,
@@ -193,7 +193,7 @@ export abstract class Action {
         break;
       }
       case ActionType.wait: {
-        const wait = action as waitAction;
+        const wait = action as WaitAction;
         cloned = Action.wait({
           duration: wait.duration,
           runDuringTransition: wait.runDuringTransition,
@@ -238,14 +238,14 @@ export abstract class Action {
     const elapsed = now - (action.runStartTime + action.startOffset);
 
     if (action.type === ActionType.custom) {
-      const customAction = action as customAction;
+      const customAction = action as CustomAction;
       customAction.callback();
       customAction.running = false;
       customAction.completed = true;
     }
 
     if (action.type === ActionType.wait) {
-      const waitAction = action as waitAction;
+      const waitAction = action as WaitAction;
       if (now > action.runStartTime + action.startOffset + action.duration) {
         waitAction.running = false;
         waitAction.completed = true;
@@ -253,7 +253,7 @@ export abstract class Action {
     }
 
     if (action.type === ActionType.move) {
-      const moveAction = action as moveAction;
+      const moveAction = action as MoveAction;
 
       if (!moveAction.started) {
         moveAction.dx = moveAction.point.x - entity.position.x;
@@ -285,7 +285,7 @@ export abstract class Action {
     }
 
     if (action.type === ActionType.scale) {
-      const scaleAction = action as scaleAction;
+      const scaleAction = action as ScaleAction;
 
       if (!scaleAction.started) {
         scaleAction.delta = scaleAction.scale - entity.scale;
@@ -303,9 +303,23 @@ export abstract class Action {
     }
   }
 
+  /**
+   * Calculates the duration of an action, including any children actions
+   * the action may contain.
+   *
+   * @remarks Uses recursion to handle arbitrary level of nesting parent
+   * actions within parent actions
+   *
+   * @param action
+   * @returns the calculated duration
+   */
   private calculateDuration(action: Action): number {
     if (action.type === ActionType.group) {
-      const groupAction = action as groupAction;
+      /**
+       * Because group actions run in parallel, the duration of a group
+       * action is the max duration of the longest running child
+       */
+      const groupAction = action as GroupAction;
       const duration = groupAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((max, dur) => {
@@ -313,10 +327,13 @@ export abstract class Action {
         }, 0);
       return duration;
     }
-
     if (action.type === ActionType.sequence) {
-      const groupAction = action as groupAction;
-      const duration = groupAction.children
+      /**
+       * Because sequence actions run in series, the duration of a sequence
+       * action is the sum of all its child durations
+       */
+      const sequenceAction = action as SequenceAction;
+      const duration = sequenceAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((sum, dur) => {
           return sum + dur;
@@ -324,32 +341,57 @@ export abstract class Action {
       return duration;
     }
 
+    /** If the action is not a group or sequence, its duration is simply the
+     * duration property of the action
+     */
     return action.duration;
   }
 
+  /**
+   * Update each action's start and end offsets.
+   *
+   * @remarks Uses recursion to handle arbitrary level of nesting parent
+   * actions within parent actions.
+   *
+   * @param action that needs assigning start and end offsets
+   */
   private calculateStartEndOffsets(action: Action): void {
-    let parentStartOffset = 0;
-    if (action.parent !== undefined) {
+    let parentStartOffset: number;
+    if (action.parent === undefined) {
+      // this is the rootAction
+      parentStartOffset = 0;
+    } else {
       parentStartOffset = action.parent.startOffset;
     }
 
     if (action.parent?.type! === ActionType.group) {
+      /**
+       * If the action's parent is a group, this action's start offset
+       * is the parent's start offset.
+       */
       action.startOffset = parentStartOffset;
       action.endOffset = action.startOffset + action.duration;
     } else if (action.parent?.type === ActionType.sequence) {
       const parent = action.parent as IActionContainer;
-
+      /**
+       * If the action's parent is a sequence, this action's start offset
+       * is the parent's start offset PLUS any sibling actions prior in
+       * the sequence.
+       */
       let dur = 0;
-      for (const a of parent!.children!) {
+      for (const a of parent.children!) {
         if (a === action) {
+          // if we've iterated to this action, then stop accumulating
           break;
         }
+        // dur is the accumulator of prior sibling durations in the sequence
         dur = dur + a.duration;
       }
-      action.startOffset = dur;
+      action.startOffset = parentStartOffset + dur;
       action.endOffset = action.startOffset + action.duration;
     } else {
-      action.startOffset = parentStartOffset;
+      // the action has no parent.
+      action.startOffset = 0;
       action.endOffset = action.startOffset + action.duration;
     }
 
@@ -360,10 +402,22 @@ export abstract class Action {
     }
   }
 
+  /**
+   * Takes an action hierarchy and flattens to an array of non-nested actions
+   *
+   * @remarks Uses recursion to handle arbitrary level of nesting parent
+   * actions within parent actions
+   *
+   * @param action - the action to flatten
+   * @param actions - the accumulator array of flattened actions. This will be
+   * undefined on the first call, and an array on recursive calls
+   * @returns flattened array of actions
+   */
   private flattenActions(
     action: Action,
     actions?: Array<Action>
   ): Array<Action> {
+    // if first call, create the accumulator array of flattened actions
     if (!actions) {
       actions = new Array<Action>();
       actions.push(action);
@@ -371,7 +425,9 @@ export abstract class Action {
     if (action.isParent) {
       const parent = action as IActionContainer;
       const children = parent.children!;
+      // flatten this parent's children and add to accumulator array
       actions.push(...children);
+      // recurse for any children who themselves are parents
       parent
         .children!.filter((child) => child.isParent)
         .forEach((child: Action) => this.flattenActions(child, actions));
@@ -379,6 +435,17 @@ export abstract class Action {
     return actions;
   }
 
+  /**
+   * Parses the action hierarchy and assigns each action its parent and
+   * root action.
+   *
+   * @remarks Uses recursion to handle arbitrary level of nesting parent
+   * actions within parent actions
+   *
+   * @param action
+   * @param rootAction - top-level action passed to the run method
+   * @param key - optional string to identify an action
+   */
   private assignParents(
     action: Action,
     rootAction: Action,
@@ -387,16 +454,18 @@ export abstract class Action {
     if (key !== undefined) {
       action.key = key;
     }
-    if (!rootAction) {
-      rootAction = action;
-      rootAction.parent = undefined;
-    }
+    /**
+     *  group and sequence are IActionContainer: parent actions that
+     *  can hold other actions
+     */
     if (action.isParent) {
       const parent = action as IActionContainer;
       const children = parent.children!;
       children.forEach((child) => {
         child.parent = action;
+        child.isChild = true;
       });
+      // recurse for any children who themselves are parents
       parent
         .children!.filter((child) => child.isParent)
         .forEach((child: Action) => this.assignParents(child, rootAction, key));
@@ -404,7 +473,7 @@ export abstract class Action {
   }
 }
 
-export class sequenceAction extends Action implements IActionContainer {
+export class SequenceAction extends Action implements IActionContainer {
   type = ActionType.sequence;
   children: Array<Action>;
   constructor(actions: Array<Action>) {
@@ -414,7 +483,7 @@ export class sequenceAction extends Action implements IActionContainer {
   }
 }
 
-export class groupAction extends Action implements IActionContainer {
+export class GroupAction extends Action implements IActionContainer {
   type = ActionType.group;
   children = new Array<Action>();
   constructor(actions: Array<Action>) {
@@ -424,7 +493,7 @@ export class groupAction extends Action implements IActionContainer {
   }
 }
 
-export class customAction extends Action {
+export class CustomAction extends Action {
   type = ActionType.custom;
   callback: () => void;
   constructor(callback: () => void, runDuringTransition = false) {
@@ -435,7 +504,7 @@ export class customAction extends Action {
   }
 }
 
-export class waitAction extends Action {
+export class WaitAction extends Action {
   type = ActionType.wait;
   constructor(duration: number, runDuringTransition: boolean) {
     super(runDuringTransition);
@@ -444,7 +513,7 @@ export class waitAction extends Action {
   }
 }
 
-export class moveAction extends Action {
+export class MoveAction extends Action {
   type = ActionType.move;
   point: Point;
   startPoint: Point;
@@ -466,7 +535,7 @@ export class moveAction extends Action {
   }
 }
 
-export class scaleAction extends Action {
+export class ScaleAction extends Action {
   type = ActionType.scale;
   scale: number;
   delta = 0;
