@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "playground",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/packages/playground"
+    },
+    {
       "type": "pwa-chrome",
       "request": "launch",
       "name": "Chrome grid-memory",

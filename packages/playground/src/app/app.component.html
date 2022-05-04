@@ -1,0 +1,53 @@
+<div style="display: flex; flex-direction: row">
+  <iframe
+    scrolling="no"
+    frameBorder="0"
+    marginHeight="0"
+    marginWidth="0"
+    #iframe
+    [srcdoc]="combineCodeHtml()"
+    style="border: 0; margin: 0; padding: 0; width: 40vw"
+  >
+  </iframe>
+
+  <div style="display: flex; flex-direction: column">
+    <div
+      style="display: flex; flex-direction: row; justify-content: space-between"
+    >
+      <button style="width: fit-content" (click)="onRunClick()">Run</button>
+      <div style="display: flex">
+        Assessment:
+        <select
+          [(ngModel)]="selectedAssessment"
+          (ngModelChange)="onSelectAssessment()"
+        >
+          <option class="dropdown-item" disabled selected value="undefined">
+            Select
+          </option>
+          <option *ngFor="let a of assessments" [ngValue]="a">
+            {{ a.name }}
+          </option>
+        </select>
+        Theme:
+        <select [(ngModel)]="selectedTheme" (ngModelChange)="onSelectTheme()">
+          <option *ngFor="let t of themes" [ngValue]="t">{{ t.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="height: 75vh; width: 55vw" #jsEditorContainer></div>
+
+    <div
+      style="
+        height: 20vh;
+        width: 55vw;
+        border-top: 2px solid gray;
+        margin-top: 4px;
+        padding-top: 4px;
+      "
+      #htmlEditorContainer
+    ></div>
+  </div>
+</div>
+
+<!-- <router-outlet></router-outlet> -->
