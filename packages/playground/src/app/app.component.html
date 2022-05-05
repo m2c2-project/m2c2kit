@@ -1,52 +1,87 @@
-<div style="display: flex; flex-direction: row">
-  <iframe
-    scrolling="no"
-    frameBorder="0"
-    marginHeight="0"
-    marginWidth="0"
-    #iframe
-    [srcdoc]="combineCodeHtml()"
-    style="border: 0; margin: 0; padding: 0; width: 40vw"
-  >
-  </iframe>
+<div
+  *ngIf="loading$ | async"
+  style="
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    z-index: 999;
+  "
+>
+  <mat-spinner> </mat-spinner>
+</div>
 
-  <div style="display: flex; flex-direction: column">
-    <div
-      style="display: flex; flex-direction: row; justify-content: space-between"
+<div style="display: flex; flex-direction: column">
+  <mat-toolbar class="toolbar" color="primary">
+    <!-- <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>more_vert</mat-icon>
+    </button> -->
+    <span>m2c2kit</span>
+    <span style="flex: 1 1 auto"></span>
+    <button mat-icon-button (click)="onRunClick()" color="accent">
+      <mat-icon>{{ runButtonIcon }}</mat-icon>
+    </button>
+    <span style="cursor: pointer" (click)="onRunClick()">Run</span>
+    <mat-slide-toggle [(ngModel)]="codeEditorVisible" style="margin-left: 32px"
+      >Code</mat-slide-toggle
     >
-      <button style="width: fit-content" (click)="onRunClick()">Run</button>
-      <div style="display: flex">
-        Assessment:
-        <select
-          [(ngModel)]="selectedAssessment"
-          (ngModelChange)="onSelectAssessment()"
-        >
-          <option class="dropdown-item" disabled selected value="undefined">
-            Select
-          </option>
-          <option *ngFor="let a of assessments" [ngValue]="a">
-            {{ a.name }}
-          </option>
-        </select>
-        Theme:
-        <select [(ngModel)]="selectedTheme" (ngModelChange)="onSelectTheme()">
-          <option *ngFor="let t of themes" [ngValue]="t">{{ t.name }}</option>
-        </select>
-      </div>
-    </div>
+    <!-- <mat-menu #menu="matMenu">
+    </mat-menu>     -->
+  </mat-toolbar>
 
-    <div style="height: 75vh; width: 55vw" #jsEditorContainer></div>
+  <div style="display: flex; flex-direction: row">
+    <iframe
+      class="m2c2kit-iframe"
+      scrolling="no"
+      frameBorder="0"
+      marginHeight="0"
+      marginWidth="0"
+      #iframe
+      [srcdoc]="combineCodeHtml()"
+      [ngStyle]="{ width: codeEditorVisible ? '45vw' : '100vw' }"
+    >
+    </iframe>
 
     <div
-      style="
-        height: 20vh;
-        width: 55vw;
-        border-top: 2px solid gray;
-        margin-top: 4px;
-        padding-top: 4px;
+      [className]="
+        codeEditorVisible
+          ? 'code-editor-column-visible'
+          : 'code-editor-column-hidden'
       "
-      #htmlEditorContainer
-    ></div>
+    >
+      <div
+        style="display: flex; flex-flow: row; justify-content: space-between"
+      >
+        <div>
+          Assessment:
+          <select
+            [(ngModel)]="selectedAssessment"
+            (ngModelChange)="onSelectAssessment()"
+          >
+            <option class="dropdown-item" disabled selected value="undefined">
+              Select
+            </option>
+            <option *ngFor="let a of assessments" [ngValue]="a">
+              {{ a.name }}
+            </option>
+          </select>
+          Theme:
+          <select [(ngModel)]="selectedTheme" (ngModelChange)="onSelectTheme()">
+            <option *ngFor="let t of themes" [ngValue]="t">{{ t.name }}</option>
+          </select>
+        </div>
+        <span class="compilation-message">
+          {{ compilationMessage }}
+        </span>
+      </div>
+
+      <div class="js-editor" #jsEditorContainer></div>
+
+      <div class="html-editor" #htmlEditorContainer></div>
+    </div>
   </div>
 </div>
 

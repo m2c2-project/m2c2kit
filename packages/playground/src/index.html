@@ -6,8 +6,39 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- TODO: host these locally, so we don't have to connect to google -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
   </head>
+
   <body>
+    <div id="loader">
+      <style>
+        .application-loading-container {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+
+        .application-loading-box {
+          width: 300px;
+          margin: 5px;
+          text-align: center;
+        }
+      </style>
+      <div class="application-loading-container">
+        <div class="application-loading-box"><h2>Loading...</h2></div>
+      </div>
+    </div>
     <app-root></app-root>
   </body>
 </html>
