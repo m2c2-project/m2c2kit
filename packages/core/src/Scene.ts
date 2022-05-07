@@ -54,6 +54,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
       )
     );
     this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
+    this.needsInitialization = false;
   }
 
   set game(game: Game) {
@@ -140,9 +141,21 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
       0,
       0
     );
-    canvas.drawRRect(rr, this.backgroundPaint!);
+    if (!this.backgroundPaint) {
+      throw new Error(`in Scene ${this}, background paint is undefined.`);
+    }
+    canvas.drawRRect(rr, this.backgroundPaint);
     canvas.restore();
 
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    this.children.forEach((child) => {
+      if (child.isDrawable) {
+        (child as unknown as IDrawable).warmup(canvas);
+      }
+    });
   }
 }

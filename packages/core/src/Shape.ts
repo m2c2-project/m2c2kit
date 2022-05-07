@@ -114,6 +114,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this.strokeColorPaint.setStyle(canvasKit.PaintStyle.Stroke);
       this.strokeColorPaint.setAntiAlias(true);
     }
+    this.needsInitialization = false;
   }
 
   get fillColor(): RgbaColor {
@@ -230,5 +231,14 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
     canvas.restore();
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    this.children.forEach((child) => {
+      if (child.isDrawable) {
+        (child as unknown as IDrawable).warmup(canvas);
+      }
+    });
   }
 }

@@ -62,6 +62,12 @@ jest.mock("../../build-umd", () => {
           requestAnimationFrame: (callback: (canvas: object) => void) => {
             return requestAnimationFrame(callback);
           },
+          width: () => {
+            return NaN;
+          },
+          height: () => {
+            return NaN;
+          },
         };
       },
       Font: function () {

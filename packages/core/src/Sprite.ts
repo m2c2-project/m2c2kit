@@ -5,7 +5,7 @@ import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
-import { Scene } from ".";
+import { Scene } from "./Scene";
 
 export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.sprite;
@@ -49,6 +49,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     }
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
+    this.needsInitialization = false;
   }
 
   set imageName(imageName: string) {
@@ -115,5 +116,20 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
       super.drawChildren(canvas);
     }
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    if (!this.loadedImage) {
+      throw new Error(
+        `warmup Sprite entity ${this.toString()}: image not loaded.`
+      );
+    }
+    canvas.drawImage(this.loadedImage.image, 0, 0);
+    this.children.forEach((child) => {
+      if (child.isDrawable) {
+        (child as unknown as IDrawable).warmup(canvas);
+      }
+    });
   }
 }

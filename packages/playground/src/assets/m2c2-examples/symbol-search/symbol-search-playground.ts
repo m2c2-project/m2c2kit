@@ -1104,7 +1104,7 @@ const session = new Session({
 
 // This is an example of how to change game parameters; default is
 // 3 pairs on top, but I'm setting it to 4.
-session.options.activities[0].setParameters({
-  number_of_top_pairs: 4,
-});
+// session.options.activities[0].setParameters({
+//   number_of_top_pairs: 4,
+// });
 session.init();

@@ -7,6 +7,7 @@ import {
   Size,
   Entity,
   Shape,
+  IDrawable,
 } from "@m2c2kit/core";
 
 export interface GridOptions extends CompositeOptions {
@@ -195,6 +196,15 @@ export class Grid extends Composite {
 
   draw(canvas: Canvas): void {
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    this.children
+      .filter((child) => child.isDrawable)
+      .forEach((child) => {
+        (child as unknown as IDrawable).warmup(canvas);
+      });
   }
 
   // override Entity.RemoveAllChildren() so that when RemoveAllChildren() is called on a Grid,

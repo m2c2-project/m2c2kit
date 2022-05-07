@@ -9,6 +9,7 @@ import {
   IText,
   RgbaColor,
   Size,
+  IDrawable,
 } from "@m2c2kit/core";
 import "../Globals";
 
@@ -144,5 +145,14 @@ export class Button extends Composite implements IText {
 
   draw(canvas: Canvas): void {
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    this.children
+      .filter((child) => child.isDrawable)
+      .forEach((child) => {
+        (child as unknown as IDrawable).warmup(canvas);
+      });
   }
 }

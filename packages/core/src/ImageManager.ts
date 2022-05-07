@@ -20,7 +20,7 @@ class LoadedImages {
 export class ImageManager {
   canvasKit?: CanvasKit;
   private renderedImages = new RenderedImages();
-  private loadedImages = new LoadedImages();
+  loadedImages = new LoadedImages();
   private _scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;

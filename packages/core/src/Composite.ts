@@ -33,4 +33,6 @@ export abstract class Composite extends Entity implements IDrawable {
   draw(canvas: Canvas): void {
     super.drawChildren(canvas);
   }
+
+  abstract warmup(canvas: Canvas): void;
 }

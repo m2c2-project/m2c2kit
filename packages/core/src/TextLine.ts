@@ -7,7 +7,7 @@ import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
-import { Scene } from ".";
+import { Scene } from "./Scene";
 
 export class TextLine
   extends Entity
@@ -109,8 +109,6 @@ export class TextLine
     if (this.fontName) {
       this.font = new this.canvasKit.Font(
         fontManager.getTypeface(gameUuid, this.fontName),
-        //fontManager.gameTypefaces[gameUuid][this.fontName],
-        //fontManager._getTypeface(this.fontName),
         this.fontSize * Globals.canvasScale
       );
     } else {
@@ -119,6 +117,7 @@ export class TextLine
         this.fontSize * Globals.canvasScale
       );
     }
+    this.needsInitialization = false;
   }
 
   /**
@@ -173,5 +172,15 @@ export class TextLine
     }
 
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    this.initialize();
+    if (this.paint === undefined || this.font === undefined) {
+      throw new Error(
+        `warmup TextLine entity ${this.toString()}: Paint or Font is undefined.`
+      );
+    }
+    canvas.drawText(this.text, 0, 0, this.paint, this.font);
   }
 }

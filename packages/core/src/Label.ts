@@ -13,7 +13,7 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
-import { Scene } from ".";
+import { Scene } from "./Scene";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.label;
@@ -150,6 +150,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
 
     this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
+    this.needsInitialization = false;
   }
 
   get text(): string {
@@ -270,5 +271,22 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
 
     super.drawChildren(canvas);
+  }
+
+  warmup(canvas: Canvas): void {
+    /**
+     * If this label is part of a relative layout, then we cannot
+     * warm it up because a label uses word wrapping, and that
+     * would not yet have been calculated
+     */
+    if (!this.layout) {
+      this.initialize();
+      if (!this.paragraph) {
+        throw new Error(
+          `warmup Label entity ${this.toString()}: paragraph is undefined`
+        );
+      }
+      canvas.drawParagraph(this.paragraph, 0, 0);
+    }
   }
 }

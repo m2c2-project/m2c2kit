@@ -349,7 +349,65 @@ export class Game implements Activity {
     if (this.surface === undefined) {
       throw new Error("CanvasKit surface is undefined");
     }
+    this.warmupShaders(this.surface);
     this.surface.requestAnimationFrame(this.loop.bind(this));
+  }
+
+  /**
+   * Warms up the Skia-based shaders underlying canvaskit
+   *
+   * @remarks Some canvaskit methods, such as drawImage, take extra time the
+   * first time they are called. If the method is part of an animation,
+   * then this may cause frame drops or "jank." To alleviate this, we can
+   * "warm up" the shader associated with the method by calling it at the
+   * beginning of our game. Thus, all warmup operations will be concentrated
+   * at the beginning and will not be noticeable. We initialize and draw
+   * all canvaskit objects that have been defined within m2c2kit entities,
+   * and then immediately draw a white rectangle over them so that the
+   * user does not see any flicker.
+   *
+   * @param surface - the canvaskit surface
+   */
+  private warmupShaders(surface: Surface): void {
+    const canvas = surface.getCanvas();
+    const whitePaint = new this.canvasKit.Paint();
+    whitePaint.setColor(this.canvasKit.Color(255, 255, 255, 1));
+
+    [...this.scenes, this.freeEntitiesScene].forEach((scene) =>
+      scene.children.forEach((child) => {
+        if (child.isDrawable) {
+          (child as unknown as IDrawable).warmup(canvas);
+        }
+      })
+    );
+
+    /**
+     * images that are in sprites will have been warmed up above, but images
+     * that are not yet added to a sprite have not been warmed up.
+     * Thus, warmup these not-yet-added images.
+     */
+    const warmupedImageNames = this.entities
+      .filter((entity) => entity.type === EntityType.sprite)
+      .map((entitity) => (entitity as Sprite).imageName);
+    const loadedImages = this.session.imageManager.loadedImages[this.uuid];
+    // loadedImages may be undefined/null if the game does not have images
+    if (loadedImages) {
+      const imageNames = Object.keys(loadedImages);
+      imageNames.forEach((imageName) => {
+        if (!warmupedImageNames.includes(imageName)) {
+          const image = loadedImages[imageName].image;
+          console.log("warmed up " + imageName);
+          canvas.drawImage(image, 0, 0);
+        }
+      });
+    }
+
+    const rr = this.canvasKit.RRectXY(
+      this.canvasKit.LTRBRect(0, 0, surface.width(), surface.height()),
+      0,
+      0
+    );
+    canvas.drawRRect(rr, whitePaint);
   }
 
   stop(): void {
