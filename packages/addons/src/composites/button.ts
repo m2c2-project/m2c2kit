@@ -27,7 +27,7 @@ export interface ButtonOptions extends CompositeOptions, TextOptions {
 export class Button extends Composite implements IText {
   compositeType = "button";
   // Button options
-  private _backgroundColor = WebColors.RoyalBlue;
+  private _backgroundColor = WebColors.Black;
   size = { width: 200, height: 50 };
   cornerRadius = 9;
   fontSize = 20;

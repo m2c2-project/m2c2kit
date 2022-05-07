@@ -3,6 +3,7 @@ import {
   WebColors,
   Transition,
   TransitionDirection,
+  Easings,
   Story,
   StoryOptions,
   Scene,
@@ -95,11 +96,11 @@ export interface InstructionsOptions extends StoryOptions {
   backButtonHeight?: number;
   /** Height of next button. Default is 50. Can be overriden within a single instruction scene */
   nextButtonHeight?: number;
-  /** Color of back button. Default is WebColors.RoyalBlue. Can be overriden within a single instruction scene */
+  /** Color of back button. Default is WebColors.Black. Can be overriden within a single instruction scene */
   backButtonBackgroundColor?: RgbaColor;
   /** Color of back button text. Default is WebColors.White. Can be overriden within a single instruction scene */
   backButtonFontColor?: RgbaColor;
-  /** Color of next button. Default is WebColors.RoyalBlue. Can be overriden within a single instruction scene */
+  /** Color of next button. Default is WebColors.Black. Can be overriden within a single instruction scene */
   nextButtonBackgroundColor?: RgbaColor;
   /** Color of next button text. Default is WebColors.White. Can be overriden within a single instruction scene */
   nextButtonFontColor?: RgbaColor;
@@ -121,6 +122,7 @@ export class Instructions extends Story {
         Transition.slide({
           direction: TransitionDirection.left,
           duration: 500,
+          easing: Easings.sinusoidalInOut,
         });
       const backSceneTransition =
         s.backSceneTransition ??
@@ -128,6 +130,7 @@ export class Instructions extends Story {
         Transition.slide({
           direction: TransitionDirection.right,
           duration: 500,
+          easing: Easings.sinusoidalInOut,
         });
       const backButtonText =
         s.backButtonText ?? options.backButtonText ?? "Back";
@@ -155,13 +158,13 @@ export class Instructions extends Story {
       const backButtonBackgroundColor =
         s.backButtonBackgroundColor ??
         options.backButtonBackgroundColor ??
-        WebColors.RoyalBlue;
+        WebColors.Black;
       const backButtonFontColor =
         s.backButtonFontColor ?? options.backButtonFontColor ?? WebColors.White;
       const nextButtonBackgroundColor =
         s.nextButtonBackgroundColor ??
         options.nextButtonBackgroundColor ??
-        WebColors.RoyalBlue;
+        WebColors.Black;
       const nextButtonFontColor =
         s.nextButtonFontColor ?? options.nextButtonFontColor ?? WebColors.White;
 
