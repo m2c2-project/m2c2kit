@@ -14,6 +14,7 @@ import {
   TrialSchema,
   Timer,
   Session,
+  Easings,
   EventBase,
   EventType,
   SessionLifecycleEvent,
@@ -29,20 +30,50 @@ class GridMemory extends Game {
      * At run time, they can be changed with the setParameters() method.
      */
     const defaultParameters: GameParameters = {
-      ReadyTime: {
-        value: 1000,
-        description: "How long the 'get ready' message is shown, milliseconds",
+      preparation_duration_ms: {
+        value: 500,
+        description: "How long the 'get ready' message is shown, milliseconds.",
       },
-      InterferenceTime: {
+      blank_grid_duration_ms: {
+        value: 500,
+        description:
+          "How long a blank grid is shown before the dots appear, milliseconds.",
+      },
+      interference_duration_ms: {
         value: 8000,
-        description: "How long the grid of E/F is shown, milliseconds",
+        description: "How long the grid of interference targets is shown, milliseconds.",
       },
-      DotPresentTime: {
+      interference_transition_animation: {
+        value: true,
+        description:
+          "Should the transitions between dot presentation, interference, and recall be animated slide transitions?",
+      },
+      dot_present_duration_ms: {
         value: 3000,
-        description: "How long the dots are shown, milliseconds",
+        description: "How long the dots are shown, milliseconds.",
       },
-      TrialNum: { value: 3, description: "How many trials to run" },
-      InstructionType: { value: "short" },
+      number_of_interference_targets: {
+        value: 6,
+        description: "How many targets to show in the interference phase.",
+      },
+      number_of_trials: {
+        value: 5,
+        description: "How many trials to run.",
+      },
+      trials_complete_scene_text: {
+        value: "You have completed all the grid memory trials",
+        description:
+          "Text for scene displayed after all trials are complete.",
+      },
+      trials_complete_scene_button_text: {
+        value: "OK",
+        description:
+          "Button text for scene displayed after all trials are complete.",
+      },      
+      instruction_type: {
+        value: "long",
+        description: "Type of intructions to show, 'short' or 'long'.",
+      },
     };
 
     /**
@@ -137,7 +168,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
-    // ============================================================================
+    // ==============================================================
     // variables for timing and user input
     let timing_dotsdrawn: number;
     let timing_getready: number;
@@ -152,16 +183,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       column: number;
     }[];
 
-    // ============================================================================
+    // ==============================================================
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
       sceneNamePrefix: "instructions",
-      backgroundColor: WebColors.White,
-      nextButtonBackgroundColor: WebColors.Black,
-      backButtonBackgroundColor: WebColors.Black,
       instructionScenes: [
         {
-          title: "Activity: Grid Memory",
+          title: "Grid Memory",
           text: "For this activity, try to remember the location of 3 dots.",
           image: "grid",
           imageAboveText: false,
@@ -171,7 +199,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           textVerticalBias: 0.25,
         },
         {
-          title: "Activity: Grid Memory",
+          title: "Grid Memory",
           text: "Before placing the 3 dots in their location, you will also have to tap some Fs on the screen as quickly as you can.",
           image: "fs",
           imageAboveText: false,
@@ -181,7 +209,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           textVerticalBias: 0.25,
         },
         {
-          title: "Activity: Grid Memory",
+          title: "Grid Memory",
           text: "Press START to begin!",
           textFontSize: 24,
           titleFontSize: 30,
@@ -190,62 +218,69 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           nextButtonBackgroundColor: WebColors.Green,
         },
       ],
-      postInstructionsScene: "getReadyScene",
+      postInstructionsScene: "preparationScene",
     });
     game.addScenes(instructionsScenes);
 
-    const nextScreenTransition = Transition.slide({
-      direction: TransitionDirection.left,
-      duration: 500,
-    });
-    const previousScreenTransition = Transition.slide({
-      direction: TransitionDirection.right,
-      duration: 500,
-    });
+    let forward_into_interference_scene_transition: Transition | undefined;
+    let back_from_interference_scene_transition: Transition | undefined;
+    if (game.getParameter<boolean>("interference_transition_animation")) {
+      forward_into_interference_scene_transition = Transition.slide({
+        direction: TransitionDirection.left,
+        duration: 500,
+        easing: Easings.sinusoidalInOut,
+      });
+      back_from_interference_scene_transition = Transition.slide({
+        direction: TransitionDirection.right,
+        duration: 500,
+        easing: Easings.sinusoidalInOut,
+      });
+    }
 
-    // ============================================================================
-    // SCENE: show get ready message, then advance after XXXX
-    // milliseconds (as defined in ReadyTime parameter)
-    const gridMemoryPage0 = new Scene({
-      name: "getReadyScene",
-      backgroundColor: WebColors.White,
+    // ==============================================================
+    // SCENE: preparation. Show get ready message, then advance after XXXX
+    // milliseconds (as defined in preparation_duration_ms parameter)
+    const preparationScene = new Scene({
+      name: "preparationScene",
     });
-    game.addScene(gridMemoryPage0);
+    game.addScene(preparationScene);
 
     const getReadyMessage = new Label({
       text: "Get Ready",
       fontSize: 24,
       position: { x: 200, y: 400 },
     });
-    gridMemoryPage0.addChild(getReadyMessage);
+    preparationScene.addChild(getReadyMessage);
 
-    gridMemoryPage0.onSetup(() => {
-      gridMemoryPage0.run(
+    preparationScene.onAppear(() => {
+      preparationScene.run(
         Action.sequence([
-          Action.wait({ duration: game.getParameter("ReadyTime") }),
+          Action.wait({
+            duration: game.getParameter("preparation_duration_ms"),
+          }),
           Action.custom({
             callback: () => {
               timing_getready = performance.now();
-              game.presentScene(gridMemoryPage1);
+              game.presentScene(dotPresentationScene);
             },
           }),
         ])
       );
     });
 
-    // ============================================================================
-    // SCENE: show the dot placement
-    const gridMemoryPage1 = new Scene({ backgroundColor: WebColors.White });
-    game.addScene(gridMemoryPage1);
+    // ==============================================================
+    // SCENE: Show the dot placement
+    const dotPresentationScene = new Scene();
+    game.addScene(dotPresentationScene);
 
-    const page1Message = new Label({
+    const rememberDotsMessage = new Label({
       text: "Remember the dot locations!",
       fontSize: 24,
       position: { x: 200, y: 150 },
     });
-    gridMemoryPage1.addChild(page1Message);
+    dotPresentationScene.addChild(rememberDotsMessage);
 
-    const grid1 = new Grid({
+    const presentationGrid = new Grid({
       size: { width: 300, height: 300 },
       position: { x: 200, y: 400 },
       rows: 5,
@@ -254,30 +289,51 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       gridLineColor: WebColors.Black,
       gridLineWidth: 4,
     });
-    gridMemoryPage1.addChild(grid1);
+    dotPresentationScene.addChild(presentationGrid);
 
-    gridMemoryPage1.onSetup(() => {
-      grid1.removeAllChildren();
+    dotPresentationScene.onSetup(() => {
+      rememberDotsMessage.hidden = true;
+    });
 
+    dotPresentationScene.onAppear(() => {
       // randomly choose 3 cells that will have the red dots
       // on a grid of size 5 rows, 5 columns
-      randomCells = RandomDraws.FromGridWithoutReplacement(3, 5, 5);
-      for (let i = 0; i < 3; i++) {
-        const circle = new Shape({
-          circleOfRadius: 20,
-          fillColor: WebColors.Red,
-          strokeColor: WebColors.Black,
-          lineWidth: 2,
-        });
-        grid1.addAtCell(circle, randomCells[i].row, randomCells[i].column);
-      }
+      rememberDotsMessage.hidden = false;
 
-      gridMemoryPage1.run(
+      dotPresentationScene.run(
         Action.sequence([
-          Action.wait({ duration: game.getParameter("DotPresentTime") }),
+          Action.wait({
+            duration: game.getParameter("blank_grid_duration_ms"),
+          }),
           Action.custom({
             callback: () => {
-              game.presentScene(gridMemoryPage2, nextScreenTransition);
+              randomCells = RandomDraws.FromGridWithoutReplacement(3, 5, 5);
+              for (let i = 0; i < 3; i++) {
+                const circle = new Shape({
+                  circleOfRadius: 20,
+                  fillColor: WebColors.Red,
+                  strokeColor: WebColors.Black,
+                  lineWidth: 2,
+                });
+                presentationGrid.addAtCell(
+                  circle,
+                  randomCells[i].row,
+                  randomCells[i].column
+                );
+              }
+            },
+          }),
+          Action.wait({
+            duration: game.getParameter("dot_present_duration_ms"),
+          }),
+          Action.custom({
+            callback: () => {
+              presentationGrid.removeAllChildren();
+              rememberDotsMessage.hidden = true;
+              game.presentScene(
+                interferenceScene,
+                forward_into_interference_scene_transition
+              );
               timing_dotsdrawn = performance.now();
             },
           }),
@@ -285,18 +341,19 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       );
     });
 
-    // ============================================================================
-    // SCENE: ask participant to the touch the Fs
-    const gridMemoryPage2 = new Scene({ backgroundColor: WebColors.White });
-    game.addScene(gridMemoryPage2);
+    // ==============================================================
+    // SCENE: interference. Ask participant to the touch the Fs
+    const interferenceScene = new Scene();
+    game.addScene(interferenceScene);
 
     const touchTheFs = new Label({
       text: "Touch the F's!",
+      fontSize: 24,
       position: { x: 200, y: 100 },
     });
-    gridMemoryPage2.addChild(touchTheFs);
+    interferenceScene.addChild(touchTheFs);
 
-    const grid = new Grid({
+    const interferenceGrid = new Grid({
       size: { width: 300, height: 480 },
       position: { x: 200, y: 400 },
       rows: 8,
@@ -305,45 +362,49 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       gridLineColor: WebColors.Transparent,
     });
 
-    gridMemoryPage2.addChild(grid);
+    interferenceScene.addChild(interferenceGrid);
 
-    gridMemoryPage2.onSetup(() => {
+    interferenceScene.onSetup(() => {
+      touchTheFs.hidden = true;
       Timer.start("gridMemoryPage2 setup");
 
-      // Advance to the next recall screen after "InterferenceTime" millisseconds
-      gridMemoryPage2.run(
+      timing_fs = performance.now();
+      ShowInterferenceActivity();
+
+      // Advance to the next recall screen after "interference_duration_ms"
+      interferenceScene.run(
         Action.sequence([
-          Action.wait({ duration: game.getParameter("InterferenceTime") }),
+          Action.wait({
+            duration: game.getParameter("interference_duration_ms"),
+          }),
           Action.custom({
             callback: () => {
-              game.presentScene(gridMemoryPage3, previousScreenTransition);
+              game.presentScene(
+                dotRecallScene,
+                back_from_interference_scene_transition
+              );
             },
           }),
         ]),
         "advanceAfterInterference"
       );
 
-      // While we're waiting until the "InterferenceTime" elapses via
-      // the above action, start another action to show the grid of
-      // E/F to tap
-      gridMemoryPage2.run(
-        Action.custom({
-          callback: () => {
-            timing_fs = performance.now();
-            ShowInterferenceActivity();
-          },
-        })
-      );
-
       // On repeated showings of the grid, we will slide it into view
       // and slideGridIntoScene = true
       function ShowInterferenceActivity(slideGridIntoScene = false) {
-        grid.removeAllChildren();
+        interferenceGrid.removeAllChildren();
         let tappedFCount = 0;
 
         // randomly choose six cells to have F in them from the grid that
         // is of size 8 rows and 5 columns
-        const FCells = RandomDraws.FromGridWithoutReplacement(6, 8, 5);
+        const number_of_interference_targets = game.getParameter<number>(
+          "number_of_interference_targets"
+        );
+        const FCells = RandomDraws.FromGridWithoutReplacement(
+          number_of_interference_targets,
+          8,
+          5
+        );
         for (let i = 0; i < 8; i++) {
           for (let j = 0; j < 5; j++) {
             const square = new Shape({
@@ -355,7 +416,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
             let letterIsF = false;
             let letter: Label;
             letter = new Label({ text: "E", fontSize: 50 });
-            for (let k = 0; k < 6; k++) {
+            for (let k = 0; k < number_of_interference_targets; k++) {
               if (FCells[k].row === i && FCells[k].column === j) {
                 letter = new Label({ text: "F", fontSize: 50 });
                 letterIsF = true;
@@ -375,9 +436,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
                     ])
                   );
                   square.userData = 1;
-                  if (tappedFCount >= 6) {
+                  if (tappedFCount >= number_of_interference_targets) {
                     // don't allow more taps on this current grid
-                    grid.gridChildren.forEach((cell) => {
+                    interferenceGrid.gridChildren.forEach((cell) => {
                       cell.entity.isUserInteractionEnabled = false;
                     });
 
@@ -388,14 +449,14 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
                 }
               });
             }
-            grid.addAtCell(letter, i, j);
-            grid.addAtCell(square, i, j);
+            interferenceGrid.addAtCell(letter, i, j);
+            interferenceGrid.addAtCell(square, i, j);
           }
         }
 
         if (slideGridIntoScene) {
-          grid.position = { x: 200, y: 1040 };
-          grid.run(Action.move({ point: { x: 200, y: 400 }, duration: 500 }));
+          interferenceGrid.position = { x: 200, y: 1040 };
+          interferenceGrid.run(Action.move({ point: { x: 200, y: 400 }, duration: 500 }));
         }
       }
 
@@ -407,19 +468,24 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       Timer.remove("gridMemoryPage2 setup");
     });
 
-    // ============================================================================
-    // SCENE: ask participant to recall the dot positions
-    const gridMemoryPage3 = new Scene({ backgroundColor: WebColors.White });
-    game.addScene(gridMemoryPage3);
+    interferenceScene.onAppear(() => {
+      console.log("page2 on appear");
+      touchTheFs.hidden = false;
+    });
 
-    const page3Message = new Label({
+    // ==============================================================
+    // SCENE: recall. Ask participant to recall the dot positions
+    const dotRecallScene = new Scene();
+    game.addScene(dotRecallScene);
+
+    const whereDotsMessage = new Label({
       text: "Where were the dots?",
       fontSize: 24,
       position: { x: 200, y: 150 },
     });
-    gridMemoryPage3.addChild(page3Message);
+    dotRecallScene.addChild(whereDotsMessage);
 
-    const grid3 = new Grid({
+    const recallGrid = new Grid({
       size: { width: 300, height: 300 },
       position: { x: 200, y: 400 },
       rows: 5,
@@ -428,12 +494,14 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       gridLineColor: WebColors.Black,
       gridLineWidth: 4,
     });
-    gridMemoryPage3.addChild(grid3);
+    dotRecallScene.addChild(recallGrid);
 
     let tappedCellCount = 0;
 
-    gridMemoryPage3.onSetup(() => {
-      grid3.removeAllChildren();
+    dotRecallScene.onSetup(() => {
+      recallGrid.removeAllChildren();
+      recallDoneButton.hidden = true;
+      whereDotsMessage.hidden = true;
 
       tappedCellCount = 0;
       tappedCells = new Array<{
@@ -481,21 +549,23 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
             }
           });
           cell.isUserInteractionEnabled = true;
-          grid3.addAtCell(cell, i, j);
+          recallGrid.addAtCell(cell, i, j);
         }
       }
     });
 
-    gridMemoryPage3.onAppear(() => {
+    dotRecallScene.onAppear(() => {
       Timer.start("responseTime");
+      recallDoneButton.hidden = false;
+      whereDotsMessage.hidden = false;
     });
 
-    const gridMemoryPage3DoneButton = new Button({
+    const recallDoneButton = new Button({
       text: "Done",
       position: { x: 200, y: 700 },
-      size: { width: 300, height: 50 },
+      size: { width: 250, height: 50 },
     });
-    gridMemoryPage3.addChild(gridMemoryPage3DoneButton);
+    dotRecallScene.addChild(recallDoneButton);
 
     // place this warning message on the scene, but hide it
     // we'll unhide it, if needed.
@@ -504,10 +574,10 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       position: { x: 200, y: 600 },
     });
     youMustSelectAllMessage.hidden = true;
-    gridMemoryPage3.addChild(youMustSelectAllMessage);
+    dotRecallScene.addChild(youMustSelectAllMessage);
 
-    gridMemoryPage3DoneButton.isUserInteractionEnabled = true;
-    gridMemoryPage3DoneButton.onTapDown(() => {
+    recallDoneButton.isUserInteractionEnabled = true;
+    recallDoneButton.onTapDown(() => {
       if (tappedCellCount < 3) {
         youMustSelectAllMessage.run(
           Action.sequence([
@@ -537,52 +607,42 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         game.addTrialData("random_cells", randomCells);
         game.addTrialData("tapped_cells", tappedCells);
         game.trialComplete();
-        if (game.trialIndex === game.getParameter("TrialNum")) {
-          game.presentScene(endPage, nextScreenTransition);
+        if (game.trialIndex === game.getParameter("number_of_trials")) {
+          const nextScreenTransition = Transition.slide({
+            direction: TransitionDirection.left,
+            duration: 500,
+            easing: Easings.sinusoidalInOut,
+          });
+          game.presentScene(doneScene, nextScreenTransition);
         } else {
-          game.presentScene(gridMemoryPage0, nextScreenTransition);
+          game.presentScene(preparationScene);
         }
       }
     });
 
-    // ============================================================================
-    // SCENE: placeholder end scene, with a button to restart it all again or exit
-    const endPage = new Scene();
-    game.addScene(endPage);
-    const doneLabel = new Label({
-      text: `This will be reassigned in the setup() callback. If you see this, something went wrong!`,
-      position: { x: 200, y: 300 },
-    });
-    endPage.addChild(doneLabel);
+    // ==============================================================
+    // SCENE: done. Show done messgae, with a button to exit.
+    const doneScene = new Scene();
+    game.addScene(doneScene);
 
-    const againButton = new Button({
-      text: "Start over",
+    const doneSceneText = new Label({
+      text: game.getParameter("trials_complete_scene_text"),
       position: { x: 200, y: 400 },
     });
-    againButton.isUserInteractionEnabled = true;
-    againButton.onTapDown(() => {
-      game.initData();
-      game.presentScene(gridMemoryPage0);
-    });
-    endPage.addChild(againButton);
+    doneScene.addChild(doneSceneText);
 
-    const exitButton = new Button({
-      text: "Exit",
-      position: { x: 200, y: 475 },
+    const okButton = new Button({
+      text: game.getParameter("trials_complete_scene_button_text"),
+      position: { x: 200, y: 600 }
     });
-    exitButton.isUserInteractionEnabled = true;
-    exitButton.onTapDown(() => {
-      // hide the start over button
-      againButton.hidden = true;
-      // don't allow repeat taps of exit button
-      exitButton.isUserInteractionEnabled = false;
+    okButton.isUserInteractionEnabled = true;
+    okButton.onTapDown(() => {
+      // don't allow repeat taps of ok button
+      okButton.isUserInteractionEnabled = false;
+      doneScene.removeAllChildren();
       game.end();
     });
-    endPage.addChild(exitButton);
-
-    endPage.onSetup(() => {
-      doneLabel.text = `You did ${game.trialIndex} trials. You're done!`;
-    });
+    doneScene.addChild(okButton);    
 
     game.entryScene = "instructions-01";
   }
@@ -649,11 +709,6 @@ function sendEventToAndroid(event: EventBase) {
 //#endregion
 
 const gridMemory = new GridMemory();
-// default InterferenceTime is 8000 ms; this is how we can specify a different
-// value (6000) from within JavaScript. See the Android code for how we can
-// specify values from native code
-gridMemory.setParameters({ InterferenceTime: 6000, ReadyTime: 1000 });
-
 const session = new Session({
   activities: [gridMemory],
   sessionCallbacks: {

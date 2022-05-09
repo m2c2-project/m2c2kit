@@ -40,18 +40,18 @@ class SymbolSearch extends Game {
       lure_percent: {
         value: 0.5,
         description:
-          "Percentage of lure trials. A lure trial is when the \
-incorrect symbol pair on the bottom contains exactly one symbol that \
-is found on the top.(1 unique symbol). A non-lure trial is when the \
+          "Percentage of lure trials. Number from 0 to 1. A lure trial is \
+when the incorrect symbol pair on the bottom contains exactly one symbol \
+that is found on the top.(1 unique symbol). A non-lure trial is when the \
 incorrect symbol pair contains exactly zero symbols that match the \
-top.(2 unique symbols.)",
+top. (2 unique symbols.)",
       },
       left_correct_percent: {
         value: 0.5,
         description:
           "Percentage of trials where the left pair is the correct answer. Number from 0 to 1.",
       },
-      preparation_wait_ms: {
+      preparation_duration_ms: {
         value: 3000,
         description:
           "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
@@ -69,7 +69,7 @@ top.(2 unique symbols.)",
         value: true,
         description: "Should new trials slide in from right to left?",
       },
-      interstimulus_interval_ms: {
+      interstimulus_interval_duration_ms: {
         value: 500,
         description:
           "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears. ",
@@ -80,13 +80,12 @@ top.(2 unique symbols.)",
       },
       trials_complete_scene_text: {
         value: "You have completed all the symbol search trials",
-        description:
-          "Button text for scene displayed after all trials are complete",
+        description: "Text for scene displayed after all trials are complete.",
       },
       trials_complete_scene_button_text: {
         value: "OK",
         description:
-          "Button text for scene displayed after all trials are complete",
+          "Button text for scene displayed after all trials are complete.",
       },
     };
 
@@ -104,7 +103,7 @@ top.(2 unique symbols.)",
       trial_configuration: {
         type: "object",
         description:
-          "JSON extended description of the trial configuration, including array describing the symbols used for the cards, starting at 0 for leftmost card and incrementing by 1 moving right",
+          "JSON extended description of the trial configuration, including array describing the symbols used for the cards, starting at 0 for leftmost upper card and incrementing by 1 moving right",
       },
       response_time_ms: {
         type: "number",
@@ -119,7 +118,7 @@ top.(2 unique symbols.)",
       correct_response_index: {
         type: "number",
         description:
-          "index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right",
+          "index of correct response, starting at 0 for leftmost upper card and incrementing by 1 moving right",
       },
     };
 
@@ -390,7 +389,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         },
         {
           title: "Symbol Search",
-          text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurate as you can.",
+          text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurately as you can.",
           image: "ssintroImage",
           imageAboveText: false,
           imageMarginTop: 12,
@@ -407,7 +406,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     const afterTrialSceneTransition = Transition.slide({
       direction: TransitionDirection.left,
-      duration: game.getParameter("interstimulus_interval_ms"),
+      duration: game.getParameter("interstimulus_interval_duration_ms"),
       easing: Easings.sinusoidalInOut,
     });
 
@@ -429,7 +428,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     countdownScene.addChild(countdownCircle);
 
     const countdownInitialNumber = Math.floor(
-      game.getParameter<number>("preparation_wait_ms") / 1000
+      game.getParameter<number>("preparation_duration_ms") / 1000
     );
 
     const countdownNumber = new Label({
@@ -520,7 +519,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       text: "or",
       fontSize: 22,
       preferredMaxLayoutWidth: 240,
-      // hidden: true,
     });
     chooseCardScene.addChild(orLabel);
     orLabel.position = { x: 200, y: 580 };
@@ -881,7 +879,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
 
     // ==================================================
-    // SCENE: done scene
+    // SCENE: done. Show done messgae, with a button to exit.
     const doneScene = new Scene();
     game.addScene(doneScene);
 
@@ -891,19 +889,19 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
     doneScene.addChild(doneSceneText);
 
-    const exitButton = new Button({
+    const okButton = new Button({
       text: game.getParameter("trials_complete_scene_button_text"),
       position: { x: 200, y: 600 },
       backgroundColor: WebColors.Black,
     });
-    exitButton.isUserInteractionEnabled = true;
-    exitButton.onTapDown(() => {
-      // don't allow repeat taps of exit button
-      exitButton.isUserInteractionEnabled = false;
+    okButton.isUserInteractionEnabled = true;
+    okButton.onTapDown(() => {
+      // don't allow repeat taps of ok button
+      okButton.isUserInteractionEnabled = false;
       doneScene.removeAllChildren();
       game.end();
     });
-    doneScene.addChild(exitButton);
+    doneScene.addChild(okButton);
 
     switch (game.getParameter("instruction_type")) {
       case "short": {
@@ -999,11 +997,6 @@ function sendEventToAndroid(event: EventBase) {
 //#endregion
 
 const symbolSearch = new SymbolSearch();
-// default InterferenceTime is 8000 ms; this is how we can specify a different
-// value (6000) from within JavaScript. See the Android code for how we can
-// specify values from native code
-//symbolSearch.setParameters({ });
-
 const session = new Session({
   activities: [symbolSearch],
   sessionCallbacks: {
@@ -1104,7 +1097,7 @@ const session = new Session({
 
 // This is an example of how to change game parameters; default is
 // 3 pairs on top, but I'm setting it to 4.
-session.options.activities[0].setParameters({
-  number_of_top_pairs: 4,
-});
+// session.options.activities[0].setParameters({
+//   number_of_top_pairs: 4,
+// });
 session.init();
