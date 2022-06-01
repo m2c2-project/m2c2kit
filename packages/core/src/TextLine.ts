@@ -1,5 +1,5 @@
 import "./Globals";
-import { Canvas, Font, Paint } from "canvaskit-wasm";
+import { Canvas, Font, Paint, Typeface } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
@@ -106,17 +106,19 @@ export class TextLine
     const fontManager = activity.fontManager;
 
     const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
+    let typeface: Typeface | null = null;
     if (this.fontName) {
-      this.font = new this.canvasKit.Font(
-        fontManager.getTypeface(gameUuid, this.fontName),
-        this.fontSize * Globals.canvasScale
-      );
+      typeface = fontManager.getTypeface(gameUuid, this.fontName);
     } else {
-      this.font = new this.canvasKit.Font(
-        null,
-        this.fontSize * Globals.canvasScale
-      );
+      const fontNames = fontManager.getFontNames(gameUuid);
+      if (fontNames.length > 0) {
+        typeface = fontManager.getTypeface(gameUuid, fontNames[0]);
+      }
     }
+    this.font = new this.canvasKit.Font(
+      typeface,
+      this.fontSize * Globals.canvasScale
+    );
     this.needsInitialization = false;
   }
 

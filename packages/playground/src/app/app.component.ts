@@ -57,6 +57,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: "Symbol Search",
       url: "./assets/m2c2-examples/symbol-search/symbol-search-playground.ts",
     },
+    {
+      name: "Color Dots",
+      url: "./assets/m2c2-examples/color-dots/color-dots-playground.ts",
+    },
   ];
 
   selectedTheme = { name: "Light", monacoName: "vs" };
@@ -79,7 +83,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    let loader = this.renderer.selectRootElement("#loader");
+    const loader = this.renderer.selectRootElement("#loader");
     this.renderer.setStyle(loader, "display", "none");
   }
 

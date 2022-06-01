@@ -14,6 +14,13 @@
     {
       "type": "pwa-chrome",
       "request": "launch",
+      "name": "Chrome color-dots",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/examples/color-dots/build"
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
       "name": "Chrome grid-memory",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/examples/grid-memory/build"

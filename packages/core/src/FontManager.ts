@@ -31,6 +31,16 @@ export class FontManager {
   }
 
   /**
+   * Gets names of fonts loaded for the specified game.
+   *
+   * @param gameUuid
+   * @returns array of font family names
+   */
+  getFontNames(gameUuid: string): Array<string> {
+    return Object.keys(this.gameTypefaces[gameUuid]) ?? new Array<string>();
+  }
+
+  /**
    * Fetches all fonts for all games.
    *
    * @param allGamesFontUrls

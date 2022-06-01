@@ -14,6 +14,9 @@ import {
   RgbaColor,
 } from "@m2c2kit/core";
 
+const SCENE_TRANSITION_EASING = Easings.sinusoidalInOut;
+const SCENE_TRANSITION_DURATION = 500;
+
 export interface InstructionScene {
   /** Primary instruction text */
   text?: string;
@@ -121,16 +124,16 @@ export class Instructions extends Story {
         options.nextSceneTransition ??
         Transition.slide({
           direction: TransitionDirection.left,
-          duration: 500,
-          easing: Easings.sinusoidalInOut,
+          duration: SCENE_TRANSITION_DURATION,
+          easing: SCENE_TRANSITION_EASING,
         });
       const backSceneTransition =
         s.backSceneTransition ??
         options.backSceneTransition ??
         Transition.slide({
           direction: TransitionDirection.right,
-          duration: 500,
-          easing: Easings.sinusoidalInOut,
+          duration: SCENE_TRANSITION_DURATION,
+          easing: SCENE_TRANSITION_EASING,
         });
       const backButtonText =
         s.backButtonText ?? options.backButtonText ?? "Back";

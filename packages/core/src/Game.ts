@@ -841,7 +841,7 @@ export class Game implements Activity {
       }
 
       if (outgoingScene && incomingScene) {
-        if (transition) {
+        if (transition && transition.type !== TransitionType.none) {
           this.animateSceneTransition(incomingScene, transition, outgoingScene);
         } else {
           outgoingScene._active = false;

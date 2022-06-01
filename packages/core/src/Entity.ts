@@ -141,7 +141,7 @@ export abstract class Entity implements EntityOptions {
       );
     }
     child.parent = this;
-    if (this.children.map((child) => child.name).includes(child.name)) {
+    if (this.children.map((c) => c.name).includes(child.name)) {
       throw new Error(
         `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. A child with name "${
           child.name
@@ -167,7 +167,7 @@ export abstract class Entity implements EntityOptions {
    */
   removeChild(child: Entity): void {
     if (this.children.includes(child)) {
-      this.children = this.children.filter((child) => child !== child);
+      this.children = this.children.filter((c) => c !== child);
     } else {
       throw new Error(
         `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`

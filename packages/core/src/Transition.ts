@@ -29,6 +29,24 @@ export abstract class Transition {
       options.easing ?? Easings.linear
     );
   }
+
+  /**
+   * Creates a scene transition with no animation or duration. The next scene is immediately drawn.
+   */
+  public static none(): NoneTransition {
+    return new NoneTransition();
+  }
+}
+
+export class NoneTransition extends Transition {
+  type = TransitionType.none;
+  easing: EasingFunction;
+  duration: number;
+  constructor() {
+    super();
+    this.duration = 0;
+    this.easing = Easings.linear;
+  }
 }
 
 export class SlideTransition extends Transition {
@@ -50,6 +68,7 @@ export class SlideTransition extends Transition {
 
 export enum TransitionType {
   slide = "Slide",
+  none = "None",
 }
 
 export enum TransitionDirection {
