@@ -1,11 +1,6 @@
-export interface TrialSchema {
-  // The key is a single variable or datum produced by each completion of a single trial. The PropertySchema is similar to what is required of each property in the "properties" object in JSON Schema
-  [key: string]: PropertySchema;
-}
+import { JsonSchema } from "./JsonSchema";
 
-export interface PropertySchema {
-  // Data type of the variable
-  type: "number" | "string" | "boolean" | "object" | "array";
-  // Optional description of the variable
-  description?: string;
+export interface TrialSchema {
+  // The key is a single variable or datum produced by each completion of a single trial. The JsonSchema is a simplified subset of JSON Schema
+  [key: string]: JsonSchema;
 }

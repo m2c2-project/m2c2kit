@@ -21,6 +21,7 @@ import {
   ActivityDataEvent,
   ActivityLifecycleEvent,
   RgbaColor,
+  Equals,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -34,59 +35,85 @@ class ColorDots extends Game {
       fixation_duration_ms: {
         value: 500,
         description: "How long fixation scene is shown, milliseconds.",
+        type: "number",
       },
       dot_colors: {
+        type: "array",
+        description: "Array of colors for dots.",
+        items: {
+          type: "object",
+          properties: {
+            colorName: {
+              type: "string",
+              description: "human-friendly name of color",
+            },
+            rgbaColor: {
+              type: "array",
+              description: "color as array, [r,g,b,a]",
+              items: {
+                type: "number",
+              },
+            },
+          },
+        },
         value: [
-          [0, 0, 0, 1],
-          // [230, 159, 0, 1],
-          // [86, 180, 233, 1],
-          [0, 158, 115, 1],
-          [240, 228, 66, 1],
-          [0, 114, 178, 1],
-          [213, 94, 0, 1],
-          [204, 121, 167, 1],
+          { colorName: "black", rgbaColor: [0, 0, 0, 1] },
+          { colorName: "green", rgbaColor: [0, 158, 115, 1] },
+          { colorName: "yellow", rgbaColor: [240, 228, 66, 1] },
+          { colorName: "blue", rgbaColor: [0, 114, 178, 1] },
+          { colorName: "orange", rgbaColor: [213, 94, 0, 1] },
+          { colorName: "pink", rgbaColor: [204, 121, 167, 1] },
+          // These two additional colors were in the original specification
+          // but not implemented: [230, 159, 0, 1], [86, 180, 233, 1]
         ],
-        description:
-          "Array of colors for dots. Each color is itself an array, [r,g,b,a]",
       },
       dot_diameter: {
         value: 48,
         description: "Diameter of dots.",
+        type: "number",
       },
       number_of_dots: {
         value: 3,
         description: "How many dots to present. Must be at least 3.",
+        type: "number",
       },
       dot_present_duration_ms: {
         value: 1000,
         description: "How long the dots are shown, milliseconds.",
+        type: "number",
       },
       dot_blank_duration_ms: {
         value: 750,
         description:
           "How long to show a blank square after dots are removed, milliseconds.",
+        type: "number",
       },
       color_selected_hold_duration_ms: {
         value: 500,
         description:
           "How long to show a square with the dot colored by the user's choice, before advancing to next scene, milliseconds.",
+        type: "number",
       },
       number_of_trials: {
         value: 5,
         description: "How many trials to run.",
+        type: "number",
       },
       trials_complete_scene_text: {
         value: "You have completed all the color dots trials",
         description: "Text for scene displayed after all trials are complete.",
+        type: "string",
       },
       trials_complete_scene_button_text: {
         value: "OK",
         description:
           "Button text for scene displayed after all trials are complete.",
+        type: "string",
       },
       instruction_type: {
         value: "long",
         description: "Type of intructions to show, 'short' or 'long'.",
+        type: "string",
       },
     };
 
@@ -97,6 +124,93 @@ class ColorDots extends Game {
      * JSON Schema Draft-07 format.
      */
     const colorDotsTrialSchema: TrialSchema = {
+      square_side_length: {
+        type: "number",
+        description:
+          "Length of square side, in pixels. This is the square in which the dots are shown.",
+      },
+      color_target: {
+        description: "color of dot that user was asked to recall",
+        type: "object",
+        properties: {
+          color_name: {
+            type: "string",
+            description: "human-friendly name of color",
+          },
+          rgba_color: {
+            type: "array",
+            description: "color as array, [r,g,b,a]",
+            items: {
+              type: "number",
+            },
+          },
+        },
+      },
+      color_selected: {
+        description: "color selected by user",
+        type: "object",
+        properties: {
+          color_name: {
+            type: "string",
+            description: "human-friendly name of color",
+          },
+          rgba_color: {
+            type: "array",
+            description: "color as array, [r,g,b,a]",
+            items: {
+              type: "number",
+            },
+          },
+        },
+      },
+      color_selected_correct: {
+        type: "boolean",
+        description: "was the color selected by the user correct?",
+      },
+      location_target: {
+        description: "location and color of dot that user was asked to place",
+        type: "object",
+        properties: {
+          x: {
+            type: "number",
+            description: "x coordinate of dot",
+          },
+          y: {
+            type: "number",
+            description: "y coordinate of dot",
+          },
+          color_name: {
+            type: "string",
+            description: "human-friendly name of color",
+          },
+          rgba_color: {
+            type: "array",
+            description: "color as array, [r,g,b,a]",
+            items: {
+              type: "number",
+            },
+          },
+        },
+      },
+      location_selected: {
+        description: "location selected by user",
+        type: "object",
+        properties: {
+          x: {
+            type: "number",
+            description: "x coordinate of dot",
+          },
+          y: {
+            type: "number",
+            description: "y coordinate of dot",
+          },
+        },
+      },
+      location_selected_delta: {
+        type: "number",
+        description:
+          "Euclidean distance between location_target and location_selected",
+      },
       color_selection_response_time_ms: {
         type: "number",
         description:
@@ -157,6 +271,19 @@ appeared.",
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
+
+    const SQUARE_SIDE_LENGTH = 350;
+
+    // ==============================================================
+    // These user input variables are referenced across scenes, thus
+    // we must define them in this scope, rather than in the
+    // scene.onSetup() function.
+    interface ColorSelected {
+      color_name: string;
+      rgba_color: RgbaColor;
+    }
+    let colorSelected: ColorSelected;
+    let selectedRgba: RgbaColor | undefined;
 
     // ==============================================================
     // SCENES: instructions
@@ -237,7 +364,8 @@ appeared.",
     interface Dot {
       x: number;
       y: number;
-      color: RgbaColor;
+      rgbaColor: RgbaColor;
+      colorName: string;
     }
 
     interface ScreenDot extends Dot {
@@ -251,10 +379,11 @@ appeared.",
     }
 
     const trialConfigurations: Array<TrialConfiguration> = [];
-
-    const squareSide = 350;
     const numberOfDots = game.getParameter<number>("number_of_dots");
-    const dotColors: Array<RgbaColor> = game.getParameter("dot_colors");
+    const dotColors =
+      game.getParameter<Array<{ colorName: string; rgbaColor: RgbaColor }>>(
+        "dot_colors"
+      );
     const dotDiameter = game.getParameter<number>("dot_diameter");
     const numberOfColors = dotColors.length;
 
@@ -275,21 +404,23 @@ appeared.",
     }
 
     for (let i = 0; i < game.getParameter<number>("number_of_trials"); i++) {
-      const availableColors: Array<RgbaColor> = JSON.parse(
-        JSON.stringify(dotColors)
-      );
+      // we clone the dotColors array because we mutate the cloned array
+      // (availableColors) to avoid re-using colors in the same trial
+      const availableColors: { colorName: string; rgbaColor: RgbaColor }[] =
+        JSON.parse(JSON.stringify(dotColors));
       const dots = new Array<Dot>();
       for (let j = 0; j < numberOfDots; j++) {
         let x: number;
         let y: number;
         do {
+          // +4, -4 to have some small margin between dot and square
           x = RandomDraws.SingleFromRange(
             0 + dotDiameter / 2 + 4,
-            squareSide - dotDiameter / 2 - 4
+            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4
           );
           y = RandomDraws.SingleFromRange(
             0 + dotDiameter / 2 + 4,
-            squareSide - dotDiameter / 2 - 4
+            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4
           );
         } while (positionTooCloseToOtherDots(x, y, dots));
 
@@ -297,8 +428,13 @@ appeared.",
           0,
           availableColors.length - 1
         );
-        const color = availableColors.splice(colorIndex, 1)[0];
-        const dot = { x, y, color };
+        const dotColor = availableColors.splice(colorIndex, 1)[0];
+        const dot = {
+          x,
+          y,
+          rgbaColor: dotColor.rgbaColor,
+          colorName: dotColor.colorName,
+        };
         dots.push(dot);
       }
 
@@ -309,6 +445,8 @@ appeared.",
 
       trialConfigurations.push({
         colorSelectionDotIndex: colorSelectionDotIndex,
+        // which dot is chosen for the location selection task is not yet
+        // known, because it depends on user input to color selection task.
         locationSelectionDotIndex: NaN,
         dots: dots,
       });
@@ -330,7 +468,7 @@ appeared.",
     fixationScene.addChild(readyLabel);
 
     const fixationSceneSquare = new Shape({
-      rect: { size: { width: squareSide, height: squareSide } },
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
       fillColor: WebColors.Transparent,
       strokeColor: WebColors.Gray,
       lineWidth: 4,
@@ -364,7 +502,7 @@ appeared.",
     game.addScene(dotPresentationScene);
 
     const dotPresentationSceneSquare = new Shape({
-      rect: { size: { width: squareSide, height: squareSide } },
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
       fillColor: WebColors.Transparent,
       strokeColor: WebColors.Gray,
       lineWidth: 4,
@@ -382,11 +520,15 @@ appeared.",
         const screenDot: ScreenDot = {
           x: dot.x,
           y: dot.y,
-          color: dot.color,
+          rgbaColor: dot.rgbaColor,
+          colorName: dot.colorName,
           shape: new Shape({
             circleOfRadius: dotDiameter / 2,
-            fillColor: dot.color,
-            position: { x: dot.x - squareSide / 2, y: dot.y - squareSide / 2 },
+            fillColor: dot.rgbaColor,
+            position: {
+              x: dot.x - SQUARE_SIDE_LENGTH / 2,
+              y: dot.y - SQUARE_SIDE_LENGTH / 2,
+            },
           }),
         };
         screenDots.push(screenDot);
@@ -419,7 +561,7 @@ appeared.",
     game.addScene(colorSelectionScene);
 
     const colorSelectionSceneSquare = new Shape({
-      rect: { size: { width: squareSide, height: squareSide } },
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
       fillColor: WebColors.Transparent,
       strokeColor: WebColors.Gray,
       lineWidth: 4,
@@ -477,6 +619,31 @@ appeared.",
           }),
           Action.custom({
             callback: () => {
+              if (!selectedRgba) {
+                throw new Error("no selected color");
+              }
+              const colorSelectedName = dotColors.filter((d) =>
+                Equals.rgbaColor(d.rgbaColor, selectedRgba)
+              )[0].colorName;
+              colorSelected = {
+                color_name: colorSelectedName,
+                rgba_color: selectedRgba,
+              };
+              game.addTrialData("color_selected", colorSelected);
+              const trialConfiguration = trialConfigurations[game.trialIndex];
+              const colorTargetDot =
+                trialConfiguration.dots[
+                  trialConfiguration.colorSelectionDotIndex
+                ];
+              const colorTarget = {
+                color_name: colorTargetDot.colorName,
+                rgba_color: colorTargetDot.rgbaColor,
+              };
+              game.addTrialData("color_target", colorTarget);
+              game.addTrialData(
+                "color_selected_correct",
+                Equals.rgbaColor(colorTargetDot.rgbaColor, selectedRgba)
+              );
               game.presentScene(locationSelectionScene);
             },
           }),
@@ -485,8 +652,6 @@ appeared.",
     });
 
     colorSelectionScene.addChild(colorSelectionDoneButton);
-
-    let selectedColor: RgbaColor | undefined;
 
     colorSelectionScene.onSetup(() => {
       whatColorLabel.hidden = false;
@@ -509,7 +674,7 @@ appeared.",
       for (let i = 0; i < numberOfColors; i++) {
         const colorDot = new Shape({
           circleOfRadius: dotDiameter / 2,
-          fillColor: dotColors[i],
+          fillColor: dotColors[i].rgbaColor,
           isUserInteractionEnabled: true,
         });
         colorDot.size = { width: dotDiameter, height: dotDiameter };
@@ -518,7 +683,7 @@ appeared.",
           colorSelectionDot.fillColor = colorDot.fillColor;
           colorSelectionDoneButton.hidden = false;
           colorSelectionDoneButton.isUserInteractionEnabled = true;
-          selectedColor = colorDot.fillColor;
+          selectedRgba = colorDot.fillColor;
         });
 
         colorPaletteGrid.addAtCell(colorDot, 0, i);
@@ -533,7 +698,7 @@ appeared.",
     game.addScene(locationSelectionScene);
 
     const locationSelectionSquare = new Shape({
-      rect: { size: { width: squareSide, height: squareSide } },
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
       fillColor: WebColors.Transparent,
       strokeColor: WebColors.Gray,
       lineWidth: 4,
@@ -555,6 +720,14 @@ appeared.",
     });
     locationSelectionSquare.addChild(touchToMoveLabel);
 
+    let locationSelectionDot: Shape;
+    let location_target: {
+      x: number;
+      y: number;
+      color_name: string;
+      color_rgba: RgbaColor;
+    };
+
     locationSelectionScene.onSetup(() => {
       const trialConfiguration = trialConfigurations[game.trialIndex];
       const colorSelectionDotIndex = trialConfiguration.colorSelectionDotIndex;
@@ -564,12 +737,16 @@ appeared.",
 
       const priorColorSelectedDot = new Shape({
         circleOfRadius: dotDiameter / 2,
-        fillColor: selectedColor,
+        fillColor: selectedRgba,
         strokeColor: WebColors.Black,
         lineWidth: 2,
         position: {
-          x: trialConfiguration.dots[colorSelectionDotIndex].x - squareSide / 2,
-          y: trialConfiguration.dots[colorSelectionDotIndex].y - squareSide / 2,
+          x:
+            trialConfiguration.dots[colorSelectionDotIndex].x -
+            SQUARE_SIDE_LENGTH / 2,
+          y:
+            trialConfiguration.dots[colorSelectionDotIndex].y -
+            SQUARE_SIDE_LENGTH / 2,
         },
       });
       locationSelectionSquare.addChild(priorColorSelectedDot);
@@ -580,11 +757,11 @@ appeared.",
           0,
           numberOfDots - 1
         );
-        // we stringify to compare these as value types
         if (
-          JSON.stringify(
-            trialConfiguration.dots[locationSelectionDotIndex].color
-          ) === JSON.stringify(selectedColor)
+          Equals.rgbaColor(
+            trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
+            selectedRgba
+          )
         ) {
           locationSelectionDotIndex = -1;
         }
@@ -595,17 +772,27 @@ appeared.",
 
       trialConfiguration.locationSelectionDotIndex = locationSelectionDotIndex;
 
-      const locationSelectionDot = new Shape({
+      locationSelectionDot = new Shape({
         circleOfRadius: dotDiameter / 2,
-        fillColor: trialConfiguration.dots[locationSelectionDotIndex].color,
+        fillColor: trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
         position: { x: 300, y: 60 },
       });
       locationSelectionScene.addChild(locationSelectionDot);
 
-      if (!selectedColor) {
+      location_target = {
+        x: trialConfiguration.dots[locationSelectionDotIndex].x,
+        y: trialConfiguration.dots[locationSelectionDotIndex].y,
+        color_name:
+          trialConfiguration.dots[locationSelectionDotIndex].colorName,
+        color_rgba:
+          trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
+      };
+      game.addTrialData("location_target", location_target);
+
+      if (!selectedRgba) {
         throw new Error("no selected color!");
       }
-      priorColorSelectedDot.fillColor = selectedColor;
+      priorColorSelectedDot.fillColor = selectedRgba;
       locationSelectionSquare.isUserInteractionEnabled = true;
 
       locationSelectionSquare.onTapDown((tapEvent) => {
@@ -615,8 +802,8 @@ appeared.",
           locationSelectionDoneButton.hidden = false;
         }
         locationSelectionDot.position = {
-          x: tapEvent.point.x - squareSide / 2,
-          y: tapEvent.point.y - squareSide / 2,
+          x: tapEvent.point.x - SQUARE_SIDE_LENGTH / 2,
+          y: tapEvent.point.y - SQUARE_SIDE_LENGTH / 2,
         };
       });
 
@@ -636,6 +823,19 @@ appeared.",
       locationRt = Timer.elapsed("locationRt");
       Timer.remove("locationRt");
       game.addTrialData("location_selection_response_time_ms", locationRt);
+
+      const location_selected = {
+        x: locationSelectionDot.position.x + SQUARE_SIDE_LENGTH / 2,
+        y: locationSelectionDot.position.y + SQUARE_SIDE_LENGTH / 2,
+      };
+      game.addTrialData("location_selected", location_selected);
+      game.addTrialData("square_side_length", SQUARE_SIDE_LENGTH);
+      const delta = Math.sqrt(
+        Math.pow(location_selected.x - location_target.x, 2) +
+          Math.pow(location_selected.y - location_target.y, 2)
+      );
+      game.addTrialData("location_selected_delta", delta);
+
       game.trialComplete();
       if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
         game.presentScene(fixationScene);
@@ -677,7 +877,6 @@ appeared.",
     doneScene.addChild(okButton);
 
     game.entryScene = "instructions-01";
-    //game.entryScene = fixationScene;
   }
 }
 
@@ -800,6 +999,10 @@ const session = new Session({
       console.log("data schema: " + JSON.stringify(ev.dataSchema));
       console.log(
         "activity parameters: " + JSON.stringify(ev.activityConfiguration)
+      );
+      console.log(
+        "activity parameters schema: " +
+          JSON.stringify(ev.activityConfigurationSchema)
       );
 
       //#region to support m2c2kit in Android WebView

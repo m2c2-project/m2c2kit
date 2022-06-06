@@ -18,6 +18,7 @@ export * from "./Easings";
 export * from "./Entity";
 export * from "./EntityOptions";
 export * from "./EntityType";
+export * from "./Equals";
 export * from "./EventBase";
 export * from "./FontData";
 export * from "./FontManager";

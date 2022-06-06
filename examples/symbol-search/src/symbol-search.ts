@@ -35,10 +35,12 @@ class SymbolSearch extends Game {
     const defaultParameters: GameParameters = {
       number_of_top_pairs: {
         value: 3,
+        type: "number",
         description: "Number of pairs to be shown on top. (1-4)",
       },
       lure_percent: {
         value: 0.5,
+        type: "number",
         description:
           "Percentage of lure trials. Number from 0 to 1. A lure trial is \
 when the incorrect symbol pair on the bottom contains exactly one symbol \
@@ -48,42 +50,51 @@ top. (2 unique symbols.)",
       },
       left_correct_percent: {
         value: 0.5,
+        type: "number",
         description:
           "Percentage of trials where the left pair is the correct answer. Number from 0 to 1.",
       },
       preparation_duration_ms: {
         value: 3000,
+        type: "number",
         description:
           "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
       },
       after_preparation_transition_duration_ms: {
         value: 500,
+        type: "number",
         description:
           "Duration, in milliseconds, of the slide in animation after the preparation phase.",
       },
       number_of_trials: {
         value: 5,
+        type: "number",
         description: "How many trials to run.",
       },
       interstimulus_animation: {
         value: true,
+        type: "boolean",
         description: "Should new trials slide in from right to left?",
       },
       interstimulus_interval_duration_ms: {
         value: 500,
+        type: "number",
         description:
           "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears. ",
       },
       instruction_type: {
         value: "long",
+        type: "string",
         description: "Type of intructions to show, 'short' or 'long'.",
       },
       trials_complete_scene_text: {
         value: "You have completed all the symbol search trials",
+        type: "string",
         description: "Text for scene displayed after all trials are complete.",
       },
       trials_complete_scene_button_text: {
         value: "OK",
+        type: "string",
         description:
           "Button text for scene displayed after all trials are complete.",
       },
@@ -98,12 +109,53 @@ top. (2 unique symbols.)",
     const symbolSearchTrialSchema: TrialSchema = {
       trial_type: {
         type: "string",
-        description: "possible values are 'normal' or 'lure'",
+        description: "indicates if trial was normal or lure",
       },
-      trial_configuration: {
+      card_configuration: {
         type: "object",
-        description:
-          "JSON extended description of the trial configuration, including array describing the symbols used for the cards, starting at 0 for leftmost upper card and incrementing by 1 moving right",
+        description: "symbols used on cards",
+        properties: {
+          top_cards_symbols: {
+            type: "array",
+            description:
+              "symbols of the top cards, starting at 0 for leftmost upper card and incrementing by 1 moving right",
+            items: {
+              type: "object",
+              properties: {
+                top: {
+                  type: "number",
+                  description:
+                    "index of the top symbol within the card, 1-based",
+                },
+                bottom: {
+                  type: "number",
+                  description:
+                    "index of the bottom symbol within the card, 1-based",
+                },
+              },
+            },
+          },
+          bottom_cards_symbols: {
+            type: "array",
+            description:
+              "symbols of the bottom cards, starting at 0 for leftmost card and incrementing by 1 moving right",
+            items: {
+              type: "object",
+              properties: {
+                top: {
+                  type: "number",
+                  description:
+                    "index of the top symbol within the card, 1-based",
+                },
+                bottom: {
+                  type: "number",
+                  description:
+                    "index of the bottom symbol within the card, 1-based",
+                },
+              },
+            },
+          },
+        },
       },
       response_time_ms: {
         type: "number",
@@ -118,7 +170,7 @@ top. (2 unique symbols.)",
       correct_response_index: {
         type: "number",
         description:
-          "index of correct response, starting at 0 for leftmost upper card and incrementing by 1 moving right",
+          "index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right",
       },
     };
 
@@ -532,26 +584,26 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       index: number;
     }
 
-    interface BriefGameParameters {
-      [key: string]: number | string | boolean | object;
-    }
+    // interface BriefGameParameters {
+    //   [key: string]: number | string | boolean | object;
+    // }
 
-    function getBriefGameParameters(
-      gameParameters?: GameParameters
-    ): BriefGameParameters {
-      const briefParams: BriefGameParameters = {};
-      let parameters: GameParameters;
-      if (gameParameters) {
-        parameters = JSON.parse(JSON.stringify(gameParameters));
-      } else {
-        parameters = {};
-      }
-      const params = Object.keys(parameters);
-      for (const param of params) {
-        briefParams[param] = parameters[param].value;
-      }
-      return briefParams;
-    }
+    // function getBriefGameParameters(
+    //   gameParameters?: GameParameters
+    // ): BriefGameParameters {
+    //   const briefParams: BriefGameParameters = {};
+    //   let parameters: GameParameters;
+    //   if (gameParameters) {
+    //     parameters = JSON.parse(JSON.stringify(gameParameters));
+    //   } else {
+    //     parameters = {};
+    //   }
+    //   const params = Object.keys(parameters);
+    //   for (const param of params) {
+    //     briefParams[param] = parameters[param].value;
+    //   }
+    //   return briefParams;
+    // }
 
     /**
      * note: these are in snake_case because we will directly serialize
@@ -562,7 +614,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       bottom_cards_symbols: Array<SymbolCard>;
       trial_type: "normal" | "lure";
       correct_response_index: number;
-      parameters: BriefGameParameters;
+      // parameters: BriefGameParameters;
     }
 
     const trialConfigurations: Array<TrialConfiguration> = [];
@@ -668,7 +720,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           : [incorrectCard, correctCard],
         trial_type: isLure ? "lure" : "normal",
         correct_response_index: isLeftCorrect ? 0 : 1,
-        parameters: getBriefGameParameters(this.options.parameters),
+        //parameters: getBriefGameParameters(this.options.parameters),
       };
       trialConfigurations.push(trial);
     }
@@ -830,7 +882,18 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           "user_response_index",
           (card.userData as bottomCardUserData).index
         );
-        game.addTrialData("trial_configuration", trialConfiguration);
+
+        // correct_response_index and trial_type are nested in the
+        // trialConfiguration, but we will expose these in a
+        // different property. So, use the rest operator to
+        // them from the trialConfiguration.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const {
+          correct_response_index,
+          trial_type,
+          ...remaining_trial_configuration
+        } = trialConfiguration;
+        game.addTrialData("card_configuration", remaining_trial_configuration);
 
         game.trialComplete();
         if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
@@ -1055,6 +1118,10 @@ const session = new Session({
       console.log("data schema: " + JSON.stringify(ev.dataSchema));
       console.log(
         "activity parameters: " + JSON.stringify(ev.activityConfiguration)
+      );
+      console.log(
+        "activity parameters schema: " +
+          JSON.stringify(ev.activityConfigurationSchema)
       );
 
       //#region to support m2c2kit in Android WebView

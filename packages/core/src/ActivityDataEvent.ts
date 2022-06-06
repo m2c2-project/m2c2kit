@@ -1,11 +1,12 @@
 import { ActivityEvent } from "./ActivityEvent";
 import { ActivityData } from "./ActivityData";
+import { JsonSchema } from "./JsonSchema";
 
-// TODO: replace any with types
 export interface ActivityDataEvent extends ActivityEvent {
   newData: ActivityData;
-  newDataSchema: any;
+  newDataSchema: JsonSchema;
   data: ActivityData;
-  dataSchema: any;
-  activityConfiguration: any;
+  dataSchema: JsonSchema;
+  activityConfiguration: unknown;
+  activityConfigurationSchema: JsonSchema;
 }

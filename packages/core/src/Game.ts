@@ -26,6 +26,8 @@ import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
 import { PendingScreenshot } from "./PendingScreenshot";
+import { GameParameters } from "./GameParameters";
+import { JsonSchema } from "./JsonSchema";
 
 interface BoundingBox {
   xMin: number;
@@ -432,7 +434,10 @@ export class Game implements Activity {
     const variables = Object.entries(trialSchema);
     const validDataTypes = ["number", "string", "boolean", "object", "array"];
     for (const [variableName, propertySchema] of variables) {
-      if (!validDataTypes.includes(propertySchema.type)) {
+      if (
+        propertySchema.type !== undefined &&
+        !validDataTypes.includes(propertySchema.type)
+      ) {
         throw new Error(
           `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`
         );
@@ -535,14 +540,14 @@ export class Game implements Activity {
       // newData is only the trial that recently completed
       // data is all the data collected so far in the game
 
-      // return our easy-to-use schema as JSON Schema Draft-07
-      const newDataSchema = {
+      // return schema as JSON Schema Draft-07
+      const newDataSchema: JsonSchema = {
         description: `a single completed trial from the assessment ${this.name}`,
         type: "object",
         properties: this.options.trialSchema,
       };
 
-      const dataSchema = {
+      const dataSchema: JsonSchema = {
         description: `all trial and metadata from the assessment ${this.name}`,
         type: "object",
         required: ["trials", "metadata"],
@@ -563,6 +568,63 @@ export class Game implements Activity {
         },
       };
 
+      /**
+       * GameParameters combines default parameters values and
+       * JSON Schema to describe what the parameters are.
+       * The next two functions extract GameParameters's two parts
+       * (the default values and the schema) so they can be returned
+       * separately in the activityData event
+       */
+
+      const makeGameActivityConfiguration = (
+        parameters: GameParameters
+      ): unknown => {
+        const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+
+        for (const prop in result) {
+          for (const subProp in result[prop]) {
+            if (subProp == "value") {
+              result[prop] = result[prop][subProp];
+            }
+          }
+        }
+        return result;
+      };
+
+      const makeGameActivityConfigurationSchema = (
+        parameters: GameParameters
+      ): JsonSchema => {
+        const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+
+        for (const prop in result) {
+          if (!("type" in result[prop]) && "value" in result[prop]) {
+            const valueType = typeof result[prop]["value"];
+            // if the "type" of the value was not provided,
+            // infer it from the value itself
+            // (note: in our JSON schema, we don't support bigint, function,
+            // symbol, or undefined, so we skip those).
+            if (
+              valueType !== "bigint" &&
+              valueType !== "function" &&
+              valueType !== "symbol" &&
+              valueType !== "undefined"
+            ) {
+              result[prop].type = valueType;
+            }
+          }
+          for (const subProp in result[prop]) {
+            if (subProp == "value") {
+              delete result[prop][subProp];
+            }
+          }
+        }
+        return {
+          description: `activity configuration from the assessment ${this.name}`,
+          type: "object",
+          properties: result,
+        } as JsonSchema;
+      };
+
       this.session.options.activityCallbacks.onActivityDataCreate({
         eventType: EventType.activityData,
         uuid: this.uuid,
@@ -571,7 +633,12 @@ export class Game implements Activity {
         newDataSchema: newDataSchema,
         data: this.data,
         dataSchema: dataSchema,
-        activityConfiguration: this.options.parameters ?? {},
+        activityConfiguration: makeGameActivityConfiguration(
+          this.options.parameters ?? {}
+        ),
+        activityConfigurationSchema: makeGameActivityConfigurationSchema(
+          this.options.parameters ?? {}
+        ),
       });
     }
   }
