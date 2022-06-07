@@ -15,6 +15,8 @@ export interface Activity {
   uuid: string;
   /** The activity's human friendly name */
   name: string;
+  /** The value of performance.now() immediately before the activity begins */
+  beginTimestamp: number;
   /** Set activity parameters if defaults are not desired*/
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setParameters(newParameters: any): void;

@@ -13,4 +13,8 @@ export class Constants {
   public static readonly DEFAULT_FONT_COLOR = WebColors.Black;
   public static readonly DEFAULT_FONT_SIZE = 16;
   public static readonly LIMITED_FPS_RATE = 5;
+  public static readonly FREE_ENTITIES_SCENE_NAME = "__freeEntitiesScene";
+  public static readonly OUTGOING_SCENE_NAME = "__outgoingScene";
+  public static readonly OUTGOING_SCENE_SPRITE_NAME = "__outgoingSceneSprite";
+  public static readonly OUTGOING_SCENE_IMAGE_NAME = "__outgoingSceneSnapshot";
 }

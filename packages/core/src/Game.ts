@@ -26,6 +26,7 @@ import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
 import { PendingScreenshot } from "./PendingScreenshot";
+import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
 import { JsonSchema } from "./JsonSchema";
 
@@ -69,6 +70,7 @@ export class Game implements Activity {
   uuid = Uuid.generate();
   name: string;
   options: GameOptions;
+  beginTimestamp = NaN;
 
   constructor(options: GameOptions) {
     this.options = options;
@@ -145,7 +147,7 @@ export class Game implements Activity {
 
   private scenes = new Array<Scene>();
   private freeEntitiesScene = new Scene({
-    name: "freeEntitiesScene",
+    name: Constants.FREE_ENTITIES_SCENE_NAME,
     backgroundColor: [255, 255, 255, 0],
   });
   private incomingSceneTransitions = new Array<SceneTransition>();
@@ -161,7 +163,7 @@ export class Game implements Activity {
    * an entity must persisently be drawn and not move with scene
    * transitions. The appearance of the free entity must be managed
    * by the programmer. Note: internally, the free entities are part of a
-   * special scene (named "freeEntitiesScene"), but this scene is handled
+   * special scene (named "__freeEntitiesScene"), but this scene is handled
    * apart from regular scenes in order to achieve the free entity behavior.
    *
    * @param entity - entity to add as a free entity
@@ -229,12 +231,37 @@ export class Game implements Activity {
   }
 
   /**
+   * Removes a scene from the game.
+   *
+   * @param scene - the scene to remove or its name as a string
+   */
+  removeScene(scene: Scene | string): void {
+    if (scene instanceof Scene) {
+      if (this.scenes.includes(scene)) {
+        this.scenes = this.scenes.filter((s) => s !== scene);
+      } else {
+        throw new Error(
+          `cannot remove scene ${scene} from game because the scene is not currently added to the game`
+        );
+      }
+    } else {
+      if (this.scenes.map((s) => s.name).includes(scene)) {
+        this.scenes = this.scenes.filter((s) => s.name !== scene);
+      } else {
+        throw new Error(
+          `cannot remove scene named "${scene}" from game because the scene is not currently added to the game`
+        );
+      }
+    }
+  }
+
+  /**
    * Specifies the scene that will be presented upon the next frame draw.
    *
    * @param scene
    * @param transition
    */
-  presentScene(scene: string | Scene, transition?: Transition): void {
+  presentScene(scene: string | Scene, transition = Transition.none()): void {
     // When we want to present a new scene, we can't immediately switch to the new scene
     // because we could be in the middle of updating the entire scene and its children hierarchy.
     // Thus, we have a queue called "incomingSceneTransitions" that has the next scene and its
@@ -352,6 +379,7 @@ export class Game implements Activity {
       throw new Error("CanvasKit surface is undefined");
     }
     this.warmupShaders(this.surface);
+    this.beginTimestamp = Timer.now();
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -844,83 +872,92 @@ export class Game implements Activity {
     if (incomingSceneTransitions.length > 0 && this.currentSceneSnapshot) {
       const incomingSceneTransition = incomingSceneTransitions.shift();
       if (incomingSceneTransition === undefined) {
-        // this should not happen, because above we verified that
-        // this.incomingSceneTransitions.length > 0
+        // should not happen; checked this.incomingSceneTransitions.length > 0
         throw new Error("no incoming scene transition");
       }
 
       const incomingScene = incomingSceneTransition.scene;
       const transition = incomingSceneTransition.transition;
 
-      const outgoingSceneImage = this.currentSceneSnapshot;
-      if (!outgoingSceneImage) {
-        throw new Error("no outgoing scene image");
+      // no transition (type "none"); just present the incoming scene
+      if (transition.type === TransitionType.none) {
+        if (this.currentScene) {
+          this.currentScene._active = false;
+        }
+        this.currentScene = incomingScene;
+        this.currentScene._active = true;
+        if (incomingScene._setupCallback) {
+          incomingScene._setupCallback(incomingScene);
+        }
+        if (incomingScene._appearCallback) {
+          incomingScene._appearCallback(incomingScene);
+        }
+        return;
       }
 
-      const outgoingScene = new Scene({ name: "outgoingScene" });
-      // Typically, a scene's width and height are assigned in its
-      // initialize() function during update(). But that approach will not
-      // work for scene transitions because we need the outgoing scene's width
-      // and height for animateSceneTransition(), which will execute before
-      // update(). Therefore, to properly position the incoming scene
-      // animation, we need to assign the outgoing scene's width and height now.
-      outgoingScene.size.width = this.canvasCssWidth;
-      outgoingScene.size.height = this.canvasCssHeight;
-
-      this.addScene(outgoingScene);
-      if (!outgoingSceneImage) {
-        console.log("outgoingSceneImage is undefined/null");
-      }
-      const loadedImage = new LoadedImage(
-        "outgoingSceneSnapshot",
-        outgoingSceneImage,
-        this.canvasCssWidth,
-        this.canvasCssHeight
-      );
-      this.session.imageManager.addLoadedImage(loadedImage, this.uuid);
-
-      // if this._rootScale is not 1, that means we scaled down everything
-      // because the display is too small, or we stretched to a larger
-      // display. When that happens, the screen shot that was taken of
-      // the outgoing scene needs to be positioned and re-scaled:
-      // the sprite containing the screen shot is scaled, and the sprite's
-      // position is adjusted.
-      const spr = new Sprite({
-        name: "outgoingSceneSprite",
-        imageName: "outgoingSceneSnapshot",
-        position: {
-          x: this.canvasCssWidth / Globals.rootScale / 2,
-          y: this.canvasCssHeight / Globals.rootScale / 2,
-        },
-      });
-      spr.scale = 1 / Globals.rootScale;
-      outgoingScene.addChild(spr);
+      // outgoingScene isn't the current scene; it's a scene that has a
+      // screenshot of the current scene.
+      const outgoingScene = this.createOutgoingScene(this.currentSceneSnapshot);
       outgoingScene._active = true;
-      if (incomingScene !== this.currentScene && this.currentScene) {
+      if (this.currentScene) {
         this.currentScene._active = false;
       }
-
       this.currentScene = incomingScene;
       this.currentScene._active = true;
-
       if (incomingScene._setupCallback) {
         incomingScene._setupCallback(incomingScene);
       }
 
-      if (outgoingScene && incomingScene) {
-        if (transition && transition.type !== TransitionType.none) {
-          this.animateSceneTransition(incomingScene, transition, outgoingScene);
-        } else {
-          outgoingScene._active = false;
-        }
-      }
-
-      if (!outgoingScene || !transition) {
-        if (incomingScene._appearCallback) {
-          incomingScene._appearCallback(incomingScene);
-        }
-      }
+      // animateSceneTransition() will run the transition animation,
+      // mark the outgoing scene as inactive once the animation is done,
+      // and also run the incoming scene's onAppear callback
+      this.animateSceneTransition(incomingScene, transition, outgoingScene);
     }
+  }
+
+  /**
+   * Creates a scene that has a screen shot of the current scene.
+   *
+   * @param outgoingSceneImage - an image of the current scene
+   * @returns - the scene with the screen shot
+   */
+  private createOutgoingScene(outgoingSceneImage: Image) {
+    const outgoingScene = new Scene({ name: Constants.OUTGOING_SCENE_NAME });
+    // Typically, a scene's width and height are assigned in its
+    // initialize() function during update(). But that approach will not
+    // work for scene transitions because we need the outgoing scene's width
+    // and height for animateSceneTransition(), which will execute before
+    // update(). Therefore, to properly position the incoming scene
+    // animation, we need to assign the outgoing scene's width and height now.
+    outgoingScene.size.width = this.canvasCssWidth;
+    outgoingScene.size.height = this.canvasCssHeight;
+
+    this.addScene(outgoingScene);
+    const loadedImage = new LoadedImage(
+      Constants.OUTGOING_SCENE_IMAGE_NAME,
+      outgoingSceneImage,
+      this.canvasCssWidth,
+      this.canvasCssHeight
+    );
+    this.session.imageManager.addLoadedImage(loadedImage, this.uuid);
+
+    // if this._rootScale is not 1, that means we scaled down everything
+    // because the display is too small, or we stretched to a larger
+    // display. When that happens, the screen shot that was taken of
+    // the outgoing scene needs to be positioned and re-scaled:
+    // the sprite containing the screen shot is scaled, and the sprite's
+    // position is adjusted.
+    const spr = new Sprite({
+      name: Constants.OUTGOING_SCENE_SPRITE_NAME,
+      imageName: Constants.OUTGOING_SCENE_IMAGE_NAME,
+      position: {
+        x: this.canvasCssWidth / Globals.rootScale / 2,
+        y: this.canvasCssHeight / Globals.rootScale / 2,
+      },
+    });
+    spr.scale = 1 / Globals.rootScale;
+    outgoingScene.addChild(spr);
+    return outgoingScene;
   }
 
   private update(): void {
@@ -1066,6 +1103,12 @@ export class Game implements Activity {
                     if (incomingScene._appearCallback) {
                       incomingScene._appearCallback(incomingScene);
                     }
+                    /**
+                     * For the transitions, the outgoing scene is a temporary scene
+                     * that has a screenshot of the previous scene. Thus it is
+                     * ok to remove because it will never be used again.
+                     */
+                    this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
                 }),
@@ -1108,6 +1151,7 @@ export class Game implements Activity {
                     if (incomingScene._appearCallback) {
                       incomingScene._appearCallback(incomingScene);
                     }
+                    this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
                 }),
@@ -1150,6 +1194,7 @@ export class Game implements Activity {
                     if (incomingScene._appearCallback) {
                       incomingScene._appearCallback(incomingScene);
                     }
+                    this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
                 }),
@@ -1192,6 +1237,7 @@ export class Game implements Activity {
                     if (incomingScene._appearCallback) {
                       incomingScene._appearCallback(incomingScene);
                     }
+                    this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
                 }),

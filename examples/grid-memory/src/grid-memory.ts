@@ -30,6 +30,11 @@ class GridMemory extends Game {
      * At run time, they can be changed with the setParameters() method.
      */
     const defaultParameters: GameParameters = {
+      number_of_dots: {
+        type: "number",
+        value: 3,
+        description: "Number of dots to present.",
+      },
       preparation_duration_ms: {
         type: "number",
         value: 500,
@@ -60,12 +65,12 @@ class GridMemory extends Game {
       },
       number_of_interference_targets: {
         type: "number",
-        value: 6,
+        value: 5,
         description: "How many targets to show in the interference phase.",
       },
       number_of_trials: {
         type: "number",
-        value: 5,
+        value: 4,
         description: "How many trials to run.",
       },
       trials_complete_scene_text: {
@@ -93,91 +98,106 @@ class GridMemory extends Game {
      * JSON Schema Draft-07 format.
      */
     const gridMemoryTrialSchema: TrialSchema = {
+      activity_begin_timestamp_ms: {
+        type: "number",
+        description:
+          "Millisecond timestamp at the beginning of the game activity.",
+      },
+      trial_begin_timestamp_ms: {
+        type: "number",
+        description: "Millisecond timestamp at the beginning of the trial.",
+      },
       random_cells: {
         type: "array",
-        description: "randomly chosen locations of the dots",
+        description: "Randomly chosen locations of the dots",
         items: {
           type: "object",
           properties: {
             row: {
               type: "number",
-              description: "row of the cell, 0-indexed",
+              description: "Row of the cell, 0-indexed.",
             },
             column: {
               type: "number",
-              description: "column of the cell, 0-indexed",
+              description: "Column of the cell, 0-indexed.",
             },
           },
         },
       },
-      tapped_cells: {
+      selected_cells: {
         type: "array",
-        description: "user selected locations of the dots",
+        description: "User selected locations of the dots.",
         items: {
           type: "object",
           properties: {
             row: {
               type: "number",
-              description: "row of the cell, 0-indexed",
+              description: "Row of the cell, 0-indexed.",
             },
             column: {
               type: "number",
-              description: "column of the cell, 0-indexed",
+              description: "Column of the cell, 0-indexed.",
             },
           },
         },
       },
       user_cell_actions: {
         type: "array",
-        description: "complete user dot actions, including dot  removals",
+        description: "Complete user dot actions: placement, removal, and done.",
         items: {
           type: "object",
           properties: {
             elapsed_duration_ms: {
               type: "number",
               description:
-                "duration, milliseconds, from when scene appeared until this user action",
+                "Duration, milliseconds, from when dot recall scene fully appeared until this user action.",
             },
             placed: {
               type: "boolean",
-              description: "was this action a dot placement?",
+              description: "Was this action a dot placement?",
             },
             removed: {
               type: "boolean",
-              description: "was this action a dot removal?",
+              description: "Was this action a dot removal?",
             },
             done: {
               type: "boolean",
-              description: "was done button pushed?",
+              description: "Was this action a done button pushed?",
             },
             row: {
               type: "number",
-              description: "row of the cell, 0-indexed",
+              description:
+                "Row of the cell, 0-indexed; -999 if non-applicable (done).",
             },
             column: {
               type: "number",
-              description: "column of the cell, 0-indexed",
+              description:
+                "Column of the cell, 0-indexed; -999 if non-applicable (done).",
             },
           },
         },
       },
       user_interference_actions: {
         type: "array",
-        description: "user actions tapping the interference targets",
+        description: "User actions tapping the interference targets.",
         items: {
           type: "object",
           properties: {
             elapsed_duration_ms: {
               type: "number",
               description:
-                "duration, milliseconds, from when scene appeared until this user action",
+                "Duration, milliseconds, from when interference scene fully appeared until this user action.",
             },
             on_target: {
               type: "boolean",
-              description: "was this action on the interference target or off?",
+              description: "Was this action on the interference target or off?",
             },
           },
         },
+      },
+      number_of_correct_dots: {
+        type: "number",
+        description: "Number of dots that were correctly placed.",
       },
     };
 
@@ -252,14 +272,13 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     // ==============================================================
     // variables for timing and user input
-    let randomCells: {
+
+    interface cell {
       row: number;
       column: number;
-    }[];
-    let tappedCells: {
-      row: number;
-      column: number;
-    }[];
+    }
+    let randomCells: cell[];
+    let tappedCells: cell[];
     interface UserCellAction {
       elapsed_duration_ms: number;
       placed: boolean;
@@ -275,6 +294,8 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     }
     let userInterferenceActions: UserInterferenceAction[];
 
+    const NUMBER_OF_DOTS = game.getParameter<number>("number_of_dots");
+
     // ==============================================================
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
@@ -282,7 +303,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       instructionScenes: [
         {
           title: "Grid Memory",
-          text: "For this activity, try to remember the location of 3 dots.",
+          text: `For this activity, try to remember the location of ${NUMBER_OF_DOTS} dots.`,
           image: "grid",
           imageAboveText: false,
           imageMarginTop: 12,
@@ -292,7 +313,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         },
         {
           title: "Grid Memory",
-          text: "Before placing the 3 dots in their location, you will also have to tap some Fs on the screen as quickly as you can.",
+          text: `Before placing the ${NUMBER_OF_DOTS} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.`,
           image: "fs",
           imageAboveText: false,
           imageMarginTop: 12,
@@ -347,6 +368,15 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     preparationScene.onAppear(() => {
       preparationScene.run(
         Action.sequence([
+          Action.custom({
+            callback: () => {
+              game.addTrialData(
+                "activity_begin_timestamp_ms",
+                this.beginTimestamp
+              );
+              game.addTrialData("trial_begin_timestamp_ms", Timer.now());
+            },
+          }),
           Action.wait({
             duration: game.getParameter("preparation_duration_ms"),
           }),
@@ -387,7 +417,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     });
 
     dotPresentationScene.onAppear(() => {
-      // randomly choose 3 cells that will have the red dots
+      // randomly choose 3 (NUMBER_OF_DOTS) cells that will have the red dots
       // on a grid of size 5 rows, 5 columns
       rememberDotsMessage.hidden = false;
 
@@ -398,8 +428,12 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           }),
           Action.custom({
             callback: () => {
-              randomCells = RandomDraws.FromGridWithoutReplacement(3, 5, 5);
-              for (let i = 0; i < 3; i++) {
+              randomCells = RandomDraws.FromGridWithoutReplacement(
+                NUMBER_OF_DOTS,
+                5,
+                5
+              );
+              for (let i = 0; i < NUMBER_OF_DOTS; i++) {
                 const circle = new Shape({
                   circleOfRadius: 20,
                   fillColor: WebColors.Red,
@@ -456,8 +490,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
 
     interferenceScene.onSetup(() => {
       touchTheFs.hidden = true;
-      Timer.start("gridMemoryPage2 setup");
-
       ShowInterferenceActivity();
 
       // Advance to the next recall screen after "interference_duration_ms"
@@ -501,7 +533,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
               rect: { size: { width: 59, height: 59 } },
               fillColor: WebColors.Transparent,
             });
-            //square.userData = 0;
 
             let letterIsF = false;
             let letter: Label;
@@ -514,8 +545,10 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
             }
 
             if (letterIsF) {
+              // square can be tapped, but yet not tapped
               square.userData = 0;
             } else {
+              // square cannot be tapped
               square.userData = -1;
             }
             square.isUserInteractionEnabled = true;
@@ -529,6 +562,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
                     Action.scale({ scale: 1, duration: 125 }),
                   ])
                 );
+                // square has been tapped
                 square.userData = 1;
                 if (tappedFCount >= number_of_interference_targets) {
                   // don't allow more taps on this current grid
@@ -568,13 +602,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           );
         }
       }
-
-      console.log(
-        `gridMemoryPage2.setup() took ${Timer.elapsed(
-          "gridMemoryPage2 setup"
-        )} ms.`
-      );
-      Timer.remove("gridMemoryPage2 setup");
     });
 
     interferenceScene.onAppear(() => {
@@ -635,9 +662,9 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           // of whether the cell has been tapped or not.
           cell.userData = 0;
           cell.onTapDown(() => {
-            if (cell.userData === 0 && tappedCellCount < 3) {
+            if (cell.userData === 0 && tappedCellCount < NUMBER_OF_DOTS) {
               // cell has not been tapped, and there are not yet
-              // 3 circles placed
+              // 3 (NUMBER_OF_DOTS) circles placed
               const circle = new Shape({
                 circleOfRadius: 20,
                 fillColor: WebColors.Red,
@@ -697,10 +724,10 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     // place this warning message on the scene, but hide it
     // we'll unhide it, if needed.
     const youMustSelectAllMessage = new Label({
-      text: "You must select all 3 locations!",
+      text: `You must select all ${NUMBER_OF_DOTS} locations!`,
       position: { x: 200, y: 600 },
+      hidden: true,
     });
-    youMustSelectAllMessage.hidden = true;
     dotRecallScene.addChild(youMustSelectAllMessage);
 
     recallDoneButton.isUserInteractionEnabled = true;
@@ -714,7 +741,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         column: -999,
       });
 
-      if (tappedCellCount < 3) {
+      if (tappedCellCount < NUMBER_OF_DOTS) {
         youMustSelectAllMessage.run(
           Action.sequence([
             Action.custom({
@@ -735,9 +762,21 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         Timer.remove("responseTime");
 
         game.addTrialData("random_cells", randomCells);
-        game.addTrialData("tapped_cells", tappedCells);
+        game.addTrialData("selected_cells", tappedCells);
         game.addTrialData("user_cell_actions", userCellActions);
         game.addTrialData("user_interference_actions", userInterferenceActions);
+
+        const cellsEqual = (cell1: cell, cell2: cell): boolean => {
+          return cell1.row === cell2.row && cell1.column === cell2.column;
+        };
+        const numberOfCorrectDots = tappedCells
+          .map((tappedCell) =>
+            randomCells.some((randomCell) => cellsEqual(randomCell, tappedCell))
+              ? 1
+              : 0
+          )
+          .reduce((a: number, b) => a + b, 0);
+        game.addTrialData("number_of_correct_dots", numberOfCorrectDots);
         game.trialComplete();
         if (game.trialIndex === game.getParameter("number_of_trials")) {
           const nextScreenTransition = Transition.slide({

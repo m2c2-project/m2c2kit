@@ -221,6 +221,15 @@ class ColorDots extends Game {
         description:
           "milliseconds from the beginning of location selection task until the user taps the done button",
       },
+      activity_begin_timestamp_ms: {
+        type: "number",
+        description:
+          "Millisecond timestamp at the beginning of the game activity.",
+      },
+      trial_begin_timestamp_ms: {
+        type: "number",
+        description: "Millisecond timestamp at the beginning of the trial.",
+      },
     };
 
     const options: GameOptions = {
@@ -237,7 +246,7 @@ appeared.",
       showFps: true,
       width: 400,
       height: 800,
-      bodyBackgroundColor: WebColors.AntiqueWhite,
+      bodyBackgroundColor: WebColors.White,
       trialSchema: colorDotsTrialSchema,
       parameters: defaultParameters,
       fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
@@ -496,6 +505,11 @@ appeared.",
       );
     });
 
+    fixationScene.onAppear(() => {
+      game.addTrialData("activity_begin_timestamp_ms", this.beginTimestamp);
+      game.addTrialData("trial_begin_timestamp_ms", Timer.now());
+    });
+
     // ==============================================================
     // SCENE: dotPresentation.
     const dotPresentationScene = new Scene();
@@ -688,6 +702,9 @@ appeared.",
 
         colorPaletteGrid.addAtCell(colorDot, 0, i);
       }
+    });
+
+    colorSelectionScene.onAppear(() => {
       Timer.start("colorRt");
     });
 
@@ -806,7 +823,9 @@ appeared.",
           y: tapEvent.point.y - SQUARE_SIDE_LENGTH / 2,
         };
       });
+    });
 
+    locationSelectionScene.onAppear(() => {
       Timer.start("locationRt");
     });
 

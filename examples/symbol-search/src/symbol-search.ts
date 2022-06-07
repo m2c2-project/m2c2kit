@@ -20,7 +20,6 @@ import {
   ActivityDataEvent,
   ActivityLifecycleEvent,
   Sprite,
-  EntityType,
   Easings,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
@@ -80,12 +79,12 @@ top. (2 unique symbols.)",
         value: 500,
         type: "number",
         description:
-          "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears. ",
+          "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears.",
       },
       instruction_type: {
         value: "long",
         type: "string",
-        description: "Type of intructions to show, 'short' or 'long'.",
+        description: "Type of instructions to show, 'short' or 'long'.",
       },
       trials_complete_scene_text: {
         value: "You have completed all the symbol search trials",
@@ -109,28 +108,28 @@ top. (2 unique symbols.)",
     const symbolSearchTrialSchema: TrialSchema = {
       trial_type: {
         type: "string",
-        description: "indicates if trial was normal or lure",
+        description: "Indicates if trial was normal or lure.",
       },
       card_configuration: {
         type: "object",
-        description: "symbols used on cards",
+        description: "Symbols used on cards.",
         properties: {
           top_cards_symbols: {
             type: "array",
             description:
-              "symbols of the top cards, starting at 0 for leftmost upper card and incrementing by 1 moving right",
+              "Symbols of the top cards, starting at 0 for leftmost upper card and incrementing by 1 moving right.",
             items: {
               type: "object",
               properties: {
                 top: {
                   type: "number",
                   description:
-                    "index of the top symbol within the card, 1-based",
+                    "Index of the top symbol within the card, 1-based.",
                 },
                 bottom: {
                   type: "number",
                   description:
-                    "index of the bottom symbol within the card, 1-based",
+                    "Index of the bottom symbol within the card, 1-based.",
                 },
               },
             },
@@ -138,39 +137,48 @@ top. (2 unique symbols.)",
           bottom_cards_symbols: {
             type: "array",
             description:
-              "symbols of the bottom cards, starting at 0 for leftmost card and incrementing by 1 moving right",
+              "Symbols of the bottom cards, starting at 0 for leftmost card and incrementing by 1 moving right.",
             items: {
               type: "object",
               properties: {
                 top: {
                   type: "number",
                   description:
-                    "index of the top symbol within the card, 1-based",
+                    "Index of the top symbol within the card, 1-based.",
                 },
                 bottom: {
                   type: "number",
                   description:
-                    "index of the bottom symbol within the card, 1-based",
+                    "Index of the bottom symbol within the card, 1-based.",
                 },
               },
             },
           },
         },
       },
-      response_time_ms: {
+      activity_begin_timestamp_ms: {
         type: "number",
         description:
-          "milliseconds from the beginning of the trial until a user taps a response",
+          "Millisecond timestamp at the beginning of the game activity.",
+      },
+      trial_begin_timestamp_ms: {
+        type: "number",
+        description: "Millisecond timestamp at the beginning of the trial.",
+      },
+      response_time_duration_ms: {
+        type: "number",
+        description:
+          "Milliseconds from the beginning of the trial until a user taps a response.",
       },
       user_response_index: {
         type: "number",
         description:
-          "index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right",
+          "Index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right.",
       },
       correct_response_index: {
         type: "number",
         description:
-          "index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right",
+          "Index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right.",
       },
     };
 
@@ -393,7 +401,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     // ==================================================
     // SCENES: instructions
-    const instructionsScenes = Instructions.Create({
+
+    let instructionsScenes: Array<Scene>;
+
+    /**
+     * sharedInstructionsOptions are what is the the same for short
+     * and long instructions
+     */
+    const sharedInstructionsOptions = {
       sceneNamePrefix: "instructions",
       backgroundColor: WebColors.White,
       nextButtonBackgroundColor: WebColors.Black,
@@ -408,52 +423,80 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         duration: 500,
         easing: Easings.sinusoidalInOut,
       }),
-      instructionScenes: [
-        {
-          title: "Symbol Search",
-          text: "You will see sets of symbols on the top and bottom of the screen.",
-          image: "gameImage",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-        },
-        {
-          title: "Symbol Search",
-          text: "When prompted, touch the set on the bottom that is exactly the same as a set above.",
-          image: "gameImageOutlinedCards",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-        },
-        {
-          title: "Symbol Search",
-          text: "Please be as fast and accurate as you can",
-          image: "stopwatchImage",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-        },
-        {
-          title: "Symbol Search",
-          text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurately as you can.",
-          image: "ssintroImage",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-          nextButtonText: "START",
-          nextButtonBackgroundColor: WebColors.Green,
-        },
-      ],
       postInstructionsScene: "countdownScene",
-    });
+    };
+
+    switch (game.getParameter("instruction_type")) {
+      case "short": {
+        instructionsScenes = Instructions.Create({
+          ...sharedInstructionsOptions,
+          instructionScenes: [
+            {
+              title: "Symbol Search",
+              text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurately as you can.",
+              image: "ssintroImage",
+              imageAboveText: false,
+              imageMarginTop: 12,
+              textFontSize: 24,
+              titleFontSize: 30,
+              textVerticalBias: 0.25,
+              nextButtonText: "START",
+              nextButtonBackgroundColor: WebColors.Green,
+            },
+          ],
+        });
+        break;
+      }
+      case "long": {
+        instructionsScenes = Instructions.Create({
+          ...sharedInstructionsOptions,
+          instructionScenes: [
+            {
+              title: "Symbol Search",
+              text: "You will see sets of symbols on the top and bottom of the screen.",
+              image: "gameImage",
+              imageAboveText: false,
+              imageMarginTop: 12,
+              textFontSize: 24,
+              titleFontSize: 30,
+              textVerticalBias: 0.25,
+            },
+            {
+              title: "Symbol Search",
+              text: "When prompted, touch the set on the bottom that is exactly the same as a set above.",
+              image: "gameImageOutlinedCards",
+              imageAboveText: false,
+              imageMarginTop: 12,
+              textFontSize: 24,
+              titleFontSize: 30,
+              textVerticalBias: 0.25,
+            },
+            {
+              title: "Symbol Search",
+              text: "Please be as fast and accurate as you can",
+              image: "stopwatchImage",
+              imageAboveText: false,
+              imageMarginTop: 12,
+              textFontSize: 24,
+              titleFontSize: 30,
+              textVerticalBias: 0.25,
+              nextButtonText: "START",
+              nextButtonBackgroundColor: WebColors.Green,
+            },
+          ],
+        });
+        break;
+      }
+      default: {
+        throw new Error(
+          `invalid value for instruction_type: ${game.getParameter(
+            "instruction_type"
+          )}`
+        );
+      }
+    }
+
+    game.entryScene = "instructions-01";
     game.addScenes(instructionsScenes);
 
     const afterTrialSceneTransition = Transition.slide({
@@ -584,27 +627,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       index: number;
     }
 
-    // interface BriefGameParameters {
-    //   [key: string]: number | string | boolean | object;
-    // }
-
-    // function getBriefGameParameters(
-    //   gameParameters?: GameParameters
-    // ): BriefGameParameters {
-    //   const briefParams: BriefGameParameters = {};
-    //   let parameters: GameParameters;
-    //   if (gameParameters) {
-    //     parameters = JSON.parse(JSON.stringify(gameParameters));
-    //   } else {
-    //     parameters = {};
-    //   }
-    //   const params = Object.keys(parameters);
-    //   for (const param of params) {
-    //     briefParams[param] = parameters[param].value;
-    //   }
-    //   return briefParams;
-    // }
-
     /**
      * note: these are in snake_case because we will directly serialize
      * these into the trial data
@@ -614,7 +636,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       bottom_cards_symbols: Array<SymbolCard>;
       trial_type: "normal" | "lure";
       correct_response_index: number;
-      // parameters: BriefGameParameters;
     }
 
     const trialConfigurations: Array<TrialConfiguration> = [];
@@ -720,7 +741,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           : [incorrectCard, correctCard],
         trial_type: isLure ? "lure" : "normal",
         correct_response_index: isLeftCorrect ? 0 : 1,
-        //parameters: getBriefGameParameters(this.options.parameters),
       };
       trialConfigurations.push(trial);
     }
@@ -743,10 +763,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           topInterCardMargin = 100;
           break;
         }
-        // case 4: {
-        //   topInterCardMargin = 50;
-        //   break;
-        // }
         default: {
           throw new Error(
             "valid values for number_of_top_pairs are 2, 3, or 4 cards"
@@ -873,7 +889,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         Timer.remove("rt");
 
         game.addTrialData("trial_type", trialConfiguration.trial_type);
-        game.addTrialData("response_time_ms", response_time);
+        game.addTrialData("response_time_duration_ms", response_time);
         game.addTrialData(
           "correct_response_index",
           trialConfiguration.correct_response_index
@@ -885,11 +901,12 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
         // correct_response_index and trial_type are nested in the
         // trialConfiguration, but we will expose these in a
-        // different property. So, use the rest operator to
+        // different property. So, use the rest operator to remove
         // them from the trialConfiguration.
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           correct_response_index,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           trial_type,
           ...remaining_trial_configuration
         } = trialConfiguration;
@@ -922,6 +939,8 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       }
 
       chooseCardScene.onAppear(() => {
+        game.addTrialData("activity_begin_timestamp_ms", this.beginTimestamp);
+        game.addTrialData("trial_begin_timestamp_ms", Timer.now());
         /** Add the question label free entity, only if not added yet */
         if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
           questionLabel.hidden = true;
@@ -965,37 +984,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       game.end();
     });
     doneScene.addChild(okButton);
-
-    switch (game.getParameter("instruction_type")) {
-      case "short": {
-        /**
-         * For short instructuions, start at scene 4 and disable the
-         * back button
-         */
-        game.entryScene = "instructions-04";
-        const shortScene = game.entities
-          .filter((e) => e.name === "instructions-04")
-          .find(Boolean);
-        const backButton = shortScene?.descendants
-          .filter(
-            (e) =>
-              e.type === EntityType.composite && (e as Button).text === "Back"
-          )
-          .find(Boolean);
-        if (backButton) {
-          backButton.hidden = true;
-        }
-        game.entryScene = "instructions-04";
-        break;
-      }
-      case "long": {
-        game.entryScene = "instructions-01";
-        break;
-      }
-      default: {
-        throw new Error("invalid value for instruction_type");
-      }
-    }
   }
 }
 
@@ -1161,10 +1149,4 @@ const session = new Session({
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-
-// This is an example of how to change game parameters; default is
-// 3 pairs on top, but I'm setting it to 4.
-// session.options.activities[0].setParameters({
-//   number_of_top_pairs: 4,
-// });
 session.init();

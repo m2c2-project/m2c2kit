@@ -44,8 +44,8 @@ export class NoneTransition extends Transition {
   duration: number;
   constructor() {
     super();
-    this.duration = 0;
-    this.easing = Easings.linear;
+    this.duration = NaN;
+    this.easing = Easings.none;
   }
 }
 
@@ -78,5 +78,5 @@ export enum TransitionDirection {
   left = "Left",
 }
 export class SceneTransition {
-  constructor(public scene: Scene, public transition?: Transition) {}
+  constructor(public scene: Scene, public transition: Transition) {}
 }
