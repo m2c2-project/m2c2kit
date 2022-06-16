@@ -1381,7 +1381,12 @@ export class Game implements Activity {
 
     const x = event.offsetX;
     const y = event.offsetY;
-    this.processTaps(scene, x, y);
+    const tapEvent: TapEvent = {
+      target: scene,
+      point: { x, y },
+      handled: false,
+    };
+    this.processTaps(scene, tapEvent, x, y);
   }
 
   private htmlCanvasTouchStartHandler(event: TouchEvent): void {
@@ -1402,7 +1407,12 @@ export class Game implements Activity {
     }
     const x = firstTouch.pageX - bounds.x;
     const y = firstTouch.pageY - bounds.y;
-    this.processTaps(scene, x, y);
+    const tapEvent: TapEvent = {
+      target: scene,
+      point: { x, y },
+      handled: false,
+    };
+    this.processTaps(scene, tapEvent, x, y);
   }
 
   private sceneCanReceiveUserInteraction(scene: Scene): boolean {
@@ -1420,24 +1430,47 @@ export class Game implements Activity {
     return false;
   }
 
-  private processTaps(entity: Entity, x: number, y: number): void {
+  private processTaps(
+    entity: Entity,
+    tapEvent: TapEvent,
+    x: number,
+    y: number
+  ): void {
+    // if it's already been handled, don't do anything
+    if (tapEvent.handled) {
+      return;
+    }
+
     // note: x and y are relative to the HTML canvas element
     if (
       entity.isUserInteractionEnabled &&
       this.tapIsWithinEntityBounds(entity, x, y)
     ) {
-      this.handleEntityTapped(entity, x, y);
+      this.handleEntityTapped(entity, tapEvent, x, y);
     }
     if (entity.children) {
       entity.children
         // a hidden entity (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
         .filter((entity) => !entity.hidden)
-        .forEach((entity) => this.processTaps(entity, x, y));
+        // only drawables have z-postion
+        .filter((entity) => entity.isDrawable)
+        // process taps on children by zPosition order
+        .sort(
+          (a, b) =>
+            (b as unknown as IDrawable).zPosition -
+            (a as unknown as IDrawable).zPosition
+        )
+        .forEach((entity) => this.processTaps(entity, tapEvent, x, y));
     }
   }
 
-  private handleEntityTapped(entity: Entity, x: number, y: number): void {
+  private handleEntityTapped(
+    entity: Entity,
+    tapEvent: TapEvent,
+    x: number,
+    y: number
+  ): void {
     entity.eventListeners
       .filter((listener) => listener.eventType === "tapdown")
       .forEach((listener) => {
@@ -1447,10 +1480,8 @@ export class Game implements Activity {
             ((x - bb.xMin) / (bb.xMax - bb.xMin)) * entity.size.width;
           const relativeY =
             ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
-          const tapEvent: TapEvent = {
-            target: entity,
-            point: { x: relativeX, y: relativeY },
-          };
+          tapEvent.target = entity;
+          tapEvent.point = { x: relativeX, y: relativeY };
           listener.callback(tapEvent);
         }
       });
