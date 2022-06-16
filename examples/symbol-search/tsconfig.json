@@ -1,7 +1,8 @@
 {
   "references": [
     { "path": "../../packages/core" },
-    { "path": "../../packages/addons" }
+    { "path": "../../packages/addons" },
+    { "path": "../../packages/sageresearch" }
   ],
   "compilerOptions": {
     "composite": true,
@@ -17,11 +18,5 @@
     "outDir": "build",
     "rootDir": "../.."
   },
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "**/symbol-search.bundle.js",
-    "rollup.config.js"
-  ]
+  "exclude": ["node_modules", "build", "dist", "rollup.config.js"]
 }

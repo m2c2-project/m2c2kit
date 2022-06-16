@@ -33,7 +33,7 @@ export default (commandLineArgs) => {
       input: "./src/color-dots.ts",
       output: [
         {
-          file: `./${outputFolder}/color-dots.bundle.js`,
+          file: `./${outputFolder}/index.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
           /**

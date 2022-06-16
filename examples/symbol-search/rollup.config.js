@@ -33,7 +33,7 @@ export default (commandLineArgs) => {
       input: "./src/symbol-search.ts",
       output: [
         {
-          file: `./${outputFolder}/symbol-search.bundle.js`,
+          file: `./${outputFolder}/index.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
           /**

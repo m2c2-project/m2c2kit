@@ -14,8 +14,6 @@ import {
   TrialSchema,
   Timer,
   Session,
-  EventBase,
-  EventType,
   SessionLifecycleEvent,
   ActivityDataEvent,
   ActivityLifecycleEvent,
@@ -23,6 +21,7 @@ import {
   Easings,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { SageResearch } from "@m2c2kit/sageresearch";
 
 class SymbolSearch extends Game {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -987,87 +986,32 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
   }
 }
 
-// ===========================================================================
-// Below is Android WebView interop. We'll need something similar for iOS.
-
-//#region to support m2c2kit in Android WebView
-/**
- * When running within an Android WebView, the below defines how the session
- * can communicate events back to the Android app. Note: names of this Android
- * namespace and its functions must match the corresponding Android code
- * in addJavascriptInterface() and @JavascriptInterface
- * In the Android code you can see that we called the namespace "Android" and it
- * matches our declared namespace here, but it could have been called anything,
- * as long as they match.
- * */
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Android {
-  function onActivityDataCreate(activityDataEventAsString: string): void;
-  function onActivityLifecycleChange(
-    activityLifecycleEventAsString: string
-  ): void;
-  function onSessionLifecycleChange(
-    sessionLifecycleEventAsString: string
-  ): void;
-  /**
-   * If the Android native app will control the session execution and be
-   * able to set custom game paraemters (which is probably what you want),
-   * be sure that sessionManualStart() in the native code returns true
-   * */
-  function sessionManualStart(): boolean;
-}
-
-/**
- * Just a quick conveneience function so we can know if we are running
- * within our custom Android WebView
- */
-function contextIsAndroidWebView(): boolean {
-  return typeof Android !== "undefined";
-}
-
-function sendEventToAndroid(event: EventBase) {
-  switch (event.eventType) {
-    case EventType.sessionLifecycle: {
-      Android.onSessionLifecycleChange(JSON.stringify(event));
-      break;
-    }
-    case EventType.activityData: {
-      Android.onActivityDataCreate(JSON.stringify(event));
-      break;
-    }
-    case EventType.activityLifecycle: {
-      Android.onActivityLifecycleChange(JSON.stringify(event));
-      break;
-    }
-    default:
-      throw new Error(
-        `attempt to send unknown event ${event.eventType} to Android`
-      );
-  }
-}
-//#endregion
-
-const symbolSearch = new SymbolSearch();
+const activity = new SymbolSearch();
 const session = new Session({
-  activities: [symbolSearch],
+  activities: [activity],
   sessionCallbacks: {
     /**
      * onSessionLifecycleChange() will be called on events such
-     * as when the session initialization is complete or when it
-     * ends.
+     * as when the session initialization is complete or when the
+     * session ends.
      *
-     * Once initialized, the session will automatically start,
-     * unless we're running in an Android WebView AND a manual start
+     * Once initialized, the below code will automatically start the session,
+     * unless we're running in a mobile WebView and a manual start
      * is desired.
      */
     onSessionLifecycleChange: (ev: SessionLifecycleEvent) => {
+      //#region to support m2c2kit in WebView: propagate events to native code
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
+      }
+      //#endregion
       if (ev.initialized) {
-        //#region to support m2c2kit in Android WebView
-        if (contextIsAndroidWebView()) {
-          sendEventToAndroid(ev);
-        }
-        if (contextIsAndroidWebView() && Android.sessionManualStart()) {
-          // don't automatically start! Let the native Android code
+        //#region to support m2c2kit in WebView
+        if (
+          SageResearch.contextIsWebView() &&
+          SageResearch.sessionManualStart()
+        ) {
+          // don't automatically start! Let the native code
           // set some game parameters and start the game
           return;
         }
@@ -1076,29 +1020,33 @@ const session = new Session({
       }
       if (ev.ended) {
         console.log("session ended");
-        //#region to support m2c2kit in Android WebView
-        if (contextIsAndroidWebView()) {
-          sendEventToAndroid(ev);
-        }
-        //#endregion
       }
     },
   },
   activityCallbacks: {
     /**
-     * onActivityDataCreate() is where you insert code to post data to an API
-     * or interop with a native function in the host app, if applicable,
-     * as we do with sendEventToAndroid()
+     * onActivityDataCreate() callback is where you insert code to post data
+     * to an API or interop with a native function in the host app,
+     * if applicable, as we do with sendEventToWebView().
      *
-     * newData is the data that was just generated by the completed trial
+     * newData is the data that was just generated by the completed trial.
      * data is all the data, cumulative of all trials, that have been generated.
      *
      * We separate out newData from data in case you want to alter the execution
      * based on the most recent trial, e.g., maybe you want to stop after
      * a certain user behavior or performance threshold in the just completed
      * trial.
+     *
+     * activityConfiguration is the game parameters that were used.
+     *
+     * The schema for all of the above are in JSON Schema format.
      */
     onActivityDataCreate: (ev: ActivityDataEvent) => {
+      //#region to support m2c2kit in WebView: propagate events to native code
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
+      }
+      //#endregion
       console.log(`********** trial complete`);
       console.log("newData: " + JSON.stringify(ev.newData));
       console.log("newData schema: " + JSON.stringify(ev.newDataSchema));
@@ -1111,20 +1059,19 @@ const session = new Session({
         "activity parameters schema: " +
           JSON.stringify(ev.activityConfigurationSchema)
       );
-
-      //#region to support m2c2kit in Android WebView
-      if (contextIsAndroidWebView()) {
-        sendEventToAndroid(ev);
-      }
-      //#endregion
     },
     /**
      * onActivityLifecycleChange() notifies us when an activity, such
-     * as an assessment or a survey, has completed. Usually, however,
+     * as a game (assessment) or a survey, has completed. Usually, however,
      * we want to know when all the activities are done, so we'll
      * look for the session ending via onSessionLifecycleChange
      */
     onActivityLifecycleChange: (ev: ActivityLifecycleEvent) => {
+      //#region to support m2c2kit in WebView: propagate events to native code
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
+      }
+      //#endregion
       if (ev.ended) {
         console.log(`ended activity ${ev.name}`);
         if (session.nextActivity) {
@@ -1132,11 +1079,6 @@ const session = new Session({
         } else {
           session.end();
         }
-        //#region to support m2c2kit in Android WebView
-        if (contextIsAndroidWebView()) {
-          sendEventToAndroid(ev);
-        }
-        //#endregion
       }
     },
   },
@@ -1145,8 +1087,19 @@ const session = new Session({
 /**
  * Make session also available on window in case we want to control
  * the session through another means, such as other javascript or
- * browser code, or the Android WebView loadUrl() method
+ * browser code, or a mobile WebView's invocation of session.start().
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-session.init();
+SageResearch.ConfigureWasmFetchInterceptor();
+session.init().then(() => {
+  /**
+   * session.init() may take a few moments when downloading non-local or
+   * non-cached resources. After session.init() completes, the below code
+   * removes the loading spinner that is defined in the HTML template.
+   */
+  const loaderDiv = document.getElementById("m2c2kit-loader-div");
+  if (loaderDiv) {
+    loaderDiv.classList.remove("m2c2kit-loader");
+  }
+});

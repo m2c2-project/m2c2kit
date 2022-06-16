@@ -4,6 +4,7 @@ import {
   Activity,
   ActivityType,
   EventType,
+  Timer,
 } from "@m2c2kit/core";
 import $ from "jquery";
 import * as SurveyKO from "survey-knockout";
@@ -18,9 +19,11 @@ export class Survey implements Activity {
   name: string;
   uuid = Uuid.generate();
   surveyJson: unknown;
+  beginTimestamp = NaN;
 
   constructor(surveyJson: unknown) {
     this.surveyJson = surveyJson;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
   }
 
@@ -33,6 +36,7 @@ export class Survey implements Activity {
   }
 
   start(): void {
+    this.beginTimestamp = Timer.now();
     // This modern theme doesn't seem as polished as
     // survey theme. It has some minor issues with margins and
     // the bootstrap-datepicker
@@ -54,7 +58,7 @@ export class Survey implements Activity {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     survey.onComplete.add((sender: any) => {
       console.log(`Finished survey. Data: ${JSON.stringify(sender.data)} `);
-      const surveyDiv = document.getElementById("surveyContainer");
+      const surveyDiv = document.getElementById("m2c2kit-survey-div");
       if (surveyDiv) {
         surveyDiv.hidden = true;
       }
@@ -71,7 +75,7 @@ export class Survey implements Activity {
     survey.onValueChanged.add((sender: any, options: any) => {
       console.log(`variable ${options.name} set: ${options.value}`);
     });
-    survey.render("surveyContainer");
+    survey.render("m2c2kit-survey-div");
   }
 
   stop(): void {

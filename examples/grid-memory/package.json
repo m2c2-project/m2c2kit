@@ -9,6 +9,7 @@
   "dependencies": {
     "@m2c2kit/addons": "0.1.10",
     "@m2c2kit/core": "0.1.10",
+    "@m2c2kit/sageresearch": "^1.0.0",
     "axios": "0.26.1"
   },
   "devDependencies": {

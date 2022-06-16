@@ -33,7 +33,7 @@ export default (commandLineArgs) => {
       input: "./src/grid-memory.ts",
       output: [
         {
-          file: `./${outputFolder}/grid-memory.bundle.js`,
+          file: `./${outputFolder}/index.js`,
           format: "esm",
           sourcemap: commandLineArgs.configServe && true,
           /**
