@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "clean": "rimraf build build-umd dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "jest"
   },
   "license": "MIT",
@@ -31,6 +32,7 @@
     "canvas": "^2.8.0",
     "jest": "^27.4.7",
     "jsdom": "^19.0.0",
+    "rimraf": "^3.0.2",
     "rollup": "2.70.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",

@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "clean": "rimraf build build-umd dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "MIT",
@@ -36,6 +37,7 @@
     "@types/bootstrap-datepicker": "0.0.15",
     "@types/jquery": "3.5.13",
     "@types/sortablejs": "1.10.7",
+    "rimraf": "^3.0.2",
     "rollup": "2.70.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",
