@@ -742,18 +742,39 @@ export class Game implements Activity {
   }
 
   /**
-   * Should be called when the current game has ended. This will trigger
-   * the onActivityLifecycleChange callback function, if one was provided in
-   * SessionOptions. This is how the game can communicate its ended or
-   * "finished" state to the parent session.
-   * It is the responsibility of the the game programmer to call this at
-   * the appropriate time. It is not triggered automatically.
+   * Should be called when current game has ended successfully.
+   *
+   * @remarks This will trigger the onActivityLifecycleChange callback function,
+   * if one was provided in SessionOptions. This is how the game can communicate
+   * its state to the parent session. It is the responsibility of the the game
+   * programmer to call this at the appropriate time. It is not triggered
+   * automatically.
    */
   end(): void {
     if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
       this.session.options.activityCallbacks.onActivityLifecycleChange({
         eventType: EventType.activityLifecycle,
         ended: true,
+        uuid: this.uuid,
+        name: this.options.name,
+      });
+    }
+  }
+
+  /**
+   * Should be called when current game has been canceled by a user action.
+   *
+   * @remarks This will trigger the onActivityLifecycleChange callback function,
+   * if one was provided in SessionOptions. This is how the game can communicate
+   * its state to the parent session. It is the responsibility of the the game
+   * programmer to call this at the appropriate time. It is not triggered
+   * automatically.
+   */
+  cancel(): void {
+    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
+      this.session.options.activityCallbacks.onActivityLifecycleChange({
+        eventType: EventType.activityLifecycle,
+        canceled: true,
         uuid: this.uuid,
         name: this.options.name,
       });

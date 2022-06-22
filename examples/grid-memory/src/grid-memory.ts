@@ -377,7 +377,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
         game.trialComplete();
-        game.end();
+        game.cancel();
       });
     }
 
@@ -1035,8 +1035,9 @@ const session = new Session({
         SageResearch.sendEventToWebView(ev);
       }
       //#endregion
-      if (ev.ended) {
-        console.log(`ended activity ${ev.name}`);
+      if (ev.ended || ev.canceled) {
+        const status = ev.ended ? "ended" : "canceled";
+        console.log(`${status} activity ${ev.name}`);
         if (session.nextActivity) {
           session.advanceToNextActivity();
         } else {
