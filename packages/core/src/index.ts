@@ -16,6 +16,8 @@ export * from "./Dimensions";
 export * from "./DrawableOptions";
 export * from "./Easings";
 export * from "./Entity";
+export * from "./EntityEvent";
+export * from "./EntityEventListener";
 export * from "./EntityOptions";
 export * from "./EntityType";
 export * from "./Equals";

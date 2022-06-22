@@ -28,7 +28,7 @@ import { EventType } from "./EventBase";
 import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
-import { JsonSchema } from "./JsonSchema";
+import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
 
 interface BoundingBox {
   xMin: number;
@@ -71,6 +71,7 @@ export class Game implements Activity {
   name: string;
   options: GameOptions;
   beginTimestamp = NaN;
+  beginIso8601Timestamp = "";
 
   constructor(options: GameOptions) {
     this.options = options;
@@ -204,6 +205,24 @@ export class Game implements Activity {
         (child) => child !== entity
       );
     }
+  }
+
+  /**
+   * Removes all free entities from the game.
+   */
+  removeAllFreeEntities(): void {
+    while (this.freeEntitiesScene.children.length) {
+      this.freeEntitiesScene.children.pop();
+    }
+  }
+
+  /**
+   * Returns the free entities that have been added to the game
+   *
+   * @returns array of free entities
+   */
+  get freeEntities(): Array<Entity> {
+    return this.freeEntitiesScene.children;
   }
 
   /**
@@ -380,6 +399,7 @@ export class Game implements Activity {
     }
     this.warmupShaders(this.surface);
     this.beginTimestamp = Timer.now();
+    this.beginIso8601Timestamp = new Date().toISOString();
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -426,7 +446,7 @@ export class Game implements Activity {
       imageNames.forEach((imageName) => {
         if (!warmupedImageNames.includes(imageName)) {
           const image = loadedImages[imageName].image;
-          console.log("warmed up " + imageName);
+          // console.log("warmed up " + imageName);
           canvas.drawImage(image, 0, 0);
         }
       });
@@ -460,17 +480,46 @@ export class Game implements Activity {
     const trialSchema = this.options.trialSchema ?? {};
 
     const variables = Object.entries(trialSchema);
-    const validDataTypes = ["number", "string", "boolean", "object", "array"];
+
     for (const [variableName, propertySchema] of variables) {
       if (
         propertySchema.type !== undefined &&
-        !validDataTypes.includes(propertySchema.type)
+        !this.propertySchemaDataTypeIsValid(propertySchema.type)
+        //!validDataTypes.includes(propertySchema.type)
       ) {
         throw new Error(
           `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`
         );
       }
     }
+  }
+
+  private propertySchemaDataTypeIsValid(
+    propertySchemaType: JsonSchemaDataType | JsonSchemaDataType[]
+  ): boolean {
+    const validDataTypes = [
+      "string",
+      "number",
+      "integer",
+      "object",
+      "array",
+      "boolean",
+      "null",
+    ];
+    if (typeof propertySchemaType === "string") {
+      return validDataTypes.includes(propertySchemaType);
+    }
+    let dataTypeIsValid = true;
+    if (Array.isArray(propertySchemaType)) {
+      propertySchemaType.forEach((element) => {
+        if (!validDataTypes.includes(element)) {
+          dataTypeIsValid = false;
+        }
+      });
+    } else {
+      throw new Error(`Invalid data type: ${propertySchemaType}`);
+    }
+    return dataTypeIsValid;
   }
 
   private getScreenMetadata(): screenMetadata {
@@ -528,7 +577,18 @@ export class Game implements Activity {
     if (!(variableName in this.options.trialSchema)) {
       throw new Error(`trial variable ${variableName} not defined in schema`);
     }
-    const expectedDataType = this.options.trialSchema[variableName].type;
+
+    let expectedDataTypes: string[];
+
+    if (Array.isArray(this.options.trialSchema[variableName].type)) {
+      expectedDataTypes = this.options.trialSchema[variableName]
+        .type as Array<JsonSchemaDataType>;
+    } else {
+      expectedDataTypes = [
+        this.options.trialSchema[variableName].type as string,
+      ];
+    }
+
     let providedDataType = typeof value as string;
     // in JavaScript, typeof an array returns "object"!
     // Therefore, do some extra checking to see if we have an array
@@ -537,9 +597,19 @@ export class Game implements Activity {
         providedDataType = "array";
       }
     }
-    if (providedDataType !== expectedDataType) {
+    if (value === undefined || value === null) {
+      providedDataType = "null";
+    }
+    if (
+      !expectedDataTypes.includes(providedDataType) &&
+      !(
+        providedDataType === "number" &&
+        Number.isInteger(value) &&
+        expectedDataTypes.includes("integer")
+      )
+    ) {
       throw new Error(
-        `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataType}"`
+        `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`
       );
     }
     this.data.trials[this.trialIndex][variableName] = value;
@@ -1386,6 +1456,7 @@ export class Game implements Activity {
       point: { x, y },
       handled: false,
     };
+    this.processTaps(this.freeEntitiesScene, tapEvent, x, y);
     this.processTaps(scene, tapEvent, x, y);
   }
 
@@ -1412,6 +1483,7 @@ export class Game implements Activity {
       point: { x, y },
       handled: false,
     };
+    this.processTaps(this.freeEntitiesScene, tapEvent, x, y);
     this.processTaps(scene, tapEvent, x, y);
   }
 

@@ -1,6 +1,10 @@
 export interface JsonSchema {
-  // Data type of the value. Note that JSON schema doesn't allow all JS types, such as bigint, function, symbol, or undefined. In addition, we don't support all JSON schema types (e.g., integer, null).
-  type?: "number" | "string" | "boolean" | "object" | "array";
+  // Data type of the value or array of acceptable data types
+  type?: JsonSchemaDataType | JsonSchemaDataType[];
+  // Values the schema can have
+  enum?: unknown[];
+  // Annotation to indicate the type of string value, e.g., "date-time" or "email"
+  format?: string;
   // Intent of the schema
   title?: string;
   // Description of the schema
@@ -18,3 +22,13 @@ export interface JsonSchema {
   // Object definitions
   $defs?: object;
 }
+
+// Note that JSON Schema doesn't allow all JavaScript types, such as bigint, function, symbol, or undefined.
+export type JsonSchemaDataType =
+  | "string"
+  | "number"
+  | "integer"
+  | "object"
+  | "array"
+  | "boolean"
+  | "null";

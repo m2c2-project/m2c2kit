@@ -17,6 +17,8 @@ export interface Activity {
   name: string;
   /** The value of performance.now() immediately before the activity begins */
   beginTimestamp: number;
+  /** The value of new Date().toISOString() immediately before the activity begins */
+  beginIso8601Timestamp: string;
   /** Set activity parameters if defaults are not desired*/
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setParameters(newParameters: any): void;

@@ -7,6 +7,8 @@ import {
   Action,
   Scene,
   Shape,
+  TrialSchema,
+  Label,
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
@@ -150,13 +152,7 @@ let g1: Game1;
 let g2: Game2;
 let perfCounter: number;
 
-beforeEach(() => {
-  g1 = new Game1();
-  g2 = new Game2();
-
-  const options: SessionOptions = { activities: [g1, g2] };
-  session = new Session(options);
-
+const setupDomAndGlobals = () => {
   const dom = new JSDOM(`<!DOCTYPE html>
   <html>
     <head>
@@ -184,9 +180,18 @@ beforeEach(() => {
   };
 
   requestedFrames = 0;
-});
+};
 
 describe("actions", () => {
+  beforeEach(() => {
+    g1 = new Game1();
+    g2 = new Game2();
+
+    const options: SessionOptions = { activities: [g1, g2] };
+    session = new Session(options);
+    setupDomAndGlobals();
+  });
+
   it("shape completes move from 200, 200 to 50, 50", () => {
     maxRequestedFrames = 63;
 
@@ -229,6 +234,15 @@ describe("actions", () => {
 });
 
 describe("Game start", () => {
+  beforeEach(() => {
+    g1 = new Game1();
+    g2 = new Game2();
+
+    const options: SessionOptions = { activities: [g1, g2] };
+    session = new Session(options);
+    setupDomAndGlobals();
+  });
+
   it("scales down on smaller screen that is half the size", () => {
     global.window.innerWidth = 200;
     global.window.innerHeight = 400;
@@ -264,6 +278,220 @@ describe("Game start", () => {
       session.start();
       session.advanceToNextActivity();
       expect(Globals.rootScale).toBe(1.5);
+    });
+  });
+});
+
+describe("free entities", () => {
+  beforeEach(() => {
+    g1 = new Game1();
+    g2 = new Game2();
+
+    g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
+    const options: SessionOptions = { activities: [g1, g2] };
+    session = new Session(options);
+    setupDomAndGlobals();
+  });
+
+  it("removes all free entities", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const label = new Label({ text: "label text" });
+      game.addFreeEntity(label);
+      game.removeAllFreeEntities();
+      expect(game.freeEntities.length).toBe(0);
+    });
+  });
+
+  it("adds a free entity", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const label = new Label({ text: "label text" });
+      game.addFreeEntity(label);
+      expect(game.freeEntities.length).toBe(2);
+    });
+  });
+
+  it("adds a free entity and removes free entity by object", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const label = new Label({ text: "label text" });
+      game.addFreeEntity(label);
+      game.removeFreeEntity(label);
+      expect(game.freeEntities.length).toBe(1);
+    });
+  });
+
+  it("adds a free entity and removes free entity by name", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const label = new Label({ text: "label text", name: "the-label" });
+      game.addFreeEntity(label);
+      game.removeFreeEntity("the-label");
+      expect(game.freeEntities.length).toBe(1);
+    });
+  });
+
+  it("throws error when attempting to remove entity object that has not been added as a free entity", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const label = new Label({ text: "label text", name: "the-label" });
+      const t = () => game.removeFreeEntity(label);
+      expect(t).toThrowError();
+    });
+  });
+
+  it("throws error when attempting to remove entity name that has not been added as a free entity", () => {
+    return session.init().then(() => {
+      const game = g1;
+      const t = () => game.removeFreeEntity("some-entity");
+      expect(t).toThrowError();
+    });
+  });
+});
+
+class Game3 extends Game {
+  constructor() {
+    const trialSchema: TrialSchema = {
+      boolean_data: {
+        type: "boolean",
+      },
+      string_data: {
+        type: "string",
+      },
+      integer_data: {
+        type: "integer",
+      },
+      number_data: {
+        type: "number",
+      },
+      object_data: {
+        type: "object",
+      },
+      array_data: {
+        type: "array",
+      },
+      null_data: {
+        type: "null",
+      },
+      string_or_null_data: {
+        type: ["string", "null"],
+      },
+    };
+
+    const gameOptions: GameOptions = {
+      name: "game3",
+      version: "0.1",
+      width: 400,
+      height: 800,
+      trialSchema: trialSchema,
+    };
+
+    super(gameOptions);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const game = this;
+    const s = new Scene({
+      name: "game1FirstScene",
+    });
+    game.addScene(s);
+    game.entryScene = s;
+  }
+}
+
+let g3: Game3;
+
+describe("addTrialData", () => {
+  beforeEach(() => {
+    g3 = new Game3();
+    const options: SessionOptions = { activities: [g3] };
+    session = new Session(options);
+    setupDomAndGlobals();
+  });
+
+  it("adds boolean data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("boolean_data", true);
+    });
+  });
+
+  it("adds string data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("string_data", "hello");
+    });
+  });
+
+  it("adds integer data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("integer_data", 10);
+    });
+  });
+
+  it("adds number data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("number_data", 5.5);
+    });
+  });
+
+  it("adds object data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("object_data", { a: 1, b: 2 });
+    });
+  });
+
+  it("adds array data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("array_data", [1, 2, 3]);
+    });
+  });
+
+  it("adds null data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("null_data", null);
+    });
+  });
+
+  it("adds undefined data", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("null_data", undefined);
+    });
+  });
+
+  it("adds string data to string | null schema", () => {
+    return session.init().then(() => {
+      session.start();
+      g3.addTrialData("string_or_null_data", "hello");
+    });
+  });
+
+  it("throws error when adding string data to boolean schema", () => {
+    return session.init().then(() => {
+      session.start();
+      const t = () => g3.addTrialData("boolean_data", "hello");
+      expect(t).toThrow(Error);
+    });
+  });
+
+  it("throws error when adding null data to boolean schema", () => {
+    return session.init().then(() => {
+      session.start();
+      const t = () => g3.addTrialData("boolean_data", null);
+      expect(t).toThrowError();
+    });
+  });
+
+  it("throws error when adding non-integer number to integer schema", () => {
+    return session.init().then(() => {
+      session.start();
+      const t = () => g3.addTrialData("integer_data", 5.5);
+      expect(t).toThrowError();
     });
   });
 });

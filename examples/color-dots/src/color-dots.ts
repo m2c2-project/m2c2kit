@@ -20,6 +20,7 @@ import {
   ActivityLifecycleEvent,
   RgbaColor,
   Equals,
+  Sprite,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 import { SageResearch } from "@m2c2kit/sageresearch";
@@ -43,11 +44,11 @@ class ColorDots extends Game {
           properties: {
             colorName: {
               type: "string",
-              description: "human-friendly name of color",
+              description: "Human-friendly name of color.",
             },
             rgbaColor: {
               type: "array",
-              description: "color as array, [r,g,b,a]",
+              description: "Color as array, [r,g,b,a].",
               items: {
                 type: "number",
               },
@@ -73,7 +74,7 @@ class ColorDots extends Game {
       number_of_dots: {
         value: 3,
         description: "How many dots to present. Must be at least 3.",
-        type: "number",
+        type: "integer",
       },
       dot_present_duration_ms: {
         value: 1000,
@@ -95,7 +96,7 @@ class ColorDots extends Game {
       number_of_trials: {
         value: 5,
         description: "How many trials to run.",
-        type: "number",
+        type: "integer",
       },
       trials_complete_scene_text: {
         value: "You have completed all the color dots trials",
@@ -112,6 +113,17 @@ class ColorDots extends Game {
         value: "long",
         description: "Type of intructions to show, 'short' or 'long'.",
         type: "string",
+        enum: ["short", "long"],
+      },
+      show_quit_button: {
+        type: "boolean",
+        value: true,
+        description: "Should the activity quit button be shown?",
+      },
+      show_fps: {
+        type: "boolean",
+        value: false,
+        description: "Should the FPS be shown?",
       },
     };
 
@@ -122,39 +134,74 @@ class ColorDots extends Game {
      * JSON Schema Draft-07 format.
      */
     const colorDotsTrialSchema: TrialSchema = {
-      square_side_length: {
-        type: "number",
+      activity_begin_iso8601_timestamp: {
+        type: "string",
+        format: "date-time",
         description:
-          "Length of square side, in pixels. This is the square in which the dots are shown.",
+          "ISO 8601 timestamp at the beginning of the game activity.",
       },
-      color_target: {
-        description: "color of dot that user was asked to recall",
-        type: "object",
-        properties: {
-          color_name: {
-            type: "string",
-            description: "human-friendly name of color",
-          },
-          rgba_color: {
-            type: "array",
-            description: "color as array, [r,g,b,a]",
-            items: {
-              type: "number",
+      trial_begin_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
+      },
+      square_side_length: {
+        type: ["number", "null"],
+        description:
+          "Length of square side, in pixels. This is the square in which the dots are shown. Null if trial was skipped.",
+      },
+      presented_dots: {
+        description:
+          "Configuration of dots presented to the user. Null if trial was skipped.",
+        type: ["array", "null"],
+        items: {
+          type: "object",
+          properties: {
+            color_name: {
+              type: "string",
+              description: "Human-friendly name of color.",
+            },
+            rgba_color: {
+              type: "array",
+              description: "Color as array, [r,g,b,a].",
+              items: {
+                type: "number",
+              },
+            },
+            location: {
+              type: "object",
+              description: "Location of dot.",
+              properties: {
+                x: {
+                  type: "number",
+                  description: "X coordinate of dot.",
+                },
+                y: {
+                  type: "number",
+                  description: "Y coordinate of dot.",
+                },
+              },
             },
           },
         },
       },
+      color_target_dot_index: {
+        description:
+          "Index (0-based) of presented dot whose color the user was asked to recall. Null if trial was skipped.",
+        type: ["integer", "null"],
+      },
       color_selected: {
-        description: "color selected by user",
-        type: "object",
+        description: "Color selected by user. Null if trial was skipped.",
+        type: ["object", "null"],
         properties: {
           color_name: {
             type: "string",
-            description: "human-friendly name of color",
+            description: "Human-friendly name of color.",
           },
           rgba_color: {
             type: "array",
-            description: "color as array, [r,g,b,a]",
+            description: "Color as array, [r,g,b,a].",
             items: {
               type: "number",
             },
@@ -162,78 +209,54 @@ class ColorDots extends Game {
         },
       },
       color_selected_correct: {
-        type: "boolean",
-        description: "was the color selected by the user correct?",
+        type: ["boolean", "null"],
+        description:
+          "Was the color selected by the user correct? Null if trial was skipped.",
       },
-      location_target: {
-        description: "location and color of dot that user was asked to place",
-        type: "object",
-        properties: {
-          x: {
-            type: "number",
-            description: "x coordinate of dot",
-          },
-          y: {
-            type: "number",
-            description: "y coordinate of dot",
-          },
-          color_name: {
-            type: "string",
-            description: "human-friendly name of color",
-          },
-          rgba_color: {
-            type: "array",
-            description: "color as array, [r,g,b,a]",
-            items: {
-              type: "number",
-            },
-          },
-        },
+      location_target_dot_index: {
+        description:
+          "Index (0-based) of presented dot whose location the user was asked to recall. Null if trial was skipped.",
+        type: ["integer", "null"],
       },
       location_selected: {
-        description: "location selected by user",
-        type: "object",
+        description: "Location selected by user. Null if trial was skipped.",
+        type: ["object", "null"],
         properties: {
           x: {
             type: "number",
-            description: "x coordinate of dot",
+            description: "X coordinate of dot.",
           },
           y: {
             type: "number",
-            description: "y coordinate of dot",
+            description: "Y coordinate of dot.",
           },
         },
       },
       location_selected_delta: {
-        type: "number",
+        type: ["number", "null"],
         description:
-          "Euclidean distance between location_target and location_selected",
+          "Euclidean distance between location target dot and the location selected by user. Null if trial was skipped.",
       },
       color_selection_response_time_ms: {
-        type: "number",
+        type: ["number", "null"],
         description:
-          "milliseconds from the beginning of color selection task until the user taps the done button",
+          "Milliseconds from the beginning of color selection task until the user taps the done button. Null if trial was skipped.",
       },
       location_selection_response_time_ms: {
-        type: "number",
+        type: ["number", "null"],
         description:
-          "milliseconds from the beginning of location selection task until the user taps the done button",
+          "Milliseconds from the beginning of location selection task until the user taps the done button. Null if trial was skipped.",
       },
-      activity_begin_timestamp_ms: {
-        type: "number",
-        description:
-          "Millisecond timestamp at the beginning of the game activity.",
-      },
-      trial_begin_timestamp_ms: {
-        type: "number",
-        description: "Millisecond timestamp at the beginning of the trial.",
+      quit_button_pressed: {
+        type: "boolean",
+        description: "Was the quit button pressed?",
       },
     };
 
     const options: GameOptions = {
       name: "Color Dots",
       version: "0.0.1",
-      shortDescription: "A short description of Grid Memory goes here...",
+      shortDescription: "A short description of Color Dots goes here...",
       longDescription:
         "Participants are asked to remember the location and color of three \
 briefly presented, and uniquely colored dots. Each trial of this task \
@@ -241,7 +264,7 @@ requires two responses (subsequently referred to as stage 1 and stage 2 in \
 the list of outcome variables): (1) reporting the color at a cued location; \
 (2) reporting the location where a circular of a specified color previously \
 appeared.",
-      showFps: true,
+      showFps: defaultParameters.show_fps.value,
       width: 400,
       height: 800,
       bodyBackgroundColor: WebColors.White,
@@ -267,6 +290,14 @@ appeared.",
           width: 250,
           url: "img/cd3.png",
         },
+        {
+          name: "circle-x",
+          height: 32,
+          width: 32,
+          // the svg is from evericons and is licensed under CC0 1.0
+          // Universal (Public Domain). see https://www.patreon.com/evericons
+          url: "./img/circle-x.svg",
+        },
       ],
     };
 
@@ -280,6 +311,27 @@ appeared.",
     const game = this;
 
     const SQUARE_SIDE_LENGTH = 350;
+
+    // ==============================================================
+
+    if (game.getParameter<boolean>("show_quit_button")) {
+      const quitSprite = new Sprite({
+        imageName: "circle-x",
+        position: { x: 380, y: 20 },
+        isUserInteractionEnabled: true,
+      });
+      game.addFreeEntity(quitSprite);
+      quitSprite.onTapDown((e) => {
+        game.removeAllFreeEntities();
+        e.handled = true;
+        const blankScene = new Scene();
+        game.addScene(blankScene);
+        game.presentScene(blankScene);
+        game.addTrialData("quit_button_pressed", true);
+        game.trialComplete();
+        game.end();
+      });
+    }
 
     // ==============================================================
     // These user input variables are referenced across scenes, thus
@@ -365,6 +417,14 @@ appeared.",
         throw new Error("invalid value for instruction_type");
       }
     }
+    instructionsScenes[0].onAppear(() => {
+      // in case user quits before starting a trial, record the
+      // timestamp
+      game.addTrialData(
+        "activity_begin_iso8601_timestamp",
+        this.beginIso8601Timestamp
+      );
+    });
     game.addScenes(instructionsScenes);
     game.entryScene = "instructions-01";
 
@@ -504,8 +564,14 @@ appeared.",
     });
 
     fixationScene.onAppear(() => {
-      game.addTrialData("activity_begin_timestamp_ms", this.beginTimestamp);
-      game.addTrialData("trial_begin_timestamp_ms", Timer.now());
+      game.addTrialData(
+        "activity_begin_iso8601_timestamp",
+        this.beginIso8601Timestamp
+      );
+      game.addTrialData(
+        "trial_begin_iso8601_timestamp",
+        new Date().toISOString()
+      );
     });
 
     // ==============================================================
@@ -647,11 +713,6 @@ appeared.",
                 trialConfiguration.dots[
                   trialConfiguration.colorSelectionDotIndex
                 ];
-              const colorTarget = {
-                color_name: colorTargetDot.colorName,
-                rgba_color: colorTargetDot.rgbaColor,
-              };
-              game.addTrialData("color_target", colorTarget);
               game.addTrialData(
                 "color_selected_correct",
                 Equals.rgbaColor(colorTargetDot.rgbaColor, selectedRgba)
@@ -802,7 +863,28 @@ appeared.",
         color_rgba:
           trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
       };
-      game.addTrialData("location_target", location_target);
+
+      const presentedDots = [];
+      for (let i = 0; i < trialConfiguration.dots.length; i++) {
+        const dot = {
+          color_name: trialConfiguration.dots[i].colorName,
+          rgba_color: trialConfiguration.dots[i].rgbaColor,
+          location: {
+            x: trialConfiguration.dots[i].x,
+            y: trialConfiguration.dots[i].y,
+          },
+        };
+        presentedDots.push(dot);
+      }
+      game.addTrialData("presented_dots", presentedDots);
+      game.addTrialData(
+        "color_target_dot_index",
+        trialConfiguration.colorSelectionDotIndex
+      );
+      game.addTrialData(
+        "location_target_dot_index",
+        trialConfiguration.locationSelectionDotIndex
+      );
 
       if (!selectedRgba) {
         throw new Error("no selected color!");
@@ -852,7 +934,7 @@ appeared.",
           Math.pow(location_selected.y - location_target.y, 2)
       );
       game.addTrialData("location_selected_delta", delta);
-
+      game.addTrialData("quit_button_pressed", false);
       game.trialComplete();
       if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
         game.presentScene(fixationScene);

@@ -33,7 +33,8 @@ class SymbolSearch extends Game {
     const defaultParameters: GameParameters = {
       number_of_top_pairs: {
         value: 3,
-        type: "number",
+        type: "integer",
+        enum: [1, 2, 3, 4],
         description: "Number of pairs to be shown on top. (1-4)",
       },
       lure_percent: {
@@ -66,7 +67,7 @@ top. (2 unique symbols.)",
       },
       number_of_trials: {
         value: 5,
-        type: "number",
+        type: "integer",
         description: "How many trials to run.",
       },
       interstimulus_animation: {
@@ -83,6 +84,7 @@ top. (2 unique symbols.)",
       instruction_type: {
         value: "long",
         type: "string",
+        enum: ["short", "long"],
         description: "Type of instructions to show, 'short' or 'long'.",
       },
       trials_complete_scene_text: {
@@ -96,6 +98,16 @@ top. (2 unique symbols.)",
         description:
           "Button text for scene displayed after all trials are complete.",
       },
+      show_quit_button: {
+        type: "boolean",
+        value: true,
+        description: "Should the activity quit button be shown?",
+      },
+      show_fps: {
+        type: "boolean",
+        value: false,
+        description: "Should the FPS be shown?",
+      },
     };
 
     /**
@@ -105,13 +117,27 @@ top. (2 unique symbols.)",
      * JSON Schema Draft-07 format.
      */
     const symbolSearchTrialSchema: TrialSchema = {
-      trial_type: {
+      activity_begin_iso8601_timestamp: {
         type: "string",
-        description: "Indicates if trial was normal or lure.",
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the game activity.",
+      },
+      trial_begin_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
+      },
+      trial_type: {
+        type: ["string", "null"],
+        enum: ["normal", "lure", null],
+        description:
+          "Indicates if trial was normal or lure. Null if trial was skipped.",
       },
       card_configuration: {
-        type: "object",
-        description: "Symbols used on cards.",
+        type: ["object", "null"],
+        description: "Symbols used on cards. Null if trial was skipped.",
         properties: {
           top_cards_symbols: {
             type: "array",
@@ -121,12 +147,12 @@ top. (2 unique symbols.)",
               type: "object",
               properties: {
                 top: {
-                  type: "number",
+                  type: "integer",
                   description:
                     "Index of the top symbol within the card, 1-based.",
                 },
                 bottom: {
-                  type: "number",
+                  type: "integer",
                   description:
                     "Index of the bottom symbol within the card, 1-based.",
                 },
@@ -141,12 +167,12 @@ top. (2 unique symbols.)",
               type: "object",
               properties: {
                 top: {
-                  type: "number",
+                  type: "integer",
                   description:
                     "Index of the top symbol within the card, 1-based.",
                 },
                 bottom: {
-                  type: "number",
+                  type: "integer",
                   description:
                     "Index of the bottom symbol within the card, 1-based.",
                 },
@@ -155,29 +181,24 @@ top. (2 unique symbols.)",
           },
         },
       },
-      activity_begin_timestamp_ms: {
-        type: "number",
-        description:
-          "Millisecond timestamp at the beginning of the game activity.",
-      },
-      trial_begin_timestamp_ms: {
-        type: "number",
-        description: "Millisecond timestamp at the beginning of the trial.",
-      },
       response_time_duration_ms: {
-        type: "number",
+        type: ["number", "null"],
         description:
-          "Milliseconds from the beginning of the trial until a user taps a response.",
+          "Milliseconds from the beginning of the trial until a user taps a response. Null if trial was skipped.",
       },
       user_response_index: {
-        type: "number",
+        type: ["integer", "null"],
         description:
-          "Index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right.",
+          "Index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right. Null if trial was skipped.",
       },
       correct_response_index: {
-        type: "number",
+        type: ["integer", "null"],
         description:
-          "Index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right.",
+          "Index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right. Null if trial was skipped.",
+      },
+      quit_button_pressed: {
+        type: "boolean",
+        description: "Was the quit button pressed?",
       },
     };
 
@@ -205,7 +226,7 @@ indicator of perceptual speed. SOURCE: Sliwinski, Martin J., Jacqueline A. \
 Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 "Reliability and validity of ambulatory cognitive assessments." Assessment \
 25, no. 1 (2018): 14-30.',
-      showFps: true,
+      showFps: defaultParameters.show_fps.value,
       width: 400,
       height: 800,
       trialSchema: symbolSearchTrialSchema,
@@ -227,9 +248,11 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         },
         {
           name: "stopwatchImage",
-          height: 250,
-          width: 360,
-          url: "img/stopwatchImage.svg",
+          height: 319,
+          width: 256,
+          // license is public domain
+          // https://commons.wikimedia.org/wiki/File:Dtjohnnymonkey-Stopwatch-no-shading.svg
+          url: "img/stopwatch.svg",
         },
         {
           name: "ssintroImage",
@@ -383,6 +406,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           width: symbol_image_size,
           url: "img/ss-24.svg",
         },
+        {
+          name: "circle-x",
+          height: 32,
+          width: 32,
+          // the svg is from evericons and is licensed under CC0 1.0
+          // Universal (Public Domain). see https://www.patreon.com/evericons
+          url: "./img/circle-x.svg",
+        },
       ],
     };
 
@@ -397,6 +428,27 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     // these are defined in game options images
     const NUMBER_OF_SYMBOLS = 24;
+
+    // ==============================================================
+
+    if (game.getParameter<boolean>("show_quit_button")) {
+      const quitSprite = new Sprite({
+        imageName: "circle-x",
+        position: { x: 380, y: 20 },
+        isUserInteractionEnabled: true,
+      });
+      game.addFreeEntity(quitSprite);
+      quitSprite.onTapDown((e) => {
+        game.removeAllFreeEntities();
+        e.handled = true;
+        const blankScene = new Scene();
+        game.addScene(blankScene);
+        game.presentScene(blankScene);
+        game.addTrialData("quit_button_pressed", true);
+        game.trialComplete();
+        game.end();
+      });
+    }
 
     // ==================================================
     // SCENES: instructions
@@ -475,7 +527,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
               text: "Please be as fast and accurate as you can",
               image: "stopwatchImage",
               imageAboveText: false,
-              imageMarginTop: 12,
+              imageMarginTop: 48,
               textFontSize: 24,
               titleFontSize: 30,
               textVerticalBias: 0.25,
@@ -494,6 +546,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         );
       }
     }
+    instructionsScenes[0].onAppear(() => {
+      // in case user quits before starting a trial, record the
+      // timestamp
+      game.addTrialData(
+        "activity_begin_iso8601_timestamp",
+        this.beginIso8601Timestamp
+      );
+    });
 
     game.entryScene = "instructions-01";
     game.addScenes(instructionsScenes);
@@ -910,7 +970,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           ...remaining_trial_configuration
         } = trialConfiguration;
         game.addTrialData("card_configuration", remaining_trial_configuration);
-
+        game.addTrialData("quit_button_pressed", false);
         game.trialComplete();
         if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
           orLabel.hidden = true;
@@ -938,8 +998,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       }
 
       chooseCardScene.onAppear(() => {
-        game.addTrialData("activity_begin_timestamp_ms", this.beginTimestamp);
-        game.addTrialData("trial_begin_timestamp_ms", Timer.now());
+        game.addTrialData(
+          "activity_begin_iso8601_timestamp",
+          this.beginIso8601Timestamp
+        );
+        game.addTrialData(
+          "trial_begin_iso8601_timestamp",
+          new Date().toISOString()
+        );
         /** Add the question label free entity, only if not added yet */
         if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
           questionLabel.hidden = true;
