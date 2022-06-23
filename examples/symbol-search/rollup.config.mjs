@@ -8,6 +8,7 @@ import livereload from "rollup-plugin-livereload";
 // import del from "rollup-plugin-delete";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
+import { copyM2c2Resources, m2c2CacheBusting } from "@m2c2kit/build-helpers";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -66,31 +67,44 @@ export default (commandLineArgs) => {
         ...sharedPlugins,
         typescript({
           sourceMap: commandLineArgs.configServe && true,
+          transformers: {
+            before: [m2c2CacheBusting()],
+          },
         }),
         sourcemaps(),
-        copy({
-          targets: [
-            // copy the wasm bundle out of node_modules so it can be served
-            {
-              src: "../../node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-              dest: outputFolder,
-            },
-            {
-              src: "fonts/*",
-              dest: `${outputFolder}/fonts`,
-            },
-            {
-              src: "img/*",
-              dest: `${outputFolder}/img`,
-            },
-            {
-              src: "css/*",
-              dest: `${outputFolder}/css`,
-            },
-          ],
-          copyOnce: false,
-          hook: "writeBundle",
-        }),
+        copyM2c2Resources("img", `${outputFolder}/img`, true),
+        copyM2c2Resources("fonts", `${outputFolder}/fonts`, true),
+        copyM2c2Resources("css", `${outputFolder}/css`, false),
+        copyM2c2Resources(
+          "../../node_modules/canvaskit-wasm/bin",
+          `${outputFolder}`,
+          false,
+          { filter: ["canvaskit.wasm"] }
+        ),
+        //copyM2c2Resources("fonts", "build/fonts", true),
+        // copy({
+        //   targets: [
+        //     // copy the wasm bundle out of node_modules so it can be served
+        //     {
+        //       src: "../../node_modules/canvaskit-wasm/bin/canvaskit.wasm",
+        //       dest: outputFolder,
+        //     },
+        //     {
+        //       src: "fonts/*",
+        //       dest: `${outputFolder}/fonts`,
+        //     },
+        //     {
+        //       src: "img/*",
+        //       dest: `${outputFolder}/img`,
+        //     },
+        //     {
+        //       src: "css/*",
+        //       dest: `${outputFolder}/css`,
+        //     },
+        //   ],
+        //   copyOnce: false,
+        //   hook: "writeBundle",
+        // }),
         copy({
           targets: [
             {

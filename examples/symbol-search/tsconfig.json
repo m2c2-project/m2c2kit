@@ -2,7 +2,8 @@
   "references": [
     { "path": "../../packages/core" },
     { "path": "../../packages/addons" },
-    { "path": "../../packages/sageresearch" }
+    { "path": "../../packages/sageresearch" },
+    { "path": "../../packages/build-helpers" }
   ],
   "compilerOptions": {
     "composite": true,
