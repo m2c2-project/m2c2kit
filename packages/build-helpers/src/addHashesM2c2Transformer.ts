@@ -1,9 +1,10 @@
-import ts from "typescript";
+import ts, { factory, SyntaxKind } from "typescript";
+import { Constants } from "./constants";
 import path from "path";
 import { getFileHash } from "./getFileHash";
+import { getCanvasKitWasmPath } from "./getCanvasKitWasmPath";
 
-export function m2c2CacheBusting() {
-  console.log("m2c2CacheBusting()");
+export function addHashesM2c2Transformer() {
   return (context: ts.TransformationContext) => {
     return (sourceFile: ts.SourceFile) => {
       const getRootVariableDeclaration = (
@@ -105,9 +106,22 @@ export function m2c2CacheBusting() {
         );
       };
 
-      const addHashToUrl = (url: string) => {
+      function nodeIsSessionNewExpression(node: ts.Node): boolean {
+        if (node.kind === SyntaxKind.NewExpression) {
+          const identifiers = node
+            .getChildren()
+            .filter((c) => c.kind === SyntaxKind.Identifier);
+          if (identifiers.length > 0) {
+            const identifier = identifiers[0] as ts.Identifier;
+            return identifier.text === "Session";
+          }
+        }
+        return false;
+      }
+
+      const addHashToUrl = (url: string, rootDir = "") => {
         const ext = path.extname(url);
-        const hash = getFileHash(url);
+        const hash = getFileHash(path.join(rootDir, url));
         if (ext) {
           url = url.replace(ext, `.${hash}${ext}`);
         } else {
@@ -122,8 +136,62 @@ export function m2c2CacheBusting() {
           nodeIsStringLiteralAssignedToImageUrl(node)
         ) {
           let url = (node as ts.StringLiteral).text;
-          url = addHashToUrl(url);
+          url = addHashToUrl(url, "src");
           return ts.factory.createStringLiteral(url);
+        }
+
+        if (nodeIsSessionNewExpression(node)) {
+          const newExpression = node as ts.NewExpression;
+          if (newExpression.arguments && newExpression.arguments.length > 0) {
+            const objectLiteral = newExpression
+              .arguments[0] as ts.ObjectLiteralExpression;
+
+            const canvasKitPath = getCanvasKitWasmPath();
+            let canvasKitUrl = Constants.DEFAULT_CANVASKITWASM_URL;
+            if (canvasKitPath) {
+              const hash = getFileHash(canvasKitPath);
+              const ext = path.extname(canvasKitUrl);
+              if (ext) {
+                canvasKitUrl = canvasKitUrl.replace(ext, `.${hash}${ext}`);
+              } else {
+                canvasKitUrl = canvasKitUrl + `.${hash}`;
+              }
+            }
+
+            /**
+             * if canvasKitWasmUrl property already exists,
+             * don't modify this node
+             */
+            const props = objectLiteral.properties.map((p) =>
+              p.name?.getText()
+            );
+            if (props.includes("canvasKitWasmUrl")) {
+              return node;
+            }
+
+            return factory.createNewExpression(
+              factory.createIdentifier("Session"),
+              undefined,
+              [
+                factory.createObjectLiteralExpression(
+                  [
+                    ...objectLiteral.properties,
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("canvasKitWasmUrl"),
+                      factory.createStringLiteral(canvasKitUrl)
+                    ),
+                  ],
+                  true
+                ),
+              ]
+            );
+          }
+
+          return factory.createNewExpression(
+            node as ts.NewExpression,
+            undefined,
+            undefined
+          );
         }
 
         return ts.visitEachChild(node, visitor, context);

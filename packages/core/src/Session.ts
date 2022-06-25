@@ -1,3 +1,4 @@
+import { Constants } from "./Constants";
 import { EventType } from "./EventBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
@@ -139,7 +140,7 @@ export class Session {
    * @returns
    */
   private async getAsynchronousAssets(): Promise<[CanvasKit, void, void[]]> {
-    const canvasKitPromise = this.loadCanvasKit();
+    const canvasKitPromise = this.loadCanvasKit(this.options.canvasKitWasmUrl);
     const fetchFontsPromise = this.fontManager.fetchFonts(
       this.getFontsConfigurationFromGames()
     );
@@ -156,8 +157,10 @@ export class Session {
 
   // call CanvasKitInit through loadCanvasKit so we can mock
   // loadCanvasKit using jest
-  private loadCanvasKit(): Promise<CanvasKit> {
-    return CanvasKitInit();
+  private loadCanvasKit(
+    canvasKitWasmUrl = Constants.DEFAULT_CANVASKITWASM_URL
+  ): Promise<CanvasKit> {
+    return CanvasKitInit(canvasKitWasmUrl);
   }
 
   private loadAssets(canvasKit: CanvasKit) {

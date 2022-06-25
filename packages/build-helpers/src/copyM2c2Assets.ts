@@ -2,22 +2,32 @@ import copy from "recursive-copy";
 import { lstatSync, existsSync, renameSync } from "fs";
 import path from "path";
 import { getFileHash } from "./getFileHash";
+import { getCanvasKitWasmPath } from "./getCanvasKitWasmPath";
 
-export function copyM2c2Resources(
+export function copyM2c2Assets(
   from: string,
   to: string,
   renameWithHash = false,
   options = {}
 ) {
   return {
-    name: "copy-m2c2-resources",
-    buildEnd: async () => {
+    name: "copy-m2c2-assets",
+    writeBundle: async () => {
       if (!existsSync(from)) {
         return;
       }
 
       options = { ...options, overwrite: true };
       const results = await copy(from, to, options);
+
+      const canvasKitPath = getCanvasKitWasmPath();
+      if (canvasKitPath) {
+        const ckResults = await copy(path.dirname(canvasKitPath), to, {
+          ...options,
+          filter: ["canvaskit.wasm"],
+        });
+        results.push(...ckResults);
+      }
 
       if (!renameWithHash) {
         return;

@@ -2,13 +2,16 @@ import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import shim from "rollup-plugin-shim";
-import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 // import del from "rollup-plugin-delete";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
-import { copyM2c2Resources, m2c2CacheBusting } from "@m2c2kit/build-helpers";
+import {
+  copyM2c2Assets,
+  addHashesM2c2Transformer,
+  copyM2c2IndexHtml,
+} from "@m2c2kit/build-helpers";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -24,6 +27,9 @@ let sharedPlugins = [
 ];
 
 export default (commandLineArgs) => {
+  const isDebug = commandLineArgs.configServe ? true : false;
+  const isProd = commandLineArgs.configProd ? true : false;
+
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
     outputFolder = "dist";
@@ -31,12 +37,12 @@ export default (commandLineArgs) => {
 
   const finalConfig = [
     {
-      input: "./src/symbol-search.ts",
+      input: "./src/index.ts",
       output: [
         {
           file: `./${outputFolder}/index.js`,
           format: "esm",
-          sourcemap: commandLineArgs.configServe && true,
+          sourcemap: isDebug, // commandLineArgs.configServe && true,
           /**
            * In the tsconfig.json, we have "rootDir": "../.." to fix an issue
            * where sourcemaps for @m2c2kit/core and addons were not getting
@@ -57,8 +63,8 @@ export default (commandLineArgs) => {
                   path.sep +
                   "src" +
                   path.sep +
-                  "symbol-search.ts",
-                "src" + path.sep + "symbol-search.ts"
+                  "index.ts",
+                "src" + path.sep + "index.ts"
               );
             }),
         },
@@ -68,53 +74,17 @@ export default (commandLineArgs) => {
         typescript({
           sourceMap: commandLineArgs.configServe && true,
           transformers: {
-            before: [m2c2CacheBusting()],
+            before: isProd ? [addHashesM2c2Transformer()] : undefined,
           },
         }),
         sourcemaps(),
-        copyM2c2Resources("img", `${outputFolder}/img`, true),
-        copyM2c2Resources("fonts", `${outputFolder}/fonts`, true),
-        copyM2c2Resources("css", `${outputFolder}/css`, false),
-        copyM2c2Resources(
-          "../../node_modules/canvaskit-wasm/bin",
-          `${outputFolder}`,
-          false,
-          { filter: ["canvaskit.wasm"] }
+        copyM2c2IndexHtml(
+          "src/index.html",
+          `${outputFolder}/index.html`,
+          `${outputFolder}/index.js`,
+          isProd
         ),
-        //copyM2c2Resources("fonts", "build/fonts", true),
-        // copy({
-        //   targets: [
-        //     // copy the wasm bundle out of node_modules so it can be served
-        //     {
-        //       src: "../../node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-        //       dest: outputFolder,
-        //     },
-        //     {
-        //       src: "fonts/*",
-        //       dest: `${outputFolder}/fonts`,
-        //     },
-        //     {
-        //       src: "img/*",
-        //       dest: `${outputFolder}/img`,
-        //     },
-        //     {
-        //       src: "css/*",
-        //       dest: `${outputFolder}/css`,
-        //     },
-        //   ],
-        //   copyOnce: false,
-        //   hook: "writeBundle",
-        // }),
-        copy({
-          targets: [
-            {
-              src: "src/index.html",
-              dest: outputFolder,
-            },
-          ],
-          copyOnce: false,
-          hook: "writeBundle",
-        }),
+        copyM2c2Assets("src/assets", `${outputFolder}/assets`, isProd),
         commandLineArgs.configServe &&
           serve({
             // we can start development server and automatically open browser by running

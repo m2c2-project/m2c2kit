@@ -9,6 +9,8 @@ import { GameParameters } from "./GameParameters";
 export interface GameOptions {
   /** Human-friendly name of this game */
   name: string;
+  /** Short identifier of this game; unique among published games and url-friendly (no spaces, special characters, or slashes)*/
+  id: string;
   /** Version of this game */
   version?: string;
   /** Uri (repository, webpage, or other location where full information about the game can be found) */

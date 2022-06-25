@@ -5,6 +5,7 @@ import { RgbaColor } from "./RgbaColor";
  * Reasonable defaults to use if values are not specified.
  */
 export class Constants {
+  public static readonly DEFAULT_CANVASKITWASM_URL = "assets/canvaskit.wasm";
   public static readonly FPS_DISPLAY_TEXT_FONT_SIZE = 12;
   public static readonly FPS_DISPLAY_TEXT_COLOR: RgbaColor = [0, 0, 0, 0.5];
   public static readonly FPS_DISPLAY_UPDATE_INTERVAL = 500;

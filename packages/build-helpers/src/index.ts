@@ -1,3 +1,4 @@
 export * from "./getFileHash";
-export * from "./copyM2c2Resources";
-export * from "./m2c2CacheBusting";
+export * from "./copyM2c2Assets";
+export * from "./addHashesM2c2Transformer";
+export * from "./copyM2c2IndexHtml";

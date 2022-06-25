@@ -8,4 +8,6 @@ export interface SessionOptions {
   activityCallbacks?: ActivityCallbacks;
   /** Callbacks executed when session events occur */
   sessionCallbacks?: SessionCallbacks;
+  /** Url of the canvaskit.wasm binary. Do not set this property; it will be set automatically. */
+  canvasKitWasmUrl?: string;
 }

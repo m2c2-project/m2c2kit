@@ -12,6 +12,6 @@ type CorrectModule = {
 
 const initialize = (all as unknown as CorrectModule).default;
 
-export function CanvasKitInit(): Promise<CanvasKit> {
-  return initialize({ locateFile: (file) => file });
+export function CanvasKitInit(canvasKitWasmUrl: string): Promise<CanvasKit> {
+  return initialize({ locateFile: () => canvasKitWasmUrl });
 }
