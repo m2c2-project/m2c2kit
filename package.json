@@ -6,6 +6,7 @@
     "packages/assessment-grid-memory/demo",
     "examples/grid-memory",
     "examples/symbol-search",
+    "examples/color-dots",
     "integration-tests/*"
   ],
   "scripts": {

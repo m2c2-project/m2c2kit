@@ -4,7 +4,6 @@ import commonjs from "@rollup/plugin-commonjs";
 import shim from "rollup-plugin-shim";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-// import del from "rollup-plugin-delete";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
 import {
@@ -21,9 +20,7 @@ let sharedPlugins = [
     path: `export function path_empty_shim() { }`,
   }),
   nodeResolve(),
-  commonjs({
-    include: "node_modules/canvaskit-wasm/**",
-  }),
+  commonjs(),
 ];
 
 export default (commandLineArgs) => {
@@ -42,7 +39,7 @@ export default (commandLineArgs) => {
         {
           file: `./${outputFolder}/index.js`,
           format: "esm",
-          sourcemap: isDebug, // commandLineArgs.configServe && true,
+          sourcemap: isDebug,
           /**
            * In the tsconfig.json, we have "rootDir": "../.." to fix an issue
            * where sourcemaps for @m2c2kit/core and addons were not getting
@@ -96,7 +93,8 @@ export default (commandLineArgs) => {
             host: "localhost",
             port: 3000,
           }),
-        commandLineArgs.configServe && livereload({ watch: "build", delay: 0 }),
+        commandLineArgs.configServe &&
+          livereload({ watch: "build", delay: 250 }),
       ],
     },
   ];

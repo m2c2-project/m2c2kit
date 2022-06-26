@@ -2,7 +2,8 @@
   "references": [
     { "path": "../../packages/core" },
     { "path": "../../packages/addons" },
-    { "path": "../../packages/sageresearch" }
+    { "path": "../../packages/sageresearch" },
+    { "path": "../../packages/build-helpers" }
   ],
   "compilerOptions": {
     "composite": true,
@@ -18,5 +19,5 @@
     "outDir": "build",
     "rootDir": "../.."
   },
-  "exclude": ["node_modules", "build", "dist", "rollup.config.js"]
+  "exclude": ["node_modules", "build", "dist"]
 }

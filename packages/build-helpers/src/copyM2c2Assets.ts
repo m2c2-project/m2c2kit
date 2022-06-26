@@ -1,5 +1,6 @@
 import copy from "recursive-copy";
-import { lstatSync, existsSync, renameSync } from "fs";
+import { existsSync } from "fs";
+import { rename, lstat } from "fs/promises";
 import path from "path";
 import { getFileHash } from "./getFileHash";
 import { getCanvasKitWasmPath } from "./getCanvasKitWasmPath";
@@ -34,7 +35,7 @@ export function copyM2c2Assets(
       }
 
       for (const result of results) {
-        if (lstatSync(result.dest).isDirectory()) {
+        if ((await lstat(result.dest)).isDirectory()) {
           continue;
         }
         let filepath = result.dest;
@@ -46,7 +47,7 @@ export function copyM2c2Assets(
         } else {
           filepath = filepath + `.${hash}`;
         }
-        renameSync(result.dest, filepath);
+        await rename(result.dest, filepath);
       }
     },
   };

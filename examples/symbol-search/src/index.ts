@@ -1050,6 +1050,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       game.end();
     });
     doneScene.addChild(okButton);
+    doneScene.onSetup(() => {
+      // no need to have cancel button, because we're done
+      game.removeAllFreeEntities();
+    });
   }
 }
 

@@ -255,6 +255,7 @@ class ColorDots extends Game {
 
     const options: GameOptions = {
       name: "Color Dots",
+      id: "color-dots",
       version: "0.0.1",
       shortDescription: "A short description of Color Dots goes here...",
       longDescription:
@@ -270,25 +271,25 @@ appeared.",
       bodyBackgroundColor: WebColors.White,
       trialSchema: colorDotsTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
+      fontUrls: ["assets/color-dots/fonts/roboto/Roboto-Regular.ttf"],
       images: [
         {
           name: "cd1",
           height: 250,
           width: 250,
-          url: "img/cd1.png",
+          url: "assets/color-dots/img/cd1.png",
         },
         {
           name: "cd2",
           height: 357,
           width: 250,
-          url: "img/cd2.png",
+          url: "assets/color-dots/img/cd2.png",
         },
         {
           name: "cd3",
           height: 345,
           width: 250,
-          url: "img/cd3.png",
+          url: "assets/color-dots/img/cd3.png",
         },
         {
           name: "circle-x",
@@ -296,7 +297,7 @@ appeared.",
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
           // Universal (Public Domain). see https://www.patreon.com/evericons
-          url: "./img/circle-x.svg",
+          url: "assets/color-dots/img/circle-x.svg",
         },
       ],
     };
@@ -974,6 +975,10 @@ appeared.",
       game.end();
     });
     doneScene.addChild(okButton);
+    doneScene.onSetup(() => {
+      // no need to have cancel button, because we're done
+      game.removeAllFreeEntities();
+    });
 
     game.entryScene = "instructions-01";
   }

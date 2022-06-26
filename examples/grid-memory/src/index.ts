@@ -260,6 +260,7 @@ class GridMemory extends Game {
     const img_default_size = 200;
     const options: GameOptions = {
       name: "Grid Memory",
+      id: "grid-memory",
       version: "0.0.1",
       shortDescription: "A short description of Grid Memory goes here...",
       longDescription:
@@ -300,19 +301,19 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       height: 800,
       trialSchema: gridMemoryTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["./fonts/roboto/Roboto-Regular.ttf"],
+      fontUrls: ["assets/grid-memory/fonts/roboto/Roboto-Regular.ttf"],
       images: [
         {
           name: "grid",
           height: img_default_size,
           width: img_default_size,
-          url: "img/dotmem1_grid.png",
+          url: "assets/grid-memory/img/dotmem1_grid.png",
         },
         {
           name: "fs",
           height: img_default_size,
           width: img_default_size,
-          url: "img/dotmem2_fs.png",
+          url: "assets/grid-memory/img/dotmem2_fs.png",
         },
         {
           name: "circle-x",
@@ -320,7 +321,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
           // Universal (Public Domain). see https://www.patreon.com/evericons
-          url: "./img/circle-x.svg",
+          url: "assets/grid-memory/img/circle-x.svg",
         },
       ],
     };
@@ -419,6 +420,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       postInstructionsScene: "preparationScene",
     });
     game.addScenes(instructionsScenes);
+    game.entryScene = "instructions-01";
     instructionsScenes[0].onAppear(() => {
       // in case user quits before starting trial, record the timestamp
       game.addTrialData(
@@ -944,8 +946,10 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
       game.end();
     });
     doneScene.addChild(okButton);
-
-    game.entryScene = "instructions-01";
+    doneScene.onSetup(() => {
+      // no need to have cancel button, because we're done
+      game.removeAllFreeEntities();
+    });
   }
 }
 

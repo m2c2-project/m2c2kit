@@ -2,12 +2,15 @@ import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import shim from "rollup-plugin-shim";
-import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-// import del from "rollup-plugin-delete";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
+import {
+  copyM2c2Assets,
+  addHashesM2c2Transformer,
+  copyM2c2IndexHtml,
+} from "@m2c2kit/build-helpers";
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -17,12 +20,13 @@ let sharedPlugins = [
     path: `export function path_empty_shim() { }`,
   }),
   nodeResolve(),
-  commonjs({
-    include: "node_modules/canvaskit-wasm/**",
-  }),
+  commonjs(),
 ];
 
 export default (commandLineArgs) => {
+  const isDebug = commandLineArgs.configServe ? true : false;
+  const isProd = commandLineArgs.configProd ? true : false;
+
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
     outputFolder = "dist";
@@ -30,12 +34,12 @@ export default (commandLineArgs) => {
 
   const finalConfig = [
     {
-      input: "./src/grid-memory.ts",
+      input: "./src/index.ts",
       output: [
         {
           file: `./${outputFolder}/index.js`,
           format: "esm",
-          sourcemap: commandLineArgs.configServe && true,
+          sourcemap: isDebug,
           /**
            * In the tsconfig.json, we have "rootDir": "../.." to fix an issue
            * where sourcemaps for @m2c2kit/core and addons were not getting
@@ -56,8 +60,8 @@ export default (commandLineArgs) => {
                   path.sep +
                   "src" +
                   path.sep +
-                  "grid-memory.ts",
-                "src" + path.sep + "grid-memory.ts"
+                  "index.ts",
+                "src" + path.sep + "index.ts"
               );
             }),
         },
@@ -66,41 +70,18 @@ export default (commandLineArgs) => {
         ...sharedPlugins,
         typescript({
           sourceMap: commandLineArgs.configServe && true,
+          transformers: {
+            before: isProd ? [addHashesM2c2Transformer()] : undefined,
+          },
         }),
         sourcemaps(),
-        copy({
-          targets: [
-            // copy the wasm bundle out of node_modules so it can be served
-            {
-              src: "../../node_modules/canvaskit-wasm/bin/canvaskit.wasm",
-              dest: outputFolder,
-            },
-            {
-              src: "fonts/*",
-              dest: `${outputFolder}/fonts`,
-            },
-            {
-              src: "img/*",
-              dest: `${outputFolder}/img`,
-            },
-            {
-              src: "css/*",
-              dest: `${outputFolder}/css`,
-            },
-          ],
-          copyOnce: false,
-          hook: "writeBundle",
-        }),
-        copy({
-          targets: [
-            {
-              src: "src/index.html",
-              dest: outputFolder,
-            },
-          ],
-          copyOnce: false,
-          hook: "writeBundle",
-        }),
+        copyM2c2IndexHtml(
+          "src/index.html",
+          `${outputFolder}/index.html`,
+          `${outputFolder}/index.js`,
+          isProd
+        ),
+        copyM2c2Assets("src/assets", `${outputFolder}/assets`, isProd),
         commandLineArgs.configServe &&
           serve({
             // we can start development server and automatically open browser by running
@@ -112,7 +93,8 @@ export default (commandLineArgs) => {
             host: "localhost",
             port: 3000,
           }),
-        commandLineArgs.configServe && livereload({ watch: "build", delay: 0 }),
+        commandLineArgs.configServe &&
+          livereload({ watch: "build", delay: 250 }),
       ],
     },
   ];
