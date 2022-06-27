@@ -40,6 +40,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   m2c2corelib = "";
   m2c2addonslib = "";
+  m2c2sageresearchlib = "";
   canvaskitLib = "";
 
   codeEditorVisible = true;
@@ -51,15 +52,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   assessments: Array<{ name: string; url: string }> = [
     {
       name: "Grid Memory",
-      url: "./assets/m2c2-examples/grid-memory/grid-memory-playground.ts",
+      url: "./assets/src/grid-memory/index.ts",
     },
     {
       name: "Symbol Search",
-      url: "./assets/m2c2-examples/symbol-search/symbol-search-playground.ts",
+      url: "./assets/src/symbol-search/index.ts",
     },
     {
       name: "Color Dots",
-      url: "./assets/m2c2-examples/color-dots/color-dots-playground.ts",
+      url: "./assets/src/color-dots/index.ts",
     },
   ];
 
@@ -122,6 +123,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       fetch("./assets/template.html"),
       fetch("./assets/m2c2kit/core/index.d.ts"),
       fetch("./assets/m2c2kit/addons/index.d.ts"),
+      fetch("./assets/m2c2kit/sageresearch/index.d.ts"),
       fetch("./assets/canvaskit-wasm/index.d.ts"),
     ])
       .then(
@@ -129,6 +131,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           templateResponse,
           coreLibResponse,
           addonsLibResponse,
+          m2c2sageresearchLibResponse,
           canvaskitLibResponse,
         ]) => {
           if (
@@ -136,6 +139,7 @@ export class AppComponent implements OnInit, AfterViewInit {
               templateResponse.ok,
               coreLibResponse.ok,
               addonsLibResponse.ok,
+              m2c2sageresearchLibResponse.ok,
               canvaskitLibResponse.ok,
             ].every((ok) => ok)
           ) {
@@ -146,6 +150,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             templateResponse.text(),
             coreLibResponse.text(),
             addonsLibResponse.text(),
+            m2c2sageresearchLibResponse.text(),
             canvaskitLibResponse.text(),
           ])
             .then(
@@ -153,10 +158,12 @@ export class AppComponent implements OnInit, AfterViewInit {
                 templateHtml,
                 m2c2kitCoreLib,
                 m2c2kitAddonsLib,
+                m2c2kitSageresearchLib,
                 canvaskitLib,
               ]) => {
                 this.m2c2corelib = m2c2kitCoreLib;
                 this.m2c2addonslib = m2c2kitAddonsLib;
+                this.m2c2sageresearchlib = m2c2kitSageresearchLib;
                 this.canvaskitLib = canvaskitLib;
                 this.html = templateHtml;
 
@@ -194,6 +201,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                 window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
                   m2c2kitAddonsLib,
                   "file:///node_modules/@m2c2kit/addons/index.d.ts"
+                );
+
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                  m2c2kitSageresearchLib,
+                  "file:///node_modules/@m2c2kit/sageresearch/index.d.ts"
                 );
 
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -265,10 +279,16 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
       await libFile2.save();
       const libFile3 = project.createSourceFile(
+        "./node_modules/@m2c2kit/sageresearch/index.d.ts",
+        this.m2c2sageresearchlib
+      );
+      await libFile3.save();
+
+      const libFile4 = project.createSourceFile(
         "./node_modules/canvaskit-wasm/index.d.ts",
         this.canvaskitLib
       );
-      await libFile3.save();
+      await libFile4.save();
 
       const sourceFile = project.createSourceFile(
         "src/assessment.ts",
@@ -339,6 +359,10 @@ export class AppComponent implements OnInit, AfterViewInit {
            */
           .replace(`"@m2c2kit/core"`, `"./assets/m2c2kit/core/index.js"`)
           .replace(`"@m2c2kit/addons"`, `"./assets/m2c2kit/addons/index.js"`)
+          .replace(
+            `"@m2c2kit/sageresearch"`,
+            `"./assets/m2c2kit/sageresearch/index.js"`
+          )
       );
       this.runButtonIcon = "arrow_right";
       this.compilationMessage = "";

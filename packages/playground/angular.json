@@ -34,14 +34,44 @@
               },
               "src/favicon.ico",
               {
+                "glob": "index.ts",
+                "input": "./../../examples/symbol-search/src",
+                "output": "./assets/src/symbol-search"
+              },
+              {
                 "glob": "**/*",
-                "input": "src/assets/m2c2-examples",
-                "output": "assets/m2c2-examples"
+                "input": "./../../examples/symbol-search/src/assets/symbol-search",
+                "output": "assets/symbol-search"
+              },
+              {
+                "glob": "index.ts",
+                "input": "./../../examples/grid-memory/src",
+                "output": "./assets/src/grid-memory"
+              },
+              {
+                "glob": "**/*",
+                "input": "./../../examples/grid-memory/src/assets/grid-memory",
+                "output": "assets/grid-memory"
+              },
+              {
+                "glob": "index.ts",
+                "input": "./../../examples/color-dots/src",
+                "output": "./assets/src/color-dots"
+              },
+              {
+                "glob": "**/*",
+                "input": "./../../examples/color-dots/src/assets/color-dots",
+                "output": "assets/color-dots"
               },
               {
                 "glob": "template.html",
                 "input": "src/assets",
                 "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets/css",
+                "output": "assets/css"
               },
               {
                 "glob": "index.*",
@@ -54,6 +84,11 @@
                 "output": "assets/m2c2kit/core"
               },
               {
+                "glob": "index.*",
+                "input": "./../sageresearch/dist",
+                "output": "assets/m2c2kit/sageresearch"
+              },
+              {
                 "glob": "index.d.ts",
                 "input": "./../../node_modules/canvaskit-wasm/types",
                 "output": "./assets/canvaskit-wasm"
@@ -61,10 +96,8 @@
               {
                 "glob": "canvaskit.wasm",
                 "input": "./../../node_modules/canvaskit-wasm/bin",
-                "output": "./"
-              },
-              "src/fonts",
-              "src/img"
+                "output": "assets"
+              }
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
