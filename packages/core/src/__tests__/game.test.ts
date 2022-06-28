@@ -101,6 +101,7 @@ class Game1 extends Game {
   constructor() {
     const gameOptions: GameOptions = {
       name: "game1",
+      id: "game1",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -129,6 +130,7 @@ class Game2 extends Game {
   constructor() {
     const gameOptions: GameOptions = {
       name: "game2",
+      id: "game2",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -381,6 +383,7 @@ class Game3 extends Game {
 
     const gameOptions: GameOptions = {
       name: "game3",
+      id: "game3",
       version: "0.1",
       width: 400,
       height: 800,

@@ -62,6 +62,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: "Color Dots",
       url: "./assets/src/color-dots/index.ts",
     },
+    {
+      name: "CLI Starter (Stroop)",
+      url: "./assets/src/cli-starter/index.ts",
+    },
   ];
 
   selectedTheme = { name: "Light", monacoName: "vs" };

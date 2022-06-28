@@ -176,6 +176,22 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
+   * Removes the children from the parent. Throws error if the parent does not contain all of the children.
+   *
+   * @param children - An array of children to remove from the parent entity
+   */
+  removeChildren(children: Array<Entity>): void {
+    children.forEach((child) => {
+      if (!this.children.includes(child)) {
+        throw new Error(
+          `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`
+        );
+      }
+    });
+    this.children = this.children.filter((child) => !children.includes(child));
+  }
+
+  /**
    * Searches all descendants by name and returns first matching entity. Descendants are children and children of children, recursively.
    *
    * @param name - Name of the descendant entity to return

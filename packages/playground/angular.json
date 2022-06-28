@@ -64,6 +64,16 @@
                 "output": "assets/color-dots"
               },
               {
+                "glob": "index.ts",
+                "input": "./../../examples/cli-starter/src",
+                "output": "./assets/src/cli-starter"
+              },
+              {
+                "glob": "**/*",
+                "input": "./../../examples/cli-starter/src/assets/cli-starter",
+                "output": "assets/cli-starter"
+              },
+              {
                 "glob": "template.html",
                 "input": "src/assets",
                 "output": "assets"

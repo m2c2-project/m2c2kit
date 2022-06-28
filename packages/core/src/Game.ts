@@ -335,7 +335,13 @@ export class Game implements Activity {
   }
 
   /**
-   * Starts the game loop. If entryScene is undefined, the game object's entryScene must be set.
+   * Starts the game loop.
+   *
+   * @remarks If entryScene is undefined, the game will start with scene
+   * defined in the game object's entryScene property. If that is undefined,
+   * the game will start with the first scene in the game object's scenes.
+   * If there are no scenes in the game object's scenes, it will throw
+   * an error.
    *
    * @param entryScene - The scene (Scene object or its string name) to display when the game starts
    */
@@ -363,8 +369,13 @@ export class Game implements Activity {
     if (entryScene !== undefined) {
       if (entryScene instanceof Scene) {
         startingScene = entryScene;
+        if (!this.scenes.includes(startingScene)) {
+          throw new Error(
+            `cannot start game. scene named "${entryScene}" has not been added to the game object`
+          );
+        }
       } else {
-        startingScene = startingScene = this.scenes
+        startingScene = this.scenes
           .filter((scene) => scene.name === entryScene)
           .find(Boolean);
         if (startingScene === undefined) {
@@ -374,22 +385,11 @@ export class Game implements Activity {
         }
       }
     } else {
-      if (this.entryScene === undefined) {
+      startingScene = this.scenes.find(Boolean);
+      if (startingScene === undefined) {
         throw new Error(
-          `cannot start game. the game object's entryScene has not been assigned`
+          `cannot start game. no scenes have been added to the game object`
         );
-      }
-      if (this.entryScene instanceof Scene) {
-        startingScene = this.entryScene;
-      } else {
-        startingScene = startingScene = this.scenes
-          .filter((scene) => scene.name === this.entryScene)
-          .find(Boolean);
-        if (startingScene === undefined) {
-          throw new Error(
-            `cannot start game. scene named "${entryScene}" has not been added to the game object`
-          );
-        }
       }
     }
 

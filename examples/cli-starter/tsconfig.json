@@ -1,0 +1,22 @@
+{
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/addons" },
+    { "path": "../../packages/build-helpers" }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "build",
+    "rootDir": "../.."
+  },
+  "exclude": ["node_modules", "build", "dist"]
+}

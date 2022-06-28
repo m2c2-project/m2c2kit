@@ -93,6 +93,7 @@ class Game1 extends Game {
   constructor() {
     const gameOptions: GameOptions = {
       name: "game1",
+      id: "game1",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -104,11 +105,14 @@ class Game1 extends Game {
     const game = this;
     game.init();
 
-    const scene1 = new Scene({ name: "myScene1" });
+    scene1 = new Scene({ name: "myScene1" });
     game.addScene(scene1);
-    const label1 = new Label({ text: "Hello", name: "myLabel1" });
+    label1 = new Label({ text: "Hello", name: "myLabel1" });
     scene1.addChild(label1);
-    const rect1 = new Shape({
+    label2 = new Label({ text: "Bye", name: "myLabel2" });
+    scene1.addChild(label2);
+
+    rect1 = new Shape({
       rect: { size: { width: 100, height: 100 } },
       name: "myRect1",
     });
@@ -124,31 +128,11 @@ let g1: Game1;
 let perfCounter: number;
 let scene1: Scene;
 let label1: Label;
+let label2: Label;
 let rect1: Shape;
 
 beforeEach(() => {
   g1 = new Game1();
-  rect1 = g1.entities
-    .filter((e) => e.name === "myRect1")
-    .find(Boolean) as Shape;
-  if (!rect1) {
-    throw new Error("myRect1 undefined");
-  }
-
-  scene1 = g1.entities
-    .filter((e) => e.name === "myScene1")
-    .find(Boolean) as Scene;
-  if (!scene1) {
-    throw new Error("myScene1 undefined");
-  }
-
-  label1 = g1.entities
-    .filter((e) => e.name === "myLabel1")
-    .find(Boolean) as Label;
-  if (!label1) {
-    throw new Error("myLabel1 undefined");
-  }
-
   const options: SessionOptions = { activities: [g1] };
   session = new Session(options);
 
@@ -215,11 +199,24 @@ describe("test descendant", () => {
 });
 
 describe("test removeAllChildren", () => {
-  it("scene1 children should have length 0", () => {
+  it("removes all children from scene1", () => {
     scene1.removeAllChildren();
-    expect(scene1.children);
     expect(scene1.children).toHaveLength(0);
-    //expect(scene1.children).toHaveSize(0);
+  });
+});
+
+describe("removeChildren", () => {
+  it("removes the children from scene1", () => {
+    scene1.removeChildren([label1, label2]);
+    expect(scene1.children).toHaveLength(0);
+  });
+
+  it("throws Error when removing a child that is not added to the parent", () => {
+    const l3 = new Label();
+    const t = () => {
+      scene1.removeChildren([l3]);
+    };
+    expect(t).toThrowError();
   });
 });
 

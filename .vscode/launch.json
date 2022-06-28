@@ -14,6 +14,13 @@
     {
       "type": "pwa-chrome",
       "request": "launch",
+      "name": "Chrome cli-starter",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/examples/cli-starter/build"
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
       "name": "Chrome color-dots",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/examples/color-dots/build"
