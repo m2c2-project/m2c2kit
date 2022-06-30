@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.1.10",
+  "version": "0.3.0",
   "description": "Additions to m2c2kit core functionalty, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.1.10"
+    "@m2c2kit/core": "0.3.0"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "5.3.1",

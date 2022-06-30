@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "npm run build -w @m2c2kit/core && npm run build -w @m2c2kit/addons && npm run build -w @m2c2kit/cli && npm run build -w @m2c2kit/assessment-grid-memory && npm run build -w grid-memory-demo && npm run build -w grid-memory && npm run build -w symbol-search",
+    "docker:build": "docker build -t m2c2kit .",
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "prepare": "husky install"
   },
@@ -31,10 +32,5 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
-  },
-  "dependencies": {
-    "@m2c2kit/automation-driver": "file:packages/automation-driver",
-    "grid-memory-demo": "file:packages/assessment-grid-memory/demo",
-    "rollup": "2.70.0"
   }
 }

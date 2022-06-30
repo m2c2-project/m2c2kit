@@ -14,7 +14,7 @@ describe("m2c2 cli starter app", () => {
      * the service name as defined within docker-compose.yaml, NOT localhost
      */
 
-    await browser.url("http://m2c2app:3000");
+    await browser.url("http://testapp:3000");
     // wait for the first scene to render, 2000ms should be ok.
     await browser.pause(2000);
     canvasElement = await M2c2Page.m2c2Canvas;
@@ -27,6 +27,8 @@ describe("m2c2 cli starter app", () => {
 
   it("should create a scene1 that pixel matches our reference scene1", async () => {
     const canvasPng = await elementToPng(canvasElement);
+    //const buffer = PNG.sync.write(canvasPng);
+    //fs.writeFileSync("scene1.png", buffer);
     const scene1Png = readPngFromFile("./images/testAppScene1.png");
     expect(diffPixelCount(canvasPng, scene1Png)).toBe(0);
   });

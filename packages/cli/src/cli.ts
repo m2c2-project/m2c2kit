@@ -17,6 +17,7 @@ import { resolve } from "path";
 import { readdir } from "fs/promises";
 import FormData from "form-data";
 import axios from "axios";
+import { isReservedWord } from "./isReservedWord.js";
 
 // this is the path of our @m2c2kit/cli program
 // our templates are stored under here
@@ -36,17 +37,40 @@ try {
   cliVersion = "UNKNOWN";
 }
 
-function copyFile(copyFileInfo: copyFileInfo): number {
-  const sourceContents = fs.readFileSync(copyFileInfo.sourceFilePath);
-  fs.writeFileSync(copyFileInfo.destinationFilePath, sourceContents);
-  return sourceContents.length;
+async function getFilenamesRecursive(dir: string): Promise<string[]> {
+  const dirents = await readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    dirents.map((dirent) => {
+      const res = resolve(dir, dirent.name);
+      return dirent.isDirectory() ? getFilenamesRecursive(res) : res;
+    })
+  );
+  return Array.prototype.concat(...files);
 }
 
-interface copyFileInfo {
-  sourceFilePath: string;
-  destinationFilePath: string;
+async function copyFolderRecursive(args: copyArgs): Promise<void> {
+  const sourceFiles = await getFilenamesRecursive(args.sourceFolder);
+  const destFiles = sourceFiles.map((f) =>
+    path.join(args.destinationFolder, f.replace(args.sourceFolder, ""))
+  );
+
+  sourceFiles.forEach((source, index) => {
+    const sourceContents = fs.readFileSync(source);
+    const destFile = destFiles[index];
+    fs.mkdirSync(path.dirname(destFile), { recursive: true });
+    fs.writeFileSync(destFile, sourceContents);
+    console.log(
+      `${chalk.green("COPY")} ${destFile} (${sourceContents.length} bytes)`
+    );
+  });
 }
 
+interface copyArgs {
+  sourceFolder: string;
+  destinationFolder: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function applyValuesToTemplate(templateFilePath: string, contents: any) {
   const templateContents = fs.readFileSync(templateFilePath).toString();
   const template = handlebars.compile(templateContents);
@@ -93,10 +117,10 @@ await yarg
         type: "string",
       });
     },
-    (argv) => {
+    async (argv) => {
       const appName = argv["name"] as string;
 
-      if (!isValidAppName(appName)) {
+      if (isReservedWord(appName)) {
         console.error(
           `${chalk.red(
             "ERROR"
@@ -120,9 +144,6 @@ await yarg
       fs.mkdirSync(newFolderPath);
       fs.mkdirSync(path.join(newFolderPath, "src"));
       fs.mkdirSync(path.join(newFolderPath, ".vscode"));
-      fs.mkdirSync(path.join(newFolderPath, "fonts", "roboto"), {
-        recursive: true,
-      });
 
       const templateFolderPath = path.join(packageHomeFolderPath, "templates");
 
@@ -137,9 +158,9 @@ await yarg
         {
           templateFilePath: path.join(
             templateFolderPath,
-            "rollup.config.js.handlebars"
+            "rollup.config.mjs.handlebars"
           ),
-          destinationFilePath: path.join(newFolderPath, "rollup.config.js"),
+          destinationFilePath: path.join(newFolderPath, "rollup.config.mjs"),
         },
         {
           templateFilePath: path.join(
@@ -158,9 +179,9 @@ await yarg
         {
           templateFilePath: path.join(
             templateFolderPath,
-            "starter.ts.handlebars"
+            "index.ts.handlebars"
           ),
-          destinationFilePath: path.join(newFolderPath, "src", `${appName}.ts`),
+          destinationFilePath: path.join(newFolderPath, "src", "index.ts"),
         },
         {
           templateFilePath: path.join(
@@ -214,63 +235,31 @@ await yarg
         yarg.exit(1, new Error("template error"));
       }
 
-      // roboto is the default font we ship
-      // it's Apache 2,, so OK to use as long as we include license
-      const copyFiles: copyFileInfo[] = [
+      const foldersToCopy: copyArgs[] = [
         {
-          sourceFilePath: path.join(
+          sourceFolder: path.join(
             packageHomeFolderPath,
-            "fonts",
-            "roboto",
-            "LICENSE.txt"
+            "assets",
+            "cli-starter"
           ),
-          destinationFilePath: path.join(
-            newFolderPath,
-            "fonts",
-            "roboto",
-            "LICENSE.txt"
-          ),
+          destinationFolder: path.join(newFolderPath, "src", "assets", appName),
         },
         {
-          sourceFilePath: path.join(
-            packageHomeFolderPath,
-            "fonts",
-            "roboto",
-            "Roboto-Regular.ttf"
-          ),
-          destinationFilePath: path.join(
-            newFolderPath,
-            "fonts",
-            "roboto",
-            "Roboto-Regular.ttf"
-          ),
+          sourceFolder: path.join(packageHomeFolderPath, "assets", "css"),
+          destinationFolder: path.join(newFolderPath, "src", "assets", "css"),
         },
         {
-          sourceFilePath: path.join(
-            packageHomeFolderPath,
-            "scripts",
-            "post-install.mjs"
-          ),
-          destinationFilePath: path.join(newFolderPath, "post-install.mjs"),
+          sourceFolder: path.join(packageHomeFolderPath, "scripts"),
+          destinationFolder: path.join(newFolderPath),
         },
       ];
 
-      let errorCopyingFiles = false;
-      copyFiles.forEach((c) => {
-        try {
-          const bytesCopied = copyFile(c);
-          console.log(
-            `${chalk.green("COPY")} ${
-              c.destinationFilePath
-            } (${bytesCopied} bytes)`
-          );
-        } catch (error) {
-          errorCopyingFiles = true;
-          console.error(`${chalk.red("ERROR")} ${c.destinationFilePath}`);
-        }
-      });
-      if (errorCopyingFiles) {
-        console.error(`${chalk.red("ERROR")}: could not copy files`);
+      try {
+        await Promise.all(
+          foldersToCopy.map(async (c) => copyFolderRecursive(c))
+        );
+      } catch (error) {
+        console.error(`${chalk.red("ERROR")}: could not copy files: ${error}`);
         yarg.exit(1, new Error("copy files error"));
       }
 
@@ -279,8 +268,10 @@ await yarg
       let npm: child_process.ChildProcessWithoutNullStreams;
       if (process.platform === "win32") {
         npm = spawn(`npm`, ["install"], { shell: true, cwd: newFolderPath });
+        // npm = spawn(`npm`, ["--version"], { shell: true, cwd: newFolderPath });
       } else {
         npm = spawn(`npm`, ["install"], { cwd: newFolderPath });
+        // npm = spawn(`npm`, ["--version"], { cwd: newFolderPath });
       }
 
       let npmOut = "";
@@ -456,16 +447,16 @@ await yarg
         );
       }
 
-      const getFilenamesRecursive = async (dir: string): Promise<string[]> => {
-        const dirents = await readdir(dir, { withFileTypes: true });
-        const files = await Promise.all(
-          dirents.map((dirent) => {
-            const res = resolve(dir, dirent.name);
-            return dirent.isDirectory() ? getFilenamesRecursive(res) : res;
-          })
-        );
-        return Array.prototype.concat(...files);
-      };
+      // const getFilenamesRecursive = async (dir: string): Promise<string[]> => {
+      //   const dirents = await readdir(dir, { withFileTypes: true });
+      //   const files = await Promise.all(
+      //     dirents.map((dirent) => {
+      //       const res = resolve(dir, dirent.name);
+      //       return dirent.isDirectory() ? getFilenamesRecursive(res) : res;
+      //     })
+      //   );
+      //   return Array.prototype.concat(...files);
+      // };
 
       const uploadFile = async (
         serverUrl: string,
@@ -553,106 +544,3 @@ await yarg
   // provide
   .version(cliVersion)
   .showHelpOnFail(true).argv;
-
-function isValidAppName(name: string): boolean {
-  const reserved = [
-    "abstract",
-    "arguments",
-    "await",
-    "boolean",
-    "break",
-    "byte",
-    "case",
-    "catch",
-    "char",
-    "class",
-    "const",
-    "continue",
-    "debugger",
-    "default",
-    "delete",
-    "do",
-    "double",
-    "else",
-    "enum",
-    "eval",
-    "export",
-    "extends",
-    "false",
-    "final",
-    "finally",
-    "float",
-    "for",
-    "function",
-    "goto",
-    "if",
-    "implements",
-    "import",
-    "in",
-    "instanceof",
-    "int",
-    "interface",
-    "let",
-    "long",
-    "native",
-    "new",
-    "null",
-    "package",
-    "private",
-    "protected",
-    "public",
-    "return",
-    "short",
-    "static",
-    "super",
-    "switch",
-    "synchronized",
-    "this",
-    "throw",
-    "throws",
-    "transient",
-    "true",
-    "try",
-    "typeof",
-    "var",
-    "void",
-    "volatile",
-    "while",
-    "with",
-    "yield",
-  ];
-
-  const builtin = [
-    "Array",
-    "Date",
-    "eval",
-    "function",
-    "hasOwnProperty",
-    "Infinity",
-    "isFinite",
-    "isNaN",
-    "isPrototypeOf",
-    "length",
-    "Math",
-    "name",
-    "NaN",
-    "Number",
-    "Object",
-    "prototype",
-    "String",
-    "toString",
-    "undefined",
-    "valueOf",
-  ];
-
-  if (reserved.includes(name) || builtin.includes(name)) {
-    return false;
-  }
-
-  const re = /^[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*$/;
-  if (!re.test(name)) {
-    return false;
-  }
-
-  return true;
-}

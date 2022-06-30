@@ -13,7 +13,19 @@ const coreVersion = JSON.parse(
 ).version;
 
 const addonsVersion = JSON.parse(
-  fs.readFileSync(path.join("packages", "core", "package.json")).toString()
+  fs.readFileSync(path.join("packages", "addons", "package.json")).toString()
+).version;
+
+const buildHelpersVersion = JSON.parse(
+  fs
+    .readFileSync(path.join("packages", "build-helpers", "package.json"))
+    .toString()
+).version;
+
+const sageResearchVersion = JSON.parse(
+  fs
+    .readFileSync(path.join("packages", "sageresearch", "package.json"))
+    .toString()
 ).version;
 
 const addonsCoreDependencyVersion = JSON.parse(
@@ -40,12 +52,26 @@ const cliTemplateAddonsDependencyVersion = JSON.parse(
     .toString()
 ).dependencies["@m2c2kit/addons"];
 
+const cliTemplateBuildHelpersDependencyVersion = JSON.parse(
+  fs
+    .readFileSync(
+      path.join("packages", "cli", "templates", "package.json.handlebars")
+    )
+    .toString()
+).devDependencies["@m2c2kit/build-helpers"];
+
 console.log(`@m2c2kit/core version: ${chalk.green(coreVersion)}`);
 console.log(`@m2c2kit/addons version: ${chalk.blue(addonsVersion)}`);
 console.log(
   `  @m2c2kit/core dependency version: ${chalk.green(
     addonsCoreDependencyVersion
   )}`
+);
+console.log(
+  `@m2c2kit/build-helpers version: ${chalk.yellow(buildHelpersVersion)}`
+);
+console.log(
+  `@m2c2kit/sageresearch version: ${chalk.cyan(sageResearchVersion)}`
 );
 console.log(`@m2c2kit/cli version ${chalk.magenta(cliVersion)}`);
 console.log(
@@ -58,11 +84,17 @@ console.log(
     cliTemplateAddonsDependencyVersion
   )}`
 );
+console.log(
+  `  package.json template @m2c2kit/build-helpers dependency version: ${chalk.yellow(
+    cliTemplateBuildHelpersDependencyVersion
+  )}`
+);
 
 const matches = [
   coreVersion === addonsCoreDependencyVersion &&
     coreVersion === cliTemplateCoreDependencyVersion,
   addonsVersion === cliTemplateAddonsDependencyVersion,
+  buildHelpersVersion === cliTemplateBuildHelpersDependencyVersion,
 ];
 
 console.log();
@@ -74,6 +106,9 @@ console.log(
 );
 console.log(
   "@m2c2kit/addons version should match version specified as dependency in cli package.json template"
+);
+console.log(
+  "@m2c2kit/build-helpers version should match version specified as dependency in cli package.json template"
 );
 console.log(
   "@m2c2kit/cli is versioned independently of @m2c2kit/core and @m2c2kit/addons"

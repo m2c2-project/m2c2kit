@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/sageresearch",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",

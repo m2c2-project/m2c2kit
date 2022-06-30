@@ -17,7 +17,7 @@ import {
 } from "@m2c2kit/core";
 import { Button, Instructions } from "@m2c2kit/addons";
 
-class CliStarter extends Game {
+class {{className}} extends Game {
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
@@ -81,8 +81,8 @@ class CliStarter extends Game {
     };
 
     const options: GameOptions = {
-      name: "cli starter assessment",
-      id: "cli-starter",
+      name: "{{appName}}",
+      id: "{{className}}",
       version: "1.0.0",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
@@ -119,9 +119,9 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        * when building for production. The following are examples of what
        * should NOT be used, even though they are syntactically correct:
        *
-       *   fontUrls: ["assets/cli-starter/" + "fonts/roboto/Roboto-Regular.ttf"]
+       *   fontUrls: ["assets/{{appName}}/" + "fonts/roboto/Roboto-Regular.ttf"]
        *
-       *   const prefix = "assets/cli-starter/";
+       *   const prefix = "assets/{{appName}}/";
        *   ...
        *   fontUrls: [prefix + "fonts/roboto/Roboto-Regular.ttf"]
        */
@@ -129,7 +129,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        * The Roboto-Regular.ttf font is licensed under the Apache License,
        * and its LICENSE.TXT will be copied as part of the build.
        */
-      fontUrls: ["assets/cli-starter/fonts/roboto/Roboto-Regular.ttf"],
+      fontUrls: ["assets/{{appName}}/fonts/roboto/Roboto-Regular.ttf"],
       /**
        * IMPORTANT: Similar to fontUrls, the url for an image must be
        * a string literal.
@@ -146,7 +146,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
            * The image url must match the location of the image under the
            * src folder.
            */
-          url: "assets/cli-starter/img/assessmentExample.png",
+          url: "assets/{{appName}}/img/assessmentExample.png",
         },
       ],
     };
@@ -257,13 +257,13 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       sceneNamePrefix: "instructions",
       instructionScenes: [
         {
-          title: "cli starter assessment",
+          title: "{{appName}}",
           text: `Select the color that matches the font color. This is commonly known as the Stroop task.`,
           textFontSize: 20,
           titleFontSize: 30,
         },
         {
-          title: "cli starter assessment",
+          title: "{{appName}}",
           text: `For example, the word Blue is colored Orange, so the correct response is Orange.`,
           textFontSize: 20,
           titleFontSize: 30,
@@ -467,7 +467,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
   }
 }
 
-const activity = new CliStarter();
+const activity = new {{className}}();
 const session = new Session({
   activities: [activity],
   sessionCallbacks: {

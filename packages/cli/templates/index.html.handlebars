@@ -1,44 +1,29 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>{{appName}}</title>    
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="assets/css/m2c2kit.css" rel="preload" as="style" />
+    <link href="assets/css/m2c2kit.css" rel="stylesheet" />
+    <link href="assets/css/survey.css" rel="stylesheet" />
+    <link href="assets/css/nouislider.css" rel="stylesheet" />
+    <link href="assets/css/select2.css" rel="stylesheet" />
+    <link
+      href="assets/css/bootstrap-datepicker.standalone.css"
+      rel="stylesheet"
+    />
+    <script type="module" src="./index.js" async></script>
+  </head>
 
-<head>
-  <title>{{appName}}</title>
-  <style type="text/css">
-    body {
-      margin: 0;
-    }
-  </style>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
-
-<body style="background: white">
-  <div style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        width: 100vw;
-      ">
-    <canvas style="height: 100vh; width: 100vw" id="m2c2kit-canvas"></canvas>
-      <!-- If you don't want the game to start immediately, remove session.start()
-           from the code and call session.start() somehow else, such as with
-           the button shown below or a programmatic call -->
-      <!-- <button
-        style="position: absolute; bottom: 8px; left: 8px"
-        id="startButton"
-        onclick="{
-          document.getElementById('startButton').disabled = true;
-          window.session.start();
-        }"
-      >
-        Start
-      </button> -->
-  </div>
-  <script type="module" src="./{{appName}}.bundle.js"></script>
-</body>
-
+  <body class="m2c2kit-background-color m2c2kit-no-margin">
+    <div id="m2c2kit-survey-div"></div>
+    <div class="m2c2kit-full-viewport m2c2kit-flex-container">
+      <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+      <div class="m2c2kit-loader" id="m2c2kit-loader-div"></div>
+    </div>
+  </body>
 </html>

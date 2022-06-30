@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  m2c2app:
+    build:
+      context: ../../packages
+      dockerfile: cli-test.Dockerfile
+    image: m2c2/cli-test
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+  selenium:
+    image: selenium/standalone-chrome
+    ports:
+      - "4444:4444"

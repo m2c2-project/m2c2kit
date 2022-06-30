@@ -1,14 +1,23 @@
 version: "3.9"
 services:
-  m2c2app:
+  registry:
     build:
-      context: ../../packages
-      dockerfile: cli-test.Dockerfile
-    image: m2c2/cli-test
+      context: ./dockerfiles/registry
+    ports:
+      - "4873:4873"
+
+  publish:
+    build:
+      context: ./dockerfiles/publish
+
+  testapp:
+    build:
+      context: ./dockerfiles/testapp
     ports:
       - "3000:3000"
       - "35729:35729"
+
   selenium:
-    image: selenium/standalone-chrome
+    image: selenium/standalone-chrome:103.0
     ports:
       - "4444:4444"

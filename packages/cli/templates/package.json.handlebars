@@ -2,24 +2,29 @@
   "name": "{{appName}}",
   "version": "1.0.0",
   "scripts": {
-    "serve": "rollup -c --watch --configServe",
-    "build": "rollup -c --configProd",
-    "postinstall": "node ./post-install.mjs"
+    "serve": "rollup -c rollup.config.mjs --watch --configServe",
+    "build": "rollup -c rollup.config.mjs --configProd",
+    "clean": "rimraf build dist .rollup.cache",
+    "Xpostinstall": "node ./post-install.mjs"
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/core": "0.1.10",
-    "@m2c2kit/addons": "0.1.10"
+    "@m2c2kit/addons": "0.3.0",
+    "@m2c2kit/core": "0.3.0"
   },
   "devDependencies": {
-    "rollup": "2.70.0",
-    "@rollup/plugin-typescript": "8.3.1",
-    "@rollup/plugin-node-resolve": "13.1.3",
+    "@m2c2kit/build-helpers": "0.3.0",
     "@rollup/plugin-commonjs": "21.0.2",
-    "rollup-plugin-shim": "1.0.0",
+    "@rollup/plugin-node-resolve": "13.1.3",
+    "@rollup/plugin-typescript": "8.3.3",
+    "rollup": "2.70.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",
+    "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "1.1.0",
-    "rollup-plugin-livereload": "2.0.5"
+    "rollup-plugin-shim": "1.0.0",
+    "rollup-plugin-sourcemaps": "0.6.3",
+    "tslib": "2.4.0",
+    "typescript": "4.7.4"
   }
 }

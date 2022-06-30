@@ -1,6 +1,6 @@
-import findupSync from "findup-sync";
+import { findUpSync } from "find-up";
 import { Constants } from "./constants";
 
-export function getCanvasKitWasmPath(): string | null {
-  return findupSync(Constants.NODE_MODULES_CANVASKITWASM_PATH);
+export function getCanvasKitWasmPath(): string | undefined {
+  return findUpSync(Constants.NODE_MODULES_CANVASKITWASM_PATH);
 }
