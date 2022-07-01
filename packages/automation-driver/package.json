@@ -18,7 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@m2c2kit/core": "0.1.10"
+    "@m2c2kit/core": "0.3.0"
   },
   "devDependencies": {},
   "license": "MIT"

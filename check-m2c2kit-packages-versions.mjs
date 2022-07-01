@@ -24,7 +24,7 @@ const buildHelpersVersion = JSON.parse(
 
 const sageResearchVersion = JSON.parse(
   fs
-    .readFileSync(path.join("packages", "sageresearch", "package.json"))
+    .readFileSync(path.join("packages", "sage-research", "package.json"))
     .toString()
 ).version;
 

@@ -9,7 +9,7 @@
     "dist/**/*"
   ],
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-node-resolve": "13.1.3",
     "@rollup/plugin-typescript": "8.3.3",
     "@types/findup-sync": "4.0.2",

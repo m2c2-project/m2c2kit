@@ -2,8 +2,16 @@
   "name": "m2c2kit",
   "description": "",
   "workspaces": [
-    "packages/*",
+    "packages/addons",
+    "packages/assessment-grid-memory",
     "packages/assessment-grid-memory/demo",
+    "packages/automation-controller",
+    "packages/automation-driver",
+    "packages/build-helpers",
+    "packages/cli",
+    "packages/core",
+    "packages/sage-research",
+    "packages/survey",
     "examples/grid-memory",
     "examples/symbol-search",
     "examples/color-dots",
@@ -11,7 +19,7 @@
     "integration-tests/*"
   ],
   "scripts": {
-    "build": "npm run build -w @m2c2kit/core && npm run build -w @m2c2kit/addons && npm run build -w @m2c2kit/cli && npm run build -w @m2c2kit/assessment-grid-memory && npm run build -w grid-memory-demo && npm run build -w grid-memory && npm run build -w symbol-search",
+    "build": "npm run build -w @m2c2kit/core && npm run build -w @m2c2kit/addons && npm run build -w @m2c2kit/cli && npm run build -w @m2c2kit/sage-research  && npm run build -w @m2c2kit/build-helpers && npm run build -w grid-memory && npm run build -w symbol-search && npm run build -w color-dots && npm run build -w cli-starter",
     "docker:build": "docker build -t m2c2kit .",
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "prepare": "husky install"

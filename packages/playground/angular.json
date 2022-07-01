@@ -29,7 +29,7 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "./../../node_modules/monaco-editor",
+                "input": "./node_modules/monaco-editor",
                 "output": "assets/monaco-editor/"
               },
               "src/favicon.ico",
@@ -95,8 +95,8 @@
               },
               {
                 "glob": "index.*",
-                "input": "./../sageresearch/dist",
-                "output": "assets/m2c2kit/sageresearch"
+                "input": "./../sage-research/dist",
+                "output": "assets/m2c2kit/sage-research"
               },
               {
                 "glob": "index.d.ts",

@@ -127,7 +127,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       fetch("./assets/template.html"),
       fetch("./assets/m2c2kit/core/index.d.ts"),
       fetch("./assets/m2c2kit/addons/index.d.ts"),
-      fetch("./assets/m2c2kit/sageresearch/index.d.ts"),
+      fetch("./assets/m2c2kit/sage-research/index.d.ts"),
       fetch("./assets/canvaskit-wasm/index.d.ts"),
     ])
       .then(
@@ -211,7 +211,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 // @ts-ignore
                 window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
                   m2c2kitSageresearchLib,
-                  "file:///node_modules/@m2c2kit/sageresearch/index.d.ts"
+                  "file:///node_modules/@m2c2kit/sage-research/index.d.ts"
                 );
 
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -283,7 +283,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       );
       await libFile2.save();
       const libFile3 = project.createSourceFile(
-        "./node_modules/@m2c2kit/sageresearch/index.d.ts",
+        "./node_modules/@m2c2kit/sage-research/index.d.ts",
         this.m2c2sageresearchlib
       );
       await libFile3.save();
@@ -364,8 +364,8 @@ export class AppComponent implements OnInit, AfterViewInit {
           .replace(`"@m2c2kit/core"`, `"./assets/m2c2kit/core/index.js"`)
           .replace(`"@m2c2kit/addons"`, `"./assets/m2c2kit/addons/index.js"`)
           .replace(
-            `"@m2c2kit/sageresearch"`,
-            `"./assets/m2c2kit/sageresearch/index.js"`
+            `"@m2c2kit/sage-research"`,
+            `"./assets/m2c2kit/sage-research/index.js"`
           )
       );
       this.runButtonIcon = "arrow_right";

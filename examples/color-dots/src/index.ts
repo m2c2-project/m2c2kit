@@ -23,7 +23,7 @@ import {
   Sprite,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
-import { SageResearch } from "@m2c2kit/sageresearch";
+import { SageResearch } from "@m2c2kit/sage-research";
 class ColorDots extends Game {
   constructor() {
     /**

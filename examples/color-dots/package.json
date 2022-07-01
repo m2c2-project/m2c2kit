@@ -8,13 +8,13 @@
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.1.10",
-    "@m2c2kit/core": "0.1.10",
-    "@m2c2kit/sageresearch": "^1.0.0"
+    "@m2c2kit/addons": "0.3.0",
+    "@m2c2kit/core": "0.3.0",
+    "@m2c2kit/sage-research": "0.3.0"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "^1.0.0",
-    "@rollup/plugin-commonjs": "21.0.2",
+    "@m2c2kit/build-helpers": "0.3.0",
+    "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-node-resolve": "13.1.3",
     "@rollup/plugin-typescript": "8.3.3",
     "rollup": "2.70.0",

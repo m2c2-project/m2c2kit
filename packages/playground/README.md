@@ -2,6 +2,10 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.12.
 
+## Development notes
+
+Although this is in a monorepo, it is not listed as one of the monorepo packages. This this project will have its own node_folders and these packages must be installed separately from this project root. It is important to be aware of where the node_modules/monaco-editor is installed, because it must be copied as part of the assets. Specifically, in angular.json, i.e., "input": "./node_modules/monaco-editor"
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
