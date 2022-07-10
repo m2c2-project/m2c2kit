@@ -81,16 +81,19 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
           this.fontColor[2],
           this.fontColor[3]
         ),
+        backgroundColor: this.backgroundColor
+          ? this.canvasKit.Color(
+              this.backgroundColor[0],
+              this.backgroundColor[1],
+              this.backgroundColor[2],
+              this.backgroundColor[3]
+            )
+          : undefined,
+        fontFamilies: this.fontName ? [this.fontName] : undefined,
         fontSize: this.fontSize * Globals.canvasScale,
       },
       textAlign: ckTextAlign,
     });
-    if (this.fontName && this.paraStyle.textStyle) {
-      this.paraStyle.textStyle.fontFamilies = [this.fontName];
-    }
-    if (this.backgroundColor && this.paraStyle.textStyle) {
-      this.paraStyle.textStyle.backgroundColor = this.backgroundColor;
-    }
 
     const activity = (this.parentSceneAsEntity as unknown as Scene).game
       .session;
@@ -136,17 +139,22 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     this.paragraph.layout(calculatedWidth * Globals.canvasScale);
 
     /**
-     * if label has a relative layout, then use the calculated width as the
-     * label's size. Otherwise, use the max width of the just completed
-     * paragraph.layout() call to layout the paragraph again, this time
-     * using the max width.
+     * If label has a relative layout, then use the calculated width as the
+     * label's size. Otherwise, we have to do the layout again to find out
+     * the true size of this paragraph: the first paragraph.layout() (above)
+     * computed the longest line length based on the max width contraint given.
+     * We do the layout again with the (now) known longest line length
+     * as the max width constraint. Use Math.ceil() to round up because it
+     * seems like fractional widths are not respected. Now when we call
+     * this.paragraph.getMaxWidth() again, it returns the max width of the
+     * paragraph based on the actual wrapping of the text shown. We need to
+     * know the actual width for proper positioning.
      */
     if (preferredWidth === 0 || this.layout.width === 0) {
       this.size.width = calculatedWidth;
     } else {
-      this.paragraph.layout(Math.ceil(this.paragraph.getMaxIntrinsicWidth()));
-      this.size.width =
-        this.paragraph.getMaxIntrinsicWidth() / Globals.canvasScale;
+      this.paragraph.layout(Math.ceil(this.paragraph.getLongestLine()));
+      this.size.width = this.paragraph.getMaxWidth() / Globals.canvasScale;
     }
 
     this.size.height = this.paragraph.getHeight() / Globals.canvasScale;

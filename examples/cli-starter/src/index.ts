@@ -56,7 +56,7 @@ class CliStarter extends Game {
      * session with a callback, along with this schema transformed into
      * JSON Schema.
      */
-    const gridMemoryTrialSchema: TrialSchema = {
+    const cliStarterTrialSchema: TrialSchema = {
       presented_word_text: {
         type: "string",
         description: "The text that was presented.",
@@ -111,7 +111,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        */
       width: 400,
       height: 800,
-      trialSchema: gridMemoryTrialSchema,
+      trialSchema: cliStarterTrialSchema,
       parameters: defaultParameters,
       /**
        * IMPORTANT: fontUrls must be an array of string literals. If you
