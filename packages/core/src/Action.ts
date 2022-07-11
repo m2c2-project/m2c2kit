@@ -9,6 +9,10 @@ import { Point } from "./Point";
 import { EasingFunction } from "./Easings";
 import { Easings } from "./Easings";
 
+/**
+ * The Action class has static methods for creating actions to be executed by
+ * an Entity.
+ */
 export abstract class Action {
   abstract type: ActionType;
 

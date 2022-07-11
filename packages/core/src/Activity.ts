@@ -3,7 +3,7 @@ import { Session } from "./Session";
 export interface Activity {
   /** The type of activity: Game or Survey */
   type: ActivityType;
-  /** Initializes the activity. */
+  /** Initializes the activity. All code to construct the activity's appearance and behavior must be placed in this method. */
   init(): void;
   /** Starts the activity */
   start(): void;

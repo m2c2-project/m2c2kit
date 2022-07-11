@@ -1,10 +1,17 @@
 export type EasingFunction = (
+  /** elapsed time since start of action */
   t: number,
+  /** start value of value to be eased */
   b: number,
+  /** total change of value to be eased */
   c: number,
+  /** total duration of action */
   d: number
 ) => number;
 
+/**
+ * The Easings class has static methods for creating easings to be used in actions.
+ */
 export class Easings {
   // These easing functions are adapted from work by Robert Penner
 

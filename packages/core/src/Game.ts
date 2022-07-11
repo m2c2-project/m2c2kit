@@ -73,6 +73,11 @@ export class Game implements Activity {
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
 
+  /**
+   * The base class for all games. New games should extend this class.
+   *
+   * @param options - {@link GameOptions}
+   */
   constructor(options: GameOptions) {
     this.options = options;
     this.name = options.name;
@@ -119,11 +124,13 @@ export class Game implements Activity {
     this._session = session;
   }
 
+  /** The scene, or its name as a string, to be presented when the game is started. If this is undefined, the game will start with the first scene that has been added */
   public entryScene?: Scene | string;
   public data: GameData = {
     trials: new Array<TrialData>(),
     metadata: {},
   };
+  /** The 0-based index of the current trial */
   public trialIndex = 0;
   private htmlCanvas?: HTMLCanvasElement;
   private surface?: Surface;
@@ -217,7 +224,7 @@ export class Game implements Activity {
   }
 
   /**
-   * Returns the free entities that have been added to the game
+   * Returns array of free entities that have been added to the game.
    *
    * @returns array of free entities
    */
@@ -404,7 +411,7 @@ export class Game implements Activity {
   }
 
   /**
-   * Warms up the Skia-based shaders underlying canvaskit
+   * Warms up the Skia-based shaders underlying canvaskit.
    *
    * @remarks Some canvaskit methods, such as drawImage, take extra time the
    * first time they are called. If the method is part of an animation,
@@ -467,7 +474,7 @@ export class Game implements Activity {
     this.gameStopRequested = true;
   }
 
-  initData(): void {
+  private initData(): void {
     this.trialIndex = 0;
     this.data = {
       trials: new Array<TrialData>(),
@@ -553,7 +560,10 @@ export class Game implements Activity {
   /**
    * Adds data to the game's TrialData object.
    *
-   * @remarks The variableName must be previously defined in the trialSchema object passed in during game initialization. see {@link GameInitOptions.trialSchema}. The type of the value must match what was defined in the trialSchema, otherwise an error is thrown.
+   * @remarks The variableName must be previously defined in the trialSchema
+   * object passed in during game initialization through
+   * {@link GameInitOptions.trialSchema}. The type of the value must match
+   * what was defined in the trialSchema, otherwise an error is thrown.
    *
    * @param variableName - variable to be set
    * @param value - value of the variable to set

@@ -11,6 +11,9 @@ export interface SlideTransitionOptions {
   easing?: EasingFunction;
 }
 
+/**
+ * The Transition class has static methods for creating animations that run as one scene transitions to another.
+ */
 export abstract class Transition {
   abstract type: TransitionType;
   abstract easing: EasingFunction;

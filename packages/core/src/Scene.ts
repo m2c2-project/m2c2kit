@@ -105,9 +105,14 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   }
 
   /**
-   * Code that will be called every time the screen is presented.
+   * Code that will be called every time the scene is presented.
    *
-   * @remarks Use this callback to set entities to their initial state, if that state might be changed later. For example, if a scene allows players to place dots on a grid, the setup() method should ensure the grid is clear of any prior dots from previous times this scene may have been displayed. In addition, if entities should vary in each iteration, that should be done here.
+   * @remarks Use this callback to set entities to their initial state, if
+   * that state might be changed later. For example, if a scene allows
+   * players to place dots on a grid, the setup() method should ensure the
+   * grid is clear of any prior dots from previous times this scene may
+   * have been displayed. In addition, if entities should vary in each
+   * iteration, that should be done here.
    *
    * @param callback
    */
@@ -117,7 +122,8 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
 
   /**
    *
-   * Code that will be called after the scene has finished any transitions and has fully appeared on the screen.
+   * Code that will be called after the scene has finished any transitions
+   * and has fully appeared on the screen.
    *
    * @param callback
    */

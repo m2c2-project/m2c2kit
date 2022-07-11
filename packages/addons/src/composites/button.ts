@@ -38,6 +38,16 @@ export class Button extends Composite implements IText {
 
   // todo: add getters/setters so button can respond to changes in its options
   // todo: add default "behaviors" (?) like button click animation?
+
+  /**
+   * A simple button of rectangle with text centered inside.
+   *
+   * @remarks This composite entity is composed of a rectangle and text. To
+   * respond to user taps, the isUserInteractionEnabled property must be set
+   * to true and an appropriate callback must be set to handle the tap event.
+   *
+   * @param options - {@link ButtonOptions}
+   */
   constructor(options: ButtonOptions) {
     super(options);
     if (options.text) {

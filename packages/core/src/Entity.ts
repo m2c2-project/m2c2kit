@@ -129,7 +129,8 @@ export abstract class Entity implements EntityOptions {
   };
 
   /**
-   * Adds a child to this parent entity. Thows exception if the child's name is not unique with respect to other children of this parent.
+   * Adds a child to this parent entity. Thows exception if the child's name
+   * is not unique with respect to other children of this parent.
    *
    * @param child - The child entity to add
    */
@@ -152,7 +153,7 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Removes all children from the entity
+   * Removes all children from the entity.
    */
   removeAllChildren(): void {
     while (this.children.length) {
@@ -161,7 +162,8 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Removes the specific child from this parent entity. Throws exception if this parent does not contain the child.
+   * Removes the specific child from this parent entity. Throws exception if
+   * this parent does not contain the child.
    *
    * @param child
    */
@@ -176,7 +178,8 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Removes the children from the parent. Throws error if the parent does not contain all of the children.
+   * Removes the children from the parent. Throws error if the parent does not
+   * contain all of the children.
    *
    * @param children - An array of children to remove from the parent entity
    */
@@ -192,7 +195,10 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Searches all descendants by name and returns first matching entity. Descendants are children and children of children, recursively.
+   * Searches all descendants by name and returns first matching entity.
+   *
+   * @remarks Descendants are children and children of children, recursively.
+   * Throws exception if no descendant with the given name is found.
    *
    * @param name - Name of the descendant entity to return
    * @returns
@@ -210,7 +216,9 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Returns all descendant entities. Descendants are children and children of children, recursively.
+   * Returns all descendant entities.
+   *
+   * @remarks Descendants are children and children of children, recursively.
    */
   get descendants(): Array<Entity> {
     function getChildEntitiesRecursive(
@@ -230,10 +238,15 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Takes the callback function to be executed when the user taps down on the entity. A TapDown is either a mouse click within the bounds of an entity OR the beginning of touches within the bounds of an entity.
+   * Takes the callback function to be executed when the user taps down on the
+   * entity. A TapDown is either a mouse click within the bounds of an entity
+   * OR the beginning of touches within the bounds of an entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace any existing callbacks? Usually we want to have only one callback defined, instead of chaining multiple ones. It is strongly recommended not to change this, unless you have a special use case. Default is true.
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks? Usually we want to have only one callback
+   * defined, instead of chaining multiple ones. It is strongly recommended
+   * not to change this, unless you have a special use case. Default is true.
    */
   onTapDown(
     callback: (tapEvent: TapEvent) => void,
@@ -611,7 +624,8 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Draws each child entity that is Drawable and is not hidden, by zPosition order (highest zPosition on top).
+   * Draws each child entity that is Drawable and is not hidden, by zPosition
+   * order (highest zPosition on top).
    *
    * @param canvas - CanvasKit canvas
    */
@@ -626,10 +640,14 @@ export abstract class Entity implements EntityOptions {
   /**
    * Runs an action on this entity.
    *
-   * @remarks If the entity is part of an active scene, the action runs immediately. Otherwise, the action will run when the entity's scene becomes active. Calling run() multiple times on an entity will add to existing actions, not replace them.
+   * @remarks If the entity is part of an active scene, the action runs
+   * immediately. Otherwise, the action will run when the entity's scene
+   * becomes active. Calling run() multiple times on an entity will add
+   * to existing actions, not replace them.
    *
    * @param action - The action to run
-   * @param key - key (string identifier) used to identify the action. Only needed if the action will be referred to later
+   * @param key - key (string identifier) used to identify the action.
+   * Only needed if the action will be referred to later
    */
   run(action: Action, key?: string): void {
     //this.actions = action.initialize(this);
@@ -640,7 +658,8 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Remove an action from this entity. If the action is running, it will be stopped.
+   * Remove an action from this entity. If the action is running, it will be
+   * stopped.
    *
    * @param key - key (string identifier) of the action to remove
    */
@@ -649,7 +668,8 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Remove all actions from this entity. If actions are running, they will be stopped.
+   * Remove all actions from this entity. If actions are running, they will be
+   * stopped.
    */
   removeAllActions(): void {
     while (this.actions.length) {

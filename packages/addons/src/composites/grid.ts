@@ -48,9 +48,12 @@ export class Grid extends Composite {
   private gridBackground?: Shape;
 
   /**
-   * A rectangular grid that supports placement of entities within the grid's cells.
+   * A rectangular grid that supports placement of entities within the grid's
+   * cells.
    *
-   * @remarks This composite entity is composed of rectangles and lines. It has convenience functions for placing and clearing entities on the grid by row and column position (zero-based indexing)
+   * @remarks This composite entity is composed of rectangles and lines. It
+   * has convenience functions for placing and clearing entities on the grid
+   * by row and column position (zero-based indexing)
    *
    * @param options - {@link GridOptions}
    */
