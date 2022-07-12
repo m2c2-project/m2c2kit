@@ -362,7 +362,6 @@ appeared.",
     switch (game.getParameter("instruction_type")) {
       case "short": {
         instructionsScenes = Instructions.Create({
-          sceneNamePrefix: "instructions",
           instructionScenes: [
             {
               title: "Color Dots",
@@ -378,13 +377,11 @@ appeared.",
               nextSceneTransition: Transition.none(),
             },
           ],
-          postInstructionsScene: "fixationScene",
         });
         break;
       }
       case "long": {
         instructionsScenes = Instructions.Create({
-          sceneNamePrefix: "instructions",
           instructionScenes: [
             {
               title: "Color Dots",
@@ -420,7 +417,6 @@ appeared.",
               nextSceneTransition: Transition.none(),
             },
           ],
-          postInstructionsScene: "fixationScene",
         });
         break;
       }
@@ -437,7 +433,6 @@ appeared.",
       );
     });
     game.addScenes(instructionsScenes);
-    game.entryScene = "instructions-01";
 
     interface Dot {
       x: number;
@@ -533,9 +528,7 @@ appeared.",
     // ==============================================================
     // SCENE: fixation. Show get ready message, then advance after XXXX
     // milliseconds (as defined in fixation_duration_ms parameter)
-    const fixationScene = new Scene({
-      name: "fixationScene",
-    });
+    const fixationScene = new Scene();
     game.addScene(fixationScene);
 
     const readyLabel = new Label({
@@ -991,8 +984,6 @@ appeared.",
       // no need to have cancel button, because we're done
       game.removeAllFreeEntities();
     });
-
-    game.entryScene = "instructions-01";
   }
 }
 

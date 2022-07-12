@@ -471,7 +471,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
      * and long instructions
      */
     const sharedInstructionsOptions = {
-      sceneNamePrefix: "instructions",
       backgroundColor: WebColors.White,
       nextButtonBackgroundColor: WebColors.Black,
       backButtonBackgroundColor: WebColors.Black,
@@ -485,7 +484,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         duration: 500,
         easing: Easings.sinusoidalInOut,
       }),
-      postInstructionsScene: "countdownScene",
     };
 
     switch (game.getParameter("instruction_type")) {
@@ -566,7 +564,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       );
     });
 
-    game.entryScene = "instructions-01";
     game.addScenes(instructionsScenes);
 
     const afterTrialSceneTransition = Transition.slide({
@@ -578,10 +575,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     // ==================================================
     // SCENE: countdownScene
 
-    const countdownScene = new Scene({
-      name: "countdownScene",
-      backgroundColor: [255, 255, 255, 1],
-    });
+    const countdownScene = new Scene();
     game.addScene(countdownScene);
 
     const countdownCircle = new Shape({

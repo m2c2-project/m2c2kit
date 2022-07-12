@@ -1,3 +1,3 @@
 export interface StoryOptions {
-  sceneNamePrefix: string;
+  sceneNamePrefix?: string;
 }

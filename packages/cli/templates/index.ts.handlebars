@@ -263,7 +263,6 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     // ==============================================================
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
-      sceneNamePrefix: "instructions",
       instructionScenes: [
         {
           title: "{{appName}}",
@@ -287,7 +286,6 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           nextButtonBackgroundColor: WebColors.Green,
         },
       ],
-      postInstructionsScene: "preparationScene",
     });
     game.addScenes(instructionsScenes);
 
@@ -300,9 +298,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
      * scenes themsevles and labels that are always displayed, we create
      * them here.
      */
-    const preparationScene = new Scene({
-      name: "preparationScene",
-    });
+    const preparationScene = new Scene();
     game.addScene(preparationScene);
 
     const getReadyMessage = new Label({

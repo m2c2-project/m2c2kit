@@ -153,7 +153,7 @@ export class Game implements Activity {
   canvasCssWidth = 0;
   canvasCssHeight = 0;
 
-  private scenes = new Array<Scene>();
+  scenes = new Array<Scene>();
   private freeEntitiesScene = new Scene({
     name: Constants.FREE_ENTITIES_SCENE_NAME,
     backgroundColor: [255, 255, 255, 0],

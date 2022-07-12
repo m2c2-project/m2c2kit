@@ -75,8 +75,8 @@ export interface InstructionScene {
 }
 
 export interface InstructionsOptions extends StoryOptions {
-  /** Name to prefix to each instruction scene name. For example, if screenNamePrefix is "instructions", instruction scenes will be named "instructions-01", "instructions-02", etc. */
-  sceneNamePrefix: string;
+  /** Name to prefix to each instruction scene name. Default is "instructions." For example, if screenNamePrefix is "instructions", instruction scenes will be named "instructions-01", "instructions-02", etc. */
+  sceneNamePrefix?: string;
   /** Name of scene that follows the last instruction scene. Clicking the "next" button on the last instruction screen will advance to this screen */
   postInstructionsScene?: string;
   /** Array of instruction scenes that form the instructions */
@@ -170,10 +170,10 @@ export class Instructions extends Story {
         WebColors.Black;
       const nextButtonFontColor =
         s.nextButtonFontColor ?? options.nextButtonFontColor ?? WebColors.White;
+      const sceneNamePrefix = options.sceneNamePrefix ?? "instructions";
 
       const scene = new Scene({
-        name:
-          options.sceneNamePrefix + "-" + (i + 1).toString().padStart(2, "0"),
+        name: sceneNamePrefix + "-" + (i + 1).toString().padStart(2, "0"),
         backgroundColor: backgroundColor,
       });
 
@@ -276,9 +276,7 @@ export class Instructions extends Story {
         backButton.isUserInteractionEnabled = true;
         backButton.onTapDown(() => {
           scene.game.presentScene(
-            options.sceneNamePrefix +
-              "-" +
-              (i + 1 - 1).toString().padStart(2, "0"),
+            sceneNamePrefix + "-" + (i + 1 - 1).toString().padStart(2, "0"),
             backSceneTransition
           );
         });
@@ -301,9 +299,7 @@ export class Instructions extends Story {
       if (i !== options.instructionScenes.length - 1) {
         nextButton.onTapDown(() => {
           scene.game.presentScene(
-            options.sceneNamePrefix +
-              "-" +
-              (i + 1 + 1).toString().padStart(2, "0"),
+            sceneNamePrefix + "-" + (i + 1 + 1).toString().padStart(2, "0"),
             nextSceneTransition
           );
         });
@@ -316,9 +312,30 @@ export class Instructions extends Story {
             );
           });
         } else {
-          console.warn(
-            "warning: instructions postInstructionsScene is not defined"
-          );
+          nextButton.onTapDown(() => {
+            const sceneIndex = scene.game.scenes.indexOf(scene);
+            if (sceneIndex === -1) {
+              /**
+               * This should never happen, unless this instruction scene has
+               * been removed from the game.
+               */
+              console.warn(
+                "warning: postInstructionsScene is not defined, and next scene cannot be determined."
+              );
+            } else {
+              const nextSceneIndex = sceneIndex + 1;
+              if (nextSceneIndex < scene.game.scenes.length) {
+                scene.game.presentScene(
+                  scene.game.scenes[nextSceneIndex],
+                  nextSceneTransition
+                );
+              } else {
+                console.warn(
+                  "warning: postInstructionsScene is not defined, and there is no next scene to present."
+                );
+              }
+            }
+          });
         }
       }
       scene.addChild(nextButton);

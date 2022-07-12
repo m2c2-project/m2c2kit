@@ -395,7 +395,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     // ==============================================================
     // SCENES: instructions
     const instructionsScenes = Instructions.Create({
-      sceneNamePrefix: "instructions",
       instructionScenes: [
         {
           title: "Grid Memory",
@@ -427,10 +426,8 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           nextButtonBackgroundColor: WebColors.Green,
         },
       ],
-      postInstructionsScene: "preparationScene",
     });
     game.addScenes(instructionsScenes);
-    game.entryScene = "instructions-01";
     instructionsScenes[0].onAppear(() => {
       // in case user quits before starting trial, record the timestamp
       game.addTrialData(
@@ -457,9 +454,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
     // ==============================================================
     // SCENE: preparation. Show get ready message, then advance after XXXX
     // milliseconds (as defined in preparation_duration_ms parameter)
-    const preparationScene = new Scene({
-      name: "preparationScene",
-    });
+    const preparationScene = new Scene();
     game.addScene(preparationScene);
 
     const getReadyMessage = new Label({
