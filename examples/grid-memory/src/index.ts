@@ -108,6 +108,11 @@ class GridMemory extends Game {
      * JSON Schema Draft-07 format.
      */
     const gridMemoryTrialSchema: TrialSchema = {
+      activity_uuid: {
+        type: "string",
+        format: "uuid",
+        description: "Unique identifier for all trials in this activity.",
+      },
       activity_begin_iso8601_timestamp: {
         type: "string",
         format: "date-time",
@@ -119,6 +124,10 @@ class GridMemory extends Game {
         format: "date-time",
         description:
           "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
+      },
+      trial_index: {
+        type: ["integer", "null"],
+        description: "Index of the trial within this assessment, 0-based.",
       },
       presented_cells: {
         type: ["array", "null"],
@@ -377,6 +386,7 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         game.addScene(blankScene);
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
+        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         game.cancel();
       });
@@ -909,6 +919,8 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
           .reduce((a: number, b) => a + b, 0);
         game.addTrialData("number_of_correct_dots", numberOfCorrectDots);
         game.addTrialData("quit_button_pressed", false);
+        game.addTrialData("trial_index", game.trialIndex);
+        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         if (game.trialIndex === game.getParameter("number_of_trials")) {
           const nextScreenTransition = Transition.slide({
