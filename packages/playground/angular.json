@@ -107,6 +107,11 @@
                 "glob": "canvaskit.wasm",
                 "input": "./../../node_modules/canvaskit-wasm/bin",
                 "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets/tutorial",
+                "output": "assets/tutorial"
               }
             ],
             "styles": [
