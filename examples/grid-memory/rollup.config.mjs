@@ -26,6 +26,7 @@ let sharedPlugins = [
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
   const isProd = commandLineArgs.configProd ? true : false;
+  const noHash = commandLineArgs.configNoHash ? true : false;
 
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
@@ -71,7 +72,8 @@ export default (commandLineArgs) => {
         typescript({
           sourceMap: commandLineArgs.configServe && true,
           transformers: {
-            before: isProd ? [addHashesM2c2Transformer()] : undefined,
+            before:
+              isProd && !noHash ? [addHashesM2c2Transformer()] : undefined,
           },
         }),
         sourcemaps(),
@@ -79,9 +81,13 @@ export default (commandLineArgs) => {
           "src/index.html",
           `${outputFolder}/index.html`,
           `${outputFolder}/index.js`,
-          isProd
+          isProd && !noHash
         ),
-        copyM2c2Assets("src/assets", `${outputFolder}/assets`, isProd),
+        copyM2c2Assets(
+          "src/assets",
+          `${outputFolder}/assets`,
+          isProd && !noHash
+        ),
         commandLineArgs.configServe &&
           serve({
             // we can start development server and automatically open browser by running

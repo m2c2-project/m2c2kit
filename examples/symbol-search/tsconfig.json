@@ -19,5 +19,5 @@
     "outDir": "build",
     "rootDir": "../.."
   },
-  "exclude": ["node_modules", "build", "dist", "rollup.config.js"]
+  "exclude": ["node_modules", "build", "dist"]
 }
