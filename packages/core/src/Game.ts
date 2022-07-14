@@ -29,6 +29,7 @@ import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
 import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
+import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
 
 interface BoundingBox {
   xMin: number;
@@ -37,30 +38,7 @@ interface BoundingBox {
   yMax: number;
 }
 export interface TrialData {
-  [key: string]: string | number | boolean | undefined | null;
-}
-export interface Metadata {
-  userAgent?: string;
-  devicePixelRatio?: number;
-  screen?: screenMetadata;
-}
-
-/**
- * screenMetadata is similar to window.Screen, except we don't want the
- * methods on the window.Screen.ScreenOrientation
- */
-interface screenMetadata {
-  readonly availHeight: number;
-  readonly availWidth: number;
-  readonly colorDepth: number;
-  readonly height: number;
-  /** ScreenOrientation has some methods on it; we only want these two properties
-   * However, when unit testing, orientation is not available to us. Thus, make this
-   * property optional
-   */
-  readonly orientation?: Pick<ScreenOrientation, "type" | "angle">;
-  readonly pixelDepth: number;
-  readonly width: number;
+  [key: string]: string | number | boolean | object | undefined | null;
 }
 
 export class Game implements Activity {
@@ -128,7 +106,6 @@ export class Game implements Activity {
   public entryScene?: Scene | string;
   public data: GameData = {
     trials: new Array<TrialData>(),
-    metadata: {},
   };
   /** The 0-based index of the current trial */
   public trialIndex = 0;
@@ -478,11 +455,6 @@ export class Game implements Activity {
     this.trialIndex = 0;
     this.data = {
       trials: new Array<TrialData>(),
-      metadata: {
-        userAgent: navigator.userAgent,
-        devicePixelRatio: window.devicePixelRatio,
-        screen: this.getScreenMetadata(),
-      },
     };
     const trialSchema = this.options.trialSchema ?? {};
 
@@ -529,31 +501,39 @@ export class Game implements Activity {
     return dataTypeIsValid;
   }
 
-  private getScreenMetadata(): screenMetadata {
+  private getDeviceMetadata(): DeviceMetadata {
     const screen = window.screen;
     if (!screen.orientation) {
       // we're likely running unit tests in node, so
       // screen.orientation was not avaiable and not mocked
       return {
+        userAgent: navigator.userAgent,
+        devicePixelRatio: window.devicePixelRatio,
+        screen: {
+          availHeight: screen.availHeight,
+          availWidth: screen.availWidth,
+          colorDepth: screen.colorDepth,
+          height: screen.height,
+          pixelDepth: screen.pixelDepth,
+          width: screen.width,
+        },
+      };
+    }
+    return {
+      userAgent: navigator.userAgent,
+      devicePixelRatio: window.devicePixelRatio,
+      screen: {
         availHeight: screen.availHeight,
         availWidth: screen.availWidth,
         colorDepth: screen.colorDepth,
         height: screen.height,
+        orientation: {
+          type: screen.orientation.type,
+          angle: screen.orientation.angle,
+        },
         pixelDepth: screen.pixelDepth,
         width: screen.width,
-      };
-    }
-    return {
-      availHeight: screen.availHeight,
-      availWidth: screen.availWidth,
-      colorDepth: screen.colorDepth,
-      height: screen.height,
-      orientation: {
-        type: screen.orientation.type,
-        angle: screen.orientation.angle,
       },
-      pixelDepth: screen.pixelDepth,
-      width: screen.width,
     };
   }
 
@@ -582,7 +562,10 @@ export class Game implements Activity {
       for (const [variableName] of variables) {
         emptyTrial[variableName] = null;
       }
-      this.data.trials.push(emptyTrial);
+      this.data.trials.push({
+        ...emptyTrial,
+        device_metadata: this.getDeviceMetadata(),
+      });
     }
     if (!(variableName in this.options.trialSchema)) {
       throw new Error(`trial variable ${variableName} not defined in schema`);
@@ -636,42 +619,38 @@ export class Game implements Activity {
    */
   trialComplete(): void {
     this.trialIndex++;
-    /** some metadata, such as window size (on browsers) or device
-     * orientation (on mobile phones) MIGHT change multiple times
-     * throughout a game. Rather than record all of these values as
-     * they potentially change, update the metadata at the end of
-     * each trial when the trial is complete.
-     */
-    this.data.metadata.screen = this.getScreenMetadata();
-    this.data.metadata.devicePixelRatio = window.devicePixelRatio;
     if (this.session.options.activityCallbacks?.onActivityDataCreate) {
       // newData is only the trial that recently completed
       // data is all the data collected so far in the game
 
       // return schema as JSON Schema Draft-07
       const newDataSchema: JsonSchema = {
-        description: `a single completed trial from the assessment ${this.name}`,
+        description: `A single trial and metadata from the assessment ${this.name}`,
         type: "object",
-        properties: this.options.trialSchema,
+        properties: {
+          ...this.options.trialSchema,
+          device_metadata: deviceMetadataSchema,
+        },
       };
 
       const dataSchema: JsonSchema = {
-        description: `all trial and metadata from the assessment ${this.name}`,
+        description: `All trials and metadata from the assessment ${this.name}`,
         type: "object",
-        required: ["trials", "metadata"],
+        required: ["trials"],
         properties: {
           trials: {
             type: "array",
             items: { $ref: "#/$defs/trial" },
-          },
-          metadata: {
-            type: "object",
+            description: "All trials from the assessment",
           },
         },
         $defs: {
           trial: {
             type: "object",
-            properties: this.options.trialSchema,
+            properties: {
+              ...this.options.trialSchema,
+              device_metadata: deviceMetadataSchema,
+            },
           },
         },
       };
