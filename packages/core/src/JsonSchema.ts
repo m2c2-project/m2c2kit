@@ -21,6 +21,8 @@ export interface JsonSchema {
   $ref?: string;
   // Object definitions
   $defs?: object;
+  // Comment string
+  $comment?: string;
 }
 
 // Note that JSON Schema doesn't allow all JavaScript types, such as bigint, function, symbol, or undefined.

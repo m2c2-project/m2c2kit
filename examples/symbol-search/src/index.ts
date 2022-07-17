@@ -117,11 +117,6 @@ top. (2 unique symbols.)",
      * JSON Schema Draft-07 format.
      */
     const symbolSearchTrialSchema: TrialSchema = {
-      activity_uuid: {
-        type: "string",
-        format: "uuid",
-        description: "Unique identifier for all trials in this activity.",
-      },
       activity_begin_iso8601_timestamp: {
         type: "string",
         format: "date-time",
@@ -216,7 +211,7 @@ top. (2 unique symbols.)",
     const options: GameOptions = {
       name: "Symbol Search",
       id: "symbol-search",
-      version: "0.0.1",
+      version: "0.8.0",
       shortDescription:
         "Symbol Search is a test of processing speed, where \
 participants see a row of symbol pairs at the top of the screen and match \
@@ -455,7 +450,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         game.addScene(blankScene);
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
-        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         game.cancel();
       });
@@ -977,7 +971,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         game.addTrialData("card_configuration", remaining_trial_configuration);
         game.addTrialData("quit_button_pressed", false);
         game.addTrialData("trial_index", game.trialIndex);
-        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
           orLabel.hidden = true;

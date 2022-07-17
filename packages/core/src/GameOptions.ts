@@ -12,7 +12,7 @@ export interface GameOptions {
   /** Short identifier of this game; unique among published games and url-friendly (no spaces, special characters, or slashes)*/
   id: string;
   /** Version of this game */
-  version?: string;
+  version: string;
   /** Uri (repository, webpage, or other location where full information about the game can be found) */
   uri?: string;
   /** Brief description of game */

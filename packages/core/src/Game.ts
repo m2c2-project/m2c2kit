@@ -30,7 +30,7 @@ import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
 import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
 import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
-
+import { TrialSchema } from "./TrialSchema";
 interface BoundingBox {
   xMin: number;
   xMax: number;
@@ -563,6 +563,9 @@ export class Game implements Activity {
         emptyTrial[variableName] = null;
       }
       this.data.trials.push({
+        activity_uuid: this.uuid,
+        activity_id: this.options.id,
+        activity_version: this.options.version,
         ...emptyTrial,
         device_metadata: this.getDeviceMetadata(),
       });
@@ -623,31 +626,52 @@ export class Game implements Activity {
       // newData is only the trial that recently completed
       // data is all the data collected so far in the game
 
+      const activitySchema: TrialSchema = {
+        activity_uuid: {
+          type: "string",
+          format: "uuid",
+          description:
+            "Unique identifier for all trials in this administration of the activity.",
+        },
+        activity_id: {
+          type: "string",
+          description: "Identifier of the activity.",
+        },
+        activity_version: {
+          type: "string",
+          description: "Version of the activity.",
+        },
+      };
+
       // return schema as JSON Schema Draft-07
       const newDataSchema: JsonSchema = {
-        description: `A single trial and metadata from the assessment ${this.name}`,
+        description: `A single trial and metadata from the assessment ${this.name}.`,
+        $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
         type: "object",
         properties: {
+          ...activitySchema,
           ...this.options.trialSchema,
           device_metadata: deviceMetadataSchema,
         },
       };
 
       const dataSchema: JsonSchema = {
-        description: `All trials and metadata from the assessment ${this.name}`,
+        description: `All trials and metadata from the assessment ${this.name}.`,
+        $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
         type: "object",
         required: ["trials"],
         properties: {
           trials: {
             type: "array",
             items: { $ref: "#/$defs/trial" },
-            description: "All trials from the assessment",
+            description: "All trials from the assessment.",
           },
         },
         $defs: {
           trial: {
             type: "object",
             properties: {
+              ...activitySchema,
               ...this.options.trialSchema,
               device_metadata: deviceMetadataSchema,
             },

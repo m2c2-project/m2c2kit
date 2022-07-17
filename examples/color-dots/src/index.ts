@@ -134,11 +134,6 @@ class ColorDots extends Game {
      * JSON Schema Draft-07 format.
      */
     const colorDotsTrialSchema: TrialSchema = {
-      activity_uuid: {
-        type: "string",
-        format: "uuid",
-        description: "Unique identifier for all trials in this activity.",
-      },
       activity_begin_iso8601_timestamp: {
         type: "string",
         format: "date-time",
@@ -265,7 +260,7 @@ class ColorDots extends Game {
     const options: GameOptions = {
       name: "Color Dots",
       id: "color-dots",
-      version: "0.0.1",
+      version: "0.8.0",
       shortDescription: "A short description of Color Dots goes here...",
       longDescription:
         "Participants are asked to remember the location and color of three \
@@ -338,7 +333,6 @@ appeared.",
         game.addScene(blankScene);
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
-        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         game.cancel();
       });
@@ -940,7 +934,6 @@ appeared.",
       game.addTrialData("location_selected_delta", delta);
       game.addTrialData("quit_button_pressed", false);
       game.addTrialData("trial_index", game.trialIndex);
-      game.addTrialData("activity_uuid", game.uuid);
       game.trialComplete();
       if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
         game.presentScene(fixationScene);

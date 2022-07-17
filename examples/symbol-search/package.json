@@ -1,6 +1,6 @@
 {
   "name": "symbol-search",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "scripts": {
     "serve": "rollup -c rollup.config.mjs --watch --configServe",
     "build": "rollup -c rollup.config.mjs --configProd",

@@ -108,11 +108,6 @@ class GridMemory extends Game {
      * JSON Schema Draft-07 format.
      */
     const gridMemoryTrialSchema: TrialSchema = {
-      activity_uuid: {
-        type: "string",
-        format: "uuid",
-        description: "Unique identifier for all trials in this activity.",
-      },
       activity_begin_iso8601_timestamp: {
         type: "string",
         format: "date-time",
@@ -270,7 +265,7 @@ class GridMemory extends Game {
     const options: GameOptions = {
       name: "Grid Memory",
       id: "grid-memory",
-      version: "0.0.1",
+      version: "0.8.0",
       shortDescription: "A short description of Grid Memory goes here...",
       longDescription:
         'Each trial of the dot memory task consisted of 3 phases: encoding, \
@@ -386,7 +381,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         game.addScene(blankScene);
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
-        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         game.cancel();
       });
@@ -915,7 +909,6 @@ ambulatory cognitive assessments." Assessment 25, no. 1 (2018): 14-30.',
         game.addTrialData("number_of_correct_dots", numberOfCorrectDots);
         game.addTrialData("quit_button_pressed", false);
         game.addTrialData("trial_index", game.trialIndex);
-        game.addTrialData("activity_uuid", game.uuid);
         game.trialComplete();
         if (game.trialIndex === game.getParameter("number_of_trials")) {
           const nextScreenTransition = Transition.slide({

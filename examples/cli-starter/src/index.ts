@@ -57,11 +57,6 @@ class CliStarter extends Game {
      * JSON Schema.
      */
     const cliStarterTrialSchema: TrialSchema = {
-      activity_uuid: {
-        type: "string",
-        format: "uuid",
-        description: "Unique identifier for all trials in this activity.",
-      },
       trial_index: {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
@@ -417,7 +412,6 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           trialConfiguration.correct_option_index === selectionIndex;
         game.addTrialData("selection_correct", correct);
         game.addTrialData("trial_index", game.trialIndex);
-        game.addTrialData("activity_uuid", game.uuid);
         /**
          * When the trial has completed, you must call game.trialComplete() to
          * 1) Increase the game.trialIndex counter
