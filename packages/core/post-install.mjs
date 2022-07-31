@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, existsSync } from "fs";
-import { resolve, join, dirname } from "path";
+import { resolve, join, dirname, basename } from "path";
 import { env, exit } from "process";
 import { readdir, readFile, mkdir, writeFile } from "fs/promises";
 
@@ -64,9 +64,35 @@ async function copyFolderRecursive(options) {
   });
 }
 
+async function copyFile(options) {
+  if (
+    !options.overwrite &&
+    existsSync(
+      join(options.destinationFolder, basename(options.sourceFilePath))
+    )
+  ) {
+    return;
+  }
+
+  const content = await readFile(options.sourceFilePath);
+
+  if (!existsSync(options.destinationFolder)) {
+    await mkdir(options.destinationFolder, { recursive: true });
+  }
+  await writeFile(
+    join(options.destinationFolder, basename(options.sourceFilePath)),
+    content
+  );
+}
+
 copyFolderRecursive({
   sourceFolder: "assets",
   destinationFolder: join(npmCwd, "src"),
   baseFolder: "assets",
+  overwrite: false,
+});
+copyFile({
+  sourceFilePath: "index.html",
+  destinationFolder: join(npmCwd, "src"),
   overwrite: false,
 });

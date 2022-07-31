@@ -9,7 +9,13 @@ npm publish -w @m2c2kit/core &
 npm publish -w @m2c2kit/addons &
 npm publish -w @m2c2kit/cli &
 npm publish -w @m2c2kit/build-helpers &
+npm publish -w @m2c2kit/assessment-color-dots &
+npm publish -w @m2c2kit/assessment-grid-memory &
+npm publish -w @m2c2kit/assessment-symbol-search &
 
 wait
 
-echo "npm publish to container registry complete: @m2c2kit/core, @m2c2kit/addons, @m2c2kit/cli, @m2c2kit/build-helpers"
+echo "npm publish to container registry complete: @m2c2kit/core, \
+@m2c2kit/addons, @m2c2kit/cli, @m2c2kit/build-helpers, \
+@m2c2kit/assessment-color-dots, @m2c2kit/assessment-grid-memory, \
+@m2c2kit/assessment-symbol-search"

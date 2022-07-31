@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  registry:
+    build:
+      context: ./dockerfiles/registry
+    ports:
+      - "4873:4873"
+
+  publish:
+    build:
+      context: ./dockerfiles/publish

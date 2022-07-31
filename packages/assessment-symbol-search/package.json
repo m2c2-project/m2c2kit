@@ -1,5 +1,5 @@
 {
-  "name": "@m2c2kit/assessment-grid-memory",
+  "name": "@m2c2kit/assessment-symbol-search",
   "version": "0.8.0",
   "scripts": {
     "build": "npm run clean && rollup -c && npm run copy-assets",

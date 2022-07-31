@@ -9,6 +9,12 @@ import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
+import findup from "findup-sync";
+
+// rollup-plugin-copy doesn't like windows backslashes
+const canvaskitWasmPath = findup(
+  "node_modules/canvaskit-wasm/bin/canvaskit.wasm"
+).replace(/\\/g, "/");
 
 let sharedPlugins = [
   // canvaskit-wasm references these node.js functions
@@ -55,7 +61,11 @@ export default [
           {
             // copy the bundled esm module and sourcemap to dist
             src: "build/index.*",
-            dest: ["dist/"],
+            dest: "dist",
+          },
+          {
+            src: canvaskitWasmPath,
+            dest: "assets",
           },
         ],
       }),

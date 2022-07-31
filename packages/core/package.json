@@ -11,17 +11,18 @@
   },
   "files": [
     "dist/index.js",
-    "dist/index.d.ts"
+    "dist/index.d.ts",
+    "assets",
+    "index.html",
+    "post-install.mjs"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c rollup.config.js",
     "clean": "rimraf build build-umd dist .rollup.cache tsconfig.tsbuildinfo",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "node post-install.mjs"
   },
   "license": "MIT",
-  "dependencies": {
-    "canvaskit-wasm": "0.33.0"
-  },
   "devDependencies": {
     "@rollup/plugin-babel": "5.3.1",
     "@rollup/plugin-commonjs": "22.0.1",
@@ -30,6 +31,8 @@
     "@types/jest": "^27.4.0",
     "@types/jsdom": "^16.2.14",
     "canvas": "^2.8.0",
+    "canvaskit-wasm": "0.33.0",
+    "findup-sync": "5.0.0",
     "jest": "^27.4.7",
     "jsdom": "^19.0.0",
     "rimraf": "^3.0.2",
