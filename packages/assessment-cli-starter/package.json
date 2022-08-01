@@ -1,0 +1,34 @@
+{
+  "name": "@m2c2kit/assessment-cli-starter",
+  "version": "0.8.0",
+  "scripts": {
+    "build": "npm run clean && rollup -c && npm run copy-assets",
+    "copy-assets": "cpy src/assets/**/* dist/assets",
+    "clean": "rimraf dist .rollup.cache tsconfig.tsbuildinfo",
+    "postinstall": "node post-install.mjs"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "assets",
+    "post-install.mjs"
+  ],
+  "dependencies": {
+    "@m2c2kit/addons": "0.3.0",
+    "@m2c2kit/core": "0.3.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "8.3.3",
+    "cpy-cli": "4.1.0",
+    "rimraf": "^3.0.2",
+    "rollup": "2.70.0",
+    "tslib": "2.4.0",
+    "typescript": "4.7.4"
+  }
+}

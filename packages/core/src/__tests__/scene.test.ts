@@ -12,24 +12,8 @@ import {
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
-/** Because jest.mock() is hoisted, any other variables provided to it must be
- * hoisted as well. We do that by using var on these variables.
- * see https://stackoverflow.com/a/68073694
- */
-// eslint-disable-next-line no-var
-var maxRequestedFrames = 180;
-// eslint-disable-next-line no-var
-var requestedFrames = 0;
-// eslint-disable-next-line no-var
-var perfCounter = 0;
-
-jest.mock("../../build-umd", () =>
-  TestHelpers.createM2c2KitMock(
-    perfCounter,
-    requestedFrames,
-    maxRequestedFrames
-  )
-);
+TestHelpers.cryptoGetRandomValuesPolyfill();
+jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
 
 let session: Session;
 let g1: Game1;
@@ -117,13 +101,8 @@ beforeEach(() => {
   // @ts-ignore
   global.document = dom.window.document;
   global.navigator = dom.window.navigator;
-
-  perfCounter = 0;
-  global.window.performance.now = () => {
-    return perfCounter;
-  };
-
-  requestedFrames = 0;
+  // @ts-ignore
+  global.performance = TestHelpers.performance;
 });
 
 describe("test duplicate method", () => {

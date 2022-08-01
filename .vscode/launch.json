@@ -7,54 +7,26 @@
     {
       "name": "playground",
       "request": "launch",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}/packages/playground"
     },
     {
-      "type": "pwa-chrome",
+      "name": "assessments demo",
+      "type": "chrome",
       "request": "launch",
-      "name": "Chrome cli-starter",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/cli-starter/build"
+      "webRoot": "${workspaceFolder}/packages/assessments-demo/build"
     },
     {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome color-dots",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/color-dots/build"
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome grid-memory",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/grid-memory/build"
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome symbol-search",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/examples/symbol-search/build"
-    },
-    {
-      "type": "pwa-chrome",
-      "request": "launch",
-      "name": "Chrome grid-memory-demo",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/packages/assessment-grid-memory/demo/build"
-    },
-    {
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "name": "Scratch Launch Chrome against localhost",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/packages/core/scratch/scratch-build"
     },
     {
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "name": "Scratch-addons Launch Chrome against localhost",
       "url": "http://localhost:3000",

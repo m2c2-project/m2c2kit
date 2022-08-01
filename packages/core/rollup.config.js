@@ -44,6 +44,7 @@ export default [
         include: ["./**/*.[tj]s"],
         exclude: ["**/__tests__", "**/*.test.ts"],
         rootDir: "src",
+        outputToFilesystem: true,
       }),
       terser(),
     ],
@@ -102,6 +103,7 @@ export default [
         // only in tsconfig.json, thus defining them here.
         include: ["./src/**/*.[tj]s"],
         exclude: ["**/__tests__", "**/*.test.ts"],
+        outputToFilesystem: true,
       }),
       sourcemaps(),
       babel({

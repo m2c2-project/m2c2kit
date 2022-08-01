@@ -1,6 +1,6 @@
 {
-  "name": "cli-starter",
-  "version": "1.0.0",
+  "name": "@m2c2kit/assessments-demo",
+  "version": "0.8.0",
   "scripts": {
     "serve": "rollup -c rollup.config.mjs --watch --configServe",
     "build": "rollup -c rollup.config.mjs --configProd",
@@ -9,6 +9,10 @@
   "private": true,
   "dependencies": {
     "@m2c2kit/addons": "0.3.0",
+    "@m2c2kit/assessment-cli-starter": "^0.8.0",
+    "@m2c2kit/assessment-color-dots": "^0.8.0",
+    "@m2c2kit/assessment-grid-memory": "^0.8.0",
+    "@m2c2kit/assessment-symbol-search": "^0.8.0",
     "@m2c2kit/core": "0.3.0"
   },
   "devDependencies": {

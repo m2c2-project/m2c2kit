@@ -961,7 +961,7 @@ export class Game implements Activity {
   }
 
   private updateGameTime(): void {
-    Globals.now = window.performance.now();
+    Globals.now = performance.now();
     if (this.priorUpdateTime) {
       Globals.deltaTime = Globals.now - this.priorUpdateTime;
     } else {

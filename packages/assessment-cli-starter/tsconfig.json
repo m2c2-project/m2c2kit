@@ -1,8 +1,5 @@
 {
-  // tsconfig.json for m2c2kit/addons is identical to the one for m2c2mit/core,
-  // except addons must also have a reference to core, otherwise intelliense
-  // in vs code won't work
-  "references": [{ "path": "../core" }],
+  "references": [{ "path": "../core" }, { "path": "../addons" }],
   "compilerOptions": {
     "composite": true,
     "target": "es6",
@@ -13,7 +10,7 @@
     "module": "es6",
     "moduleResolution": "node",
     "allowJs": true,
-    "outDir": "build",
+    "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

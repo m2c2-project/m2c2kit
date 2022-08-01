@@ -1,27 +1,16 @@
 import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import shim from "rollup-plugin-shim";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import sourcemaps from "rollup-plugin-sourcemaps";
-import path from "path";
+import copy from "rollup-plugin-copy";
 import {
   copyM2c2Assets,
   addHashesM2c2Transformer,
   copyM2c2IndexHtml,
 } from "@m2c2kit/build-helpers";
 
-let sharedPlugins = [
-  // canvaskit-wasm references these node.js functions
-  // shim them to empty functions for browser usage
-  shim({
-    fs: `export function fs_empty_shim() { }`,
-    path: `export function path_empty_shim() { }`,
-  }),
-  nodeResolve(),
-  commonjs(),
-];
+let sharedPlugins = [nodeResolve()];
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
@@ -41,30 +30,6 @@ export default (commandLineArgs) => {
           file: `./${outputFolder}/index.js`,
           format: "esm",
           sourcemap: isDebug,
-          /**
-           * In the tsconfig.json, we have "rootDir": "../.." to fix an issue
-           * where sourcemaps for @m2c2kit/core and addons were not getting
-           * the correct path. However, that made the sourcemap for the main
-           * entry typescript file not have the correct path.
-           * The below fixes it.
-           */
-          sourcemapPathTransform:
-            commandLineArgs.configServe &&
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ((relativeSourcePath, sourcemapPath) => {
-              return relativeSourcePath.replace(
-                ".." +
-                  path.sep +
-                  ".." +
-                  path.sep +
-                  ".." +
-                  path.sep +
-                  "src" +
-                  path.sep +
-                  "index.ts",
-                "src" + path.sep + "index.ts"
-              );
-            }),
         },
       ],
       plugins: [
@@ -78,16 +43,48 @@ export default (commandLineArgs) => {
         }),
         sourcemaps(),
         copyM2c2IndexHtml(
-          "src/index.html",
+          "../core/index.html",
           `${outputFolder}/index.html`,
           `${outputFolder}/index.js`,
           isProd && !noHash
         ),
         copyM2c2Assets(
-          "src/assets",
+          "../core/assets",
           `${outputFolder}/assets`,
           isProd && !noHash
         ),
+        copy({
+          targets: [
+            {
+              src: "../assessment-cli-starter/assets/cli-starter",
+              dest: `${outputFolder}/assets`,
+            },
+          ],
+        }),
+        copy({
+          targets: [
+            {
+              src: "../assessment-color-dots/assets/color-dots",
+              dest: `${outputFolder}/assets`,
+            },
+          ],
+        }),
+        copy({
+          targets: [
+            {
+              src: "../assessment-grid-memory/assets/grid-memory",
+              dest: `${outputFolder}/assets`,
+            },
+          ],
+        }),
+        copy({
+          targets: [
+            {
+              src: "../assessment-symbol-search/assets/symbol-search",
+              dest: `${outputFolder}/assets`,
+            },
+          ],
+        }),
         commandLineArgs.configServe &&
           serve({
             // we can start development server and automatically open browser by running

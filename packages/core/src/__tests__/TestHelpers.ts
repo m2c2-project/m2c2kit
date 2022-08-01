@@ -1,9 +1,29 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 export class TestHelpers {
-  static createM2c2KitMock(
-    perfCounter: number,
-    requestedFrames: number,
-    maxRequestedFrames: number
-  ): any {
+  static cryptoGetRandomValuesPolyfill(): void {
+    // @ts-ignore
+    global.crypto = {
+      // @ts-ignore
+      getRandomValues: function (buffer: Array<T>) {
+        const result = new Array<number>(buffer.length);
+        for (let i = 0; i < buffer.length; i++) {
+          result.push(Math.floor(Math.random() * 256));
+        }
+        return result;
+      },
+    };
+  }
+
+  static perfCounter = 0;
+  static requestedFrames = 0;
+  static maxRequestedFrames = 0;
+
+  static performance = {
+    now: () => this.perfCounter,
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static createM2c2KitMock(): any {
     const skiaCanvas = {
       save: () => undefined,
       scale: () => undefined,
@@ -13,9 +33,9 @@ export class TestHelpers {
     };
 
     const requestAnimationFrame = (callback: (canvas: object) => void) => {
-      perfCounter = perfCounter + 16.66666666666667;
-      if (requestedFrames < maxRequestedFrames) {
-        requestedFrames++;
+      this.perfCounter = this.perfCounter + 16.66666666666667;
+      if (TestHelpers.requestedFrames < TestHelpers.maxRequestedFrames) {
+        TestHelpers.requestedFrames++;
         callback(skiaCanvas);
       }
       return undefined;
@@ -39,6 +59,12 @@ export class TestHelpers {
             },
             requestAnimationFrame: (callback: (canvas: object) => void) => {
               return requestAnimationFrame(callback);
+            },
+            width: () => {
+              return NaN;
+            },
+            height: () => {
+              return NaN;
             },
           };
         },

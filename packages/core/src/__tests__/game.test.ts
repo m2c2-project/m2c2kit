@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { TestHelpers } from "./TestHelpers";
 import {
   Session,
   SessionOptions,
@@ -12,89 +13,9 @@ import {
 } from "../../build-umd";
 import { JSDOM } from "jsdom";
 
-// jest.mock("../../dist/umd/m2c2kit", () => {
-//   const m2c2kit = jest.requireActual("../../dist/umd/m2c2kit");
-//   // original.Game.prototype.init = (options: GameInitOptions): Promise<void> => {
-//   //   throw new Error("err!");
-//   // }
-
-//   m2c2kit.Game.prototype.init = jest.fn().mockReturnValue(Promise.resolve());
-//   return m2c2kit;
-// });
-
-// for how to mock part of a module using jest,
-// see https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
-
-let maxRequestedFrames = 180;
-let requestedFrames = 0;
-
-const skiaCanvas = {
-  save: () => undefined,
-  scale: () => undefined,
-  drawRRect: () => undefined,
-  restore: () => undefined,
-  drawText: () => undefined,
-};
-
-const requestAnimationFrame = (callback: (canvas: object) => void) => {
-  perfCounter = perfCounter + 16.66666666666667;
-  if (requestedFrames < maxRequestedFrames) {
-    requestedFrames++;
-    callback(skiaCanvas);
-  }
-  return undefined;
-};
-
+TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => {
-  const m2c2kit = jest.requireActual("../../build-umd");
-
-  m2c2kit.Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
-    Promise.resolve({
-      PaintStyle: {
-        Fill: undefined,
-      },
-      MakeCanvasSurface: () => {
-        return {
-          reportBackendTypeIsGPU: () => true,
-          getCanvas: () => {
-            return skiaCanvas;
-          },
-          makeImageSnapshot: () => {
-            return {};
-          },
-          requestAnimationFrame: (callback: (canvas: object) => void) => {
-            return requestAnimationFrame(callback);
-          },
-          width: () => {
-            return NaN;
-          },
-          height: () => {
-            return NaN;
-          },
-        };
-      },
-      Font: function () {
-        return {};
-      },
-      Paint: function () {
-        return {
-          setColor: () => undefined,
-          setAntiAlias: () => undefined,
-          setStyle: () => undefined,
-        };
-      },
-      Color: function () {
-        return {};
-      },
-      LTRBRect: function () {
-        return {};
-      },
-      RRectXY: function () {
-        return {};
-      },
-    })
-  );
-  return m2c2kit;
+  return TestHelpers.createM2c2KitMock();
 });
 
 class Game1 extends Game {
@@ -152,9 +73,8 @@ class Game2 extends Game {
 let session: Session;
 let g1: Game1;
 let g2: Game2;
-let perfCounter: number;
 
-const setupDomAndGlobals = () => {
+function setupDomAndGlobals(): void {
   const dom = new JSDOM(`<!DOCTYPE html>
   <html>
     <head>
@@ -175,14 +95,9 @@ const setupDomAndGlobals = () => {
   // @ts-ignore
   global.document = dom.window.document;
   global.navigator = dom.window.navigator;
-
-  perfCounter = 0;
-  global.window.performance.now = () => {
-    return perfCounter;
-  };
-
-  requestedFrames = 0;
-};
+  // @ts-ignore
+  global.performance = TestHelpers.performance;
+}
 
 describe("actions", () => {
   beforeEach(() => {
@@ -195,9 +110,10 @@ describe("actions", () => {
   });
 
   it("shape completes move from 200, 200 to 50, 50", () => {
-    maxRequestedFrames = 63;
-
     return session.init().then(() => {
+      TestHelpers.perfCounter = 0;
+      TestHelpers.requestedFrames = 0;
+      TestHelpers.maxRequestedFrames = 63;
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
         .find(Boolean);
@@ -207,16 +123,17 @@ describe("actions", () => {
       rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
-        `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
+        `frames requested: ${TestHelpers.requestedFrames}, ellapsed virtual milliseconds: ${TestHelpers.perfCounter}`
       );
       expect(rect1.position).toEqual({ x: 50, y: 50 });
     });
   });
 
   it("shape is exactly midway halfway through move from 200, 200 to 50, 50", () => {
-    maxRequestedFrames = 32;
-
     return session.init().then(() => {
+      TestHelpers.perfCounter = 0;
+      TestHelpers.requestedFrames = 0;
+      TestHelpers.maxRequestedFrames = 32;
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
         .find(Boolean);
@@ -227,7 +144,7 @@ describe("actions", () => {
       rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
       session.start();
       console.debug(
-        `frames requested: ${requestedFrames}, ellapsed virtual milliseconds: ${perfCounter}`
+        `frames requested: ${TestHelpers.requestedFrames}, ellapsed virtual milliseconds: ${TestHelpers.perfCounter}`
       );
       expect(Math.round(rect1.position.x)).toEqual(125);
       expect(Math.round(rect1.position.y)).toEqual(125);
