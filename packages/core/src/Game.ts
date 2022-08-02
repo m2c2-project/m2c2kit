@@ -75,7 +75,7 @@ export class Game implements Activity {
           `game ${this.options.name} does not have a parameter named ${key}. attempt to set parameter ${key} to value ${newParameters[key]} will be ignored`
         );
       } else if (this.options.parameters && this.options.parameters[key]) {
-        this.options.parameters[key].value = newParameters[key];
+        this.options.parameters[key].default = newParameters[key];
       }
     });
   }
@@ -312,7 +312,7 @@ export class Game implements Activity {
       this.options.parameters !== undefined &&
       Object.keys(this.options.parameters).includes(parameterName)
     ) {
-      return this.options.parameters[parameterName].value as T;
+      return this.options.parameters[parameterName].default as T;
     } else {
       throw new Error(`game parameter ${parameterName} not found`);
     }
@@ -643,10 +643,11 @@ export class Game implements Activity {
         },
       };
 
-      // return schema as JSON Schema Draft-07
+      // return schema as JSON Schema draft 2019-09
       const newDataSchema: JsonSchema = {
         description: `A single trial and metadata from the assessment ${this.name}.`,
         $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
+        $schema: "https://json-schema.org/draft/2019-09/schema",
         type: "object",
         properties: {
           ...activitySchema,
@@ -658,6 +659,7 @@ export class Game implements Activity {
       const dataSchema: JsonSchema = {
         description: `All trials and metadata from the assessment ${this.name}.`,
         $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
+        $schema: "https://json-schema.org/draft/2019-09/schema",
         type: "object",
         required: ["trials"],
         properties: {
@@ -694,7 +696,7 @@ export class Game implements Activity {
 
         for (const prop in result) {
           for (const subProp in result[prop]) {
-            if (subProp == "value") {
+            if (subProp == "default") {
               result[prop] = result[prop][subProp];
             }
           }
@@ -709,7 +711,7 @@ export class Game implements Activity {
 
         for (const prop in result) {
           if (!("type" in result[prop]) && "value" in result[prop]) {
-            const valueType = typeof result[prop]["value"];
+            const valueType = typeof result[prop]["default"];
             // if the "type" of the value was not provided,
             // infer it from the value itself
             // (note: in our JSON schema, we don't support bigint, function,
@@ -724,7 +726,7 @@ export class Game implements Activity {
             }
           }
           for (const subProp in result[prop]) {
-            if (subProp == "value") {
+            if (subProp == "default") {
               delete result[prop][subProp];
             }
           }

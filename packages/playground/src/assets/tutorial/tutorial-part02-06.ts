@@ -32,6 +32,7 @@ class Tutorial extends Game {
 
         const options: GameOptions = {
             name: "Tutorial Part1",
+            version: "0.0.1",
             id: "tut1",
             showFps: false,
             width: 400,

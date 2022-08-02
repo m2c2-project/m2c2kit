@@ -17,23 +17,23 @@ class CliStarter extends Game {
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
-     * Each game parameter should have a type, a value (this is the default
+     * Each game parameter should have a type, default (this is the default
      * value), and a description.
      */
     const defaultParameters: GameParameters = {
       preparation_duration_ms: {
         type: "number",
-        value: 500,
+        default: 500,
         description: "How long the 'get ready' message is shown, milliseconds.",
       },
       number_of_trials: {
         type: "integer",
-        value: 5,
+        default: 5,
         description: "How many trials to run.",
       },
       show_fps: {
         type: "boolean",
-        value: false,
+        default: false,
         description: "Should the FPS be shown?",
       },
     };
@@ -101,7 +101,7 @@ The original paper by Stroop has been one of the most cited papers in the \
 history of experimental psychology, leading to more than 700 Stroop-related \
 articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       uri: "An external link to your assessment repository or informational website.",
-      showFps: defaultParameters.show_fps.value,
+      showFps: defaultParameters.show_fps.default,
       /**
        * Actual pixel resolution will be scaled to fit the device, while
        * preserving the aspect ratio. It is important, however, to specify
