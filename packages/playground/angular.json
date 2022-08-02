@@ -35,42 +35,42 @@
               "src/favicon.ico",
               {
                 "glob": "index.ts",
-                "input": "./../../examples/symbol-search/src",
+                "input": "./../assessment-symbol-search/src",
                 "output": "./assets/src/symbol-search"
               },
               {
                 "glob": "**/*",
-                "input": "./../../examples/symbol-search/src/assets/symbol-search",
+                "input": "./../assessment-symbol-search/assets/symbol-search",
                 "output": "assets/symbol-search"
               },
               {
                 "glob": "index.ts",
-                "input": "./../../examples/grid-memory/src",
+                "input": "./../assessment-grid-memory/src",
                 "output": "./assets/src/grid-memory"
               },
               {
                 "glob": "**/*",
-                "input": "./../../examples/grid-memory/src/assets/grid-memory",
+                "input": "./../assessment-grid-memory/assets/grid-memory",
                 "output": "assets/grid-memory"
               },
               {
                 "glob": "index.ts",
-                "input": "./../../examples/color-dots/src",
+                "input": "./../assessment-color-dots/src",
                 "output": "./assets/src/color-dots"
               },
               {
                 "glob": "**/*",
-                "input": "./../../examples/color-dots/src/assets/color-dots",
+                "input": "./../assessment-color-dots/assets/color-dots",
                 "output": "assets/color-dots"
               },
               {
                 "glob": "index.ts",
-                "input": "./../../examples/cli-starter/src",
+                "input": "./../assessment-cli-starter/src",
                 "output": "./assets/src/cli-starter"
               },
               {
                 "glob": "**/*",
-                "input": "./../../examples/cli-starter/src/assets/cli-starter",
+                "input": "./../assessment-cli-starter/assets/cli-starter",
                 "output": "assets/cli-starter"
               },
               {

@@ -4,5 +4,6 @@
   //   "examples/grid-memory": true,
   //   "tools": true
   // },
-  "jest.jestCommandLine": "npm run test -w @m2c2kit/core --"
+  "jest.jestCommandLine": "npm run test -w @m2c2kit/core --",
+  "npm.exclude": "**/packages/playground/dist/**"
 }
