@@ -109,6 +109,11 @@ module.exports = {
     noParse: [require.resolve("@ts-morph/common/dist/typescript.js")],
   },
   plugins: [new ModifyAssets()],
+  devServer: {
+    devMiddleware: {
+      writeToDisk: true,
+    },
+  },
 };
 
 const sessionCode = `const session = new Session({

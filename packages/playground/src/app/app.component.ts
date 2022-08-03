@@ -170,6 +170,42 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: "tutorial-part03-08.ts",
       url: "./assets/tutorial/tutorial-part03-08.ts",
     },
+    {
+      name: "tutorial-part04-01.ts",
+      url: "./assets/tutorial/tutorial-part04-01.ts",
+    },
+    {
+      name: "tutorial-part04-02.ts",
+      url: "./assets/tutorial/tutorial-part04-02.ts",
+    },
+    {
+      name: "tutorial-part04-03.ts",
+      url: "./assets/tutorial/tutorial-part04-03.ts",
+    },
+    {
+      name: "tutorial-part04-04.ts",
+      url: "./assets/tutorial/tutorial-part04-04.ts",
+    },
+    {
+      name: "tutorial-part04-05.ts",
+      url: "./assets/tutorial/tutorial-part04-05.ts",
+    },
+    {
+      name: "tutorial-part04-06.ts",
+      url: "./assets/tutorial/tutorial-part04-06.ts",
+    },
+    {
+      name: "tutorial-part04-07.ts",
+      url: "./assets/tutorial/tutorial-part04-07.ts",
+    },
+    {
+      name: "tutorial-part04-08.ts",
+      url: "./assets/tutorial/tutorial-part04-08.ts",
+    },
+    {
+      name: "tutorial-part04-09.ts",
+      url: "./assets/tutorial/tutorial-part04-09.ts",
+    },
   ];
 
   selectedTheme = { name: "Light", monacoName: "vs" };
