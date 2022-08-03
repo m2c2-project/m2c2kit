@@ -1,100 +1,147 @@
 // eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
-const { Compilation, sources } = require("webpack");
-// eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
 const { Buffer } = require("buffer");
+// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
+const CopyPlugin = require("copy-webpack-plugin");
 
 /**
  * Some assets need to be modified before they will work in the browser.
+ * Note: in earlier approach (commit e5ea899dba5378331eac710d2a3afdc5f72ee03b),
+ * I used a custom WebPack plugin to modify the assets, but for an unknown
+ * reason this worked only in development (ng serve) and not production
+ * (ng build).
  */
-class ModifyAssets {
-  apply(compiler) {
-    compiler.hooks.thisCompilation.tap("ModifyAssets", (compilation) => {
-      compilation.hooks.processAssets.tap(
-        {
-          name: "ModifyAssets",
-          stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE,
-        },
-        (assets) => {
-          console.log();
-          for (let assetName in assets) {
-            /**
-             * The index.js has been built with an import to m2c2 core as
-             * @m2c2kit/core, but this needs to be changed to a URL path
-             * to work in the browser.
-             */
-            if (assetName === "assets/m2c2kit/addons/index.js") {
-              console.log(`Modified asset: ${assetName}`);
-              const asset = compilation.getAsset(assetName);
-              let assetString = asset.source
-                .source()
-                .toString("utf8")
-                .replace("@m2c2kit/core", "./../core/index.js");
 
-              const buffer = Buffer.from(assetString, "utf8");
-              compilation.updateAsset(assetName, new sources.RawSource(buffer));
-            }
+/**
+ * The index.js has been built with an import to m2c2 core as
+ * @m2c2kit/core, but this needs to be changed to a URL path
+ * to work in the browser.
+ */
+const replaceStringInBuffer = (buffer, search, replace) =>
+  Buffer.from(buffer.toString("utf8").replace(search, replace), "utf8");
 
-            /**
-             * The assessment TypeScript source code is just the class for the
-             * assessment, and not the supporting code to bootstrap the session
-             * start and events. We add this supporting code so a runnable
-             * test can be executed in the browser.
-             */
-            const assetsToProcess = [
-              {
-                name: "assets/src/cli-starter/index.ts",
-                class: "CliStarter",
-              },
-              {
-                name: "assets/src/color-dots/index.ts",
-                class: "ColorDots",
-              },
-              {
-                name: "assets/src/grid-memory/index.ts",
-                class: "GridMemory",
-              },
-              {
-                name: "assets/src/symbol-search/index.ts",
-                class: "SymbolSearch",
-              },
-            ];
+/**
+ * The assessment TypeScript source code is just the class for the
+ * assessment, and not the supporting code to add the assessment to
+ * the session, start, and handle events. We add this supporting code so a
+ * runnable test can be executed in the browser.
+ */
+const addBoilerplateCodeToAssessment = (buffer, className) => {
+  let code =
+    buffer.toString("utf8") +
+    `const activity = new ${className}();\n` +
+    sessionCode;
 
-            assetsToProcess.forEach((assetToProcess) => {
-              if (assetName === assetToProcess.name) {
-                console.log(`Modified asset: ${assetName}`);
-                const asset = compilation.getAsset(assetName);
-                let assetString =
-                  asset.source.source().toString("utf8") +
-                  `const activity = new ${assetToProcess.class}();\n` +
-                  sessionCode;
-
-                assetString = assetString.replace(
-                  '} from "@m2c2kit/core";',
-                  `  Session,
+  code = code
+    .replace(
+      '} from "@m2c2kit/core";',
+      `  Session,
   SessionLifecycleEvent,
   ActivityDataEvent,
   ActivityLifecycleEvent,
 } from "@m2c2kit/core";`
-                );
+    )
+    .replace(`export { ${className} };`, "");
 
-                assetString = assetString.replace(
-                  `export { ${assetToProcess.className} };`,
-                  ""
-                );
+  return Buffer.from(code, "utf8");
+};
 
-                const buffer = Buffer.from(assetString, "utf8");
-                compilation.updateAsset(
-                  assetName,
-                  new sources.RawSource(buffer)
-                );
-              }
-            });
-          }
-        }
+/**
+ * These were formerly handled in angular.json, but that approach with the
+ * compiler hook did not work in production build.
+ */
+const CopyPluginPatterns = [
+  { from: "src/favicon.ico", to: "favicon.ico" },
+  { from: "./node_modules/monaco-editor", to: "assets/monaco-editor" },
+  { from: "src/assets/css", to: "assets/css" },
+  {
+    from: "canvaskit.wasm",
+    to: "assets",
+    context: "./../../node_modules/canvaskit-wasm/bin",
+  },
+  {
+    from: "index.d.ts",
+    to: "assets/canvaskit-wasm",
+    context: "./../../node_modules/canvaskit-wasm/types",
+  },
+  { from: "index.*", to: "assets/m2c2kit/core", context: "./../core/dist" },
+  {
+    from: "index.*",
+    to: "assets/m2c2kit/addons",
+    context: "./../addons/dist",
+    transform(content) {
+      return replaceStringInBuffer(
+        content,
+        "@m2c2kit/core",
+        "./../core/index.js"
       );
-    });
-  }
-}
+    },
+  },
+  {
+    from: "index.*",
+    to: "assets/m2c2kit/sage-research",
+    context: "./../sage-research/dist",
+    transform(content) {
+      return replaceStringInBuffer(
+        content,
+        "@m2c2kit/core",
+        "./../core/index.js"
+      );
+    },
+  },
+  { from: "template.html", to: "assets", context: "./src/assets" },
+  {
+    from: "index.ts",
+    to: "assets/src/cli-starter",
+    context: "./../assessment-cli-starter/src",
+    transform(content) {
+      return addBoilerplateCodeToAssessment(content, "CliStarter");
+    },
+  },
+  {
+    from: "./../assessment-cli-starter/assets/cli-starter",
+    to: "assets/cli-starter",
+  },
+  {
+    from: "index.ts",
+    to: "assets/src/color-dots",
+    context: "./../assessment-color-dots/src",
+    transform(content) {
+      return addBoilerplateCodeToAssessment(content, "ColorDots");
+    },
+  },
+  {
+    from: "./../assessment-color-dots/assets/color-dots",
+    to: "assets/color-dots",
+  },
+  {
+    from: "index.ts",
+    to: "assets/src/grid-memory",
+    context: "./../assessment-grid-memory/src",
+    transform(content) {
+      return addBoilerplateCodeToAssessment(content, "GridMemory");
+    },
+  },
+  {
+    from: "./../assessment-grid-memory/assets/grid-memory",
+    to: "assets/grid-memory",
+  },
+  {
+    from: "index.ts",
+    to: "assets/src/symbol-search",
+    context: "./../assessment-symbol-search/src",
+    transform(content) {
+      return addBoilerplateCodeToAssessment(content, "SymbolSearch");
+    },
+  },
+  {
+    from: "./../assessment-symbol-search/assets/symbol-search",
+    to: "assets/symbol-search",
+  },
+  {
+    from: "./src/assets/tutorial",
+    to: "assets/tutorial",
+  },
+];
 
 // eslint-disable-next-line no-undef
 module.exports = {
@@ -108,12 +155,11 @@ module.exports = {
     // eslint-disable-next-line no-undef
     noParse: [require.resolve("@ts-morph/common/dist/typescript.js")],
   },
-  plugins: [new ModifyAssets()],
-  devServer: {
-    devMiddleware: {
-      writeToDisk: true,
-    },
-  },
+  plugins: [
+    new CopyPlugin({
+      patterns: CopyPluginPatterns,
+    }),
+  ],
 };
 
 const sessionCode = `const session = new Session({
