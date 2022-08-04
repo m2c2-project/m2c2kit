@@ -30,6 +30,13 @@ export class Session {
    */
   constructor(options: SessionOptions) {
     this.options = options;
+    for (const activity of this.options.activities) {
+      if (this.options.activities.filter((a) => a === activity).length > 1) {
+        throw new Error(
+          `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`
+        );
+      }
+    }
     this.fontManager = new FontManager();
     this.imageManager = new ImageManager();
     this.options.activities.forEach((activity) => (activity.session = this));
@@ -47,7 +54,7 @@ export class Session {
     this.loadAssets(canvasKit);
 
     console.log(
-      `Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
+      `⚪ Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
     );
     Timer.remove("sessionInit");
     const sessionLifecycleChangeCallback =
@@ -66,8 +73,10 @@ export class Session {
    */
   start(): void {
     this.currentActivity = this.options.activities.find(Boolean);
-    this.logStartingActivity();
-    this.currentActivity?.start();
+    if (this.currentActivity) {
+      this.configureDomForActivity(this.currentActivity);
+      this.currentActivity.start();
+    }
   }
 
   /**
@@ -98,8 +107,10 @@ export class Session {
     }
     this.currentActivity.stop();
     this.currentActivity = this.nextActivity;
-    this.logStartingActivity();
-    this.currentActivity.start();
+    if (this.currentActivity) {
+      this.configureDomForActivity(this.currentActivity);
+      this.currentActivity.start();
+    }
   }
 
   /**
@@ -120,16 +131,54 @@ export class Session {
     return this.options.activities[currentActivityIndex + 1];
   }
 
-  private logStartingActivity(): void {
-    if (
-      this.currentActivity &&
-      this.currentActivity.type == ActivityType.game
-    ) {
-      const currentGame = this.currentActivity as Game;
-      const version = currentGame.options.version
-        ? `, version ${currentGame.options.version}`
-        : "";
-      console.log(`starting game: ${currentGame.options.name + version}`);
+  /**
+   * Depending on the type of activity, set the visibility of the survey div
+   * and canvas div.
+   *
+   * @param activity - the activity to configure the DOM for
+   */
+  private configureDomForActivity(activity: Activity): void {
+    if (activity.type == ActivityType.game) {
+      this.setCanvasDivVisibility(true);
+      this.setSurveyDivVisibility(false);
+    }
+    if (activity.type == ActivityType.survey) {
+      this.setCanvasDivVisibility(false);
+      this.setSurveyDivVisibility(true);
+    }
+  }
+
+  /**
+   * Shows or hides the survey div.
+   *
+   * @param visible - true if the survey div should be visible
+   */
+  private setSurveyDivVisibility(visible: boolean): void {
+    const surveyDiv = document.getElementById("m2c2kit-survey-div");
+    if (surveyDiv && visible) {
+      surveyDiv.classList.remove("m2c2kit-display-none");
+      surveyDiv.classList.add("m2c2kit-display-block");
+    }
+    if (surveyDiv && !visible) {
+      surveyDiv.classList.add("m2c2kit-display-none");
+      surveyDiv.classList.remove("m2c2kit-display-block");
+    }
+  }
+
+  /**
+   * Shows or hides the canvas div.
+   *
+   * @param visible - true if the canvas div should be visible
+   */
+  private setCanvasDivVisibility(visible: boolean): void {
+    const canvasDiv = document.getElementById("m2c2kit-canvas-div");
+    if (canvasDiv && visible) {
+      canvasDiv.classList.remove("m2c2kit-display-none");
+      canvasDiv.classList.add("m2c2kit-flex-container");
+    }
+    if (canvasDiv && !visible) {
+      canvasDiv.classList.add("m2c2kit-display-none");
+      canvasDiv.classList.remove("m2c2kit-flex-container");
     }
   }
 

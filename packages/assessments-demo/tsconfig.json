@@ -3,7 +3,8 @@
     { "path": "../assessment-cli-starter" },
     { "path": "../assessment-color-dots" },
     { "path": "../assessment-grid-memory" },
-    { "path": "../assessment-symbol-search" }
+    { "path": "../assessment-symbol-search" },
+    { "path": "../survey" }
   ],
   "compilerOptions": {
     "target": "es6",

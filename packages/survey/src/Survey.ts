@@ -2,6 +2,7 @@ import {
   Session,
   Uuid,
   Activity,
+  ActivityData,
   ActivityType,
   EventType,
   Timer,
@@ -13,16 +14,40 @@ import select2 from "select2";
 import "bootstrap-datepicker";
 import "sortablejs";
 
+/**
+ * The structure of options object that is returned in SurveyJs callbacks.
+ *
+ * @remarks Note that the interface definition is not complete; different
+ * SurveyJs callbacks have additional properties not listed below. Check
+ * survey.ko.d.ts for more.
+ */
+interface SurveyJsOptions {
+  name: string;
+  question: SurveyKO.Question;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
+}
+
+/**
+ * The class for presenting surveys.
+ *
+ * @remarks There should not be any need to extend this class.
+ *
+ * @param surveyJson - The JSON survey definition, following the SurveyJS
+ * specifications
+ */
 export class Survey implements Activity {
   readonly type = ActivityType.survey;
-  _session?: Session;
+  private _session?: Session;
   name: string;
   uuid = Uuid.generate();
-  surveyJson: unknown;
+  private _surveyJson?: unknown;
   beginTimestamp = NaN;
+  beginIso8601Timestamp = "";
+  private _survey?: SurveyKO.Survey;
 
-  constructor(surveyJson: unknown) {
-    this.surveyJson = surveyJson;
+  constructor(surveyJson?: unknown) {
+    this._surveyJson = surveyJson;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
   }
@@ -30,13 +55,22 @@ export class Survey implements Activity {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   init() {}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setParameters(): void {
-    throw new Error("setParameters not supported for survey activites");
+  /**
+   * Sets the JSON survey definition, if it was not already set in
+   * the constructor.
+   *
+   * @param surveyJson - The JSON survey definition, following the SurveyJS
+   * specifications
+   */
+  setParameters(surveyJson: unknown): void {
+    this._surveyJson = surveyJson;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.name = (surveyJson as any)?.name ?? "unnamed survey";
   }
 
   start(): void {
     this.beginTimestamp = Timer.now();
+    this.beginIso8601Timestamp = new Date().toISOString();
     // This modern theme doesn't seem as polished as
     // survey theme. It has some minor issues with margins and
     // the bootstrap-datepicker
@@ -50,38 +84,89 @@ export class Survey implements Activity {
     widgets.sortablejs(SurveyKO);
     widgets.bootstrapdatepicker(SurveyKO, $);
 
-    const survey = new SurveyKO.Survey(this.surveyJson);
-    survey.focusFirstQuestionAutomatic = false;
-    survey.completeText = "Next";
-    // this hides the default surveyjs default complation html
-    survey.completedHtml = `<html></html>`;
+    this.survey = new SurveyKO.Survey(this._surveyJson);
+    this.survey.focusFirstQuestionAutomatic = false;
+    this.survey.completeText = "Next";
+    // this hides the default surveyjs default completion html
+    this.survey.completedHtml = `<html></html>`;
+
+    /**
+     * Next we hook into SurveyJS callbacks we are interested in. SurveyJS
+     * has many callbacks, so there could be more functionalty we could tap
+     * into.
+     */
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    survey.onComplete.add((sender: any) => {
-      console.log(`Finished survey. Data: ${JSON.stringify(sender.data)} `);
-      const surveyDiv = document.getElementById("m2c2kit-survey-div");
-      if (surveyDiv) {
-        surveyDiv.hidden = true;
-      }
+    this.survey.onComplete.add(() => {
       if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
         this.session.options.activityCallbacks.onActivityLifecycleChange({
           eventType: EventType.activityLifecycle,
+          activityType: this.type,
           ended: true,
           uuid: this.uuid,
           name: this.name,
         });
       }
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    survey.onValueChanged.add((sender: any, options: any) => {
-      console.log(`variable ${options.name} set: ${options.value}`);
-    });
-    survey.render("m2c2kit-survey-div");
+
+    this.survey.onValueChanged.add(
+      (sender: SurveyKO.Survey, options: SurveyJsOptions) => {
+        /**
+         * SurveyJS onValueChanged sends back 1) the just completed question
+         * as a key-value pair in the options object, and 2) all the completed
+         * questions as multiple key-value pairs in the sender.data object.
+         * These match up with the types we need, newData and e.g., ActivityData.
+         */
+        if (this.session.options.activityCallbacks?.onActivityDataCreate) {
+          this.session.options.activityCallbacks.onActivityDataCreate({
+            eventType: EventType.activityData,
+            activityType: this.type,
+            uuid: this.uuid,
+            name: this.name,
+            newData: { [options.name]: options.value },
+            newDataSchema: {},
+            data: sender.data as unknown as ActivityData,
+            dataSchema: {},
+            activityConfiguration: {},
+            activityConfigurationSchema: {},
+          });
+        }
+      }
+    );
+
+    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
+      this.session.options.activityCallbacks.onActivityLifecycleChange({
+        eventType: EventType.activityLifecycle,
+        started: true,
+        uuid: this.uuid,
+        name: this.name,
+        activityType: this.type,
+      });
+    }
+
+    const surveyDiv = document.getElementById("m2c2kit-survey-div");
+    if (!surveyDiv) {
+      throw new Error(
+        "m2c2kit-survey-div not found in DOM. cannot start survey."
+      );
+    }
+    this.survey.render("m2c2kit-survey-div");
   }
 
   stop(): void {
-    console.log("stop");
+    /**
+     * According to the docs, https://surveyjs.io/Documentation/Library?id=surveymodel#dispose,
+     * we should call dispose(). But this is throwing an error messsage in the
+     * console. This doesn't seem to have any effect on later activities
+     * (m2c2kit games or surveys), but to be safe, we will not call dispose().
+     * However, keep this issue in mind in case of memory leaks.
+     */
+    // this.survey.dispose();
   }
 
+  /**
+   * Returns the session that contains this survey.
+   */
   get session(): Session {
     if (!this._session) {
       throw new Error("session is undefined");
@@ -89,7 +174,35 @@ export class Survey implements Activity {
     return this._session;
   }
 
+  /**
+   * Sets the session that contains this survey.
+   */
   set session(session: Session) {
     this._session = session;
+  }
+
+  private get survey(): SurveyKO.Survey {
+    if (!this._survey) {
+      throw new Error("survey (SurveyKO.Survey) is undefined");
+    }
+    return this._survey;
+  }
+
+  private set survey(survey: SurveyKO.Survey) {
+    this._survey = survey;
+  }
+
+  /**
+   * DO NOT USE THIS METHOD.
+   *
+   * @remarks For some reason, rollup-plugin-dts is dropping the
+   * ActivityType enum. This is a workaround to get it back.
+   *
+   * @param __y
+   */
+  __x(__y: ActivityType): void {
+    if (__y === ActivityType.survey) {
+      console.log("");
+    }
   }
 }

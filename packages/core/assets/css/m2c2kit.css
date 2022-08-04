@@ -6,6 +6,14 @@
   margin: 0;
 }
 
+.m2c2kit-display-none {
+  display: none;
+}
+
+.m2c2kit-display-block {
+  display: block;
+}
+
 .m2c2kit-full-viewport {
   height: 100vh;
   width: 100vw;

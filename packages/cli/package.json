@@ -17,7 +17,7 @@
     "build": "npm run clean && npm run compile && npm run copy-files && npm run write-dotenv",
     "compile": "tsc",
     "clean": "rimraf dist build/",
-    "copy-files": "cpy --flat build/src/*.js dist && cpy scripts templates assets dist",
+    "copy-files": "cpy --flat build/src/*.js dist && cpy templates assets dist",
     "write-dotenv": "node write-dotenv.js"
   },
   "author": "",

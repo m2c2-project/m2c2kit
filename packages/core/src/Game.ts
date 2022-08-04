@@ -385,6 +385,16 @@ export class Game implements Activity {
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
     this.surface.requestAnimationFrame(this.loop.bind(this));
+
+    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
+      this.session.options.activityCallbacks.onActivityLifecycleChange({
+        eventType: EventType.activityLifecycle,
+        started: true,
+        uuid: this.uuid,
+        name: this.options.name,
+        activityType: this.type,
+      });
+    }
   }
 
   /**
@@ -742,6 +752,7 @@ export class Game implements Activity {
         eventType: EventType.activityData,
         uuid: this.uuid,
         name: this.options.name,
+        activityType: this.type,
         newData: this.data.trials[this.trialIndex - 1],
         newDataSchema: newDataSchema,
         data: this.data,
@@ -772,6 +783,7 @@ export class Game implements Activity {
         ended: true,
         uuid: this.uuid,
         name: this.options.name,
+        activityType: this.type,
       });
     }
   }
@@ -792,6 +804,7 @@ export class Game implements Activity {
         canceled: true,
         uuid: this.uuid,
         name: this.options.name,
+        activityType: this.type,
       });
     }
   }
@@ -868,7 +881,7 @@ export class Game implements Activity {
     }
     this.surface = surface;
     console.log(
-      `CanvasKit surface is backed by ${
+      `⚪ CanvasKit surface is backed by ${
         this.surface.reportBackendTypeIsGPU() ? "GPU" : "CPU"
       }`
     );

@@ -41,6 +41,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   m2c2corelib = "";
   m2c2addonslib = "";
   m2c2sageresearchlib = "";
+  m2c2surveylib = "";
   canvaskitLib = "";
 
   codeEditorVisible = true;
@@ -206,6 +207,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: "tutorial-part04-09.ts",
       url: "./assets/tutorial/tutorial-part04-09.ts",
     },
+    {
+      name: "tutorial-part04-Survey.ts",
+      url: "./assets/tutorial/tutorial-part04-Survey.ts",
+    },
   ];
 
   selectedTheme = { name: "Light", monacoName: "vs" };
@@ -264,10 +269,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     Promise.all([
-      fetch("./assets/template.html"),
+      fetch("./assets/index.html"),
       fetch("./assets/m2c2kit/core/index.d.ts"),
       fetch("./assets/m2c2kit/addons/index.d.ts"),
       fetch("./assets/m2c2kit/sage-research/index.d.ts"),
+      fetch("./assets/m2c2kit/survey/index.d.ts"),
       fetch("./assets/canvaskit-wasm/index.d.ts"),
     ])
       .then(
@@ -276,6 +282,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           coreLibResponse,
           addonsLibResponse,
           m2c2sageresearchLibResponse,
+          m2c2surveyLibResponse,
           canvaskitLibResponse,
         ]) => {
           if (
@@ -284,6 +291,7 @@ export class AppComponent implements OnInit, AfterViewInit {
               coreLibResponse.ok,
               addonsLibResponse.ok,
               m2c2sageresearchLibResponse.ok,
+              m2c2surveyLibResponse.ok,
               canvaskitLibResponse.ok,
             ].every((ok) => ok)
           ) {
@@ -295,6 +303,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             coreLibResponse.text(),
             addonsLibResponse.text(),
             m2c2sageresearchLibResponse.text(),
+            m2c2surveyLibResponse.text(),
             canvaskitLibResponse.text(),
           ])
             .then(
@@ -303,11 +312,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                 m2c2kitCoreLib,
                 m2c2kitAddonsLib,
                 m2c2kitSageresearchLib,
+                m2c2kitSurveyLib,
                 canvaskitLib,
               ]) => {
                 this.m2c2corelib = m2c2kitCoreLib;
                 this.m2c2addonslib = m2c2kitAddonsLib;
                 this.m2c2sageresearchlib = m2c2kitSageresearchLib;
+                this.m2c2surveylib = m2c2kitSurveyLib;
                 this.canvaskitLib = canvaskitLib;
                 this.html = templateHtml;
 
@@ -352,6 +363,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                 window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
                   m2c2kitSageresearchLib,
                   "file:///node_modules/@m2c2kit/sage-research/index.d.ts"
+                );
+
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                  m2c2kitSurveyLib,
+                  "file:///node_modules/@m2c2kit/survey/index.d.ts"
                 );
 
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -427,12 +445,17 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.m2c2sageresearchlib
       );
       await libFile3.save();
-
       const libFile4 = project.createSourceFile(
+        "./node_modules/@m2c2kit/survey/index.d.ts",
+        this.m2c2surveylib
+      );
+      await libFile4.save();
+
+      const libFile5 = project.createSourceFile(
         "./node_modules/canvaskit-wasm/index.d.ts",
         this.canvaskitLib
       );
-      await libFile4.save();
+      await libFile5.save();
 
       const sourceFile = project.createSourceFile(
         "src/assessment.ts",
@@ -507,6 +530,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             `"@m2c2kit/sage-research"`,
             `"./assets/m2c2kit/sage-research/index.js"`
           )
+          .replace(`"@m2c2kit/survey"`, `"./assets/m2c2kit/survey/index.js"`)
       );
       this.runButtonIcon = "arrow_right";
       this.compilationMessage = "";

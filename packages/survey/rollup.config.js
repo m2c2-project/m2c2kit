@@ -1,5 +1,4 @@
 import typescript from "@rollup/plugin-typescript";
-import shim from "rollup-plugin-shim";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
@@ -9,40 +8,24 @@ import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-let sharedPlugins = [
-  // canvaskit-wasm references these node.js functions
-  // shim them to empty functions for browser usage
-  shim({
-    fs: `export function fs_empty_shim() { }`,
-    path: `export function path_empty_shim() { }`,
-  }),
-  nodeResolve(),
-  commonjs(),
-];
-
 export default [
   {
     input: ["./src/index.ts"],
     // the output is build because we need a later step to
     // combine all declaration files
     output: [{ dir: "./build", format: "es", sourcemap: true }],
+    external: ["@m2c2kit/core"],
     plugins: [
       del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
-      ...sharedPlugins,
+      nodeResolve(),
+      commonjs(),
       typescript({
-        // I was getting errors when defining include and exclude
-        // only in tsconfig.json, thus defining them here.
-        // note, however, because I specified rootDir below,
-        // the include and exclude now are relative to src
-        include: ["./**/*.[tj]s"],
-        exclude: ["**/__tests__", "**/*.test.ts"],
-        rootDir: "src",
+        outputToFilesystem: true,
       }),
       sourcemaps(),
       terser(),
     ],
   },
-
   {
     // bundle all declaration files and place the declaration
     // bundle in dist
@@ -90,18 +73,18 @@ export default [
         esModule: false,
         exports: "named",
         sourcemap: true,
+        globals: {
+          "@m2c2kit/core": "core",
+        },
       },
     ],
+    external: ["@m2c2kit/core"],
     plugins: [
-      ...sharedPlugins,
+      nodeResolve(),
+      commonjs(),
       typescript({
-        // tsconfig.json defined the outDir as build, so we must
-        // use a different one for this umd build
+        outputToFilesystem: true,
         outDir: "./build-umd",
-        // I was getting errors when defining include and exclude
-        // only in tsconfig.json, thus defining them here.
-        include: ["./src/**/*.[tj]s"],
-        exclude: ["**/__tests__", "**/*.test.ts"],
       }),
       babel({
         // compact: false to supress minor warning note

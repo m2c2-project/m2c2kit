@@ -248,10 +248,10 @@ await yarg
           sourceFolder: path.join(packageHomeFolderPath, "assets", "css"),
           destinationFolder: path.join(newFolderPath, "src", "assets", "css"),
         },
-        {
-          sourceFolder: path.join(packageHomeFolderPath, "scripts"),
-          destinationFolder: path.join(newFolderPath),
-        },
+        // {
+        //   sourceFolder: path.join(packageHomeFolderPath, "scripts"),
+        //   destinationFolder: path.join(newFolderPath),
+        // },
       ];
 
       try {

@@ -3,7 +3,6 @@ import { existsSync } from "fs";
 import { rename, lstat } from "fs/promises";
 import path from "path";
 import { getFileHash } from "./getFileHash";
-import { getCanvasKitWasmPath } from "./getCanvasKitWasmPath";
 
 export function copyM2c2Assets(
   from: string,
@@ -20,15 +19,6 @@ export function copyM2c2Assets(
 
       options = { ...options, overwrite: true };
       const results = await copy(from, to, options);
-
-      const canvasKitPath = getCanvasKitWasmPath();
-      if (canvasKitPath) {
-        const ckResults = await copy(path.dirname(canvasKitPath), to, {
-          ...options,
-          filter: ["canvaskit.wasm"],
-        });
-        results.push(...ckResults);
-      }
 
       if (!renameWithHash) {
         return;

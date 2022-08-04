@@ -88,9 +88,9 @@ class Tutorial extends Game {
         const trialConfigurations: TrialConfiguration[] = [];
 
         const evenTrials = Math.ceil(game.getParameter<number>("even_percent") * numberOfTrials);
-        const eventTrialIndexes = RandomDraws.FromRangeWithoutReplacement(evenTrials, 0, 9);
+        const evenTrialIndexes = RandomDraws.FromRangeWithoutReplacement(evenTrials, 0, numberOfTrials - 1);
         for (let i = 0; i < numberOfTrials; i++) {
-            if (eventTrialIndexes.includes(i)) {
+            if (evenTrialIndexes.includes(i)) {
                 // need an even number
                 let x = RandomDraws.SingleFromRange(1, 10);
                 while (x % 2 === 1) {

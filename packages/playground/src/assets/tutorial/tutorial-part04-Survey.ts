@@ -13,11 +13,87 @@ import {
     Session,
     SessionLifecycleEvent,
     ActivityDataEvent,
+    ActivityType,
     ActivityLifecycleEvent,
     LabelHorizontalAlignmentMode,
-    RgbaColor
+    RgbaColor,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Survey } from "@m2c2kit/survey";
+
+const surveyJson1 = {
+    name: "Survey1",
+    pages: [
+        {
+            description: "Welcome to the WAKE UP Survey!",
+            elements: [
+                {
+                    type: "radiogroup",
+                    name: "where",
+                    title: "Where are you right now?",
+                    hasNone: false,
+                    colCount: 2,
+                    choices: ["Home", "School", "Work", "Other"],
+                },
+                {
+                    type: "nouislider",
+                    name: "stressed",
+                    title: "How stressed are you right now?",
+                },
+            ],
+        },
+    ],
+};
+
+const surveyJson2 = {
+    name: "Survey2",
+    pages: [
+        {
+            description: "Example of some more unusual input elements",
+            elements: [
+                {
+                    name: "date",
+                    type: "bootstrapdatepicker",
+                    inputType: "date",
+                    title: "Pick your favorite date:",
+                    dateFormat: "mm/dd/yy",
+                },
+                {
+                    type: "tagbox",
+                    choices: [
+                        {
+                            value: 1,
+                            text: "USA",
+                        },
+                        {
+                            value: 2,
+                            text: "Mexico",
+                        },
+                        {
+                            value: 3,
+                            text: "Canada",
+                        },
+                        {
+                            value: 4,
+                            text: "UK",
+                        },
+                        {
+                            value: 5,
+                            text: "China",
+                        },
+                        {
+                            value: 999,
+                            text: "None",
+                        },
+                    ],
+                    name: "countries",
+                    title:
+                        "Please select all countries you have been for the last 3 years.",
+                },
+            ],
+        },
+    ],
+};
 
 class Tutorial extends Game {
     constructor() {
@@ -30,7 +106,7 @@ class Tutorial extends Game {
                     "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
             },
             number_of_trials: {
-                default: 10,
+                default: 4,
                 type: "integer",
                 description: "How many trials to run.",
             },
@@ -66,7 +142,7 @@ class Tutorial extends Game {
             height: 800,
             trialSchema: starterTrialSchema,
             parameters: defaultParameters,
-            bodyBackgroundColor: WebColors.LightGray,
+            bodyBackgroundColor: WebColors.White,
             fontUrls: ["assets/cli-starter/fonts/roboto/Roboto-Regular.ttf"],
         };
 
@@ -89,21 +165,21 @@ class Tutorial extends Game {
 
         const evenTrials = Math.ceil(game.getParameter<number>("even_percent") * numberOfTrials);
         const evenTrialIndexes = RandomDraws.FromRangeWithoutReplacement(evenTrials, 0, numberOfTrials - 1);
-        for (let i=0; i<numberOfTrials; i++) {
+        for (let i = 0; i < numberOfTrials; i++) {
             if (evenTrialIndexes.includes(i)) {
                 // need an even number
                 let x = RandomDraws.SingleFromRange(1, 10);
                 while (x % 2 === 1) {
                     x = RandomDraws.SingleFromRange(1, 10);
                 }
-                trialConfigurations.push( { randomValue: x});
+                trialConfigurations.push({ randomValue: x });
             } else {
                 // need an odd number
                 let x = RandomDraws.SingleFromRange(1, 10);
                 while (x % 2 === 0) {
                     x = RandomDraws.SingleFromRange(1, 10);
                 }
-                trialConfigurations.push( { randomValue: x});
+                trialConfigurations.push({ randomValue: x });
             }
         }
 
@@ -156,39 +232,30 @@ class Tutorial extends Game {
         const oddButton = new Button({ text: "Odd", position: { x: 125, y: 600 }, size: { width: 100, height: 50 } });
         oddEvenScene.addChild(oddButton);
         oddButton.onTapDown(() => {
-            Timer.stop("rt");
-            game.addTrialData("response_time_duration_ms", Timer.elapsed("rt"));
-            Timer.remove("rt");
-            oddButton.isUserInteractionEnabled = false;
-            evenButton.isUserInteractionEnabled = false;
-            game.addTrialData("user_selection", "odd");
-            const numericValue = parseInt(numberLabel.text);
-            if (numericValue % 2 === 1) {
-                console.log("CORRECT!");
-                game.addTrialData("selection_correct", true);
-            } else {
-                console.log("WRONG!");
-                game.addTrialData("selection_correct", false);
-            }
-            game.trialComplete();
-            if (game.trialIndex < numberOfTrials) {
-                game.presentScene(getReadyScene);
-            } else {
-                game.presentScene(doneScene)
-            }
+            handleTap(false);
         });
 
         const evenButton = new Button({ text: "Even", position: { x: 275, y: 600 }, size: { width: 100, height: 50 } });
         oddEvenScene.addChild(evenButton);
         evenButton.onTapDown(() => {
+            handleTap(true);
+        });
+
+        function handleTap(userSelectedEven: boolean): void {
             Timer.stop("rt");
             game.addTrialData("response_time_duration_ms", Timer.elapsed("rt"));
             Timer.remove("rt");
-            game.addTrialData("user_selection", "even");
             oddButton.isUserInteractionEnabled = false;
             evenButton.isUserInteractionEnabled = false;
-            const numericValue = parseInt(numberLabel.text);
-            if (numericValue % 2 === 0) {
+            if (userSelectedEven) {
+                game.addTrialData("user_selection", "even");
+            } else {
+                game.addTrialData("user_selection", "odd");
+            }
+
+            const numericValueWasEven = parseInt(numberLabel.text) % 2 === 0;
+            if ((numericValueWasEven && userSelectedEven) ||
+                (!numericValueWasEven && !userSelectedEven)) {
                 console.log("CORRECT!");
                 game.addTrialData("selection_correct", true);
             } else {
@@ -201,7 +268,7 @@ class Tutorial extends Game {
             } else {
                 game.presentScene(doneScene)
             }
-        });
+        }
 
         const numberLabel = new Label({ fontSize: 32, position: { x: 200, y: 400 } });
         oddEvenScene.addChild(numberLabel);
@@ -220,7 +287,7 @@ class Tutorial extends Game {
         game.addScene(doneScene);
 
         const doneLabel = new Label({
-            text: "You're done",
+            text: "You're done the odd/even assessment",
             position: { x: 200, y: 300 }
         });
         doneScene.addChild(doneLabel);
@@ -233,9 +300,12 @@ class Tutorial extends Game {
     }
 }
 
+const s1 = new Survey(surveyJson1);
+const s2 = new Survey(surveyJson2);
+
 const activity = new Tutorial();
 const session = new Session({
-    activities: [activity],
+    activities: [s1, activity, s2],
     sessionCallbacks: {
         /**
          * onSessionLifecycleChange() will be called on events such
@@ -249,36 +319,87 @@ const session = new Session({
                 session.start();
             }
             if (ev.ended) {
-                console.log("ended session");
+                console.log("🔴 ended session");
             }
         },
     },
     activityCallbacks: {
+        /**
+         * onActivityDataCreate() callback is where you insert code to post data
+         * to an API or interop with a native function in the host app,
+         * if applicable.
+         *
+         * newData is the data that was just generated by the completed trial or
+         * survey question.
+         * data is all the data, cumulative of all trials or questions in the
+         * activity, that have been generated.
+         *
+         * We separate out newData from data in case you want to alter the execution
+         * based on the most recent trial, e.g., maybe you want to stop after
+         * a certain user behavior or performance threshold in the just completed
+         * trial.
+         *
+         * activityConfiguration is the game parameters that were used.
+         *
+         * The schema for all of the above are in JSON Schema format.
+         * Currently, only games generate schema.
+         */
         onActivityDataCreate: (ev: ActivityDataEvent) => {
-            console.log(`********** trial complete`);
-            console.log("newData: " + JSON.stringify(ev.newData));
-            console.log("data: " + JSON.stringify(ev.data));
+            if (ev.activityType === ActivityType.game) {
+                console.log(`✅ trial complete:`);
+            } else if (ev.activityType === ActivityType.survey) {
+                console.log(`✅ question answered:`);
+            }
+            console.log("  newData: " + JSON.stringify(ev.newData));
+            console.log("  newData schema: " + JSON.stringify(ev.newDataSchema));
+            console.log("  data: " + JSON.stringify(ev.data));
+            console.log("  data schema: " + JSON.stringify(ev.dataSchema));
             console.log(
-                "activity parameters: " + JSON.stringify(ev.activityConfiguration)
+                "  activity parameters: " + JSON.stringify(ev.activityConfiguration)
+            );
+            console.log(
+                "  activity parameters schema: " +
+                JSON.stringify(ev.activityConfigurationSchema)
             );
         },
+        /**
+         * onActivityLifecycleChange() notifies us when an activity, such
+         * as a game (assessment) or a survey, has ended or canceled.
+         * Usually, however, we want to know when all the activities are done,
+         * so we'll look for the session ending via onSessionLifecycleChange
+         */
         onActivityLifecycleChange: (ev: ActivityLifecycleEvent) => {
+            const activityType =
+                ev.activityType === ActivityType.game ? "game" : "survey";
             if (ev.ended || ev.canceled) {
-                const status = ev.ended ? "ended" : "canceled";
-                console.log(`${status} activity ${ev.name}`);
+                const status = ev.ended ? "🔴 ended" : "🚫 canceled";
+                console.log(`${status} activity (${activityType}) ${ev.name}`);
                 if (session.nextActivity) {
                     session.advanceToNextActivity();
                 } else {
                     session.end();
                 }
             }
+            if (ev.started) {
+                console.log(`🟢 started activity (${activityType}) ${ev.name}`);
+            }
         },
-    }
+    },
 });
 
+/**
+ * Make session also available on window in case we want to control
+ * the session through another means, such as other javascript or
+ * browser code, or a mobile WebView's invocation of session.start().
+ * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
 session.init().then(() => {
+    /**
+     * session.init() may take a few moments when downloading non-local or
+     * non-cached resources. After session.init() completes, the below code
+     * removes the loading spinner that is defined in the HTML template.
+     */
     const loaderDiv = document.getElementById("m2c2kit-loader-div");
     if (loaderDiv) {
         loaderDiv.classList.remove("m2c2kit-loader");
