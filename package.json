@@ -22,7 +22,7 @@
     "integration-tests/*"
   ],
   "scripts": {
-    "build": "npm run build -w @m2c2kit/core && npm run build -w @m2c2kit/addons && npm run build -w @m2c2kit/cli && npm run build -w @m2c2kit/sage-research  && npm run build -w @m2c2kit/build-helpers && npm run build -w @m2c2kit/assessment-grid-memory && npm run build -w @m2c2kit/assessment-symbol-search && npm run build -w @m2c2kit/assessment-color-dots && npm run build -w @m2c2kit/assessment-cli-starter",
+    "build": "concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/sage-research\" && concurrently \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-cli-starter\"",
     "docker:build": "docker build -t m2c2kit .",
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "prepare": "husky install"
@@ -35,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
     "chalk": "^5.0.1",
+    "concurrently": "^7.3.0",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "find-up": "6.3.0",
