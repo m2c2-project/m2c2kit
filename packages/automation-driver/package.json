@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/automation-driver",
-  "version": "1.0.0",
+  "version": "0.1.10",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",

@@ -4,6 +4,7 @@
 **/build-umd
 **/dist
 **/.rollup.cache
+**/tsconfig.tsbuildinfo
 **/.gradle
 **/.angular
 **/[Dd]ebug/
