@@ -1,11 +1,8 @@
-import { ActivityEvent } from "./ActivityEvent";
 import { ActivityData } from "./ActivityData";
 import { ActivityMetric } from "./ActivityMetric";
 import { JsonSchema } from "./JsonSchema";
 
-export interface ActivityDataEvent extends ActivityEvent {
-  newData: ActivityData;
-  newDataSchema: JsonSchema;
+export interface FinalActivityData {
   data: ActivityData;
   dataSchema: JsonSchema;
   activityConfiguration: unknown;

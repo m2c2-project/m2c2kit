@@ -31,6 +31,8 @@ import { GameParameters } from "./GameParameters";
 import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
 import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
 import { TrialSchema } from "./TrialSchema";
+import { GameMetric } from "./GameMetrics";
+
 interface BoundingBox {
   xMin: number;
   xMax: number;
@@ -50,6 +52,8 @@ export class Game implements Activity {
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
+  private gameMetrics: Array<GameMetric> = new Array<GameMetric>();
+  fpsMetricReportThreshold: number;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -61,6 +65,8 @@ export class Game implements Activity {
     this.name = options.name;
     this.freeEntitiesScene.game = this;
     this.freeEntitiesScene.needsInitialization = true;
+    this.fpsMetricReportThreshold =
+      options.fpsMetricReportThreshold ?? Constants.FPS_METRIC_REPORT_THRESHOLD;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -121,7 +127,7 @@ export class Game implements Activity {
   private drawnFrames = 0;
   private lastFpsUpdate = 0;
   private nextFpsUpdate = 0;
-  private fps = 0;
+  private fpsRate = 0;
   private animationFramesRequested = 0;
   private limitFps = false;
   private unitTesting = false;
@@ -624,7 +630,8 @@ export class Game implements Activity {
   /**
    * Should be called when the current trial has completed. It will
    * also increment the trial index.
-   * Calling this will trigger the onActivityDataCreate callback function,
+   *
+   * @remarks Calling will trigger the onActivityDataCreate callback function,
    * if one was provided in SessionOptions. This is how the game communicates
    * trial data to the parent session, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
@@ -633,138 +640,146 @@ export class Game implements Activity {
   trialComplete(): void {
     this.trialIndex++;
     if (this.session.options.activityCallbacks?.onActivityDataCreate) {
-      // newData is only the trial that recently completed
-      // data is all the data collected so far in the game
-
-      const activitySchema: TrialSchema = {
-        activity_uuid: {
-          type: "string",
-          format: "uuid",
-          description:
-            "Unique identifier for all trials in this administration of the activity.",
-        },
-        activity_id: {
-          type: "string",
-          description: "Identifier of the activity.",
-        },
-        activity_version: {
-          type: "string",
-          description: "Version of the activity.",
-        },
-      };
-
-      // return schema as JSON Schema draft 2019-09
-      const newDataSchema: JsonSchema = {
-        description: `A single trial and metadata from the assessment ${this.name}.`,
-        $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
-        $schema: "https://json-schema.org/draft/2019-09/schema",
-        type: "object",
-        properties: {
-          ...activitySchema,
-          ...this.options.trialSchema,
-          device_metadata: deviceMetadataSchema,
-        },
-      };
-
-      const dataSchema: JsonSchema = {
-        description: `All trials and metadata from the assessment ${this.name}.`,
-        $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
-        $schema: "https://json-schema.org/draft/2019-09/schema",
-        type: "object",
-        required: ["trials"],
-        properties: {
-          trials: {
-            type: "array",
-            items: { $ref: "#/$defs/trial" },
-            description: "All trials from the assessment.",
-          },
-        },
-        $defs: {
-          trial: {
-            type: "object",
-            properties: {
-              ...activitySchema,
-              ...this.options.trialSchema,
-              device_metadata: deviceMetadataSchema,
-            },
-          },
-        },
-      };
-
-      /**
-       * GameParameters combines default parameters values and
-       * JSON Schema to describe what the parameters are.
-       * The next two functions extract GameParameters's two parts
-       * (the default values and the schema) so they can be returned
-       * separately in the activityData event
-       */
-
-      const makeGameActivityConfiguration = (
-        parameters: GameParameters
-      ): unknown => {
-        const result: GameParameters = JSON.parse(JSON.stringify(parameters));
-
-        for (const prop in result) {
-          for (const subProp in result[prop]) {
-            if (subProp == "default") {
-              result[prop] = result[prop][subProp];
-            }
-          }
-        }
-        return result;
-      };
-
-      const makeGameActivityConfigurationSchema = (
-        parameters: GameParameters
-      ): JsonSchema => {
-        const result: GameParameters = JSON.parse(JSON.stringify(parameters));
-
-        for (const prop in result) {
-          if (!("type" in result[prop]) && "value" in result[prop]) {
-            const valueType = typeof result[prop]["default"];
-            // if the "type" of the value was not provided,
-            // infer it from the value itself
-            // (note: in our JSON schema, we don't support bigint, function,
-            // symbol, or undefined, so we skip those).
-            if (
-              valueType !== "bigint" &&
-              valueType !== "function" &&
-              valueType !== "symbol" &&
-              valueType !== "undefined"
-            ) {
-              result[prop].type = valueType;
-            }
-          }
-          for (const subProp in result[prop]) {
-            if (subProp == "default") {
-              delete result[prop][subProp];
-            }
-          }
-        }
-        return {
-          description: `activity configuration from the assessment ${this.name}`,
-          type: "object",
-          properties: result,
-        } as JsonSchema;
-      };
-
       this.session.options.activityCallbacks.onActivityDataCreate({
         eventType: EventType.activityData,
         uuid: this.uuid,
         name: this.options.name,
         activityType: this.type,
+        /** newData is only the trial that recently completed */
         newData: this.data.trials[this.trialIndex - 1],
-        newDataSchema: newDataSchema,
+        newDataSchema: this.makeNewGameDataSchema(),
+        /** data is all the data collected so far in the game */
         data: this.data,
-        dataSchema: dataSchema,
-        activityConfiguration: makeGameActivityConfiguration(
+        dataSchema: this.makeGameDataSchema(),
+        activityConfiguration: this.makeGameActivityConfiguration(
           this.options.parameters ?? {}
         ),
-        activityConfigurationSchema: makeGameActivityConfigurationSchema(
+        activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
           this.options.parameters ?? {}
         ),
+        activityMetrics: this.gameMetrics,
       });
     }
+  }
+
+  /**
+   * The m2c2kit engine will automatically include these schema and their
+   * values in the trial data.
+   */
+  private readonly automaticTrialSchema: TrialSchema = {
+    activity_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Unique identifier for all trials in this administration of the activity.",
+    },
+    activity_id: {
+      type: "string",
+      description: "Identifier of the activity.",
+    },
+    activity_version: {
+      type: "string",
+      description: "Version of the activity.",
+    },
+  };
+
+  private makeNewGameDataSchema(): JsonSchema {
+    // return schema as JSON Schema draft 2019-09
+    const newDataSchema: JsonSchema = {
+      description: `A single trial and metadata from the assessment ${this.name}.`,
+      $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
+      $schema: "https://json-schema.org/draft/2019-09/schema",
+      type: "object",
+      properties: {
+        ...this.automaticTrialSchema,
+        ...this.options.trialSchema,
+        device_metadata: deviceMetadataSchema,
+      },
+    };
+    return newDataSchema;
+  }
+
+  private makeGameDataSchema(): JsonSchema {
+    const dataSchema: JsonSchema = {
+      description: `All trials and metadata from the assessment ${this.name}.`,
+      $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
+      $schema: "https://json-schema.org/draft/2019-09/schema",
+      type: "object",
+      required: ["trials"],
+      properties: {
+        trials: {
+          type: "array",
+          items: { $ref: "#/$defs/trial" },
+          description: "All trials from the assessment.",
+        },
+      },
+      $defs: {
+        trial: {
+          type: "object",
+          properties: {
+            ...this.automaticTrialSchema,
+            ...this.options.trialSchema,
+            device_metadata: deviceMetadataSchema,
+          },
+        },
+      },
+    };
+    return dataSchema;
+  }
+
+  /**
+   * GameParameters combines default parameters values and
+   * JSON Schema to describe what the parameters are.
+   * The next two functions extract GameParameters's two parts
+   * (the default values and the schema) so they can be returned
+   * separately in the activityData event
+   */
+
+  private makeGameActivityConfiguration(parameters: GameParameters): unknown {
+    const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+
+    for (const prop in result) {
+      for (const subProp in result[prop]) {
+        if (subProp == "default") {
+          result[prop] = result[prop][subProp];
+        }
+      }
+    }
+    return result;
+  }
+
+  private makeGameActivityConfigurationSchema(
+    parameters: GameParameters
+  ): JsonSchema {
+    const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+
+    for (const prop in result) {
+      if (!("type" in result[prop]) && "value" in result[prop]) {
+        const valueType = typeof result[prop]["default"];
+        // if the "type" of the value was not provided,
+        // infer it from the value itself
+        // (note: in our JSON schema, we don't support bigint, function,
+        // symbol, or undefined, so we skip those).
+        if (
+          valueType !== "bigint" &&
+          valueType !== "function" &&
+          valueType !== "symbol" &&
+          valueType !== "undefined"
+        ) {
+          result[prop].type = valueType;
+        }
+      }
+      for (const subProp in result[prop]) {
+        if (subProp == "default") {
+          delete result[prop][subProp];
+        }
+      }
+    }
+    return {
+      description: `activity configuration from the assessment ${this.name}`,
+      type: "object",
+      properties: result,
+    } as JsonSchema;
   }
 
   /**
@@ -784,6 +799,17 @@ export class Game implements Activity {
         uuid: this.uuid,
         name: this.options.name,
         activityType: this.type,
+        finalData: {
+          data: this.data,
+          dataSchema: this.makeGameDataSchema(),
+          activityConfiguration: this.makeGameActivityConfiguration(
+            this.options.parameters ?? {}
+          ),
+          activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+            this.options.parameters ?? {}
+          ),
+          activityMetrics: this.gameMetrics,
+        },
       });
     }
   }
@@ -805,6 +831,17 @@ export class Game implements Activity {
         uuid: this.uuid,
         name: this.options.name,
         activityType: this.type,
+        finalData: {
+          data: this.data,
+          dataSchema: this.makeGameDataSchema(),
+          activityConfiguration: this.makeGameActivityConfiguration(
+            this.options.parameters ?? {}
+          ),
+          activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+            this.options.parameters ?? {}
+          ),
+          activityMetrics: this.gameMetrics,
+        },
       });
     }
   }
@@ -1092,8 +1129,35 @@ export class Game implements Activity {
       .forEach((scene) => scene.draw(canvas));
 
     this.drawnFrames++;
+    this.calculateFps();
     if (this.showFps) {
       this.drawFps(canvas);
+    }
+  }
+
+  private calculateFps(): void {
+    if (this.lastFpsUpdate === 0) {
+      this.lastFpsUpdate = Globals.now;
+      this.nextFpsUpdate = Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+    } else {
+      if (Globals.now >= this.nextFpsUpdate) {
+        this.fpsRate =
+          this.drawnFrames / ((Globals.now - this.lastFpsUpdate) / 1000);
+        this.drawnFrames = 0;
+        this.lastFpsUpdate = Globals.now;
+        this.nextFpsUpdate =
+          Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+        if (this.fpsRate < this.fpsMetricReportThreshold) {
+          this.gameMetrics.push({
+            fps: Number.parseFloat(this.fpsRate.toFixed(2)),
+            fps_interval_ms: Constants.FPS_DISPLAY_UPDATE_INTERVAL,
+            fps_report_threshold: this.fpsMetricReportThreshold,
+            activity_type: ActivityType.game,
+            activity_uuid: this.uuid,
+            iso8601_timestamp: new Date().toISOString(),
+          });
+        }
+      }
     }
   }
 
@@ -1394,34 +1458,20 @@ export class Game implements Activity {
   }
 
   private drawFps(canvas: Canvas): void {
-    if (this.lastFpsUpdate === 0) {
-      this.lastFpsUpdate = Globals.now;
-      this.nextFpsUpdate = Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
-    } else {
-      if (Globals.now >= this.nextFpsUpdate) {
-        this.fps =
-          this.drawnFrames / ((Globals.now - this.lastFpsUpdate) / 1000);
-        this.drawnFrames = 0;
-        this.lastFpsUpdate = Globals.now;
-        this.nextFpsUpdate =
-          Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
-      }
-
-      canvas.save();
-      const drawScale = Globals.canvasScale;
-      canvas.scale(1 / drawScale, 1 / drawScale);
-      if (!this.fpsTextFont || !this.fpsTextPaint) {
-        throw new Error("fps font or paint is undefined");
-      }
-      canvas.drawText(
-        "FPS: " + this.fps.toFixed(2),
-        0,
-        0 + Constants.FPS_DISPLAY_TEXT_FONT_SIZE * drawScale,
-        this.fpsTextPaint,
-        this.fpsTextFont
-      );
-      canvas.restore();
+    canvas.save();
+    const drawScale = Globals.canvasScale;
+    canvas.scale(1 / drawScale, 1 / drawScale);
+    if (!this.fpsTextFont || !this.fpsTextPaint) {
+      throw new Error("fps font or paint is undefined");
     }
+    canvas.drawText(
+      "FPS: " + this.fpsRate.toFixed(2),
+      0,
+      0 + Constants.FPS_DISPLAY_TEXT_FONT_SIZE * drawScale,
+      this.fpsTextPaint,
+      this.fpsTextFont
+    );
+    canvas.restore();
   }
 
   /**

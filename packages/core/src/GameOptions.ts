@@ -2,10 +2,10 @@ import { RgbaColor } from "./RgbaColor";
 import { BrowserImage } from "./BrowserImage";
 import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
+
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
  */
-
 export interface GameOptions {
   /** Human-friendly name of this game */
   name: string;
@@ -39,6 +39,8 @@ export interface GameOptions {
   showFps?: boolean;
   /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */
   bodyBackgroundColor?: RgbaColor;
+  /** The FPS will be logged in game metrics if the FPS is lower than this value. Default is 59, as defined in Constants.FPS_METRIC_REPORT_THRESHOLD */
+  fpsMetricReportThreshold?: number;
   /** Adapt execution for unit testing? Default is false */
   _unitTesting?: boolean;
 }

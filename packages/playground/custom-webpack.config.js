@@ -248,6 +248,10 @@ const sessionCode = `const session = new Session({
         "  activity parameters schema: " +
           JSON.stringify(ev.activityConfigurationSchema)
       );
+      console.log(
+        "  activity metrics: " +
+          JSON.stringify(ev.activityMetrics)
+      );      
     },
     /**
      * onActivityLifecycleChange() notifies us when an activity, such

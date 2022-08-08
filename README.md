@@ -1,13 +1,8 @@
-<div style="display: flex; align-items: center; flex-direction: column">
-<div style="display: flex; flex-direction: row;">
-  <img style="margin-right: 16px;" src=".github/images/m2c2.svg" width="72" />
-  <div style="display:flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-    <div style="font-size: 2em;">m2c2kit</div>
-    <div style="font-size: 1.25em; font-style: italic;">a library for cross-platform cognitive assessments</div>
-  </div>
-</div>
+<div align="center">
+<img style="margin-right: 16px;" src=".github/images/m2c2.svg" width="128" />
+<h1>m2c2kit</h1>
 
-</br>
+_a library for cross-platform cognitive assessments_
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
