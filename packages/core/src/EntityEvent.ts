@@ -1,7 +1,6 @@
+import { EventBase } from "./EventBase";
 import { Entity } from "./Entity";
 
-export interface EntityEvent {
+export interface EntityEvent extends EventBase {
   target: Entity;
-  /** Has the event been handled by a prior listener, or should it continue to propagate to other listeners */
-  handled: boolean;
 }

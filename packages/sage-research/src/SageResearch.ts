@@ -54,22 +54,22 @@ export class SageResearch {
    * @param event - the m2c2kit event to send to the Android app.
    */
   public static sendEventToAndroid(event: EventBase): void {
-    switch (event.eventType) {
-      case EventType.sessionLifecycle: {
+    switch (event.type) {
+      case EventType.SessionLifecycle: {
         Android.onSessionLifecycleChange(JSON.stringify(event));
         break;
       }
-      case EventType.activityData: {
+      case EventType.ActivityData: {
         Android.onActivityDataCreate(JSON.stringify(event));
         break;
       }
-      case EventType.activityLifecycle: {
+      case EventType.ActivityLifecycle: {
         Android.onActivityLifecycleChange(JSON.stringify(event));
         break;
       }
       default:
         throw new Error(
-          `attempt to send unknown event ${event.eventType} to Android`
+          `attempt to send unknown event ${event.type} to Android`
         );
     }
   }

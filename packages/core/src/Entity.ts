@@ -2,6 +2,7 @@ import "./Globals";
 import { Canvas, CanvasKit } from "canvaskit-wasm";
 import { EntityEventListener } from "./EntityEventListener";
 import { EntityEvent } from "./EntityEvent";
+import { M2PointerEvent } from "./M2PointerEvent";
 import { TapEvent } from "./TapEvent";
 import { IDrawable } from "./IDrawable";
 import { DrawableOptions } from "./DrawableOptions";
@@ -18,6 +19,7 @@ import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
 import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
+import { EventType } from "./EventBase";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -86,6 +88,9 @@ export abstract class Entity implements EntityOptions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   userData: any = {};
   loopMessages = new Set<string>();
+
+  pressed = false;
+  pressedInHitArea = false;
 
   constructor(options: EntityOptions = {}) {
     if (options.name === undefined) {
@@ -238,37 +243,205 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Takes the callback function to be executed when the user taps down on the
-   * entity. A TapDown is either a mouse click within the bounds of an entity
-   * OR the beginning of touches within the bounds of an entity.
+   * Executes a callback when the user presses down on the entity.
+   *
+   * @remarks TapDown is a pointer down (mouse click or touches begin) within
+   * the bounds of the entity.
    *
    * @param callback - function to execute
    * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks? Usually we want to have only one callback
-   * defined, instead of chaining multiple ones. It is strongly recommended
-   * not to change this, unless you have a special use case. Default is true.
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
    */
   onTapDown(
     callback: (tapEvent: TapEvent) => void,
     replaceExistingCallback = true
   ): void {
+    // cast <(ev: EntityEvent) => void> is needed because callback parameter
+    // in this onTapDown method has argument of type TapEvent, but
+    // addEventListener() expects a more general EntityEvent type
+    this.addEventListener(
+      EventType.TapDown,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user releases a press, that has been fully
+   * within the entity, from the entity.
+   *
+   * @remarks TapUp is a pointer up (mouse click release or touches end) within
+   * the bounds of the entity and the pointer, while down, has never moved
+   * beyond the bounds of the entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onTapUp(
+    callback: (tapEvent: TapEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.TapUp,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user releases a press from the entity within
+   * the bounds of the entity.
+   *
+   * @remarks TapUpAny is a pointer up (mouse click release or touches end)
+   * within the bounds of the entity and the pointer, while down, is allowed to
+   * have been beyond the bounds of the entity during the press before the
+   * release.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onTapUpAny(
+    callback: (tapEvent: TapEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.TapUpAny,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user moves the pointer (mouse, touches) beyond
+   * the bounds of the entity while the pointer is down.
+   *
+   * @remarks TapLeave occurs when the pointer (mouse, touches) that has
+   * previously pressed the entity moves beyond the bounds of the entity
+   * before the press release.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onTapLeave(
+    callback: (tapEvent: TapEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.TapLeave,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the pointer first is down on the entity.
+   *
+   * @remarks PointerDown is a pointer down (mouse click or touches begin) within
+   * the bounds of the entity. It occurs under the same conditions as TapDown.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onPointerDown(
+    callback: (m2PointerEvent: M2PointerEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.PointerDown,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user releases a press from the entity within
+   * the bounds of the entity.
+   *
+   * @remarks PointerUp is a pointer up (mouse click release or touches end)
+   * within the bounds of the entity. It does not require that there was a
+   * previous PointerDown on the entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onPointerUp(
+    callback: (m2PointerEvent: M2PointerEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.PointerUp,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user moves the pointer (mouse or touches)
+   * within the bounds of the entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onPointerMove(
+    callback: (m2PointerEvent: M2PointerEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.PointerMove,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  private addEventListener(
+    type: EventType,
+    callback: (ev: EntityEvent) => void,
+    replaceExistingCallback: boolean
+  ): void {
+    const eventListener: EntityEventListener = {
+      type: type,
+      entityUuid: this.uuid,
+      callback: callback,
+    };
+
     // By default, we'll replace the existing callback if there is one
     // Why? If the same setup code is called more than once for a scene that repeats, it could
     // add the same callback again. Usually, this is not the intent.
 
-    // cast <(ev: EntityEvent) => void> is needed because callback parameter
-    // in this onTapDown method has argument of type TapEvent, but
-    // in the EntityEventListener type, the callback property expects a
-    // callback with argument of type EntityEvent
-    const eventListener: EntityEventListener = {
-      eventType: "tapdown",
-      entityName: this.name,
-      callback: <(ev: EntityEvent) => void>callback,
-    };
-
     if (replaceExistingCallback) {
       this.eventListeners = this.eventListeners.filter(
-        (listener) => listener.entityName !== eventListener.entityName
+        (listener) =>
+          !(
+            listener.entityUuid === eventListener.entityUuid &&
+            listener.type === eventListener.type
+          )
       );
     }
     this.eventListeners.push(eventListener);

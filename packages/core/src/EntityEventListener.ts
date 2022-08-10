@@ -1,8 +1,8 @@
+import { EventType } from "./EventBase";
 import { EntityEvent } from "./EntityEvent";
 
-// TODO: use entity uuid, not name, to prevent name conflicts/collisions
 export interface EntityEventListener {
-  eventType: string;
-  entityName: string;
+  type: EventType;
+  entityUuid: string;
   callback: (event: EntityEvent) => void;
 }

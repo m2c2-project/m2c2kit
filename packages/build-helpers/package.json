@@ -19,7 +19,7 @@
     "rollup-plugin-dts": "^4.2.2"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "npm run clean && rollup -c",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

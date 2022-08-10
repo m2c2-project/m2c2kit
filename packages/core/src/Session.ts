@@ -61,7 +61,7 @@ export class Session {
       this.options.sessionCallbacks?.onSessionLifecycleChange;
     if (sessionLifecycleChangeCallback) {
       sessionLifecycleChangeCallback({
-        eventType: EventType.sessionLifecycle,
+        type: EventType.SessionLifecycle,
         initialized: true,
         ended: false,
       });
@@ -87,7 +87,7 @@ export class Session {
       this.options.sessionCallbacks?.onSessionLifecycleChange;
     if (sessionLifecycleChangeCallback) {
       sessionLifecycleChangeCallback({
-        eventType: EventType.sessionLifecycle,
+        type: EventType.SessionLifecycle,
         initialized: false,
         ended: true,
       });

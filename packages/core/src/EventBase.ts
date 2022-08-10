@@ -1,11 +1,24 @@
+/**
+ * The base type for all m2c2kit events.
+ *
+ * @remarks I would have named it Event, but that would collide with
+ * the existing DOM Event
+ */
 export interface EventBase {
-  eventType: EventType;
+  type: EventType;
+  handled?: boolean;
 }
-/** Note: I would have named it Event, but that would collide with
- * the existing, and much more well-known, Web API Event */
 
 export enum EventType {
-  activityData = "ActivityData",
-  activityLifecycle = "ActivityLifecycle",
-  sessionLifecycle = "SessionLifecycle",
+  ActivityData = "ActivityData",
+  ActivityLifecycle = "ActivityLifecycle",
+  SessionLifecycle = "SessionLifecycle",
+  TapDown = "TapDown",
+  TapUp = "TapUp",
+  TapUpAny = "TapUpAny",
+  TapLeave = "TapLeave",
+  PointerDown = "PointerDown",
+  PointerUp = "PointerUp",
+  PointerMove = "PointerMove",
+  CompositeCustom = "CompositeCustom",
 }

@@ -3,7 +3,9 @@ import { Activity } from "./Activity";
 import { ActivityType } from "./ActivityType";
 import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
+import { EventBase } from "./EventBase";
 import { TapEvent } from "./TapEvent";
+import { M2PointerEvent } from "./M2PointerEvent";
 import { EntityEvent } from "./EntityEvent";
 import { IDrawable } from "./IDrawable";
 import { Entity } from "./Entity";
@@ -32,6 +34,7 @@ import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
 import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
 import { TrialSchema } from "./TrialSchema";
 import { GameMetric } from "./GameMetrics";
+import { Point } from "./Point";
 
 interface BoundingBox {
   xMin: number;
@@ -352,7 +355,7 @@ export class Game implements Activity {
 
     this.setupCanvasKitSurface();
     this.setupFpsFont();
-    this.setupEventHandlers();
+    this.setupCanvasDomEventHandlers();
 
     let startingScene: Scene | undefined;
 
@@ -394,7 +397,7 @@ export class Game implements Activity {
 
     if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
       this.session.options.activityCallbacks.onActivityLifecycleChange({
-        eventType: EventType.activityLifecycle,
+        type: EventType.ActivityLifecycle,
         started: true,
         uuid: this.uuid,
         name: this.options.name,
@@ -641,7 +644,7 @@ export class Game implements Activity {
     this.trialIndex++;
     if (this.session.options.activityCallbacks?.onActivityDataCreate) {
       this.session.options.activityCallbacks.onActivityDataCreate({
-        eventType: EventType.activityData,
+        type: EventType.ActivityData,
         uuid: this.uuid,
         name: this.options.name,
         activityType: this.type,
@@ -794,7 +797,7 @@ export class Game implements Activity {
   end(): void {
     if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
       this.session.options.activityCallbacks.onActivityLifecycleChange({
-        eventType: EventType.activityLifecycle,
+        type: EventType.ActivityLifecycle,
         ended: true,
         uuid: this.uuid,
         name: this.options.name,
@@ -826,7 +829,7 @@ export class Game implements Activity {
   cancel(): void {
     if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
       this.session.options.activityCallbacks.onActivityLifecycleChange({
-        eventType: EventType.activityLifecycle,
+        type: EventType.ActivityLifecycle,
         canceled: true,
         uuid: this.uuid,
         name: this.options.name,
@@ -942,20 +945,24 @@ export class Game implements Activity {
     this.fpsTextPaint.setAntiAlias(true);
   }
 
-  private setupEventHandlers(): void {
+  private setupCanvasDomEventHandlers(): void {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
     // When the callback is executed, within the execuion of the callback code
     // we want 'this' to be this game object, not the html canvas to which the event listener is attached.
-    // Thus, we use "this.htmlCanvasMouseDownHandler.bind(this)" instead of the usual "htmlCanvasMouseDownHandler"
+    // Thus, we use "this.htmlCanvasPointerDownHandler.bind(this)" instead of the usual "htmlCanvasPointerDownHandler"
     this.htmlCanvas.addEventListener(
-      "mousedown",
-      this.htmlCanvasMouseDownHandler.bind(this)
+      "pointerdown",
+      this.htmlCanvasPointerDownHandler.bind(this)
     );
     this.htmlCanvas.addEventListener(
-      "touchstart",
-      this.htmlCanvasTouchStartHandler.bind(this)
+      "pointerup",
+      this.htmlCanvasPointerUpHandler.bind(this)
+    );
+    this.htmlCanvas.addEventListener(
+      "pointermove",
+      this.htmlCanvasPointerMoveHandler.bind(this)
     );
   }
 
@@ -1479,13 +1486,13 @@ export class Game implements Activity {
    *
    * @remarks Typically, event listeners will be created using a method specific to the event, such as onTapDown(). This alternative allows creation with entity name.
    *
-   * @param eventType - the type of event to listen for, e.g., "tapdown"
+   * @param type - the type of event to listen for, e.g., "tapdown"
    * @param entityName - the entity name for which an event will be listened
    * @param callback
    * @param replaceExistingCallback
    */
   createEventListener(
-    eventType: string,
+    type: EventType,
     entityName: string,
     callback: (event: EntityEvent) => void,
     replaceExistingCallback = true
@@ -1507,14 +1514,14 @@ export class Game implements Activity {
       );
     }
 
-    switch (eventType) {
-      case "tapdown": {
-        entity.onTapDown(callback, replaceExistingCallback);
+    switch (type) {
+      case EventType.PointerDown: {
+        entity.onPointerDown(callback, replaceExistingCallback);
         break;
       }
       default: {
         throw new Error(
-          `could not create event listener: event type ${eventType} is not known`
+          `could not create event listener: event type ${type} is not known`
         );
       }
     }
@@ -1541,49 +1548,381 @@ export class Game implements Activity {
     return entities;
   }
 
-  private htmlCanvasMouseDownHandler(event: MouseEvent): void {
-    event.preventDefault();
+  /**
+   * Receives callback from DOM PointerDown event
+   *
+   * @param domPointerEvent - PointerEvent from the DOM
+   * @returns
+   */
+  private htmlCanvasPointerDownHandler(domPointerEvent: PointerEvent): void {
+    domPointerEvent.preventDefault();
     const scene = this.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-
-    const x = event.offsetX;
-    const y = event.offsetY;
-    const tapEvent: TapEvent = {
-      target: scene,
-      point: { x, y },
+    const m2Event: EventBase = {
+      type: EventType.PointerDown,
       handled: false,
     };
-    this.processTaps(this.freeEntitiesScene, tapEvent, x, y);
-    this.processTaps(scene, tapEvent, x, y);
+    this.processDomPointerDown(
+      this.freeEntitiesScene,
+      m2Event,
+      domPointerEvent
+    );
+    this.processDomPointerDown(scene, m2Event, domPointerEvent);
   }
 
-  private htmlCanvasTouchStartHandler(event: TouchEvent): void {
-    event.preventDefault();
+  private htmlCanvasPointerUpHandler(domPointerEvent: PointerEvent): void {
+    domPointerEvent.preventDefault();
     const scene = this.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-
-    const canvas = event.target as HTMLCanvasElement;
-    const bounds = canvas.getBoundingClientRect();
-    const firstTouch = event.touches.item(0);
-    if (firstTouch === null) {
-      console.warn(
-        "warning: canvas received touchstart event, but TouchList was empty"
-      );
-      return;
-    }
-    const x = firstTouch.pageX - bounds.x;
-    const y = firstTouch.pageY - bounds.y;
-    const tapEvent: TapEvent = {
-      target: scene,
-      point: { x, y },
+    const m2Event: EventBase = {
+      type: EventType.PointerUp,
       handled: false,
     };
-    this.processTaps(this.freeEntitiesScene, tapEvent, x, y);
-    this.processTaps(scene, tapEvent, x, y);
+    this.processDomPointerUp(this.freeEntitiesScene, m2Event, domPointerEvent);
+    this.processDomPointerUp(scene, m2Event, domPointerEvent);
+  }
+
+  private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
+    domPointerEvent.preventDefault();
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+    const m2Event: EventBase = {
+      type: EventType.PointerMove,
+      handled: false,
+    };
+    this.processDomPointerMove(
+      this.freeEntitiesScene,
+      m2Event,
+      domPointerEvent
+    );
+    this.processDomPointerMove(scene, m2Event, domPointerEvent);
+  }
+
+  /**
+   * Determines if/how m2c2kit entities respond to the DOM PointerDown event
+   *
+   * @param entity - entity that might be affected by the DOM PointerDown event
+   * @param m2Event
+   * @param domPointerEvent
+   */
+  private processDomPointerDown(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    if (m2Event.handled) {
+      return;
+    }
+
+    // note: offsetX and offsetY are relative to the HTML canvas element
+    if (
+      entity.isUserInteractionEnabled &&
+      this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY
+      )
+    ) {
+      entity.pressed = true;
+      entity.pressedInHitArea = true;
+      this.raiseM2PointerDownEvent(entity, m2Event, domPointerEvent);
+      this.raiseTapDownEvent(entity, m2Event, domPointerEvent);
+    }
+    if (entity.children) {
+      entity.children
+        // a hidden entity (and its children) can't receive taps,
+        // even if isUserInteractionEnabled is true
+        .filter((entity) => !entity.hidden)
+        // only drawables have z-postion
+        .filter((entity) => entity.isDrawable)
+        // process taps on children by zPosition order
+        .sort(
+          (a, b) =>
+            (b as unknown as IDrawable).zPosition -
+            (a as unknown as IDrawable).zPosition
+        )
+        .forEach((entity) =>
+          this.processDomPointerDown(entity, m2Event, domPointerEvent)
+        );
+    }
+  }
+
+  private processDomPointerUp(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    if (m2Event.handled) {
+      return;
+    }
+
+    if (
+      entity.isUserInteractionEnabled &&
+      entity.pressed &&
+      entity.pressedInHitArea
+    ) {
+      /**
+       * released pointer within hit area after pointer had been earlier
+       * been pressed in the hit area and never left the hit area
+       */
+      entity.pressed = false;
+      entity.pressedInHitArea = false;
+      this.raiseTapUpEvent(entity, m2Event, domPointerEvent);
+      this.raiseTapUpAny(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
+    } else if (
+      entity.isUserInteractionEnabled &&
+      entity.pressed &&
+      entity.pressedInHitArea == false
+    ) {
+      /**
+       * released pointer anywhere after pointer had been earlier
+       * been pressed in the hit area
+       */
+      entity.pressed = false;
+      entity.pressedInHitArea = false;
+      this.raiseTapUpAny(entity, m2Event, domPointerEvent);
+    } else if (
+      entity.isUserInteractionEnabled &&
+      this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY
+      )
+    ) {
+      /**
+       * released pointer in the hit area
+       */
+      entity.pressed = false;
+      entity.pressedInHitArea = false;
+      this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
+    }
+
+    if (entity.children) {
+      entity.children
+        // a hidden entity (and its children) can't receive taps,
+        // even if isUserInteractionEnabled is true
+        .filter((entity) => !entity.hidden)
+        // only drawables have z-postion
+        .filter((entity) => entity.isDrawable)
+        // process taps on children by zPosition order
+        .sort(
+          (a, b) =>
+            (b as unknown as IDrawable).zPosition -
+            (a as unknown as IDrawable).zPosition
+        )
+        .forEach((entity) =>
+          this.processDomPointerUp(entity, m2Event, domPointerEvent)
+        );
+    }
+  }
+
+  private processDomPointerMove(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    if (m2Event.handled) {
+      return;
+    }
+
+    // note: offsetX and offsetY are relative to the HTML canvas element
+    if (
+      entity.isUserInteractionEnabled &&
+      entity.pressed &&
+      entity.pressedInHitArea &&
+      !this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY
+      )
+    ) {
+      entity.pressedInHitArea = false;
+      this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
+    }
+    if (
+      this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY
+      )
+    ) {
+      this.raiseM2PointerMoveEvent(entity, m2Event, domPointerEvent);
+    }
+
+    if (entity.children) {
+      entity.children
+        // a hidden entity (and its children) can't receive taps,
+        // even if isUserInteractionEnabled is true
+        .filter((entity) => !entity.hidden)
+        // only drawables have z-postion
+        .filter((entity) => entity.isDrawable)
+        // process taps on children by zPosition order
+        .sort(
+          (a, b) =>
+            (b as unknown as IDrawable).zPosition -
+            (a as unknown as IDrawable).zPosition
+        )
+        .forEach((entity) =>
+          this.processDomPointerMove(entity, m2Event, domPointerEvent)
+        );
+    }
+  }
+
+  private raiseM2PointerDownEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.PointerDown;
+    this.raiseEventOnListeningEntities<M2PointerEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseTapDownEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.TapDown;
+    this.raiseEventOnListeningEntities<TapEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseTapLeaveEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.TapLeave;
+    this.raiseEventOnListeningEntities<TapEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseM2PointerUpEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.PointerUp;
+    this.raiseEventOnListeningEntities<M2PointerEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseTapUpEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.TapUp;
+    this.raiseEventOnListeningEntities<TapEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseTapUpAny(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.TapUpAny;
+    this.raiseEventOnListeningEntities<TapEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseM2PointerMoveEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.type = EventType.PointerMove;
+    this.raiseEventOnListeningEntities<M2PointerEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private calculatePointWithinEntityFromDomPointerEvent(
+    entity: Entity,
+    domPointerEvent: PointerEvent
+  ): Point {
+    const x = domPointerEvent.offsetX;
+    const y = domPointerEvent.offsetY;
+    const bb = this.calculateEntityAbsoluteBoundingBox(entity);
+    const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * entity.size.width;
+    const relativeY =
+      ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
+    return { x: relativeX, y: relativeY };
+  }
+
+  private raiseEventOnListeningEntities<T extends EntityEvent>(
+    entity: Entity,
+    m2Event: EventBase,
+    domEvent: Event
+  ): void {
+    entity.eventListeners
+      .filter((listener) => listener.type === m2Event.type)
+      .forEach((listener) => {
+        if (listener.entityUuid === entity.uuid) {
+          (m2Event as T).target = entity;
+
+          switch (m2Event.type) {
+            case EventType.PointerDown:
+            case EventType.PointerMove:
+            case EventType.PointerUp:
+              (m2Event as M2PointerEvent).point =
+                this.calculatePointWithinEntityFromDomPointerEvent(
+                  entity,
+                  domEvent as PointerEvent
+                );
+              (m2Event as M2PointerEvent).buttons = (
+                domEvent as PointerEvent
+              ).buttons;
+              listener.callback(m2Event as T);
+              break;
+            case EventType.TapDown:
+            case EventType.TapUp:
+            case EventType.TapUpAny:
+            case EventType.TapLeave:
+              (m2Event as TapEvent).point =
+                this.calculatePointWithinEntityFromDomPointerEvent(
+                  entity,
+                  domEvent as PointerEvent
+                );
+
+              (m2Event as TapEvent).buttons = (
+                domEvent as PointerEvent
+              ).buttons;
+
+              listener.callback(m2Event as T);
+              break;
+          }
+        }
+      });
   }
 
   private sceneCanReceiveUserInteraction(scene: Scene): boolean {
@@ -1601,85 +1940,37 @@ export class Game implements Activity {
     return false;
   }
 
-  private processTaps(
-    entity: Entity,
-    tapEvent: TapEvent,
-    x: number,
-    y: number
-  ): void {
-    // if it's already been handled, don't do anything
-    if (tapEvent.handled) {
-      return;
-    }
-
-    // note: x and y are relative to the HTML canvas element
-    if (
-      entity.isUserInteractionEnabled &&
-      this.tapIsWithinEntityBounds(entity, x, y)
-    ) {
-      this.handleEntityTapped(entity, tapEvent, x, y);
-    }
-    if (entity.children) {
-      entity.children
-        // a hidden entity (and its children) can't receive taps,
-        // even if isUserInteractionEnabled is true
-        .filter((entity) => !entity.hidden)
-        // only drawables have z-postion
-        .filter((entity) => entity.isDrawable)
-        // process taps on children by zPosition order
-        .sort(
-          (a, b) =>
-            (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition
-        )
-        .forEach((entity) => this.processTaps(entity, tapEvent, x, y));
-    }
-  }
-
-  private handleEntityTapped(
-    entity: Entity,
-    tapEvent: TapEvent,
-    x: number,
-    y: number
-  ): void {
-    entity.eventListeners
-      .filter((listener) => listener.eventType === "tapdown")
-      .forEach((listener) => {
-        if (listener.entityName === entity.name) {
-          const bb = this.calculateEntityAbsoluteBoundingBox(entity);
-          const relativeX =
-            ((x - bb.xMin) / (bb.xMax - bb.xMin)) * entity.size.width;
-          const relativeY =
-            ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
-          tapEvent.target = entity;
-          tapEvent.point = { x: relativeX, y: relativeY };
-          listener.callback(tapEvent);
-        }
-      });
-  }
-
-  private tapIsWithinEntityBounds(
+  /**
+   *
+   * Checks if the given canvas point is within the entity's bounds.
+   *
+   * @param entity - entity to check bounds for
+   * @param x - x coordinate of the canvas point
+   * @param y - y coordinate of the canvas point
+   * @returns true if x, y point is within the entity's bounds
+   */
+  private IsCanvasPointWithinEntityBounds(
     entity: Entity,
     x: number,
     y: number
   ): boolean {
     if (!entity.isDrawable) {
-      throw "only drawable entities can receive tap events";
+      throw "only drawable entities can receive pointer events";
     }
 
     if (entity.size.width === 0 || entity.size.height === 0) {
-      console.warn(
-        `warning: entity ${entity.toString()} has isUserInteractionEnabled = true, but has no tappable area. Size is ${
-          entity.size.width
-        }, ${entity.size.height}`
-      );
+      // console.warn(
+      //   `warning: entity ${entity.toString()} has isUserInteractionEnabled = true, but has no interactable area. Size is ${
+      //     entity.size.width
+      //   }, ${entity.size.height}`
+      // );
       return false;
     }
 
     if (entity.type === EntityType.textline && isNaN(entity.size.width)) {
-      console.warn(
-        `warning: entity ${entity.toString()} is a textline with width = NaN. A textline must have its width manually set.`
-      );
+      // console.warn(
+      //   `warning: entity ${entity.toString()} is a textline with width = NaN. A textline must have its width manually set.`
+      // );
       return false;
     }
 

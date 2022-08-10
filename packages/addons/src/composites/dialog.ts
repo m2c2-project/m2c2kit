@@ -10,6 +10,7 @@ import {
   Size,
   IDrawable,
   EntityEventListener,
+  EventType,
 } from "@m2c2kit/core";
 import "../Globals";
 import { Button } from "./button";
@@ -120,17 +121,27 @@ export class Dialog extends Composite {
     // in the EntityEventListener type, the callback property expects a
     // callback with argument of type EntityEvent
     const eventListener: EntityEventListener = {
-      eventType: "dialogresult",
-      entityName: this.name,
+      type: EventType.CompositeCustom,
+      entityUuid: this.uuid,
       callback: <(ev: EntityEvent) => void>callback,
     };
 
     if (replaceExistingCallback) {
       this.eventListeners = this.eventListeners.filter(
-        (listener) => listener.entityName !== eventListener.entityName
+        (listener) =>
+          !(
+            listener.entityUuid === eventListener.entityUuid &&
+            listener.type === eventListener.type
+          )
       );
     }
     this.eventListeners.push(eventListener);
+    // if (replaceExistingCallback) {
+    //   this.eventListeners = this.eventListeners.filter(
+    //     (listener) => listener.entityName !== eventListener.entityName
+    //   );
+    // }
+    // this.eventListeners.push(eventListener);
   }
 
   override initialize(): void {
@@ -152,9 +163,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.eventType === "dialogresult")
+          .filter((listener) => listener.type === EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
+              type: EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Dismiss,
@@ -204,9 +216,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.eventType === "dialogresult")
+          .filter((listener) => listener.type === EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
+              type: EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Negative,
@@ -228,9 +241,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.eventType === "dialogresult")
+          .filter((listener) => listener.type === EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
+              type: EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Positive,
