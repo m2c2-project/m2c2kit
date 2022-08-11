@@ -1,9 +1,9 @@
 export enum EntityType {
-  entity = "Entity",
-  scene = "Scene",
-  sprite = "Sprite",
-  label = "Label",
-  textline = "TextLine",
-  shape = "Shape",
-  composite = "Composite",
+  Entity = "Entity",
+  Scene = "Scene",
+  Sprite = "Sprite",
+  Label = "Label",
+  TextLine = "TextLine",
+  Shape = "Shape",
+  Composite = "Composite",
 }

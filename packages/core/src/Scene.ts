@@ -9,7 +9,7 @@ import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
 
 export class Scene extends Entity implements IDrawable, SceneOptions {
-  readonly type = EntityType.scene;
+  readonly type = EntityType.Scene;
   isDrawable = true;
   // Drawable options
   anchorPoint = { x: 0, y: 0 };

@@ -2,7 +2,7 @@ import { EntityEvent } from "./EntityEvent";
 import { Point } from "./Point";
 
 /**
- * Describes an event involving the pointer (mouse, touches) and an entity.
+ * Describes an interaction between the pointer (mouse, touches) and an entity.
  *
  * @remarks I would have named it PointerEvent, but that would collide with
  * the existing DOM PointerEvent.

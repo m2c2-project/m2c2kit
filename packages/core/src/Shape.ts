@@ -10,7 +10,7 @@ import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 
 export class Shape extends Entity implements IDrawable, ShapeOptions {
-  readonly type = EntityType.shape;
+  readonly type = EntityType.Shape;
   isDrawable = true;
   isShape = true;
   // Drawable options
@@ -18,7 +18,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   zPosition = 0;
   // Shape options
   // TODO: fix the Size issue; should be readonly (calculated value) in all entities, but Rectangle
-  shapeType = ShapeType.undefined;
+  shapeType = ShapeType.Undefined;
   circleOfRadius?: number;
   rect?: RectOptions;
   cornerRadius = 0;
@@ -39,7 +39,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     handleInterfaceOptions(this, options);
     if (options.circleOfRadius !== undefined) {
       this.circleOfRadius = options.circleOfRadius;
-      this.shapeType = ShapeType.circle;
+      this.shapeType = ShapeType.Circle;
     }
     if (options.rect) {
       this.rect = options.rect;
@@ -58,7 +58,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       } else if (options.rect.x !== undefined && options.rect.y !== undefined) {
         this.position = { x: options.rect.x, y: options.rect.y };
       }
-      this.shapeType = ShapeType.rectangle;
+      this.shapeType = ShapeType.Rectangle;
     }
     if (options.cornerRadius) {
       this.cornerRadius = options.cornerRadius;
@@ -178,7 +178,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     canvas.scale(1 / drawScale, 1 / drawScale);
 
     if (
-      this.shapeType === ShapeType.circle &&
+      this.shapeType === ShapeType.Circle &&
       this.circleOfRadius !== undefined
     ) {
       const cx = this.absolutePosition.x * drawScale;
@@ -196,7 +196,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       }
     }
 
-    if (this.shapeType === ShapeType.rectangle) {
+    if (this.shapeType === ShapeType.Rectangle) {
       const rr = this.canvasKit.RRectXY(
         this.canvasKit.LTRBRect(
           (this.absolutePosition.x -

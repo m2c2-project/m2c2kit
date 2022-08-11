@@ -1,11 +1,4 @@
-import { CanvasKit } from "canvaskit-wasm";
-import { FontManager } from "./FontManager";
-import { ImageManager } from "./ImageManager";
-
 export class GlobalVariables {
-  // public canvasKit!: CanvasKit;
-  // public fontManager!: FontManager;
-  // public imageManager!: ImageManager;
   public now = NaN;
   public deltaTime = NaN;
   public canvasScale = NaN;

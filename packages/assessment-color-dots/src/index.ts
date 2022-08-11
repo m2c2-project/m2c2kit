@@ -938,7 +938,7 @@ appeared.",
         game.presentScene(
           doneScene,
           Transition.slide({
-            direction: TransitionDirection.left,
+            direction: TransitionDirection.Left,
             duration: 500,
             easing: Easings.sinusoidalInOut,
           })

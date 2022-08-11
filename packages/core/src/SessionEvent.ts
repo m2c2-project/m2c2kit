@@ -1,5 +1,7 @@
+import { Session } from "./Session";
 import { EventBase } from "./EventBase";
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
+/** Base interface for all Session events. */
 export interface SessionEvent extends EventBase {
-  // empty for now, but likely to add to it
+  target: Session;
 }

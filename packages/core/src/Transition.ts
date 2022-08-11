@@ -42,7 +42,7 @@ export abstract class Transition {
 }
 
 export class NoneTransition extends Transition {
-  type = TransitionType.none;
+  type = TransitionType.None;
   easing: EasingFunction;
   duration: number;
   constructor() {
@@ -53,7 +53,7 @@ export class NoneTransition extends Transition {
 }
 
 export class SlideTransition extends Transition {
-  type = TransitionType.slide;
+  type = TransitionType.Slide;
   easing: EasingFunction;
   duration: number;
   direction: TransitionDirection;
@@ -70,15 +70,15 @@ export class SlideTransition extends Transition {
 }
 
 export enum TransitionType {
-  slide = "Slide",
-  none = "None",
+  Slide = "Slide",
+  None = "None",
 }
 
 export enum TransitionDirection {
-  up = "Up",
-  down = "Down",
-  right = "Right",
-  left = "Left",
+  Up = "Up",
+  Down = "Down",
+  Right = "Right",
+  Left = "Left",
 }
 export class SceneTransition {
   constructor(public scene: Scene, public transition: Transition) {}

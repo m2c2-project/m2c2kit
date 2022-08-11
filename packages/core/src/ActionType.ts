@@ -1,8 +1,9 @@
+/** The type of action */
 export enum ActionType {
-  sequence = "Sequence",
-  group = "Group",
-  wait = "Wait",
-  custom = "Custom",
-  move = "Move",
-  scale = "Scale",
+  Sequence = "Sequence",
+  Group = "Group",
+  Wait = "Wait",
+  Custom = "Custom",
+  Move = "Move",
+  Scale = "Scale",
 }

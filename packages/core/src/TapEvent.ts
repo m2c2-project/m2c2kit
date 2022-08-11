@@ -1,6 +1,12 @@
 import { EntityEvent } from "./EntityEvent";
 import { Point } from "./Point";
 
+/**
+ * Desrcibes an interaction of a pointer (mouse, touches) pressing an entity.
+ *
+ * @remarks Unlike M2PointerEvent, TapEvent considers how the pointer, while
+ * in the down state, moves in relation to the bounds of the entity.
+ */
 export interface TapEvent extends EntityEvent {
   /** Point that was tapped on entity, relative to the entity coordinate system */
   point: Point;

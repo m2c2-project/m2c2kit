@@ -1,9 +1,10 @@
 import {
   Session,
   SessionLifecycleEvent,
-  ActivityDataEvent,
+  ActivityResultsEvent,
   ActivityLifecycleEvent,
   ActivityType,
+  EventType,
 } from "@m2c2kit/core";
 
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
@@ -20,24 +21,24 @@ const session = new Session({
   activities: [a1, a2, a3, a4],
   sessionCallbacks: {
     /**
-     * onSessionLifecycleChange() will be called on events such
+     * onSessionLifecycle() will be called on events such
      * as when the session initialization is complete or when the
      * session ends.
      *
      * Once initialized, the below code will start the session.
      */
-    onSessionLifecycleChange: (ev: SessionLifecycleEvent) => {
-      if (ev.initialized) {
+    onSessionLifecycle: (ev: SessionLifecycleEvent) => {
+      if (ev.type === EventType.SessionInitialize) {
         session.start();
       }
-      if (ev.ended) {
+      if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
       }
     },
   },
   activityCallbacks: {
     /**
-     * onActivityDataCreate() callback is where you insert code to post data
+     * onActivityResults() callback is where you insert code to post data
      * to an API or interop with a native function in the host app,
      * if applicable.
      *
@@ -56,10 +57,10 @@ const session = new Session({
      * The schema for all of the above are in JSON Schema format.
      * Currently, only games generate schema.
      */
-    onActivityDataCreate: (ev: ActivityDataEvent) => {
-      if (ev.activityType === ActivityType.game) {
+    onActivityResults: (ev: ActivityResultsEvent) => {
+      if (ev.target.type === ActivityType.Game) {
         console.log(`✅ trial complete:`);
-      } else if (ev.activityType === ActivityType.survey) {
+      } else if (ev.target.type === ActivityType.Survey) {
         console.log(`✅ question answered:`);
       }
       console.log("  newData: " + JSON.stringify(ev.newData));
@@ -76,25 +77,29 @@ const session = new Session({
       console.log("  activity metrics: " + JSON.stringify(ev.activityMetrics));
     },
     /**
-     * onActivityLifecycleChange() notifies us when an activity, such
+     * onActivityLifecycle() notifies us when an activity, such
      * as a game (assessment) or a survey, has ended or canceled.
      * Usually, however, we want to know when all the activities are done,
      * so we'll look for the session ending via onSessionLifecycleChange
      */
-    onActivityLifecycleChange: (ev: ActivityLifecycleEvent) => {
+    onActivityLifecycle: (ev: ActivityLifecycleEvent) => {
       const activityType =
-        ev.activityType === ActivityType.game ? "game" : "survey";
-      if (ev.ended || ev.canceled) {
-        const status = ev.ended ? "🔴 ended" : "🚫 canceled";
-        console.log(`${status} activity (${activityType}) ${ev.name}`);
+        ev.target.type === ActivityType.Game ? "game" : "survey";
+      if (
+        ev.type === EventType.ActivityEnd ||
+        ev.type === EventType.ActivityCancel
+      ) {
+        const status =
+          ev.type === EventType.ActivityEnd ? "🔴 ended" : "🚫 canceled";
+        console.log(`${status} activity (${activityType}) ${ev.target.name}`);
         if (session.nextActivity) {
           session.advanceToNextActivity();
         } else {
           session.end();
         }
       }
-      if (ev.started) {
-        console.log(`🟢 started activity (${activityType}) ${ev.name}`);
+      if (ev.type === EventType.ActivityStart) {
+        console.log(`🟢 started activity (${activityType}) ${ev.target.name}`);
       }
     },
   },

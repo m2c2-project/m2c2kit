@@ -8,7 +8,7 @@ import { LoadedImage } from "./LoadedImage";
 import { Scene } from "./Scene";
 
 export class Sprite extends Entity implements IDrawable, SpriteOptions {
-  readonly type = EntityType.sprite;
+  readonly type = EntityType.Sprite;
   isDrawable = true;
   // Drawable options
   anchorPoint = { x: 0.5, y: 0.5 };

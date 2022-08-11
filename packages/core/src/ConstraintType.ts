@@ -1,8 +1,9 @@
 /**
  * This enum is used interally for processing the layout constraints. We use
- * an enum to avoid magic strings.
+ * an enum to avoid magic strings. NOTE: the casing in ConstraintType must
+ * match the casing in Constraints.ts. Thus, this enum's members are in
+ * lowercase, which is not typical Typescript style.
  */
-
 export enum ConstraintType {
   topToTopOf = "topToTopOf",
   topToBottomOf = "topToBottomOf",

@@ -136,8 +136,8 @@ export abstract class Action {
     const clonedActions = actions
       .filter(
         (action) =>
-          action.type !== ActionType.group &&
-          action.type !== ActionType.sequence
+          action.type !== ActionType.Group &&
+          action.type !== ActionType.Sequence
       )
       .map((action) => {
         // to prevent circular references, set parent to defined
@@ -153,7 +153,7 @@ export abstract class Action {
     let cloned: Action;
 
     switch (action.type) {
-      case ActionType.sequence: {
+      case ActionType.Sequence: {
         const sequence = action as SequenceAction;
         const sequenceChildren = sequence.children.map((child) =>
           Action.cloneAction(child, key)
@@ -161,7 +161,7 @@ export abstract class Action {
         cloned = Action.sequence(sequenceChildren);
         break;
       }
-      case ActionType.group: {
+      case ActionType.Group: {
         const group = action as SequenceAction;
         const groupChildren = group.children.map((child) =>
           Action.cloneAction(child, key)
@@ -169,7 +169,7 @@ export abstract class Action {
         cloned = Action.sequence(groupChildren);
         break;
       }
-      case ActionType.move: {
+      case ActionType.Move: {
         const move = action as MoveAction;
         cloned = Action.move({
           point: move.point,
@@ -179,7 +179,7 @@ export abstract class Action {
         });
         break;
       }
-      case ActionType.custom: {
+      case ActionType.Custom: {
         const code = action as CustomAction;
         cloned = Action.custom({
           callback: code.callback,
@@ -187,7 +187,7 @@ export abstract class Action {
         });
         break;
       }
-      case ActionType.scale: {
+      case ActionType.Scale: {
         const scale = action as ScaleAction;
         cloned = Action.scale({
           scale: scale.scale,
@@ -196,7 +196,7 @@ export abstract class Action {
         });
         break;
       }
-      case ActionType.wait: {
+      case ActionType.Wait: {
         const wait = action as WaitAction;
         cloned = Action.wait({
           duration: wait.duration,
@@ -241,14 +241,14 @@ export abstract class Action {
 
     const elapsed = now - (action.runStartTime + action.startOffset);
 
-    if (action.type === ActionType.custom) {
+    if (action.type === ActionType.Custom) {
       const customAction = action as CustomAction;
       customAction.callback();
       customAction.running = false;
       customAction.completed = true;
     }
 
-    if (action.type === ActionType.wait) {
+    if (action.type === ActionType.Wait) {
       const waitAction = action as WaitAction;
       if (now > action.runStartTime + action.startOffset + action.duration) {
         waitAction.running = false;
@@ -256,7 +256,7 @@ export abstract class Action {
       }
     }
 
-    if (action.type === ActionType.move) {
+    if (action.type === ActionType.Move) {
       const moveAction = action as MoveAction;
 
       if (!moveAction.started) {
@@ -288,7 +288,7 @@ export abstract class Action {
       }
     }
 
-    if (action.type === ActionType.scale) {
+    if (action.type === ActionType.Scale) {
       const scaleAction = action as ScaleAction;
 
       if (!scaleAction.started) {
@@ -318,7 +318,7 @@ export abstract class Action {
    * @returns the calculated duration
    */
   private calculateDuration(action: Action): number {
-    if (action.type === ActionType.group) {
+    if (action.type === ActionType.Group) {
       /**
        * Because group actions run in parallel, the duration of a group
        * action is the max duration of the longest running child
@@ -331,7 +331,7 @@ export abstract class Action {
         }, 0);
       return duration;
     }
-    if (action.type === ActionType.sequence) {
+    if (action.type === ActionType.Sequence) {
       /**
        * Because sequence actions run in series, the duration of a sequence
        * action is the sum of all its child durations
@@ -368,14 +368,14 @@ export abstract class Action {
       parentStartOffset = action.parent.startOffset;
     }
 
-    if (action.parent?.type! === ActionType.group) {
+    if (action.parent?.type! === ActionType.Group) {
       /**
        * If the action's parent is a group, this action's start offset
        * is the parent's start offset.
        */
       action.startOffset = parentStartOffset;
       action.endOffset = action.startOffset + action.duration;
-    } else if (action.parent?.type === ActionType.sequence) {
+    } else if (action.parent?.type === ActionType.Sequence) {
       const parent = action.parent as IActionContainer;
       /**
        * If the action's parent is a sequence, this action's start offset
@@ -478,7 +478,7 @@ export abstract class Action {
 }
 
 export class SequenceAction extends Action implements IActionContainer {
-  type = ActionType.sequence;
+  type = ActionType.Sequence;
   children: Array<Action>;
   constructor(actions: Array<Action>) {
     super();
@@ -488,7 +488,7 @@ export class SequenceAction extends Action implements IActionContainer {
 }
 
 export class GroupAction extends Action implements IActionContainer {
-  type = ActionType.group;
+  type = ActionType.Group;
   children = new Array<Action>();
   constructor(actions: Array<Action>) {
     super();
@@ -498,7 +498,7 @@ export class GroupAction extends Action implements IActionContainer {
 }
 
 export class CustomAction extends Action {
-  type = ActionType.custom;
+  type = ActionType.Custom;
   callback: () => void;
   constructor(callback: () => void, runDuringTransition = false) {
     super(runDuringTransition);
@@ -509,7 +509,7 @@ export class CustomAction extends Action {
 }
 
 export class WaitAction extends Action {
-  type = ActionType.wait;
+  type = ActionType.Wait;
   constructor(duration: number, runDuringTransition: boolean) {
     super(runDuringTransition);
     this.duration = duration;
@@ -518,7 +518,7 @@ export class WaitAction extends Action {
 }
 
 export class MoveAction extends Action {
-  type = ActionType.move;
+  type = ActionType.Move;
   point: Point;
   startPoint: Point;
   dx = 0;
@@ -540,7 +540,7 @@ export class MoveAction extends Action {
 }
 
 export class ScaleAction extends Action {
-  type = ActionType.scale;
+  type = ActionType.Scale;
   scale: number;
   delta = 0;
   constructor(scale: number, duration: number, runDuringTransition = false) {

@@ -58,12 +58,11 @@ export class Session {
     );
     Timer.remove("sessionInit");
     const sessionLifecycleChangeCallback =
-      this.options.sessionCallbacks?.onSessionLifecycleChange;
+      this.options.sessionCallbacks?.onSessionLifecycle;
     if (sessionLifecycleChangeCallback) {
       sessionLifecycleChangeCallback({
-        type: EventType.SessionLifecycle,
-        initialized: true,
-        ended: false,
+        target: this,
+        type: EventType.SessionInitialize,
       });
     }
   }
@@ -84,12 +83,11 @@ export class Session {
    */
   end(): void {
     const sessionLifecycleChangeCallback =
-      this.options.sessionCallbacks?.onSessionLifecycleChange;
+      this.options.sessionCallbacks?.onSessionLifecycle;
     if (sessionLifecycleChangeCallback) {
       sessionLifecycleChangeCallback({
-        type: EventType.SessionLifecycle,
-        initialized: false,
-        ended: true,
+        target: this,
+        type: EventType.SessionEnd,
       });
     }
   }
@@ -138,11 +136,11 @@ export class Session {
    * @param activity - the activity to configure the DOM for
    */
   private configureDomForActivity(activity: Activity): void {
-    if (activity.type == ActivityType.game) {
+    if (activity.type == ActivityType.Game) {
       this.setCanvasDivVisibility(true);
       this.setSurveyDivVisibility(false);
     }
-    if (activity.type == ActivityType.survey) {
+    if (activity.type == ActivityType.Survey) {
       this.setCanvasDivVisibility(false);
       this.setSurveyDivVisibility(true);
     }
@@ -224,7 +222,7 @@ export class Session {
     this.imageManager.canvasKit = this.canvasKit;
 
     this.options.activities
-      .filter((activity) => activity.type == ActivityType.game)
+      .filter((activity) => activity.type == ActivityType.Game)
       .forEach((activity) => {
         const game = activity as unknown as Game;
         game.canvasKit = canvasKit;
@@ -233,7 +231,7 @@ export class Session {
 
   private getFontsConfigurationFromGames(): GameFontUrls[] {
     return this.options.activities
-      .filter((activity) => activity.type == ActivityType.game)
+      .filter((activity) => activity.type == ActivityType.Game)
       .map((activity) => {
         const game = activity as unknown as Game;
         return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
@@ -242,7 +240,7 @@ export class Session {
 
   private getImagesConfigurationFromGames(): GameImages[] {
     return this.options.activities
-      .filter((activity) => activity.type == ActivityType.game)
+      .filter((activity) => activity.type == ActivityType.Game)
       .map((activity) => {
         const game = activity as unknown as Game;
         return { uuid: game.uuid, images: game.options.images ?? [] };

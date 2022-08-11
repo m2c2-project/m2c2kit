@@ -1,6 +1,7 @@
 import { SessionEvent } from "./SessionEvent";
-export interface SessionLifecycleEvent extends SessionEvent {
-  initialized?: boolean;
-  ended?: boolean;
-  started?: boolean;
-}
+
+/**
+ * Notifies when a session starts, ends, or initializes.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionLifecycleEvent extends SessionEvent {}

@@ -13,7 +13,7 @@ export class TextLine
   extends Entity
   implements IDrawable, IText, TextLineOptions
 {
-  readonly type = EntityType.textline;
+  readonly type = EntityType.TextLine;
   isDrawable = true;
   isText = true;
   // Drawable options

@@ -1,6 +1,6 @@
-import { ActivityData } from "./ActivityData";
+import { ActivityKeyValueData } from "./ActivityKeyValueData";
 import { TrialData } from "./Game";
 
-export interface GameData extends ActivityData {
+export interface GameData extends ActivityKeyValueData {
   trials: Array<TrialData>;
 }

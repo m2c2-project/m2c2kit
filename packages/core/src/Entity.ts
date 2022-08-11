@@ -61,7 +61,7 @@ export function handleInterfaceOptions(
   }
 }
 export abstract class Entity implements EntityOptions {
-  type = EntityType.entity;
+  type = EntityType.Entity;
   isDrawable = false;
   isShape = false;
   isText = false;
@@ -141,7 +141,7 @@ export abstract class Entity implements EntityOptions {
    */
   addChild(child: Entity): void {
     // Do not allow a scene to be child of another entity.
-    if (child.type == EntityType.scene) {
+    if (child.type == EntityType.Scene) {
       throw new Error(
         "A scene cannot be the child of an entity. A scene can only be added to a game object"
       );
@@ -511,11 +511,11 @@ export abstract class Entity implements EntityOptions {
       // But if the alter IS a scene, there's no need to make this
       // calculate because the scene is the root coordinate system and
       // it's top by definition is 0
-      if (!(constraint.alterEntity.type === EntityType.scene)) {
+      if (!(constraint.alterEntity.type === EntityType.Scene)) {
         y = y - constraint.alterEntity.size.height * 0.5 * scale;
       }
     } else {
-      if (!(constraint.alterEntity.type === EntityType.scene)) {
+      if (!(constraint.alterEntity.type === EntityType.Scene)) {
         y = y + constraint.alterEntity.size.height * 0.5 * scale;
       } else {
         y = y + constraint.alterEntity.size.height * scale;
@@ -540,11 +540,11 @@ export abstract class Entity implements EntityOptions {
     let x = constraint.alterEntity.absolutePosition.x;
 
     if (constraint.alterEntityMinimum) {
-      if (!(constraint.alterEntity.type === EntityType.scene)) {
+      if (!(constraint.alterEntity.type === EntityType.Scene)) {
         x = x - constraint.alterEntity.size.width * 0.5 * scale;
       }
     } else {
-      if (!(constraint.alterEntity.type === EntityType.scene)) {
+      if (!(constraint.alterEntity.type === EntityType.Scene)) {
         x = x + constraint.alterEntity.size.width * 0.5 * scale;
       } else {
         x = x + constraint.alterEntity.size.width * scale;
@@ -732,7 +732,7 @@ export abstract class Entity implements EntityOptions {
           } else {
             const entityName = constraints[constraint] as string;
             let allGameEntities: Array<Entity>;
-            if (parent.type === EntityType.scene) {
+            if (parent.type === EntityType.Scene) {
               //allGameEntities = (parent as Scene).game.entities;
               allGameEntities = parent.descendants;
             } else {
@@ -921,7 +921,7 @@ export abstract class Entity implements EntityOptions {
 
   get canvasKit(): CanvasKit {
     let parentScene: Scene;
-    if (this.type === EntityType.scene) {
+    if (this.type === EntityType.Scene) {
       parentScene = this as unknown as Scene;
     } else {
       parentScene = this.parentSceneAsEntity as Scene;
@@ -930,12 +930,12 @@ export abstract class Entity implements EntityOptions {
   }
 
   get parentSceneAsEntity(): Entity {
-    if (this.type === EntityType.scene) {
+    if (this.type === EntityType.Scene) {
       throw new Error(
         `Entity ${this} is a scene and cannot have a parent scene`
       );
     }
-    if (this.parent && this.parent.type === EntityType.scene) {
+    if (this.parent && this.parent.type === EntityType.Scene) {
       return this.parent;
     } else if (this.parent) {
       return this.parent.parentSceneAsEntity;

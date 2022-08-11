@@ -465,12 +465,12 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       nextButtonBackgroundColor: WebColors.Black,
       backButtonBackgroundColor: WebColors.Black,
       nextSceneTransition: Transition.slide({
-        direction: TransitionDirection.left,
+        direction: TransitionDirection.Left,
         duration: 500,
         easing: Easings.sinusoidalInOut,
       }),
       backSceneTransition: Transition.slide({
-        direction: TransitionDirection.right,
+        direction: TransitionDirection.Right,
         duration: 500,
         easing: Easings.sinusoidalInOut,
       }),
@@ -557,7 +557,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     game.addScenes(instructionsScenes);
 
     const afterTrialSceneTransition = Transition.slide({
-      direction: TransitionDirection.left,
+      direction: TransitionDirection.Left,
       duration: game.getParameter("interstimulus_interval_duration_ms"),
       easing: Easings.sinusoidalInOut,
     });
@@ -584,7 +584,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       text: countdownInitialNumber.toString(),
       fontSize: 50,
       preferredMaxLayoutWidth: 200,
-      horizontalAlignmentMode: LabelHorizontalAlignmentMode.center,
+      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
       fontColor: [255, 255, 255, 1],
     });
     countdownCircle.addChild(countdownNumber);
@@ -593,7 +593,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       text: "GET READY",
       fontSize: 50,
       preferredMaxLayoutWidth: 300,
-      horizontalAlignmentMode: LabelHorizontalAlignmentMode.center,
+      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
       position: { x: 200, y: 500 },
     });
     countdownScene.addChild(getreadyLabel);
@@ -627,7 +627,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
             game.presentScene(
               chooseCardScene,
               Transition.slide({
-                direction: TransitionDirection.left,
+                direction: TransitionDirection.Left,
                 duration: game.getParameter(
                   "after_preparation_transition_duration_ms"
                 ),

@@ -1,8 +1,7 @@
-import { ActivityType } from "./ActivityType";
+import { Activity } from "./Activity";
 import { EventBase } from "./EventBase";
 
+/** Base interface for all Activity events. */
 export interface ActivityEvent extends EventBase {
-  uuid: string;
-  name: string;
-  activityType: ActivityType;
+  target: Activity;
 }

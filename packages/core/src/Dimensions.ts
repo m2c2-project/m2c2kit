@@ -1,3 +1,3 @@
 export enum Dimensions {
-  MATCH_CONSTRAINT = 0,
+  MatchConstraint = 0,
 }

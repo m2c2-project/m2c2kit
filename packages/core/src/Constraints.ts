@@ -1,5 +1,10 @@
 import { Entity } from "./Entity";
 
+/**
+ * Constraints for defining relative layouts.
+ *
+ * @remarks FOR INTERNAL USE ONLY
+ */
 export interface Constraints {
   /** Constrain the top (vertical axis) of this entity to the top of the specified entity. The tops of both will appear at the same vertical location */
   topToTopOf?: Entity | string;

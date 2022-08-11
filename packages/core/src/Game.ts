@@ -47,7 +47,7 @@ export interface TrialData {
 }
 
 export class Game implements Activity {
-  readonly type = ActivityType.game;
+  readonly type = ActivityType.Game;
   _canvasKit?: CanvasKit;
   _session?: Session;
   uuid = Uuid.generate();
@@ -395,13 +395,10 @@ export class Game implements Activity {
     this.beginIso8601Timestamp = new Date().toISOString();
     this.surface.requestAnimationFrame(this.loop.bind(this));
 
-    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
-      this.session.options.activityCallbacks.onActivityLifecycleChange({
-        type: EventType.ActivityLifecycle,
-        started: true,
-        uuid: this.uuid,
-        name: this.options.name,
-        activityType: this.type,
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.session.options.activityCallbacks.onActivityLifecycle({
+        type: EventType.ActivityStart,
+        target: this,
       });
     }
   }
@@ -440,7 +437,7 @@ export class Game implements Activity {
      * Thus, warmup these not-yet-added images.
      */
     const warmupedImageNames = this.entities
-      .filter((entity) => entity.type === EntityType.sprite)
+      .filter((entity) => entity.type === EntityType.Sprite)
       .map((entitity) => (entitity as Sprite).imageName);
     const loadedImages = this.session.imageManager.loadedImages[this.uuid];
     // loadedImages may be undefined/null if the game does not have images
@@ -642,12 +639,10 @@ export class Game implements Activity {
    */
   trialComplete(): void {
     this.trialIndex++;
-    if (this.session.options.activityCallbacks?.onActivityDataCreate) {
-      this.session.options.activityCallbacks.onActivityDataCreate({
+    if (this.session.options.activityCallbacks?.onActivityResults) {
+      this.session.options.activityCallbacks.onActivityResults({
         type: EventType.ActivityData,
-        uuid: this.uuid,
-        name: this.options.name,
-        activityType: this.type,
+        target: this,
         /** newData is only the trial that recently completed */
         newData: this.data.trials[this.trialIndex - 1],
         newDataSchema: this.makeNewGameDataSchema(),
@@ -795,14 +790,11 @@ export class Game implements Activity {
    * automatically.
    */
   end(): void {
-    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
-      this.session.options.activityCallbacks.onActivityLifecycleChange({
-        type: EventType.ActivityLifecycle,
-        ended: true,
-        uuid: this.uuid,
-        name: this.options.name,
-        activityType: this.type,
-        finalData: {
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.session.options.activityCallbacks.onActivityLifecycle({
+        type: EventType.ActivityEnd,
+        target: this,
+        results: {
           data: this.data,
           dataSchema: this.makeGameDataSchema(),
           activityConfiguration: this.makeGameActivityConfiguration(
@@ -827,14 +819,11 @@ export class Game implements Activity {
    * automatically.
    */
   cancel(): void {
-    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
-      this.session.options.activityCallbacks.onActivityLifecycleChange({
-        type: EventType.ActivityLifecycle,
-        canceled: true,
-        uuid: this.uuid,
-        name: this.options.name,
-        activityType: this.type,
-        finalData: {
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.session.options.activityCallbacks.onActivityLifecycle({
+        type: EventType.ActivityCancel,
+        target: this,
+        results: {
           data: this.data,
           dataSchema: this.makeGameDataSchema(),
           activityConfiguration: this.makeGameActivityConfiguration(
@@ -1043,7 +1032,7 @@ export class Game implements Activity {
       const transition = incomingSceneTransition.transition;
 
       // no transition (type "none"); just present the incoming scene
-      if (transition.type === TransitionType.none) {
+      if (transition.type === TransitionType.None) {
         if (this.currentScene) {
           this.currentScene._active = false;
         }
@@ -1159,7 +1148,7 @@ export class Game implements Activity {
             fps: Number.parseFloat(this.fpsRate.toFixed(2)),
             fps_interval_ms: Constants.FPS_DISPLAY_UPDATE_INTERVAL,
             fps_report_threshold: this.fpsMetricReportThreshold,
-            activity_type: ActivityType.game,
+            activity_type: ActivityType.Game,
             activity_uuid: this.uuid,
             iso8601_timestamp: new Date().toISOString(),
           });
@@ -1268,10 +1257,10 @@ export class Game implements Activity {
     outgoingScene._transitioning = true;
 
     switch (transition.type) {
-      case TransitionType.slide: {
+      case TransitionType.Slide: {
         const direction = (transition as SlideTransition).direction;
         switch (direction) {
-          case TransitionDirection.left:
+          case TransitionDirection.Left:
             incomingScene.position.x = incomingScene.size.width;
             // Because these actions are part of the scene transition, it's important to set optional parameter
             // runDuringTransition to "true" for the Move and Custom actions.
@@ -1325,7 +1314,7 @@ export class Game implements Activity {
               ])
             );
             break;
-          case TransitionDirection.right:
+          case TransitionDirection.Right:
             incomingScene.position.x = -incomingScene.size.width;
             incomingScene.run(
               Action.sequence([
@@ -1368,7 +1357,7 @@ export class Game implements Activity {
               ])
             );
             break;
-          case TransitionDirection.up:
+          case TransitionDirection.Up:
             incomingScene.position.y = incomingScene.size.height;
             incomingScene.run(
               Action.sequence([
@@ -1411,7 +1400,7 @@ export class Game implements Activity {
               ])
             );
             break;
-          case TransitionDirection.down:
+          case TransitionDirection.Down:
             incomingScene.position.y = -incomingScene.size.height;
             incomingScene.run(
               Action.sequence([
@@ -1561,6 +1550,7 @@ export class Game implements Activity {
       return;
     }
     const m2Event: EventBase = {
+      target: scene,
       type: EventType.PointerDown,
       handled: false,
     };
@@ -1579,6 +1569,7 @@ export class Game implements Activity {
       return;
     }
     const m2Event: EventBase = {
+      target: scene,
       type: EventType.PointerUp,
       handled: false,
     };
@@ -1593,6 +1584,7 @@ export class Game implements Activity {
       return;
     }
     const m2Event: EventBase = {
+      target: scene,
       type: EventType.PointerMove,
       handled: false,
     };
@@ -1780,6 +1772,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.PointerDown;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
@@ -1793,6 +1786,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.TapDown;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
@@ -1806,6 +1800,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.TapLeave;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
@@ -1819,6 +1814,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.PointerUp;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
@@ -1832,6 +1828,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.TapUp;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
@@ -1845,6 +1842,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.TapUpAny;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
@@ -1858,6 +1856,7 @@ export class Game implements Activity {
     m2Event: EventBase,
     domPointerEvent: PointerEvent
   ): void {
+    m2Event.target = entity;
     m2Event.type = EventType.PointerMove;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
@@ -1967,7 +1966,7 @@ export class Game implements Activity {
       return false;
     }
 
-    if (entity.type === EntityType.textline && isNaN(entity.size.width)) {
+    if (entity.type === EntityType.TextLine && isNaN(entity.size.width)) {
       // console.warn(
       //   `warning: entity ${entity.toString()} is a textline with width = NaN. A textline must have its width manually set.`
       // );

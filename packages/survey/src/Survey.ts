@@ -2,7 +2,7 @@ import {
   Session,
   Uuid,
   Activity,
-  ActivityData,
+  ActivityKeyValueData,
   ActivityType,
   EventType,
   Timer,
@@ -37,7 +37,7 @@ interface SurveyJsOptions {
  * specifications
  */
 export class Survey implements Activity {
-  readonly type = ActivityType.survey;
+  readonly type = ActivityType.Survey;
   private _session?: Session;
   name: string;
   uuid = Uuid.generate();
@@ -98,13 +98,10 @@ export class Survey implements Activity {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.survey.onComplete.add(() => {
-      if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
-        this.session.options.activityCallbacks.onActivityLifecycleChange({
-          eventType: EventType.activityLifecycle,
-          activityType: this.type,
-          ended: true,
-          uuid: this.uuid,
-          name: this.name,
+      if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+        this.session.options.activityCallbacks.onActivityLifecycle({
+          type: EventType.ActivityEnd,
+          target: this,
         });
       }
     });
@@ -117,15 +114,13 @@ export class Survey implements Activity {
          * questions as multiple key-value pairs in the sender.data object.
          * These match up with the types we need, newData and e.g., ActivityData.
          */
-        if (this.session.options.activityCallbacks?.onActivityDataCreate) {
-          this.session.options.activityCallbacks.onActivityDataCreate({
-            eventType: EventType.activityData,
-            activityType: this.type,
-            uuid: this.uuid,
-            name: this.name,
+        if (this.session.options.activityCallbacks?.onActivityResults) {
+          this.session.options.activityCallbacks.onActivityResults({
+            type: EventType.ActivityData,
+            target: this,
             newData: { [options.name]: options.value },
             newDataSchema: {},
-            data: sender.data as unknown as ActivityData,
+            data: sender.data as unknown as ActivityKeyValueData,
             dataSchema: {},
             activityConfiguration: {},
             activityConfigurationSchema: {},
@@ -134,13 +129,10 @@ export class Survey implements Activity {
       }
     );
 
-    if (this.session.options.activityCallbacks?.onActivityLifecycleChange) {
-      this.session.options.activityCallbacks.onActivityLifecycleChange({
-        eventType: EventType.activityLifecycle,
-        started: true,
-        uuid: this.uuid,
-        name: this.name,
-        activityType: this.type,
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.session.options.activityCallbacks.onActivityLifecycle({
+        type: EventType.ActivityStart,
+        target: this,
       });
     }
 
@@ -201,7 +193,7 @@ export class Survey implements Activity {
    * @param __y
    */
   __x(__y: ActivityType): void {
-    if (__y === ActivityType.survey) {
+    if (__y === ActivityType.Survey) {
       console.log("");
     }
   }

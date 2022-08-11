@@ -10,7 +10,7 @@ import { ActivityType } from "./ActivityType";
  * these data will be directly exported to persistence.
  */
 export interface GameMetric extends ActivityMetric {
-  activity_type: ActivityType.game;
+  activity_type: ActivityType.Game;
 }
 
 /**

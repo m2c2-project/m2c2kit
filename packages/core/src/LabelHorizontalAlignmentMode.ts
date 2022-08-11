@@ -1,5 +1,5 @@
 export enum LabelHorizontalAlignmentMode {
-  center,
-  left,
-  right,
+  Center,
+  Left,
+  Right,
 }

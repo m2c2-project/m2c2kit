@@ -1,5 +1,8 @@
 import { RgbaColor } from "./RgbaColor";
 
+/**
+ * Utility class for comparing equality of m2c2kit objects.
+ */
 export class Equals {
   /**
    * Compares two RgbaColor objects and returns true if they are equal.

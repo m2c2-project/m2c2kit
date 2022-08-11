@@ -411,7 +411,7 @@ class GridMemory extends Game {
           text: "Press START to begin!",
           textFontSize: 24,
           titleFontSize: 30,
-          textAlignmentMode: LabelHorizontalAlignmentMode.center,
+          textAlignmentMode: LabelHorizontalAlignmentMode.Center,
           nextButtonText: "START",
           nextButtonBackgroundColor: WebColors.Green,
         },
@@ -430,12 +430,12 @@ class GridMemory extends Game {
     let back_from_interference_scene_transition: Transition | undefined;
     if (game.getParameter<boolean>("interference_transition_animation")) {
       forward_into_interference_scene_transition = Transition.slide({
-        direction: TransitionDirection.left,
+        direction: TransitionDirection.Left,
         duration: 500,
         easing: Easings.sinusoidalInOut,
       });
       back_from_interference_scene_transition = Transition.slide({
-        direction: TransitionDirection.right,
+        direction: TransitionDirection.Right,
         duration: 500,
         easing: Easings.sinusoidalInOut,
       });
@@ -908,7 +908,7 @@ class GridMemory extends Game {
         game.trialComplete();
         if (game.trialIndex === game.getParameter("number_of_trials")) {
           const nextScreenTransition = Transition.slide({
-            direction: TransitionDirection.left,
+            direction: TransitionDirection.Left,
             duration: 500,
             easing: Easings.sinusoidalInOut,
           });

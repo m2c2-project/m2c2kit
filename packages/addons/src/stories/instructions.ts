@@ -123,7 +123,7 @@ export class Instructions extends Story {
         s.nextSceneTransition ??
         options.nextSceneTransition ??
         Transition.slide({
-          direction: TransitionDirection.left,
+          direction: TransitionDirection.Left,
           duration: SCENE_TRANSITION_DURATION,
           easing: SCENE_TRANSITION_EASING,
         });
@@ -131,7 +131,7 @@ export class Instructions extends Story {
         s.backSceneTransition ??
         options.backSceneTransition ??
         Transition.slide({
-          direction: TransitionDirection.right,
+          direction: TransitionDirection.Right,
           duration: SCENE_TRANSITION_DURATION,
           easing: SCENE_TRANSITION_EASING,
         });
@@ -154,7 +154,7 @@ export class Instructions extends Story {
       const textMarginStart = s.textMarginStart ?? 48;
       const textMarginEnd = s.textMarginEnd ?? 48;
       const textAlignmentMode =
-        s.textAlignmentMode ?? LabelHorizontalAlignmentMode.left;
+        s.textAlignmentMode ?? LabelHorizontalAlignmentMode.Left;
       const textFontSize = s.textFontSize ?? 16;
       const titleFontSize = s.titleFontSize ?? 16;
       const titleMarginTop = s.titleMarginTop ?? 48;
@@ -198,7 +198,7 @@ export class Instructions extends Story {
       if (s.text !== undefined) {
         textLabel = new Label({
           text: s.text,
-          preferredMaxLayoutWidth: Dimensions.MATCH_CONSTRAINT,
+          preferredMaxLayoutWidth: Dimensions.MatchConstraint,
           horizontalAlignmentMode: textAlignmentMode,
           fontSize: textFontSize,
           layout: {

@@ -6,7 +6,7 @@ import { Point } from "./Point";
 import { CompositeOptions } from "./CompositeOptions";
 
 export abstract class Composite extends Entity implements IDrawable {
-  readonly type = EntityType.composite;
+  readonly type = EntityType.Composite;
   compositeType = "<compositeType>";
   isDrawable = true;
   // Drawable options

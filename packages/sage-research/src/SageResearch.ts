@@ -55,7 +55,9 @@ export class SageResearch {
    */
   public static sendEventToAndroid(event: EventBase): void {
     switch (event.type) {
-      case EventType.SessionLifecycle: {
+      case EventType.SessionStart:
+      case EventType.SessionEnd:
+      case EventType.SessionInitialize: {
         Android.onSessionLifecycleChange(JSON.stringify(event));
         break;
       }
@@ -63,7 +65,9 @@ export class SageResearch {
         Android.onActivityDataCreate(JSON.stringify(event));
         break;
       }
-      case EventType.ActivityLifecycle: {
+      case EventType.ActivityStart:
+      case EventType.ActivityEnd:
+      case EventType.ActivityCancel: {
         Android.onActivityLifecycleChange(JSON.stringify(event));
         break;
       }

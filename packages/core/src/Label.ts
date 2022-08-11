@@ -16,7 +16,7 @@ import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 import { Scene } from "./Scene";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
-  readonly type = EntityType.label;
+  readonly type = EntityType.Label;
   isDrawable = true;
   isText = true;
   // Drawable options
@@ -29,7 +29,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   private _fontSize = Constants.DEFAULT_FONT_SIZE; // public getter/setter is below
 
   // Label options
-  private _horizontalAlignmentMode = LabelHorizontalAlignmentMode.center; // public getter/setter is below
+  private _horizontalAlignmentMode = LabelHorizontalAlignmentMode.Center; // public getter/setter is below
   private _preferredMaxLayoutWidth: number | undefined; // public getter/setter is below
   private _backgroundColor?: RgbaColor | undefined; // public getter/setter is below
 
@@ -60,13 +60,13 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   override initialize(): void {
     let ckTextAlign: EmbindEnumEntity = this.canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
-      case LabelHorizontalAlignmentMode.center:
+      case LabelHorizontalAlignmentMode.Center:
         ckTextAlign = this.canvasKit.TextAlign.Center;
         break;
-      case LabelHorizontalAlignmentMode.left:
+      case LabelHorizontalAlignmentMode.Left:
         ckTextAlign = this.canvasKit.TextAlign.Left;
         break;
-      case LabelHorizontalAlignmentMode.right:
+      case LabelHorizontalAlignmentMode.Right:
         ckTextAlign = this.canvasKit.TextAlign.Right;
         break;
       default:

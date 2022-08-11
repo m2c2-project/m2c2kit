@@ -13,6 +13,11 @@ class GameTypefaces {
   };
 }
 
+/**
+ * Class for loading, preparing, and providing fonts to games.
+ *
+ * @remarks FOR INTERNAL USE ONLY
+ */
 export class FontManager {
   canvasKit?: CanvasKit;
   fontMgr?: FontMgr;

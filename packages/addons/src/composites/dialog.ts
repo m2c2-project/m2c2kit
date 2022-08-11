@@ -33,9 +33,9 @@ export interface DialogOptions extends CompositeOptions {
 }
 
 export enum DialogResult {
-  Dismiss = "dismiss",
-  Positive = "positive",
-  Negative = "negative",
+  Dismiss = "Dismiss",
+  Positive = "Positive",
+  Negative = "Negative",
 }
 
 export interface DialogEvent extends EntityEvent {
