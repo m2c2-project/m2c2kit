@@ -5,7 +5,7 @@
 export interface BrowserImage {
   /** Name that will be used to refer to the image. Must be unique among all
    * images within a game */
-  name: string;
+  imageName: string;
   /** Width to scale image to */
   width: number;
   /** Height to scale image to */

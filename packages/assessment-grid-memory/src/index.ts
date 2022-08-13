@@ -304,19 +304,19 @@ class GridMemory extends Game {
       fontUrls: ["assets/grid-memory/fonts/roboto/Roboto-Regular.ttf"],
       images: [
         {
-          name: "grid",
+          imageName: "grid",
           height: img_default_size,
           width: img_default_size,
           url: "assets/grid-memory/img/dotmem1_grid.png",
         },
         {
-          name: "fs",
+          imageName: "fs",
           height: img_default_size,
           width: img_default_size,
           url: "assets/grid-memory/img/dotmem2_fs.png",
         },
         {
-          name: "circle-x",
+          imageName: "circle-x",
           height: 32,
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
@@ -389,7 +389,7 @@ class GridMemory extends Game {
         {
           title: "Grid Memory",
           text: `For this activity, try to remember the location of ${NUMBER_OF_DOTS} dots.`,
-          image: "grid",
+          imageName: "grid",
           imageAboveText: false,
           imageMarginTop: 12,
           textFontSize: 24,
@@ -399,7 +399,7 @@ class GridMemory extends Game {
         {
           title: "Grid Memory",
           text: `Before placing the ${NUMBER_OF_DOTS} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.`,
-          image: "fs",
+          imageName: "fs",
           imageAboveText: false,
           imageMarginTop: 12,
           textFontSize: 24,

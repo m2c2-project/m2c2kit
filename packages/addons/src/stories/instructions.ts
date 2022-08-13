@@ -36,8 +36,8 @@ export interface InstructionScene {
   titleMarginTop?: number;
   /** Font size of title text. Default is 16 */
   titleFontSize?: number;
-  /** Optional image to show */
-  image?: string;
+  /** Name of optional image to show */
+  imageName?: string;
   /** Default is to center image vertically within the scene (imageVerticalBias = .5).  Setting imageVerticalBias less than .5 will pull the image towards the top. Setting imageVerticalBias greater than .5 will pull the image towards the bottom */
   imageVerticalBias?: number;
   /** If the image appears below the primary instruction text (imageAboveText = false), this is the margin from the bottom of the primary instruction text to the top of the image */
@@ -216,12 +216,12 @@ export class Instructions extends Story {
         scene.addChild(textLabel);
       }
 
-      if (s.image !== undefined) {
+      if (s.imageName !== undefined) {
         let image: Sprite;
         if (textLabel !== undefined) {
           if (imageAboveText) {
             image = new Sprite({
-              imageName: s.image,
+              imageName: s.imageName,
               layout: {
                 marginBottom: imageMarginBottom,
                 constraints: {
@@ -233,7 +233,7 @@ export class Instructions extends Story {
             });
           } else {
             image = new Sprite({
-              imageName: s.image,
+              imageName: s.imageName,
               layout: {
                 marginTop: imageMarginTop,
                 constraints: {
@@ -246,7 +246,7 @@ export class Instructions extends Story {
           }
         } else {
           image = new Sprite({
-            imageName: s.image,
+            imageName: s.imageName,
             layout: {
               constraints: {
                 topToTopOf: scene,

@@ -84,7 +84,7 @@ export class ImageManager {
         const findDuplicates = (arr: string[]) =>
           arr.filter((item, index) => arr.indexOf(item) != index);
         const duplicateImageNames = findDuplicates(
-          gameImages.images.map((i) => i.name)
+          gameImages.images.map((i) => i.imageName)
         );
         if (duplicateImageNames.length > 0) {
           throw new Error(
@@ -157,7 +157,7 @@ export class ImageManager {
       const dataUrl = this.scratchCanvas.toDataURL();
 
       const renderedImage = new RenderedDataUrlImage(
-        browserImage.name,
+        browserImage.imageName,
         dataUrl,
         browserImage.width,
         browserImage.height
@@ -167,7 +167,7 @@ export class ImageManager {
       if (!this.renderedImages[gameUuid]) {
         this.renderedImages[gameUuid] = {};
       }
-      this.renderedImages[gameUuid][browserImage.name] = renderedImage;
+      this.renderedImages[gameUuid][browserImage.imageName] = renderedImage;
     };
 
     const onError = () => {
@@ -178,10 +178,10 @@ export class ImageManager {
         additional = ` image source was url ${browserImage.url}`;
       }
       console.warn(
-        `unable to render image named ${browserImage.name}.${additional}`
+        `unable to render image named ${browserImage.imageName}.${additional}`
       );
       const renderedImage = new RenderedDataUrlImage(
-        browserImage.name,
+        browserImage.imageName,
         "",
         0,
         0
@@ -189,7 +189,7 @@ export class ImageManager {
       if (!this.renderedImages[gameUuid]) {
         this.renderedImages[gameUuid] = {};
       }
-      this.renderedImages[gameUuid][browserImage.name] = renderedImage;
+      this.renderedImages[gameUuid][browserImage.imageName] = renderedImage;
     };
 
     return new Promise((resolve) => {
@@ -239,7 +239,7 @@ export class ImageManager {
             imageSource = image.src;
           }
           console.warn(
-            `svg image named ${browserImage.name} loaded from ${imageSource} has naturalHeight 0 and/or naturalWidth 0. This is probably because the svg is missing height and width attributes. This will cause the svg not to render on Firefox, due to issue described at https://bugzilla.mozilla.org/show_bug.cgi?id=700533. m2c2kit will attempt to infer the height and width from the svg viewBox, but it is strongly recommended that all svg images have height and width attributes.`
+            `svg image named ${browserImage.imageName} loaded from ${imageSource} has naturalHeight 0 and/or naturalWidth 0. This is probably because the svg is missing height and width attributes. This will cause the svg not to render on Firefox, due to issue described at https://bugzilla.mozilla.org/show_bug.cgi?id=700533. m2c2kit will attempt to infer the height and width from the svg viewBox, but it is strongly recommended that all svg images have height and width attributes.`
           );
 
           const reloadImageUsingViewBoxWidthHeight = (
@@ -247,7 +247,7 @@ export class ImageManager {
           ): void => {
             const viewBoxError = (): void => {
               console.warn(
-                `svg image named ${browserImage.name} has missing or invalid viewBox; unable to render.`
+                `svg image named ${browserImage.imageName} has missing or invalid viewBox; unable to render.`
               );
               renderLoadedImage();
               resolve();
@@ -298,7 +298,7 @@ export class ImageManager {
             // we should never get here, because either browserImage.svgString
             // or browserImage.url should be defined
             console.warn(
-              `unable to render svg image named ${browserImage.name}.`
+              `unable to render svg image named ${browserImage.imageName}.`
             );
             renderLoadedImage();
             resolve();
@@ -307,7 +307,7 @@ export class ImageManager {
           if (image.naturalHeight === 0 || image.naturalWidth === 0) {
             // not an svg, but still 0 natural height or natural width
             console.warn(
-              `image named ${browserImage.name} has naturalHeight 0 and/or naturalWidth 0. This may cause inaccurate rendering. Please check the image.`
+              `image named ${browserImage.imageName} has naturalHeight 0 and/or naturalWidth 0. This may cause inaccurate rendering. Please check the image.`
             );
           }
           renderLoadedImage();
@@ -322,7 +322,7 @@ export class ImageManager {
 
       if (browserImage.svgString && browserImage.url) {
         throw new Error(
-          `provide svgString or url. both were provided for image named ${browserImage.name}`
+          `provide svgString or url. both were provided for image named ${browserImage.imageName}`
         );
       }
       if (browserImage.svgString) {
@@ -332,7 +332,7 @@ export class ImageManager {
         image.src = browserImage.url;
       } else {
         throw new Error(
-          `no svgString or url provided for image named ${browserImage.name}`
+          `no svgString or url provided for image named ${browserImage.imageName}`
         );
       }
     });

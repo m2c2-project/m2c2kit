@@ -136,7 +136,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        */
       images: [
         {
-          name: "assessmentImage",
+          imageName: "assessmentImage",
           /**
            * The image will be resized to the height and width specified.
            */
@@ -267,7 +267,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           textFontSize: 20,
           titleFontSize: 30,
           textVerticalBias: 0.15,
-          image: "assessmentImage",
+          imageName: "assessmentImage",
           imageAboveText: false,
           imageMarginTop: 20,
           /**
