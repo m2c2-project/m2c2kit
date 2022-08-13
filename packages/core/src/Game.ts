@@ -953,6 +953,15 @@ export class Game implements Activity {
       "pointermove",
       this.htmlCanvasPointerMoveHandler.bind(this)
     );
+    /**
+     * on some (all?) mobile devices, even if the page is has no scrollable
+     * content, a touch drag down will partially scroll the screen. This will
+     * interfere will some of our events, such as trail making. Thus, we
+     * prevent this.
+     */
+    this.htmlCanvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+    });
   }
 
   private loop(canvas: Canvas): void {
