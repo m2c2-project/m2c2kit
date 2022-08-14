@@ -41,6 +41,8 @@ export * from "./Layout";
 export * from "./LayoutConstraint";
 export * from "./LoadedImage";
 export * from "./MoveActionOptions";
+export * from "./MutablePath";
+export * from "./Path";
 export * from "./Point";
 export * from "./RandomDraws";
 export * from "./RectOptions";

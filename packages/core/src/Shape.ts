@@ -6,6 +6,7 @@ import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
+import { Path } from "./Path";
 import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 
@@ -21,6 +22,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   shapeType = ShapeType.Undefined;
   circleOfRadius?: number;
   rect?: RectOptions;
+  path?: Path;
   cornerRadius = 0;
   private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR; // public getter/setter is below
   private _strokeColor?: RgbaColor | undefined; // public getter/setter is below
@@ -30,16 +32,38 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private strokeColorPaint?: Paint;
 
   /**
-   * Rectangular or circular shape
+   * Rectangular, circular, or path-based shape
    *
    * @param options - {@link ShapeOptions}
    */
   constructor(options: ShapeOptions = {}) {
     super(options);
     handleInterfaceOptions(this, options);
+    if (options.path !== undefined) {
+      this.path = options.path;
+      this.size.width = options.path.size.width;
+      this.size.height = options.path.size.height;
+      if (!this.strokeColor) {
+        this.strokeColor = Constants.DEFAULT_PATH_STROKE_COLOR;
+      }
+      if (!this.lineWidth) {
+        this.lineWidth = Constants.DEFAULT_PATH_LINE_WIDTH;
+      }
+      this.shapeType = ShapeType.Path;
+      if (options.circleOfRadius || options.rect) {
+        throw new Error(
+          "Shape must specify only one of: path, circleOfRadius, or rect"
+        );
+      }
+    }
     if (options.circleOfRadius !== undefined) {
       this.circleOfRadius = options.circleOfRadius;
       this.shapeType = ShapeType.Circle;
+      if (options.path || options.rect) {
+        throw new Error(
+          "Shape must specify only one of: path, circleOfRadius, or rect"
+        );
+      }
     }
     if (options.rect) {
       this.rect = options.rect;
@@ -176,6 +200,37 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
+
+    if (this.shapeType === ShapeType.Path && this.path) {
+      /** paths use origin with anchor point at 0,0 (upper left) */
+      const pathOriginX =
+        (this.absolutePosition.x -
+          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+        drawScale;
+      /** paths use origin with anchor point at 0,0 (upper left) */
+      const pathOriginY =
+        (this.absolutePosition.y -
+          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+        drawScale;
+
+      if (this.strokeColor && this.strokeColorPaint && this.lineWidth) {
+        // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
+        this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
+
+        for (const subpath of this.path.subpaths) {
+          const points = subpath.flat();
+          for (let i = 0; i < points.length - 1; i++) {
+            canvas.drawLine(
+              pathOriginX + points[i].x * drawScale,
+              pathOriginY + points[i].y * drawScale,
+              pathOriginX + points[i + 1].x * drawScale,
+              pathOriginY + points[i + 1].y * drawScale,
+              this.strokeColorPaint
+            );
+          }
+        }
+      }
+    }
 
     if (
       this.shapeType === ShapeType.Circle &&

@@ -15,9 +15,17 @@ export class Constants {
   public static readonly FPS_DISPLAY_UPDATE_INTERVAL = 1000;
   /** The frames per second will be logged in game metrics if the FPS is lower than this value */
   public static readonly FPS_METRIC_REPORT_THRESHOLD = 59;
+  /** Scene color, if none is specified. */
   public static readonly DEFAULT_SCENE_BACKGROUND_COLOR = WebColors.White;
+  /** Shape fill color, if none is specified. */
   public static readonly DEFAULT_SHAPE_FILL_COLOR = WebColors.Red;
+  /** Color of paths in a shape, if none is specified. */
+  public static readonly DEFAULT_PATH_STROKE_COLOR = WebColors.Red;
+  /** Line width of paths in a shape, if none is specified. */
+  public static readonly DEFAULT_PATH_LINE_WIDTH = 2;
+  /** Color of text in Label and TextLine, if none is specified. */
   public static readonly DEFAULT_FONT_COLOR = WebColors.Black;
+  /** Font size in Label and TextLine, if none is specified. */
   public static readonly DEFAULT_FONT_SIZE = 16;
   public static readonly LIMITED_FPS_RATE = 5;
   public static readonly FREE_ENTITIES_SCENE_NAME = "__freeEntitiesScene";

@@ -21,7 +21,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   /**
    * Visual image displayed on the screen.
    *
-   * @remarks Sprites must be loaded during the Game.init() method prior to their use.
+   * @remarks Images that will be used to create the sprite must be loaded during the Game.init() method prior to their use.
    *
    * @param options - {@link SpriteOptions}
    */
