@@ -15,8 +15,9 @@
     }
   },
   "files": [
-    "dist",
-    "assets",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "assets/**",
     "post-install.mjs"
   ],
   "dependencies": {

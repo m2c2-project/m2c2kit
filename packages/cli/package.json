@@ -4,7 +4,7 @@
   "description": "m2c2kit command line interface",
   "module": "dist/cli.js",
   "files": [
-    "dist"
+    "dist/**"
   ],
   "type": "module",
   "bin": {
