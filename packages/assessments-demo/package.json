@@ -5,7 +5,7 @@
     "serve": "rollup -c rollup.config.mjs --watch --configServe",
     "build": "rollup -c rollup.config.mjs --configProd --configNoHash",
     "build-webview": "rollup -c rollup.config.webview.mjs --configProd --configNoHash",
-    "clean": "rimraf build dist .rollup.cache"
+    "clean": "rimraf build dist dist-webview .rollup.cache"
   },
   "private": true,
   "dependencies": {
