@@ -22,6 +22,8 @@
     "build",
     "dist",
     "rollup.config.mjs",
-    "post-install.mjs"
+    "post-install.mjs",
+    "dist-webview",
+    "rollup.config.webview.mjs"
   ]
 }

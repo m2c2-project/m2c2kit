@@ -29,6 +29,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    namespace 'edu.psu.m2c2.simplewebview'
+
+    project.tasks.preBuild.dependsOn("copym2c2kitassets")
 }
 
 dependencies {
@@ -41,4 +44,10 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+
+tasks.register('copym2c2kitassets', Copy) {
+    from '../../../packages/assessments-demo/dist-webview'
+    into 'src/main/assets'
+    include '**/*'
 }

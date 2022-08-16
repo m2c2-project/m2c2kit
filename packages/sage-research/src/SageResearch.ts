@@ -11,13 +11,9 @@ import { EventBase, EventType } from "@m2c2kit/core";
  * */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Android {
-  function onActivityDataCreate(activityDataEventAsString: string): void;
-  function onActivityLifecycleChange(
-    activityLifecycleEventAsString: string
-  ): void;
-  function onSessionLifecycleChange(
-    sessionLifecycleEventAsString: string
-  ): void;
+  function onActivityResults(activityResultsEventAsString: string): void;
+  function onActivityLifecycle(activityLifecycleEventAsString: string): void;
+  function onSessionLifecycle(sessionLifecycleEventAsString: string): void;
   /**
    * If the Android native app will control the session execution and be
    * able to set custom game paraemters (which is probably what you want),
@@ -54,21 +50,30 @@ export class SageResearch {
    * @param event - the m2c2kit event to send to the Android app.
    */
   public static sendEventToAndroid(event: EventBase): void {
+    /**
+     * event.target is the object that fired the event, which is an Activity,
+     * Session, or Entity. These objects have circular references, so we will
+     * keep just target's type and name.
+     */
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    event.target = { type: event.target.type, name: event.target.name };
+
     switch (event.type) {
       case EventType.SessionStart:
       case EventType.SessionEnd:
       case EventType.SessionInitialize: {
-        Android.onSessionLifecycleChange(JSON.stringify(event));
+        Android.onSessionLifecycle(JSON.stringify(event));
         break;
       }
       case EventType.ActivityData: {
-        Android.onActivityDataCreate(JSON.stringify(event));
+        Android.onActivityResults(JSON.stringify(event));
         break;
       }
       case EventType.ActivityStart:
       case EventType.ActivityEnd:
       case EventType.ActivityCancel: {
-        Android.onActivityLifecycleChange(JSON.stringify(event));
+        Android.onActivityLifecycle(JSON.stringify(event));
         break;
       }
       default:
