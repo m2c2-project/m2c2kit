@@ -13,6 +13,8 @@ export class Constants {
   public static readonly FPS_DISPLAY_TEXT_COLOR: RgbaColor = [0, 0, 0, 0.5];
   /** Frequency, in milliseconds, at which to update frames per second metric shown on the screen */
   public static readonly FPS_DISPLAY_UPDATE_INTERVAL = 1000;
+  /** Maximum number of activity metrics to log. */
+  public static readonly MAXIMUM_RECORDED_ACTIVITY_METRICS = 32;
   /** The frames per second will be logged in game metrics if the FPS is lower than this value */
   public static readonly FPS_METRIC_REPORT_THRESHOLD = 59;
   /** Scene color, if none is specified. */

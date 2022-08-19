@@ -39,6 +39,8 @@ export interface GameOptions {
   showFps?: boolean;
   /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */
   bodyBackgroundColor?: RgbaColor;
+  /** Maximum number of activity metrics to log. */
+  maximumRecordedActivityMetrics?: number;
   /** The FPS will be logged in game metrics if the FPS is lower than this value. Default is 59, as defined in Constants.FPS_METRIC_REPORT_THRESHOLD */
   fpsMetricReportThreshold?: number;
   /** Adapt execution for unit testing? Default is false */

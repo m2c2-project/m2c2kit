@@ -50,15 +50,7 @@ export class SageResearch {
    * @param event - the m2c2kit event to send to the Android app.
    */
   public static sendEventToAndroid(event: EventBase): void {
-    /**
-     * event.target is the object that fired the event, which is an Activity,
-     * Session, or Entity. These objects have circular references, so we will
-     * keep just target's type and name.
-     */
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    event.target = { type: event.target.type, name: event.target.name };
-
+    this.removeCircularReferencesFromEvent(event);
     switch (event.type) {
       case EventType.SessionStart:
       case EventType.SessionEnd:
@@ -102,6 +94,7 @@ export class SageResearch {
    * @param event - the m2c2kit event to send to the iOS app.
    */
   public static sendEventToIOS(event: EventBase): void {
+    this.removeCircularReferencesFromEvent(event);
     window.webkit.messageHandlers.iOS.postMessage(event);
   }
 
@@ -160,6 +153,22 @@ export class SageResearch {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Removes circular references from event object.
+   *
+   * @remarks event.target is the object that fired the event, which is an
+   * Activity, Session, or Entity. These objects have circular references,
+   * which will cause problems when serializing. Thus, before we pass the
+   * event to Android or iOS, retain just target's type and name.
+   *
+   * @param event
+   */
+  private static removeCircularReferencesFromEvent(event: EventBase): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    event.target = { type: event.target.type, name: event.target.name };
   }
 
   /**

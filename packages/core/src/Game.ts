@@ -56,7 +56,8 @@ export class Game implements Activity {
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
   private gameMetrics: Array<GameMetric> = new Array<GameMetric>();
-  fpsMetricReportThreshold: number;
+  private fpsMetricReportThreshold: number;
+  private maximumRecordedActivityMetrics: number;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -70,6 +71,9 @@ export class Game implements Activity {
     this.freeEntitiesScene.needsInitialization = true;
     this.fpsMetricReportThreshold =
       options.fpsMetricReportThreshold ?? Constants.FPS_METRIC_REPORT_THRESHOLD;
+    this.maximumRecordedActivityMetrics =
+      options.maximumRecordedActivityMetrics ??
+      Constants.MAXIMUM_RECORDED_ACTIVITY_METRICS;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -1152,7 +1156,10 @@ export class Game implements Activity {
         this.lastFpsUpdate = Globals.now;
         this.nextFpsUpdate =
           Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
-        if (this.fpsRate < this.fpsMetricReportThreshold) {
+        if (
+          this.gameMetrics.length < this.maximumRecordedActivityMetrics &&
+          this.fpsRate < this.fpsMetricReportThreshold
+        ) {
           this.gameMetrics.push({
             fps: Number.parseFloat(this.fpsRate.toFixed(2)),
             fps_interval_ms: Constants.FPS_DISPLAY_UPDATE_INTERVAL,
