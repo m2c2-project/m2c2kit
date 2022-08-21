@@ -18,19 +18,6 @@ const a2 = new GridMemory();
 const a3 = new SymbolSearch();
 const a4 = new CliStarter();
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Android {
-  function onActivityResults(activityResultsEventAsString: string): void;
-  function onActivityLifecycle(activityLifecycleEventAsString: string): void;
-  function onSessionLifecycle(sessionLifecycleEventAsString: string): void;
-  /**
-   * If the Android native app will control the session execution and be
-   * able to set custom game paraemters (which is probably what you want),
-   * be sure that sessionManualStart() in the native code returns true
-   * */
-  function sessionManualStart(): boolean;
-}
-
 const session = new Session({
   activities: [a1, a2, a3, a4],
   sessionCallbacks: {
@@ -42,20 +29,20 @@ const session = new Session({
      * Once initialized, the below code will start the session.
      */
     onSessionLifecycle: (ev: SessionLifecycleEvent) => {
-      //#region to support m2c2kit in Android WebView
-      if (SageResearch.contextIsAndroidWebView()) {
-        SageResearch.sendEventToAndroid(ev);
+      //#region to support m2c2kit in WebView
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
       }
       //#endregion
 
       if (ev.type === EventType.SessionInitialize) {
-        //#region to support m2c2kit in Android WebView
+        //#region to support m2c2kit in WebView
         if (
-          SageResearch.contextIsAndroidWebView() &&
-          Android.sessionManualStart()
+          SageResearch.contextIsWebView() &&
+          SageResearch.sessionManualStart()
         ) {
-          // don't automatically start! Let the native Android code
-          // set some game parameters and start the game
+          // don't automatically start! Let the native code
+          // set game parameters and start the game when desired.
           return;
         }
         //#endregion
@@ -88,9 +75,9 @@ const session = new Session({
      * Currently, only games generate schema.
      */
     onActivityResults: (ev: ActivityResultsEvent) => {
-      //#region to support m2c2kit in Android WebView
-      if (SageResearch.contextIsAndroidWebView()) {
-        SageResearch.sendEventToAndroid(ev);
+      //#region to support m2c2kit in WebView
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
       }
       //#endregion
 
@@ -119,9 +106,9 @@ const session = new Session({
      * so we'll look for the session ending via onSessionLifecycleChange
      */
     onActivityLifecycle: (ev: ActivityLifecycleEvent) => {
-      //#region to support m2c2kit in Android WebView
-      if (SageResearch.contextIsAndroidWebView()) {
-        SageResearch.sendEventToAndroid(ev);
+      //#region to support m2c2kit in WebView
+      if (SageResearch.contextIsWebView()) {
+        SageResearch.sendEventToWebView(ev);
       }
       //#endregion
 
@@ -146,7 +133,10 @@ const session = new Session({
     },
   },
 });
-
+/**
+ * Needed to support loading wasm from file in iOS WKWebView
+ */
+SageResearch.ConfigureWasmFetchInterceptor();
 /**
  * Make session also available on window in case we want to control
  * the session through another means, such as other javascript or
