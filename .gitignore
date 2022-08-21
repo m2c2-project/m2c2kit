@@ -13,6 +13,8 @@ examples/android-simple-webview/app/src/main/assets
 # wasm binaries
 *.wasm
 
+**/.DS_Store
+
 # Logs
 logs
 *.log

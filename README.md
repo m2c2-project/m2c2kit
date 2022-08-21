@@ -72,6 +72,13 @@ m2c2kit is a mono repository. Assuming you have installed [Node.js](https://node
 
 Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core) library. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency. Within the `packages/core` folder, tests can be run with `npm run test` (provided that the core package has already been built with `npm run build`).
 
+## Examples
+
+- [`android-simple-webview`](examples/android-simple-webview/) - Android Studio project showing  m2c2kit assessments integrated into a native Android app. Assessments are bundled into the app and do not require an internet connection.
+
+- [`ios-simple-webview`](examples/ios-simple-webview/) - Xcode project showing  m2c2kit assessments integrated into a native iOS app. Assessments are bundled into the app and do not require an internet connection.
+
+
 ## Contributing
 
 [Prettier](https://prettier.io/) has been configured to automatically run on each commit. It will format TypeScript, JavaScript, HTML, and JSON to [uniform coding styles](https://prettier.io/docs/en/why-prettier.html).
