@@ -104,7 +104,10 @@ describe("actions", () => {
     g1 = new Game1();
     g2 = new Game2();
 
-    const options: SessionOptions = { activities: [g1, g2] };
+    const options: SessionOptions = {
+      activities: [g1, g2],
+      canvasKitWasmUrl: "assets/canvaskit.wasm",
+    };
     session = new Session(options);
     setupDomAndGlobals();
   });
@@ -157,7 +160,10 @@ describe("Game start", () => {
     g1 = new Game1();
     g2 = new Game2();
 
-    const options: SessionOptions = { activities: [g1, g2] };
+    const options: SessionOptions = {
+      activities: [g1, g2],
+      canvasKitWasmUrl: "assets/canvaskit.wasm",
+    };
     session = new Session(options);
     setupDomAndGlobals();
   });
@@ -207,7 +213,10 @@ describe("free entities", () => {
     g2 = new Game2();
 
     g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
-    const options: SessionOptions = { activities: [g1, g2] };
+    const options: SessionOptions = {
+      activities: [g1, g2],
+      canvasKitWasmUrl: "assets/canvaskit.wasm",
+    };
     session = new Session(options);
     setupDomAndGlobals();
   });
@@ -323,7 +332,10 @@ let g3: Game3;
 describe("addTrialData", () => {
   beforeEach(() => {
     g3 = new Game3();
-    const options: SessionOptions = { activities: [g3] };
+    const options: SessionOptions = {
+      activities: [g3],
+      canvasKitWasmUrl: "assets/canvaskit.wasm",
+    };
     session = new Session(options);
     setupDomAndGlobals();
   });

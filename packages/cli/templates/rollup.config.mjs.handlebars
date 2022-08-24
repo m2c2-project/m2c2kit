@@ -1,31 +1,12 @@
 import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import shim from "rollup-plugin-shim";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-import path from "path";
-import {
-  copyM2c2Assets,
-  addHashesM2c2Transformer,
-  copyM2c2IndexHtml,
-} from "@m2c2kit/build-helpers";
-
-let sharedPlugins = [
-  // canvaskit-wasm references these node.js functions
-  // shim them to empty functions for browser usage
-  shim({
-    fs: `export function fs_empty_shim() { }`,
-    path: `export function path_empty_shim() { }`,
-  }),
-  nodeResolve(),
-  commonjs(),
-];
+import copy from "rollup-plugin-copy";
+import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
-  const isProd = commandLineArgs.configProd ? true : false;
-  const noHash = commandLineArgs.configNoHash ? true : false;
 
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
@@ -43,29 +24,33 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        ...sharedPlugins,
+        nodeResolve(),
         typescript({
           sourceMap: commandLineArgs.configServe && true,
-          transformers: {
-            before:
-              isProd && !noHash ? [addHashesM2c2Transformer()] : undefined,
-          },
         }),
-        copyM2c2IndexHtml(
-          "src/index.html",
-          `${outputFolder}/index.html`,
-          `${outputFolder}/index.js`,
-          isProd && !noHash
-        ),
-        copyM2c2Assets(
-          "src/assets",
-          `${outputFolder}/assets`,
-          isProd && !noHash
-        ),
+        copy({
+          targets: [
+            {
+              src: "./src/assets",
+              dest: outputFolder,
+            },
+            {
+              src: "./src/index.html",
+              dest: outputFolder,
+            },
+          ],
+        }),
+        commandLineArgs.configProd &&
+          !commandLineArgs.configNoHash &&
+          hashM2c2kitAssets(outputFolder),
         commandLineArgs.configServe &&
           serve({
-            // we can start development server and automatically open browser by running
-            // npm run serve -- --configOpen
+            /**
+             * Start development server and automatically open browser with
+             *   npm run serve -- --configOpen
+             * However, to debug and hit breakpoints, you must launch
+             * the browser through vs code.
+             */
             open: commandLineArgs.configOpen && true,
             verbose: true,
             contentBase: [`./${outputFolder}`],
@@ -74,6 +59,10 @@ export default (commandLineArgs) => {
             port: 3000,
           }),
         commandLineArgs.configServe &&
+          /**
+           * Try a shorter delay for quicker reloads, but increase it if
+           * the browser reloads before the new build is fully ready.
+           */
           livereload({ watch: "build", delay: 250 }),
       ],
     },

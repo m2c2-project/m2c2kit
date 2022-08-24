@@ -8,8 +8,8 @@ export interface SessionOptions {
   activityCallbacks?: ActivityCallbacks;
   /** Callbacks executed when session events occur */
   sessionCallbacks?: SessionCallbacks;
-  /** Url of the canvaskit.wasm binary. Do not set this property; it will be set automatically. */
-  canvasKitWasmUrl?: string;
+  /** Url of the canvaskit.wasm binary. Always set to the default value of "assets/canvaskit.wasm" */
+  canvasKitWasmUrl: "assets/canvaskit.wasm";
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

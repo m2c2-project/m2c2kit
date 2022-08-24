@@ -41,7 +41,7 @@ export default [
     plugins: [
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
-      typescript(),
+      typescript({ outputToFilesystem: true }),
       prependToBundle("index.js", codeToPrepend),
     ],
     external: ["fs/promises"],
@@ -66,4 +66,5 @@ export default [
   },
 ];
 
+// if get a note about circular dependencies with glob,
 // see https://github.com/isaacs/node-glob/issues/365

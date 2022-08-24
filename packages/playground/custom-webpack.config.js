@@ -194,6 +194,7 @@ module.exports = {
 
 const sessionCode = `const session = new Session({
   activities: [activity],
+  canvasKitWasmUrl: "assets/canvaskit.wasm",
   sessionCallbacks: {
     /**
      * onSessionLifecycle() will be called on events such

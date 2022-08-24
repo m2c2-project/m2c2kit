@@ -57,7 +57,10 @@ let rect1: Shape;
 
 beforeEach(() => {
   g1 = new Game1();
-  const options: SessionOptions = { activities: [g1] };
+  const options: SessionOptions = {
+    activities: [g1],
+    canvasKitWasmUrl: "assets/canvaskit.wasm",
+  };
   session = new Session(options);
 
   const dom = new JSDOM(`<!DOCTYPE html>

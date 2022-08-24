@@ -5,8 +5,6 @@ import { RgbaColor } from "./RgbaColor";
  * Reasonable defaults to use if values are not specified.
  */
 export class Constants {
-  /** Once built, the URL where the canvaskit wasm binary is stored. This will change if hashing is enabled during build. */
-  public static readonly DEFAULT_CANVASKITWASM_URL = "assets/canvaskit.wasm";
   /** Size of the font showing frames per second */
   public static readonly FPS_DISPLAY_TEXT_FONT_SIZE = 12;
   /** Color of the font showing frames per second */

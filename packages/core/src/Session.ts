@@ -204,9 +204,7 @@ export class Session {
 
   // call CanvasKitInit through loadCanvasKit so we can mock
   // loadCanvasKit using jest
-  private loadCanvasKit(
-    canvasKitWasmUrl = Constants.DEFAULT_CANVASKITWASM_URL
-  ): Promise<CanvasKit> {
+  private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
     return CanvasKitInit(canvasKitWasmUrl);
   }
 

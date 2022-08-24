@@ -92,7 +92,10 @@ beforeEach(() => {
   g1 = new Game1();
   g2 = new Game2();
 
-  const options: SessionOptions = { activities: [g1, g2] };
+  const options: SessionOptions = {
+    activities: [g1, g2],
+    canvasKitWasmUrl: "assets/canvaskit.wasm",
+  };
   session = new Session(options);
 });
 

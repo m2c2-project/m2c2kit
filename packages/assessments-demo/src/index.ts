@@ -19,6 +19,7 @@ const a4 = new CliStarter();
 
 const session = new Session({
   activities: [a1, a2, a3, a4],
+  canvasKitWasmUrl: "assets/canvaskit.wasm",
   sessionCallbacks: {
     /**
      * onSessionLifecycle() will be called on events such

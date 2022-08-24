@@ -4,18 +4,10 @@ import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import copy from "rollup-plugin-copy";
-import {
-  copyM2c2Assets,
-  addHashesM2c2Transformer,
-  copyM2c2IndexHtml,
-} from "@m2c2kit/build-helpers";
-
-let sharedPlugins = [nodeResolve()];
+import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
-  const isProd = commandLineArgs.configProd ? true : false;
-  const noHash = commandLineArgs.configNoHash ? true : false;
 
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
@@ -33,62 +25,50 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        ...sharedPlugins,
+        nodeResolve(),
         typescript({
           sourceMap: commandLineArgs.configServe && true,
-          transformers: {
-            before:
-              isProd && !noHash ? [addHashesM2c2Transformer()] : undefined,
-          },
         }),
         sourcemaps(),
-        copyM2c2IndexHtml(
-          "../core/index.html",
-          `${outputFolder}/index.html`,
-          `${outputFolder}/index.js`,
-          isProd && !noHash
-        ),
-        copyM2c2Assets(
-          "../core/assets",
-          `${outputFolder}/assets`,
-          isProd && !noHash
-        ),
         copy({
           targets: [
+            {
+              src: "../core/assets/",
+              dest: outputFolder,
+            },
+            {
+              src: "../core/index.html",
+              dest: outputFolder,
+            },
             {
               src: "../assessment-cli-starter/assets/cli-starter",
               dest: `${outputFolder}/assets`,
             },
-          ],
-        }),
-        copy({
-          targets: [
             {
               src: "../assessment-color-dots/assets/color-dots",
               dest: `${outputFolder}/assets`,
             },
-          ],
-        }),
-        copy({
-          targets: [
             {
               src: "../assessment-grid-memory/assets/grid-memory",
               dest: `${outputFolder}/assets`,
             },
-          ],
-        }),
-        copy({
-          targets: [
             {
               src: "../assessment-symbol-search/assets/symbol-search",
               dest: `${outputFolder}/assets`,
             },
           ],
         }),
+        commandLineArgs.configProd &&
+          !commandLineArgs.configNoHash &&
+          hashM2c2kitAssets(outputFolder),
         commandLineArgs.configServe &&
           serve({
-            // we can start development server and automatically open browser by running
-            // npm run serve -- --configOpen
+            /**
+             * Start development server and automatically open browser with
+             *   npm run serve -- --configOpen
+             * However, to debug and hit breakpoints, you must launch
+             * the browser through vs code.
+             */
             open: commandLineArgs.configOpen && true,
             verbose: true,
             contentBase: [`./${outputFolder}`],
@@ -97,6 +77,10 @@ export default (commandLineArgs) => {
             port: 3000,
           }),
         commandLineArgs.configServe &&
+          /**
+           * Try a shorter delay for quicker reloads, but increase it if
+           * the browser reloads before the new build is fully ready.
+           */
           livereload({ watch: "build", delay: 250 }),
       ],
     },

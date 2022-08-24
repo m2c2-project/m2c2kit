@@ -3,7 +3,7 @@
   "version": "0.8.0",
   "scripts": {
     "serve": "rollup -c rollup.config.mjs --watch --configServe",
-    "build": "rollup -c rollup.config.mjs --configProd --configNoHash",
+    "build": "rollup -c rollup.config.mjs --configProd",
     "build-webview": "rollup -c rollup.config.webview.mjs --configProd --configNoHash",
     "clean": "rimraf build dist dist-webview .rollup.cache"
   },

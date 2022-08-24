@@ -67,150 +67,150 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: "CLI Starter (Stroop)",
       url: "./assets/src/cli-starter/index.ts",
     },
-    {
-      name: "tutorial-part01-01.ts",
-      url: "./assets/tutorial/tutorial-part01-01.ts",
-    },
-    {
-      name: "tutorial-part01-02.ts",
-      url: "./assets/tutorial/tutorial-part01-02.ts",
-    },
-    {
-      name: "tutorial-part01-03.ts",
-      url: "./assets/tutorial/tutorial-part01-03.ts",
-    },
-    {
-      name: "tutorial-part01-04.ts",
-      url: "./assets/tutorial/tutorial-part01-04.ts",
-    },
-    {
-      name: "tutorial-part01-05.ts",
-      url: "./assets/tutorial/tutorial-part01-05.ts",
-    },
-    {
-      name: "tutorial-part01-06.ts",
-      url: "./assets/tutorial/tutorial-part01-06.ts",
-    },
-    {
-      name: "tutorial-part01-07.ts",
-      url: "./assets/tutorial/tutorial-part01-07.ts",
-    },
-    {
-      name: "tutorial-part01-08.ts",
-      url: "./assets/tutorial/tutorial-part01-08.ts",
-    },
-    {
-      name: "tutorial-part02-01.ts",
-      url: "./assets/tutorial/tutorial-part02-01.ts",
-    },
-    {
-      name: "tutorial-part02-02.ts",
-      url: "./assets/tutorial/tutorial-part02-02.ts",
-    },
-    {
-      name: "tutorial-part02-03.ts",
-      url: "./assets/tutorial/tutorial-part02-03.ts",
-    },
-    {
-      name: "tutorial-part02-04.ts",
-      url: "./assets/tutorial/tutorial-part02-04.ts",
-    },
-    {
-      name: "tutorial-part02-05.ts",
-      url: "./assets/tutorial/tutorial-part02-05.ts",
-    },
-    {
-      name: "tutorial-part02-06.ts",
-      url: "./assets/tutorial/tutorial-part02-06.ts",
-    },
-    {
-      name: "tutorial-part02-07.ts",
-      url: "./assets/tutorial/tutorial-part02-07.ts",
-    },
-    {
-      name: "tutorial-part02-08.ts",
-      url: "./assets/tutorial/tutorial-part02-08.ts",
-    },
-    {
-      name: "tutorial-part02-09.ts",
-      url: "./assets/tutorial/tutorial-part02-09.ts",
-    },
-    {
-      name: "tutorial-part02-10.ts",
-      url: "./assets/tutorial/tutorial-part02-10.ts",
-    },
-    {
-      name: "tutorial-part03-01.ts",
-      url: "./assets/tutorial/tutorial-part03-01.ts",
-    },
-    {
-      name: "tutorial-part03-02.ts",
-      url: "./assets/tutorial/tutorial-part03-02.ts",
-    },
-    {
-      name: "tutorial-part03-03.ts",
-      url: "./assets/tutorial/tutorial-part03-03.ts",
-    },
-    {
-      name: "tutorial-part03-04.ts",
-      url: "./assets/tutorial/tutorial-part03-04.ts",
-    },
-    {
-      name: "tutorial-part03-05.ts",
-      url: "./assets/tutorial/tutorial-part03-05.ts",
-    },
-    {
-      name: "tutorial-part03-06.ts",
-      url: "./assets/tutorial/tutorial-part03-06.ts",
-    },
-    {
-      name: "tutorial-part03-07.ts",
-      url: "./assets/tutorial/tutorial-part03-07.ts",
-    },
-    {
-      name: "tutorial-part03-08.ts",
-      url: "./assets/tutorial/tutorial-part03-08.ts",
-    },
-    {
-      name: "tutorial-part04-01.ts",
-      url: "./assets/tutorial/tutorial-part04-01.ts",
-    },
-    {
-      name: "tutorial-part04-02.ts",
-      url: "./assets/tutorial/tutorial-part04-02.ts",
-    },
-    {
-      name: "tutorial-part04-03.ts",
-      url: "./assets/tutorial/tutorial-part04-03.ts",
-    },
-    {
-      name: "tutorial-part04-04.ts",
-      url: "./assets/tutorial/tutorial-part04-04.ts",
-    },
-    {
-      name: "tutorial-part04-05.ts",
-      url: "./assets/tutorial/tutorial-part04-05.ts",
-    },
-    {
-      name: "tutorial-part04-06.ts",
-      url: "./assets/tutorial/tutorial-part04-06.ts",
-    },
-    {
-      name: "tutorial-part04-07.ts",
-      url: "./assets/tutorial/tutorial-part04-07.ts",
-    },
-    {
-      name: "tutorial-part04-08.ts",
-      url: "./assets/tutorial/tutorial-part04-08.ts",
-    },
-    {
-      name: "tutorial-part04-09.ts",
-      url: "./assets/tutorial/tutorial-part04-09.ts",
-    },
-    {
-      name: "tutorial-part04-Survey.ts",
-      url: "./assets/tutorial/tutorial-part04-Survey.ts",
-    },
+    // {
+    //   name: "tutorial-part01-01.ts",
+    //   url: "./assets/tutorial/tutorial-part01-01.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-02.ts",
+    //   url: "./assets/tutorial/tutorial-part01-02.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-03.ts",
+    //   url: "./assets/tutorial/tutorial-part01-03.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-04.ts",
+    //   url: "./assets/tutorial/tutorial-part01-04.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-05.ts",
+    //   url: "./assets/tutorial/tutorial-part01-05.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-06.ts",
+    //   url: "./assets/tutorial/tutorial-part01-06.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-07.ts",
+    //   url: "./assets/tutorial/tutorial-part01-07.ts",
+    // },
+    // {
+    //   name: "tutorial-part01-08.ts",
+    //   url: "./assets/tutorial/tutorial-part01-08.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-01.ts",
+    //   url: "./assets/tutorial/tutorial-part02-01.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-02.ts",
+    //   url: "./assets/tutorial/tutorial-part02-02.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-03.ts",
+    //   url: "./assets/tutorial/tutorial-part02-03.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-04.ts",
+    //   url: "./assets/tutorial/tutorial-part02-04.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-05.ts",
+    //   url: "./assets/tutorial/tutorial-part02-05.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-06.ts",
+    //   url: "./assets/tutorial/tutorial-part02-06.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-07.ts",
+    //   url: "./assets/tutorial/tutorial-part02-07.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-08.ts",
+    //   url: "./assets/tutorial/tutorial-part02-08.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-09.ts",
+    //   url: "./assets/tutorial/tutorial-part02-09.ts",
+    // },
+    // {
+    //   name: "tutorial-part02-10.ts",
+    //   url: "./assets/tutorial/tutorial-part02-10.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-01.ts",
+    //   url: "./assets/tutorial/tutorial-part03-01.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-02.ts",
+    //   url: "./assets/tutorial/tutorial-part03-02.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-03.ts",
+    //   url: "./assets/tutorial/tutorial-part03-03.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-04.ts",
+    //   url: "./assets/tutorial/tutorial-part03-04.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-05.ts",
+    //   url: "./assets/tutorial/tutorial-part03-05.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-06.ts",
+    //   url: "./assets/tutorial/tutorial-part03-06.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-07.ts",
+    //   url: "./assets/tutorial/tutorial-part03-07.ts",
+    // },
+    // {
+    //   name: "tutorial-part03-08.ts",
+    //   url: "./assets/tutorial/tutorial-part03-08.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-01.ts",
+    //   url: "./assets/tutorial/tutorial-part04-01.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-02.ts",
+    //   url: "./assets/tutorial/tutorial-part04-02.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-03.ts",
+    //   url: "./assets/tutorial/tutorial-part04-03.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-04.ts",
+    //   url: "./assets/tutorial/tutorial-part04-04.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-05.ts",
+    //   url: "./assets/tutorial/tutorial-part04-05.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-06.ts",
+    //   url: "./assets/tutorial/tutorial-part04-06.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-07.ts",
+    //   url: "./assets/tutorial/tutorial-part04-07.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-08.ts",
+    //   url: "./assets/tutorial/tutorial-part04-08.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-09.ts",
+    //   url: "./assets/tutorial/tutorial-part04-09.ts",
+    // },
+    // {
+    //   name: "tutorial-part04-Survey.ts",
+    //   url: "./assets/tutorial/tutorial-part04-Survey.ts",
+    // },
   ];
 
   selectedTheme = { name: "Light", monacoName: "vs" };

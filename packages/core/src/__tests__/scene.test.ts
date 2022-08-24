@@ -78,7 +78,10 @@ beforeEach(() => {
     throw new Error("myLabel1 undefined");
   }
 
-  const options: SessionOptions = { activities: [g1] };
+  const options: SessionOptions = {
+    activities: [g1],
+    canvasKitWasmUrl: "assets/canvaskit.wasm",
+  };
   session = new Session(options);
 
   const dom = new JSDOM(`<!DOCTYPE html>
