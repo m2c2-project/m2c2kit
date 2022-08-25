@@ -583,6 +583,7 @@ export class Game implements Activity {
         emptyTrial[variableName] = null;
       }
       this.data.trials.push({
+        session_uuid: this.session.uuid,
         activity_uuid: this.uuid,
         activity_id: this.options.id,
         activity_version: this.options.version,
@@ -669,6 +670,12 @@ export class Game implements Activity {
    * values in the trial data.
    */
   private readonly automaticTrialSchema: TrialSchema = {
+    session_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Unique identifier for all activities in this administration of the session.",
+    },
     activity_uuid: {
       type: "string",
       format: "uuid",

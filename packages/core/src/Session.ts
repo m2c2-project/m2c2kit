@@ -1,4 +1,3 @@
-import { Constants } from "./Constants";
 import { EventType } from "./EventBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
