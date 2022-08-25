@@ -237,15 +237,15 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       images: [
         {
           imageName: "gameImage",
-          height: 274,
-          width: 280,
-          url: "assets/symbol-search/img/gameImage.svg",
+          height: 340,
+          width: 255,
+          url: "assets/symbol-search/img/gameImage.png",
         },
         {
           imageName: "gameImageOutlinedCards",
-          height: 274,
-          width: 280,
-          url: "assets/symbol-search/img/gameImageOutlinedCards.svg",
+          height: 340,
+          width: 255,
+          url: "assets/symbol-search/img/gameImageOutlinedCards.png",
         },
         {
           imageName: "stopwatchImage",
@@ -257,9 +257,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         },
         {
           imageName: "ssintroImage",
-          height: 190,
-          width: 360,
-          url: "assets/symbol-search/img/ssintroImage.svg",
+          height: 186,
+          width: 336,
+          url: "assets/symbol-search/img/ssintroImage.png",
         },
         // NOTE: names of symbols must be in form of ss-01, starting
         // at ss-01, not ss-00.
