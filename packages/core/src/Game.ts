@@ -58,6 +58,8 @@ export class Game implements Activity {
   private gameMetrics: Array<GameMetric> = new Array<GameMetric>();
   private fpsMetricReportThreshold: number;
   private maximumRecordedActivityMetrics: number;
+  private stepCount = 0;
+  private steppingNow = 0;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -123,7 +125,7 @@ export class Game implements Activity {
   /** The 0-based index of the current trial */
   public trialIndex = 0;
   private htmlCanvas?: HTMLCanvasElement;
-  private surface?: Surface;
+  surface?: Surface;
   private showFps?: boolean;
   private bodyBackgroundColor?: RgbaColor;
 
@@ -303,7 +305,6 @@ export class Game implements Activity {
     incomingScene.needsInitialization = false;
 
     const sceneTransition = new SceneTransition(incomingScene, transition);
-    this.currentSceneSnapshot = undefined;
     this.incomingSceneTransitions.push(sceneTransition);
     if (incomingScene.game.bodyBackgroundColor !== undefined) {
       document.body.style.backgroundColor = `rgb(${incomingScene.game.bodyBackgroundColor[0]},${incomingScene.game.bodyBackgroundColor[1]},${incomingScene.game.bodyBackgroundColor[2]},${incomingScene.game.bodyBackgroundColor[3]})`;
@@ -397,6 +398,14 @@ export class Game implements Activity {
     this.warmupShaders(this.surface);
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
+
+    if (this.options.timeStepping) {
+      this.addTimeSteppingControlsToDom();
+      this.updateTimeSteppingOutput();
+    } else {
+      this.removeTimeSteppingControlsFromDom();
+    }
+
     this.surface.requestAnimationFrame(this.loop.bind(this));
 
     if (this.session.options.activityCallbacks?.onActivityLifecycle) {
@@ -404,6 +413,85 @@ export class Game implements Activity {
         type: EventType.ActivityStart,
         target: this,
       });
+    }
+  }
+
+  private addTimeSteppingControlsToDom() {
+    const existingDiv = document.getElementById("m2c2kit-time-stepping-div");
+    if (existingDiv) {
+      return;
+    }
+
+    const body = document.getElementsByTagName("body")[0];
+    if (body) {
+      const div = document.createElement("div");
+      div.id = "m2c2kit-time-stepping-div";
+      body.prepend(div);
+
+      const btn = document.createElement("button");
+      btn.id = "1-step-advance";
+      btn.title = "advance 1 step (16.667 ms)";
+      btn.innerText = ">";
+      btn.style.marginRight = "4px";
+      div.appendChild(btn);
+      btn.addEventListener("click", this.advanceStepsHandler.bind(this));
+
+      const btn2 = document.createElement("button");
+      btn2.id = "55-step-advance";
+      btn2.title = "advance 55 steps (916.667 ms)";
+      btn2.innerText = ">>";
+      btn2.style.marginRight = "4px";
+      div.appendChild(btn2);
+      btn2.addEventListener("click", this.advanceStepsHandler.bind(this));
+
+      const stepsInput = document.createElement("input");
+      stepsInput.id = "time-stepping-steps-input";
+      stepsInput.title = "steps";
+      stepsInput.style.width = "40px";
+      stepsInput.style.marginRight = "4px";
+      stepsInput.setAttribute("readonly", "true");
+      div.appendChild(stepsInput);
+
+      const nowInput = document.createElement("input");
+      nowInput.id = "time-stepping-now-input";
+      nowInput.title = "milliseconds";
+      nowInput.style.width = "80px";
+      nowInput.style.marginRight = "4px";
+      nowInput.setAttribute("readonly", "true");
+      div.appendChild(nowInput);
+    }
+  }
+
+  private updateTimeSteppingOutput(): void {
+    const stepsInput = document.getElementById(
+      "time-stepping-steps-input"
+    ) as HTMLInputElement;
+    if (stepsInput) {
+      stepsInput.value = this.stepCount.toString();
+    }
+    const nowInput = document.getElementById(
+      "time-stepping-now-input"
+    ) as HTMLInputElement;
+    if (nowInput) {
+      nowInput.value = this.steppingNow.toFixed(2);
+    }
+  }
+
+  private advanceStepsHandler(mouseEvent: MouseEvent): void {
+    if ((mouseEvent?.target as HTMLElement)?.id === "1-step-advance") {
+      this.steppingNow = this.steppingNow + 16.66666666666667;
+      this.stepCount = this.stepCount + 1;
+    } else if ((mouseEvent?.target as HTMLElement)?.id === "55-step-advance") {
+      this.steppingNow = this.steppingNow + 16.66666666666667 * 55;
+      this.stepCount = this.stepCount + 55;
+    }
+    this.updateTimeSteppingOutput();
+  }
+
+  private removeTimeSteppingControlsFromDom() {
+    const div = document.getElementById("m2c2kit-time-stepping-div");
+    if (div) {
+      div.remove();
     }
   }
 
@@ -1003,10 +1091,22 @@ export class Game implements Activity {
       this.update();
       this.draw(canvas);
 
-      if (this.incomingSceneTransitions.length > 0) {
-        // in order to do a scene transition, we need an image of the outgoing scene
-        this.currentSceneSnapshot = this.takeCurrentSceneSnapshot();
+      /**
+       * In prior versions, I took a snapshot only when needed, e.g.,
+       * after a new scene transition was requested. From performance testing,
+       * however, I found that taking a snapshot has negligible impact on
+       * performance. It is only encoding the image to bytes, i.e.,
+       * image.encodeToBytes(), that is expensive. Thus, we can take a
+       * snapshot after every draw, in case we'll need the snapshot.
+       *
+       * IMPORTANT: snapshots must be deleted when not needed, otherwise we
+       * will create a massive memory leak because we are creating them
+       * 60 times per second.
+       */
+      while (this.snapshots.length > 0) {
+        this.snapshots.shift()?.delete();
       }
+      this.snapshots.push(this.takeCurrentSceneSnapshot());
 
       /**
        * Free entities should not slide off the screen during transitions.
@@ -1028,8 +1128,15 @@ export class Game implements Activity {
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
+  snapshots = new Array<Image>();
+
   private updateGameTime(): void {
-    Globals.now = performance.now();
+    if (!this.options.timeStepping) {
+      Globals.now = performance.now();
+    } else {
+      Globals.now = this.steppingNow;
+    }
+
     if (this.priorUpdateTime) {
       Globals.deltaTime = Globals.now - this.priorUpdateTime;
     } else {
@@ -1040,8 +1147,18 @@ export class Game implements Activity {
   private handleIncomingSceneTransitions(
     incomingSceneTransitions: Array<SceneTransition>
   ): void {
-    // only begin this scene transition if we have a snapshot of the current scene
-    if (incomingSceneTransitions.length > 0 && this.currentSceneSnapshot) {
+    if (incomingSceneTransitions.length === 0) {
+      return;
+    }
+    /**
+     * Only begin this scene transition if 1) we have a snapshot of the
+     * current scene, OR 2) the incoming scene has transition type of
+     * None and thus we don't need a snapshot.
+     */
+    if (
+      this.snapshots.length > 0 ||
+      incomingSceneTransitions[0].transition.type === TransitionType.None
+    ) {
       const incomingSceneTransition = incomingSceneTransitions.shift();
       if (incomingSceneTransition === undefined) {
         // should not happen; checked this.incomingSceneTransitions.length > 0
@@ -1069,6 +1186,10 @@ export class Game implements Activity {
 
       // outgoingScene isn't the current scene; it's a scene that has a
       // screenshot of the current scene.
+      this.currentSceneSnapshot = this.snapshots.shift();
+      if (!this.currentSceneSnapshot) {
+        throw new Error("No snapshop available for outgoing scene");
+      }
       const outgoingScene = this.createOutgoingScene(this.currentSceneSnapshot);
       outgoingScene._active = true;
       if (this.currentScene) {
@@ -1328,8 +1449,8 @@ export class Game implements Activity {
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
-                    if (outgoingScene.game.currentSceneSnapshot) {
-                      outgoingScene.game.currentSceneSnapshot.delete();
+                    if (this.currentSceneSnapshot) {
+                      this.currentSceneSnapshot.delete();
                     }
                   },
                   runDuringTransition: true,
@@ -1371,8 +1492,8 @@ export class Game implements Activity {
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
-                    if (outgoingScene.game.currentSceneSnapshot) {
-                      outgoingScene.game.currentSceneSnapshot.delete();
+                    if (this.currentSceneSnapshot) {
+                      this.currentSceneSnapshot.delete();
                     }
                   },
                   runDuringTransition: true,
@@ -1414,8 +1535,8 @@ export class Game implements Activity {
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
-                    if (outgoingScene.game.currentSceneSnapshot) {
-                      outgoingScene.game.currentSceneSnapshot.delete();
+                    if (this.currentSceneSnapshot) {
+                      this.currentSceneSnapshot.delete();
                     }
                   },
                   runDuringTransition: true,
@@ -1457,8 +1578,8 @@ export class Game implements Activity {
                   callback: () => {
                     outgoingScene._active = false;
                     outgoingScene._transitioning = false;
-                    if (outgoingScene.game.currentSceneSnapshot) {
-                      outgoingScene.game.currentSceneSnapshot.delete();
+                    if (this.currentSceneSnapshot) {
+                      this.currentSceneSnapshot.delete();
                     }
                   },
                   runDuringTransition: true,

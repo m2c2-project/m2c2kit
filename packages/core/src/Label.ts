@@ -275,6 +275,18 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       }
 
       canvas.drawParagraph(this.paragraph, x, y);
+      /**
+       * On older Android devices (and/or older versions of Chrome?), text is
+       * distorted. The problem looks identical to the issue raised here:
+       * https://github.com/flutter/flutter/issues/75327
+       * It may be tied to some Adreno GPUs, because it is referenced in a
+       * fix here: https://skia-review.googlesource.com/c/skia/+/571418/,
+       * which should be part of canvaskit-wasm 0.36.1. However, this
+       * bug still appears.
+       * By manually calling flush(), it corrects the problem. When a full
+       * fix is added to canvaskit-wasm, the below line should be removed.
+       */
+      this.game.surface?.flush();
       canvas.restore();
     }
 

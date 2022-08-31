@@ -21,7 +21,6 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   _transitioning = false;
   _setupCallback?: (scene: Scene) => void;
   _appearCallback?: (scene: Scene) => void;
-  private _game?: Game;
   private backgroundPaint?: Paint;
 
   /**
@@ -60,12 +59,18 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   set game(game: Game) {
     this._game = game;
   }
+  /**
+   * The game which this scene is a part of.
+   *
+   * @remarks Throws error if scene is not part of the game object.
+   */
   get game(): Game {
     if (this._game === undefined) {
-      throw new Error("no active game");
+      throw new Error(`Scene ${this} has not been added to a game.`);
     }
     return this._game;
   }
+
   get backgroundColor(): RgbaColor {
     return this._backgroundColor;
   }

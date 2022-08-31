@@ -37,6 +37,12 @@
   position: absolute;
 }
 
+#m2c2kit-time-stepping-div {
+  position: fixed;
+  top: 4px;
+  left: 4px
+}
+
 /* Safari */
 @-webkit-keyframes m2c2kit-loader-spin {
   0% {

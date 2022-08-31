@@ -55,7 +55,9 @@ export class TestHelpers {
               return skiaCanvas;
             },
             makeImageSnapshot: () => {
-              return {};
+              return {
+                delete: () => undefined,
+              };
             },
             requestAnimationFrame: (callback: (canvas: object) => void) => {
               return requestAnimationFrame(callback);

@@ -7,7 +7,7 @@ import { CanvasKit } from "canvaskit-wasm";
 export * from "canvaskit-wasm";
 
 type CorrectModule = {
-  default: typeof all.CanvasKitInit;
+  default: typeof all.default;
 };
 
 const initialize = (all as unknown as CorrectModule).default;

@@ -136,7 +136,14 @@ describe("actions", () => {
     return session.init().then(() => {
       TestHelpers.perfCounter = 0;
       TestHelpers.requestedFrames = 0;
-      TestHelpers.maxRequestedFrames = 32;
+      /**
+       * why 31 frames? The game loop begins, updates, and draws. This is
+       * frame 1. During this first loop pass, the action is queued to run.
+       * It will begin movement on the next loop pass. Thus, we need 30 MORE
+       * frames (frames 2-31) to get halfway through the 1000 ms action,
+       * for a total of 31.
+       */
+      TestHelpers.maxRequestedFrames = 31;
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
         .find(Boolean);

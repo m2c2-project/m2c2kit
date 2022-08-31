@@ -45,4 +45,6 @@ export interface GameOptions {
   fpsMetricReportThreshold?: number;
   /** Adapt execution for unit testing? Default is false */
   _unitTesting?: boolean;
+  /** Advance through time step-by-step, for development and debugging */
+  timeStepping?: boolean;
 }

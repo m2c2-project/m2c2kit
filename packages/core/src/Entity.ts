@@ -20,6 +20,7 @@ import { EntityType } from "./EntityType";
 import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
+import { Game } from "./Game";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -73,6 +74,7 @@ export abstract class Entity implements EntityOptions {
   hidden = false;
   layout: Layout = {};
 
+  _game?: Game;
   parent?: Entity;
   children = new Array<Entity>();
   absolutePosition: Point = { x: 0, y: 0 }; // position within the root coordinate system
@@ -118,6 +120,25 @@ export abstract class Entity implements EntityOptions {
   // we will override this in each derived class. This method will never be called.
   initialize(): void {
     throw new Error("initialize() called in abstract base class Entity.");
+  }
+
+  /**
+   * The game which this entity is a part of.
+   *
+   * @remarks Throws error if entity is not part of the game object.
+   */
+  get game(): Game {
+    const findParentScene = (entity: Entity): Scene => {
+      if (!entity.parent) {
+        throw new Error(`Entity ${this} has not been added to a scene.`);
+      } else if (entity.parent.type === EntityType.Scene) {
+        return entity.parent as Scene;
+      } else {
+        return findParentScene(entity.parent);
+      }
+    };
+
+    return findParentScene(this).game;
   }
 
   /**
