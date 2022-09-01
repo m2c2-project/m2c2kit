@@ -4,6 +4,7 @@ export interface DeviceMetadata {
   userAgent?: string;
   devicePixelRatio?: number;
   screen?: screenMetadata;
+  webGlRenderer?: string;
 }
 
 /**
@@ -79,6 +80,11 @@ export const deviceMetadataSchema: JsonSchema = {
           description: "Pixel depth of screen.",
         },
       },
+    },
+    webGlRenderer: {
+      type: "string",
+      description:
+        "WebGL driver vendor and renderer. Taken from WEBGL_debug_renderer_info.",
     },
   },
 };

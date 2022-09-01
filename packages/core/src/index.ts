@@ -69,3 +69,4 @@ export * from "./Transition";
 export * from "./Uuid";
 export * from "./WaitActionOptions";
 export * from "./WebColors";
+export * from "./WebGlInfo";

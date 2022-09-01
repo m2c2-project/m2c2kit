@@ -35,6 +35,7 @@ import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
 import { TrialSchema } from "./TrialSchema";
 import { GameMetric } from "./GameMetrics";
 import { Point } from "./Point";
+import { WebGlInfo } from "./WebGlInfo";
 
 interface BoundingBox {
   xMin: number;
@@ -141,6 +142,7 @@ export class Game implements Activity {
   private limitFps = false;
   private unitTesting = false;
   private gameStopRequested = false;
+  private webGlRendererInfo = "";
 
   canvasCssWidth = 0;
   canvasCssHeight = 0;
@@ -625,6 +627,7 @@ export class Game implements Activity {
           pixelDepth: screen.pixelDepth,
           width: screen.width,
         },
+        webGlRenderer: this.webGlRendererInfo,
       };
     }
     return {
@@ -642,6 +645,7 @@ export class Game implements Activity {
         pixelDepth: screen.pixelDepth,
         width: screen.width,
       },
+      webGlRenderer: this.webGlRendererInfo,
     };
   }
 
@@ -1001,6 +1005,14 @@ export class Game implements Activity {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
+
+    try {
+      this.webGlRendererInfo = WebGlInfo.getRendererString();
+    } catch {
+      this.webGlRendererInfo = "err";
+      WebGlInfo.dispose();
+    }
+
     const surface = this.canvasKit.MakeCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
