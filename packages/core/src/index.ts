@@ -7,6 +7,7 @@ export * from "./ActivityType";
 export * from "./Session";
 export * from "./SessionOptions";
 export * from "./SessionLifecycleEvent";
+export * from "./CanvasKitHelpers";
 export * from "./Composite";
 export * from "./CompositeOptions";
 export * from "./Constants";

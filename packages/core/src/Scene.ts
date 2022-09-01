@@ -7,6 +7,7 @@ import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 export class Scene extends Entity implements IDrawable, SceneOptions {
   readonly type = EntityType.Scene;
@@ -54,6 +55,10 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     );
     this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.needsInitialization = false;
+  }
+
+  dispose(): void {
+    CanvasKitHelpers.Dispose([this.backgroundPaint]);
   }
 
   set game(game: Game) {

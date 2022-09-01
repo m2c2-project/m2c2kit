@@ -1,3 +1,4 @@
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { EventType } from "./EventBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
@@ -89,6 +90,25 @@ export class Session {
         type: EventType.SessionEnd,
       });
     }
+    this.stop();
+  }
+
+  private stop(): void {
+    this.dispose();
+  }
+
+  /**
+   * Frees up resources that were allocated to run the session.
+   *
+   * @remarks This will be done automatically by the m2c2kit library;
+   * the end-user must not call this.
+   */
+  private dispose(): void {
+    /**
+     * All CanvasKit objects are disposed by the games that used them,
+     * except for FontMgr, which is session-wide and shared by games.
+     */
+    CanvasKitHelpers.Dispose([this.fontManager.fontMgr]);
   }
 
   /**

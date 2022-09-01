@@ -9,6 +9,7 @@ import { ShapeOptions } from "./ShapeOptions";
 import { Path } from "./Path";
 import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 export class Shape extends Entity implements IDrawable, ShapeOptions {
   readonly type = EntityType.Shape;
@@ -139,6 +140,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this.strokeColorPaint.setAntiAlias(true);
     }
     this.needsInitialization = false;
+  }
+
+  dispose(): void {
+    CanvasKitHelpers.Dispose([this.strokeColorPaint, this.fillColorPaint]);
   }
 
   get fillColor(): RgbaColor {

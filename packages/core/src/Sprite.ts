@@ -6,6 +6,7 @@ import { EntityType } from "./EntityType";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
 import { Scene } from "./Scene";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.Sprite;
@@ -50,6 +51,10 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
     this.needsInitialization = false;
+  }
+
+  dispose(): void {
+    CanvasKitHelpers.Dispose([this.loadedImage?.image]);
   }
 
   set imageName(imageName: string) {

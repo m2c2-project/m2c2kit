@@ -26,6 +26,9 @@ export abstract class Composite extends Entity implements IDrawable {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   override initialize(): void {}
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  dispose(): void {}
+
   update(): void {
     super.update();
   }

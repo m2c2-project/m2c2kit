@@ -159,6 +159,11 @@ export class Grid extends Composite {
     this.needsInitialization = false;
   }
 
+  // all entities that make up grid are added as children, so they
+  // have their own dispose methods
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  override dispose(): void {}
+
   /**
    * Duplicates an entity using deep copy.
    *

@@ -8,6 +8,7 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
 import { Scene } from "./Scene";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 export class TextLine
   extends Entity
@@ -29,6 +30,7 @@ export class TextLine
 
   private paint?: Paint;
   private font?: Font;
+  private typeface: Typeface | null = null;
 
   /**
    * Single-line text rendered on the screen.
@@ -106,20 +108,23 @@ export class TextLine
     const fontManager = activity.fontManager;
 
     const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
-    let typeface: Typeface | null = null;
     if (this.fontName) {
-      typeface = fontManager.getTypeface(gameUuid, this.fontName);
+      this.typeface = fontManager.getTypeface(gameUuid, this.fontName);
     } else {
       const fontNames = fontManager.getFontNames(gameUuid);
       if (fontNames.length > 0) {
-        typeface = fontManager.getTypeface(gameUuid, fontNames[0]);
+        this.typeface = fontManager.getTypeface(gameUuid, fontNames[0]);
       }
     }
     this.font = new this.canvasKit.Font(
-      typeface,
+      this.typeface,
       this.fontSize * Globals.canvasScale
     );
     this.needsInitialization = false;
+  }
+
+  dispose(): void {
+    CanvasKitHelpers.Dispose([this.font, this.typeface, this.paint]);
   }
 
   /**

@@ -559,6 +559,19 @@ export class Game implements Activity {
       this.currentScene._active = false;
     }
     this.gameStopRequested = true;
+    this.dispose();
+  }
+
+  /**
+   * Frees up resources that were allocated to run the game.
+   *
+   * @remarks This will be done automatically by the m2c2kit library;
+   * the end-user must not call this.
+   */
+  dispose(): void {
+    this.entities
+      .filter((e) => e.isDrawable)
+      .forEach((e) => (e as unknown as IDrawable).dispose());
   }
 
   private initData(): void {

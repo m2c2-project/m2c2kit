@@ -71,13 +71,18 @@ export class TestHelpers {
           };
         },
         Font: function () {
-          return {};
+          return {
+            delete: () => undefined,
+            isDeleted: () => undefined,
+          };
         },
         Paint: function () {
           return {
             setColor: () => undefined,
             setAntiAlias: () => undefined,
             setStyle: () => undefined,
+            delete: () => undefined,
+            isDeleted: () => undefined,
           };
         },
         Color: function () {

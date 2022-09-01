@@ -4,6 +4,7 @@ import {
   Paragraph,
   EmbindEnumEntity,
   ParagraphStyle,
+  ParagraphBuilder,
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -14,6 +15,7 @@ import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 import { Scene } from "./Scene";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.Label;
@@ -35,6 +37,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
 
   private paragraph?: Paragraph;
   private paraStyle?: ParagraphStyle;
+  private builder?: ParagraphBuilder;
 
   /**
    * Single or multi-line text formatted and rendered on the screen.
@@ -106,18 +109,18 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       throw new Error("no fonts loaded");
     }
 
-    const builder = this.canvasKit.ParagraphBuilder.Make(
+    this.builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
       fontManager.fontMgr
     );
     if (!this.text) {
       this.text = "";
     }
-    builder.addText(this.text);
+    this.builder.addText(this.text);
     if (this.text === "") {
       console.warn(`warning: empty text in label "${this.name}"`);
     }
-    this.paragraph = builder.build();
+    this.paragraph = this.builder.build();
     const preferredWidth =
       //this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
       this.preferredMaxLayoutWidth ?? Globals.canvasCssWidth;
@@ -159,6 +162,11 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
 
     this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
     this.needsInitialization = false;
+  }
+
+  dispose(): void {
+    CanvasKitHelpers.Dispose([this.paragraph, this.builder]);
+    // Note: ParagraphStyle has no delete() method, so nothing to dispose
   }
 
   get text(): string {

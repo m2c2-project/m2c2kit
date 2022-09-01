@@ -1,3 +1,4 @@
+import { CanvasKitHelpers } from "@m2c2kit/core";
 import { Paint, Canvas } from "canvaskit-wasm";
 import {
   WebColors,
@@ -99,6 +100,10 @@ export class Button extends Composite implements IText {
     buttonRectangle.addChild(buttonLabel);
 
     this.needsInitialization = false;
+  }
+
+  override dispose(): void {
+    CanvasKitHelpers.Dispose([this.backgroundPaint]);
   }
 
   get backgroundColor(): RgbaColor {
