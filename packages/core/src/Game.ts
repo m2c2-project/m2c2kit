@@ -977,11 +977,22 @@ export class Game implements Activity {
       if (canvases.length === 0) {
         throw new Error("no html canvas tag was found in the html");
       } else if (canvases.length > 1) {
-        console.warn(
-          "warning: more than one html canvas was found. Using the first one"
-        );
+        console.warn("warning: more than one html canvas was found.");
       }
-      htmlCanvas = canvasCollection[0];
+      const m2c2kitCanvas = canvases.filter(
+        (c) => c.id === "m2c2kit-canvas"
+      )[0];
+      if (m2c2kitCanvas) {
+        htmlCanvas = m2c2kitCanvas;
+        if (canvases.length > 1) {
+          console.log("using canvas with id 'm2c2kit-canvas'");
+        }
+      } else {
+        htmlCanvas = canvasCollection[0];
+        if (canvases.length > 1) {
+          console.log("using first canvas");
+        }
+      }
     } else {
       htmlCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (htmlCanvas === undefined) {
