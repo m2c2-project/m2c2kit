@@ -1037,7 +1037,7 @@ export class Game implements Activity {
       WebGlInfo.dispose();
     }
 
-    const surface = this.canvasKit.MakeCanvasSurface(this.htmlCanvas);
+    const surface = this.canvasKit.MakeWebGLCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
         `could not make CanvasKit surface from canvas HTML element`
@@ -1101,11 +1101,11 @@ export class Game implements Activity {
 
   private loop(canvas: Canvas): void {
     if (this.gameStopRequested) {
-      // not sure if it is necessary/recommended to delete?
-      // if (this.surface === undefined) {
-      //   throw new Error("CanvasKit surface is undefined");
-      // }
-      // this.surface.deleteLater();
+      if (this.surface === undefined) {
+        throw new Error("CanvasKit surface is undefined");
+      }
+      // delete() shows an error in console. deleteLater() does not. Why?
+      this.surface.deleteLater();
       return;
     }
     this.animationFramesRequested++;

@@ -17,7 +17,7 @@ export class Session {
   fontManager: FontManager;
   imageManager: ImageManager;
   currentActivity?: Activity;
-  uuid = Uuid.generate();
+  uuid: string;
   private canvasKit?: CanvasKit;
 
   /**
@@ -40,6 +40,11 @@ export class Session {
     this.fontManager = new FontManager();
     this.imageManager = new ImageManager();
     this.options.activities.forEach((activity) => (activity.session = this));
+    if (this.options.sessionUuid) {
+      this.uuid = this.options.sessionUuid;
+    } else {
+      this.uuid = Uuid.generate();
+    }
   }
 
   /**
@@ -52,6 +57,7 @@ export class Session {
 
     const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);
+    this.imageManager.removeScratchCanvas();
 
     console.log(
       `⚪ Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
@@ -90,6 +96,8 @@ export class Session {
         type: EventType.SessionEnd,
       });
     }
+    this.setCanvasDivVisibility(false);
+    this.setSurveyDivVisibility(false);
     this.stop();
   }
 

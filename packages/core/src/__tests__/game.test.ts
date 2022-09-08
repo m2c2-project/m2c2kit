@@ -11,7 +11,6 @@ import {
   TrialSchema,
   Label,
 } from "../../build-umd";
-import { JSDOM } from "jsdom";
 
 TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => {
@@ -74,31 +73,6 @@ let session: Session;
 let g1: Game1;
 let g2: Game2;
 
-function setupDomAndGlobals(): void {
-  const dom = new JSDOM(`<!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <canvas style="height: 100vh; width: 100vw"></canvas>
-      </div>
-    </body>
-  </html>`);
-
-  // for how to mock globals,
-  // see https://www.grzegorowski.com/how-to-mock-global-window-with-jest
-
-  // @ts-ignore
-  global.window = dom.window;
-  // @ts-ignore
-  global.document = dom.window.document;
-  global.navigator = dom.window.navigator;
-  // @ts-ignore
-  global.performance = TestHelpers.performance;
-}
-
 describe("actions", () => {
   beforeEach(() => {
     g1 = new Game1();
@@ -109,7 +83,7 @@ describe("actions", () => {
       canvasKitWasmUrl: "assets/canvaskit.wasm",
     };
     session = new Session(options);
-    setupDomAndGlobals();
+    TestHelpers.setupDomAndGlobals();
   });
 
   it("shape completes move from 200, 200 to 50, 50", () => {
@@ -172,7 +146,7 @@ describe("Game start", () => {
       canvasKitWasmUrl: "assets/canvaskit.wasm",
     };
     session = new Session(options);
-    setupDomAndGlobals();
+    TestHelpers.setupDomAndGlobals();
   });
 
   it("scales down on smaller screen that is half the size", () => {
@@ -225,7 +199,7 @@ describe("free entities", () => {
       canvasKitWasmUrl: "assets/canvaskit.wasm",
     };
     session = new Session(options);
-    setupDomAndGlobals();
+    TestHelpers.setupDomAndGlobals();
   });
 
   it("removes all free entities", () => {
@@ -344,7 +318,7 @@ describe("addTrialData", () => {
       canvasKitWasmUrl: "assets/canvaskit.wasm",
     };
     session = new Session(options);
-    setupDomAndGlobals();
+    TestHelpers.setupDomAndGlobals();
   });
 
   it("adds boolean data", () => {

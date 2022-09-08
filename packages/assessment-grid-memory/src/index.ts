@@ -69,6 +69,12 @@ class GridMemory extends Game {
         default: 4,
         description: "How many trials to run.",
       },
+      show_trials_complete_scene: {
+        default: true,
+        type: "boolean",
+        description:
+          "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
+      },
       trials_complete_scene_text: {
         type: "string",
         default: "You have completed all the grid memory trials",
@@ -912,7 +918,11 @@ class GridMemory extends Game {
             duration: 500,
             easing: Easings.sinusoidalInOut,
           });
-          game.presentScene(doneScene, nextScreenTransition);
+          if (game.getParameter("show_trials_complete_scene")) {
+            game.presentScene(doneScene, nextScreenTransition);
+          } else {
+            game.end();
+          }
         } else {
           game.presentScene(preparationScene);
         }

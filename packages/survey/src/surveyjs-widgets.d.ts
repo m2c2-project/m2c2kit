@@ -8,4 +8,5 @@ declare module "surveyjs-widgets" {
   export function nouislider(Survey: unknown): void;
   export function sortablejs(Survey: unknown): void;
   export function bootstrapdatepicker(Survey: unknown, $: unknown): void;
+  export function bootstrapslider(Survey: unknown): void;
 }

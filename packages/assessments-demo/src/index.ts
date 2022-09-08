@@ -11,14 +11,17 @@ import { ColorDots } from "@m2c2kit/assessment-color-dots";
 import { GridMemory } from "@m2c2kit/assessment-grid-memory";
 import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";
 import { CliStarter } from "@m2c2kit/assessment-cli-starter";
+import { Survey } from "@m2c2kit/survey";
+import { surveyJson } from "./surveyJson";
 
 const a1 = new ColorDots();
 const a2 = new GridMemory();
 const a3 = new SymbolSearch();
 const a4 = new CliStarter();
+const survey = new Survey(surveyJson);
 
 const session = new Session({
-  activities: [a1, a2, a3, a4],
+  activities: [a1, a2, a3, a4, survey],
   canvasKitWasmUrl: "assets/canvaskit.wasm",
   sessionCallbacks: {
     /**

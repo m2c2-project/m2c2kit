@@ -10,6 +10,8 @@ export interface SessionOptions {
   sessionCallbacks?: SessionCallbacks;
   /** Url of the canvaskit.wasm binary. Always set to the default value of "assets/canvaskit.wasm" */
   canvasKitWasmUrl: "assets/canvaskit.wasm";
+  /** Use a specified session UUID, rather than create a new one */
+  sessionUuid?: string;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

@@ -83,6 +83,12 @@ top. (2 unique symbols.)",
         enum: ["short", "long"],
         description: "Type of instructions to show, 'short' or 'long'.",
       },
+      show_trials_complete_scene: {
+        default: true,
+        type: "boolean",
+        description:
+          "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
+      },
       trials_complete_scene_text: {
         default: "You have completed all the symbol search trials",
         type: "string",
@@ -523,7 +529,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
             },
             {
               title: "Symbol Search",
-              text: "Please be as fast and accurate as you can",
+              text: "Please be as fast and accurate as you can.",
               imageName: "stopwatchImage",
               imageAboveText: false,
               imageMarginTop: 48,
@@ -989,7 +995,11 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         } else {
           questionLabel.hidden = false;
           game.removeFreeEntity("questionLabelFree");
-          game.presentScene(doneScene, afterTrialSceneTransition);
+          if (game.getParameter("show_trials_complete_scene")) {
+            game.presentScene(doneScene, afterTrialSceneTransition);
+          } else {
+            game.end();
+          }
         }
       }
 

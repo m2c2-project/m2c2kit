@@ -403,4 +403,9 @@ export class ImageManager {
     }
     return u8arr.buffer;
   }
+
+  removeScratchCanvas(): void {
+    this.ctx = undefined;
+    this._scratchCanvas?.remove();
+  }
 }

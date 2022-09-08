@@ -10,8 +10,6 @@ import {
   Scene,
 } from "../../build-umd";
 
-import { JSDOM } from "jsdom";
-
 TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => {
   return TestHelpers.createM2c2KitMock();
@@ -66,29 +64,6 @@ let g1: Game1;
 let g2: Game2;
 
 beforeEach(() => {
-  const dom = new JSDOM(`<!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <canvas style="height: 100vh; width: 100vw"></canvas>
-      </div>
-    </body>
-  </html>`);
-
-  // for how to mock globals,
-  // see https://www.grzegorowski.com/how-to-mock-global-window-with-jest
-
-  // @ts-ignore
-  global.window = dom.window;
-  // @ts-ignore
-  global.document = dom.window.document;
-  global.navigator = dom.window.navigator;
-  // @ts-ignore
-  global.performance = TestHelpers.performance;
-
   g1 = new Game1();
   g2 = new Game2();
 
@@ -97,6 +72,7 @@ beforeEach(() => {
     canvasKitWasmUrl: "assets/canvaskit.wasm",
   };
   session = new Session(options);
+  TestHelpers.setupDomAndGlobals();
 });
 
 describe("Session", () => {

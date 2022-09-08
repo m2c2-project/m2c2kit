@@ -95,6 +95,12 @@ class ColorDots extends Game {
         description: "How many trials to run.",
         type: "integer",
       },
+      show_trials_complete_scene: {
+        default: true,
+        type: "boolean",
+        description:
+          "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
+      },
       trials_complete_scene_text: {
         default: "You have completed all the color dots trials",
         description: "Text for scene displayed after all trials are complete.",
@@ -935,14 +941,18 @@ appeared.",
       if (game.trialIndex < game.getParameter<number>("number_of_trials")) {
         game.presentScene(fixationScene);
       } else {
-        game.presentScene(
-          doneScene,
-          Transition.slide({
-            direction: TransitionDirection.Left,
-            duration: 500,
-            easing: Easings.sinusoidalInOut,
-          })
-        );
+        if (game.getParameter("show_trials_complete_scene")) {
+          game.presentScene(
+            doneScene,
+            Transition.slide({
+              direction: TransitionDirection.Left,
+              duration: 500,
+              easing: Easings.sinusoidalInOut,
+            })
+          );
+        } else {
+          game.end();
+        }
       }
     });
     locationSelectionScene.addChild(locationSelectionDoneButton);

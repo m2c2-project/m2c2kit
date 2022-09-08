@@ -175,10 +175,6 @@ export class TextLine
         );
       }
       canvas.drawText(this.text, x, y, this.paint, this.font);
-      /**
-       * see draw() method in Label.ts for explanation of next line
-       */
-      this.game.surface?.flush();
       canvas.restore();
     }
 

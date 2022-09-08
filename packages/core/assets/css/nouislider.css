@@ -1,8 +1,8 @@
 /*!
  * Copyright (c) 2019 Léon Gersen
  * License: MIT (https://github.com/leongersen/noUiSlider/blob/master/LICENSE.md)
- */ 
-/*! nouislider - 14.7.0 - 4/6/2021 */
+ */
+/*! nouislider - 15.6.1 - 8/12/2022 */
 /* Functional styling;
  * These styles are required for noUiSlider to function.
  * You don't need to change these rules to apply your design.
@@ -43,19 +43,13 @@
   z-index: 1;
   top: 0;
   right: 0;
+  height: 100%;
+  width: 100%;
   -ms-transform-origin: 0 0;
   -webkit-transform-origin: 0 0;
   -webkit-transform-style: preserve-3d;
   transform-origin: 0 0;
   transform-style: flat;
-}
-.noUi-connect {
-  height: 100%;
-  width: 100%;
-}
-.noUi-origin {
-  height: 10%;
-  width: 10%;
 }
 /* Offset direction
  */
@@ -67,6 +61,7 @@
  * connect elements.
  */
 .noUi-vertical .noUi-origin {
+  top: -100%;
   width: 0;
 }
 .noUi-horizontal .noUi-origin {
@@ -107,7 +102,7 @@
   width: 28px;
   height: 34px;
   right: -6px;
-  top: -17px;
+  bottom: -17px;
 }
 .noUi-txt-dir-rtl.noUi-horizontal .noUi-handle {
   left: -17px;
@@ -117,16 +112,16 @@
  * Giving the connect element a border radius causes issues with using transform: scale
  */
 .noUi-target {
-  background: #fafafa;
+  background: #FAFAFA;
   border-radius: 4px;
-  border: 1px solid #d3d3d3;
-  box-shadow: inset 0 1px 1px #f0f0f0, 0 3px 6px -5px #bbb;
+  border: 1px solid #D3D3D3;
+  box-shadow: inset 0 1px 1px #F0F0F0, 0 3px 6px -5px #BBB;
 }
 .noUi-connects {
   border-radius: 3px;
 }
 .noUi-connect {
-  background: #3fb8af;
+  background: #3FB8AF;
 }
 /* Handles and cursors;
  */
@@ -137,14 +132,14 @@
   cursor: ns-resize;
 }
 .noUi-handle {
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D9D9D9;
   border-radius: 3px;
-  background: #fff;
+  background: #FFF;
   cursor: default;
-  box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ebebeb, 0 3px 6px -3px #bbb;
+  box-shadow: inset 0 0 1px #FFF, inset 0 1px 7px #EBEBEB, 0 3px 6px -3px #BBB;
 }
 .noUi-active {
-  box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ddd, 0 3px 6px -3px #bbb;
+  box-shadow: inset 0 0 1px #FFF, inset 0 1px 7px #DDD, 0 3px 6px -3px #BBB;
 }
 /* Handle stripes;
  */
@@ -155,7 +150,7 @@
   position: absolute;
   height: 14px;
   width: 1px;
-  background: #e8e7e6;
+  background: #E8E7E6;
   left: 14px;
   top: 6px;
 }
@@ -175,7 +170,7 @@
 /* Disabled state;
  */
 [disabled] .noUi-connect {
-  background: #b8b8b8;
+  background: #B8B8B8;
 }
 [disabled].noUi-target,
 [disabled].noUi-handle,
@@ -211,13 +206,13 @@
  */
 .noUi-marker {
   position: absolute;
-  background: #ccc;
+  background: #CCC;
 }
 .noUi-marker-sub {
-  background: #aaa;
+  background: #AAA;
 }
 .noUi-marker-large {
-  background: #aaa;
+  background: #AAA;
 }
 /* Horizontal layout;
  *
@@ -280,7 +275,7 @@
 .noUi-tooltip {
   display: block;
   position: absolute;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D9D9D9;
   border-radius: 3px;
   background: #fff;
   color: #000;

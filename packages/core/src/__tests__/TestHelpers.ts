@@ -14,6 +14,25 @@ export class TestHelpers {
     };
   }
 
+  static setupDomAndGlobals(): void {
+    const html = `<!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body>
+          <canvas style="height: 100vh; width: 100vw"></canvas>
+        </div>
+      </body>
+    </html>`;
+    document.documentElement.innerHTML = html;
+
+    Object.defineProperty(window, "performance", {
+      value: TestHelpers.performance,
+    });
+  }
+
   static perfCounter = 0;
   static requestedFrames = 0;
   static maxRequestedFrames = 0;
@@ -49,6 +68,28 @@ export class TestHelpers {
           Fill: undefined,
         },
         MakeCanvasSurface: () => {
+          return {
+            reportBackendTypeIsGPU: () => true,
+            getCanvas: () => {
+              return skiaCanvas;
+            },
+            makeImageSnapshot: () => {
+              return {
+                delete: () => undefined,
+              };
+            },
+            requestAnimationFrame: (callback: (canvas: object) => void) => {
+              return requestAnimationFrame(callback);
+            },
+            width: () => {
+              return NaN;
+            },
+            height: () => {
+              return NaN;
+            },
+          };
+        },
+        MakeWebGLCanvasSurface: () => {
           return {
             reportBackendTypeIsGPU: () => true,
             getCanvas: () => {
