@@ -20,6 +20,7 @@
     "@angular/platform-browser": "^13.3.1",
     "@angular/platform-browser-dynamic": "^13.3.1",
     "@angular/router": "^13.3.1",
+    "@webgpu/types": "0.1.21",
     "monaco-editor": "^0.33.0",
     "rxjs": "^7.5.5",
     "ts-morph": "^14.0.0",

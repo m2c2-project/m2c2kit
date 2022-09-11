@@ -5,7 +5,6 @@ import livereload from "rollup-plugin-livereload";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import copy from "rollup-plugin-copy";
 import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
-import replace from "@rollup/plugin-replace";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
@@ -26,18 +25,6 @@ export default (commandLineArgs) => {
         },
       ],
       plugins: [
-        /**
-         * replace is needed if we have included @m2c2kit/survey, because it
-         * uses react. see https://github.com/rollup/rollup/issues/487
-         */
-        replace({
-          values: {
-            "process.env.NODE_ENV": commandLineArgs.configProd
-              ? JSON.stringify("production")
-              : JSON.stringify("development"),
-          },
-          preventAssignment: true,
-        }),
         nodeResolve(),
         typescript({
           sourceMap: commandLineArgs.configServe && true,

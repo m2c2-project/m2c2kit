@@ -21,7 +21,7 @@ import { IElement, ISurveyElement, IQuestion } from "survey-react";
 
 /**
  * The structure of options object that is returned in SurveyJs
- * onValueChanged event *
+ * onValueChanged event
  */
 interface ValueChangedOptions {
   name: string;
@@ -32,7 +32,7 @@ interface ValueChangedOptions {
 
 /**
  * The structure of options object that is returned in SurveyJs
- * onCurrentPageChanging event *
+ * onCurrentPageChanging event
  */
 interface OnCurrentPageChangingOptions {
   oldCurrentPage: SurveyReact.PageModel;

@@ -77,6 +77,11 @@ const CopyPluginPatterns = [
     to: "assets/canvaskit-wasm",
     context: "./../../node_modules/canvaskit-wasm/types",
   },
+  {
+    from: "index.d.ts",
+    to: "assets/webgpu/types",
+    context: "./node_modules/@webgpu/types/dist",
+  },
   { from: "index.*", to: "assets/m2c2kit/core", context: "./../core/dist" },
   {
     from: "index.*",
@@ -171,6 +176,10 @@ const CopyPluginPatterns = [
     from: "./src/assets/tutorial",
     to: "assets/tutorial",
   },
+  {
+    from: "./src/assets/survey-example",
+    to: "assets/survey-example",
+  },
 ];
 
 // eslint-disable-next-line no-undef
@@ -237,7 +246,7 @@ const sessionCode = `const session = new Session({
       if (ev.target.type === ActivityType.Game) {
         console.log(\`✅ trial complete:\`);
       } else if (ev.target.type === ActivityType.Survey) {
-        console.log(\`✅ question answered:\`);
+        console.log(\`✅ survey response:\`);
       }
       console.log("  newData: " + JSON.stringify(ev.newData));
       console.log("  newData schema: " + JSON.stringify(ev.newDataSchema));

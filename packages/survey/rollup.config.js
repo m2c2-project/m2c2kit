@@ -8,6 +8,26 @@ import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
+/**
+ * @m2c2kit/survey uses SurveyJS's react-based library. React uses
+ * process.env.NODE_ENV to determine the production environment. This will not
+ * be available in the browser, so shim it.
+ * see https://github.com/rollup/rollup/issues/487
+ */
+function prependToBundle(filename, content) {
+  return {
+    name: "prepend-to-bundle",
+    generateBundle: (_options, bundle) => {
+      if (bundle[filename]?.type === "chunk") {
+        bundle[filename].code = content + bundle[filename].code;
+      } else {
+        throw new Error(`bundle named ${filename} not found.`);
+      }
+    },
+  };
+}
+const codeToPrepend = `let process={env:{NODE_ENV:'production'}};`;
+
 export default [
   {
     input: ["./src/index.ts"],
@@ -24,6 +44,7 @@ export default [
       }),
       sourcemaps(),
       terser(),
+      prependToBundle("index.js", codeToPrepend),
     ],
   },
   {
@@ -42,10 +63,12 @@ export default [
           },
           {
             src: [
-              "../../node_modules/survey-knockout/modern.css",
-              "../../node_modules/survey-knockout/modern.min.css",
-              "../../node_modules/survey-knockout/survey.css",
-              "../../node_modules/survey-knockout/survey.min.css",
+              "../../node_modules/survey-react/modern.css",
+              "../../node_modules/survey-react/modern.min.css",
+              "../../node_modules/survey-react/survey.css",
+              "../../node_modules/survey-react/survey.min.css",
+              "../../node_modules/survey-react/defaultV2.css",
+              "../../node_modules/survey-react/defaultV2.min.css",
               "../../node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.css",
               "../../node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.min.css",
               "../../node_modules/select2/dist/css/select2.css",

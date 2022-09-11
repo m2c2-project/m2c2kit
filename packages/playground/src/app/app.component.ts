@@ -42,7 +42,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   m2c2addonslib = "";
   m2c2sageresearchlib = "";
   m2c2surveylib = "";
-  canvaskitLib = "";
+  canvaskitlib = "";
+  webgpulib = "";
 
   codeEditorVisible = true;
   runButtonIcon = "arrow_right";
@@ -66,6 +67,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     {
       name: "CLI Starter (Stroop)",
       url: "./assets/src/cli-starter/index.ts",
+    },
+    {
+      name: "Survey example",
+      url: "./assets/survey-example/index.ts",
     },
     // {
     //   name: "tutorial-part01-01.ts",
@@ -260,158 +265,163 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.initMonaco();
   }
 
-  private initMonaco(): void {
+  private async initMonaco(): Promise<void> {
     if (!this.monacoEditorService.loaded) {
-      this.monacoEditorService.loadingFinished.pipe(first()).subscribe(() => {
-        this.initMonaco();
-      });
+      this.monacoEditorService.loadingFinished
+        .pipe(first())
+        .subscribe(async () => {
+          await this.initMonaco();
+        });
       return;
     }
 
-    Promise.all([
-      fetch("./assets/index.html"),
-      fetch("./assets/m2c2kit/core/index.d.ts"),
-      fetch("./assets/m2c2kit/addons/index.d.ts"),
-      fetch("./assets/m2c2kit/sage-research/index.d.ts"),
-      fetch("./assets/m2c2kit/survey/index.d.ts"),
-      fetch("./assets/canvaskit-wasm/index.d.ts"),
-    ])
-      .then(
-        ([
-          templateResponse,
-          coreLibResponse,
-          addonsLibResponse,
-          m2c2sageresearchLibResponse,
-          m2c2surveyLibResponse,
-          canvaskitLibResponse,
-        ]) => {
-          if (
-            ![
-              templateResponse.ok,
-              coreLibResponse.ok,
-              addonsLibResponse.ok,
-              m2c2sageresearchLibResponse.ok,
-              m2c2surveyLibResponse.ok,
-              canvaskitLibResponse.ok,
-            ].every((ok) => ok)
-          ) {
-            console.log("%cfatal error loading assets", "color: red");
+    const assetUrls = [
+      "./assets/index.html",
+      "./assets/m2c2kit/core/index.d.ts",
+      "./assets/m2c2kit/addons/index.d.ts",
+      "./assets/m2c2kit/sage-research/index.d.ts",
+      "./assets/m2c2kit/survey/index.d.ts",
+      "./assets/canvaskit-wasm/index.d.ts",
+      "./assets/webgpu/types/index.d.ts",
+    ];
+
+    const fetchAssetUrl = (url: string): Promise<FetchedAsset> => {
+      const showErrorMessageInIde = (): void => {
+        this.compilationMessage = "⚠ IDE error. see console.";
+        this.changeDetectorRef.detectChanges();
+      };
+      return fetch(url)
+        .then((response) => {
+          if (!response.ok) {
+            showErrorMessageInIde();
+            throw new Error(
+              `Fatal error loading asset from ${url}. Error: ${response.status}`
+            );
           }
-
-          Promise.all([
-            templateResponse.text(),
-            coreLibResponse.text(),
-            addonsLibResponse.text(),
-            m2c2sageresearchLibResponse.text(),
-            m2c2surveyLibResponse.text(),
-            canvaskitLibResponse.text(),
-          ])
-            .then(
-              ([
-                templateHtml,
-                m2c2kitCoreLib,
-                m2c2kitAddonsLib,
-                m2c2kitSageresearchLib,
-                m2c2kitSurveyLib,
-                canvaskitLib,
-              ]) => {
-                this.m2c2corelib = m2c2kitCoreLib;
-                this.m2c2addonslib = m2c2kitAddonsLib;
-                this.m2c2sageresearchlib = m2c2kitSageresearchLib;
-                this.m2c2surveylib = m2c2kitSurveyLib;
-                this.canvaskitLib = canvaskitLib;
-                this.html = templateHtml;
-
-                // see https://stackoverflow.com/a/43080286
-                // compiler options
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
-                  {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    target: monaco.languages.typescript.ScriptTarget.ES2019,
-                    allowNonTsExtensions: true,
-                    moduleResolution:
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore
-                      monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    module: monaco.languages.typescript.ModuleKind.ES2019,
-                    noEmit: true,
-                    // typeRoots: ["node_modules/@types"]
-                  }
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                  m2c2kitCoreLib,
-                  "file:///node_modules/@m2c2kit/core/index.d.ts"
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                  m2c2kitAddonsLib,
-                  "file:///node_modules/@m2c2kit/addons/index.d.ts"
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                  m2c2kitSageresearchLib,
-                  "file:///node_modules/@m2c2kit/sage-research/index.d.ts"
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                  m2c2kitSurveyLib,
-                  "file:///node_modules/@m2c2kit/survey/index.d.ts"
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                const model = window.monaco.editor.createModel(
-                  "",
-                  "typescript",
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  window.monaco.Uri.parse("file:///assessment.ts")
-                );
-                monacoEditor.editor.setModelLanguage(model, "typescript");
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                this.jsEditor = window.monaco.editor.create(
-                  this._jsEditorContainer.nativeElement,
-                  { model, theme: this.selectedTheme.monacoName }
-                );
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                this.htmlEditor = window.monaco.editor.create(
-                  this._htmlEditorContainer.nativeElement,
-                  {
-                    value: this.html,
-                    language: "html",
-                    theme: this.selectedTheme.monacoName,
-                  }
-                );
-                this.loading$.next(false);
-                this.changeDetectorRef.detectChanges();
-              }
-            )
+          return response
+            .text()
+            .then((s) => {
+              return {
+                url: url,
+                assetAsString: s,
+              };
+            })
             .catch((err) => {
-              console.log("%cfatal error loading assets: " + err, "color: red");
+              showErrorMessageInIde();
+              throw new Error(
+                `Fatal error loading asset from ${url}. Error: ${err}`
+              );
             });
-        }
-      )
-      .catch((err) => {
-        console.log("%cfatal error loading assets: " + err, "color: red");
+        })
+        .catch((err) => {
+          showErrorMessageInIde();
+          throw new Error(
+            `Fatal error loading asset from ${url}. Error: ${err}`
+          );
+        });
+    };
+
+    async function fetchAssetsAsync(
+      assetUrls: string[]
+    ): Promise<FetchedAssets> {
+      const fetchedAssetArray = await Promise.all(
+        assetUrls.map((u) => fetchAssetUrl(u))
+      );
+      const fetchedAssets: FetchedAssets = {};
+      fetchedAssetArray.forEach((fa) => {
+        fetchedAssets[fa.url] = fa.assetAsString;
       });
+      return fetchedAssets;
+    }
+
+    const fetchedAssets = await fetchAssetsAsync(assetUrls);
+    this.m2c2corelib = fetchedAssets["./assets/m2c2kit/core/index.d.ts"];
+    this.m2c2addonslib = fetchedAssets["./assets/m2c2kit/addons/index.d.ts"];
+    this.m2c2sageresearchlib =
+      fetchedAssets["./assets/m2c2kit/sage-research/index.d.ts"];
+    this.m2c2surveylib = fetchedAssets["./assets/m2c2kit/survey/index.d.ts"];
+    this.canvaskitlib = fetchedAssets["./assets/canvaskit-wasm/index.d.ts"];
+    this.webgpulib = fetchedAssets["./assets/webgpu/types/index.d.ts"];
+    this.html = fetchedAssets["./assets/index.html"];
+
+    // see https://stackoverflow.com/a/43080286
+    // compiler options
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      target: monaco.languages.typescript.ScriptTarget.ES2019,
+      allowNonTsExtensions: true,
+      moduleResolution:
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      module: monaco.languages.typescript.ModuleKind.ES2019,
+      noEmit: true,
+      // typeRoots: ["node_modules/@types"]
+    });
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      this.m2c2corelib,
+      "file:///node_modules/@m2c2kit/core/index.d.ts"
+    );
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      this.m2c2addonslib,
+      "file:///node_modules/@m2c2kit/addons/index.d.ts"
+    );
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      this.m2c2sageresearchlib,
+      "file:///node_modules/@m2c2kit/sage-research/index.d.ts"
+    );
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      this.m2c2surveylib,
+      "file:///node_modules/@m2c2kit/survey/index.d.ts"
+    );
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const model = window.monaco.editor.createModel(
+      "",
+      "typescript",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      window.monaco.Uri.parse("file:///index.ts")
+    );
+    monacoEditor.editor.setModelLanguage(model, "typescript");
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.jsEditor = window.monaco.editor.create(
+      this._jsEditorContainer.nativeElement,
+      { model, theme: this.selectedTheme.monacoName }
+    );
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.htmlEditor = window.monaco.editor.create(
+      this._htmlEditorContainer.nativeElement,
+      {
+        value: this.html,
+        language: "html",
+        theme: this.selectedTheme.monacoName,
+      }
+    );
+    this.loading$.next(false);
+    this.changeDetectorRef.detectChanges();
   }
 
   combineCodeHtml(): SafeHtml | undefined {
@@ -453,12 +463,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       const libFile5 = project.createSourceFile(
         "./node_modules/canvaskit-wasm/index.d.ts",
-        this.canvaskitLib
+        this.canvaskitlib
       );
       await libFile5.save();
 
+      const libFile6 = project.createSourceFile(
+        "./node_modules/@webgpu/types/index.d.ts",
+        this.webgpulib
+      );
+      await libFile6.save();
+
       const sourceFile = project.createSourceFile(
-        "src/assessment.ts",
+        "src/index.ts",
         this.jsEditor?.getValue()
       );
       await sourceFile.save();
@@ -511,7 +527,8 @@ export class AppComponent implements OnInit, AfterViewInit {
       const result = project.emitToMemory();
 
       this.htmlData = this.sanitizer.bypassSecurityTrustHtml(
-        this.html
+        this.htmlEditor
+          .getValue()
           .replace(
             "</body>",
             '<script type="module">' +
@@ -532,6 +549,9 @@ export class AppComponent implements OnInit, AfterViewInit {
           )
           .replace(`"@m2c2kit/survey"`, `"./assets/m2c2kit/survey/index.js"`)
       );
+      // TODO: add an option to get the bundled html (index.html w/script)
+      // and export it (as a zip?)
+      // console.log(this.htmlData["changingThisBreaksApplicationSecurity"]);
       this.runButtonIcon = "arrow_right";
       this.compilationMessage = "";
       this.changeDetectorRef.detectChanges();
@@ -546,4 +566,13 @@ export class AppComponent implements OnInit, AfterViewInit {
      */
     setTimeout(compileFunction, 25);
   }
+}
+
+interface FetchedAssets {
+  [key: string]: string;
+}
+
+interface FetchedAsset {
+  url: string;
+  assetAsString: string;
 }
