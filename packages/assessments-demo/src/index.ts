@@ -65,7 +65,7 @@ const session = new Session({
       if (ev.target.type === ActivityType.Game) {
         console.log(`✅ trial complete:`);
       } else if (ev.target.type === ActivityType.Survey) {
-        console.log(`✅ question answered:`);
+        console.log(`✅ survey response:`);
       }
       console.log("  newData: " + JSON.stringify(ev.newData));
       console.log("  newData schema: " + JSON.stringify(ev.newDataSchema));

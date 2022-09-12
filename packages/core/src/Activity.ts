@@ -13,8 +13,10 @@ export interface Activity {
   session: Session;
   /** The activity's unique identifier. NOTE: This is newly generated each session. The uuid for an activity will vary across sessions. */
   uuid: string;
-  /** The activity's human friendly name */
+  /** Human-friendly name of this activity */
   name: string;
+  /** Short identifier of this activity */
+  id: string;
   /** The value of performance.now() immediately before the activity begins */
   beginTimestamp: number;
   /** The value of new Date().toISOString() immediately before the activity begins */

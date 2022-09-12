@@ -53,6 +53,7 @@ export class Game implements Activity {
   _session?: Session;
   uuid = Uuid.generate();
   name: string;
+  id: string;
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
@@ -70,6 +71,7 @@ export class Game implements Activity {
   constructor(options: GameOptions) {
     this.options = options;
     this.name = options.name;
+    this.id = options.id;
     this.freeEntitiesScene.game = this;
     this.freeEntitiesScene.needsInitialization = true;
     this.fpsMetricReportThreshold =

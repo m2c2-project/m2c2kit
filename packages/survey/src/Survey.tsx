@@ -62,11 +62,13 @@ export class Survey implements Activity {
   readonly type = ActivityType.Survey;
   private _session?: Session;
   name: string;
+  id: string;
   uuid = Uuid.generate();
   private _surveyJson?: unknown;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
   private _survey?: SurveyReact.Model;
+  private responseIndex = 0;
 
   private skippedElements: SkippedElements = {};
 
@@ -74,6 +76,13 @@ export class Survey implements Activity {
     this._surveyJson = surveyJson;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
+    if (this.name === "unnamed survey") {
+      console.warn(
+        `Survey json has no name property. Using "unnamed survey" as the name. It is highly recommended to set name property in survey json.`
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.id = (surveyJson as any)?.id ?? (surveyJson as any)?.name ?? "survey";
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -90,6 +99,13 @@ export class Survey implements Activity {
     this._surveyJson = surveyJson;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
+    if (this.name === "unnamed survey") {
+      console.warn(
+        `Survey json has no name property. Using "unnamed survey" as the name. It is highly recommended to set name property in survey json.`
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.id = (surveyJson as any)?.id ?? (surveyJson as any)?.name ?? "survey";
   }
 
   start(): void {
@@ -167,21 +183,32 @@ export class Survey implements Activity {
           });
 
         if (Object.keys(newSkippedElements).length > 0) {
+          const automaticSurveyDataProperties = {
+            session_uuid: this.session.uuid,
+            activity_uuid: this.uuid,
+            activity_id: this.id,
+          };
+          const data = {
+            ...this.addSkippedElementsToData(sender.data, this.skippedElements),
+            ...automaticSurveyDataProperties,
+          };
           if (this.session.options.activityCallbacks?.onActivityResults) {
             this.session.options.activityCallbacks.onActivityResults({
               type: EventType.ActivityData,
               target: this,
-              newData: newSkippedElements,
+              newData: {
+                ...newSkippedElements,
+                response_index: this.responseIndex,
+                ...automaticSurveyDataProperties,
+              },
               newDataSchema: {},
-              data: this.addSkippedElementsToData(
-                sender.data,
-                this.skippedElements
-              ),
+              data: data,
               dataSchema: {},
               activityConfiguration: {},
               activityConfigurationSchema: {},
             });
           }
+          this.responseIndex++;
         }
       }
     );
@@ -221,20 +248,31 @@ export class Survey implements Activity {
         }
 
         if (this.session.options.activityCallbacks?.onActivityResults) {
+          const automaticSurveyDataProperties = {
+            session_uuid: this.session.uuid,
+            activity_uuid: this.uuid,
+            activity_id: this.id,
+          };
+          const data = {
+            ...this.addSkippedElementsToData(sender.data, this.skippedElements),
+            ...automaticSurveyDataProperties,
+          };
           this.session.options.activityCallbacks.onActivityResults({
             type: EventType.ActivityData,
             target: this,
-            newData: newData,
+            newData: {
+              ...newData,
+              response_index: this.responseIndex,
+              ...automaticSurveyDataProperties,
+            },
             newDataSchema: {},
-            data: this.addSkippedElementsToData(
-              sender.data,
-              this.skippedElements
-            ),
+            data: data,
             dataSchema: {},
             activityConfiguration: {},
             activityConfigurationSchema: {},
           });
         }
+        this.responseIndex++;
       }
     );
 
