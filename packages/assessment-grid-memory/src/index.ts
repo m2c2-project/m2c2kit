@@ -688,31 +688,46 @@ class GridMemory extends Game {
                   // but this time, slide it into view
                   ShowInterferenceActivity(true);
                 }
-                userInterferenceActions.push({
-                  elapsed_duration_ms: Timer.elapsed(
-                    "interferenceResponseTime"
-                  ),
-                  action_type: "on-target",
-                  cell: {
-                    row: (<squareUserData>square.userData).row,
-                    column: (<squareUserData>square.userData).column,
-                    tap_x: e.point.x,
-                    tap_y: e.point.y,
-                  },
-                });
+                /**
+                 * There is an edge case in which the interference_duration_ms
+                 * has ellapsed and we auto-advance to the next scene, but
+                 * then the user taps a target. In that case, the
+                 * "interferenceResponseTime" timer has been removed, and thus
+                 * a call to Timer.elapsed() will throw an error.
+                 * To prevent this, check if the timer exists before
+                 * calling Timer.elapsed(). We will not record these user taps,
+                 * but that is OK because we are at or beyond the
+                 * interference_duration_ms duration.
+                 */
+                if (Timer.exists("interferenceResponseTime")) {
+                  userInterferenceActions.push({
+                    elapsed_duration_ms: Timer.elapsed(
+                      "interferenceResponseTime"
+                    ),
+                    action_type: "on-target",
+                    cell: {
+                      row: (<squareUserData>square.userData).row,
+                      column: (<squareUserData>square.userData).column,
+                      tap_x: e.point.x,
+                      tap_y: e.point.y,
+                    },
+                  });
+                }
               } else {
-                userInterferenceActions.push({
-                  elapsed_duration_ms: Timer.elapsed(
-                    "interferenceResponseTime"
-                  ),
-                  action_type: "off-target",
-                  cell: {
-                    row: (<squareUserData>square.userData).row,
-                    column: (<squareUserData>square.userData).column,
-                    tap_x: e.point.x,
-                    tap_y: e.point.y,
-                  },
-                });
+                if (Timer.exists("interferenceResponseTime")) {
+                  userInterferenceActions.push({
+                    elapsed_duration_ms: Timer.elapsed(
+                      "interferenceResponseTime"
+                    ),
+                    action_type: "off-target",
+                    cell: {
+                      row: (<squareUserData>square.userData).row,
+                      column: (<squareUserData>square.userData).column,
+                      tap_x: e.point.x,
+                      tap_y: e.point.y,
+                    },
+                  });
+                }
               }
             });
 
