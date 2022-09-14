@@ -34,7 +34,7 @@ interface ValueChangedOptions {
  * The structure of options object that is returned in SurveyJs
  * onCurrentPageChanging event
  */
-interface OnCurrentPageChangingOptions {
+interface CurrentPageChangingOptions {
   oldCurrentPage: SurveyReact.PageModel;
   newCurrentPage: SurveyReact.PageModel;
   allowChanging: boolean;
@@ -43,11 +43,19 @@ interface OnCurrentPageChangingOptions {
 }
 
 /**
- * Definition of object to hold names of elements that have been
- * skipped by the participant.
+ * Elements that have been skipped by the participant.
  */
 interface SkippedElements {
   [key: string]: null;
+}
+
+/**
+ * Survey element name and its value.
+ */
+interface SurveyVariable {
+  name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
 }
 
 /**
@@ -69,7 +77,6 @@ export class Survey implements Activity {
   beginIso8601Timestamp = "";
   private _survey?: SurveyReact.Model;
   private responseIndex = 0;
-
   private skippedElements: SkippedElements = {};
 
   constructor(surveyJson?: unknown) {
@@ -126,7 +133,6 @@ export class Survey implements Activity {
 
     this.survey = new SurveyReact.Model(this._surveyJson);
     this.survey.focusFirstQuestionAutomatic = false;
-    // this.survey.completeText = "Next";
     // this hides the default surveyjs default completion html
     this.survey.completedHtml = `<html></html>`;
 
@@ -148,10 +154,10 @@ export class Survey implements Activity {
      * skipped. To create elements that are simply informational pages
      * that should not collect data (variables), give them a name that
      * starts with "__" (two underscores). These elements can be skipped
-     * and they will not generate m2c2kig events.
+     * and they will not generate m2c2kit events.
      */
     this.survey.onCurrentPageChanging.add(
-      (sender: SurveyReact.Model, options: OnCurrentPageChangingOptions) => {
+      (sender: SurveyReact.Model, options: CurrentPageChangingOptions) => {
         const newSkippedElements: { [key: string]: null } = {};
         const elements = options.oldCurrentPage.elements as Array<IElement>;
         elements
@@ -188,19 +194,33 @@ export class Survey implements Activity {
             activity_uuid: this.uuid,
             activity_id: this.id,
           };
-          const data = {
-            ...this.addSkippedElementsToData(sender.data, this.skippedElements),
+
+          const newData: ActivityKeyValueData = {
+            variables: new Array<SurveyVariable>(),
+            response_index: this.responseIndex,
+            ...automaticSurveyDataProperties,
+          };
+
+          for (const [key, value] of Object.entries(newSkippedElements)) {
+            const response: SurveyVariable = {
+              name: key,
+              value: value,
+            };
+            (newData["variables"] as Array<SurveyVariable>).push(response);
+          }
+
+          const data: ActivityKeyValueData = {
+            variables: this.createSurveyVariablesArray(
+              sender.data,
+              this.skippedElements
+            ),
             ...automaticSurveyDataProperties,
           };
           if (this.session.options.activityCallbacks?.onActivityResults) {
             this.session.options.activityCallbacks.onActivityResults({
               type: EventType.ActivityData,
               target: this,
-              newData: {
-                ...newSkippedElements,
-                response_index: this.responseIndex,
-                ...automaticSurveyDataProperties,
-              },
+              newData: newData,
               newDataSchema: {},
               data: data,
               dataSchema: {},
@@ -222,10 +242,9 @@ export class Survey implements Activity {
          * SurveyJS onValueChanged sends back 1) the just completed question
          * as a key-value pair in the options object, and 2) all the completed
          * questions as multiple key-value pairs in the sender.data object.
-         * These match up with the types we need, newData and e.g., ActivityData.
          */
 
-        const newData = { [options.name]: options.value };
+        const newResponse = { [options.name]: options.value };
 
         /**
          * User may have answered an element that was previously skipped; no
@@ -244,27 +263,41 @@ export class Survey implements Activity {
          */
         if (Array.isArray(options.value) && options.value.length === 0) {
           this.addElementNameTopSkippedElements(options.name);
-          newData[options.name] = null;
+          newResponse[options.name] = null;
+        }
+
+        const automaticSurveyDataProperties = {
+          session_uuid: this.session.uuid,
+          activity_uuid: this.uuid,
+          activity_id: this.id,
+        };
+
+        const newData: ActivityKeyValueData = {
+          variables: new Array<SurveyVariable>(),
+          response_index: this.responseIndex,
+          ...automaticSurveyDataProperties,
+        };
+
+        for (const [key, value] of Object.entries(newResponse)) {
+          const response: SurveyVariable = {
+            name: key,
+            value: value,
+          };
+          (newData["variables"] as Array<SurveyVariable>).push(response);
         }
 
         if (this.session.options.activityCallbacks?.onActivityResults) {
-          const automaticSurveyDataProperties = {
-            session_uuid: this.session.uuid,
-            activity_uuid: this.uuid,
-            activity_id: this.id,
-          };
-          const data = {
-            ...this.addSkippedElementsToData(sender.data, this.skippedElements),
+          const data: ActivityKeyValueData = {
+            variables: this.createSurveyVariablesArray(
+              sender.data,
+              this.skippedElements
+            ),
             ...automaticSurveyDataProperties,
           };
           this.session.options.activityCallbacks.onActivityResults({
             type: EventType.ActivityData,
             target: this,
-            newData: {
-              ...newData,
-              response_index: this.responseIndex,
-              ...automaticSurveyDataProperties,
-            },
+            newData: newData,
             newDataSchema: {},
             data: data,
             dataSchema: {},
@@ -299,11 +332,6 @@ export class Survey implements Activity {
         "m2c2kit-survey-div not found in DOM. cannot start survey."
       );
     }
-    //this.survey.render("m2c2kit-survey-div");
-    // const rootElement = document.getElementById("m2c2kit-survey-div");
-    // if (!rootElement) {
-    //   throw new Error("");
-    // }
     const root = createRoot(surveyDiv);
     root.render(<SurveyReact.Survey model={this.survey} />);
   }
@@ -333,14 +361,28 @@ export class Survey implements Activity {
     return elementName in this.skippedElements;
   }
 
-  private addSkippedElementsToData(
+  private createSurveyVariablesArray(
     data: ActivityKeyValueData,
     skippedElements: SkippedElements
-  ): ActivityKeyValueData {
-    return {
-      ...skippedElements,
-      ...data,
-    };
+  ): Array<SurveyVariable> {
+    const variables: Array<SurveyVariable> = [];
+
+    for (const [key, value] of Object.entries(data)) {
+      const response: SurveyVariable = {
+        name: key,
+        value: value,
+      };
+      variables.push(response);
+    }
+
+    for (const [key, value] of Object.entries(skippedElements)) {
+      const response: SurveyVariable = {
+        name: key,
+        value: value,
+      };
+      variables.push(response);
+    }
+    return variables;
   }
 
   /**
