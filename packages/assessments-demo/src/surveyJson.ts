@@ -5,6 +5,7 @@ export const surveyJson = {
    * this activity. Within a study, use different survey names.
    */
   name: "demo-survey",
+  confirmSkipping: true,
   pages: [
     {
       name: "page1",
