@@ -2,13 +2,22 @@
 // https://medium.com/rewrite-tech/visual-studio-code-tips-for-monorepo-development-with-multi-root-workspaces-and-extension-6b69420ecd12
 {
   "folders": [
-     {
-       "path": "."
-     },
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "packages/core",
+      "path": "packages/core"
+    },
+    {
+      "name": "packages/survey",
+      "path": "packages/survey"
+    },
   ],
   "settings": {
     "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["dot-memory", "tools", "demo-server"],
+    "jest.disabledWorkspaceFolders": ["root"],
     "azureFunctions.projectSubpath": "tools/demo-server/bin/Release/net6.0/publish",
   },
   "extensions": {

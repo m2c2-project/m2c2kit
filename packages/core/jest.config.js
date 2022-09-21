@@ -14,10 +14,13 @@ module.exports = {
    * types for jasmine. see tsconfig.jest.json, where I explicitly include
    * types only for jest and node
    */
-  globals: {
-    "ts-jest": {
-      tsconfig: `./src/__tests__/tsconfig.json`,
-    },
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      // required due to custom location of tsconfig.json configuration file
+      // https://kulshekhar.github.io/ts-jest/docs/getting-started/options/tsconfig
+      { tsconfig: "./src/__tests__/tsconfig.json" },
+    ],
   },
   testEnvironment: "jsdom",
 };
