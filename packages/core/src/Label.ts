@@ -39,6 +39,8 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   private paraStyle?: ParagraphStyle;
   private builder?: ParagraphBuilder;
 
+  private _translatedText = "";
+
   /**
    * Single or multi-line text formatted and rendered on the screen.
    *
@@ -76,14 +78,53 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
         throw new Error("unknown horizontalAlignmentMode");
     }
 
+    if (!this.text) {
+      this.text = "";
+    }
+
+    let textColor = this.canvasKit.Color(
+      this.fontColor[0],
+      this.fontColor[1],
+      this.fontColor[2],
+      this.fontColor[3]
+    );
+
+    let textForParagraph: string;
+    const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+    if (i18n) {
+      let translated = i18n.t(this.text);
+      if (translated === undefined) {
+        const fallbackTranslated = i18n.t(this.text, true);
+        if (fallbackTranslated === undefined) {
+          translated = this.text;
+        } else {
+          translated = fallbackTranslated;
+        }
+        if (i18n.options.missingTranslationFontColor) {
+          textColor = this.canvasKit.Color(
+            i18n.options.missingTranslationFontColor[0],
+            i18n.options.missingTranslationFontColor[1],
+            i18n.options.missingTranslationFontColor[2],
+            i18n.options.missingTranslationFontColor[3]
+          );
+        }
+      }
+      this._translatedText = translated;
+      textForParagraph = this._translatedText;
+      if (this._translatedText === "") {
+        console.warn(`warning: empty translated text in label "${this.name}"`);
+      }
+    } else {
+      textForParagraph = this.text;
+      this._translatedText = "";
+      if (this.text === "") {
+        console.warn(`warning: empty text in label "${this.name}"`);
+      }
+    }
+
     this.paraStyle = new this.canvasKit.ParagraphStyle({
       textStyle: {
-        color: this.canvasKit.Color(
-          this.fontColor[0],
-          this.fontColor[1],
-          this.fontColor[2],
-          this.fontColor[3]
-        ),
+        color: textColor,
         backgroundColor: this.backgroundColor
           ? this.canvasKit.Color(
               this.backgroundColor[0],
@@ -98,13 +139,11 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       textAlign: ckTextAlign,
     });
 
-    const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .session;
-    if (!activity) {
-      throw new Error("activity is undefined");
+    const session = (this.parentSceneAsEntity as Scene).game.session;
+    if (!session) {
+      throw new Error("session is undefined");
     }
-    const fontManager = activity.fontManager;
-
+    const fontManager = session.fontManager;
     if (fontManager.fontMgr === undefined) {
       throw new Error("no fonts loaded");
     }
@@ -113,13 +152,8 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.paraStyle,
       fontManager.fontMgr
     );
-    if (!this.text) {
-      this.text = "";
-    }
-    this.builder.addText(this.text);
-    if (this.text === "") {
-      console.warn(`warning: empty text in label "${this.name}"`);
-    }
+
+    this.builder.addText(textForParagraph);
     this.paragraph = this.builder.build();
     const preferredWidth =
       //this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
@@ -175,6 +209,10 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   set text(text: string) {
     this._text = text;
     this.needsInitialization = true;
+  }
+
+  get translatedText(): string {
+    return this._translatedText;
   }
 
   get fontName(): string | undefined {

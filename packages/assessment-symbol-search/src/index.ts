@@ -428,6 +428,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
   }
 
   override init() {
+    super.init();
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias

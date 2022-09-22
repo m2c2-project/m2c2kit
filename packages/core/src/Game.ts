@@ -36,6 +36,9 @@ import { TrialSchema } from "./TrialSchema";
 import { GameMetric } from "./GameMetrics";
 import { Point } from "./Point";
 import { WebGlInfo } from "./WebGlInfo";
+import { I18n } from "./I18n";
+import { Translations } from "./Translations";
+import { LocalizationOptions } from "./LocalizationOptions";
 
 interface BoundingBox {
   xMin: number;
@@ -62,6 +65,7 @@ export class Game implements Activity {
   private maximumRecordedActivityMetrics: number;
   private stepCount = 0;
   private steppingNow = 0;
+  i18n?: I18n;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -79,10 +83,60 @@ export class Game implements Activity {
     this.maximumRecordedActivityMetrics =
       options.maximumRecordedActivityMetrics ??
       Constants.MAXIMUM_RECORDED_ACTIVITY_METRICS;
+    this.addLocalizationParametersToGameParameters();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  init() {}
+  private addLocalizationParametersToGameParameters(): void {
+    this.options.parameters = {
+      ...this.options.parameters,
+      ...I18n.makeLocalizationParameters(),
+    };
+  }
+
+  init() {
+    if (this.isLocalizationRequested()) {
+      const options = this.getLocalizationOptionsFromGameParameters();
+      this.i18n = new I18n(options);
+    }
+  }
+
+  private getLocalizationOptionsFromGameParameters() {
+    const locale = this.getParameter<string>("locale");
+    const fallbackLocale = this.getParameterOrFallback<string, undefined>(
+      "fallback_locale",
+      undefined
+    );
+    const missingTranslationColor = this.getParameterOrFallback<
+      RgbaColor,
+      undefined
+    >("missing_translation_font_color", undefined);
+    const additionalTranslations = this.getParameterOrFallback<
+      Translations,
+      undefined
+    >("translations", undefined);
+    const translations = this.options.translations;
+    return <LocalizationOptions>{
+      locale,
+      fallbackLocale,
+      missingTranslationFontColor: missingTranslationColor,
+      additionalTranslations,
+      translations,
+    };
+  }
+
+  private isLocalizationRequested(): boolean {
+    const locale = this.getParameterOrFallback<string, undefined>(
+      "locale",
+      undefined
+    );
+
+    if (locale === "") {
+      throw new Error(
+        "Empty string in locale. Leave locale undefined or null to prevent localization."
+      );
+    }
+    return locale !== undefined && locale !== null;
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setParameters(newParameters: any): void {
@@ -333,6 +387,42 @@ export class Game implements Activity {
       return this.options.parameters[parameterName].default as T;
     } else {
       throw new Error(`game parameter ${parameterName} not found`);
+    }
+  }
+
+  /**
+   * Gets the value of the game parameter. If parameterName
+   * is not found, then return fallback value
+   *
+   * @param parameterName - the name of the game parameter whose value is requested
+   * @param fallback - the value to return if parameterName is not found
+   * @returns
+   */
+  getParameterOrFallback<T, U>(parameterName: string, fallbackValue: U): T | U {
+    if (
+      this.options.parameters !== undefined &&
+      Object.keys(this.options.parameters).includes(parameterName)
+    ) {
+      return this.options.parameters[parameterName].default as T;
+    } else {
+      return fallbackValue;
+    }
+  }
+
+  /**
+   * Returns true if a game parameter exists for the given string.
+   *
+   * @param parameterName - the name of the game parameter whose existence is queried
+   * @returns
+   */
+  hasParameter(parameterName: string): boolean {
+    if (
+      this.options.parameters !== undefined &&
+      Object.keys(this.options.parameters).includes(parameterName)
+    ) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -852,7 +942,15 @@ export class Game implements Activity {
    */
 
   private makeGameActivityConfiguration(parameters: GameParameters): unknown {
-    const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+    const gameParams: GameParameters = JSON.parse(JSON.stringify(parameters));
+    // don't include the parameters used for localization
+    const {
+      locale,
+      fallback_locale,
+      missing_translation_font_color,
+      translations,
+      ...result
+    } = gameParams;
 
     for (const prop in result) {
       for (const subProp in result[prop]) {
@@ -867,7 +965,15 @@ export class Game implements Activity {
   private makeGameActivityConfigurationSchema(
     parameters: GameParameters
   ): JsonSchema {
-    const result: GameParameters = JSON.parse(JSON.stringify(parameters));
+    const gameParams: GameParameters = JSON.parse(JSON.stringify(parameters));
+    // don't include the parameters used for localization
+    const {
+      locale,
+      fallback_locale,
+      missing_translation_font_color,
+      translations,
+      ...result
+    } = gameParams;
 
     for (const prop in result) {
       if (!("type" in result[prop]) && "value" in result[prop]) {

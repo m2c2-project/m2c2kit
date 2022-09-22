@@ -312,7 +312,8 @@ appeared.",
     super(options);
   }
 
-  init(): void {
+  override init(): void {
+    super.init();
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias

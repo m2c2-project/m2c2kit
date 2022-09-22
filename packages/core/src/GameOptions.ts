@@ -2,6 +2,7 @@ import { RgbaColor } from "./RgbaColor";
 import { BrowserImage } from "./BrowserImage";
 import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
+import { Translations } from "./Translations";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
@@ -47,4 +48,6 @@ export interface GameOptions {
   _unitTesting?: boolean;
   /** Advance through time step-by-step, for development and debugging */
   timeStepping?: boolean;
+  /** Translations for localization. */
+  translations?: Translations;
 }

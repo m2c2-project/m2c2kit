@@ -19,6 +19,26 @@
     "jest.autoRun": "off",
     "jest.disabledWorkspaceFolders": ["root"],
     "azureFunctions.projectSubpath": "tools/demo-server/bin/Release/net6.0/publish",
+    // when I switched to multiroot workspace, the vs code source control tab
+    // used lots of CPU, and seemed to be watching many more files. Also, it
+    // caused node errors because it was watching files as they were being changed
+    // eg, Error: EPERM: operation not permitted, unlink <file....>
+    // modifying the files.watcherExclude setting fixed the problem
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/*/**": true,
+      "**/.hg/store/**": true,
+      // above are defaults from https://code.visualstudio.com/docs/getstarted/settings#_default-settings
+      // below are specific to my workspace. these are already part of .gitignore and thus should
+      // not be watched by vs code.
+      "**/build/**": true,
+      "**/dist/**": true,
+      "**/dist-webview/**": true,
+      "**/build-umd/**": true,
+      "**/.rollup.cache/**": true,
+      "**/.tsconfig.tsbuildinfo": true,
+    },
   },
   "extensions": {
     "recommendations": [
@@ -26,5 +46,5 @@
       "orta.vscode-jest",
       "esbenp.prettier-vscode"
     ]
-  }
+  },
 }
