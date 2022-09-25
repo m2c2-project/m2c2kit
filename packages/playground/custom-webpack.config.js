@@ -119,8 +119,9 @@ const CopyPluginPatterns = [
       );
       return replaceStringInBuffer(
         c1,
-        "import * as SurveyKO from 'survey-knockout';",
-        "declare namespace SurveyKO { class Survey {} }"
+        "import * as SurveyReact from 'survey-react';",
+        // need to declare all the survey-react classes we use because we don't actually import this library
+        "declare namespace SurveyReact { class Model {} class StylesManager {} class SurveyModel {} class Question {} class PageModel {} }"
       );
     },
   },
