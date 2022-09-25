@@ -22,10 +22,11 @@
     "integration-tests/*"
   ],
   "scripts": {
-    "build": "concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/survey\" \"npm run build -w @m2c2kit/sage-research\" && concurrently \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-cli-starter\" && concurrently \"npm run build -w @m2c2kit/assessments-demo\" \"npm run build-webview -w @m2c2kit/assessments-demo\"",
+    "build": "concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/survey\" \"npm run build -w @m2c2kit/sage-research\" && concurrently \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-cli-starter\" && concurrently \"npm run build -w @m2c2kit/assessments-demo\" \"npm run build-webview -w @m2c2kit/assessments-demo\" && npm run copy-no-js-bundler-assets",
     "docker:build": "docker build -t m2c2kit .",
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "test": "concurrently \"npm run test -w @m2c2kit/core\" \"npm run test -w @m2c2kit/survey\"",
+    "copy-no-js-bundler-assets": "cpy --flat packages/core/build-nobundler/*.[jt]s examples/no-js-bundler-development/lib/ && cpy --flat packages/addons/build-nobundler/*.[jt]s examples/no-js-bundler-development/lib/ && cpy --flat packages/survey/build-nobundler/*.[jt]s examples/no-js-bundler-development/lib/ && cpy . ../../../examples/no-js-bundler-development/assets --cwd=packages/core/assets && cpy --flat packages/assessment-symbol-search/assets/symbol-search/fonts/roboto/Roboto-Regular.ttf examples/no-js-bundler-development/assets/no-bundler-example/fonts/roboto && cpy --flat packages/core/index.html examples/no-js-bundler-development && npx cpy . ../../../examples/no-js-bundler-development/assets --cwd=packages/assessment-symbol-search/assets && cpy --flat packages/assessment-symbol-search/build-nobundler/*.[jt]s examples/no-js-bundler-development/lib/",
     "prepare": "husky install"
   },
   "type": "module",
@@ -37,9 +38,11 @@
     "@typescript-eslint/parser": "^5.22.0",
     "chalk": "^5.0.1",
     "concurrently": "^7.3.0",
+    "cpy-cli": "4.1.0",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "find-up": "6.3.0",
+    "http-server": "14.1.1",
     "husky": "^7.0.4",
     "lint-staged": "^12.4.1",
     "prettier": "2.6.2"

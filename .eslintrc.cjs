@@ -22,6 +22,7 @@ module.exports = {
     "dist",
     "build",
     "build-umd",
+    "build-nobundler",
     "node_modules",
   ],
 };

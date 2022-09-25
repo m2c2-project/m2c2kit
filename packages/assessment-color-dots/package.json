@@ -4,7 +4,7 @@
   "scripts": {
     "build": "npm run clean && rollup -c && npm run copy-assets",
     "copy-assets": "cpy src/assets/**/* dist/assets",
-    "clean": "rimraf dist .rollup.cache tsconfig.tsbuildinfo",
+    "clean": "rimraf dist build-nobundler .rollup.cache tsconfig.tsbuildinfo",
     "postinstall": "node post-install.mjs"
   },
   "main": "dist/index.js",
@@ -25,10 +25,12 @@
     "@m2c2kit/core": "0.3.0"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "13.1.3",
     "@rollup/plugin-typescript": "8.3.3",
     "cpy-cli": "4.1.0",
     "rimraf": "^3.0.2",
     "rollup": "2.70.0",
+    "rollup-plugin-terser": "7.0.2",
     "tslib": "2.4.0",
     "typescript": "4.7.4"
   }

@@ -1,0 +1,4 @@
+# these are built or copied from other packages, so ignore
+assets
+lib
+index.html

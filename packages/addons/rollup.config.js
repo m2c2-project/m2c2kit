@@ -15,7 +15,9 @@ export default [
     output: [{ dir: "./build", format: "es", sourcemap: true }],
     external: ["@m2c2kit/core"],
     plugins: [
-      del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
+      del({
+        targets: ["dist/*", "build/*", "build-umd/*", "build-nobundler/*"],
+      }),
       nodeResolve(),
       typescript({
         outputToFilesystem: true,
@@ -78,6 +80,82 @@ export default [
             // copy the bundled declarations to build-umd
             src: "dist/index.d.ts",
             dest: ["build-umd/"],
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.addons.esm.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.js",
+        },
+      },
+    ],
+    external: ["@m2c2kit/core"],
+    plugins: [
+      nodeResolve(),
+      typescript({
+        outputToFilesystem: true,
+        // tsconfig.json defined the outDir as build, so we must
+        // use a different one for this umd build
+        outDir: "./build-nobundler",
+        sourceMap: false,
+      }),
+      babel({
+        babelHelpers: "bundled",
+      }),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.addons.esm.d.ts",
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make minified esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.addons.esm.min.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
+        },
+      },
+    ],
+    external: ["@m2c2kit/core"],
+    plugins: [
+      typescript({
+        outputToFilesystem: true,
+        // tsconfig.json defined the outDir as build, so we must
+        // use a different one for this build
+        outDir: "./build-nobundler",
+        sourceMap: false,
+      }),
+      babel({
+        babelHelpers: "bundled",
+      }),
+      terser(),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.addons.esm.min.d.ts",
           },
         ],
       }),

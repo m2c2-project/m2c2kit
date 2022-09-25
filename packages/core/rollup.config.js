@@ -34,7 +34,9 @@ export default [
     // combine all declaration files
     output: [{ dir: "./build", format: "es", sourcemap: true }],
     plugins: [
-      del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
+      del({
+        targets: ["dist/*", "build/*", "build-umd/*", "build-nobundler/*"],
+      }),
       ...sharedPlugins,
       typescript({
         // I was getting errors when defining include and exclude
@@ -115,6 +117,83 @@ export default [
             // copy the bundled declarations to build-umd
             src: "dist/index.d.ts",
             dest: ["build-umd/"],
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.core.esm.js",
+        format: "es",
+      },
+    ],
+    plugins: [
+      ...sharedPlugins,
+      typescript({
+        // tsconfig.json defined the outDir as build, so we must
+        // use a different one for this umd build
+        outDir: "./build-nobundler",
+        // I was getting errors when defining include and exclude
+        // only in tsconfig.json, thus defining them here.
+        include: ["./src/**/*.[tj]s"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
+        outputToFilesystem: true,
+        sourceMap: false,
+      }),
+      babel({
+        babelHelpers: "bundled",
+      }),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.core.esm.d.ts",
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make minified esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.core.esm.min.js",
+        format: "es",
+      },
+    ],
+    plugins: [
+      ...sharedPlugins,
+      typescript({
+        // tsconfig.json defined the outDir as build, so we must
+        // use a different one for this build
+        outDir: "./build-nobundler",
+        // I was getting errors when defining include and exclude
+        // only in tsconfig.json, thus defining them here.
+        include: ["./src/**/*.[tj]s"],
+        exclude: ["**/__tests__", "**/*.test.ts"],
+        outputToFilesystem: true,
+        sourceMap: false,
+      }),
+      babel({
+        babelHelpers: "bundled",
+      }),
+      terser(),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.core.esm.min.d.ts",
           },
         ],
       }),

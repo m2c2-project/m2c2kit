@@ -36,7 +36,9 @@ export default [
     output: [{ dir: "./build", format: "es", sourcemap: true }],
     external: ["@m2c2kit/core"],
     plugins: [
-      del({ targets: ["dist/*", "build/*", "build-umd/*"] }),
+      del({
+        targets: ["dist/*", "build/*", "build-umd/*", "build-nobundler/*"],
+      }),
       nodeResolve(),
       commonjs(),
       typescript({
@@ -121,6 +123,89 @@ export default [
             // copy the bundled declarations to build-umd
             src: "dist/index.d.ts",
             dest: ["build-umd/"],
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.survey.esm.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.js",
+        },
+      },
+    ],
+    external: ["@m2c2kit/core"],
+    plugins: [
+      nodeResolve(),
+      commonjs(),
+      typescript({
+        outputToFilesystem: true,
+        outDir: "./build-nobundler",
+        sourceMap: false,
+      }),
+      babel({
+        // compact: false to supress minor warning note
+        // see https://stackoverflow.com/a/29857361
+        babelHelpers: "bundled",
+        compact: false,
+      }),
+      prependToBundle("m2c2kit.survey.esm.js", codeToPrepend),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.survey.esm.d.ts",
+          },
+        ],
+      }),
+    ],
+  },
+
+  // Make minified esm bundle for development without a bundler
+  {
+    input: "./src/index.ts",
+    output: [
+      {
+        file: "./build-nobundler/m2c2kit.survey.esm.min.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
+        },
+      },
+    ],
+    external: ["@m2c2kit/core"],
+    plugins: [
+      nodeResolve(),
+      commonjs(),
+      typescript({
+        outputToFilesystem: true,
+        outDir: "./build-nobundler",
+        sourceMap: false,
+      }),
+      babel({
+        // compact: false to supress minor warning note
+        // see https://stackoverflow.com/a/29857361
+        babelHelpers: "bundled",
+        compact: false,
+      }),
+      terser(),
+      prependToBundle("m2c2kit.survey.esm.min.js", codeToPrepend),
+      copy({
+        targets: [
+          {
+            // copy the bundled declarations to build-nobundler
+            src: "dist/index.d.ts",
+            dest: "build-nobundler/",
+            rename: () => "m2c2kit.survey.esm.min.d.ts",
           },
         ],
       }),
