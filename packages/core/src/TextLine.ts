@@ -32,6 +32,9 @@ export class TextLine
   private font?: Font;
   private typeface: Typeface | null = null;
 
+  private _translatedText = "";
+  private missingTranslationPaint?: Paint;
+
   /**
    * Single-line text rendered on the screen.
    *
@@ -57,6 +60,10 @@ export class TextLine
   set text(text: string) {
     this._text = text;
     this.needsInitialization = true;
+  }
+
+  get translatedText(): string {
+    return this._translatedText;
   }
 
   get fontName(): string | undefined {
@@ -100,12 +107,26 @@ export class TextLine
     this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
 
-    const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .session;
-    if (!activity) {
-      throw new Error("activity is undefined");
+    const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+    if (i18n && i18n.options.missingTranslationFontColor) {
+      this.missingTranslationPaint = new this.canvasKit.Paint();
+      this.missingTranslationPaint.setColor(
+        this.canvasKit.Color(
+          i18n.options.missingTranslationFontColor[0],
+          i18n.options.missingTranslationFontColor[1],
+          i18n.options.missingTranslationFontColor[2],
+          i18n.options.missingTranslationFontColor[3]
+        )
+      );
+      this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
+      this.paint.setAntiAlias(true);
     }
-    const fontManager = activity.fontManager;
+
+    const session = (this.parentSceneAsEntity as unknown as Scene).game.session;
+    if (!session) {
+      throw new Error("session is undefined");
+    }
+    const fontManager = session.fontManager;
 
     const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
     if (this.fontName) {
@@ -169,12 +190,44 @@ export class TextLine
           this.size.height * this.anchorPoint.y * this.absoluteScale) *
         drawScale;
 
-      if (this.paint === undefined || this.font === undefined) {
+      let textForDraw: string;
+      let paintForDraw = this.paint;
+      const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+      if (i18n) {
+        let translated = i18n.t(this.text);
+        if (translated === undefined) {
+          const fallbackTranslated = i18n.t(this.text, true);
+          if (fallbackTranslated === undefined) {
+            translated = this.text;
+          } else {
+            translated = fallbackTranslated;
+          }
+          if (this.missingTranslationPaint) {
+            paintForDraw = this.missingTranslationPaint;
+          }
+        }
+        this._translatedText = translated;
+        textForDraw = this._translatedText;
+        if (this._translatedText === "") {
+          console.warn(
+            `warning: empty translated text in textline "${this.name}"`
+          );
+        }
+      } else {
+        textForDraw = this.text;
+        this._translatedText = "";
+        if (this.text === "") {
+          console.warn(`warning: empty text in textline "${this.name}"`);
+        }
+      }
+
+      if (paintForDraw === undefined || this.font === undefined) {
         throw new Error(
           `in TextLine entity ${this}, Paint or Font is undefined.`
         );
       }
-      canvas.drawText(this.text, x, y, this.paint, this.font);
+
+      canvas.drawText(textForDraw, x, y, paintForDraw, this.font);
       canvas.restore();
     }
 
