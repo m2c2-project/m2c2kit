@@ -269,7 +269,7 @@ export class Instructions extends Story {
           size: { width: backButtonWidth, height: backButtonHeight },
           layout: {
             marginStart: 32,
-            marginBottom: 32,
+            marginBottom: 80,
             constraints: { bottomToBottomOf: scene, startToStartOf: scene },
           },
         });
@@ -291,7 +291,7 @@ export class Instructions extends Story {
         size: { width: nextButtonWidth, height: nextButtonHeight },
         layout: {
           marginEnd: 32,
-          marginBottom: 32,
+          marginBottom: 80,
           constraints: { bottomToBottomOf: scene, endToEndOf: scene },
         },
       });

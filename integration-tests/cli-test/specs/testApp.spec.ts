@@ -36,10 +36,10 @@ describe("m2c2 cli starter app", () => {
   it("should advance to next page and create a scene2 that pixel matches our reference scene2", async () => {
     /**
      * x, y arguments to click are OFFSETS from CENTER of element
-     * Thus, 110, 340 is in the hit area of the NEXT button
+     * Thus, 110, 292 is in the hit area of the NEXT button
      * from the center of our 400 wide by 800 high canvas
      */
-    await canvasElement.click({ x: 110, y: 340 });
+    await canvasElement.click({ x: 110, y: 292 });
     await browser.pause(1000);
 
     const canvasPng = await elementToPng(canvasElement);
