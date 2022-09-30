@@ -28,12 +28,10 @@ function initbootstrapsliderm2c2() {
     },
     htmlTemplate: "<div></div>",
     activatedByChanged: function (activatedBy: string) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       Survey.JsonObject.metaData.addClass(
         "bootstrapslider-m2c2",
         [],
-        null,
+        undefined,
         "empty"
       );
       Survey.JsonObject.metaData.addProperties("bootstrapslider-m2c2", [

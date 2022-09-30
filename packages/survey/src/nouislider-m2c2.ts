@@ -17,8 +17,12 @@ function initnouisliderm2c2() {
     },
     htmlTemplate: "<div><div></div></div>",
     activatedByChanged: function (activatedBy: string) {
-      // @ts-ignore
-      Survey.JsonObject.metaData.addClass("nouislider-m2c2", [], null, "empty");
+      Survey.JsonObject.metaData.addClass(
+        "nouislider-m2c2",
+        [],
+        undefined,
+        "empty"
+      );
       Survey.JsonObject.metaData.addProperties("nouislider-m2c2", [
         {
           name: "step:number",
