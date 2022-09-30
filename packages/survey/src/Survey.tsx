@@ -24,7 +24,10 @@ import { CompletingOptions } from "./CompletingOptions";
 import { AutomaticSurveyDataProperties } from "./AutomaticSurveyDataProperties";
 import { SurveyVariable } from "./SurveyVariable";
 
+// TODO: this will have to be handled specially for i18n
 const CONFIRM_SKIP_TEXT = "Are you sure you want to skip these questions?";
+
+type SurveyVariables = Array<SurveyVariable>;
 
 /**
  * The class for presenting surveys.
@@ -45,8 +48,8 @@ export class Survey implements Activity {
   beginIso8601Timestamp = "";
   private _survey?: SurveyReact.Model;
   private responseIndex = 0;
-  private skippedElements = new Array<string>();
   private confirmSkipping = false;
+  private m2c2SurveyData: SurveyVariables = new Array<SurveyVariable>();
 
   constructor(surveyJson?: unknown) {
     if (surveyJson) {
@@ -106,7 +109,7 @@ export class Survey implements Activity {
 
   private modifyDefaultSurveyJsConfiguration() {
     this.survey.focusFirstQuestionAutomatic = false;
-    // this hides the default surveyjs default completion html
+    // replace the default surveyjs default completion html with blank html
     this.survey.completedHtml = `<html></html>`;
   }
 
@@ -114,11 +117,20 @@ export class Survey implements Activity {
     const surveyDiv = document.getElementById("m2c2kit-survey-div");
     if (!surveyDiv) {
       throw new Error(
-        "m2c2kit-survey-div not found in DOM. cannot start survey."
+        "renderSurveyJs(): m2c2kit-survey-div not found in DOM. cannot start survey."
       );
     }
     const root = createRoot(surveyDiv);
     root.render(<SurveyReact.Survey model={this.survey} />);
+  }
+
+  private addM2c2kitEventCallbacks() {
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.session.options.activityCallbacks.onActivityLifecycle({
+        type: EventType.ActivityStart,
+        target: this,
+      });
+    }
   }
 
   /**
@@ -132,15 +144,14 @@ export class Survey implements Activity {
      * SurveyJS raises a value changed event only when an element receives
      * user interaction. Non-required elements that are skipped will not
      * raise events. Thus, to record skippped elements, we hook into an
-     * event when the page is about to change. We look at all the elements
-     * on the page, find elements whose values are undefined, and add these
-     * to our object of skipped elements.
+     * event when the page is about to change or the survey is about to
+     * complete. We look at all the elements on the page, find elements whose
+     * values are undefined, and assign null values to them.
      */
 
     this.survey.onCurrentPageChanging.add(
       (sender: SurveyReact.Model, options: CurrentPageChangingOptions) => {
-        const elements = options.oldCurrentPage.elements as Array<IElement>;
-        if (this.shouldShowSkipConfirmation(elements)) {
+        if (this.shouldShowSkipConfirmation(options.oldCurrentPage)) {
           {
             if (!confirm(CONFIRM_SKIP_TEXT)) {
               options.allowChanging = false;
@@ -148,49 +159,20 @@ export class Survey implements Activity {
             }
           }
         }
-
-        const newSkippedElements = this.getNewSkippedElements(elements);
-        if (newSkippedElements.length > 0) {
-          this.skippedElements.push(...newSkippedElements);
-          const newData =
-            this.makeNewDataObjectFromSkippedElements(newSkippedElements);
-          const data = this.makeDataObject(sender);
-          this.callOnActivityResultsCallback(newData, data);
-          this.responseIndex++;
-        }
+        this.updateSurveyData(sender);
       }
     );
 
-    /**
-     * When a value has changed, raise an ActivityData event.
-     */
     this.survey.onValueChanged.add(
-      (sender: SurveyReact.Model, options: ValueChangedOptions) => {
-        const newResponse = { [options.name]: options.value };
-
-        if (this.valueChangedFromNull(options)) {
-          this.removeElementNameFromSkippedElements(options.name);
-        }
-        if (this.arrayValueChangedToNull(options)) {
-          this.addElementNameToSkippedElements(options.name);
-          /**
-           * Element that is an array response (e.g., check all that apply),
-           * but now has no selections, will be returned as null, not []
-           */
-          newResponse[options.name] = null;
-        }
-
-        const newData = this.makeNewDataFromChangedValue(newResponse);
-        const data = this.makeDataObject(sender);
-        this.callOnActivityResultsCallback(newData, data);
-        this.responseIndex++;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      (sender: SurveyReact.Model, _options: ValueChangedOptions) => {
+        this.updateSurveyData(sender);
       }
     );
 
     this.survey.onCompleting.add(
       (sender: SurveyReact.Model, options: CompletingOptions) => {
-        const elements = sender.currentPage.elements as Array<IElement>;
-        if (this.shouldShowSkipConfirmation(elements)) {
+        if (this.shouldShowSkipConfirmation(sender.currentPage)) {
           {
             if (!confirm(CONFIRM_SKIP_TEXT)) {
               options.allowComplete = false;
@@ -198,16 +180,7 @@ export class Survey implements Activity {
             }
           }
         }
-
-        const newSkippedElements = this.getNewSkippedElements(elements);
-        if (newSkippedElements.length > 0) {
-          this.skippedElements.push(...newSkippedElements);
-          const newData =
-            this.makeNewDataObjectFromSkippedElements(newSkippedElements);
-          const data = this.makeDataObject(sender);
-          this.callOnActivityResultsCallback(newData, data);
-          this.responseIndex++;
-        }
+        this.updateSurveyData(sender);
       }
     );
 
@@ -221,42 +194,254 @@ export class Survey implements Activity {
     });
   }
 
-  private addM2c2kitEventCallbacks() {
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.session.options.activityCallbacks.onActivityLifecycle({
-        type: EventType.ActivityStart,
-        target: this,
-      });
+  private updateSurveyData(sender: SurveyReact.SurveyModel) {
+    const previousM2c2SurveyData: SurveyVariables = JSON.parse(
+      JSON.stringify(this.m2c2SurveyData)
+    );
+    const currentM2c2SurveyData = this.makeM2c2SurveyData(sender);
+    const changedM2c2SurveyData = this.calculateChangedM2c2SurveyData(
+      previousM2c2SurveyData,
+      currentM2c2SurveyData
+    );
+
+    if (changedM2c2SurveyData.length > 0) {
+      const newData = this.makeNewDataObject(changedM2c2SurveyData);
+      const data = this.makeDataObject(currentM2c2SurveyData);
+      this.callOnActivityResultsCallback(newData, data);
+      this.responseIndex++;
+      this.m2c2SurveyData = currentM2c2SurveyData;
     }
   }
 
-  private arrayValueChangedToNull(options: ValueChangedOptions) {
-    return Array.isArray(options.value) && options.value.length === 0;
+  private calculateChangedM2c2SurveyData(
+    previous: SurveyVariables,
+    current: SurveyVariables
+  ) {
+    const changed: SurveyVariables = new Array<SurveyVariable>();
+
+    current.forEach((cur) => {
+      const previousVariable = previous.find((prev) => prev.name === cur.name);
+      if (!previousVariable) {
+        changed.push(cur);
+      }
+      if (previousVariable && previousVariable.value !== cur.value) {
+        changed.push(cur);
+      }
+    });
+    return changed;
   }
 
-  private valueChangedFromNull(options: ValueChangedOptions) {
-    return (
-      (!Array.isArray(options.value) && options.value !== undefined) ||
-      (Array.isArray(options.value) && options.value.length !== 0)
+  private makeM2c2SurveyData(survey: SurveyReact.SurveyModel): SurveyVariables {
+    const m2c2SurveyData: SurveyVariables = JSON.parse(
+      JSON.stringify(this.m2c2SurveyData)
     );
+    const surveyJsData = JSON.parse(JSON.stringify(survey.data)) as {
+      [elementName: string]: any;
+    };
+    const pageSkippedElementNames = this.getSkippedElementNamesOnPage(
+      survey.currentPage as SurveyReact.PageModel
+    );
+    pageSkippedElementNames.forEach((elementName) => {
+      surveyJsData[elementName] = null;
+    });
+
+    for (const [elementName, value] of Object.entries(surveyJsData)) {
+      if (this.IsSurveyJsVariableMultipleResponse(elementName)) {
+        const dummyVariables =
+          this.makeDummiesFromMultipleResponse(elementName);
+
+        dummyVariables.forEach((d) => {
+          const variable = m2c2SurveyData.find((v) => v.name === d.name);
+          if (variable) {
+            variable.value = d.value;
+          } else {
+            m2c2SurveyData.push(d);
+          }
+        });
+      } else {
+        const variable = m2c2SurveyData.find((v) => v.name === elementName);
+        if (variable) {
+          variable.value = value;
+        } else {
+          m2c2SurveyData.push({ name: elementName, value: value });
+        }
+      }
+    }
+    return m2c2SurveyData;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private makeNewDataFromChangedValue(newResponse: { [x: string]: any }) {
-    const newData: ActivityKeyValueData = {
-      variables: new Array<SurveyVariable>(),
+  private makeNewDataObject(variables: SurveyVariables): ActivityKeyValueData {
+    return {
+      variables: variables,
       response_index: this.responseIndex,
       ...this.makeAutomaticSurveyDataProperties(),
     };
+  }
 
-    for (const [key, value] of Object.entries(newResponse)) {
-      const response: SurveyVariable = {
-        name: key,
-        value: value,
-      };
-      (newData["variables"] as Array<SurveyVariable>).push(response);
+  private makeDataObject(variables: SurveyVariables): ActivityKeyValueData {
+    return {
+      variables: variables,
+      ...this.makeAutomaticSurveyDataProperties(),
+    };
+  }
+
+  private getSkippedElementNamesOnPage(
+    page: SurveyReact.PageModel
+  ): Array<string> {
+    /**
+     * Every element will generate "data" if they are
+     * skipped. To create elements that are simply informational pages
+     * that should not collect data (variables), give them a name that
+     * starts with "__" (two underscores). These elements can be skipped
+     * and they will not generate m2c2kit events.
+     */
+
+    const skippedElementNames = new Array<string>();
+    const elements = page.elements as Array<IElement>;
+
+    elements
+      .map((e) => e as unknown as ISurveyElement & IQuestion)
+      .forEach((e) => {
+        if (
+          typeof e.name === "string" &&
+          typeof e.value !== undefined &&
+          !e.name.startsWith("__")
+        ) {
+          if (e.value === undefined) {
+            skippedElementNames.push(e.name);
+          }
+
+          // element might be a checkbox with nothing checked
+          if (Array.isArray(e.value) && e.value.length === 0) {
+            skippedElementNames.push(e.name);
+          }
+        }
+      });
+    return skippedElementNames;
+  }
+
+  private makeDummiesFromMultipleResponse(
+    elementName: string
+  ): SurveyVariables {
+    if (!this.IsSurveyJsVariableMultipleResponse(elementName)) {
+      throw new Error(
+        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} is not a multiple response variable.`
+      );
     }
-    return newData;
+
+    let choices: Array<any>;
+    let selectedValues: Array<any> | undefined;
+    let noneChoice = {};
+
+    if (this.getSurveyJsElementByName(elementName).getType() === "checkbox") {
+      const checkbox = this.getSurveyJsElementByName(
+        elementName
+      ) as SurveyReact.QuestionCheckboxModel;
+      if (checkbox.hasNone) {
+        let noneTextName = this.getCheckboxNoneChoiceName(elementName);
+        if (!noneTextName) {
+          noneTextName = checkbox.noneText;
+        }
+        if (!noneTextName) {
+          noneTextName = "none";
+        }
+        noneChoice = {
+          value: "none",
+          name: noneTextName,
+        };
+      }
+      choices = (checkbox.choices as Array<any>).concat(noneChoice);
+      selectedValues = checkbox.value;
+    } else {
+      throw new Error(
+        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} has unexpected structure.`
+      );
+    }
+
+    if (!selectedValues || selectedValues.length === 0) {
+      return this.makeAllDummiesNull(elementName, choices);
+    }
+
+    return this.assignSelectedValuesToChoices(
+      elementName,
+      selectedValues,
+      choices
+    );
+  }
+
+  private assignSelectedValuesToChoices(
+    elementName: string,
+    selectedValues: Array<any>,
+    choices: Array<any>
+  ): SurveyVariables {
+    const dummyVariables: SurveyVariables = new Array<SurveyVariable>();
+    for (const choice of choices) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let variableValue: any;
+      if (selectedValues.includes(choice.value)) {
+        variableValue = 1;
+      } else {
+        variableValue = 0;
+      }
+      const variableName = this.addChoiceToVariableName(elementName, choice);
+      dummyVariables.push({ name: variableName, value: variableValue });
+    }
+    return dummyVariables;
+  }
+
+  private makeAllDummiesNull(
+    elementName: string,
+    choices: Array<any>
+  ): SurveyVariables {
+    const dummyVariables: SurveyVariables = new Array<SurveyVariable>();
+    for (const choice of choices) {
+      const variableName = this.addChoiceToVariableName(elementName, choice);
+      dummyVariables.push({
+        name: variableName,
+        value: null,
+      });
+    }
+    return dummyVariables;
+  }
+
+  private addChoiceToVariableName(elementName: string, choice: any): string {
+    if (choice.name) {
+      return elementName + "_" + choice.name;
+    }
+    return elementName + "_" + choice.value;
+  }
+
+  private IsSurveyJsVariableMultipleResponse(elementName: string): boolean {
+    const element = this.getSurveyJsElementByName(elementName);
+    return element.getType() === "checkbox";
+  }
+
+  private getSurveyJsElementByName(elementName: string): IElement {
+    const surveyJsElements = (
+      this.survey.pages as SurveyReact.PageModel[]
+    ).flatMap((p) => p.elements as SurveyReact.IElement[]);
+    const surveyJsElement = surveyJsElements.find(
+      (e) => e.name === elementName
+    );
+    if (!surveyJsElement) {
+      throw new Error(
+        `getSurveyJsElementByName(): surveyJs element ${elementName} not found.`
+      );
+    }
+    return surveyJsElement;
+  }
+
+  private getCheckboxNoneChoiceName(elementName: string): string | undefined {
+    const surveyJsElementsUntyped = (
+      (this._surveyJson as any)?.pages as Array<any>
+    )?.flatMap((p) => p.elements as Array<any>);
+    const surveyJsElementUntyped = surveyJsElementsUntyped?.find(
+      (e) => e.name === elementName
+    );
+    if (typeof surveyJsElementUntyped?.noneName === "string") {
+      return surveyJsElementUntyped.noneName;
+    }
+    return undefined;
   }
 
   private makeAutomaticSurveyDataProperties(): AutomaticSurveyDataProperties {
@@ -285,86 +470,12 @@ export class Survey implements Activity {
     }
   }
 
-  private makeDataObject(
-    sender: SurveyReact.SurveyModel
-  ): ActivityKeyValueData {
-    const automaticSurveyDataProperties =
-      this.makeAutomaticSurveyDataProperties();
-    return {
-      variables: this.createSurveyVariablesArray(
-        sender.data,
-        this.skippedElements
-      ),
-      ...automaticSurveyDataProperties,
-    };
+  private shouldShowSkipConfirmation(page: SurveyReact.PageModel): boolean {
+    return this.confirmSkipping && this.pageHasSkippedElements(page);
   }
 
-  private makeNewDataObjectFromSkippedElements(
-    newSkippedElements: string[]
-  ): ActivityKeyValueData {
-    const automaticSurveyDataProperties =
-      this.makeAutomaticSurveyDataProperties();
-    const newData: ActivityKeyValueData = {
-      variables: new Array<SurveyVariable>(),
-      response_index: this.responseIndex,
-      ...automaticSurveyDataProperties,
-    };
-
-    newSkippedElements.forEach((e) => {
-      const response: SurveyVariable = {
-        name: e,
-        value: null,
-      };
-      (newData["variables"] as Array<SurveyVariable>).push(response);
-    });
-    return newData;
-  }
-
-  private getNewSkippedElements(
-    elements: SurveyReact.IElement[]
-  ): Array<string> {
-    /**
-     * Every element will generate "data" if they are
-     * skipped. To create elements that are simply informational pages
-     * that should not collect data (variables), give them a name that
-     * starts with "__" (two underscores). These elements can be skipped
-     * and they will not generate m2c2kit events.
-     */
-
-    const newSkippedElements = new Array<string>();
-    elements
-      .map((e) => e as unknown as ISurveyElement & IQuestion)
-      .forEach((e) => {
-        if (
-          typeof e.name === "string" &&
-          typeof e.value !== undefined &&
-          !e.name.startsWith("__")
-        ) {
-          if (
-            e.value === undefined &&
-            !this.skippedElementsContainsElementName(e.name)
-          ) {
-            newSkippedElements.push(e.name);
-          }
-
-          // element might be a checkbox with nothing checked
-          if (
-            Array.isArray(e.value) &&
-            e.value.length === 0 &&
-            !this.skippedElementsContainsElementName(e.name)
-          ) {
-            newSkippedElements.push(e.name);
-          }
-        }
-      });
-    return newSkippedElements;
-  }
-
-  private shouldShowSkipConfirmation(elements: Array<IElement>): boolean {
-    return this.confirmSkipping && this.pageHasSkippedElements(elements);
-  }
-
-  private pageHasSkippedElements(elements: Array<IElement>): boolean {
+  private pageHasSkippedElements(page: SurveyReact.PageModel): boolean {
+    const elements = page.elements as Array<IElement>;
     let hasSkippedElements = false;
     elements
       .map((e) => e as unknown as ISurveyElement & IQuestion)
@@ -378,47 +489,14 @@ export class Survey implements Activity {
             hasSkippedElements = true;
           }
 
-          // element might be a checkbox with nothing checked
+          // element might be a multiresponse variable with
+          // with nothing selected: this is an empty array.
           if (Array.isArray(e.value) && e.value.length === 0) {
             hasSkippedElements = true;
           }
         }
       });
     return hasSkippedElements;
-  }
-
-  private removeElementNameFromSkippedElements(elementName: string): void {
-    this.skippedElements = this.skippedElements.filter(
-      (e) => e !== elementName
-    );
-  }
-
-  private addElementNameToSkippedElements(elementName: string): void {
-    if (!this.skippedElements.includes(elementName)) {
-      this.skippedElements.push(elementName);
-    }
-  }
-
-  private skippedElementsContainsElementName(elementName: string): boolean {
-    return this.skippedElements.includes(elementName);
-  }
-
-  private createSurveyVariablesArray(
-    data: ActivityKeyValueData,
-    skippedElements: Array<string>
-  ): Array<SurveyVariable> {
-    const variables: Array<SurveyVariable> = [];
-
-    for (const [key, value] of Object.entries(data)) {
-      const response: SurveyVariable = {
-        name: key,
-        value: value,
-      };
-      variables.push(response);
-    }
-
-    skippedElements.forEach((e) => variables.push({ name: e, value: null }));
-    return variables;
   }
 
   /**
@@ -455,7 +533,7 @@ export class Survey implements Activity {
     widgets.select2tagbox(SurveyReact, $);
     widgets.sortablejs(SurveyReact);
     widgets.bootstrapdatepicker(SurveyReact, $);
-    //widgets.bootstrapslider(SurveyReact);
+    // we use the versions customized for m2c2
     initbootstrapsliderm2c2();
     initnouisliderm2c2();
   }

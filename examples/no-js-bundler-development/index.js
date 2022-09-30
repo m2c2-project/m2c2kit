@@ -124,7 +124,7 @@ const surveyJson = {
               text: "Office or other work place",
             },
             {
-              value: 5,
+              value: 4,
               text: "Other",
             },
           ],
@@ -136,7 +136,7 @@ const surveyJson = {
       name: "page2",
       elements: [
         {
-          type: "nouislider",
+          type: "nouislider-m2c2",
           name: "like_bundlers",
           title: "How much do you like using JavaScript bundlers?",
           rangeMin: 0,

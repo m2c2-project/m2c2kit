@@ -17,21 +17,26 @@ class bootstrapsliderQuestion extends Survey.Question {
 
 function initbootstrapsliderm2c2() {
   const widget = {
-    name: "bootstrapslider",
-    title: "Bootstrap Slider",
+    name: "bootstrapslider-m2c2",
+    title: "Bootstrap Slider-m2c2",
     iconName: "icon-bootstrap-slider",
     widgetIsLoaded: function () {
       return typeof Slider !== "undefined";
     },
     isFit: function (question: Survey.Question) {
-      return question.getType() === "bootstrapslider";
+      return question.getType() === "bootstrapslider-m2c2";
     },
     htmlTemplate: "<div></div>",
     activatedByChanged: function (activatedBy: string) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      Survey.JsonObject.metaData.addClass("bootstrapslider", [], null, "empty");
-      Survey.JsonObject.metaData.addProperties("bootstrapslider", [
+      Survey.JsonObject.metaData.addClass(
+        "bootstrapslider-m2c2",
+        [],
+        null,
+        "empty"
+      );
+      Survey.JsonObject.metaData.addProperties("bootstrapslider-m2c2", [
         {
           name: "step:number",
           default: 1,
@@ -69,7 +74,7 @@ function initbootstrapsliderm2c2() {
           category: "general",
         },
       ]);
-      Survey.JsonObject.metaData.addProperty("bootstrapslider", {
+      Survey.JsonObject.metaData.addProperty("bootstrapslider-m2c2", {
         name: "config",
         default: null,
         category: "general",
@@ -136,9 +141,6 @@ function initbootstrapsliderm2c2() {
         config.value = question.value || question.initialValue;
       }
 
-      //config.ticks = [1,2,3,4,5];
-      //config.ticks_labels=["bad", "", "", "", "great"];
-
       const slider = new Slider(inputEl, config);
 
       slider.on("change", function (valueObj: any) {
@@ -163,7 +165,7 @@ function initbootstrapsliderm2c2() {
       question.readOnlyChangedCallback = null;
     },
     pdfRender: function (_: any, options: any) {
-      if (options.question.getType() === "bootstrapslider") {
+      if (options.question.getType() === "bootstrapslider-m2c2") {
         const point = options.module.SurveyHelper.createPoint(
           options.module.SurveyHelper.mergeRects.apply(null, options.bricks)
         );
@@ -198,9 +200,5 @@ function initbootstrapsliderm2c2() {
 
   Survey.CustomWidgetCollection.Instance.addCustomWidget(widget, "customtype");
 }
-
-// if (typeof Survey !== "undefined") {
-//   init(Survey);
-// }
 
 export default initbootstrapsliderm2c2;

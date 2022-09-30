@@ -6,20 +6,20 @@ function initnouisliderm2c2() {
   const iconId = "icon-nouislider";
   //Survey.SvgRegistry && Survey.SvgRegistry.registerIconFromSvg(iconId, require('svg-inline-loader?classPrefix!./images/nouislider.svg'), "");
   const widget = {
-    name: "nouislider",
-    title: "noUiSlider",
+    name: "nouislider-m2c2",
+    title: "noUiSlider-m2c2",
     iconName: iconId,
     widgetIsLoaded: function () {
       return typeof noUiSlider != "undefined";
     },
     isFit: function (question: Survey.Question) {
-      return question.getType() === "nouislider";
+      return question.getType() === "nouislider-m2c2";
     },
     htmlTemplate: "<div><div></div></div>",
     activatedByChanged: function (activatedBy: string) {
       // @ts-ignore
-      Survey.JsonObject.metaData.addClass("nouislider", [], null, "empty");
-      Survey.JsonObject.metaData.addProperties("nouislider", [
+      Survey.JsonObject.metaData.addClass("nouislider-m2c2", [], null, "empty");
+      Survey.JsonObject.metaData.addProperties("nouislider-m2c2", [
         {
           name: "step:number",
           category: "slider",
@@ -247,7 +247,7 @@ function initnouisliderm2c2() {
       question.updateSliderProperties = undefined;
     },
     pdfRender: function (_: any, options: any) {
-      if (options.question.getType() === "nouislider") {
+      if (options.question.getType() === "nouislider-m2c2") {
         const point = options.module.SurveyHelper.createPoint(
           options.module.SurveyHelper.mergeRects.apply(null, options.bricks)
         );
@@ -277,9 +277,5 @@ function initnouisliderm2c2() {
   };
   Survey.CustomWidgetCollection.Instance.addCustomWidget(widget, "customtype");
 }
-
-// if (typeof Survey !== "undefined") {
-//     initnouisliderm2c2(Survey);
-// }
 
 export default initnouisliderm2c2;

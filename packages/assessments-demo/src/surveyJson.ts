@@ -42,7 +42,7 @@ export const surveyJson = {
               text: "Office or other work place",
             },
             {
-              value: 5,
+              value: 4,
               text: "Other",
             },
           ],
@@ -54,6 +54,19 @@ export const surveyJson = {
       name: "page3",
       elements: [
         {
+          /**
+           * checkbox is a multi-select question type. m2c2kit will store
+           * the answer as a series of variables, one for each choice. These
+           * are typically called "dummy variables." The value of the dummy
+           * variable will be 1 if the choice was selected, and 0 otherwise.
+           * The name of each dummy variable will be the name of the element
+           * followed by an underscore and the name of the choice, e.g.,
+           * "who_now_spousepartner." If a choice name is not configured, the
+           * value will be used instead, e.g., "who_now_1". If a "none"
+           * choice is configured (hasNone: true), the name of this none
+           * choice should be set using the "noneName" property (the "name"
+           * property is used for the checkbox element name).
+           */
           type: "checkbox",
           name: "who_now",
           title: "Who is around you? (Please select all that apply.)",
@@ -61,22 +74,27 @@ export const surveyJson = {
             {
               value: 1,
               text: "Spouse/Partner",
+              name: "spousepartner",
             },
             {
               value: 2,
               text: "Your child(ren) or grandchild(ren)",
+              name: "children",
             },
             {
               value: 3,
               text: "Other family member(s)",
+              name: "otherfamily",
             },
             {
               value: 4,
               text: "Other people",
+              name: "otherpeople",
             },
           ],
           hasNone: true,
           noneText: "Nobody",
+          noneName: "nobody",
         },
       ],
       description: "RIGHT NOW...",
@@ -85,7 +103,7 @@ export const surveyJson = {
       name: "page4",
       elements: [
         {
-          type: "nouislider",
+          type: "nouislider-m2c2",
           name: "mood_valence",
           title: "How is your overall MOOD?",
           rangeMin: 0,
@@ -154,7 +172,7 @@ export const surveyJson = {
       elements: [
         {
           name: "bootstrapslider-widget",
-          type: "bootstrapslider",
+          type: "bootstrapslider-m2c2",
           title: "This is a different style of slider.",
           step: 50,
           rangeMin: 100,

@@ -168,11 +168,11 @@ export class TestHelpers {
   static callOnActivityResultsCallbackSpy?: jest.SpyInstance;
 
   static spyOnSurveyReactModel(
+    surveyModel: SurveyReact.Model,
     onActivityResultsCallback: (
       newData: ActivityKeyValueData,
       data: ActivityKeyValueData
-    ) => void,
-    callbackFunctions: surveyJsCallbacks
+    ) => void
   ): void {
     this.callOnActivityResultsCallbackSpy = jest.spyOn(
       Survey.prototype,
@@ -189,42 +189,7 @@ export class TestHelpers {
       .spyOn(Survey.prototype, "createSurveyReactModel")
       // @ts-ignore
       .mockImplementation(() => {
-        return {
-          onCurrentPageChanging: {
-            add: (
-              func: (
-                sender: SurveyReact.Model,
-                options: CurrentPageChangingOptions
-              ) => void
-            ) => {
-              callbackFunctions.onCurrentPageChangingCallback = func;
-            },
-          },
-          onValueChanged: {
-            add: (
-              func: (
-                sender: SurveyReact.Model,
-                options: ValueChangedOptions
-              ) => void
-            ) => {
-              callbackFunctions.onValueChangedCallback = func;
-            },
-          },
-          onCompleting: {
-            add: (
-              func: (
-                sender: SurveyReact.Model,
-                options: CompletingOptions
-              ) => void
-            ) => {
-              callbackFunctions.onCompletingCallback = func;
-            },
-          },
-          onComplete: {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            add: () => {},
-          },
-        };
+        return surveyModel;
       });
   }
 }
