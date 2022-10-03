@@ -333,7 +333,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
      * warm it up because a label uses word wrapping, and that
      * would not yet have been calculated
      */
-    if (!this.layout) {
+    if (Object.keys(this.layout).length === 0) {
       this.initialize();
       if (!this.paragraph) {
         throw new Error(

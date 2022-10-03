@@ -267,7 +267,7 @@ class GridMemory extends Game {
     const options: GameOptions = {
       name: "Grid Memory",
       id: "grid-memory",
-      version: "0.8.0",
+      version: "0.8.1",
       shortDescription: "A short description of Grid Memory goes here...",
       longDescription:
         'Each trial of the dot memory task consisted of 3 phases: encoding, \

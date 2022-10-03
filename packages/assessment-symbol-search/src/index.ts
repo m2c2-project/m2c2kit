@@ -213,7 +213,7 @@ top. (2 unique symbols.)",
     const options: GameOptions = {
       name: "Symbol Search",
       id: "symbol-search",
-      version: "0.8.0",
+      version: "0.8.1",
       shortDescription:
         "Symbol Search is a test of processing speed, where \
 participants see a row of symbol pairs at the top of the screen and match \
@@ -605,45 +605,46 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
     countdownScene.addChild(getreadyLabel);
 
-    countdownScene.onAppear(() => {
-      const countdownSequence = new Array<Action>();
+    const countdownSequence = new Array<Action>();
 
-      for (let i = countdownInitialNumber - 1; i > 0; i--) {
-        countdownSequence.push(Action.wait({ duration: 1000 }));
-        countdownSequence.push(
-          Action.custom({
-            callback: () => {
-              countdownNumber.text = i.toString();
-            },
-          })
-        );
-      }
-
+    for (let i = countdownInitialNumber - 1; i > 0; i--) {
       countdownSequence.push(Action.wait({ duration: 1000 }));
       countdownSequence.push(
         Action.custom({
           callback: () => {
-            countdownNumber.text = "0";
+            countdownNumber.text = i.toString();
           },
         })
       );
+    }
 
-      countdownSequence.push(
-        Action.custom({
-          callback: () => {
-            game.presentScene(
-              chooseCardScene,
-              Transition.slide({
-                direction: TransitionDirection.Left,
-                duration: game.getParameter(
-                  "after_preparation_transition_duration_ms"
-                ),
-                easing: Easings.sinusoidalInOut,
-              })
-            );
-          },
-        })
-      );
+    countdownSequence.push(Action.wait({ duration: 1000 }));
+    countdownSequence.push(
+      Action.custom({
+        callback: () => {
+          countdownNumber.text = "0";
+        },
+      })
+    );
+
+    countdownSequence.push(
+      Action.custom({
+        callback: () => {
+          game.presentScene(
+            chooseCardScene,
+            Transition.slide({
+              direction: TransitionDirection.Left,
+              duration: game.getParameter(
+                "after_preparation_transition_duration_ms"
+              ),
+              easing: Easings.sinusoidalInOut,
+            })
+          );
+        },
+      })
+    );
+
+    countdownScene.onAppear(() => {
       countdownScene.run(Action.sequence(countdownSequence));
     });
 

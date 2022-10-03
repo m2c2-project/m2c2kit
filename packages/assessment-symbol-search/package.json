@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-symbol-search",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "scripts": {
     "build": "npm run clean && rollup -c && npm run copy-assets",
     "copy-assets": "cpy src/assets/**/* dist/assets",
