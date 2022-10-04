@@ -151,9 +151,14 @@ export class Survey implements Activity {
 
     this.survey.onCurrentPageChanging.add(
       (sender: SurveyReact.Model, options: CurrentPageChangingOptions) => {
-        if (this.shouldShowSkipConfirmation(options.oldCurrentPage)) {
+        if (
+          this.shouldShowSkipConfirmation(
+            options.oldCurrentPage,
+            options.newCurrentPage
+          )
+        ) {
           {
-            if (!confirm(CONFIRM_SKIP_TEXT)) {
+            if (!this.confirmSkip(options.oldCurrentPage.name)) {
               options.allowChanging = false;
               return;
             }
@@ -172,9 +177,9 @@ export class Survey implements Activity {
 
     this.survey.onCompleting.add(
       (sender: SurveyReact.Model, options: CompletingOptions) => {
-        if (this.shouldShowSkipConfirmation(sender.currentPage)) {
+        if (this.shouldShowSkipConfirmation(sender.currentPage, undefined)) {
           {
-            if (!confirm(CONFIRM_SKIP_TEXT)) {
+            if (!this.confirmSkip(sender.currentPage.name)) {
               options.allowComplete = false;
               return;
             }
@@ -192,6 +197,16 @@ export class Survey implements Activity {
         });
       }
     });
+  }
+
+  private confirmSkip(pageName: string): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const surveyJsPagesUntyped = (this._surveyJson as any).pages as Array<any>;
+    const currentPage = surveyJsPagesUntyped?.find((p) => p.name === pageName);
+    if (currentPage?.confirmSkippingText) {
+      return confirm(currentPage.confirmSkippingText);
+    }
+    return confirm(CONFIRM_SKIP_TEXT);
   }
 
   private updateSurveyData(sender: SurveyReact.SurveyModel) {
@@ -337,6 +352,7 @@ export class Survey implements Activity {
       const checkbox = this.getSurveyJsElementByName(
         elementName
       ) as SurveyReact.QuestionCheckboxModel;
+      choices = checkbox.choices as Array<any>;
       if (checkbox.hasNone) {
         let noneTextName = this.getCheckboxNoneChoiceName(elementName);
         if (!noneTextName) {
@@ -349,8 +365,8 @@ export class Survey implements Activity {
           value: "none",
           name: noneTextName,
         };
+        choices = (checkbox.choices as Array<any>).concat(noneChoice);
       }
-      choices = (checkbox.choices as Array<any>).concat(noneChoice);
       selectedValues = checkbox.value;
     } else {
       throw new Error(
@@ -470,8 +486,27 @@ export class Survey implements Activity {
     }
   }
 
-  private shouldShowSkipConfirmation(page: SurveyReact.PageModel): boolean {
-    return this.confirmSkipping && this.pageHasSkippedElements(page);
+  private shouldShowSkipConfirmation(
+    currentPage: SurveyReact.PageModel,
+    nextPage?: SurveyReact.PageModel
+  ): boolean {
+    return (
+      this.confirmSkipping &&
+      this.pageHasSkippedElements(currentPage) &&
+      this.nextPageIsAfterCurrentPage(currentPage, nextPage)
+    );
+  }
+
+  private nextPageIsAfterCurrentPage(
+    currentPage: SurveyReact.PageModel,
+    nextPage?: SurveyReact.PageModel
+  ): boolean {
+    // nextPage is undefined if this was the last page
+    if (nextPage === undefined) {
+      return true;
+    }
+    const pages = this._survey?.pages as SurveyReact.PageModel[];
+    return pages?.indexOf(nextPage) > pages?.indexOf(currentPage);
   }
 
   private pageHasSkippedElements(page: SurveyReact.PageModel): boolean {
