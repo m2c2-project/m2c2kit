@@ -8,6 +8,8 @@ import {
   Timer,
 } from "@m2c2kit/core";
 import $ from "jquery";
+import React from "react";
+import Modal from "react-modal";
 import * as SurveyReact from "survey-react";
 import { createRoot } from "react-dom/client";
 import widgets from "surveyjs-widgets";
@@ -23,6 +25,7 @@ import { CurrentPageChangingOptions } from "./CurrentPageChangingOptions";
 import { CompletingOptions } from "./CompletingOptions";
 import { AutomaticSurveyDataProperties } from "./AutomaticSurveyDataProperties";
 import { SurveyVariable } from "./SurveyVariable";
+import { ConfirmationSkipModalConfiguration } from "./ConfirmationSkipModalConfiguration";
 
 // TODO: this will have to be handled specially for i18n
 const CONFIRM_SKIP_TEXT = "Are you sure you want to skip these questions?";
@@ -50,6 +53,11 @@ export class Survey implements Activity {
   private responseIndex = 0;
   private confirmSkipping = false;
   private m2c2SurveyData: SurveyVariables = new Array<SurveyVariable>();
+  private confirmationSkipModal: ConfirmationSkipModalConfiguration = {
+    // the show function is set in the React component
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    show: () => {},
+  };
 
   constructor(surveyJson?: unknown) {
     if (surveyJson) {
@@ -120,9 +128,112 @@ export class Survey implements Activity {
         "renderSurveyJs(): m2c2kit-survey-div not found in DOM. cannot start survey."
       );
     }
+    Modal.setAppElement("#m2c2kit-survey-div");
     const root = createRoot(surveyDiv);
-    root.render(<SurveyReact.Survey model={this.survey} />);
+    root.render(<this.SurveyComponent />);
   }
+
+  ModalDialog = () => {
+    const [modalIsOpen, setIsOpen] = React.useState(false);
+
+    this.confirmationSkipModal.show = () => {
+      setIsOpen(true);
+    };
+
+    function closeModal() {
+      setIsOpen(false);
+    }
+
+    const yesClicked = () => {
+      this.updateSurveyData(this.survey);
+      closeModal();
+      this.confirmationSkipModal.bypass = true;
+      if (this.confirmationSkipModal.newPageIfSkipIsConfirmed) {
+        this.survey.currentPage =
+          this.confirmationSkipModal.newPageIfSkipIsConfirmed;
+      } else {
+        this.survey.doComplete();
+      }
+    };
+
+    function noClicked() {
+      closeModal();
+    }
+
+    const modalButtonStyle = {
+      backgroundColor: "white",
+      border: "solid",
+      borderRadius: 4,
+      color: "darkslategrey",
+      textAlign: "center",
+      textDecoration: "none",
+      display: "inline-block",
+      fontSize: 16,
+      width: 100,
+      margin: "8px 8px",
+      paddingTop: "1em",
+      paddingBottom: "1em",
+      cursor: "pointer",
+    } as const;
+
+    return (
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Skip Confirmation Modal"
+        style={{
+          overlay: {
+            zIndex: 1000,
+            backgroundColor: "rgba(255, 255, 255, .75)",
+          },
+          content: {
+            position: undefined,
+            margin: "10% 10% 10% 10%",
+            top: undefined,
+            left: undefined,
+            right: undefined,
+            bottom: undefined,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "white",
+            zIndex: 10,
+            fontFamily:
+              "Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif",
+          },
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {this.confirmationSkipModal.paragraphs?.map((line) => (
+            <p>{line}</p>
+          ))}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+            }}
+          >
+            <button style={modalButtonStyle} onClick={yesClicked}>
+              Yes
+            </button>
+            <button style={modalButtonStyle} onClick={noClicked}>
+              No
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
+  SurveyComponent = () => {
+    return (
+      <div>
+        <SurveyReact.Survey model={this.survey} />
+        <this.ModalDialog />
+      </div>
+    );
+  };
 
   private addM2c2kitEventCallbacks() {
     if (this.session.options.activityCallbacks?.onActivityLifecycle) {
@@ -151,18 +262,24 @@ export class Survey implements Activity {
 
     this.survey.onCurrentPageChanging.add(
       (sender: SurveyReact.Model, options: CurrentPageChangingOptions) => {
+        if (this.confirmationSkipModal.bypass) {
+          this.confirmationSkipModal.bypass = false;
+          return;
+        }
         if (
           this.shouldShowSkipConfirmation(
             options.oldCurrentPage,
             options.newCurrentPage
           )
         ) {
-          {
-            if (!this.confirmSkip(options.oldCurrentPage.name)) {
-              options.allowChanging = false;
-              return;
-            }
-          }
+          this.confirmationSkipModal.newPageIfSkipIsConfirmed =
+            options.newCurrentPage;
+          this.confirmationSkipModal.paragraphs = this.getConfirmationSkipText(
+            options.oldCurrentPage.name
+          );
+          this.confirmationSkipModal.show();
+          options.allowChanging = false;
+          return;
         }
         this.updateSurveyData(sender);
       }
@@ -177,12 +294,18 @@ export class Survey implements Activity {
 
     this.survey.onCompleting.add(
       (sender: SurveyReact.Model, options: CompletingOptions) => {
+        if (this.confirmationSkipModal.bypass) {
+          this.confirmationSkipModal.bypass = false;
+          return;
+        }
         if (this.shouldShowSkipConfirmation(sender.currentPage, undefined)) {
           {
-            if (!this.confirmSkip(sender.currentPage.name)) {
-              options.allowComplete = false;
-              return;
-            }
+            this.confirmationSkipModal.newPageIfSkipIsConfirmed = undefined;
+            this.confirmationSkipModal.paragraphs =
+              this.getConfirmationSkipText(sender.currentPage.name);
+            this.confirmationSkipModal.show();
+            options.allowComplete = false;
+            return;
           }
         }
         this.updateSurveyData(sender);
@@ -199,14 +322,15 @@ export class Survey implements Activity {
     });
   }
 
-  private confirmSkip(pageName: string): boolean {
+  private getConfirmationSkipText(pageName: string): Array<string> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const surveyJsPagesUntyped = (this._surveyJson as any).pages as Array<any>;
     const currentPage = surveyJsPagesUntyped?.find((p) => p.name === pageName);
     if (currentPage?.confirmSkippingText) {
-      return confirm(currentPage.confirmSkippingText);
+      const lines = (currentPage.confirmSkippingText as string).split("<br>");
+      return lines;
     }
-    return confirm(CONFIRM_SKIP_TEXT);
+    return [CONFIRM_SKIP_TEXT];
   }
 
   private updateSurveyData(sender: SurveyReact.SurveyModel) {
