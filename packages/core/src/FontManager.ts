@@ -42,7 +42,10 @@ export class FontManager {
    * @returns array of font family names
    */
   getFontNames(gameUuid: string): Array<string> {
-    return Object.keys(this.gameTypefaces[gameUuid]) ?? new Array<string>();
+    if (!this.gameTypefaces[gameUuid]) {
+      return new Array<string>();
+    }
+    return Object.keys(this.gameTypefaces[gameUuid]);
   }
 
   /**

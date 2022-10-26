@@ -83,29 +83,7 @@ beforeEach(() => {
     canvasKitWasmUrl: "assets/canvaskit.wasm",
   };
   session = new Session(options);
-
-  const dom = new JSDOM(`<!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <canvas style="height: 100vh; width: 100vw"></canvas>
-      </div>
-    </body>
-  </html>`);
-
-  // for how to mock globals,
-  // see https://www.grzegorowski.com/how-to-mock-global-window-with-jest
-
-  // @ts-ignore
-  global.window = dom.window;
-  // @ts-ignore
-  global.document = dom.window.document;
-  global.navigator = dom.window.navigator;
-  // @ts-ignore
-  global.performance = TestHelpers.performance;
+  TestHelpers.setupDomAndGlobals();
 });
 
 describe("test duplicate method", () => {

@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.3.0",
+    "@m2c2kit/core": "0.3.2",
     "bootstrap-datepicker": "1.9.0",
     "bootstrap-slider": "11.0.2",
     "jquery": "3.6.0",

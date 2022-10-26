@@ -14,7 +14,7 @@
     "@m2c2kit/assessment-color-dots": "^0.8.0",
     "@m2c2kit/assessment-grid-memory": "^0.8.0",
     "@m2c2kit/assessment-symbol-search": "^0.8.0",
-    "@m2c2kit/core": "0.3.0",
+    "@m2c2kit/core": "0.3.2",
     "@m2c2kit/sage-research": "^0.3.0",
     "@m2c2kit/survey": "0.3.0"
   },

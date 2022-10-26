@@ -10,6 +10,8 @@ import { terser } from "rollup-plugin-terser";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
 import findup from "findup-sync";
+import replace from "@rollup/plugin-replace";
+import { version } from "./package.json";
 
 // rollup-plugin-copy doesn't like windows backslashes
 const canvaskitWasmPath = findup(
@@ -17,6 +19,10 @@ const canvaskitWasmPath = findup(
 ).replace(/\\/g, "/");
 
 let sharedPlugins = [
+  replace({
+    __M2C2KIT_PACKAGE_JSON_VERSION__: version,
+    preventAssignment: true,
+  }),
   // canvaskit-wasm references these node.js functions
   // shim them to empty functions for browser usage
   shim({

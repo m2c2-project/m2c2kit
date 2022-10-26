@@ -90,7 +90,7 @@ describe("actions", () => {
     return session.init().then(() => {
       TestHelpers.perfCounter = 0;
       TestHelpers.requestedFrames = 0;
-      TestHelpers.maxRequestedFrames = 63;
+      TestHelpers.maxRequestedFrames = 66;
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
         .find(Boolean);
@@ -111,13 +111,17 @@ describe("actions", () => {
       TestHelpers.perfCounter = 0;
       TestHelpers.requestedFrames = 0;
       /**
-       * why 31 frames? The game loop begins, updates, and draws. This is
-       * frame 1. During this first loop pass, the action is queued to run.
-       * It will begin movement on the next loop pass. Thus, we need 30 MORE
-       * frames (frames 2-31) to get halfway through the 1000 ms action,
-       * for a total of 31.
+       * Why 35 frames? The game loop begins and 4 preliminary frames are done:
+       * 3 to warm up shaders, and 1 to hide the loader elements. For these
+       * first 4 frames, game time is NOT updated.
+       *
+       * The next loop call is the first true frame that is part of the game
+       * presented to the user. This is frame 5. During this first true frame
+       * loop call, the action is queued to run. It will begin movement on the
+       * next loop pass. Thus, we need 30 MORE frames (frames 6 to 35) to get
+       * halfway through the 1000 ms action. This is a total of 35 frames.
        */
-      TestHelpers.maxRequestedFrames = 31;
+      TestHelpers.maxRequestedFrames = 35;
       const rect1 = g1.entities
         .filter((e) => e.name === "myRect1")
         .find(Boolean);

@@ -20,6 +20,7 @@ export class Session {
   currentActivity?: Activity;
   uuid: string;
   private canvasKit?: CanvasKit;
+  private version = "__M2C2KIT_PACKAGE_JSON_VERSION__";
 
   /**
    * A Session contains one or more activities; currently, the only
@@ -52,6 +53,7 @@ export class Session {
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async init(): Promise<void> {
+    console.log(`⚪ @m2c2kit/core version ${this.version}`);
     Timer.start("sessionInit");
     DomHelpers.addLoadingElements();
     DomHelpers.setSpinnerVisibility(true);
