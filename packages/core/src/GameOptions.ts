@@ -50,4 +50,6 @@ export interface GameOptions {
   timeStepping?: boolean;
   /** Translations for localization. */
   translations?: Translations;
+  /** Show logs for WebGl activity? */
+  logWebGl?: boolean;
 }

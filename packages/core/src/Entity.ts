@@ -21,6 +21,7 @@ import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
 import { Game } from "./Game";
+import { ActionType } from "./ActionType";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -261,6 +262,44 @@ export abstract class Entity implements EntityOptions {
       getChildEntitiesRecursive(child, entities)
     );
     return entities;
+  }
+
+  /**
+   * Returns all ancestor entities, not including the entity itself.
+   */
+  get ancestors(): Array<Entity> {
+    function getAncestorsRecursive(
+      entity: Entity,
+      entities: Array<Entity>
+    ): Array<Entity> {
+      if (entity.type == EntityType.Scene || !entity.parent) {
+        return entities;
+      }
+      entities.push(entity.parent);
+      return getAncestorsRecursive(entity.parent, entities);
+    }
+    const entities = new Array<Entity>();
+    return getAncestorsRecursive(this, entities);
+  }
+
+  /**
+   * Determines if this entity or ancestor is part of an active action that
+   * affects it appearance.
+   *
+   * @remarks This is used to determine if the entity should be rendered with
+   * anti-aliasing or not. Anti-aliasing on some devices causes a new shader
+   * to be compiled during the action, which causes jank.
+   *
+   * @returns true if part of active action affecting appearance
+   */
+  involvedInActionAffectingAppearance(): boolean {
+    const entities = this.ancestors.concat(this);
+    const actions = entities.flatMap((entity) => entity.actions);
+    return actions.some(
+      (action) =>
+        action.running &&
+        (action.type === ActionType.Move || action.type === ActionType.Scale)
+    );
   }
 
   /**

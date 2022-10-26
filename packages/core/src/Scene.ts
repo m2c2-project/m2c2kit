@@ -147,20 +147,18 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
-    const rr = this.canvasKit.RRectXY(
-      this.canvasKit.LTRBRect(
-        this.position.x * drawScale * Globals.rootScale,
-        this.position.y * drawScale * Globals.rootScale,
-        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
-        (this.position.y + this.size.height) * drawScale * Globals.rootScale
-      ),
-      0,
-      0
-    );
     if (!this.backgroundPaint) {
       throw new Error(`in Scene ${this}, background paint is undefined.`);
     }
-    canvas.drawRRect(rr, this.backgroundPaint);
+    canvas.drawRect(
+      [
+        this.position.x * drawScale * Globals.rootScale,
+        this.position.y * drawScale * Globals.rootScale,
+        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
+        (this.position.y + this.size.height) * drawScale * Globals.rootScale,
+      ],
+      this.backgroundPaint
+    );
     canvas.restore();
 
     super.drawChildren(canvas);
@@ -168,6 +166,24 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
 
   warmup(canvas: Canvas): void {
     this.initialize();
+
+    canvas.save();
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    canvas.scale(1 / drawScale, 1 / drawScale);
+    if (!this.backgroundPaint) {
+      throw new Error(`in Scene ${this}, background paint is undefined.`);
+    }
+    canvas.drawRect(
+      [
+        this.position.x * drawScale * Globals.rootScale,
+        this.position.y * drawScale * Globals.rootScale,
+        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
+        (this.position.y + this.size.height) * drawScale * Globals.rootScale,
+      ],
+      this.backgroundPaint
+    );
+    canvas.restore();
+
     this.children.forEach((child) => {
       if (child.isDrawable) {
         (child as unknown as IDrawable).warmup(canvas);

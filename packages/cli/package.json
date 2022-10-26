@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "m2c2kit command line interface",
   "module": "dist/cli.js",
   "files": [

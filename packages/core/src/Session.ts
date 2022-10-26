@@ -11,6 +11,7 @@ import { Timer } from "./Timer";
 import { SessionOptions } from "./SessionOptions";
 import { Uuid } from "./Uuid";
 import { ActivityType } from "./ActivityType";
+import { DomHelpers } from "./DomHelpers";
 
 export class Session {
   options: SessionOptions;
@@ -52,6 +53,9 @@ export class Session {
    */
   async init(): Promise<void> {
     Timer.start("sessionInit");
+    DomHelpers.addLoadingElements();
+    DomHelpers.setSpinnerVisibility(true);
+    DomHelpers.setCanvasOverlayVisibility(true);
 
     this.options.activities.forEach((activity) => activity.init());
 
@@ -79,7 +83,7 @@ export class Session {
   start(): void {
     this.currentActivity = this.options.activities.find(Boolean);
     if (this.currentActivity) {
-      this.configureDomForActivity(this.currentActivity);
+      DomHelpers.configureDomForActivity(this.currentActivity);
       this.currentActivity.start();
     }
   }
@@ -96,8 +100,7 @@ export class Session {
         type: EventType.SessionEnd,
       });
     }
-    this.setCanvasDivVisibility(false);
-    this.setSurveyDivVisibility(false);
+    DomHelpers.hideAll();
     this.stop();
   }
 
@@ -133,7 +136,7 @@ export class Session {
     this.currentActivity.stop();
     this.currentActivity = this.nextActivity;
     if (this.currentActivity) {
-      this.configureDomForActivity(this.currentActivity);
+      DomHelpers.configureDomForActivity(this.currentActivity);
       this.currentActivity.start();
     }
   }
@@ -154,57 +157,6 @@ export class Session {
       this.currentActivity
     );
     return this.options.activities[currentActivityIndex + 1];
-  }
-
-  /**
-   * Depending on the type of activity, set the visibility of the survey div
-   * and canvas div.
-   *
-   * @param activity - the activity to configure the DOM for
-   */
-  private configureDomForActivity(activity: Activity): void {
-    if (activity.type == ActivityType.Game) {
-      this.setCanvasDivVisibility(true);
-      this.setSurveyDivVisibility(false);
-    }
-    if (activity.type == ActivityType.Survey) {
-      this.setCanvasDivVisibility(false);
-      this.setSurveyDivVisibility(true);
-    }
-  }
-
-  /**
-   * Shows or hides the survey div.
-   *
-   * @param visible - true if the survey div should be visible
-   */
-  private setSurveyDivVisibility(visible: boolean): void {
-    const surveyDiv = document.getElementById("m2c2kit-survey-div");
-    if (surveyDiv && visible) {
-      surveyDiv.classList.remove("m2c2kit-display-none");
-      surveyDiv.classList.add("m2c2kit-display-block");
-    }
-    if (surveyDiv && !visible) {
-      surveyDiv.classList.add("m2c2kit-display-none");
-      surveyDiv.classList.remove("m2c2kit-display-block");
-    }
-  }
-
-  /**
-   * Shows or hides the canvas div.
-   *
-   * @param visible - true if the canvas div should be visible
-   */
-  private setCanvasDivVisibility(visible: boolean): void {
-    const canvasDiv = document.getElementById("m2c2kit-canvas-div");
-    if (canvasDiv && visible) {
-      canvasDiv.classList.remove("m2c2kit-display-none");
-      canvasDiv.classList.add("m2c2kit-flex-container");
-    }
-    if (canvasDiv && !visible) {
-      canvasDiv.classList.add("m2c2kit-display-none");
-      canvasDiv.classList.remove("m2c2kit-flex-container");
-    }
   }
 
   /**

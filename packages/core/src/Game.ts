@@ -39,6 +39,9 @@ import { WebGlInfo } from "./WebGlInfo";
 import { I18n } from "./I18n";
 import { Translations } from "./Translations";
 import { LocalizationOptions } from "./LocalizationOptions";
+import { WebColors } from "./WebColors";
+import { DomHelpers } from "./DomHelpers";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 interface BoundingBox {
   xMin: number;
@@ -48,6 +51,12 @@ interface BoundingBox {
 }
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
+}
+
+type WarmupFunction = (canvas: Canvas, positionOffset?: number) => void;
+interface WarmupFunctionQueue {
+  warmupFunction: WarmupFunction;
+  positionOffset?: number;
 }
 
 export class Game implements Activity {
@@ -66,6 +75,8 @@ export class Game implements Activity {
   private stepCount = 0;
   private steppingNow = 0;
   i18n?: I18n;
+  private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
+  private loaderElementsRemoved = false;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -489,7 +500,6 @@ export class Game implements Activity {
     if (this.surface === undefined) {
       throw new Error("CanvasKit surface is undefined");
     }
-    this.warmupShaders(this.surface);
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
 
@@ -499,6 +509,19 @@ export class Game implements Activity {
     } else {
       this.removeTimeSteppingControlsFromDom();
     }
+
+    DomHelpers.setCanvasOverlayVisibility(true);
+
+    this.warmupFunctionQueue.push({
+      warmupFunction: this.warmupShadersWithPrimitives,
+    });
+    this.warmupFunctionQueue.push({
+      warmupFunction: this.warmupShadersWithPrimitives,
+      positionOffset: 0.10012117,
+    });
+    this.warmupFunctionQueue.push({
+      warmupFunction: this.warmupShadersWithScenes,
+    });
 
     this.surface.requestAnimationFrame(this.loop.bind(this));
 
@@ -590,32 +613,141 @@ export class Game implements Activity {
   }
 
   /**
-   * Warms up the Skia-based shaders underlying canvaskit.
+   * Warms up the Skia-based shaders underlying canvaskit by drawing
+   * primitives.
    *
-   * @remarks Some canvaskit methods, such as drawImage, take extra time the
-   * first time they are called. If the method is part of an animation,
-   * then this may cause frame drops or "jank." To alleviate this, we can
-   * "warm up" the shader associated with the method by calling it at the
-   * beginning of our game. Thus, all warmup operations will be concentrated
-   * at the beginning and will not be noticeable. We initialize and draw
-   * all canvaskit objects that have been defined within m2c2kit entities,
-   * and then immediately draw a white rectangle over them so that the
-   * user does not see any flicker.
+   * @remarks Some canvaskit methods take extra time the first time they are
+   * called because a WebGL shader must be compiled. If the method is part of
+   * an animation, then this may cause frame drops or "jank." To alleviate
+   * this, we can "warm up" the shader associated with the method by calling
+   * it at the beginning of our game. Thus, all warmup operations will be
+   * concentrated at the beginning and will not be noticeable. This warmup
+   * function draws a series of primitives to the canvas. From testing,
+   * the actual WebGl shaders compiled by canvaskit vary depending on the
+   * device hardware. Thus, warmup functions that might call all relevant
+   * WebGL shaders on desktop hardware may not be sufficient for mobile.
    *
-   * @param surface - the canvaskit surface
+   * @param canvas - the canvaskit-canvas to draw on
+   * @param positionOffset - an offset to add to the position of each
+   * primitive. Different shaders may be compiled depending on if the position
+   * was fractional or not. This offset allows us to warmup both cases.
    */
-  private warmupShaders(surface: Surface): void {
-    const canvas = surface.getCanvas();
-    const whitePaint = new this.canvasKit.Paint();
-    whitePaint.setColor(this.canvasKit.Color(255, 255, 255, 1));
+  private warmupShadersWithPrimitives(
+    canvas: Canvas,
+    positionOffset = 0
+  ): void {
+    canvas.save();
+    if (positionOffset == 0) {
+      canvas.scale(1 / Globals.canvasScale, 1 / Globals.canvasScale);
+    } else {
+      canvas.scale(
+        (1 / Globals.canvasScale) * 1.13,
+        (1 / Globals.canvasScale) * 1.13
+      );
+    }
 
-    [...this.scenes, this.freeEntitiesScene].forEach((scene) =>
+    if (!this.surface) {
+      throw new Error("surface is undefined");
+    }
+    const surfaceWidth = this.surface.width();
+    const surfaceHeight = this.surface.height();
+    const centerX = Math.round(surfaceWidth / 2) + positionOffset;
+    const centerY = Math.round(surfaceHeight / 2) + positionOffset;
+    const originX = positionOffset;
+    const originY = positionOffset;
+
+    const backgroundPaint = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      WebColors.White,
+      this.canvasKit.PaintStyle.Fill,
+      true
+    );
+    canvas.drawRect(
+      [0, 0, this.surface.width(), this.surface.height()],
+      backgroundPaint
+    );
+
+    const fillColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      WebColors.Black,
+      this.canvasKit.PaintStyle.Fill,
+      false
+    );
+
+    const fillColorPaintAntialiased = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      WebColors.Black,
+      this.canvasKit.PaintStyle.Fill,
+      true
+    );
+
+    const strokeColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      WebColors.Black,
+      this.canvasKit.PaintStyle.Stroke,
+      false
+    );
+    strokeColorPaintNotAntialiased.setStrokeWidth(2);
+
+    const strokeColorPaintAntialiased = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      WebColors.Black,
+      this.canvasKit.PaintStyle.Stroke,
+      true
+    );
+    strokeColorPaintAntialiased.setStrokeWidth(2);
+
+    canvas.drawCircle(centerX, centerY, 32, fillColorPaintNotAntialiased);
+    canvas.drawCircle(centerX, centerY, 32, fillColorPaintAntialiased);
+    canvas.drawCircle(centerX, centerY, 32, strokeColorPaintNotAntialiased);
+    canvas.drawCircle(centerX, centerY, 32, strokeColorPaintAntialiased);
+
+    const fontManager = this.session.fontManager;
+    const fontNames = this.session.fontManager.getFontNames(this.uuid);
+    if (fontNames.length > 0) {
+      const typeface = fontManager.getTypeface(this.uuid, fontNames[0]);
+      const font = new this.canvasKit.Font(typeface, 16 * Globals.canvasScale);
+      canvas.drawText(
+        "abc",
+        centerX,
+        centerY,
+        fillColorPaintNotAntialiased,
+        font
+      );
+      canvas.drawText("abc", centerX, centerY, fillColorPaintAntialiased, font);
+    }
+
+    const snapshot = this.takeCurrentSceneSnapshot();
+    canvas.drawImage(snapshot, originX, originY);
+    snapshot.delete();
+
+    canvas.drawRect([originX, originY, 16, 16], fillColorPaintNotAntialiased);
+    canvas.drawRect([originX, originY, 16, 16], fillColorPaintAntialiased);
+    canvas.drawRect([originX, originY, 16, 16], strokeColorPaintNotAntialiased);
+    canvas.drawRect([originX, originY, 16, 16], strokeColorPaintAntialiased);
+    canvas.restore();
+  }
+
+  /**
+   * Warms up the Skia-based shaders underlying canvaskit by drawing
+   * m2c2kit entities.
+   *
+   * @remarks While warmupShadersWithPrimitives draws a predefined set of
+   * primitives, this function initializes and draws all canvaskit objects
+   * that have been defined as m2c2kit entities. This not only is another
+   * opportunity for shader warmup, it also does the entity initialization.
+   *
+   * @param canvas - the canvaskit-canvas to draw on
+   */
+  private warmupShadersWithScenes(canvas: Canvas): void {
+    [...this.scenes, this.freeEntitiesScene].forEach((scene) => {
+      scene.warmup(canvas);
       scene.children.forEach((child) => {
         if (child.isDrawable) {
           (child as unknown as IDrawable).warmup(canvas);
         }
-      })
-    );
+      });
+    });
 
     /**
      * images that are in sprites will have been warmed up above, but images
@@ -632,18 +764,20 @@ export class Game implements Activity {
       imageNames.forEach((imageName) => {
         if (!warmupedImageNames.includes(imageName)) {
           const image = loadedImages[imageName].image;
-          // console.log("warmed up " + imageName);
           canvas.drawImage(image, 0, 0);
         }
       });
     }
 
-    const rr = this.canvasKit.RRectXY(
-      this.canvasKit.LTRBRect(0, 0, surface.width(), surface.height()),
-      0,
-      0
+    const whitePaint = new this.canvasKit.Paint();
+    whitePaint.setColor(this.canvasKit.Color(255, 255, 255, 1));
+    if (!this.surface) {
+      throw new Error("surface is undefined");
+    }
+    canvas.drawRect(
+      [0, 0, this.surface.width(), this.surface.height()],
+      whitePaint
     );
-    canvas.drawRRect(rr, whitePaint);
   }
 
   stop(): void {
@@ -1138,6 +1272,11 @@ export class Game implements Activity {
       throw new Error("main html canvas is undefined");
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.logWebGl = this.options.logWebGl;
+    this.interceptWebGlCalls();
+
     try {
       this.webGlRendererInfo = WebGlInfo.getRendererString();
     } catch {
@@ -1158,6 +1297,85 @@ export class Game implements Activity {
       }`
     );
     this.surface.getCanvas().scale(Globals.canvasScale, Globals.canvasScale);
+  }
+
+  private interceptWebGlCalls() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (!this.htmlCanvas.__proto__.m2c2ModifiedGetContext) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.htmlCanvas.__proto__.m2c2ModifiedGetContext = true;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const getContextOriginal = this.htmlCanvas.__proto__.getContext;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.htmlCanvas.__proto__.getContext = function (...args) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (window.logWebGl) {
+          console.log(
+            `🔼 getContext(${args.map((a) => a.toString()).join(", ")})`
+          );
+        }
+        const context = getContextOriginal.apply(this, [...args]);
+
+        // if (context.__proto__.createProgram) {
+        //   if (!context.__proto__.m2c2ModifiedCreateProgram) {
+        //     context.__proto__.m2c2ModifiedCreateProgram = true;
+        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //     // @ts-ignore
+        //     const createProgramOriginal = context.__proto__.createProgram;
+        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //     // @ts-ignore
+        //     context.__proto__.createProgram = function (...args) {
+        //       console.log("🔼 createProgram()");
+        //       return createProgramOriginal.apply(this, [...args]);
+        //     };
+        //   }
+        // }
+
+        // if (context.__proto__.shaderSource) {
+        //   if (!context.__proto__.m2c2ModifiedShaderSource) {
+        //     context.__proto__.m2c2ModifiedShaderSource = true;
+        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //     // @ts-ignore
+        //     const shaderSourceOriginal = context.__proto__.shaderSource
+        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //     // @ts-ignore
+        //     context.__proto__.shaderSource= function (...args) {
+        //       console.log(`🔼 shaderSource(): ${args[1]}`);
+        //       return shaderSourceOriginal.apply(this, [...args]);
+        //     };
+        //   }
+        // }
+
+        if (context.__proto__.compileShader) {
+          if (!context.__proto__.m2c2ModifiedCompileShader) {
+            context.__proto__.m2c2ModifiedCompileShader = true;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const compileShaderOriginal = context.__proto__.compileShader;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            context.__proto__.compileShader = function (...args) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              if (window.logWebGl) {
+                const shader = args[0];
+                const source = context.getShaderSource(shader);
+                console.log(`🔼 compileShader():`);
+                console.log(source);
+              }
+              return compileShaderOriginal.apply(this, [...args]);
+            };
+          }
+        }
+
+        return context;
+      };
+    }
   }
 
   private setupFpsFont(): void {
@@ -1208,10 +1426,26 @@ export class Game implements Activity {
   }
 
   private loop(canvas: Canvas): void {
+    if (!this.surface) {
+      throw new Error("surface is undefined");
+    }
+
+    if (this.warmupFunctionQueue.length > 0) {
+      const warmup = this.warmupFunctionQueue.shift();
+      warmup?.warmupFunction.call(this, canvas, warmup.positionOffset);
+      this.surface.requestAnimationFrame(this.loop.bind(this));
+      return;
+    }
+
+    if (!this.loaderElementsRemoved) {
+      this.loaderElementsRemoved = true;
+      DomHelpers.setCanvasOverlayVisibility(false);
+      DomHelpers.setSpinnerVisibility(false);
+      this.surface.requestAnimationFrame(this.loop.bind(this));
+      return;
+    }
+
     if (this.gameStopRequested) {
-      if (this.surface === undefined) {
-        throw new Error("CanvasKit surface is undefined");
-      }
       // delete() shows an error in console. deleteLater() does not. Why?
       this.surface.deleteLater();
       return;
@@ -1266,9 +1500,6 @@ export class Game implements Activity {
     }
 
     this.priorUpdateTime = Globals.now;
-    if (this.surface === undefined) {
-      throw new Error("CanvasKit surface is undefined");
-    }
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 

@@ -25,7 +25,14 @@
   align-items: center;
 }
 
-.m2c2kit-loader {
+.m2c2kit-canvas-overlay {
+  background-color: white;
+  width: 100vw;
+  height: 100vh;
+  position: absolute
+}
+
+.m2c2kit-spinner {
   border: 16px solid #f3f3f3;
   border-radius: 50%;
   border-top: 16px solid #212529;

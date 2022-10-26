@@ -15,8 +15,13 @@ import {
      * this activity. Within a study, use different survey names.
      */
     name: "demo-survey",
+    confirmSkipping: true,
     pages: [
       {
+        /**
+         * Specify a unique name for each page. This is needed for additional
+         * m2c2-specific enhancements.
+         */
         name: "page1",
         elements: [
           {
@@ -110,6 +115,8 @@ import {
       },
       {
         name: "page4",
+        confirmSkippingText:
+        "If you want to leave the response in the center, go back to the question, tap the slider, and then select NEXT.<br>Are you sure you want to skip this page?",
         elements: [
           {
             type: "nouislider-m2c2",
@@ -297,15 +304,5 @@ import {
    * */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as unknown as any).session = session;
-  session.init().then(() => {
-    /**
-     * session.init() may take a few moments when downloading non-local or
-     * non-cached resources. After session.init() completes, the below code
-     * removes the loading spinner that is defined in the HTML template.
-     */
-    const loaderDiv = document.getElementById("m2c2kit-loader-div");
-    if (loaderDiv) {
-      loaderDiv.classList.remove("m2c2kit-loader");
-    }
-  });
+  session.init();
   

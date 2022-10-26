@@ -6,6 +6,14 @@
   margin: 0;
 }
 
+.m2c2kit-display-none {
+  display: none;
+}
+
+.m2c2kit-display-block {
+  display: block;
+}
+
 .m2c2kit-full-viewport {
   height: 100vh;
   width: 100vw;
@@ -17,7 +25,14 @@
   align-items: center;
 }
 
-.m2c2kit-loader {
+.m2c2kit-canvas-overlay {
+  background-color: white;
+  width: 100vw;
+  height: 100vh;
+  position: absolute
+}
+
+.m2c2kit-spinner {
   border: 16px solid #f3f3f3;
   border-radius: 50%;
   border-top: 16px solid #212529;
@@ -27,6 +42,12 @@
   -webkit-animation: m2c2kit-loader-spin 1.5s linear infinite;
   animation: m2c2kit-loader-spin 1.5s linear infinite;
   position: absolute;
+}
+
+#m2c2kit-time-stepping-div {
+  position: fixed;
+  top: 4px;
+  left: 4px
 }
 
 /* Safari */

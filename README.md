@@ -90,16 +90,24 @@ to
 FROM emsdk-base
 ```
 
-4. Edit the skia C++ code to apply the fix to all GPUs. Edit the file `~/skia/src/gpu/ganesh/gl/GrGLCaps.cpp` and change the code that says
+4. Edit the skia C++ code to apply the fix to all GPUs. Edit the file `~/skia/src/gpu/ganesh/gl/GrGLCaps.cpp` and comment out the code that limits the fix to only certain GPUs. Change
 
 ```
-(ctxInfo.webglRenderer() == GrGLRenderer::kAdreno4xx_other || ctxInfo.webglRenderer() == GrGLRenderer::kAdreno630)
+    if (ctxInfo.renderer()      == GrGLRenderer::kWebGL &&
+        (ctxInfo.webglRenderer() == GrGLRenderer::kAdreno4xx_other ||
+         ctxInfo.webglRenderer() == GrGLRenderer::kAdreno630)) {
+        fFlushBeforeWritePixels = true;
+    }
 ```
 
 to
 
 ```
-(true || ctxInfo.webglRenderer() == GrGLRenderer::kAdreno4xx_other || ctxInfo.webglRenderer() == GrGLRenderer::kAdreno630)
+    //if (ctxInfo.renderer()      == GrGLRenderer::kWebGL &&
+    //    (ctxInfo.webglRenderer() == GrGLRenderer::kAdreno4xx_other ||
+    //     ctxInfo.webglRenderer() == GrGLRenderer::kAdreno630)) {
+        fFlushBeforeWritePixels = true;
+    //}
 ```
 
 5. Run the following commands:
@@ -111,6 +119,8 @@ docker build -t canvaskit-emsdk ./skia/infra/canvaskit/docker/canvaskit-emsdk/
 docker run -a stdout -v ~/skia:/SRC -w /SRC emsdk-base python tools/git-sync-deps
 docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh
 ```
+
+Note: In the last step, alternatively use `docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh debug_build` to build a debug version of `canvaskit-wasm`, which will create a non-minified version of `canvaskit.js` and a wasm binary with full features. This is practical only for debugging, because the wasm binary is much larger (over _100 megabytes_) than the release version.
 
 6. The build artifacts of interest, `canvaskit.js` and `canvaskit.wasm`, are in `~/skia/out`. Assuming you have already executed `npm install`, replace the same two files in `node_modules/canvaskit-wasm/bin` with these newly built files. Before replacing the files, rename the originals so you can easily switch back, if needed. Note: you must replace both `canvaskit.js` and `canvaskit.wasm` -- you cannot simply replace the wasm file.
 

@@ -25,12 +25,15 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   rect?: RectOptions;
   path?: Path;
   cornerRadius = 0;
-  private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR; // public getter/setter is below
-  private _strokeColor?: RgbaColor | undefined; // public getter/setter is below
+  private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR;
+  private _strokeColor?: RgbaColor | undefined;
   lineWidth?: number;
+  private _isAntialiased = true;
 
-  private fillColorPaint?: Paint;
-  private strokeColorPaint?: Paint;
+  private _fillColorPaintAntialiased?: Paint;
+  private _strokeColorPaintAntialiased?: Paint;
+  private _fillColorPaintNotAntialiased?: Paint;
+  private _strokeColorPaintNotAntialiased?: Paint;
 
   /**
    * Rectangular, circular, or path-based shape
@@ -97,6 +100,9 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     if (options.lineWidth) {
       this.lineWidth = options.lineWidth;
     }
+    if (options.isAntialiased !== undefined) {
+      this.isAntialiased = options.isAntialiased;
+    }
     if (options.strokeColor && options.lineWidth === undefined) {
       console.warn(
         `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is undefined. In normal usage, both would be set or both would be undefined.`
@@ -111,55 +117,44 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
   override initialize(): void {
     if (this.fillColor) {
-      const canvasKit = this.canvasKit;
-      this.fillColorPaint = new canvasKit.Paint();
-      this.fillColorPaint.setColor(
-        canvasKit.Color(
-          this.fillColor[0],
-          this.fillColor[1],
-          this.fillColor[2],
-          this.fillColor[3]
-        )
+      this.fillColorPaintAntialiased = CanvasKitHelpers.makePaint(
+        this.canvasKit,
+        this.fillColor,
+        this.canvasKit.PaintStyle.Fill,
+        true
       );
-      this.fillColorPaint.setStyle(canvasKit.PaintStyle.Fill);
-      this.fillColorPaint.setAntiAlias(true);
+      this.fillColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
+        this.canvasKit,
+        this.fillColor,
+        this.canvasKit.PaintStyle.Fill,
+        false
+      );
     }
 
     if (this.strokeColor) {
-      const canvasKit = this.canvasKit;
-      this.strokeColorPaint = new canvasKit.Paint();
-      this.strokeColorPaint.setColor(
-        canvasKit.Color(
-          this.strokeColor[0],
-          this.strokeColor[1],
-          this.strokeColor[2],
-          this.strokeColor[3]
-        )
+      this.strokeColorPaintAntialiased = CanvasKitHelpers.makePaint(
+        this.canvasKit,
+        this.strokeColor,
+        this.canvasKit.PaintStyle.Stroke,
+        true
       );
-      this.strokeColorPaint.setStyle(canvasKit.PaintStyle.Stroke);
-      this.strokeColorPaint.setAntiAlias(true);
+      this.strokeColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
+        this.canvasKit,
+        this.strokeColor,
+        this.canvasKit.PaintStyle.Stroke,
+        false
+      );
     }
     this.needsInitialization = false;
   }
 
   dispose(): void {
-    CanvasKitHelpers.Dispose([this.strokeColorPaint, this.fillColorPaint]);
-  }
-
-  get fillColor(): RgbaColor {
-    return this._fillColor;
-  }
-  set fillColor(fillColor: RgbaColor) {
-    this._fillColor = fillColor;
-    this.needsInitialization = true;
-  }
-
-  get strokeColor(): RgbaColor | undefined {
-    return this._strokeColor;
-  }
-  set strokeColor(strokeColor: RgbaColor | undefined) {
-    this._strokeColor = strokeColor;
-    this.needsInitialization = true;
+    CanvasKitHelpers.Dispose([
+      this._strokeColorPaintAntialiased,
+      this._strokeColorPaintNotAntialiased,
+      this._fillColorPaintAntialiased,
+      this._fillColorPaintNotAntialiased,
+    ]);
   }
 
   /**
@@ -218,9 +213,15 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
           this.anchorPoint.y * this.size.height * this.absoluteScale) *
         drawScale;
 
-      if (this.strokeColor && this.strokeColorPaint && this.lineWidth) {
+      if (
+        this.strokeColor &&
+        this.strokeColorPaintAntialiased &&
+        this.lineWidth
+      ) {
         // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-        this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
+        this.strokeColorPaintAntialiased.setStrokeWidth(
+          this.lineWidth * drawScale
+        );
 
         for (const subpath of this.path.subpaths) {
           const points = subpath.flat();
@@ -230,75 +231,265 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
               pathOriginY + points[i].y * drawScale,
               pathOriginX + points[i + 1].x * drawScale,
               pathOriginY + points[i + 1].y * drawScale,
-              this.strokeColorPaint
+              this.strokeColorPaintAntialiased
             );
           }
         }
       }
     }
 
-    if (
-      this.shapeType === ShapeType.Circle &&
-      this.circleOfRadius !== undefined
-    ) {
-      const cx = this.absolutePosition.x * drawScale;
-      const cy = this.absolutePosition.y * drawScale;
-      const radius = this.circleOfRadius * this.absoluteScale * drawScale;
-
-      if (this.fillColor && this.fillColorPaint) {
-        canvas.drawCircle(cx, cy, radius, this.fillColorPaint);
-      }
-
-      if (this.strokeColor && this.strokeColorPaint && this.lineWidth) {
-        // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-        this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
-        canvas.drawCircle(cx, cy, radius, this.strokeColorPaint);
-      }
+    if (this.shapeType === ShapeType.Circle) {
+      this.drawCircle(canvas);
     }
 
     if (this.shapeType === ShapeType.Rectangle) {
-      const rr = this.canvasKit.RRectXY(
-        this.canvasKit.LTRBRect(
-          (this.absolutePosition.x -
-            this.anchorPoint.x * this.size.width * this.absoluteScale) *
-            drawScale,
-          (this.absolutePosition.y -
-            this.anchorPoint.y * this.size.height * this.absoluteScale) *
-            drawScale,
-          (this.absolutePosition.x +
-            this.size.width * this.absoluteScale -
-            this.anchorPoint.x * this.size.width * this.absoluteScale) *
-            drawScale,
-          (this.absolutePosition.y +
-            this.size.height * this.absoluteScale -
-            this.anchorPoint.y * this.size.height * this.absoluteScale) *
-            drawScale
-        ),
-        this.cornerRadius * drawScale,
-        this.cornerRadius * drawScale
-      );
-
-      if (this.fillColor && this.fillColorPaint) {
-        canvas.drawRRect(rr, this.fillColorPaint);
-      }
-
-      if (this.strokeColor && this.strokeColorPaint && this.lineWidth) {
-        // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-        this.strokeColorPaint.setStrokeWidth(this.lineWidth * drawScale);
-        canvas.drawRRect(rr, this.strokeColorPaint);
-      }
+      this.drawRectangle(canvas);
     }
 
     canvas.restore();
     super.drawChildren(canvas);
   }
 
+  private drawCircle(canvas: Canvas) {
+    if (!this.circleOfRadius) {
+      return;
+    }
+
+    if (this.fillColor) {
+      const paint = this.getFillPaint();
+      this.drawCircleWithCanvasKit(canvas, paint);
+    }
+
+    if (this.strokeColor && this.lineWidth) {
+      const paint = this.getStrokePaint(this.lineWidth);
+      this.drawCircleWithCanvasKit(canvas, paint);
+    }
+  }
+
+  private drawRectangle(canvas: Canvas) {
+    if (this.fillColor) {
+      const paint = this.getFillPaint();
+      this.drawRectangleWithCanvasKit(canvas, paint);
+    }
+
+    if (this.strokeColor && this.lineWidth) {
+      const paint = this.getStrokePaint(this.lineWidth);
+      this.drawRectangleWithCanvasKit(canvas, paint);
+    }
+  }
+
+  private drawCircleWithCanvasKit(canvas: Canvas, paint: Paint): void {
+    if (!this.circleOfRadius) {
+      return;
+    }
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const cx = this.absolutePosition.x * drawScale;
+    const cy = this.absolutePosition.y * drawScale;
+    const radius = this.circleOfRadius * this.absoluteScale * drawScale;
+    canvas.drawCircle(cx, cy, radius, paint);
+  }
+
+  private drawRectangleWithCanvasKit(canvas: Canvas, paint: Paint): void {
+    const rr = this.calculateCKRoundedRectangle();
+    canvas.drawRRect(rr, paint);
+  }
+
+  private calculateCKRoundedRectangle() {
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    return this.canvasKit.RRectXY(
+      this.canvasKit.LTRBRect(
+        (this.absolutePosition.x -
+          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.y -
+          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.x +
+          this.size.width * this.absoluteScale -
+          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.y +
+          this.size.height * this.absoluteScale -
+          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          drawScale
+      ),
+      this.cornerRadius * drawScale,
+      this.cornerRadius * drawScale
+    );
+  }
+
+  private getFillPaint(): Paint {
+    /**
+     * If the shape is involved in a running animation action (e.g., move,
+     * scale), then do not use an antialiased paint while the action is
+     * running, because it can cause visible jank. I found that a new shader
+     * program might be created for antialiased circles as they are animated.
+     * (This was not the case for rectangles, though. Skia uses different
+     * antialiasing techniques, depending on the shape primitive:
+     * https://groups.google.com/g/skia-discuss/c/OUzwQqxsCmo/m/P_BroOJBDgAJ
+     * https://groups.google.com/g/skia-discuss/c/TuRfkQ7u_kU/m/ZEhxAT0zBAAJ)
+     */
+    if (this.involvedInActionAffectingAppearance()) {
+      return this.fillColorPaintNotAntialiased;
+    }
+    return this.isAntialiased
+      ? this.fillColorPaintAntialiased
+      : this.fillColorPaintNotAntialiased;
+  }
+
+  private getStrokePaint(lineWidth: number) {
+    let paint: Paint;
+    if (this.involvedInActionAffectingAppearance()) {
+      paint = this.strokeColorPaintNotAntialiased;
+    } else {
+      paint = this.isAntialiased
+        ? this.strokeColorPaintAntialiased
+        : this.strokeColorPaintNotAntialiased;
+    }
+
+    // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    paint.setStrokeWidth(lineWidth * drawScale);
+    return paint;
+  }
+
   warmup(canvas: Canvas): void {
     this.initialize();
+
+    canvas.save();
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    canvas.scale(1 / drawScale, 1 / drawScale);
+
+    if (this.shapeType === ShapeType.Circle) {
+      if (this.fillColor) {
+        this.warmupFilledCircle(canvas);
+      }
+      if (this.strokeColor && this.lineWidth) {
+        this.warmupStrokedCircle(canvas);
+      }
+    }
+
+    if (this.shapeType === ShapeType.Rectangle) {
+      if (this.fillColor) {
+        this.warmupFilledRectangle(canvas);
+      }
+      if (this.strokeColor && this.lineWidth) {
+        this.warmupStrokedRectangle(canvas);
+      }
+    }
+
+    canvas.restore();
+
     this.children.forEach((child) => {
       if (child.isDrawable) {
         (child as unknown as IDrawable).warmup(canvas);
       }
     });
+  }
+
+  private warmupFilledCircle(canvas: Canvas) {
+    if (!this.circleOfRadius) {
+      return;
+    }
+    this.drawCircleWithCanvasKit(canvas, this.fillColorPaintAntialiased);
+    this.drawCircleWithCanvasKit(canvas, this.fillColorPaintNotAntialiased);
+  }
+
+  private warmupStrokedCircle(canvas: Canvas) {
+    if (!this.lineWidth || !this.circleOfRadius) {
+      return;
+    }
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
+    this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
+    this.strokeColorPaintNotAntialiased.setStrokeWidth(
+      this.lineWidth * drawScale
+    );
+    this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintNotAntialiased);
+  }
+
+  private warmupFilledRectangle(canvas: Canvas) {
+    this.drawRectangleWithCanvasKit(canvas, this.fillColorPaintAntialiased);
+    this.drawRectangleWithCanvasKit(canvas, this.fillColorPaintNotAntialiased);
+  }
+
+  private warmupStrokedRectangle(canvas: Canvas) {
+    if (!this.lineWidth || !this.circleOfRadius) {
+      return;
+    }
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
+    this.drawRectangleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
+    this.strokeColorPaintNotAntialiased.setStrokeWidth(
+      this.lineWidth * drawScale
+    );
+    this.drawRectangleWithCanvasKit(
+      canvas,
+      this.strokeColorPaintNotAntialiased
+    );
+  }
+
+  get fillColor(): RgbaColor {
+    return this._fillColor;
+  }
+  set fillColor(fillColor: RgbaColor) {
+    this._fillColor = fillColor;
+    this.needsInitialization = true;
+  }
+
+  get strokeColor(): RgbaColor | undefined {
+    return this._strokeColor;
+  }
+  set strokeColor(strokeColor: RgbaColor | undefined) {
+    this._strokeColor = strokeColor;
+    this.needsInitialization = true;
+  }
+
+  get isAntialiased(): boolean {
+    return this._isAntialiased;
+  }
+  set isAntialiased(isAntialiased: boolean) {
+    this._isAntialiased = isAntialiased;
+    this.needsInitialization = true;
+  }
+
+  public get fillColorPaintAntialiased(): Paint {
+    if (!this._fillColorPaintAntialiased) {
+      throw new Error("fillColorPaintAntiAliased is undefined");
+    }
+    return this._fillColorPaintAntialiased;
+  }
+  public set fillColorPaintAntialiased(value: Paint) {
+    this._fillColorPaintAntialiased = value;
+  }
+
+  public get strokeColorPaintAntialiased(): Paint {
+    if (!this._strokeColorPaintAntialiased) {
+      throw new Error("strokeColorPaintAntiAliased is undefined");
+    }
+    return this._strokeColorPaintAntialiased;
+  }
+  public set strokeColorPaintAntialiased(value: Paint) {
+    this._strokeColorPaintAntialiased = value;
+  }
+
+  public get fillColorPaintNotAntialiased(): Paint {
+    if (!this._fillColorPaintNotAntialiased) {
+      throw new Error("fillColorPaintNotAntiAliased is undefined");
+    }
+    return this._fillColorPaintNotAntialiased;
+  }
+  public set fillColorPaintNotAntialiased(value: Paint) {
+    this._fillColorPaintNotAntialiased = value;
+  }
+
+  public get strokeColorPaintNotAntialiased(): Paint {
+    if (!this._strokeColorPaintNotAntialiased) {
+      throw new Error("strokeColorPaintNotAntiAliased is undefined");
+    }
+    return this._strokeColorPaintNotAntialiased;
+  }
+  public set strokeColorPaintNotAntialiased(value: Paint) {
+    this._strokeColorPaintNotAntialiased = value;
   }
 }

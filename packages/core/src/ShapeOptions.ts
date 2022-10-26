@@ -21,4 +21,6 @@ export interface ShapeOptions extends EntityOptions, DrawableOptions {
   lineWidth?: number;
   /** A path from which to create the shape */
   path?: Path;
+  /** Should the shape be drawn with antialiasing. Default is yes. */
+  isAntialiased?: boolean;
 }

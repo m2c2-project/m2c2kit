@@ -112,16 +112,28 @@ const CopyPluginPatterns = [
     to: "assets/m2c2kit/survey",
     context: "./../survey/dist",
     transform(content) {
-      const c1 = replaceStringInBuffer(
+      let c1 = replaceStringInBuffer(
         content,
         "@m2c2kit/core",
         "./../core/index.js"
       );
+
+      /**
+       * The following line has now appeared in the @m2c2kit/survey type
+       * definition file. It is a "triple-slash directive" (see
+       * https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html).
+       * This causes problems, because the compiler looks for a "react" type
+       * definition file. Therfore, we remove the line. At the same time, we
+       * have to declare the JSX namespace and the Element class, which would
+       * have been in the "react" type definition file.
+       */
+      c1 = replaceStringInBuffer(c1, `/// <reference types="react" />`, "");
+
       return replaceStringInBuffer(
         c1,
         "import * as SurveyReact from 'survey-react';",
         // need to declare all the survey-react classes we use because we don't actually import this library
-        "declare namespace SurveyReact { class Model {} class StylesManager {} class SurveyModel {} class Question {} class PageModel {} }"
+        "declare namespace SurveyReact { class Model {} class StylesManager {} class SurveyModel {} class Question {} class PageModel {} }\ndeclare namespace JSX { class Element {} }"
       );
     },
   },
@@ -294,15 +306,5 @@ const sessionCode = `const session = new Session({
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-session.init().then(() => {
-  /**
-   * session.init() may take a few moments when downloading non-local or
-   * non-cached resources. After session.init() completes, the below code
-   * removes the loading spinner that is defined in the HTML template.
-   */
-  const loaderDiv = document.getElementById("m2c2kit-loader-div");
-  if (loaderDiv) {
-    loaderDiv.classList.remove("m2c2kit-loader");
-  }
-});
+session.init();
 `;
