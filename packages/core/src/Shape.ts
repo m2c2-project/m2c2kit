@@ -1,12 +1,13 @@
 import "./Globals";
-import { Canvas, Paint } from "canvaskit-wasm";
+import { Canvas, Paint, Path } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
-import { Path } from "./Path";
+import { M2Path } from "./M2Path";
+import { SvgStringPath } from "./SvgStringPath";
 import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
@@ -23,7 +24,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   shapeType = ShapeType.Undefined;
   circleOfRadius?: number;
   rect?: RectOptions;
-  path?: Path;
+  path?: M2Path | SvgStringPath;
+  ckPath: Path | null = null;
+  ckPathWidth?: number;
+  ckPathHeight?: number;
+  pathSvgString?: string;
   cornerRadius = 0;
   private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR;
   private _strokeColor?: RgbaColor | undefined;
@@ -35,6 +40,16 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private _fillColorPaintNotAntialiased?: Paint;
   private _strokeColorPaintNotAntialiased?: Paint;
 
+  private svgPathRequestedWidth?: number;
+  private svgPathRequestedHeight?: number;
+  private svgPathScaleForResizing = 1;
+  private svgPathWidth = 0;
+  private svgPathHeight = 0;
+  private svgPreviousAbsoluteScale = 1;
+  private svgPreviousAbsoluteX = 0;
+  private svgPreviousAbsoluteY = 0;
+  private pathIsSvgStringPath = false;
+
   /**
    * Rectangular, circular, or path-based shape
    *
@@ -43,26 +58,43 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   constructor(options: ShapeOptions = {}) {
     super(options);
     handleInterfaceOptions(this, options);
-    if (options.path !== undefined) {
-      this.path = options.path;
-      this.size.width = options.path.size.width;
-      this.size.height = options.path.size.height;
+
+    if ((options?.path as SvgStringPath)?.svgString !== undefined) {
+      this.shapeType = ShapeType.Path;
+      this.pathIsSvgStringPath = true;
+
+      this.pathSvgString = (options.path as SvgStringPath).svgString;
+      this.svgPathRequestedWidth = (options.path as SvgStringPath).width;
+      this.svgPathRequestedHeight = (options.path as SvgStringPath).height;
+
+      if (
+        this.svgPathRequestedHeight !== undefined &&
+        this.svgPathRequestedWidth !== undefined
+      ) {
+        throw new Error(
+          "Cannot specify both width and height for SVG string path."
+        );
+      }
+
       if (!this.strokeColor) {
         this.strokeColor = Constants.DEFAULT_PATH_STROKE_COLOR;
       }
-      if (!this.lineWidth) {
+      if (this.lineWidth === undefined) {
         this.lineWidth = Constants.DEFAULT_PATH_LINE_WIDTH;
       }
-      this.shapeType = ShapeType.Path;
       if (options.circleOfRadius || options.rect) {
         throw new Error(
           "Shape must specify only one of: path, circleOfRadius, or rect"
         );
       }
     }
+
     if (options.circleOfRadius !== undefined) {
       this.circleOfRadius = options.circleOfRadius;
       this.shapeType = ShapeType.Circle;
+      if (options.size !== undefined) {
+        throw new Error("Size cannot be specified for circle shape");
+      }
       if (options.path || options.rect) {
         throw new Error(
           "Shape must specify only one of: path, circleOfRadius, or rect"
@@ -87,7 +119,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.position = { x: options.rect.x, y: options.rect.y };
       }
       this.shapeType = ShapeType.Rectangle;
+      if (options.size !== undefined) {
+        throw new Error("Size cannot be specified for rectangle shape");
+      }
     }
+
     if (options.cornerRadius) {
       this.cornerRadius = options.cornerRadius;
     }
@@ -97,7 +133,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     if (options.strokeColor) {
       this.strokeColor = options.strokeColor;
     }
-    if (options.lineWidth) {
+    if (options.lineWidth !== undefined) {
       this.lineWidth = options.lineWidth;
     }
     if (options.isAntialiased !== undefined) {
@@ -116,6 +152,32 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   }
 
   override initialize(): void {
+    if (this.shapeType === ShapeType.Path && this.pathIsSvgStringPath) {
+      if (!this.pathSvgString) {
+        throw new Error("SVG Path string is null/undefined");
+      }
+      this.ckPath = this.canvasKit.Path.MakeFromSVGString(this.pathSvgString);
+      if (!this.ckPath) {
+        throw new Error("could not make CanvasKit Path from SVG string");
+      }
+
+      const bounds = this.ckPath.getBounds();
+      this.svgPathWidth = bounds[2] + (bounds[0] < 0 ? Math.abs(bounds[0]) : 0);
+      this.svgPathHeight =
+        bounds[3] + (bounds[1] < 0 ? Math.abs(bounds[1]) : 0);
+
+      this.size.width = this.size.width ?? this.svgPathWidth;
+      this.size.height = this.size.height ?? this.svgPathHeight;
+
+      if (this.svgPathRequestedHeight !== undefined) {
+        this.svgPathScaleForResizing =
+          this.svgPathRequestedHeight / this.svgPathHeight;
+      } else if (this.svgPathRequestedWidth !== undefined) {
+        this.svgPathScaleForResizing =
+          this.svgPathRequestedWidth / this.svgPathWidth;
+      }
+    }
+
     if (this.fillColor) {
       this.fillColorPaintAntialiased = CanvasKitHelpers.makePaint(
         this.canvasKit,
@@ -154,6 +216,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this._strokeColorPaintNotAntialiased,
       this._fillColorPaintAntialiased,
       this._fillColorPaintNotAntialiased,
+      this.ckPath,
     ]);
   }
 
@@ -201,41 +264,12 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
 
-    if (this.shapeType === ShapeType.Path && this.path) {
-      /** paths use origin with anchor point at 0,0 (upper left) */
-      const pathOriginX =
-        (this.absolutePosition.x -
-          this.anchorPoint.x * this.size.width * this.absoluteScale) *
-        drawScale;
-      /** paths use origin with anchor point at 0,0 (upper left) */
-      const pathOriginY =
-        (this.absolutePosition.y -
-          this.anchorPoint.y * this.size.height * this.absoluteScale) *
-        drawScale;
+    if (this.shapeType === ShapeType.Path && !this.pathIsSvgStringPath) {
+      this.drawPathFromM2Path(canvas);
+    }
 
-      if (
-        this.strokeColor &&
-        this.strokeColorPaintAntialiased &&
-        this.lineWidth
-      ) {
-        // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-        this.strokeColorPaintAntialiased.setStrokeWidth(
-          this.lineWidth * drawScale
-        );
-
-        for (const subpath of this.path.subpaths) {
-          const points = subpath.flat();
-          for (let i = 0; i < points.length - 1; i++) {
-            canvas.drawLine(
-              pathOriginX + points[i].x * drawScale,
-              pathOriginY + points[i].y * drawScale,
-              pathOriginX + points[i + 1].x * drawScale,
-              pathOriginY + points[i + 1].y * drawScale,
-              this.strokeColorPaintAntialiased
-            );
-          }
-        }
-      }
+    if (this.shapeType === ShapeType.Path && this.pathIsSvgStringPath) {
+      this.drawPathFromSvgString(canvas);
     }
 
     if (this.shapeType === ShapeType.Circle) {
@@ -248,6 +282,119 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
     canvas.restore();
     super.drawChildren(canvas);
+  }
+
+  private drawPathFromM2Path(canvas: Canvas) {
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    /** paths use origin with anchor point at 0,0 (upper left) */
+    const pathOriginX =
+      (this.absolutePosition.x -
+        this.anchorPoint.x * this.size.width * this.absoluteScale) *
+      drawScale;
+    /** paths use origin with anchor point at 0,0 (upper left) */
+    const pathOriginY =
+      (this.absolutePosition.y -
+        this.anchorPoint.y * this.size.height * this.absoluteScale) *
+      drawScale;
+
+    if (
+      this.strokeColor &&
+      this.strokeColorPaintAntialiased &&
+      this.lineWidth
+    ) {
+      // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
+      this.strokeColorPaintAntialiased.setStrokeWidth(
+        this.lineWidth * drawScale
+      );
+
+      const subpaths = (this.path as M2Path).subpaths;
+      for (const subpath of subpaths) {
+        const points = subpath.flat();
+        for (let i = 0; i < points.length - 1; i++) {
+          canvas.drawLine(
+            pathOriginX + points[i].x * drawScale,
+            pathOriginY + points[i].y * drawScale,
+            pathOriginX + points[i + 1].x * drawScale,
+            pathOriginY + points[i + 1].y * drawScale,
+            this.strokeColorPaintAntialiased
+          );
+        }
+      }
+    }
+  }
+
+  private drawPathFromSvgString(canvas: Canvas): void {
+    if (!this.ckPath) {
+      return;
+    }
+
+    const x = this.calculateSvgPathX();
+    const y = this.calculateSvgPathY();
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const pathScale = drawScale * this.svgPathScaleForResizing;
+
+    if (this.pathNeedsTransform(pathScale, x, y)) {
+      const matrix = this.calculateTransformationMatrix(pathScale, x, y);
+      this.ckPath = this.ckPath.transform(matrix);
+      this.saveSvgPathDrawParameters(pathScale, x, y);
+    }
+
+    if (this.fillColor) {
+      const paint = this.getFillPaint();
+      canvas.drawPath(this.ckPath, paint);
+    }
+
+    if (this.strokeColor && this.lineWidth) {
+      const paint = this.getStrokePaint(this.lineWidth);
+      canvas.drawPath(this.ckPath, paint);
+    }
+  }
+
+  private calculateSvgPathY() {
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    return (
+      (this.absolutePosition.y +
+        (this.size.height - this.svgPathHeight * this.svgPathScaleForResizing) /
+          2 -
+        this.anchorPoint.y * this.size.height) *
+      drawScale
+    );
+  }
+
+  private calculateSvgPathX() {
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    return (
+      (this.absolutePosition.x +
+        (this.size.width - this.svgPathWidth * this.svgPathScaleForResizing) /
+          2 -
+        this.anchorPoint.x * this.size.width) *
+      drawScale
+    );
+  }
+
+  private saveSvgPathDrawParameters(pathScale: number, x: number, y: number) {
+    this.svgPreviousAbsoluteScale = pathScale;
+    this.svgPreviousAbsoluteX = x;
+    this.svgPreviousAbsoluteY = y;
+  }
+
+  private calculateTransformationMatrix(
+    pathScale: number,
+    x: number,
+    y: number
+  ) {
+    const dScale = pathScale / this.svgPreviousAbsoluteScale;
+    const dX = x - this.svgPreviousAbsoluteX;
+    const dY = y - this.svgPreviousAbsoluteY;
+    return [dScale, 0, dX, 0, dScale, dY, 0, 0, 1];
+  }
+
+  private pathNeedsTransform(pathScale: number, x: number, y: number) {
+    return (
+      pathScale !== this.svgPreviousAbsoluteScale ||
+      x !== this.svgPreviousAbsoluteX ||
+      y !== this.svgPreviousAbsoluteY
+    );
   }
 
   private drawCircle(canvas: Canvas) {

@@ -1,4 +1,4 @@
-import { Path } from "./Path";
+import { M2Path } from "./M2Path";
 import { Point } from "./Point";
 import { Entity } from "./Entity";
 import { Size } from "./Size";
@@ -6,7 +6,7 @@ import { Size } from "./Size";
 /**
  * Lines and/or shapes, and methods for creating them.
  */
-export class MutablePath implements Path {
+export class MutablePath implements M2Path {
   size: Size = { width: 0, height: 0 };
   _subpaths = new Array<Array<Point>>();
 

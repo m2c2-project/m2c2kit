@@ -9,6 +9,7 @@ import {
   FontMgr,
   CanvasKit,
   PaintStyle,
+  Path,
 } from "canvaskit-wasm";
 import { RgbaColor } from "./RgbaColor";
 
@@ -32,6 +33,7 @@ export class CanvasKitHelpers {
           | Image
           | Typeface
           | FontMgr
+          | Path
         >
     >
   ): void {

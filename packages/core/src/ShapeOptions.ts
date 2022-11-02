@@ -3,7 +3,9 @@ import { DrawableOptions } from "./DrawableOptions";
 import { EntityOptions } from "./EntityOptions";
 import { RgbaColor } from "./RgbaColor";
 import { RectOptions } from "./RectOptions";
-import { Path } from "./Path";
+import { M2Path } from "./M2Path";
+import { Size } from "./Size";
+import { SvgStringPath } from "./SvgStringPath";
 
 export interface ShapeOptions extends EntityOptions, DrawableOptions {
   shapeType?: ShapeType;
@@ -20,7 +22,9 @@ export interface ShapeOptions extends EntityOptions, DrawableOptions {
   /** Width of outline. Default is undefined for rectangle and cricle, 2 for path. */
   lineWidth?: number;
   /** A path from which to create the shape */
-  path?: Path;
+  path?: M2Path | SvgStringPath;
+  /** Size of container "viewbox" for path shapes. Leave undefined for circle and rectangle shapes. */
+  size?: Size;
   /** Should the shape be drawn with antialiasing. Default is yes. */
   isAntialiased?: boolean;
 }

@@ -742,11 +742,6 @@ export class Game implements Activity {
   private warmupShadersWithScenes(canvas: Canvas): void {
     [...this.scenes, this.freeEntitiesScene].forEach((scene) => {
       scene.warmup(canvas);
-      scene.children.forEach((child) => {
-        if (child.isDrawable) {
-          (child as unknown as IDrawable).warmup(canvas);
-        }
-      });
     });
 
     /**

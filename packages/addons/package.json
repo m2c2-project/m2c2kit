@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.3.2"
+    "@m2c2kit/core": "0.3.3"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "5.3.1",
