@@ -163,6 +163,18 @@ const CopyPluginPatterns = [
   },
   {
     from: "index.ts",
+    to: "assets/src/color-shapes",
+    context: "./../assessment-color-shapes/src",
+    transform(content) {
+      return addBoilerplateCodeToAssessment(content, "ColorShapes");
+    },
+  },
+  {
+    from: "./../assessment-color-shapes/assets/color-shapes",
+    to: "assets/color-shapes",
+  },
+  {
+    from: "index.ts",
     to: "assets/src/grid-memory",
     context: "./../assessment-grid-memory/src",
     transform(content) {

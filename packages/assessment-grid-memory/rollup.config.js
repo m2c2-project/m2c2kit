@@ -24,7 +24,7 @@ export default [
     input: "./src/index.ts",
     output: [
       {
-        file: "./build-nobundler/m2c2kit.assessment-symbol-search.esm.min.js",
+        file: "./build-nobundler/m2c2kit.assessment-grid-memory.esm.min.js",
         format: "es",
       },
     ],

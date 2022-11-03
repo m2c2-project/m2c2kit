@@ -1,22 +1,13 @@
 import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
-import replace from "@rollup/plugin-replace";
-import { version } from "./package.json";
-
-const sharedPlugins = [
-  replace({
-    __M2C2KIT_PACKAGE_JSON_VERSION__: version,
-    preventAssignment: true,
-  }),
-];
 
 export default [
   {
     input: ["./src/index.ts"],
     output: [{ dir: "./dist", format: "es", sourcemap: true }],
     external: ["@m2c2kit/core", "@m2c2kit/addons"],
-    plugins: [...sharedPlugins, typescript({ outputToFilesystem: true })],
+    plugins: [typescript({ outputToFilesystem: true })],
   },
 
   // Make minified esm bundle for development without a bundler
@@ -24,12 +15,11 @@ export default [
     input: "./src/index.ts",
     output: [
       {
-        file: "./build-nobundler/m2c2kit.assessment-color-dots.esm.min.js",
+        file: "./build-nobundler/m2c2kit.assessment-color-shapes.esm.min.js",
         format: "es",
       },
     ],
     plugins: [
-      ...sharedPlugins,
       nodeResolve(),
       typescript({
         outputToFilesystem: true,

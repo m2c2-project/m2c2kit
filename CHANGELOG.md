@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## `@m2c2kit/core` [0.3.3] - 2022-11-02
+## `@m2c2kit/assessment-color-shapes` [0.8.1] - 2022-11-03
+
+### Added
+
+- Initial development of assessment.
+
+## `@m2c2kit/core` [0.3.3] - 2022-11-03
 
 ### Added
 

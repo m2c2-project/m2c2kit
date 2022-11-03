@@ -61,6 +61,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       url: "./assets/src/symbol-search/index.ts",
     },
     {
+      name: "Color Shapes",
+      url: "./assets/src/color-shapes/index.ts",
+    },
+    {
       name: "Color Dots",
       url: "./assets/src/color-dots/index.ts",
     },

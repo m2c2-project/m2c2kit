@@ -56,6 +56,10 @@ export default (commandLineArgs) => {
               src: "../assessment-symbol-search/assets/symbol-search",
               dest: `${outputFolder}/assets`,
             },
+            {
+              src: "../assessment-color-shapes/assets/color-shapes",
+              dest: `${outputFolder}/assets`,
+            },
           ],
         }),
         commandLineArgs.configProd &&

@@ -2,9 +2,8 @@
   "name": "@m2c2kit/assessment-grid-memory",
   "version": "0.8.1",
   "scripts": {
-    "build": "npm run clean && rollup -c && npm run copy-assets",
-    "copy-assets": "cpy src/assets/**/* dist/assets",
-    "clean": "rimraf dist build-nobundler .rollup.cache tsconfig.tsbuildinfo",
+    "build": "npm run clean && rollup -c",
+    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
     "postinstall": "node post-install.mjs"
   },
   "main": "dist/index.js",

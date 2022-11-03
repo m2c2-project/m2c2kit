@@ -2,6 +2,7 @@
   "references": [
     { "path": "../assessment-cli-starter" },
     { "path": "../assessment-color-dots" },
+    { "path": "../assessment-color-shapes" },
     { "path": "../assessment-grid-memory" },
     { "path": "../assessment-symbol-search" },
     { "path": "../survey" }
