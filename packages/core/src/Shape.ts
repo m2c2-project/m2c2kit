@@ -45,9 +45,9 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private svgPathScaleForResizing = 1;
   private svgPathWidth = 0;
   private svgPathHeight = 0;
-  private svgPreviousAbsoluteScale = 1;
-  private svgPreviousAbsoluteX = 0;
-  private svgPreviousAbsoluteY = 0;
+  private svgPreviousAbsoluteScale = NaN;
+  private svgPreviousAbsoluteX = NaN;
+  private svgPreviousAbsoluteY = NaN;
   private pathIsSvgStringPath = false;
 
   /**
@@ -176,6 +176,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.svgPathScaleForResizing =
           this.svgPathRequestedWidth / this.svgPathWidth;
       }
+
+      this.svgPreviousAbsoluteScale = 1;
+      this.svgPreviousAbsoluteX = 0;
+      this.svgPreviousAbsoluteY = 0;
     }
 
     if (this.fillColor) {
@@ -331,7 +335,8 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const x = this.calculateSvgPathX();
     const y = this.calculateSvgPathY();
     const drawScale = Globals.canvasScale / this.absoluteScale;
-    const pathScale = drawScale * this.svgPathScaleForResizing;
+    const pathScale =
+      drawScale * this.svgPathScaleForResizing * Globals.rootScale;
 
     if (this.pathNeedsTransform(pathScale, x, y)) {
       const matrix = this.calculateTransformationMatrix(pathScale, x, y);
@@ -354,7 +359,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     return (
       (this.absolutePosition.y +
-        (this.size.height - this.svgPathHeight * this.svgPathScaleForResizing) /
+        (this.size.height -
+          this.svgPathHeight *
+            this.svgPathScaleForResizing *
+            Globals.rootScale) /
           2 -
         this.anchorPoint.y * this.size.height) *
       drawScale
@@ -365,7 +373,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     return (
       (this.absolutePosition.x +
-        (this.size.width - this.svgPathWidth * this.svgPathScaleForResizing) /
+        (this.size.width -
+          this.svgPathWidth *
+            this.svgPathScaleForResizing *
+            Globals.rootScale) /
           2 -
         this.anchorPoint.x * this.size.width) *
       drawScale
