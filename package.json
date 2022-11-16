@@ -2,6 +2,7 @@
   "name": "m2c2kit",
   "description": "",
   "workspaces": [
+    "website",
     "packages/addons",
     "packages/assessment-cli-starter",
     "packages/assessment-color-dots",
