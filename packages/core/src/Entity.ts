@@ -303,6 +303,22 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
+   * Determines if the entity is a transitioning Scene or a descendant of a
+   * transitioning Scene.
+   *
+   * @returns true if transitioning
+   */
+  involvedInSceneTransition(): boolean {
+    let rootScene: Scene;
+    if (this.type === EntityType.Scene) {
+      rootScene = this as unknown as Scene;
+    } else {
+      rootScene = this.parentSceneAsEntity as unknown as Scene;
+    }
+    return rootScene._transitioning;
+  }
+
+  /**
    * Executes a callback when the user presses down on the entity.
    *
    * @remarks TapDown is a pointer down (mouse click or touches begin) within
@@ -712,9 +728,10 @@ export abstract class Entity implements EntityOptions {
       }
     }
 
-    // We must distinguish actions that run during a scene transition and those that do not.
-    // We must first handle all the actions that run during a scene transition, and only when those are
-    // complete can we start the regular actions
+    /**
+     * Distinguish uncompleted actions that can run during a scene transition
+     * from uncompleted "regular" ones that do not
+     */
     const uncompletedTransitionActions = this.actions.filter(
       (action) => action.runDuringTransition && !action.completed
     );
@@ -722,7 +739,7 @@ export abstract class Entity implements EntityOptions {
       (action) => !action.runDuringTransition && !action.completed
     );
 
-    // First, evaluate all uncompleted actions that can run during a transition
+    // Evaluate all uncompleted actions that can run during a transition
     if (uncompletedTransitionActions.length > 0) {
       uncompletedTransitionActions.forEach((action) => {
         if (action.runStartTime === -1) {
@@ -733,9 +750,13 @@ export abstract class Entity implements EntityOptions {
       uncompletedTransitionActions.forEach((action) =>
         Action.evaluateAction(action, this, Globals.now, Globals.deltaTime)
       );
-    } else if (uncompletedRegularActions.length > 0) {
-      // Now that we've completed at the actions that run during a transition,
-      // we can set the start time for any uncompleted regular actions
+    }
+
+    // If not transitioning, evaluate all regular uncompleted actions
+    if (
+      !this.involvedInSceneTransition() &&
+      uncompletedRegularActions.length > 0
+    ) {
       uncompletedRegularActions.forEach((action) => {
         if (action.runStartTime === -1) {
           action.runStartTime = Globals.now;
@@ -980,13 +1001,7 @@ export abstract class Entity implements EntityOptions {
   // }
 
   get canvasKit(): CanvasKit {
-    let parentScene: Scene;
-    if (this.type === EntityType.Scene) {
-      parentScene = this as unknown as Scene;
-    } else {
-      parentScene = this.parentSceneAsEntity as Scene;
-    }
-    return parentScene.game.canvasKit;
+    return this.game.canvasKit;
   }
 
   get parentSceneAsEntity(): Entity {
