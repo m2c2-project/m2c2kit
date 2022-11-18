@@ -1,0 +1,45 @@
+---
+sidebar_position: 6
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Buttons
+
+A `Button` is a very useful UI element.
+
+Buttons are everywhere in user interfaces. If you think about it, a typical button is made of more basic UI elements: text centered within a rectangle with rounded corners. You could make a button from a `Label` and a rectangle `Shape`, but it would be a lot of work. Instead, the m2c2kit library has a pre-built `Button`.
+
+:::note
+
+If you click the button, nothing happens. That's because we haven't told the button what to do when it's clicked. We'll learn about that later.
+
+:::
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
+export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const startButton = new Button({
+    text: "Start",
+    size: { width: 100, height: 50 },
+    position: { x: 100, y: 200 }
+});
+sceneOne.addChild(startButton);`;
+
+export const more = [
+{ description: <>By default, buttons are black with white text, but they are [customizable]</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const startButton = new Button({
+    text: "STOP",
+    size: { width: 120, height: 80 },
+    backgroundColor: WebColors.DarkRed,
+    fontColor: WebColors.Chartreuse,
+    fontSize: 32,
+    position: { x: 100, y: 200 }
+});
+sceneOne.addChild(startButton);`},
+];
+
+<CodeExample code={code} more={more} template={template}/>

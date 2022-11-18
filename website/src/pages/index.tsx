@@ -14,12 +14,31 @@ function HomepageHeader() {
       <div className="container">
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
+        <div
+          className={styles.buttons}
+          style={{ flexFlow: "row wrap", justifyContent: "center" }}
+        >
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro"
+            style={{ margin: "0.5em" }}
           >
-            Docusaurus Tutorial - 5min ⏱️
+            Introduction - 📖
+          </Link>
+          <Link
+            className="button button--secondary button--lg"
+            to="/docs/examples"
+            style={{ margin: "0.5em" }}
+          >
+            Examples - 📱
+          </Link>
+          <Link
+            className="button button--secondary button--lg"
+            to="/docs/tutorial-fundamentals/fundamentals"
+            style={{ margin: "0.5em" }}
+          >
+            Interactive Tutorial - 🖥️
+            {/* Docusaurus Tutorial - 5min ⏱️ */}
           </Link>
         </div>
       </div>
@@ -31,8 +50,8 @@ export default function Home(): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />"
+      title={`${siteConfig.title}`}
+      description="a library for cross-platform cognitive assessments"
     >
       <HomepageHeader />
       <main>

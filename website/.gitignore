@@ -1,3 +1,9 @@
+# assets needed for our embedded example game, which we've called "docs"
+static/m2c2kit/*
+!static/m2c2kit/assets/
+static/m2c2kit/assets/*
+!static/m2c2kit/assets/docs
+
 # Dependencies
 /node_modules
 

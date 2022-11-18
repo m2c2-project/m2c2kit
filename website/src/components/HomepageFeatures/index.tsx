@@ -10,32 +10,31 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "Easy to Use",
-    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
+    title: "Mobile first",
+    Svg: require("@site/static/img/phone-tablet-and-laptop.svg").default,
+    description: (
+      <>Optimized for touch and mobile devices while also usable on desktops.</>
+    ),
+  },
+  {
+    title: "Portable",
+    Svg: require("@site/static/img/wheelbarrow.svg").default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Use on browsers, compile within native apps, or embed in products like
+        RedCap or Qualtrics. A shared assessment codebase reduces development
+        time and promotes experiment standardization across devices and
+        services.
       </>
     ),
   },
   {
-    title: "Focus on What Matters",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    title: "Rapid iteration",
+    Svg: require("@site/static/img/flash-clock.svg").default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
-    ),
-  },
-  {
-    title: "Powered by React",
-    Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
-    description: (
-      <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Quickly develop and test new assessments with the JavaScript-based
+        library and deploy them in studies.
       </>
     ),
   },

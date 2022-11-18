@@ -6,8 +6,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "My Site",
-  tagline: "Dinosaurs are cool",
+  title: "m2c2kit",
+  tagline: "a library for cross-platform cognitive assessments",
   url: "https://your-docusaurus-test-site.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -36,16 +36,17 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+          // editUrl:
+          //   "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-        },
+        blog: false,
+        // blog: {
+        //   showReadingTime: true,
+        //   // Please change this to your repo.
+        //   // Remove this to remove the "edit this page" links.
+        //   editUrl:
+        //     "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+        // },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
@@ -53,25 +54,44 @@ const config = {
     ],
   ],
 
+  themes: [
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+        indexDocs: true,
+        indexPages: true,
+        indexBlog: false,
+        highlightSearchTermsOnTargetPage: false,
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      docs: {
+        sidebar: {
+          autoCollapseCategories: true,
+          hideable: true,
+        },
+      },
       navbar: {
-        title: "My Site",
+        title: "m2c2kit",
         logo: {
-          alt: "My Site Logo",
-          src: "img/logo.svg",
+          alt: "m2c2kit Site Logo",
+          src: "img/m2c2.svg",
         },
         items: [
+          // {
+          //   type: "doc",
+          //   docId: "intro",
+          //   position: "left",
+          //   label: "Tutorial",
+          // },
+          //{ to: "/blog", label: "Blog", position: "left" },
           {
-            type: "doc",
-            docId: "intro",
-            position: "left",
-            label: "Tutorial",
-          },
-          { to: "/blog", label: "Blog", position: "left" },
-          {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/m2c2-project/m2c2kit",
             label: "GitHub",
             position: "right",
           },
@@ -80,47 +100,63 @@ const config = {
       footer: {
         style: "dark",
         links: [
+          //{
+          // title: "Docs",
+          // items: [
           {
-            title: "Docs",
-            items: [
-              {
-                label: "Tutorial",
-                to: "/docs/intro",
-              },
-            ],
+            label: "Introduction",
+            to: "/docs/intro",
           },
           {
-            title: "Community",
-            items: [
-              {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
-              },
-              {
-                label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
-              },
-              {
-                label: "Twitter",
-                href: "https://twitter.com/docusaurus",
-              },
-            ],
+            label: "Examples",
+            to: "/docs/examples",
           },
           {
-            title: "More",
-            items: [
-              {
-                label: "Blog",
-                to: "/blog",
-              },
-              {
-                label: "GitHub",
-                href: "https://github.com/facebook/docusaurus",
-              },
-            ],
+            label: "Getting Started",
+            to: "/docs/getting-started",
           },
+          {
+            label: "Tutorial",
+            to: "/docs/tutorial-fundamentals/fundamentals",
+          },
+          {
+            label: "Reference",
+            to: "/docs/reference",
+          },
+          //],
+          //},
+          // {
+          //   title: "Community",
+          //   items: [
+          //     {
+          //       label: "Stack Overflow",
+          //       href: "https://stackoverflow.com/questions/tagged/docusaurus",
+          //     },
+          //     {
+          //       label: "Discord",
+          //       href: "https://discordapp.com/invite/docusaurus",
+          //     },
+          //     {
+          //       label: "Twitter",
+          //       href: "https://twitter.com/docusaurus",
+          //     },
+          //   ],
+          // },
+          //   {
+          //     title: "More",
+          //     items: [
+          //       {
+          //         label: "Blog",
+          //         to: "/blog",
+          //       },
+          //       {
+          //         label: "GitHub",
+          //         href: "https://github.com/facebook/docusaurus",
+          //       },
+          //     ],
+          //   },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} m2c2kit. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,

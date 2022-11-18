@@ -1,0 +1,79 @@
+---
+sidebar_position: 11
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Scaling
+
+Adjust an entity's `scale` to make it larger or smaller.
+
+The `scale` property will adjust an entity's `width` and `height` by the same amount. Adjustments are multiplicative. For example, if you set `scale: 2`, the entity will be twice as large as its original size. A `scale: 1` would have no effect on its appearance. Children inherit scaling from their parents.
+
+Below, we create a circle with `circleOfRadius: 100`, which will be a circle of diameter 200 pixels and will occupy the entire width of the scene (which is 200 pixels wide). But, because it has `scale: 0.5`, it will take up only 1/2 of the scene's width. The child `Label` within the circle will also be scaled down.
+
+:::note
+
+If you want a circle with radius 100 scale of .5, why not simply create a circle with radius 50 and no scale? Later, we'll see it is useful to create an entity at one scale, but then change its scale in response to a user action.
+
+:::
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
+export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const circle = new Shape({
+    circleOfRadius: 100,
+    fillColor: WebColors.LightGreen,
+    position: { x: 100, y: 200 },
+    scale: .5
+});
+sceneOne.addChild(circle);
+ 
+const hiLabel = new Label( { text: "Hi!"});
+circle.addChild(hiLabel);`
+ 
+export const more = [
+{ description: <>See the example [without] the scaling applied.</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const circle = new Shape({
+    circleOfRadius: 100,
+    fillColor: WebColors.LightGreen,
+    position: { x: 100, y: 200 },
+});
+sceneOne.addChild(circle);
+ 
+const hiLabel = new Label( { text: "Hi!"});
+circle.addChild(hiLabel);`},
+{ description: <>Text at [large] scaling will remain sharp.</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const circle = new Shape({
+    circleOfRadius: 100,
+    fillColor: WebColors.LightGreen,
+    position: { x: 100, y: 200 },
+    scale: 20
+});
+sceneOne.addChild(circle);
+ 
+const hiLabel = new Label( { text: "Hi!"});
+circle.addChild(hiLabel);`},
+{ description: <>If you set the `scale` on a child, it will be applied in addition to any parent scaling. In [this] example, the parent has `&#123; scale: .5 &#125;` and the child has `&#123; scale: .4 &#125;`. The child `Label` will appear with a calculated scale of .20 (.5 * .4 = .20). That's tiny!</>,
+code:`const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const circle = new Shape({
+    circleOfRadius: 100,
+    fillColor: WebColors.LightGreen,
+    position: { x: 100, y: 200 },
+    scale: .5
+});
+sceneOne.addChild(circle);
+ 
+const hiLabel = new Label({
+    text: "THIS IS VERY SMALL TEXT!",
+    scale: .4
+});
+circle.addChild(hiLabel);`}]
+
+<CodeExample code={code} more={more} template={template}/>

@@ -1,0 +1,73 @@
+---
+sidebar_position: 10
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Hiding
+
+You can create an entity, but keep it hidden.
+
+You can set the `hidden` property on any entity. If it is `true`, the entity -- _and all its children_ -- will not display.
+
+Below, we create two labels, but you can see only one of them. The other label is hidden.
+
+:::note
+
+Why go through the trouble to create something but not show it? Later, we'll see it is useful to create a hidden entity, but then "unhide it" in response to a user action.
+
+:::
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
+export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const visibleLabel = new Label({
+    text: "You can see this!",
+    position: { x: 100, y: 100 }
+});
+sceneOne.addChild(visibleLabel);
+ 
+const invisibleLabel = new Label({
+    text: "But can you see this?",
+    position: { x: 100, y: 200 },
+    hidden: true
+});
+sceneOne.addChild(invisibleLabel);`
+ 
+export const more = [
+{ description: <>If you [set] `hidden: false` (or remove the `hidden` property from `invisibleLabel`), it will appear.</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const visibleLabel = new Label({
+    text: "You can see this!",
+    position: { x: 100, y: 100 }
+});
+sceneOne.addChild(visibleLabel);
+ 
+const invisibleLabel = new Label({
+    text: "But can you see this?",
+    position: { x: 100, y: 200 },
+    hidden: false
+});
+sceneOne.addChild(invisibleLabel);`},
+{ description: <>If a [parent] has `hidden: true`, its children will also not appear -- even if you set `hidden: false` on the child. This code shows an empty scene.</>,
+code:`const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const parentRect = new Shape({
+    rect: { size: { height: 80, width: 120 } },
+    strokeColor: WebColors.RebeccaPurple,
+    lineWidth: 2,
+    fillColor: WebColors.Transparent,
+    position: { x: 100, y: 100 },
+    hidden: true
+});
+sceneOne.addChild(parentRect);
+ 
+const childLabel = new Label({
+    text: "I will not display!",
+    hidden: false
+});
+parentRect.addChild(childLabel);`}]
+
+<CodeExample code={code} more={more} template={template}/>
