@@ -163,6 +163,60 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+
+  plugins: [
+    [
+      "./src/plugins/plugin-m2c2kit-copy-assets.js",
+      {
+        folders: [
+          {
+            source: "../packages/core/build-nobundler",
+            destination: "static/m2c2kit/lib",
+            extensions: [".js", ".ts"],
+          },
+          {
+            source: "../packages/addons/build-nobundler",
+            destination: "static/m2c2kit/lib",
+            extensions: [".js", ".ts"],
+          },
+          {
+            source: "../packages/survey/build-nobundler",
+            destination: "static/m2c2kit/lib",
+            extensions: [".js", ".ts"],
+          },
+          {
+            source: "../packages/core/assets",
+            destination: "static/m2c2kit/assets",
+          },
+          {
+            source: "../packages/core/dist",
+            destination: "static/m2c2kit/declarations/m2c2kit/core",
+            extensions: [".d.ts"],
+          },
+          {
+            source: "../packages/addons/dist",
+            destination: "static/m2c2kit/declarations/m2c2kit/addons",
+            extensions: [".d.ts"],
+          },
+          {
+            source: "../packages/survey/dist",
+            destination: "static/m2c2kit/declarations/m2c2kit/survey",
+            extensions: [".d.ts"],
+          },
+          {
+            source: "../node_modules/canvaskit-wasm/types",
+            destination: "static/m2c2kit/declarations/canvaskit-wasm",
+            extensions: [".d.ts"],
+          },
+          {
+            source: "../node_modules/@webgpu/types/dist",
+            destination: "static/m2c2kit/declarations/webgpu",
+            extensions: [".d.ts"],
+          },
+        ],
+      },
+    ],
+  ],
 };
 
 module.exports = config;

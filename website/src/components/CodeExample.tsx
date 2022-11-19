@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Playground from "@site/src/components/Playground";
+import useIsBrowser from "@docusaurus/useIsBrowser";
 
 export function Change(props) {
   return (
@@ -219,14 +220,22 @@ export default function CodeExample(props) {
     return value;
   }
 
-  const editorWidth = useMedia(
-    // Media queries
-    ["(min-width: 1450px)", "(min-width: 1250px)", "(min-width: 997px)"],
-    // widths (relates to above media queries by array index)
-    [900, 700, 525],
-    // Default width
-    525
-  );
+  /**
+   * useIsBrowser() is needed because useMedia() is not available on
+   * server-side rendering.
+   * Without this check, we can't create an optimized build ("npm run build").
+   * https://docusaurus.io/docs/advanced/ssg#useisbrowser
+   */
+  const editorWidth = useIsBrowser()
+    ? useMedia(
+        // Media queries
+        ["(min-width: 1450px)", "(min-width: 1250px)", "(min-width: 997px)"],
+        // widths (relates to above media queries by array index)
+        [900, 700, 525],
+        // Default width
+        525
+      )
+    : 900;
 
   return (
     <div>
