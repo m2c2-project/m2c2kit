@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Playground from "@site/src/components/Playground";
-import useIsBrowser from "@docusaurus/useIsBrowser";
+import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
 
 export function Change(props) {
   return (
@@ -19,7 +19,7 @@ export interface RichFormat {
 export function Explore(props) {
   return (
     props.examples?.length > 0 && (
-      <div>
+      <div style={{ marginTop: "1rem" }}>
         <b>Explore:</b>
         <br />
         <ul>
@@ -180,7 +180,6 @@ export function Console(props) {
 export default function CodeExample(props) {
   // see https://dilshankelsen.com/call-child-function-from-parent-component-in-react/
   const runCodeFunc = React.useRef(null);
-
   const [js, setJs] = React.useState(props.code);
   const changeCode = (newCode) => {
     setJs(newCode);
@@ -190,6 +189,16 @@ export default function CodeExample(props) {
   // see https://usehooks.com/useMedia/
   // Hook
   function useMedia(queries, values, defaultValue) {
+    /**
+     * ExecutionEnvironment is needed because useMedia() is not available on
+     * server-side rendering.
+     * Without this check, we can't create an optimized build ("npm run build").
+     * https://docusaurus.io/docs/docusaurus-core/#executionenvironment
+     */
+    if (!ExecutionEnvironment.canUseDOM) {
+      return 900;
+    }
+
     // Array containing a media query list for each query
     const mediaQueryLists = queries.map((q) => window.matchMedia(q));
     // Function that gets value based on matching media query
@@ -220,22 +229,14 @@ export default function CodeExample(props) {
     return value;
   }
 
-  /**
-   * useIsBrowser() is needed because useMedia() is not available on
-   * server-side rendering.
-   * Without this check, we can't create an optimized build ("npm run build").
-   * https://docusaurus.io/docs/advanced/ssg#useisbrowser
-   */
-  const editorWidth = useIsBrowser()
-    ? useMedia(
-        // Media queries
-        ["(min-width: 1450px)", "(min-width: 1250px)", "(min-width: 997px)"],
-        // widths (relates to above media queries by array index)
-        [900, 700, 525],
-        // Default width
-        525
-      )
-    : 900;
+  const editorWidth = useMedia(
+    // Media queries
+    ["(min-width: 1450px)", "(min-width: 1250px)", "(min-width: 997px)"],
+    // widths (relates to above media queries by array index)
+    [900, 700, 525],
+    // Default width
+    525
+  );
 
   return (
     <div>

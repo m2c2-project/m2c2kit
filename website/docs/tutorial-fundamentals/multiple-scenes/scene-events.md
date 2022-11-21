@@ -105,7 +105,7 @@ sceneTwo.onSetup(() => {
 });
  
 sceneTwo.onAppear(() => {
-    console.log("sceneOne onAppear event");
+    console.log("sceneTwo onAppear event");
     wordLabel.hidden = false;
 });
  

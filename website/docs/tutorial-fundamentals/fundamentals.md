@@ -8,9 +8,9 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Fundamentals
 
-This tutorial introduces you to the fundamentals of m2c2kit
+This tutorial introduces you to the fundamentals of m2c2kit:
 
-- Graphical "primitives" (shapes, labels, and other basic building blocks)
+- Graphical primitives (shapes, labels, and other basic building blocks)
 - How to interact with a user
 - How to generate data from a user's behavior
 
@@ -32,19 +32,21 @@ If you change something and it doesn't work, just reload the page to get back to
 
 ## Hello, world
 
+This example shows a simple label with the text "Hello, world." There's nothing else to it!
+
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
 export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.LightBlue });
 game.addScene(sceneOne);
 const helloLabel = new Label({ text: "Hello, world.", position: { x: 100, y: 200 } });
-sceneOne.addChild(helloLabel)`;
+sceneOne.addChild(helloLabel);`;
 
 export const more = [
 { description: <>Change the [background] from `WebColors.LightBlue` to `WebColors.PaleGreen`.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.PaleGreen });
 game.addScene(sceneOne);
 const helloLabel = new Label({ text: "Hello, world.", position: { x: 100, y: 200 } });
-sceneOne.addChild(helloLabel)`},
+sceneOne.addChild(helloLabel);`},
 { description: <>Change the [text] to `I love mobile research!`</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.LightBlue });
 game.addScene(sceneOne);

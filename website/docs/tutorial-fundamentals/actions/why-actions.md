@@ -5,9 +5,9 @@ hide_table_of_contents: true
 
 import CodeExample from '@site/src/components/CodeExample';
 
-# Why Actions
+# Why Actions?
 
-Actions are a powerful way to change the appearance of your entities.
+Actions are a powerful way to change the appearance of your entities and control the timing of your assessment.
 
 We've learned how to create multiple scenes, customize the appearance of entities, allow user interaction, and respond to that interaction. After we learn how to collect data (record scientifically relevant user behavior) in a later section, we'll have all the tools we need to create a fully functional assessment. Why do we need another concept, **Actions**?
 

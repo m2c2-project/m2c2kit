@@ -1,0 +1,60 @@
+---
+sidebar_position: 4
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Scale
+
+The `Scale` action the entity's scale over time.
+
+The options object for the `Scale` action has the following properties:
+
+- `scale`: The scale of the entity once the Action has completed. This is a ratio, so a value of 2 will double the size of the entity.
+- `duration`: The duration of the animation in milliseconds.
+- `runDuringTransition`: A boolean indicating whether the action should run during a transition. This is an optional property. If not specified, the default is `false`.
+
+The below example will scale the circle to 2.5 times its original size when the button is clicked.
+
+```js
+clickMeButton.onTapDown(() => {
+    circle.run(Action.scale({
+        scale: 2.5,
+        duration: 1000,
+    }));
+    console.log("Circle scale action has begun.");
+});
+```
+
+As in the `Move` [example](./move.md), repeated clicks will run the action again, but because the circle is already at its destination scale, there will be no visible change.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
+
+export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.Aquamarine });
+game.addScene(sceneOne);
+ 
+const clickMeButton = new Button({
+    text: "Click me",
+    size: { width: 100, height: 50 },
+    position: { x: 100, y: 350 },
+    isUserInteractionEnabled: true
+});
+sceneOne.addChild(clickMeButton);
+ 
+const circle = new Shape({
+    circleOfRadius: 40,
+    fillColor: WebColors.DodgerBlue,
+    position: { x: 100, y: 200 }
+});
+sceneOne.addChild(circle);
+ 
+clickMeButton.onTapDown(() => {
+    circle.run(Action.scale({
+        scale: 2.5,
+        duration: 1000,
+    }));
+    console.log("Circle scale action has begun.");
+});`
+
+<CodeExample code={code} template={template} console="true"/>
