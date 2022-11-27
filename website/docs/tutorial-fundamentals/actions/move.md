@@ -29,9 +29,11 @@ clickMeButton.onTapDown(() => {
 });`
 ```
 
-Note that the message, "Circle move action has begun," will be printed to the console *immediately* after the button is clicked and does not wait until the move animation is done. This is because the `run()` method is asynchronous -- it schedules the `Action.move()` Action to begin running in the background. Then the `run()` method finishes, and execution proceeds to the next line: `console.log()` to print the message.
+## Actions are asynchronous
 
-Repeated clicks will run the move action again, but because the circle is already at its destination of `{ x: 50, y: 50 }`, there will be no visible change.
+Note that the message, "Circle move action has begun," will be printed to the console *immediately* after the button is clicked and does not wait until the move animation is done. This is because Actions are asynchronous. The `run()` method schedules the `Action.move()` Action to begin running in the background, and then the `run()` method finishes becuase it does not wait for the Action to complete. Execution proceeds to the next line: `console.log()` prints the message.
+
+Once the circle has finished moving, repeated clicks will run the move action again, but because the circle is already at its destination of `{ x: 50, y: 50 }`, there will be no visible change.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
@@ -62,4 +64,49 @@ clickMeButton.onTapDown(() => {
     console.log("Circle move action has begun.");
 });`
 
-<CodeExample code={code} template={template} console="true"/>
+export const more = [
+{ description: <>Reload the example and try clicking "Click me" multiple times quickly. This will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the entity. You probably do not want this behavior. One way to [fix] this is to prevent the user from clicking the "Click me" button until the animation is complete: in the event handler for the button, set the <code>isUserInteractionEnabled</code> property of the button to <code>false</code>. This prevents additional clicks:
+<pre>
+  <code className="language-js">{`clickMeButton.onTapDown(() => {
+    clickMeButton.isUserInteractionEnabled = false;
+    circle.run(Action.move({
+        point: { x: 50, y: 50 },
+        duration: 1500,
+        easing: Easings.quadraticInOut
+    }));
+    console.log("Circle move action has begun.");
+});`}
+  </code>
+</pre>
+Now, the user can repeatedly hit the "Click me" button, but the animation will not be interrupted.
+</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.Aquamarine });
+game.addScene(sceneOne);
+ 
+const clickMeButton = new Button({
+    text: "Click me",
+    size: { width: 100, height: 50 },
+    position: { x: 100, y: 350 },
+    isUserInteractionEnabled: true
+});
+sceneOne.addChild(clickMeButton);
+ 
+const circle = new Shape({
+    circleOfRadius: 40,
+    fillColor: WebColors.DodgerBlue,
+    position: { x: 100, y: 250 }
+});
+sceneOne.addChild(circle);
+ 
+clickMeButton.onTapDown(() => {
+    clickMeButton.isUserInteractionEnabled = false;    
+    circle.run(Action.move({
+        point: { x: 50, y: 50 },
+        duration: 1500,
+        easing: Easings.quadraticInOut
+    }));
+    console.log("Circle move action has begun.");
+});`},
+];
+
+<CodeExample code={code} more={more} template={template} console="true"/>

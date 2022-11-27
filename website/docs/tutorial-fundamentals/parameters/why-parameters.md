@@ -1,0 +1,57 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Why Parameters?
+
+When researchers design assessments, they often need flexibility to vary how the assessment is presented. For example, a researcher might vary the number of stimuli, change the delay time between a fixation and recall phase, or increase the number of trials.
+
+If a separate assessment had to be created each time one of these characteristics changed, it would be very time-consuming. Instead, assessments can have configurable **parameters** to vary the characteristics of an assessment without having to reprogram it.
+
+## m2c2kit parameters are JSON Schema
+
+The parameters of an assessment are as important as the user data -- it's difficult to interpret the user behavior without knowing exactly what was presented to the user.
+
+Similar to how m2c2kit [defines the user data](../user-data/schemas.md), m2c2kit uses JSON Schema to define assessment parameters. The one addition is that m2c2kit parameters require an additional property, `default`, which is the value of the parameter to use if none is provided.
+
+## What should be parameters?
+
+It's up to you to decide what aspects of an assessment should be configurable parameters. Aspects of your assessment that researchers want to change should be parameters. For example, if an assessment invovles repeated trials, the number of trials should nearly always be a parameter.
+
+On the other hand, you create unnecessary complexity if you make every aspect of an assessment a parameter. For example, do the font colors for every `Label` need to be parameters? Probably not -- You Ain't Gonna Need It! ([YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it)).
+
+This is an excerpt of parameters from the Symbol Search assessment:
+
+```js
+left_correct_percent: {
+    default: 0.5,
+    type: "number",
+    description:
+        "Percentage of trials where the left pair is the correct answer. Number from 0 to 1.",
+},
+preparation_duration_ms: {
+    default: 3000,
+    type: "number",
+    description:
+        "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
+},
+after_preparation_transition_duration_ms: {
+    default: 500,
+    type: "number",
+    description:
+        "Duration, in milliseconds, of the slide in animation after the preparation phase.",
+},
+number_of_trials: {
+    default: 5,
+    type: "integer",
+    description: "How many trials to run.",
+},
+interstimulus_animation: {
+    default: true,
+    type: "boolean",
+    description: "Should new trials slide in from right to left?",
+}
+```

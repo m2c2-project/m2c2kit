@@ -15,7 +15,7 @@ Below, we create a circle with `circleOfRadius: 100`, which will be a circle of 
 
 :::note
 
-If you want a circle with radius 100 scale of .5, why not simply create a circle with radius 50 and no scale? Later, we'll see it is useful to create an entity at one scale, but then change its scale in response to a user action.
+If you want a circle with radius 100 scale of .5, why not simply create a circle with radius 50 and no scale? [Later](../interactivity/visual-responses.md), we'll see it is useful to create an entity at one scale, but then change its scale in response to a user action.
 
 :::
 

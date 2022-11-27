@@ -16,6 +16,8 @@ Go to the m2c2kit [playground](https://m2c2kit.z13.web.core.windows.net/) to tak
 
 Make sure you have installed [Node.js](https://nodejs.org) (version >=16). The CLI can quickly scaffold a demo app and serve it on your local machine.
 
+**CURRENTLY THE BUILD ON NPM IS OUTDATED, DO NOT USE THE BELOW**
+
 ```
 npm install -g @m2c2kit/cli
 m2 new myapp

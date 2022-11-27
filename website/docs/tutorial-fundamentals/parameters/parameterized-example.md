@@ -1,0 +1,270 @@
+---
+sidebar_position: 3
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Parameterized Example
+
+It's up to you to decide what aspects of an assessment should be configurable parameters. As an example, we'll extend a [previous example](../user-data/saving-data.md) and make the following into parameters:
+
+- The number of trials.
+- The button labels for the affirmative and negative responses.
+
+## Define the parameters with JSON Schema
+
+```js
+const defaultParameters = {
+    number_of_trials: {
+        type: "integer",
+        default: 3,
+        description: "How many trials to run.",
+    },
+    affirmative_text: {
+        type: "string",
+        default: "Yep!",
+        description: "Text for the affirmative button.",
+    },
+    negative_text: {
+        type: "string",
+        default: "Nope!",
+        description: "Text for the negative button.",
+    },
+};
+```
+
+We've named the variable for the parameters object as `defaultParameters`. You can name it anything you like, as long as you use the same name in the `parameters` property of the game options.
+
+## Assign the parameters in the game options
+
+```js
+const options = {
+    width: 200, height: 400,
+    fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+    trialSchema: demoSchema,
+    parameters: defaultParameters
+};
+```
+
+## Use Parameters in the Assessment
+
+The code gets the "Yes" button text from the parameter `affirmative_text`, not a hard-coded value:
+
+```js
+const yesButton = new Button({
+    text: game.getParameter("affirmative_text"),
+    size: { width: 75, height: 50 },
+    position: { x: 50, y: 200 },
+    isUserInteractionEnabled: true
+})
+```
+
+The button handlers check if the game's trial index is at the limit, `number_of_trials`, and if so, ends the assessment by advancing to an ending scene:
+
+```js
+yesButton.onTapDown(() => {
+    game.addTrialData("mobile_research_fun", true);
+    game.addTrialData("trial_index", game.trialIndex);
+    game.trialComplete();
+    if (game.trialIndex === game.getParameter("number_of_trials")) {
+        game.presentScene(endScene);
+    }
+});
+```
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+export const code = `class DocsDemo extends Game {
+    constructor() {
+ 
+        const defaultParameters = {
+            number_of_trials: {
+                type: "integer",
+                default: 3,
+                description: "How many trials to run.",
+            },
+            affirmative_text: {
+                type: "string",
+                default: "Yep!",
+                description: "Text for the affirmative button.",
+            },
+            negative_text: {
+                type: "string",
+                default: "Nope!",
+                description: "Text for the negative button.",
+            },
+        };
+ 
+        const demoSchema = {
+            trial_index: {
+                type: "integer",
+                description: "Index of the trial within this assessment, 0-based.",
+            },
+            mobile_research_fun: {
+                type: "boolean",
+                description: "User response to question about mobile research being fun.",
+            }
+        }
+ 
+        const options = {
+            width: 200, height: 400,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            trialSchema: demoSchema,
+            parameters: defaultParameters
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+        const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
+        game.addScene(sceneOne);
+        const questionLabel = new Label({
+            text: "Is mobile research fun?",
+            position: { x: 100, y: 100 }
+        });
+        sceneOne.addChild(questionLabel);
+ 
+        const yesButton = new Button({
+            text: game.getParameter("affirmative_text"),
+            size: { width: 75, height: 50 },
+            position: { x: 50, y: 200 },
+            isUserInteractionEnabled: true
+        })
+        sceneOne.addChild(yesButton);
+ 
+        const noButton = new Button({
+            text: game.getParameter("negative_text"),
+            size: { width: 75, height: 50 },
+            position: { x: 150, y: 200 },
+            isUserInteractionEnabled: true
+        })
+        sceneOne.addChild(noButton);
+ 
+        yesButton.onTapDown(() => {
+            game.addTrialData("mobile_research_fun", true);
+            game.addTrialData("trial_index", game.trialIndex);
+            game.trialComplete();
+            if (game.trialIndex === game.getParameter("number_of_trials")) {
+                game.presentScene(endScene);
+            }
+        });
+        noButton.onTapDown(() => {
+            game.addTrialData("mobile_research_fun", false);
+            game.addTrialData("trial_index", game.trialIndex);
+            game.trialComplete();
+            if (game.trialIndex === game.getParameter("number_of_trials")) {
+                game.presentScene(endScene);
+            }
+        });
+ 
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneText = new Label({
+            text: "You're done!",
+            position: { x: 100, y: 200 }
+        })
+        endScene.addChild(doneText);
+    }
+}`;
+
+export const more = [
+{ description: <>You will get an error if you try to get a game parameter that was not defined in the schema. For example, this example incorrectly tries to get the number of trials from a [non-existent parameter] called `maximum_trials`. It will throw an error when you click a response.</>,
+code: `class DocsDemo extends Game {
+    constructor() {
+ 
+        const defaultParameters = {
+            number_of_trials: {
+                type: "integer",
+                default: 3,
+                description: "How many trials to run.",
+            },
+            affirmative_text: {
+                type: "string",
+                default: "Yep!",
+                description: "Text for the affirmative button.",
+            },
+            negative_text: {
+                type: "string",
+                default: "Nope!",
+                description: "Text for the negative button.",
+            },
+        };
+ 
+        const demoSchema = {
+            trial_index: {
+                type: "integer",
+                description: "Index of the trial within this assessment, 0-based.",
+            },
+            mobile_research_fun: {
+                type: "boolean",
+                description: "User response to question about mobile research being fun.",
+            }
+        }
+ 
+        const options = {
+            width: 200, height: 400,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            trialSchema: demoSchema,
+            parameters: defaultParameters
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+        const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
+        game.addScene(sceneOne);
+        const questionLabel = new Label({
+            text: "Is mobile research fun?",
+            position: { x: 100, y: 100 }
+        });
+        sceneOne.addChild(questionLabel);
+ 
+        const yesButton = new Button({
+            text: game.getParameter("affirmative_text"),
+            size: { width: 75, height: 50 },
+            position: { x: 50, y: 200 },
+            isUserInteractionEnabled: true
+        })
+        sceneOne.addChild(yesButton);
+ 
+        const noButton = new Button({
+            text: game.getParameter("negative_text"),
+            size: { width: 75, height: 50 },
+            position: { x: 150, y: 200 },
+            isUserInteractionEnabled: true
+        })
+        sceneOne.addChild(noButton);
+ 
+        yesButton.onTapDown(() => {
+            game.addTrialData("mobile_research_fun", true);
+            game.addTrialData("trial_index", game.trialIndex);
+            game.trialComplete();
+            if (game.trialIndex === game.getParameter("number_of_trials")) {
+                game.presentScene(endScene);
+            }
+        });
+        noButton.onTapDown(() => {
+            game.addTrialData("mobile_research_fun", false);
+            game.addTrialData("trial_index", game.trialIndex);
+            game.trialComplete();
+            if (game.trialIndex === game.getParameter("maximum_trials")) {
+                game.presentScene(endScene);
+            }
+        });
+ 
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneText = new Label({
+            text: "You're done!",
+            position: { x: 100, y: 200 }
+        })
+        endScene.addChild(doneText);
+    }
+}`},];
+
+<CodeExample code={code} template={template} more={more} console={"true"}/>
+
+[^1]: For the tutorials, however, *do not* change the name! This tutorial website engine expect the class name to be `DocsDemo`, and it will not work if you rename it.
+

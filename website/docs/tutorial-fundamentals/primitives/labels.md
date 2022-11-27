@@ -23,7 +23,7 @@ const helloLabel = new Label({ text: "Hello, world.", position: { x: 100, y: 200
 sceneOne.addChild(helloLabel);`
 
 export const more = [
-{ description: <>[Move] the label further down the scene.</>,
+{ description: <>[Move] the label further down the scene by changing the value of `y` on the label's `position`.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
 const helloLabel = new Label({ text: "Hello, world.", position: { x: 100, y: 350 } });
@@ -41,9 +41,11 @@ sceneOne.addChild(secondLabel);`},
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
 const helloLabel = new Label({
-    text: "Hello, world. This is now a longer label wrapped to a narrow width.",
+    text: "I'm m2c2kit.",
     position: { x: 100, y: 200 },
-    preferredMaxLayoutWidth: 50,
+    fontColor: WebColors.Red,
+    backgroundColor: WebColors.Yellow,
+    fontSize: 32
 });
 sceneOne.addChild(helloLabel);`},
 { description: <>By default, long labels will wrap to fit the width of the scene. You can [change] this behavior by setting `preferredMaxLayoutWidth`.</>,

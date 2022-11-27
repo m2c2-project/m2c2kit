@@ -15,7 +15,35 @@ The example looks a little different because it exposes more boilerplate code fo
 
 :::
 
-TODO: Add a description of how to load images.
+## Loading the image
+
+The image for the sprite must be loaded before the sprite is created. The image is specified in the `images` property of the game options. Each image must have the following:
+
+- `imageName` - The name of the image. This is used to refer to the image in the `Sprite` constructor.
+- `height` - The height of the image in pixels. This is not the height of the image within the file, but the height as it will appear in the game.
+- `width` - The width of the image in pixels. This is not the width of the image within the file, but the width as it will appear in the game.
+
+In addition, the each image must have *one* of the following:
+
+- `url` - The URL of the image file. This can be a location on the internet or a local file on the server hosting your assessment.
+- `svgString` - The SVG string for the image. This is a string that contains the SVG markup for the image, which begins with `<SVG>` and ends with `</SVG>`
+
+:::info
+
+Because this tutorial runs in the browser, you cannot alter the image assets on the server hosting the assessment. The URL of `assets/docs/img/blue-marble.jpg` has been set up beforehand with this image. Other local file URLs will not work. You can, of course, edit the tutorial to use any image URL on the internet, e.g., `https://via.placeholder.com/150.jpg`
+
+:::
+
+## Creating the Sprite
+
+To create the `Sprite`, you pass in the name of the image that you used in the game options. Like a `Shape` or `Label`, you can set the position of the `Sprite`:
+
+```js
+const earthSprite = new Sprite({
+    imageName: "earth",
+    position: { x: 100, y: 200 }
+});
+```
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 export const code = `class DocsDemo extends Game {

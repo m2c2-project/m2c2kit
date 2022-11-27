@@ -52,15 +52,19 @@ goButton.onTapDown(() => {
 });`;
 
 export const more = [
-{ description: <>Try clicking "GO" multiple times quickly. This will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the entity. You probably do not want this behavior. One way to [fix] this is to prevent the user from clicking the "GO" button until all the animations are complete:
+{ description: <>Clicking "GO" multiple times quickly will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the entity. To fix this, to the `Sequence` Action, add Actions [before and after] the animations to disable and re-enable the button:
 <ul>
-<li>When the "GO" button is clicked, set the <code>isUserInteractionEnabled</code> property of the button to <code>false</code>. This prevents additional clicks.</li>
-<li>Add an additional Action to the sequence: a <code>Custom</code> Action that will set the <code>isUserInteractionEnabled</code> property of the button back to <code>true</code> so it again responds to clicks, now that the animations are complete.</li>
+<li>A <code>Custom</code> Action sets the <code>isUserInteractionEnabled</code> property of the button to <code>false</code> before the animations begin. This prevents additional clicks.</li>
+<li>When the animations are complete, a <code>Custom</code> Action sets the <code>isUserInteractionEnabled</code> property of the button to <code>true</code> so it again responds to clicks.</li>
 </ul>
 <pre>
   <code className="language-js">{`goButton.onTapDown(() => {
-    goButton.isUserInteractionEnabled = false;
     moveLabel.run(Action.sequence([
+        Action.custom({
+            callback: () => {
+                goButton.isUserInteractionEnabled = false;
+            }
+        })        
         Action.move({ point: { x: 100, y: 50 }, duration: 500 }),
         Action.wait({ duration: 250 }),
         Action.move({ point: { x: 100, y: 300 }, duration: 500 }),
@@ -90,8 +94,12 @@ const goButton = new Button({
 sceneOne.addChild(goButton);
  
 goButton.onTapDown(() => {
-    goButton.isUserInteractionEnabled = false;
     moveLabel.run(Action.sequence([
+        Action.custom({
+            callback: () => {
+                goButton.isUserInteractionEnabled = false;
+            }
+        }),
         Action.move({ point: { x: 100, y: 50 }, duration: 500 }),
         Action.wait({ duration: 250 }),
         Action.move({ point: { x: 100, y: 300 }, duration: 500 }),

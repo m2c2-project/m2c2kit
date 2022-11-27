@@ -15,7 +15,7 @@ Below, we create two labels, but you can see only one of them. The other label i
 
 :::note
 
-Why go through the trouble to create something but not show it? Later, we'll see it is useful to create a hidden entity, but then "unhide it" in response to a user action.
+Why go through the trouble to create something but not show it? [Later](../interactivity/visual-responses.md), we'll see it is useful to create a hidden entity, but then "unhide it" in response to a user action.
 
 :::
 

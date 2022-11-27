@@ -1,0 +1,109 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Timer Considerations
+
+When using transitions, it is very important to consider when to begin the timer.
+
+## `OnAppear` or `OnSetup`?
+
+In the [previous example](./timing-user-behavior.md), the code to begin the timer is in the `sceneTwo.onAppear()` event handler, which happens when the second screen has fully slid into view and stopped moving. With practice, you can probably achieve a response time of less than 300 or 400 milliseconds, because you know where the "CLICK ME!" button will appear.
+
+On the other hand, consider if the code to begin the timer is placed in the `sceneTwo.onSetup()` event handler:
+
+```js
+sceneTwo.onSetup(() => {
+    backButton.hidden = true;
+    clickMeButton.hidden = true;
+    console.log("sceneTwo onSetup event");
+    clickMeButton.hidden = false;
+    clickMeButton.isUserInteractionEnabled = true;
+    Timer.start("rt");    
+});
+```
+
+Compare your performance here versus the [previous example](./timing-user-behavior.md).
+
+With this code, it will be impossible to achieve a response time of less than 500 milliseconds. The timer begins before the second scene has finished its transition, which has duration 500 milliseconds. Even if the user clicks the "CLICK ME!" button as it is sliding into view, it will not accept interactions until the transition is complete.
+
+:::tip
+
+In most situations, to time a user behavior that starts with a new scene, the code to start the timer should be in the `OnAppear` event handler.
+
+:::
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
+
+export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const beginButton = new Button({
+    text: "Begin",
+    backgroundColor: WebColors.Chocolate,
+    size: { width: 150, height: 50 },
+    position: { x: 100, y: 325 },
+    isUserInteractionEnabled: true
+});
+sceneOne.addChild(beginButton);
+ 
+beginButton.onTapDown(() => {
+    game.presentScene(sceneTwo,
+        Transition.slide({
+            direction: TransitionDirection.Left,
+            duration: 500,
+            easing: Easings.quadraticInOut
+        }));
+});
+ 
+const sceneTwo = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneTwo);
+ 
+sceneTwo.onSetup(() => {
+    backButton.hidden = true;
+    clickMeButton.hidden = true;
+    console.log("sceneTwo onSetup event");
+    clickMeButton.hidden = false;
+    clickMeButton.isUserInteractionEnabled = true;
+    Timer.start("rt");    
+});
+ 
+const clickMeButton = new Button({
+    text: 'CLICK ME!',
+    backgroundColor: WebColors.Green,
+    size: { width: 150, height: 100 },
+    position: { x: 100, y: 100 },
+    isUserInteractionEnabled: true,
+    hidden: false
+});
+sceneTwo.addChild(clickMeButton);
+clickMeButton.onTapDown(() => {
+    clickMeButton.isUserInteractionEnabled = false;
+    const clickDurationMs = Timer.elapsed("rt");
+    Timer.remove("rt");
+    console.log("You took " + clickDurationMs + " milliseconds");
+    backButton.hidden = false;
+});
+ 
+const backButton = new Button({
+    text: 'Back',
+    backgroundColor: WebColors.PaleVioletRed,
+    size: { width: 150, height: 50 },
+    position: { x: 100, y: 325 },
+    isUserInteractionEnabled: true,
+    hidden: true
+});
+sceneTwo.addChild(backButton);
+ 
+backButton.onTapDown(() => {
+    game.presentScene(sceneOne,
+        Transition.slide({
+            direction: TransitionDirection.Right,
+            duration: 500, easing: Easings.quadraticInOut
+        }));
+});
+`;
+
+<CodeExample code={code} template={template} console={"true"}/>

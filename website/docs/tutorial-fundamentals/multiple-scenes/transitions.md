@@ -22,7 +22,7 @@ The `presentScene()` method takes an optional second argument that specifies the
 
 - `direction` - the direction the new scene slides towards. It can be `TransitionDirection.Left`, `TransitionDirection.Right`, `TransitionDirection.Up`, or `TransitionDirection.Down`. This is required.
 - `duration` - how long it takes for the transition to complete, in milliseconds. This is required.
-- `easing` - the easing function to use. This is optional. We'll learn about this later.
+- `easing` - the easing function to use. This is optional. We'll learn about this [later](./easings.md).
 
 Below, the transition from the first to the second screen is an animation that slides in the new screen from right to left, which is `direction: TransitionDirection.Left`. The animation takes 750 milliseconds to occur.
 

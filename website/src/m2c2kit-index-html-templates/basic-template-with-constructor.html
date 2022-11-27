@@ -153,13 +153,13 @@
             }
           },
           onActivityResults: (ev) => {
-            if (ev.target.type === ActivityType.Game) {
-              console.log(`✅ trial complete:`);
-            } else if (ev.target.type === ActivityType.Survey) {
-              console.log(`✅ survey response:`);
-            }
-            console.log("  newData: " + JSON.stringify(ev.newData));
-            console.log("  data: " + JSON.stringify(ev.data));
+            // if (ev.target.type === ActivityType.Game) {
+            //   console.log(`✅ trial complete:`);
+            // } else if (ev.target.type === ActivityType.Survey) {
+            //   console.log(`✅ survey response:`);
+            // }
+            console.log("Trial Data: " + JSON.stringify(ev.newData) + "\n");
+            //console.log("  data: " + JSON.stringify(ev.data));
           },
         },
         sessionCallbacks: {

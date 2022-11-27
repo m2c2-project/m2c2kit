@@ -9,7 +9,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Events have properties that describe the event.
 
-In the event handler code for an event, you know what event has occured. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the entity. But what if you want to know where the user tapped down?
+In the event handler code for an event, you know what event has occured. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the entity. But what if you need to know where the user tapped down?
 
 The Tap and Pointer events all contain these additional properties:
 

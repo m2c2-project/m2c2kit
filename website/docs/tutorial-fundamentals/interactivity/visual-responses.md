@@ -20,13 +20,13 @@ How you respond to user events is limited only by the requirements of your asses
 
 ## Place code in the event handler to respond to user events
 
-The below example shows a simple instruction ("Click the square"). When the user taps the square, the square's event handler executes code: a hello response appears, along with the cumulative number of hellos. The hello text font size increases with each click, and the text moves up the scene. After three clicks, no more are allowed: the square is hidden, and a final message is shown.
+The below example shows a simple instruction ("Click the square"). When the user taps the square, the square's event handler executes code: a hello response appears, along with the cumulative number of hellos. The hello label scale increases with each click, and the text moves up the scene. After three clicks, no more are allowed: the square is hidden, and a final message is shown.
 
 The logic for handling the user's tap is in the `onTapDown()` event handler:
 
 ```js
 square.onTapDown(() => {
-    if (helloCount == 3) {
+    if (helloCount === 3) {
       square.hidden = true;
       instructionsLabel.hidden = true;
       tooManyLabel.hidden = false;
@@ -34,7 +34,7 @@ square.onTapDown(() => {
 
     helloCount++;
     helloLabel.text = "Hello #" + helloCount;
-    helloLabel.fontSize = helloLabel.fontSize * 1.4;
+    helloLabel.scale = helloLabel.scale * 1.4;
     helloLabel.position.y = helloLabel.position.y - 10;
 });
 ```
@@ -84,13 +84,13 @@ square.onTapDown(() => {
  
     helloCount++;
     helloLabel.text = "Hello #" + helloCount;
-    helloLabel.fontSize = helloLabel.fontSize * 1.4;
+    helloLabel.scale = helloLabel.scale * 1.4;
     helloLabel.position.y = helloLabel.position.y - 10;
 });
 `;
 
 export const more = [
-{ description: <>A more advanced example demonstrates event properties. It uses a [single] event handler, called `buttonEventHandler()` for different buttons and events. It examines the event's `type` property to know which event occured and the `target` property to know which button had the event.</>,
+{ description: <>This example uses a [single] event handler and the event's `type` property to modify a label's text.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.DeepSkyBlue });
 game.addScene(sceneOne);
 const buttonOne = new Button({

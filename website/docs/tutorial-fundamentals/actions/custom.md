@@ -16,7 +16,7 @@ The options object for the `Custom` action has the following properties:
 
 :::tip
 
-To be precise, the `callback` property is a function. You may not be familiar with the **arrow function** syntax, which looks like `() => { ... }` and might seem strange. Don't worry too much about it -- just put the code you want to execute inside the curly braces. You can read more about arrow functions [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions).
+To be precise, the `callback` property is a [callback function](https://en.wikipedia.org/wiki/Callback_(computer_programming)). You may not be familiar with the **arrow function** syntax, which looks like `() => { ... }` and might seem strange. Don't worry too much about it -- just put the code you want to execute inside the curly braces. You can read more about arrow functions [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions).
 
 :::
 

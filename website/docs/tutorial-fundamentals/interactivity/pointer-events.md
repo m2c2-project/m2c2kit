@@ -7,13 +7,17 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Pointer Events
 
-TODO: explain
-
 :::note
 
 Pointer events are more "low level" than Tap events. You can stick with Tap events until you are doing more advanced things.
 
 :::
+
+A `PointerDown` event occurs under the same conditions as a `TapDown` event. A `PointerUp` event, however, occurs whenever a touch or click is released within the bounds of the entity, *even if the touch or click was started outside the bounds of the entity*.
+
+A `PointerMove` event differs for mouse and touch. For mouse, the event occurs whenever the mouse pointer moves over the entity; it does not matter if a mouse button is pressed or not. For touch, the event occurs whenever the touch moves.
+
+`PointerMove` generates an event for every pixel the mouse or touch moves. This can be a lot of events. The example displays the timestamp of the event, so you can see each unique event.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
