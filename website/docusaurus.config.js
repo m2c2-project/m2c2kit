@@ -109,7 +109,7 @@ const config = {
           },
           {
             label: "Examples",
-            to: "/docs/examples",
+            to: "/docs/category/examples",
           },
           {
             label: "Getting Started",
@@ -212,6 +212,38 @@ const config = {
             source: "../node_modules/@webgpu/types/dist",
             destination: "static/m2c2kit/declarations/webgpu",
             extensions: [".d.ts"],
+          },
+          {
+            source: "../packages/assessment-symbol-search/build-nobundler",
+            destination: "static/m2c2kit/lib",
+          },
+          {
+            source: "../packages/assessment-symbol-search/assets",
+            destination: "static/m2c2kit/assets",
+          },
+          {
+            source: "../packages/assessment-color-dots/build-nobundler",
+            destination: "static/m2c2kit/lib",
+          },
+          {
+            source: "../packages/assessment-color-dots/assets",
+            destination: "static/m2c2kit/assets",
+          },
+          {
+            source: "../packages/assessment-color-shapes/build-nobundler",
+            destination: "static/m2c2kit/lib",
+          },
+          {
+            source: "../packages/assessment-color-shapes/assets",
+            destination: "static/m2c2kit/assets",
+          },
+          {
+            source: "../packages/assessment-grid-memory/build-nobundler",
+            destination: "static/m2c2kit/lib",
+          },
+          {
+            source: "../packages/assessment-grid-memory/assets",
+            destination: "static/m2c2kit/assets",
           },
         ],
       },

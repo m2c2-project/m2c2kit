@@ -241,7 +241,7 @@ code: `class DocsDemo extends Game {
             game.addTrialData("mobile_research_fun", true);
             game.addTrialData("trial_index", game.trialIndex);
             game.trialComplete();
-            if (game.trialIndex === game.getParameter("number_of_trials")) {
+            if (game.trialIndex === game.getParameter("maximum_trials")) {
                 game.presentScene(endScene);
             }
         });

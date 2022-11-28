@@ -1,5 +1,13 @@
 import React from "react";
 
-export default function SimpleIFrame({ srcDoc, title }) {
-  return <iframe srcDoc={srcDoc} title={title} height="400" width="200" />;
+export default function SimpleIFrame(props) {
+  return (
+    <iframe
+      srcDoc={props.srcDoc ?? ""}
+      title={props.title ?? ""}
+      height={props.height ?? "400"}
+      width={props.width ?? "200"}
+      style={{ border: props.border }}
+    />
+  );
 }
