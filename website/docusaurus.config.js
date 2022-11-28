@@ -121,7 +121,7 @@ const config = {
           },
           {
             label: "Reference",
-            to: "/docs/reference",
+            to: "/docs/category/api-reference",
           },
           //],
           //},
@@ -165,6 +165,34 @@ const config = {
     }),
 
   plugins: [
+    [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "api-core",
+        entryPoints: ["../packages/core/src/index.ts"],
+        tsconfig: "../packages/core/tsconfig.json",
+        out: "reference/api-core",
+        sidebar: {
+          categoryLabel: "@m2c2kit/core",
+          position: 0,
+          fullNames: true,
+        },
+      },
+    ],
+    [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "api-addons",
+        entryPoints: ["../packages/addons/src/index.ts"],
+        tsconfig: "../packages/addons/tsconfig.json",
+        out: "reference/api-addons",
+        sidebar: {
+          categoryLabel: "@m2c2kit/addons",
+          position: 1,
+          fullNames: true,
+        },
+      },
+    ],
     [
       "./src/plugins/plugin-m2c2kit-copy-assets.js",
       {
