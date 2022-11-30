@@ -11,14 +11,8 @@ The `Custom` action executes code you specify.
 
 The options object for the `Custom` action has the following properties:
 
-- `callback`: The code to execute.
+- `callback`: The code to execute, in the form of a [callback function](../interactivity/interaction-events.md).
 - `runDuringTransition`: A boolean indicating whether the action should run during a transition. This is an optional property. If not specified, the default is `false`.
-
-:::tip
-
-To be precise, the `callback` property is a [callback function](https://en.wikipedia.org/wiki/Callback_(computer_programming)). You may not be familiar with the **arrow function** syntax, which looks like `() => { ... }` and might seem strange. Don't worry too much about it -- just put the code you want to execute inside the curly braces. You can read more about arrow functions [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions).
-
-:::
 
 When the button is clicked, the below example prints an "Abracadabra" message to the console and then hides the circle by setting its `hidden` property to `true`.
 

@@ -18,9 +18,19 @@ These are the kinds of problems that the `Action` solves.
 
 ## Actions for animation
 
-Animation is moving an entity from one position to another. Most devices update their screen 60 times per second; each update draws a [frame](https://en.wikipedia.org/wiki/Film_frame). To make it appear that an entity is smoothly moving across the screen, you simply update it's position a little bit when you draw the next frame. In many videogame libraries, there is a concept of a [game loop](https://en.wikipedia.org/wiki/Video_game_programming#Game_structure), which executes 60 times per second. To move the entity, you update its position 60 times per second. You need to keep track of the entity's current position, the position it's moving to, and the amount of time it should take to get there. You also need to keep track of how much time has passed since the entity started moving. This is a lot of work!
+Animation is moving an entity from one position to another. Actions make it easy to animate entities. Simply create an action with `Action.move()` that describes the animation.
 
-Actions make it easy to animate entities. Simply create an action with `Action.move()` that describes the animation. It will take care of the details for you without a game loop.[^1]
+<details>
+  <summary>Where is the game loop?</summary>
+  <p>Each time a device updates its screen, it draws a <a href="https://en.wikipedia.org/wiki/Film_frame">frame</a>. To make it appear that an entity is smoothly moving across the screen, you simply update it's position a little bit when you draw the next frame.
+  </p>
+
+  <p>In many videogame libraries, there is a concept of a <a href="https://en.wikipedia.org/wiki/Video_game_programming#Game_structure">game loop</a>, which usually executes 60 times per second because most devices update their screen 60 times per second. To move the entity, you adjust its position 60 times per second. You need to keep track of the entity's current position, the position it's moving to, and the amount of time it should take to get there. You also need to keep track of how much time has passed since the entity started moving. This is a lot of work!
+  </p>
+
+  <p>Internally, m2c2kit runs a game loop, but the library abstracts this away from the programmer through the <code>Move</code> Action.
+  </p>
+</details>
 
 ## Actions for timing
 
@@ -32,7 +42,7 @@ To implement reliable timing, creation an action with `Action.wait()`.
 
 If Actions seem confusing, just focus on the action for timing: `Action.wait()`. This will be used in nearly every assessment because experiments require certain stimuli to be shown at specific times.
 
-Graphical Actions, like `Action.move()`, give the assessment's UI a modern feel and polish, but aren't necessary.[^2]
+Graphical Actions, like `Action.move()`, give the assessment's UI a modern feel and polish, but aren't necessary.[^1]
 
 :::
 
@@ -77,5 +87,4 @@ square.onTapDown(() => {
 
 <CodeExample code={code} template={template} console="true"/>
 
-[^1]: Internally, m2c2kit runs a game loop, but the library abstracts this away from the programmer.
-[^2]: Rarely, you might need animation Actions if your assessment requires complex graphical movements.
+[^1]: Rarely, you might need animation Actions if your assessment requires complex graphical movements.

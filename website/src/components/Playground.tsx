@@ -45,7 +45,14 @@ export default function Playground(props) {
           flexWrap: "wrap",
         }}
       >
-        <SimpleIFrame key={rnd} srcDoc={srcDoc} title="hi" />
+        <SimpleIFrame
+          key={rnd}
+          srcDoc={srcDoc}
+          title=""
+          width={props.iframeWidth}
+          height={props.iframeHeight}
+          border={props.iframeBorder}
+        />
         <MonacoEditor
           updateCode={updateCode}
           runCode={runCode}

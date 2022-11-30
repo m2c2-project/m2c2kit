@@ -246,6 +246,9 @@ export default function CodeExample(props) {
           template={props.template}
           runCodeFunc={runCodeFunc}
           editorWidth={editorWidth}
+          iframeWidth={props.iframeWidth}
+          iframeHeight={props.iframeHeight}
+          iframeBorder={props.iframeBorder}
         />
         {props.console === "true" && <Console width="100%" />}
       </div>

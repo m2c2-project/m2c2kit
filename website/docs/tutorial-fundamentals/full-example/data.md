@@ -1,0 +1,325 @@
+---
+sidebar_position: 5
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Saving Data
+
+## Schema
+
+All data must be defined in the schema. We use this schema:
+
+```js
+const schema = {
+    trial_index: {
+        type: "integer",
+        description: "Index of the trial within this assessment, 0-based.",
+    },
+    congruent_stimulus: {
+        type: "boolean",
+        description: "Did the word displayed on the screen match its font color?",
+    },
+    response_time_ms: {
+        type: "number",
+        description: "Time in milliseconds between when the word appears and the user taps a response button.",
+    },
+    response_correct: {
+        type: "boolean",
+        description: "Was the user's response correct? (Did the button response match the font color).",
+    }      
+};
+```
+
+## Timing the user
+
+How long the user takes to respond is important. This response time will be the duration from when the word appears until when the user taps a response button. We start a timer in the same Action in which we make the word visible and the response buttons enabled.
+
+```js
+Action.custom( {callback: () => {
+    redButton.hidden = false;
+    greenButton.hidden = false;
+    blueButton.hidden = false;
+    wordLabel.text = trialConfigurations[game.trialIndex].word;
+    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+    redButton.isUserInteractionEnabled = true;
+    greenButton.isUserInteractionEnabled = true;
+    blueButton.isUserInteractionEnabled = true;
+    // highlight-start
+    Timer.start("rt");
+    // highlight-end
+}})
+```
+
+We stop the timer in the `handleResponse` event handler for the button taps, and store the elapsed time in the variable `responseTime`.
+
+```js
+function handleResponse(buttonColor) {
+    Timer.stop("rt");
+    const responseTime = Timer.elapsed("rt");
+    ...
+```
+
+## Saving data for the trial
+
+Because the button tap is the end of all the user's behavior for this trial, at this point we have all the data on this trial. In the `handleResponse` event handler, save the trial data for each of the measurements in the schema.
+
+```js
+function handleResponse(buttonColor) {
+    Timer.stop("rt");
+    const responseTime = Timer.elapsed("rt");
+    game.addTrialData("trial_index", game.trialIndex);
+    game.addTrialData("response_time_ms", responseTime);
+    Timer.remove("rt");
+    game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
+    if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
+        game.addTrialData("response_correct", true);
+    } else {
+        game.addTrialData("response_correct", false);
+    }
+    ...
+```
+
+## Progress so far
+
+The assessment now saves data for each trial. When the user completes the assessment, however, the end scene does not yet display the feedback results. 
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+ 
+        const schema = {
+            trial_index: {
+                type: "integer",
+                description: "Index of the trial within this assessment, 0-based.",
+            },
+            congruent_stimulus: {
+                type: "boolean",
+                description: "Did the word displayed on the screen match its font color?",
+            },
+            response_time_ms: {
+                type: "number",
+                description: "Time in milliseconds between when the word appears and the user taps a response button.",
+            },
+            response_correct: {
+                type: "boolean",
+                description: "Was the user's response correct? (Did the button response match the font color).",
+            }      
+        };
+  
+        const options = {
+            width: 400, height: 800,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            images: [{
+                imageName: "stroop-screenshot",
+                height: 336, width: 384, url: "assets/docs/img/stroop.png"
+            }],            
+            trialSchema: schema,
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+     
+        const wordColors = [
+            {text: "Red", color: WebColors.Red},
+            {text: "Green", color: WebColors.Green},
+            {text: "Blue", color: WebColors.Blue}
+        ];
+        const numberOfTrials = 3;
+        const numberOfCongruentTrials = 2;
+        const trialConfigurations = [];
+        const congruentIndexes = RandomDraws.FromRangeWithoutReplacement(numberOfCongruentTrials, 0, numberOfTrials - 1);
+ 
+        for (let i = 0; i < numberOfTrials; i++) {
+            const wordIndex = RandomDraws.SingleFromRange(0, wordColors.length - 1);
+            const text = wordColors[wordIndex].text;
+            let isCongruent;
+            let textColor;
+            let colorAsString;
+            if (congruentIndexes.includes(i)) {
+                textColor = wordColors[wordIndex].color;
+                colorAsString = wordColors[wordIndex].text;
+                isCongruent = true;
+            } else {
+                const colorOptions = wordColors.filter(wc => wc.text != text);
+                const colorIndex = RandomDraws.SingleFromRange(0, colorOptions.length - 1);
+                textColor = colorOptions[colorIndex].color;
+                colorAsString = colorOptions[colorIndex].text;
+                isCongruent = false;
+            }
+            const trial = { word: text, color: textColor, colorString: colorAsString, congruent: isCongruent};
+            trialConfigurations.push(trial);            
+        }
+        console.log(JSON.stringify(trialConfigurations));
+  
+        // ========================================
+        // SCENES: instructions
+        const instructionsScenes = Instructions.Create({
+            instructionScenes: [
+                {
+                    title: "Stroop Assessment",
+                    text: "Select the color that matches the font color. This is commonly known as the Stroop task.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                },
+                {
+                    title: "Stroop Assessment",
+                    text: "For example, the word Red is colored Blue, so the correct response is Blue.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                    imageName: "stroop-screenshot",
+                    imageAboveText: true,
+                    textVerticalBias: .65,                   
+                    /**
+                     * We override the next button's default text and color
+                     */
+                    nextButtonText: "START",
+                    nextButtonBackgroundColor: WebColors.Green,
+                },
+            ],
+        });
+        game.addScenes(instructionsScenes);
+ 
+        // ========================================
+        // SCENE: presentation 
+        const presentationScene = new Scene();
+        game.addScene(presentationScene);
+ 
+        const fixationCross = new Label({
+            text: "+",
+            color: WebColors.Black,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(fixationCross);
+ 
+        const redButton = new Button({
+            text: "Red",
+            position: { x: 100, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(redButton);
+ 
+        const greenButton = new Button({
+            text: "Green",
+            position: { x: 200, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(greenButton);
+ 
+        const blueButton = new Button({
+            text: "Blue",
+            position: { x: 300, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(blueButton);
+ 
+        const wordLabel = new Label({
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+        });
+        presentationScene.addChild(wordLabel);
+ 
+        presentationScene.onAppear(() => {            
+            fixationCross.run(Action.sequence([
+                Action.wait({duration: 1000}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = false;
+                }}),
+                Action.wait({duration: 1000}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = true;
+                }}),
+                Action.wait({duration: 1000}),                
+                Action.custom( {callback: () => {
+                    redButton.hidden = false;
+                    greenButton.hidden = false;
+                    blueButton.hidden = false;
+                    wordLabel.text = trialConfigurations[game.trialIndex].word;
+                    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+                    redButton.isUserInteractionEnabled = true;
+                    greenButton.isUserInteractionEnabled = true;
+                    blueButton.isUserInteractionEnabled = true; 
+                    Timer.start("rt");
+                }}),
+            ]));
+        });
+ 
+        function handleResponse(buttonColor) {
+            Timer.stop("rt");
+            const responseTime = Timer.elapsed("rt");
+            game.addTrialData("trial_index", game.trialIndex);
+            game.addTrialData("response_time_ms", responseTime);
+            Timer.remove("rt");
+            game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
+            if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
+                game.addTrialData("response_correct", true);
+            } else {
+                game.addTrialData("response_correct", false);
+            }
+ 
+            redButton.hidden = true;
+            greenButton.hidden = true;
+            blueButton.hidden = true;
+            wordLabel.text = "";
+            redButton.isUserInteractionEnabled = false;
+            greenButton.isUserInteractionEnabled = false;
+            blueButton.isUserInteractionEnabled = false;
+            game.trialComplete();
+            if (game.trialIndex === numberOfTrials) {
+                game.presentScene(endScene, Transition.slide({
+                    direction: TransitionDirection.Left,
+                    duration: 500,
+                    easing: Easings.quadraticInOut,
+                }));
+            } else {
+                game.presentScene(presentationScene);
+            }
+        }
+ 
+        redButton.onTapDown(()=> {
+            handleResponse("Red");
+        });
+        greenButton.onTapDown(()=> {
+            handleResponse("Green");
+        });
+        blueButton.onTapDown(()=> {
+            handleResponse("Blue");
+        });
+  
+        // ========================================
+        // SCENE: end
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneLabel = new Label({
+            text: "You are done!",
+            position: { x: 200, y: 200 },
+        });
+        endScene.addChild(doneLabel);
+        const percentCorrectLabel = new Label({
+            text: "Percent correct: ",
+            position: { x: 200, y: 300 },
+        });
+        endScene.addChild(percentCorrectLabel);
+        const congruentRtLabel = new Label({
+            text: "Mean congruent rt: ",
+            position: { x: 200, y: 350 },
+        });
+        endScene.addChild(congruentRtLabel);
+        const incongruentRtLabel = new Label({
+            text: "Mean incongruent rt: ",
+            position: { x: 200, y: 400 },
+        });
+        endScene.addChild(incongruentRtLabel);                
+    }
+}`;
+
+<CodeExample code={code} template={template} console={"true"}/>

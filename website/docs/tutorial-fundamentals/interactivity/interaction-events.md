@@ -9,6 +9,29 @@ import CodeExample from '@site/src/components/CodeExample';
 
 One way of thinking of user interaction is that the user is sending **events** to the entities. For example, when the user clicks on a button, the button receives a `TapDown` event. The button can then respond to the event by executing code. The code passed into the `onTapDown()` method is called an [event handler](<https://en.wikipedia.org/wiki/Event_(computing)#Event_handler>) because it handles the `TapDown` event.
 
+This event handler prints a message to the console when the button is tapped:
+
+```js
+tapDownButton.onTapDown(() => {
+    console.log("TapDown event!");
+});
+```
+
+<details >
+  <summary>Event handlers, callback functions, and <code>() =></code></summary>
+  <p>To be precise, the event handler is a <a href="https://en.wikipedia.org/wiki/Callback_(computer_programming)">callback function</a>. You may not be familiar with the <b>arrow function</b> syntax, which looks like <code>() => &#123; ... &#125;</code> and might seem strange. Don't worry too much about it -- just put the code you want to execute inside the curly braces. You can read more about arrow functions <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">here</a>.
+  </p>Alternatively, instead of arrow function syntax, you could provide a function. This code is equivalent to the above:
+<pre>
+  <code className="language-js">{`function logTheEvent() {
+  console.log("TapDown event!");
+}
+ 
+tapDownButton.onTapDown(logTheEvent);`}
+  </code>
+</pre>
+  <p>Arrows function are a useful shortcut when you don't want to define a separate function to execute some code.</p>
+</details>
+
 There are several types of events that can be sent to entities:
 
 - `TapDown` - occurs when the user begins a touch or click within the bounds of the entity.

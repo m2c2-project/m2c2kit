@@ -1,0 +1,388 @@
+---
+sidebar_position: 7
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Adding Parameters
+
+We first define the parameters:
+
+```js
+const defaultParameters = {
+    number_of_trials: {
+        type: "integer",
+        default: 3,
+        description: "How many trials to run.",
+    },
+    number_of_congruent_trials: {
+        type: "integer",
+        default: 2,
+        description: "How many trials will be congruent (word matches its color).",
+    },
+    fixation_cross_duration_ms: {
+        type: "number",
+        default: 1000,
+        description: "Duration, in milliseconds, of how long the fixation across will be shown.",
+    },
+    post_fixation_cross_blank_duration_ms: {
+        type: "number",
+        default: 1000,
+        description: "Duration, in milliseconds, of how long a blank screen is shown after the fixation cross is hidden but before the word and response buttons are shown.",
+    },
+    show_feedback: {
+        type: "boolean",
+        default: false,
+        description: "Should feedback, in the form of the user's perfomance, be shown at the end of the assessment? Default is true.",
+    }
+};
+```
+
+## Using parameters
+
+We call `game.getParameter()` to retrieve the value of each parameter and use that in place of a hard-coded value.
+
+This is done in in the randomization code:
+
+```js
+const numberOfTrials = game.getParameter("number_of_trials");
+const numberOfCongruentTrials = game.getParameter("number_of_congruent_trials");
+```
+
+It is also used in the Actions that show the fixation cross and word:
+
+```js
+Action.custom( {callback: () => {
+    fixationCross.hidden = false;
+}}),
+Action.wait({duration: game.getParameter("fixation_cross_duration_ms")}),
+Action.custom( {callback: () => {
+    fixationCross.hidden = true;
+}}),
+Action.wait({duration: game.getParameter("post_fixation_cross_blank_duration_ms")}),
+```
+
+Finally, determine whether to show the results on the last scene. To do this, we now initialize the results labels' text to empty strings (`""`). Only in the end scene's `onSetup` event handler do we set the labels' text to the results, if `show_feedback` is true:
+
+```js
+endScene.onSetup( ()=> {
+    // highlight-next-line
+    if (game.getParameter("show_feedback")) {
+        const percentCorrect = game.data.trials.filter((trial) => trial.response_correct).length / numberOfTrials;
+        percentCorrectLabel.text = "Percent correct: " + percentCorrect.toFixed(2);
+
+        const congruentTrials = game.data.trials.filter((trial) => trial.congruent_stimulus);
+        let congruentRtSum = 0;
+        for (let i = 0; i < congruentTrials.length; i++) {
+            congruentRtSum = congruentRtSum + congruentTrials[i].response_time_ms;
+        }
+        const meanCongruentRt = congruentRtSum / congruentTrials.length;
+        congruentRtLabel.text = "Mean congruent rt: " + meanCongruentRt.toFixed(2);
+
+        const incongruentTrials = game.data.trials.filter((trial) => !trial.congruent_stimulus);
+        let incongruentRtSum = 0;
+        for (let i = 0; i < incongruentTrials.length; i++) {
+            incongruentRtSum = incongruentRtSum + incongruentTrials[i].response_time_ms;
+        }
+        const meanIncongruentRt = incongruentRtSum / incongruentTrials.length;
+        incongruentRtLabel.text = "Mean incongruent rt: " + meanIncongruentRt.toFixed(2);
+    }
+});
+```
+
+## Progress so far
+
+You now have a fully completed assessment with parameters. The next page will present this at full size.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+ 
+        const defaultParameters = {
+            number_of_trials: {
+                type: "integer",
+                default: 3,
+                description: "How many trials to run.",
+            },
+            number_of_congruent_trials: {
+                type: "integer",
+                default: 2,
+                description: "How many trials will be congruent (word matches its color).",
+            },
+            fixation_cross_duration_ms: {
+                type: "number",
+                default: 1000,
+                description: "Duration, in milliseconds, of how long the fixation across will be shown.",
+            },
+            post_fixation_cross_blank_duration_ms: {
+                type: "number",
+                default: 1000,
+                description: "Duration, in milliseconds, of how long a blank screen is shown after the fixation cross is hidden but before the word and response buttons are shown.",
+            },
+            show_feedback: {
+                type: "boolean",
+                default: true,
+                description: "Should feedback, in the form of the user's perfomance, be shown at the end of the assessment? Default is true.",
+            }
+        };
+ 
+        const schema = {
+            trial_index: {
+                type: "integer",
+                description: "Index of the trial within this assessment, 0-based.",
+            },
+            congruent_stimulus: {
+                type: "boolean",
+                description: "Did the word displayed on the screen match its font color?",
+            },
+            response_time_ms: {
+                type: "number",
+                description: "Time in milliseconds between when the word appears and the user taps a response button.",
+            },
+            response_correct: {
+                type: "boolean",
+                description: "Was the user's response correct? (Did the button response match the font color).",
+            }      
+        };
+  
+        const options = {
+            width: 400, height: 800,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            images: [{
+                imageName: "stroop-screenshot",
+                height: 336, width: 384, url: "assets/docs/img/stroop.png"
+            }],
+            trialSchema: schema,
+            parameters: defaultParameters,
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+     
+        const wordColors = [
+            {text: "Red", color: WebColors.Red},
+            {text: "Green", color: WebColors.Green},
+            {text: "Blue", color: WebColors.Blue}
+        ];
+        const numberOfTrials = game.getParameter("number_of_trials");
+        const numberOfCongruentTrials = game.getParameter("number_of_congruent_trials");
+        const trialConfigurations = [];
+        const congruentIndexes = RandomDraws.FromRangeWithoutReplacement(numberOfCongruentTrials, 0, numberOfTrials - 1);
+ 
+        for (let i = 0; i < numberOfTrials; i++) {
+            const wordIndex = RandomDraws.SingleFromRange(0, wordColors.length - 1);
+            const text = wordColors[wordIndex].text;
+            let isCongruent;
+            let textColor;
+            let colorAsString;
+            if (congruentIndexes.includes(i)) {
+                textColor = wordColors[wordIndex].color;
+                colorAsString = wordColors[wordIndex].text;
+                isCongruent = true;
+            } else {
+                const colorOptions = wordColors.filter(wc => wc.text != text);
+                const colorIndex = RandomDraws.SingleFromRange(0, colorOptions.length - 1);
+                textColor = colorOptions[colorIndex].color;
+                colorAsString = colorOptions[colorIndex].text;
+                isCongruent = false;
+            }
+            const trial = { word: text, color: textColor, colorString: colorAsString, congruent: isCongruent};
+            trialConfigurations.push(trial);            
+        }
+        console.log(JSON.stringify(trialConfigurations));
+  
+        // ========================================
+        // SCENES: instructions
+        const instructionsScenes = Instructions.Create({
+            instructionScenes: [
+                {
+                    title: "Stroop Assessment",
+                    text: "Select the color that matches the font color. This is commonly known as the Stroop task.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                },
+                {
+                    title: "Stroop Assessment",
+                    text: "For example, the word Red is colored Blue, so the correct response is Blue.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                    imageName: "stroop-screenshot",
+                    imageAboveText: true,
+                    textVerticalBias: .65,                   
+                    /**
+                     * We override the next button's default text and color
+                     */
+                    nextButtonText: "START",
+                    nextButtonBackgroundColor: WebColors.Green,
+                },
+            ],
+        });
+        game.addScenes(instructionsScenes);
+ 
+        // ========================================
+        // SCENE: presentation 
+        const presentationScene = new Scene();
+        game.addScene(presentationScene);
+ 
+        const fixationCross = new Label({
+            text: "+",
+            color: WebColors.Black,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(fixationCross);
+ 
+        const redButton = new Button({
+            text: "Red",
+            position: { x: 100, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(redButton);
+ 
+        const greenButton = new Button({
+            text: "Green",
+            position: { x: 200, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(greenButton);
+ 
+        const blueButton = new Button({
+            text: "Blue",
+            position: { x: 300, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(blueButton);
+ 
+        const wordLabel = new Label({
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+        });
+        presentationScene.addChild(wordLabel);
+ 
+        presentationScene.onAppear(() => {            
+            fixationCross.run(Action.sequence([
+                Action.wait({duration: 1000}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = false;
+                }}),
+                Action.wait({duration: game.getParameter("fixation_cross_duration_ms")}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = true;
+                }}),
+                Action.wait({duration: game.getParameter("post_fixation_cross_blank_duration_ms")}),
+                Action.custom( {callback: () => {
+                    redButton.hidden = false;
+                    greenButton.hidden = false;
+                    blueButton.hidden = false;
+                    wordLabel.text = trialConfigurations[game.trialIndex].word;
+                    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+                    redButton.isUserInteractionEnabled = true;
+                    greenButton.isUserInteractionEnabled = true;
+                    blueButton.isUserInteractionEnabled = true;
+ 
+                    Timer.start("rt");
+                }}),
+            ]));
+        });
+ 
+        function handleResponse(buttonColor) {
+            Timer.stop("rt");
+            const responseTime = Timer.elapsed("rt");
+            game.addTrialData("trial_index", game.trialIndex);
+            game.addTrialData("response_time_ms", responseTime);
+            Timer.remove("rt");
+            game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
+            if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
+                game.addTrialData("response_correct", true);
+            } else {
+                game.addTrialData("response_correct", false);
+            }
+ 
+             redButton.hidden = true;
+            greenButton.hidden = true;
+            blueButton.hidden = true;
+            wordLabel.text = "";
+            redButton.isUserInteractionEnabled = false;
+            greenButton.isUserInteractionEnabled = false;
+            blueButton.isUserInteractionEnabled = false;
+            game.trialComplete();
+            if (game.trialIndex === numberOfTrials) {
+                game.presentScene(endScene, Transition.slide({
+                    direction: TransitionDirection.Left,
+                    duration: 500,
+                    easing: Easings.quadraticInOut,
+                }));
+            } else {
+                game.presentScene(presentationScene);
+            }
+        }
+ 
+        redButton.onTapDown(()=> {
+            handleResponse("Red");
+        });
+        greenButton.onTapDown(()=> {
+            handleResponse("Green");
+        });
+        blueButton.onTapDown(()=> {
+            handleResponse("Blue");
+        });
+  
+        // ========================================
+        // SCENE: end
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneLabel = new Label({
+            text: "You are done!",
+            position: { x: 200, y: 200 },
+        });
+        endScene.addChild(doneLabel);
+        const percentCorrectLabel = new Label({
+            text: "",
+            position: { x: 200, y: 300 },
+        });
+        endScene.addChild(percentCorrectLabel);
+        const congruentRtLabel = new Label({
+            text: "",
+            position: { x: 200, y: 350 },
+        });
+        endScene.addChild(congruentRtLabel);
+        const incongruentRtLabel = new Label({
+            text: "",
+            position: { x: 200, y: 400 },
+        });
+        endScene.addChild(incongruentRtLabel);
+ 
+        endScene.onSetup( ()=> {
+            if (game.getParameter("show_feedback")) {
+                const percentCorrect = game.data.trials.filter((trial) => trial.response_correct).length / numberOfTrials;
+                percentCorrectLabel.text = "Percent correct: " + percentCorrect.toFixed(2);
+    
+                const congruentTrials = game.data.trials.filter((trial) => trial.congruent_stimulus);
+                let congruentRtSum = 0;
+                for (let i = 0; i < congruentTrials.length; i++) {
+                    congruentRtSum = congruentRtSum + congruentTrials[i].response_time_ms;
+                }
+                const meanCongruentRt = congruentRtSum / congruentTrials.length;
+                congruentRtLabel.text = "Mean congruent rt: " + meanCongruentRt.toFixed(2);
+    
+                const incongruentTrials = game.data.trials.filter((trial) => !trial.congruent_stimulus);
+                let incongruentRtSum = 0;
+                for (let i = 0; i < incongruentTrials.length; i++) {
+                    incongruentRtSum = incongruentRtSum + incongruentTrials[i].response_time_ms;
+                }
+                const meanIncongruentRt = incongruentRtSum / incongruentTrials.length;
+                incongruentRtLabel.text = "Mean incongruent rt: " + meanIncongruentRt.toFixed(2);
+            }
+        });
+    }
+}`;
+
+<CodeExample code={code} template={template} console={"true"}/>

@@ -14,6 +14,10 @@ This tutorial introduces you to the fundamentals of m2c2kit:
 - How to interact with a user
 - How to generate data from a user's behavior
 
+## JavaScript or TypeScript?
+
+m2c2kit is written in TypeScript, but it is fully compatible with JavaScript projects. This tutorial uses JavaScript.
+
 ## Live code
 
 This tutorial contains live code examples. The code you see in the editor is the actual code used to run the example in your browser.[^1] The code automatically runs when the page loads. You'll learn best by playing with the code and seeing how it changes the output. Edit the code and click the "Run" button to see the results.

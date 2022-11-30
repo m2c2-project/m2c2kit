@@ -1,0 +1,277 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Scenes
+
+The first step in designing an assessment is deciding what scenes are needed.
+
+## Instructions
+
+The opening scenes are the instructions. This is where you tell the participant what they need to do. We use use built-in helper method, `Instructions.Create()`, to make these two scenes.
+
+:::note
+
+For the image on the second instruction screen, I used an pre-created image, `stroop-screenshot`, that will match our completed assessment.
+
+:::
+
+```js
+const instructionsScenes = Instructions.Create({
+    instructionScenes: [
+        {
+            title: "Stroop Assessment",
+            text: "Select the color that matches the font color. This is commonly known as the Stroop task.",
+            textFontSize: 20,
+            titleFontSize: 30,
+        },
+        {
+            title: "Stroop Assessment",
+            text: "For example, the word Red is colored Blue, so the correct response is Blue.",
+            textFontSize: 20,
+            titleFontSize: 30,
+            imageName: "stroop-screenshot",
+            imageAboveText: true,
+            textVerticalBias: .65,                   
+            /**
+             * We override the next button's default text and color
+             */
+            nextButtonText: "START",
+            nextButtonBackgroundColor: WebColors.Green,
+        },
+    ],
+});
+game.addScenes(instructionsScenes);
+```
+
+## Fixation Cross, Stimulus, Response Buttons
+
+Each trial of Stroop has multiple phases: a fixation cross is shown, it disappears, and then the stimulus with the response buttons are shown. Each of these could be a different scene. Alternatively, the trial could be a single scene with Actions to control the appearance and disappearance of the fixation cross and stimulus. It's up to you to decide what works best for your assessment. In this example, we take the single scene approach.
+
+```js
+const presentationScene = new Scene();
+game.addScene(presentationScene);
+
+const fixationCross = new Label({
+    text: "+",
+    color: WebColors.Black,
+    position: { x: 200, y: 400 },
+    fontSize: 64,
+    hidden: true
+});
+presentationScene.addChild(fixationCross);
+
+const redButton = new Button({
+    text: "Red",
+    position: { x: 100, y: 600 },
+    size: { width: 80, height: 50 },
+    hidden: true
+});
+presentationScene.addChild(redButton);
+
+const greenButton = new Button({
+    text: "Green",
+    position: { x: 200, y: 600 },
+    size: { width: 80, height: 50 },
+    hidden: true
+});
+presentationScene.addChild(greenButton);
+
+const blueButton = new Button({
+    text: "Blue",
+    position: { x: 300, y: 600 },
+    size: { width: 80, height: 50 },
+    hidden: true
+});
+presentationScene.addChild(blueButton);
+
+const wordLabel = new Label({
+    text: "Red",
+    fontColor: WebColors.Red,
+    position: { x: 200, y: 400 },
+    fontSize: 64,
+    hidden: true
+});
+presentationScene.addChild(wordLabel);
+```
+
+Note how we set the `hidden` property to `true` for all of these entities. This is because we do not them to be visible until we explicitly show them in the presentation scene's `onAppear` event handler:
+
+```js
+presentationScene.onAppear(() => {
+    fixationCross.hidden = false;
+    redButton.hidden = false;
+    greenButton.hidden = false;
+    blueButton.hidden = false;
+    wordLabel.hidden = false;
+});
+```
+
+## Completion Scene
+
+This shows at the end to let the participant know they are done and how they did.
+
+```js
+const endScene = new Scene();
+game.addScene(endScene);
+const doneLabel = new Label({
+    text: "You are done!",
+    color: WebColors.Black,
+    position: { x: 200, y: 200 },
+});
+endScene.addChild(doneLabel);
+const percentCorrectLabel = new Label({
+    text: "Percent correct: ",
+    position: { x: 200, y: 300 },
+});
+endScene.addChild(percentCorrectLabel);
+const congruentRtLabel = new Label({
+    text: "Mean congruent rt: ",
+    position: { x: 200, y: 350 },
+});
+endScene.addChild(congruentRtLabel);
+const incongruentRtLabel = new Label({
+    text: "Mean incongruent rt: ",
+    position: { x: 200, y: 400 },
+});
+endScene.addChild(incongruentRtLabel);     
+```
+
+## Progress so far
+
+If you run the assessment, you can navigate the instructions and advance to the presentation scene. The presentation scene is not yet functional, and it shows all the entities at once. We will fix that in the next section.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+ 
+        const options = {
+            width: 400, height: 800,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            images: [{
+                imageName: "stroop-screenshot",
+                height: 336, width: 384, url: "assets/docs/img/stroop.png"
+            }],
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+ 
+        // ==============================================================
+        // SCENES: instructions
+        const instructionsScenes = Instructions.Create({
+            instructionScenes: [
+                {
+                    title: "Stroop Assessment",
+                    text: "Select the color that matches the font color. This is commonly known as the Stroop task.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                },
+                {
+                    title: "Stroop Assessment",
+                    text: "For example, the word Red is colored Blue, so the correct response is Blue.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                    imageName: "stroop-screenshot",
+                    imageAboveText: true,
+                    textVerticalBias: .65,                   
+                    /**
+                     * We override the next button's default text and color
+                     */
+                    nextButtonText: "START",
+                    nextButtonBackgroundColor: WebColors.Green,
+                },
+            ],
+        });
+        game.addScenes(instructionsScenes);
+ 
+        // ========================================
+        // SCENE: presentation 
+        const presentationScene = new Scene();
+        game.addScene(presentationScene);
+ 
+        const fixationCross = new Label({
+            text: "+",
+            color: WebColors.Black,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(fixationCross);
+ 
+        const redButton = new Button({
+            text: "Red",
+            position: { x: 100, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(redButton);
+ 
+        const greenButton = new Button({
+            text: "Green",
+            position: { x: 200, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(greenButton);
+ 
+        const blueButton = new Button({
+            text: "Blue",
+            position: { x: 300, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(blueButton);
+ 
+        const wordLabel = new Label({
+            text: "Red",
+            fontColor: WebColors.Red,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(wordLabel);
+ 
+        presentationScene.onAppear(() => {
+            fixationCross.hidden = false;
+            redButton.hidden = false;
+            greenButton.hidden = false;
+            blueButton.hidden = false;
+            wordLabel.hidden = false;
+        });
+ 
+        // ========================================
+        // SCENE: end
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneLabel = new Label({
+            text: "You are done!",
+            color: WebColors.Black,
+            position: { x: 200, y: 200 },
+        });
+        endScene.addChild(doneLabel);
+        const percentCorrectLabel = new Label({
+            text: "Percent correct: ",
+            position: { x: 200, y: 300 },
+        });
+        endScene.addChild(percentCorrectLabel);
+        const congruentRtLabel = new Label({
+            text: "Mean congruent rt: ",
+            position: { x: 200, y: 350 },
+        });
+        endScene.addChild(congruentRtLabel);
+        const incongruentRtLabel = new Label({
+            text: "Mean incongruent rt: ",
+            position: { x: 200, y: 400 },
+        });
+        endScene.addChild(incongruentRtLabel);        
+    }
+}`;
+
+<CodeExample code={code} template={template} console={"true"}/>

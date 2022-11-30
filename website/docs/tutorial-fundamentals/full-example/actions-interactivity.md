@@ -1,0 +1,249 @@
+---
+sidebar_position: 3
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Actions and Interactivity
+
+## Display the stimuli properly
+
+We use Actions to display the stimuli in the correct order with specified delays. Instead of showing all the entities at once, a `Sequence` Action runs additional Actions to achieve the following when the presentation scene appears:
+
+- A delay of 1000 milliseconds.
+- Showing the fixation cross.
+- A delay of 1000 milliseconds.
+- Hiding the fixation cross.
+- A delay of 1000 milliseconds.
+- Showing the word and the response buttons and enabling the response buttons.
+
+```js
+presentationScene.onAppear(() => {            
+    fixationCross.run(Action.sequence([
+        Action.wait({duration: 1000}),
+        Action.custom( {callback: () => {
+            fixationCross.hidden = false;
+        }}),
+        Action.wait({duration: 1000}),
+        Action.custom( {callback: () => {
+            fixationCross.hidden = true;
+        }}),
+        Action.wait({duration: 1000}),                
+        Action.custom( {callback: () => {
+            redButton.hidden = false;
+            greenButton.hidden = false;
+            blueButton.hidden = false;
+            wordLabel.hidden = false;
+            redButton.isUserInteractionEnabled = true;
+            greenButton.isUserInteractionEnabled = true;
+            blueButton.isUserInteractionEnabled = true;
+        }}),
+    ]));
+});
+```
+
+## Respond to user input
+
+The response buttons were enabled in the `onAppear` event handler. Aside from the fact that each button represents a different color, the buttons have identical behavior. Rather than writing duplicated event handler code for each button, we write one event handler function, called `handleResponse()`, and assign it to the `onTap` event handler of each button.
+
+The event handler prints to the console the button that is clicked and hides the buttons and the word. The `isUserInteractionEnabled` property of the buttons is set to `false` to prevent the user from clicking the buttons again. Finally, the event handler presents the scene again so another trial can happen.
+
+```js
+function handleResponse(buttonColor) {
+    console.log("You clicked " + buttonColor);
+    redButton.hidden = true;
+    greenButton.hidden = true;
+    blueButton.hidden = true;
+    wordLabel.hidden = true;
+    redButton.isUserInteractionEnabled = false;
+    greenButton.isUserInteractionEnabled = false;
+    blueButton.isUserInteractionEnabled = false;
+    game.presentScene(presentationScene);
+}
+
+redButton.onTapDown(()=> {
+    handleResponse("Red");
+});
+greenButton.onTapDown(()=> {
+    handleResponse("Green");
+});
+blueButton.onTapDown(()=> {
+    handleResponse("Blue");
+});
+```
+
+## Progress so far
+
+The assessment now properly shows the stimuli and response buttons. The buttons can be clicked, and the assessment runs multiple trials.
+
+However, the assessment presents the same word and color every time. Also, the trials will continue forever, and the user can never advance to the end scene.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+ 
+        const options = {
+            width: 400, height: 800,
+            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            images: [{
+                imageName: "stroop-screenshot",
+                height: 336, width: 384, url: "assets/docs/img/stroop.png"
+            }],
+        };
+        super(options);
+    }
+ 
+    init() {
+        const game = this;
+  
+        // ========================================
+        // SCENES: instructions
+        const instructionsScenes = Instructions.Create({
+            instructionScenes: [
+                {
+                    title: "Stroop Assessment",
+                    text: "Select the color that matches the font color. This is commonly known as the Stroop task.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                },
+                {
+                    title: "Stroop Assessment",
+                    text: "For example, the word Red is colored Blue, so the correct response is Blue.",
+                    textFontSize: 20,
+                    titleFontSize: 30,
+                    imageName: "stroop-screenshot",
+                    imageAboveText: true,
+                    textVerticalBias: .65,                   
+                    /**
+                     * We override the next button's default text and color
+                     */
+                    nextButtonText: "START",
+                    nextButtonBackgroundColor: WebColors.Green,
+                },
+            ],
+        });
+        game.addScenes(instructionsScenes);
+ 
+        // ========================================
+        // SCENE: presentation 
+        const presentationScene = new Scene();
+        game.addScene(presentationScene);
+ 
+        const fixationCross = new Label({
+            text: "+",
+            color: WebColors.Black,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(fixationCross);
+ 
+        const redButton = new Button({
+            text: "Red",
+            position: { x: 100, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(redButton);
+ 
+        const greenButton = new Button({
+            text: "Green",
+            position: { x: 200, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(greenButton);
+ 
+        const blueButton = new Button({
+            text: "Blue",
+            position: { x: 300, y: 600 },
+            size: { width: 80, height: 50 },
+            hidden: true
+        });
+        presentationScene.addChild(blueButton);
+ 
+        const wordLabel = new Label({
+            text: "Red",
+            fontColor: WebColors.Red,
+            position: { x: 200, y: 400 },
+            fontSize: 64,
+            hidden: true
+        });
+        presentationScene.addChild(wordLabel);
+ 
+        presentationScene.onAppear(() => {            
+            fixationCross.run(Action.sequence([
+                Action.wait({duration: 1000}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = false;
+                }}),
+                Action.wait({duration: 1000}),
+                Action.custom( {callback: () => {
+                    fixationCross.hidden = true;
+                }}),
+                Action.wait({duration: 1000}),                
+                Action.custom( {callback: () => {
+                    redButton.hidden = false;
+                    greenButton.hidden = false;
+                    blueButton.hidden = false;
+                    wordLabel.hidden = false;
+                    redButton.isUserInteractionEnabled = true;
+                    greenButton.isUserInteractionEnabled = true;
+                    blueButton.isUserInteractionEnabled = true;
+                }}),
+            ]));
+        });
+ 
+        function handleResponse(buttonColor) {
+            console.log("You clicked " + buttonColor);
+            redButton.hidden = true;
+            greenButton.hidden = true;
+            blueButton.hidden = true;
+            wordLabel.hidden = true;
+            redButton.isUserInteractionEnabled = false;
+            greenButton.isUserInteractionEnabled = false;
+            blueButton.isUserInteractionEnabled = false;
+            game.presentScene(presentationScene);
+        }
+ 
+        redButton.onTapDown(()=> {
+            handleResponse("Red");
+        });
+        greenButton.onTapDown(()=> {
+            handleResponse("Green");
+        });
+        blueButton.onTapDown(()=> {
+            handleResponse("Blue");
+        });
+  
+        // ========================================
+        // SCENE: end
+        const endScene = new Scene();
+        game.addScene(endScene);
+        const doneLabel = new Label({
+            text: "You are done!",
+            color: WebColors.Black,
+            position: { x: 200, y: 200 },
+        });
+        endScene.addChild(doneLabel);
+        const percentCorrectLabel = new Label({
+            text: "Percent correct: ",
+            position: { x: 200, y: 300 },
+        });
+        endScene.addChild(percentCorrectLabel);
+        const congruentRtLabel = new Label({
+            text: "Mean congruent rt: ",
+            position: { x: 200, y: 350 },
+        });
+        endScene.addChild(congruentRtLabel);
+        const incongruentRtLabel = new Label({
+            text: "Mean incongruent rt: ",
+            position: { x: 200, y: 400 },
+        });
+        endScene.addChild(incongruentRtLabel);
+    }
+}`;
+
+<CodeExample code={code} template={template} console={"true"}/>
