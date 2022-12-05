@@ -6,6 +6,7 @@ import {
   ActivityType,
   EventType,
 } from "@m2c2kit/core";
+import { LocalDatabase } from "@m2c2kit/db";
 
 import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
@@ -81,6 +82,10 @@ const session = new Session({
           JSON.stringify(ev.activityConfigurationSchema)
       );
       console.log("  activity metrics: " + JSON.stringify(ev.activityMetrics));
+
+      db.saveActivityResults(ev).catch((err) => {
+        console.error("Could not save results to local database. err: " + err);
+      });
     },
     /**
      * onActivityLifecycle() notifies us when an activity, such
@@ -118,4 +123,5 @@ const session = new Session({
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
+const db = new LocalDatabase();
 session.init();

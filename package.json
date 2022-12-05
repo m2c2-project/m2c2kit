@@ -17,10 +17,11 @@
     "packages/core",
     "packages/sage-research",
     "packages/survey",
+    "packages/db",
     "integration-tests/*"
   ],
   "scripts": {
-    "build": "concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/survey\" \"npm run build -w @m2c2kit/sage-research\" && concurrently \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-color-shapes\" \"npm run build -w @m2c2kit/assessment-cli-starter\" && concurrently \"npm run build -w @m2c2kit/assessments-demo\" \"npm run build-webview -w @m2c2kit/assessments-demo\" && npm run copy-no-js-bundler-assets",
+    "build": "concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/survey\" \"npm run build -w @m2c2kit/sage-research\" \"npm run build -w @m2c2kit/db\" && concurrently \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-color-shapes\" \"npm run build -w @m2c2kit/assessment-cli-starter\" && concurrently \"npm run build -w @m2c2kit/assessments-demo\" \"npm run build-webview -w @m2c2kit/assessments-demo\" && npm run copy-no-js-bundler-assets",
     "docker:build": "docker build -t m2c2kit .",
     "check-m2c2kit-versions": "node check-m2c2kit-packages-versions.mjs",
     "test": "concurrently \"npm run test -w @m2c2kit/core -- --silent\" \"npm run test -w @m2c2kit/survey -- --silent\"",

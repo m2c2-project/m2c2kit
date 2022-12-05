@@ -60,6 +60,14 @@ export default (commandLineArgs) => {
               src: "../assessment-color-shapes/assets/color-shapes",
               dest: `${outputFolder}/assets`,
             },
+            {
+              src: "../db/data.html",
+              dest: `${outputFolder}`,
+            },
+            {
+              src: "../db/dist/data.js",
+              dest: `${outputFolder}`,
+            },
           ],
         }),
         commandLineArgs.configProd &&

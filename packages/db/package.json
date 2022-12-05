@@ -1,0 +1,37 @@
+{
+  "name": "@m2c2kit/db",
+  "version": "0.3.0",
+  "description": "A local database for storing m2c2kit data on the device. It is built using Dexie.js, and the underlying client-side storage is IndexedDB.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/data.js",
+    "data.html"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "13.1.3",
+    "@rollup/plugin-typescript": "8.3.3",
+    "rollup-plugin-copy": "3.4.0",
+    "rollup-plugin-delete": "2.0.0",
+    "rollup-plugin-dts": "4.2.0",
+    "typescript": "4.7.4"
+  },
+  "dependencies": {
+    "@m2c2kit/core": "0.3.3",
+    "dexie": "3.2.2"
+  }
+}

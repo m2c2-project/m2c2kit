@@ -5,7 +5,8 @@
     { "path": "../assessment-color-shapes" },
     { "path": "../assessment-grid-memory" },
     { "path": "../assessment-symbol-search" },
-    { "path": "../survey" }
+    { "path": "../survey" },
+    { "path": "../db" }
   ],
   "compilerOptions": {
     "target": "es6",
