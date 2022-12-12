@@ -329,13 +329,44 @@ export class ImageManager {
         image.src =
           "data:image/svg+xml," + encodeURIComponent(browserImage.svgString);
       } else if (browserImage.url) {
-        image.src = browserImage.url;
+        /**
+         * Originally, below was a single line: image.src = browserImage.url
+         * This worked, but this prevented us from intercepting this image
+         * request and modifying the url (we do this by patching the
+         * fetch function in some use cases, such as in the playground).
+         * So, now we fetch the image ourselves and set the image src
+         * to the data url.
+         */
+        fetch(browserImage.url)
+          .then((response) => response.arrayBuffer())
+          .then((data) => {
+            const base64String = btoa(
+              String.fromCharCode(...new Uint8Array(data))
+            );
+            const subtype = this.inferImageSubtypeFromUrl(browserImage.url);
+            image.src = "data:image/" + subtype + ";base64," + base64String;
+          });
       } else {
         throw new Error(
           `no svgString or url provided for image named ${browserImage.imageName}`
         );
       }
     });
+  }
+
+  private inferImageSubtypeFromUrl(url?: string) {
+    // default to jpeg if no extension
+    let subtype = "jpeg";
+    if (url?.includes(".")) {
+      subtype = url.split(".").pop()?.toLowerCase() ?? "jpeg";
+      if (subtype === "") {
+        subtype = "jpeg";
+      }
+    }
+    if (subtype === "svg") {
+      subtype = "svg+xml";
+    }
+    return subtype;
   }
 
   private convertRenderedDataUrlImageToCanvasKitImage(

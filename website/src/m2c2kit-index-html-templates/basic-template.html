@@ -127,14 +127,7 @@
         }
       }
       const activity = new DocsDemo();
-      activity.options.images = activity.options.images?.map((img) => {
-        if (img.url.startsWith("./assets/")) {
-          img.url = img.url.replace("./assets/", "/m2c2kit/assets/");
-        } else if (img.url.startsWith("assets/")) {
-          img.url = img.url.replace("assets/", "/m2c2kit/assets/");
-        }
-        return img;
-      });
+
       const session = new Session({
         canvasKitWasmUrl: "assets/canvaskit.wasm",
         activities: [activity],

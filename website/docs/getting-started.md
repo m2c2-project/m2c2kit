@@ -10,7 +10,7 @@ TODO: Getting started...
 
 ## No-install quickstart
 
-Go to the m2c2kit [playground](https://m2c2kit.z13.web.core.windows.net/) to take assessments, view assessment source code (TypeScript), and modify assessments (or create new ones) in your web browser.
+Go to the m2c2kit [playground](/playground) to run assessments, examine code, and create new assessments in your web browser.
 
 ## Local install
 

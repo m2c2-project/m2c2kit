@@ -83,6 +83,7 @@ const config = {
           src: "img/m2c2.svg",
         },
         items: [
+          { to: "playground", label: "Playground", position: "right" },
           // {
           //   type: "doc",
           //   docId: "intro",
