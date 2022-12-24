@@ -117,9 +117,6 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     } else {
       textForParagraph = this.text;
       this._translatedText = "";
-      if (this.text === "") {
-        console.warn(`warning: empty text in label "${this.name}"`);
-      }
     }
 
     this.paraStyle = new this.canvasKit.ParagraphStyle({

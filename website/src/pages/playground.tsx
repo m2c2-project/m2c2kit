@@ -7,7 +7,7 @@ import CodeEditor from "../components/CodeEditor";
 // @ts-ignore
 import template from "raw-loader!@site/src/m2c2kit-index-html-templates/playground-template.html";
 import SimpleIFrame from "../components/SimpleIFrame";
-import Dropdown from "../components/dropdown";
+import Dropdown from "../components/Dropdown";
 import useIsBrowser from "@docusaurus/useIsBrowser";
 
 // see https://www.pluralsight.com/guides/re-render-react-component-on-window-resize
