@@ -17,7 +17,7 @@ const HASH_CHARACTER_LENGTH = 16;
 /**
  * Defines a rename operation to be done, with its original and new name.
  */
-interface fileRename {
+interface FileRename {
   original: string;
   new: string;
 }
@@ -59,7 +59,7 @@ export function hashM2c2kitAssets(rootDir: string) {
   return {
     name: "hash-m2c2kit-assets",
     closeBundle: async () => {
-      const fileRenames = new Array<fileRename>();
+      const fileRenames = new Array<FileRename>();
 
       // Parse index.js using acorn and acorn-walk
       let indexjs: string;
@@ -335,6 +335,7 @@ export function hashM2c2kitAssets(rootDir: string) {
           renameSync(fr.original, fr.new);
         }
       });
+      await writeHashManifest(rootDir, fileRenames);
     },
   };
 }
@@ -356,11 +357,29 @@ const addHashToUrl = (url: string, rootDir: string) => {
   return url;
 };
 
+async function writeHashManifest(rootDir: string, fileRenames: FileRename[]) {
+  const manifestFilename = path.join(rootDir, "hash-manifest.json");
+  const manifest: { [originalName: string]: string } = {};
+
+  fileRenames.forEach((fr) => {
+    let originalName = fr.original.replace(rootDir + path.sep, "");
+    let hashedName = fr.new.replace(rootDir + path.sep, "");
+    if (process.platform === "win32") {
+      originalName = originalName.replace(/\\/g, "/");
+      hashedName = hashedName.replace(/\\/g, "/");
+    }
+    manifest[originalName] = hashedName;
+  });
+
+  const manifestString = JSON.stringify(manifest, null, 2);
+  await writeFile(manifestFilename, manifestString);
+}
+
 function addFileToFilesToBeRenamed(
   rootDir: string,
   originalUrlValue: string,
   hashedUrlValue: string,
-  fileRenames: fileRename[]
+  fileRenames: FileRename[]
 ) {
   const filename = path.join(rootDir, originalUrlValue);
   const hashedFilename = path.join(rootDir, hashedUrlValue);
