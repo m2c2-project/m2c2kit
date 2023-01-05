@@ -58,91 +58,46 @@ export function hashM2c2kitAssets(rootDir: string) {
 
   return {
     name: "hash-m2c2kit-assets",
-    closeBundle: async () => {
-      const fileRenames = new Array<FileRename>();
+    closeBundle: {
+      sequential: true,
+      async handler() {
+        const fileRenames = new Array<FileRename>();
 
-      // Parse index.js using acorn and acorn-walk
-      let indexjs: string;
-      try {
-        indexjs = await readFile(indexJsFile, "utf-8");
-      } catch {
-        throw new Error(
-          "could not hash m2c2 assets because there was an error reading index.js. This is a fatal problem because index.js is required."
-        );
-      }
+        // Parse index.js using acorn and acorn-walk
+        let indexjs: string;
+        try {
+          indexjs = await readFile(indexJsFile, "utf-8");
+        } catch {
+          throw new Error(
+            "could not hash m2c2 assets because there was an error reading index.js. This is a fatal problem because index.js is required."
+          );
+        }
 
-      let ast: acorn.Node;
-      try {
-        ast = acorn.parse(indexjs, { ecmaVersion: 2020 });
-      } catch {
-        throw new Error(
-          "could not hash m2c2 assets because there was an error parsing index.js. This is a fatal problem because index.js is not valid JavaScript."
-        );
-      }
+        let ast: acorn.Node;
+        try {
+          ast = acorn.parse(indexjs, { ecmaVersion: 2020 });
+        } catch {
+          throw new Error(
+            "could not hash m2c2 assets because there was an error parsing index.js. This is a fatal problem because index.js is not valid JavaScript."
+          );
+        }
 
-      // it was helpful to use https://astexplorer.net/ to understand the AST
+        // it was helpful to use https://astexplorer.net/ to understand the AST
 
-      walk.ancestor(ast, {
-        // this code will be run each time the walker visits a literal
-        Literal(node, ancestors: Array<acorn.Node>) {
-          if (ancestors.length >= 2) {
-            const maybeProperty = ancestors.slice(-2)[0];
-
-            if (maybeProperty.type === "Property") {
-              const property = maybeProperty as unknown as estree.Property;
-
-              if (
-                property.key.type === "Identifier" &&
-                (property.key as estree.Identifier).name == "canvasKitWasmUrl"
-              ) {
-                // property is canvasKitWasmUrl
-                const literal = node as unknown as estree.Literal;
-                const originalUrlValue = literal.value as string;
-
-                try {
-                  const hashedUrlValue = addHashToUrl(
-                    originalUrlValue,
-                    rootDir
-                  );
-
-                  literal.value = (literal.value as string).replace(
-                    originalUrlValue,
-                    hashedUrlValue
-                  );
-                  literal.raw = (literal.raw as string).replace(
-                    originalUrlValue,
-                    hashedUrlValue
-                  );
-
-                  addFileToFilesToBeRenamed(
-                    rootDir,
-                    originalUrlValue,
-                    hashedUrlValue,
-                    fileRenames
-                  );
-                } catch {
-                  console.log(
-                    `warning: could not hash canvaskit.wasm resource because it was not found at ${originalUrlValue}`
-                  );
-                }
-              }
-            }
-          }
-
-          if (ancestors.length >= 3) {
-            const maybeArrayExpression = ancestors.slice(-2)[0];
-
-            if (maybeArrayExpression.type === "ArrayExpression") {
-              const maybeProperty = ancestors.slice(-3)[0];
+        walk.ancestor(ast, {
+          // this code will be run each time the walker visits a literal
+          Literal(node, ancestors: Array<acorn.Node>) {
+            if (ancestors.length >= 2) {
+              const maybeProperty = ancestors.slice(-2)[0];
 
               if (maybeProperty.type === "Property") {
                 const property = maybeProperty as unknown as estree.Property;
 
                 if (
                   property.key.type === "Identifier" &&
-                  (property.key as estree.Identifier).name == "fontUrls"
+                  (property.key as estree.Identifier).name == "canvasKitWasmUrl"
                 ) {
-                  // property is fontUrls
+                  // property is canvasKitWasmUrl
                   const literal = node as unknown as estree.Literal;
                   const originalUrlValue = literal.value as string;
 
@@ -169,87 +124,135 @@ export function hashM2c2kitAssets(rootDir: string) {
                     );
                   } catch {
                     console.log(
-                      `warning: could not hash a font url resource because it was not found at ${originalUrlValue}`
+                      `warning: could not hash canvaskit.wasm resource because it was not found at ${originalUrlValue}`
                     );
                   }
                 }
               }
             }
-          }
 
-          // we'll be looking back 5 levels
-          if (ancestors.length >= 5) {
-            const maybeProperty = ancestors.slice(-2)[0];
+            if (ancestors.length >= 3) {
+              const maybeArrayExpression = ancestors.slice(-2)[0];
 
-            if (maybeProperty.type === "Property") {
-              const property = maybeProperty as unknown as estree.Property;
+              if (maybeArrayExpression.type === "ArrayExpression") {
+                const maybeProperty = ancestors.slice(-3)[0];
 
-              if (
-                property.key.type === "Identifier" &&
-                (property.key as estree.Identifier).name == "url"
-              ) {
-                // property is url
-                const maybeObjExpression = ancestors.slice(-3)[0];
-                if (maybeObjExpression.type === "ObjectExpression") {
-                  const objExpression =
-                    maybeObjExpression as unknown as estree.ObjectExpression;
+                if (maybeProperty.type === "Property") {
+                  const property = maybeProperty as unknown as estree.Property;
 
-                  const properties = objExpression.properties
-                    .filter((p) => p.type === "Property")
-                    .map((p) => p as estree.Property);
+                  if (
+                    property.key.type === "Identifier" &&
+                    (property.key as estree.Identifier).name == "fontUrls"
+                  ) {
+                    // property is fontUrls
+                    const literal = node as unknown as estree.Literal;
+                    const originalUrlValue = literal.value as string;
 
-                  const identifiers = properties
-                    .filter((p) => p.key.type === "Identifier")
-                    .map((p) => (p.key as estree.Identifier).name);
+                    try {
+                      const hashedUrlValue = addHashToUrl(
+                        originalUrlValue,
+                        rootDir
+                      );
 
-                  const urlBrowserImageProperties = [
-                    "imageName",
-                    "height",
-                    "width",
-                    "url",
-                  ];
+                      literal.value = (literal.value as string).replace(
+                        originalUrlValue,
+                        hashedUrlValue
+                      );
+                      literal.raw = (literal.raw as string).replace(
+                        originalUrlValue,
+                        hashedUrlValue
+                      );
 
-                  const propCount = identifiers.filter(
-                    (i) => urlBrowserImageProperties.indexOf(i) !== -1
-                  ).length;
-                  if (propCount === 4) {
-                    // the object expression has the 4 properties
-                    const maybeArrayExpression = ancestors.slice(-4)[0];
-                    if (maybeArrayExpression.type === "ArrayExpression") {
-                      const maybeProperty = ancestors.slice(-5)[0];
-                      if (maybeProperty.type === "Property") {
-                        const property =
-                          maybeProperty as unknown as estree.Property;
-                        if (
-                          property.key.type === "Identifier" &&
-                          (property.key as estree.Identifier).name == "images"
-                        ) {
-                          // property is images
-                          const literal = node as unknown as estree.Literal;
-                          const originalUrlValue = literal.value as string;
+                      addFileToFilesToBeRenamed(
+                        rootDir,
+                        originalUrlValue,
+                        hashedUrlValue,
+                        fileRenames
+                      );
+                    } catch {
+                      console.log(
+                        `warning: could not hash a font url resource because it was not found at ${originalUrlValue}`
+                      );
+                    }
+                  }
+                }
+              }
+            }
 
-                          try {
-                            const hashedUrlValue = addHashToUrl(
-                              originalUrlValue,
-                              rootDir
-                            );
+            // we'll be looking back 5 levels
+            if (ancestors.length >= 5) {
+              const maybeProperty = ancestors.slice(-2)[0];
 
-                            literal.value = (literal.value as string).replace(
-                              originalUrlValue,
-                              hashedUrlValue
-                            );
-                            literal.raw = (literal.raw as string).replace(
-                              originalUrlValue,
-                              hashedUrlValue
-                            );
-                            addFileToFilesToBeRenamed(
-                              rootDir,
-                              originalUrlValue,
-                              hashedUrlValue,
-                              fileRenames
-                            );
-                          } catch {
-                            `warning: could not hash an image resource because it was not found at ${originalUrlValue} `;
+              if (maybeProperty.type === "Property") {
+                const property = maybeProperty as unknown as estree.Property;
+
+                if (
+                  property.key.type === "Identifier" &&
+                  (property.key as estree.Identifier).name == "url"
+                ) {
+                  // property is url
+                  const maybeObjExpression = ancestors.slice(-3)[0];
+                  if (maybeObjExpression.type === "ObjectExpression") {
+                    const objExpression =
+                      maybeObjExpression as unknown as estree.ObjectExpression;
+
+                    const properties = objExpression.properties
+                      .filter((p) => p.type === "Property")
+                      .map((p) => p as estree.Property);
+
+                    const identifiers = properties
+                      .filter((p) => p.key.type === "Identifier")
+                      .map((p) => (p.key as estree.Identifier).name);
+
+                    const urlBrowserImageProperties = [
+                      "imageName",
+                      "height",
+                      "width",
+                      "url",
+                    ];
+
+                    const propCount = identifiers.filter(
+                      (i) => urlBrowserImageProperties.indexOf(i) !== -1
+                    ).length;
+                    if (propCount === 4) {
+                      // the object expression has the 4 properties
+                      const maybeArrayExpression = ancestors.slice(-4)[0];
+                      if (maybeArrayExpression.type === "ArrayExpression") {
+                        const maybeProperty = ancestors.slice(-5)[0];
+                        if (maybeProperty.type === "Property") {
+                          const property =
+                            maybeProperty as unknown as estree.Property;
+                          if (
+                            property.key.type === "Identifier" &&
+                            (property.key as estree.Identifier).name == "images"
+                          ) {
+                            // property is images
+                            const literal = node as unknown as estree.Literal;
+                            const originalUrlValue = literal.value as string;
+
+                            try {
+                              const hashedUrlValue = addHashToUrl(
+                                originalUrlValue,
+                                rootDir
+                              );
+
+                              literal.value = (literal.value as string).replace(
+                                originalUrlValue,
+                                hashedUrlValue
+                              );
+                              literal.raw = (literal.raw as string).replace(
+                                originalUrlValue,
+                                hashedUrlValue
+                              );
+                              addFileToFilesToBeRenamed(
+                                rootDir,
+                                originalUrlValue,
+                                hashedUrlValue,
+                                fileRenames
+                              );
+                            } catch {
+                              `warning: could not hash an image resource because it was not found at ${originalUrlValue} `;
+                            }
                           }
                         }
                       }
@@ -258,84 +261,85 @@ export function hashM2c2kitAssets(rootDir: string) {
                 }
               }
             }
-          }
-        },
-      });
+          },
+        });
 
-      const indexJsCode = generate(ast);
-      await writeFile(indexJsFile, indexJsCode);
+        const indexJsCode = generate(ast);
+        await writeFile(indexJsFile, indexJsCode);
 
-      // Parse links in index.html using htmlparser2
-      // note: if link has attribute hash="false", then hashing
-      // is skipped for that link
-      const rawHtml = await readFile(indexHtmlFile, "utf-8");
-      const dom = parseDocument(rawHtml);
+        // Parse links in index.html using htmlparser2
+        // note: if link has attribute hash="false", then hashing
+        // is skipped for that link
+        const rawHtml = await readFile(indexHtmlFile, "utf-8");
+        const dom = parseDocument(rawHtml);
 
-      // handle the css links
-      const links = selectAll("link", dom);
-      links
-        .map((link) => link as unknown as Element)
-        .forEach((link) => {
-          if (
-            link.attribs["href"].endsWith(".css") &&
-            !(link.attribs["hash"]?.toLowerCase() === "false")
-          ) {
-            const originalUrl = link.attribs["href"];
+        // handle the css links
+        const links = selectAll("link", dom);
+        links
+          .map((link) => link as unknown as Element)
+          .forEach((link) => {
+            if (
+              link.attribs["href"].endsWith(".css") &&
+              !(link.attribs["hash"]?.toLowerCase() === "false")
+            ) {
+              const originalUrl = link.attribs["href"];
 
-            try {
-              link.attribs["href"] = addHashToUrl(
-                link.attribs["href"],
-                rootDir
-              );
-              addFileToFilesToBeRenamed(
-                rootDir,
-                originalUrl,
-                link.attribs["href"],
-                fileRenames
-              );
-            } catch {
-              console.log(
-                `warning: could not hash css resource because it was not found at ${link.attribs["href"]}`
-              );
+              try {
+                link.attribs["href"] = addHashToUrl(
+                  link.attribs["href"],
+                  rootDir
+                );
+                addFileToFilesToBeRenamed(
+                  rootDir,
+                  originalUrl,
+                  link.attribs["href"],
+                  fileRenames
+                );
+              } catch {
+                console.log(
+                  `warning: could not hash css resource because it was not found at ${link.attribs["href"]}`
+                );
+              }
             }
+          });
+
+        // handle the script link to index.js
+        const scripts = selectAll("script", dom);
+        scripts
+          .map((script) => script as unknown as Element)
+          .forEach((script) => {
+            if (
+              script.attribs["src"] === "./index.js" &&
+              !(script.attribs["hash"]?.toLowerCase() === "false")
+            ) {
+              try {
+                const hashedFilename = addHashToUrl("index.js", rootDir);
+                script.attribs["src"] = "./" + path.basename(hashedFilename);
+                addFileToFilesToBeRenamed(
+                  rootDir,
+                  "index.js",
+                  hashedFilename,
+                  fileRenames
+                );
+              } catch {
+                console.log(
+                  `warning: could not hash index.js because it was not found at ${indexJsFile}`
+                );
+              }
+            }
+          });
+
+        await writeFile(indexHtmlFile, render(dom));
+
+        fileRenames.forEach((fr) => {
+          // we must check existsSync because a file may be included twice
+          if (existsSync(fr.original)) {
+            renameSync(fr.original, fr.new);
           }
         });
 
-      // handle the script link to index.js
-      const scripts = selectAll("script", dom);
-      scripts
-        .map((script) => script as unknown as Element)
-        .forEach((script) => {
-          if (
-            script.attribs["src"] === "./index.js" &&
-            !(script.attribs["hash"]?.toLowerCase() === "false")
-          ) {
-            try {
-              const hashedFilename = addHashToUrl("index.js", rootDir);
-              script.attribs["src"] = "./" + path.basename(hashedFilename);
-              addFileToFilesToBeRenamed(
-                rootDir,
-                "index.js",
-                hashedFilename,
-                fileRenames
-              );
-            } catch {
-              console.log(
-                `warning: could not hash index.js because it was not found at ${indexJsFile}`
-              );
-            }
-          }
-        });
-
-      await writeFile(indexHtmlFile, render(dom));
-
-      fileRenames.forEach((fr) => {
-        // we must check existsSync because a file may be included twice
-        if (existsSync(fr.original)) {
-          renameSync(fr.original, fr.new);
-        }
-      });
-      await writeHashManifest(rootDir, fileRenames);
+        await writeHashManifest(rootDir, fileRenames);
+      },
     },
   };
 }

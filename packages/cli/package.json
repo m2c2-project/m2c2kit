@@ -36,9 +36,9 @@
     "@types/node": "18.0.0",
     "@types/prompts": "2.0.14",
     "@types/yargs": "17.0.9",
-    "cpy-cli": "4.1.0",
+    "cpy-cli": "4.2.0",
     "rimraf": "^3.0.2",
-    "tslib": "2.4.0",
-    "typescript": "4.7.4"
+    "tslib": "2.4.1",
+    "typescript": "4.9.4"
   }
 }

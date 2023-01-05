@@ -4,7 +4,10 @@ import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import copy from "rollup-plugin-copy";
-import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
+import {
+  hashM2c2kitAssets,
+  makeM2c2kitServiceWorker,
+} from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
@@ -73,6 +76,10 @@ export default (commandLineArgs) => {
         commandLineArgs.configProd &&
           !commandLineArgs.configNoHash &&
           hashM2c2kitAssets(outputFolder),
+        commandLineArgs.configProd &&
+          !commandLineArgs.configNoHash &&
+          commandLineArgs.configServiceWorker &&
+          makeM2c2kitServiceWorker(outputFolder, ["data.html", "data.js"]),
         commandLineArgs.configServe &&
           serve({
             /**

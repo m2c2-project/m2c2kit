@@ -11,7 +11,11 @@ import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
 import findup from "findup-sync";
 import replace from "@rollup/plugin-replace";
-import { version } from "./package.json";
+import { readFileSync } from "fs";
+
+const pkg = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf8")
+);
 
 // rollup-plugin-copy doesn't like windows backslashes
 const canvaskitWasmPath = findup(
@@ -20,7 +24,7 @@ const canvaskitWasmPath = findup(
 
 let sharedPlugins = [
   replace({
-    __M2C2KIT_PACKAGE_JSON_VERSION__: version,
+    __M2C2KIT_PACKAGE_JSON_VERSION__: pkg.version,
     preventAssignment: true,
   }),
   // canvaskit-wasm references these node.js functions

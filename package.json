@@ -37,7 +37,7 @@
     "@typescript-eslint/parser": "^5.22.0",
     "chalk": "^5.0.1",
     "concurrently": "^7.3.0",
-    "cpy-cli": "4.1.0",
+    "cpy-cli": "4.2.0",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "find-up": "6.3.0",
