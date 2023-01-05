@@ -29,14 +29,14 @@
     "@rollup/plugin-node-resolve": "15.0.1",
     "@rollup/plugin-replace": "5.0.2",
     "@rollup/plugin-typescript": "10.0.1",
-    "@types/jest": "29.0.3",
-    "@types/jsdom": "20.0.0",
+    "@types/jest": "29.2.5",
+    "@types/jsdom": "20.0.1",
     "canvas": "2.11.0",
     "canvaskit-wasm": "0.37.0",
     "findup-sync": "5.0.0",
-    "jest": "29.0.3",
-    "jest-environment-jsdom": "29.0.3",
-    "jsdom": "20.0.0",
+    "jest": "29.3.1",
+    "jest-environment-jsdom": "29.3.1",
+    "jsdom": "20.0.3",
     "rimraf": "3.0.2",
     "rollup": "3.9.1",
     "rollup-plugin-copy": "3.4.0",
@@ -45,6 +45,6 @@
     "rollup-plugin-shim": "1.0.0",
     "rollup-plugin-sourcemaps": "0.6.3",
     "rollup-plugin-terser": "7.0.2",
-    "ts-jest": "29.0.1"
+    "ts-jest": "29.0.3"
   }
 }
