@@ -27,7 +27,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.0.1",
     "@rollup/plugin-replace": "5.0.2",
-    "@rollup/plugin-typescript": "10.0.1",
+    "@rollup/plugin-typescript": "11.0.0",
     "cpy-cli": "4.2.0",
     "rimraf": "^3.0.2",
     "rollup": "3.9.1",
