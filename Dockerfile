@@ -1,9 +1,10 @@
-FROM node:18.12.1
+FROM node:18.13.0
 
 WORKDIR /usr/src/m2c2kit
 
 COPY . .
 
+RUN npm install -g npm@9.2.0
 RUN npm install concurrently --location=global
 RUN npm install
 
