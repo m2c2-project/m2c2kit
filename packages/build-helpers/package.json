@@ -30,9 +30,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "acorn": "8.8.0",
+    "acorn": "8.8.1",
     "acorn-walk": "8.2.0",
-    "astring": "1.8.3",
+    "astring": "1.8.4",
     "css-select": "5.1.0",
     "dom-serializer": "2.0.0",
     "domhandler": "5.0.3",

@@ -76,7 +76,7 @@ These steps are optional, but if you observe text distortion, you can make a cus
 
 1. Clone the repository from within your home directory: `git clone https://github.com/google/skia.git`
 
-2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.37.0 was deployed from commit 796df2a. To use this: `git -C ~/skia checkout 796df2a`
+2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.37.2 was deployed from commit dd85a90. To use this: `git -C ~/skia checkout dd85a90`
 
 3. One of the docker files refers to an image in an inaccessible registry. Edit the file `~/skia/infra/canvaskit/docker/canvaskit-emsdk/Dockerfile` and change the line that says
 
@@ -116,7 +116,7 @@ to
 docker build -t emsdk-base ~/skia/infra/wasm-common/docker/emsdk-base/
 docker run -v ~/skia:/SRC -v ~/skia/out/dockerpathkit:/OUT emsdk-base /SRC/infra/pathkit/build_pathkit.sh
 docker build -t canvaskit-emsdk ./skia/infra/canvaskit/docker/canvaskit-emsdk/
-docker run -a stdout -v ~/skia:/SRC -w /SRC emsdk-base python tools/git-sync-deps
+docker run -a stdout -v ~/skia:/SRC -w /SRC emsdk-base python3 tools/git-sync-deps
 docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh
 ```
 

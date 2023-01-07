@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "ver": "rollup --version",
     "clean": "rimraf build build-nobundler build-umd dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "jest",
     "postinstall": "node post-install.mjs"
@@ -32,7 +33,7 @@
     "@types/jest": "29.2.5",
     "@types/jsdom": "20.0.1",
     "canvas": "2.11.0",
-    "canvaskit-wasm": "0.37.0",
+    "canvaskit-wasm": "0.37.2",
     "findup-sync": "5.0.0",
     "jest": "29.3.1",
     "jest-environment-jsdom": "29.3.1",
