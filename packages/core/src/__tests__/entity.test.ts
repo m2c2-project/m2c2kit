@@ -9,7 +9,6 @@ import {
   Label,
   Shape,
 } from "../../build-umd";
-import { JSDOM } from "jsdom";
 
 TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
@@ -26,9 +25,12 @@ class Game1 extends Game {
     };
 
     super(gameOptions);
+  }
+
+  async init() {
+    await super.init();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
-    game.init();
 
     scene1 = new Scene({ name: "myScene1" });
     game.addScene(scene1);
@@ -55,7 +57,7 @@ let label1: Label;
 let label2: Label;
 let rect1: Shape;
 
-beforeEach(() => {
+beforeEach(async () => {
   g1 = new Game1();
   const options: SessionOptions = {
     activities: [g1],
@@ -63,14 +65,13 @@ beforeEach(() => {
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
+  await session.init();
 });
 
 describe("test descendants", () => {
   it("descendants of scene1 contain label1 and rect1", () => {
-    return session.init().then(() => {
-      expect(scene1.descendants).toContain(label1);
-      expect(scene1.descendants).toContain(rect1);
-    });
+    expect(scene1.descendants).toContain(label1);
+    expect(scene1.descendants).toContain(rect1);
   });
 
   it("descendants of label1 contain rect1", () => {

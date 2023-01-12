@@ -12,6 +12,7 @@ import { SessionOptions } from "./SessionOptions";
 import { Uuid } from "./Uuid";
 import { ActivityType } from "./ActivityType";
 import { DomHelpers } from "./DomHelpers";
+import { IDataStore } from "./IDataStore";
 
 export class Session {
   options: SessionOptions;
@@ -19,6 +20,7 @@ export class Session {
   imageManager: ImageManager;
   currentActivity?: Activity;
   uuid: string;
+  dataStore?: IDataStore;
   private canvasKit?: CanvasKit;
   private version = "__M2C2KIT_PACKAGE_JSON_VERSION__";
 
@@ -59,7 +61,14 @@ export class Session {
     DomHelpers.setSpinnerVisibility(true);
     DomHelpers.setCanvasOverlayVisibility(true);
 
-    this.options.activities.forEach((activity) => activity.init());
+    await Promise.all(
+      this.options.activities.map((activity) => {
+        // IDataStore implementation is provided by another library and must
+        // be set in the session before calling session.init()
+        activity.dataStore = this.dataStore;
+        return activity.init();
+      })
+    );
 
     const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);

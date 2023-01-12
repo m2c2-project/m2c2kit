@@ -67,10 +67,11 @@ const options = {
 
 - The last line of the constructor has the code `super(options)`. This is how we get all the built-in functionality of the `Game` class. Just always remember to include this at the end of your constructor.
 
-- Within the `init()`, we write our assessment code, as we have been doing all along. The only difference is the first line,  `const game = this`, which is how we can conveniently refer to the game object (this was hidden from you in the previous examples). 
+- Within the `init()`, we write our assessment code, as we have been doing all along. The only difference is the first two lines: `await super.init()` runs some built-in setup code. `const game = this` allows us to conveniently refer to the game object (this was hidden from you in the previous examples). 
 
 ```js
-init() {
+async init() {
+    await super.init();
     const game = this;
     const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
     game.addScene(sceneOne);
@@ -102,7 +103,8 @@ export const code = `class DocsDemo extends Game {
         super(options);
     }
  
-    init() {
+    async init() {
+        await super.init();
         const game = this;
         const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
         game.addScene(sceneOne);

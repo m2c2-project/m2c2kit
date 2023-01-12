@@ -154,8 +154,8 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     super(options);
   }
 
-  override init(): void {
-    super.init();
+  override async init() {
+    await super.init();
     /**
      * Just for convenience, alias the variable game to "this"
      * (even though eslint doesn't like it)

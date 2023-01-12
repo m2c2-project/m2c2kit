@@ -42,6 +42,7 @@ import { LocalizationOptions } from "./LocalizationOptions";
 import { WebColors } from "./WebColors";
 import { DomHelpers } from "./DomHelpers";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { IDataStore } from "./IDataStore";
 
 interface BoundingBox {
   xMin: number;
@@ -77,6 +78,7 @@ export class Game implements Activity {
   i18n?: I18n;
   private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
   private loaderElementsRemoved = false;
+  private _dataStore?: IDataStore;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -104,11 +106,147 @@ export class Game implements Activity {
     };
   }
 
-  init() {
+  async init() {
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
       this.i18n = new I18n(options);
     }
+  }
+
+  /**
+   * Saves an item to the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   * @param key - item key
+   * @param value - item value
+   * @param globalStore - if true, treat the item as "global" and not
+   * associated with a specific activity; global items can be accessed
+   * by any activity. Default is false.
+   * @returns key
+   */
+  storeSetItem(
+    key: string,
+    value: string | number | boolean | object | undefined | null,
+    globalStore = false
+  ): Promise<string> {
+    const k = globalStore ? key : this.id.concat(":", key);
+    const activityId = globalStore ? "" : this.id;
+    return this.dataStore.setItem(k, value, activityId);
+  }
+
+  /**
+   * Gets an item value from the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   * @param key - item key
+   * @param globalStore - if true, treat the item as "global" and not
+   * associated with a specific activity; global items can be accessed
+   * by any activity. Default is false.
+   * @returns value of the item
+   */
+  storeGetItem<T extends string | number | boolean | object | undefined | null>(
+    key: string,
+    globalStore = false
+  ): Promise<T> {
+    const k = globalStore ? key : this.id.concat(":", key);
+    return this.dataStore.getItem<T>(k);
+  }
+
+  /**
+   * Deletes an item value from the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   * @param key - item key
+   * @param globalStore - if true, treat the item as "global" and not
+   * associated with a specific activity; global items can be accessed
+   * by any activity. Default is false.
+   */
+  storeDeleteItem(key: string, globalStore = false) {
+    const k = globalStore ? key : this.id.concat(":", key);
+    return this.dataStore.deleteItem(k);
+  }
+
+  /**
+   * Deletes all items from the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   */
+  storeClearItems() {
+    return this.dataStore.clearItemsByActivityId(this.id);
+  }
+
+  /**
+   * Returns keys of all items in the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   * @param globalStore - if true, treat the item as "global" and not
+   * associated with a specific activity; global items can be accessed
+   * by any activity. Default is false.
+   */
+  storeItemsKeys(globalStore = false) {
+    return this.dataStore.itemsKeysByActivityId(globalStore ? "" : this.id);
+  }
+
+  /**
+   * Determines if a key exists in the activity's key-value store.
+   *
+   * @remarks The underlying persistence provider of the key-value store must
+   * be previously set in the activity's `Session` before use:
+   * ```
+   * const db: IDataStore = new LocalDatabase();
+   * session.dataStore = db;
+   * session.init();
+   * ```
+   * @param key - item key
+   * @param globalStore - if true, treat the item as "global" and not
+   * associated with a specific activity; global items can be accessed
+   * by any activity. Default is false.
+   * @returns true if the key exists, false otherwise
+   */
+  storeItemExists(key: string, globalStore = false) {
+    const k = globalStore ? key : this.id.concat(":", key);
+    return this.dataStore.itemExists(k);
+  }
+
+  get dataStore(): IDataStore {
+    if (!this._dataStore) {
+      throw new Error("dataStore is undefined");
+    }
+    return this._dataStore;
+  }
+
+  set dataStore(dataStore: IDataStore) {
+    this._dataStore = dataStore;
   }
 
   private getLocalizationOptionsFromGameParameters() {
@@ -909,6 +1047,7 @@ export class Game implements Activity {
         emptyTrial[variableName] = null;
       }
       this.data.trials.push({
+        document_uuid: Uuid.generate(),
         session_uuid: this.session.uuid,
         activity_uuid: this.uuid,
         activity_id: this.options.id,
@@ -962,7 +1101,7 @@ export class Game implements Activity {
    * Should be called when the current trial has completed. It will
    * also increment the trial index.
    *
-   * @remarks Calling will trigger the onActivityDataCreate callback function,
+   * @remarks Calling will trigger the onActivityResults callback function,
    * if one was provided in SessionOptions. This is how the game communicates
    * trial data to the parent session, which can then save or process the data.
    * It is the responsibility of the the game programmer to call this at
@@ -973,6 +1112,7 @@ export class Game implements Activity {
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.session.options.activityCallbacks.onActivityResults({
         type: EventType.ActivityData,
+        iso8601Timestamp: new Date().toISOString(),
         target: this,
         /** newData is only the trial that recently completed */
         newData: this.data.trials[this.trialIndex - 1],
@@ -996,6 +1136,11 @@ export class Game implements Activity {
    * values in the trial data.
    */
   private readonly automaticTrialSchema: TrialSchema = {
+    document_uuid: {
+      type: "string",
+      format: "uuid",
+      description: "Unique identifier for this data document.",
+    },
     session_uuid: {
       type: "string",
       format: "uuid",

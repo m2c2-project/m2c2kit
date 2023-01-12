@@ -1,10 +1,11 @@
 import { ActivityType } from "./ActivityType";
+import { IDataStore } from "./IDataStore";
 import { Session } from "./Session";
 export interface Activity {
   /** The type of activity: Game or Survey */
   type: ActivityType;
-  /** Initializes the activity. All code to construct the activity's appearance and behavior must be placed in this method. */
-  init(): void;
+  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.init()`. */
+  init(): Promise<void>;
   /** Starts the activity */
   start(): void;
   /** Stops the activity */
@@ -24,4 +25,6 @@ export interface Activity {
   /** Set activity parameters if defaults are not desired*/
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setParameters(newParameters: any): void;
+  /** Optional store to use for saving data. The implementation of the store is not provided by the \@m2c2kit/core library. */
+  dataStore?: IDataStore;
 }

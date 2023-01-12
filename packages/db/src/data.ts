@@ -4,7 +4,7 @@ import { IActivityResultsTable } from "./IActivityResultsTable";
 // declare these on Dexie so TypeScript knows about them
 declare module "dexie" {
   interface Dexie {
-    activityResults: Dexie.Table<IActivityResultsTable, number>;
+    activityResults: Dexie.Table<IActivityResultsTable, string>;
   }
 }
 
@@ -12,7 +12,7 @@ const db = new Dexie("m2c2db");
 
 db.version(1).stores({
   // keep the below in sync with code in index.ts
-  activityResults: "++id,timestamp,activity_id",
+  activityResults: "document_uuid,timestamp,activity_id",
 });
 
 db.activityResults.count().then((totalCount) => {

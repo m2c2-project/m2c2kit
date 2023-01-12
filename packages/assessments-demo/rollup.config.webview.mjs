@@ -45,6 +45,10 @@ export default (commandLineArgs) => {
               dest: `${outputFolder}/assets`,
             },
             {
+              src: "../assessment-color-shapes/assets/color-shapes",
+              dest: `${outputFolder}/assets`,
+            },
+            {
               src: "../assessment-color-dots/assets/color-dots",
               dest: `${outputFolder}/assets`,
             },

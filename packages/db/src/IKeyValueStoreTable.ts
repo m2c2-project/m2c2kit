@@ -1,10 +1,8 @@
-import { ActivityKeyValueData } from "@m2c2kit/core";
-
-export interface IActivityResultsTable {
-  document_uuid: string;
+export interface IKeyValueStoreTable {
   // Store timestamp as unix epoch milliseconds because IndexedDB will index it
   // Likely more efficient to index a number than an ISO string?
   timestamp: number;
   activity_id: string;
-  data: ActivityKeyValueData;
+  key: string;
+  value: string | number | boolean | object | undefined | null;
 }

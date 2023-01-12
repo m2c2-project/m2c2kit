@@ -302,8 +302,8 @@ class ColorShapes extends Game {
     super(options);
   }
 
-  override init(): void {
-    super.init();
+  override async init() {
+    await super.init();
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias

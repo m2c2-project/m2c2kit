@@ -9,17 +9,19 @@ import {
 import { SageResearch } from "@m2c2kit/sage-research";
 
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
+import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
 import { GridMemory } from "@m2c2kit/assessment-grid-memory";
 import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";
 import { CliStarter } from "@m2c2kit/assessment-cli-starter";
 
-const a1 = new ColorDots();
-const a2 = new GridMemory();
-const a3 = new SymbolSearch();
-const a4 = new CliStarter();
+const a1 = new ColorShapes();
+const a2 = new ColorDots();
+const a3 = new GridMemory();
+const a4 = new SymbolSearch();
+const a5 = new CliStarter();
 
 const session = new Session({
-  activities: [a1, a2, a3, a4],
+  activities: [a1, a2, a3, a4, a5],
   canvasKitWasmUrl: "assets/canvaskit.wasm",
   sessionCallbacks: {
     /**
@@ -145,14 +147,4 @@ SageResearch.ConfigureWasmFetchInterceptor();
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-session.init().then(() => {
-  /**
-   * session.init() may take a few moments when downloading non-local or
-   * non-cached resources. After session.init() completes, the below code
-   * removes the loading spinner that is defined in the HTML template.
-   */
-  const loaderDiv = document.getElementById("m2c2kit-loader-div");
-  if (loaderDiv) {
-    loaderDiv.classList.remove("m2c2kit-loader");
-  }
-});
+session.init();

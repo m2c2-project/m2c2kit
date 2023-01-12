@@ -5,9 +5,13 @@ import {
   ActivityLifecycleEvent,
   ActivityType,
   EventType,
+  Game,
+  Scene,
+  Label,
+  LabelHorizontalAlignmentMode,
+  IDataStore,
 } from "@m2c2kit/core";
 import { LocalDatabase } from "@m2c2kit/db";
-
 import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
 import { GridMemory } from "@m2c2kit/assessment-grid-memory";
@@ -15,6 +19,7 @@ import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";
 import { CliStarter } from "@m2c2kit/assessment-cli-starter";
 import { Survey } from "@m2c2kit/survey";
 import { surveyJson } from "./surveyJson";
+import { Button, VirtualKeyboard } from "@m2c2kit/addons";
 
 const a1 = new ColorShapes();
 const a2 = new ColorDots();
@@ -23,8 +28,90 @@ const a4 = new SymbolSearch();
 const a5 = new CliStarter();
 const survey = new Survey(surveyJson);
 
+class Demo extends Game {
+  constructor() {
+    const options = {
+      name: "demo",
+      id: "demo",
+      version: "0",
+      width: 400,
+      height: 800,
+      //fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+      // images: [
+      //     {
+      //         imageName: "stroop-screenshot",
+      //         height: 336,
+      //         width: 384,
+      //         url: "./assets/docs/img/stroop.png",
+      //     },
+      // ],
+    };
+    super(options);
+  }
+
+  override async init() {
+    await super.init();
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const game = this;
+
+    await this.storeSetItem("name", "pc111");
+    await this.storeSetItem("seen", [1232321, 43432, 4324324]);
+    console.log(await this.storeGetItem("name"));
+    console.log(await this.storeGetItem("seen"));
+    //await this.storeClearItems();
+
+    const t = (await this.storeGetItem<number>("times", true)) ?? 0;
+    await this.storeSetItem("times", t + 1, true);
+
+    console.log(await this.storeGetItem("times", true));
+
+    console.log(await this.storeItemExists("name"));
+    console.log(await this.storeItemExists("name1"));
+    console.log(await this.storeItemExists("name", false));
+
+    //await this.storeDeleteItem("times", true);
+
+    const s0 = new Scene();
+    game.addScene(s0);
+
+    const keyboard = new VirtualKeyboard({
+      position: { x: 200, y: 400 },
+      size: { width: 400, height: 300 },
+    });
+    s0.addChild(keyboard);
+
+    const textbox = new Label({
+      position: { x: 10, y: 100 },
+      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Left,
+      preferredMaxLayoutWidth: 390,
+      anchorPoint: { x: 0, y: 0 },
+    });
+    s0.addChild(textbox);
+
+    const exit = new Button({
+      text: "Next",
+      position: { x: 200, y: 50 },
+      isUserInteractionEnabled: true,
+    });
+    exit.onTapDown(() => {
+      game.end();
+    });
+    s0.addChild(exit);
+
+    keyboard.onKeyUp((e) => {
+      console.log(e.key);
+      if (e.key !== "Shift" && e.key !== "Backspace") {
+        textbox.text += e.key;
+      }
+      if (e.key === "Backspace") {
+        textbox.text = textbox.text.slice(0, textbox.text.length - 1);
+      }
+    });
+  }
+}
+
 const session = new Session({
-  activities: [a1, a2, a3, a4, a5, survey],
+  activities: [new Demo(), a1, a2, a3, a4, a5, survey],
   canvasKitWasmUrl: "assets/canvaskit.wasm",
   sessionCallbacks: {
     /**
@@ -123,5 +210,6 @@ const session = new Session({
  * */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-const db = new LocalDatabase();
+const db: IDataStore = new LocalDatabase();
+session.dataStore = db;
 session.init();

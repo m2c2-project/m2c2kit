@@ -69,7 +69,8 @@
           };
           super(options);
         }
-        init() {
+        async init() {
+          await super.init();
           const game = this;
           const sceneOne = new Scene();
           game.addScene(sceneOne);

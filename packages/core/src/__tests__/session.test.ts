@@ -27,6 +27,10 @@ class Game1 extends Game {
     };
 
     super(gameOptions);
+  }
+
+  async init() {
+    await super.init();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -49,6 +53,10 @@ class Game2 extends Game {
     };
 
     super(gameOptions);
+  }
+
+  async init() {
+    await super.init();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -63,7 +71,7 @@ let session: Session;
 let g1: Game1;
 let g2: Game2;
 
-beforeEach(() => {
+beforeEach(async () => {
   g1 = new Game1();
   g2 = new Game2();
 
@@ -73,6 +81,7 @@ beforeEach(() => {
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
+  await session.init();
 });
 
 describe("Session", () => {
@@ -92,32 +101,24 @@ describe("Session init", () => {
   it("assigns canvaskit", () => {
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
-    return session.init().then(() => {
-      expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
-      expect(session.imageManager.canvasKit).toHaveProperty(
-        "MakeCanvasSurface"
-      );
-      expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
-      expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
-    });
+    expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
+    expect(session.imageManager.canvasKit).toHaveProperty("MakeCanvasSurface");
+    expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
+    expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
   });
 });
 
 describe("Session start", () => {
   it("starts first activity", () => {
-    return session.init().then(() => {
-      session.start();
-      expect(session.currentActivity).toBe(g1);
-    });
+    session.start();
+    expect(session.currentActivity).toBe(g1);
   });
 });
 
 describe("Session advanceToNextActivity", () => {
   it("advances to next activity", () => {
-    return session.init().then(() => {
-      session.start();
-      session.advanceToNextActivity();
-      expect(session.currentActivity).toBe(g2);
-    });
+    session.start();
+    session.advanceToNextActivity();
+    expect(session.currentActivity).toBe(g2);
   });
 });

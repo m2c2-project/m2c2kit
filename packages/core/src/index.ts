@@ -33,6 +33,7 @@ export * from "./GameParameters";
 export * from "./Globals";
 export * from "./GlobalVariables";
 export * from "./I18n";
+export * from "./IDataStore";
 export * from "./IDrawable";
 export * from "./ImageManager";
 export * from "./IText";

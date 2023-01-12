@@ -22,4 +22,6 @@ export interface ActivityResultsEvent extends ActivityEvent, ActivityResults {
   // activityConfiguration: unknown;
   // activityConfigurationSchema: JsonSchema;
   // activityMetrics?: Array<ActivityMetric>;
+  /** ISO 8601 timestamp of the event. Specifically, value of "new Date().toISOString()" executed on the device when the ActivityResultsEvent occured. */
+  iso8601Timestamp: string;
 }

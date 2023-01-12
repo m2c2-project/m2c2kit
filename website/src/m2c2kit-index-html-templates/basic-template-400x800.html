@@ -126,7 +126,8 @@
           };
           super(options);
         }
-        init() {
+        async init() {
+          await super.init();
           const game = this;
           // _-_BEGIN_CODE_REPLACEMENT_BLOCK_-_
           const sceneOne = new Scene({ backgroundColor: WebColors.SkyBlue });

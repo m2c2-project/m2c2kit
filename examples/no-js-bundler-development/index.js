@@ -43,8 +43,8 @@ class NoBundler extends Game {
     super(options);
   }
 
-  init() {
-    super.init();
+  async init() {
+    await super.init();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const sceneOne = new Scene();

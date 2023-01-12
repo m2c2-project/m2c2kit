@@ -66,7 +66,7 @@ export class Survey implements Activity {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  init() {}
+  async init() {}
 
   /**
    * Sets the JSON survey definition, if it was not already set in
@@ -586,6 +586,7 @@ export class Survey implements Activity {
 
   private makeAutomaticSurveyDataProperties(): AutomaticSurveyDataProperties {
     return {
+      document_uuid: Uuid.generate(),
       session_uuid: this.session.uuid,
       activity_uuid: this.uuid,
       activity_id: this.id,
@@ -599,6 +600,7 @@ export class Survey implements Activity {
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.session.options.activityCallbacks.onActivityResults({
         type: EventType.ActivityData,
+        iso8601Timestamp: new Date().toISOString(),
         target: this,
         newData: newData,
         newDataSchema: {},

@@ -98,7 +98,8 @@ class Stroop extends Game {
     super(options);
   }
 
-  init() {
+  async init() {
+    await super.init();
     const game = this;
 
     const wordColors = [

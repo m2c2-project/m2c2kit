@@ -10,7 +10,6 @@ import {
   Shape,
   WebColors,
 } from "../../build-umd";
-import { JSDOM } from "jsdom";
 
 TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
@@ -33,9 +32,12 @@ class Game1 extends Game {
     };
 
     super(gameOptions);
+  }
+
+  async init() {
+    await super.init();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
-    game.init();
 
     const scene1 = new Scene({
       name: "myScene1",
@@ -55,8 +57,17 @@ class Game1 extends Game {
   }
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   g1 = new Game1();
+
+  const options: SessionOptions = {
+    activities: [g1],
+    canvasKitWasmUrl: "assets/canvaskit.wasm",
+  };
+  session = new Session(options);
+  TestHelpers.setupDomAndGlobals();
+  await session.init();
+
   rect1 = g1.entities
     .filter((e) => e.name === "myRect1")
     .find(Boolean) as Shape;
@@ -77,21 +88,12 @@ beforeEach(() => {
   if (!label1) {
     throw new Error("myLabel1 undefined");
   }
-
-  const options: SessionOptions = {
-    activities: [g1],
-    canvasKitWasmUrl: "assets/canvaskit.wasm",
-  };
-  session = new Session(options);
-  TestHelpers.setupDomAndGlobals();
 });
 
 describe("test duplicate method", () => {
   it("scene2 is a scene", () => {
-    return session.init().then(() => {
-      const scene2 = scene1.duplicate();
-      expect(scene2).toBeInstanceOf(Scene);
-    });
+    const scene2 = scene1.duplicate();
+    expect(scene2).toBeInstanceOf(Scene);
   });
 
   it("scene2's game is scene1's game", () => {
