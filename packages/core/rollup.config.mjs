@@ -6,7 +6,7 @@ import copy from "rollup-plugin-copy";
 import babel from "@rollup/plugin-babel";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import path from "path";
 import findup from "findup-sync";
