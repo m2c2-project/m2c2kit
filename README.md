@@ -76,12 +76,12 @@ These steps are optional, but if you observe text distortion, you can make a cus
 
 1. Clone the repository from within your home directory: `git clone https://github.com/google/skia.git`
 
-2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.37.2 was deployed from commit dd85a90. To use this: `git -C ~/skia checkout dd85a90`
+2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.38.0 was deployed from commit 9e51c2c. To use this: `git -C ~/skia checkout 9e51c2c`
 
 3. One of the docker files refers to an image in an inaccessible registry. Edit the file `~/skia/infra/canvaskit/docker/canvaskit-emsdk/Dockerfile` and change the line that says
 
 ```
-FROM gcr.io/skia-public/emsdk-base:3.1.3_v1
+FROM gcr.io/skia-public/emsdk-base:3.1.26_v2
 ```
 
 to
@@ -120,7 +120,9 @@ docker run -a stdout -v ~/skia:/SRC -w /SRC emsdk-base python3 tools/git-sync-de
 docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh
 ```
 
-Note: In the last step, alternatively use `docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh debug_build` to build a debug version of `canvaskit-wasm`, which will create a non-minified version of `canvaskit.js` and a wasm binary with full features. This is practical only for debugging, because the wasm binary is much larger (over _100 megabytes_) than the release version.
+Note 1: If you have previously built `canvaskit-wasm`, remove existing docker images for `canvaskit-emsdk` and `emsdk-base`.
+
+Note 2: In the last step, alternatively use `docker run -v ~/skia:/SRC -v ~/skia/out:/OUT canvaskit-emsdk /SRC/infra/canvaskit/build_canvaskit.sh debug_build` to build a debug version of `canvaskit-wasm`, which will create a non-minified version of `canvaskit.js` and a wasm binary with full features. This is practical only for debugging, because the wasm binary is much larger (over _100 megabytes_) than the release version.
 
 6. The build artifacts of interest, `canvaskit.js` and `canvaskit.wasm`, are in `~/skia/out`. Assuming you have already executed `npm install`, replace the same two files in `node_modules/canvaskit-wasm/bin` with these newly built files. Before replacing the files, rename the originals so you can easily switch back, if needed. Note: you must replace both `canvaskit.js` and `canvaskit.wasm` -- you cannot simply replace the wasm file.
 
