@@ -213,7 +213,7 @@ top. (2 unique symbols.)",
     const options: GameOptions = {
       name: "Symbol Search",
       id: "symbol-search",
-      version: "__M2C2KIT_PACKAGE_JSON_VERSION__",
+      version: "__PACKAGE_JSON_VERSION__",
       shortDescription:
         "Symbol Search is a test of processing speed, where \
 participants see a row of symbol pairs at the top of the screen and match \

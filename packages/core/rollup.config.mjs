@@ -24,7 +24,7 @@ const canvaskitWasmPath = findup(
 
 let sharedPlugins = [
   replace({
-    __M2C2KIT_PACKAGE_JSON_VERSION__: pkg.version,
+    __PACKAGE_JSON_VERSION__: pkg.version,
     preventAssignment: true,
   }),
   // canvaskit-wasm references these node.js functions

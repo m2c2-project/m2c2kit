@@ -263,7 +263,7 @@ class ColorDots extends Game {
     const options: GameOptions = {
       name: "Color Dots",
       id: "color-dots",
-      version: "0.8.1",
+      version: "__PACKAGE_JSON_VERSION__",
       shortDescription: "A short description of Color Dots goes here...",
       longDescription:
         "Participants are asked to remember the location and color of three \

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-dots",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "scripts": {
     "build": "npm run clean && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
@@ -20,8 +20,8 @@
     "post-install.mjs"
   ],
   "dependencies": {
-    "@m2c2kit/addons": "0.3.0",
-    "@m2c2kit/core": "0.3.3"
+    "@m2c2kit/addons": "0.3.1",
+    "@m2c2kit/core": "0.3.4"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.0.1",
@@ -29,7 +29,7 @@
     "@rollup/plugin-terser": "0.3.0",
     "@rollup/plugin-typescript": "11.0.0",
     "cpy-cli": "4.2.0",
-    "rimraf": "4.0.4",
+    "rimraf": "4.0.7",
     "rollup": "3.10.0",
     "tslib": "2.4.1",
     "typescript": "4.9.4"

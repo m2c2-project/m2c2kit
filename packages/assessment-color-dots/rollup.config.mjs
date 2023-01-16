@@ -10,7 +10,7 @@ const pkg = JSON.parse(
 
 const sharedPlugins = [
   replace({
-    __M2C2KIT_PACKAGE_JSON_VERSION__: pkg.version,
+    __PACKAGE_JSON_VERSION__: pkg.version,
     preventAssignment: true,
   }),
 ];

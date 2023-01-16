@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/db",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A local database for storing m2c2kit data on the device. It is built using Dexie.js, and the underlying client-side storage is IndexedDB.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -32,7 +32,7 @@
     "typescript": "4.9.4"
   },
   "dependencies": {
-    "@m2c2kit/core": "0.3.3",
+    "@m2c2kit/core": "0.3.4",
     "dexie": "3.2.2"
   }
 }

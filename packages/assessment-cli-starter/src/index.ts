@@ -83,7 +83,7 @@ class CliStarter extends Game {
     const options: GameOptions = {
       name: "cli starter assessment",
       id: "cli-starter",
-      version: "1.0.0",
+      version: "__PACKAGE_JSON_VERSION__",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
       longDescription: `In psychology, the Stroop effect is the delay in \

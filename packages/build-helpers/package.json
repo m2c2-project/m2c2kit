@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/build-helpers",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "module": "dist/index.js",
   "type": "module",
@@ -17,7 +17,7 @@
     "@types/findup-sync": "4.0.2",
     "cpy-cli": "4.2.0",
     "findup-sync": "5.0.0",
-    "rimraf": "4.0.4",
+    "rimraf": "4.0.7",
     "rollup": "3.10.0",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-dts": "5.1.1",

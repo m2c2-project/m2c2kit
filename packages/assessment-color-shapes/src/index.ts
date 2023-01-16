@@ -260,7 +260,7 @@ class ColorShapes extends Game {
     const options: GameOptions = {
       name: "Color Shapes",
       id: "color-shapes",
-      version: "0.8.1",
+      version: "__PACKAGE_JSON_VERSION__",
       shortDescription: "A short description of Color Shapes goes here...",
       longDescription: `Color Shapes is a change detection paradigm used to measure visual short-term memory binding (Parra et al., 2009). Participants are asked to memorize the shapes and colors of three different polygons for 3 seconds. The three polygons are then removed from the screen and re-displayed at different locations, either having the same or different colors. Participants are then asked to decide whether the combination of colors and shapes are the "Same" or "Different" between the study and test phases.`,
       showFps: defaultParameters.show_fps.default,
@@ -479,12 +479,77 @@ class ColorShapes extends Game {
         shapeColors.length - 1
       );
 
+      // do not allow shapes to be in the same row or column
+      // or along the diagonal
+      const onDiagonal = (
+        locations: {
+          row: number;
+          column: number;
+        }[]
+      ): boolean => {
+        if (
+          locations
+            .map((c) => c.row === 0 && c.column === 0)
+            .some((e) => e === true) &&
+          locations
+            .map((c) => c.row === 1 && c.column === 1)
+            .some((e) => e === true) &&
+          locations
+            .map((c) => c.row === 2 && c.column === 2)
+            .some((e) => e === true)
+        ) {
+          return true;
+        }
+        if (
+          locations
+            .map((c) => c.row === 2 && c.column === 0)
+            .some((e) => e === true) &&
+          locations
+            .map((c) => c.row === 1 && c.column === 1)
+            .some((e) => e === true) &&
+          locations
+            .map((c) => c.row === 0 && c.column === 2)
+            .some((e) => e === true)
+        ) {
+          return true;
+        }
+        return false;
+      };
+
+      const inLine = (
+        locations: {
+          row: number;
+          column: number;
+        }[]
+      ): boolean => {
+        const uniqueRows = new Set(locations.map((l) => l.row)).size;
+        const uniqueColumns = new Set(locations.map((l) => l.column)).size;
+
+        if (uniqueRows !== 1 && uniqueColumns !== 1) {
+          return false;
+        }
+        return true;
+      };
+
       // assign present shapes' locations and colors
-      const presentLocations = RandomDraws.FromGridWithoutReplacement(
-        numberOfShapesShown,
-        rows,
-        columns
-      );
+      let presentLocationsOk = false;
+      let presentLocations: {
+        row: number;
+        column: number;
+      }[];
+      do {
+        presentLocations = RandomDraws.FromGridWithoutReplacement(
+          numberOfShapesShown,
+          rows,
+          columns
+        );
+
+        if (!inLine(presentLocations) && !onDiagonal(presentLocations)) {
+          presentLocationsOk = true;
+        } else {
+          presentLocationsOk = false;
+        }
+      } while (!presentLocationsOk);
       for (let j = 0; j < numberOfShapesShown; j++) {
         const presentShape: PresentShape = {
           shape: shapeLibrary[shapesToShowIndexes[j]],
@@ -497,11 +562,24 @@ class ColorShapes extends Game {
       }
 
       // assign response shapes' locations
-      const responseLocations = RandomDraws.FromGridWithoutReplacement(
-        numberOfShapesShown,
-        rows,
-        columns
-      );
+      let responseLocationsOk = false;
+      let responseLocations: {
+        row: number;
+        column: number;
+      }[];
+      do {
+        responseLocations = RandomDraws.FromGridWithoutReplacement(
+          numberOfShapesShown,
+          rows,
+          columns
+        );
+
+        if (!inLine(responseLocations) && !onDiagonal(responseLocations)) {
+          responseLocationsOk = true;
+        } else {
+          responseLocationsOk = false;
+        }
+      } while (!responseLocationsOk);
       for (let j = 0; j < numberOfShapesShown; j++) {
         const responseShape: PresentShape = {
           shape: presentShapes[j].shape,

@@ -22,7 +22,7 @@ export class Session {
   uuid: string;
   dataStore?: IDataStore;
   private canvasKit?: CanvasKit;
-  private version = "__M2C2KIT_PACKAGE_JSON_VERSION__";
+  private version = "__PACKAGE_JSON_VERSION__";
 
   /**
    * A Session contains one or more activities; currently, the only

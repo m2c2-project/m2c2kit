@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/sage-research",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -14,7 +14,7 @@
     "dist/index.d.ts"
   ],
   "dependencies": {
-    "@m2c2kit/core": "0.3.3"
+    "@m2c2kit/core": "0.3.4"
   },
   "scripts": {
     "build": "npm run clean && rollup -c",
@@ -28,7 +28,7 @@
     "@rollup/plugin-node-resolve": "15.0.1",
     "@rollup/plugin-terser": "0.3.0",
     "@rollup/plugin-typescript": "11.0.0",
-    "rimraf": "4.0.4",
+    "rimraf": "4.0.7",
     "rollup": "3.10.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",

@@ -1,13 +1,25 @@
 import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
+import replace from "@rollup/plugin-replace";
+import { readFileSync } from "fs";
 
+const pkg = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf8")
+);
+
+const sharedPlugins = [
+  replace({
+    __PACKAGE_JSON_VERSION__: pkg.version,
+    preventAssignment: true,
+  }),
+];
 export default [
   {
     input: ["./src/index.ts"],
     output: [{ dir: "./dist", format: "es", sourcemap: true }],
     external: ["@m2c2kit/core", "@m2c2kit/addons"],
-    plugins: [typescript({ outputToFilesystem: true })],
+    plugins: [...sharedPlugins, typescript({ outputToFilesystem: true })],
   },
 
   // Make minified esm bundle for development without a bundler
@@ -20,6 +32,7 @@ export default [
       },
     ],
     plugins: [
+      ...sharedPlugins,
       nodeResolve(),
       typescript({
         outputToFilesystem: true,

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/survey",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.3.3",
+    "@m2c2kit/core": "0.3.4",
     "bootstrap-datepicker": "1.9.0",
     "bootstrap-slider": "11.0.2",
     "jquery": "3.6.0",
@@ -29,7 +29,6 @@
     "react-modal": "3.15.1",
     "select2": "4.0.13",
     "sortablejs": "1.14.0",
-    "survey-knockout": "1.9.47",
     "survey-react": "1.9.47",
     "surveyjs-widgets": "1.9.47"
   },
@@ -51,7 +50,7 @@
     "jest": "29.3.1",
     "jest-environment-jsdom": "29.3.1",
     "jsdom": "21.0.0",
-    "rimraf": "4.0.4",
+    "rimraf": "4.0.7",
     "rollup": "3.10.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-delete": "2.0.0",
