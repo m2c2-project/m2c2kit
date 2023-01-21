@@ -165,14 +165,14 @@ const session = new Session({
   canvasKitWasmUrl: "assets/canvaskit.wasm",
   activities: [symbolSearch, activity, survey],
   activityCallbacks: {
-    onActivityLifecycle: (ev) => {
+    onActivityLifecycle: async (ev) => {
       if (
         ev.type === EventType.ActivityEnd ||
         ev.type === EventType.ActivityCancel
       ) {
         const nextActivity = session.nextActivity;
         if (nextActivity) {
-          session.advanceToNextActivity();
+          await session.goToNextActivity();
         } else {
           session.end();
         }
@@ -189,9 +189,9 @@ const session = new Session({
     },
   },
   sessionCallbacks: {
-    onSessionLifecycle: (ev) => {
+    onSessionLifecycle: async (ev) => {
       if (ev.type === EventType.SessionInitialize) {
-        session.start();
+        await session.start();
       }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
@@ -201,9 +201,4 @@ const session = new Session({
 });
 
 window.session = session;
-session.init().then(() => {
-  const loaderDiv = document.getElementById("m2c2kit-loader-div");
-  if (loaderDiv) {
-    loaderDiv.classList.remove("m2c2kit-loader");
-  }
-});
+session.init();

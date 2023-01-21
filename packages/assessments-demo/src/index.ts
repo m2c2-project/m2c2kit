@@ -34,9 +34,9 @@ const session = new Session({
      *
      * Once initialized, the below code will start the session.
      */
-    onSessionLifecycle: (ev: SessionLifecycleEvent) => {
+    onSessionLifecycle: async (ev: SessionLifecycleEvent) => {
       if (ev.type === EventType.SessionInitialize) {
-        session.start();
+        await session.start();
       }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
@@ -93,24 +93,26 @@ const session = new Session({
      * Usually, however, we want to know when all the activities are done,
      * so we'll look for the session ending via onSessionLifecycleChange
      */
-    onActivityLifecycle: (ev: ActivityLifecycleEvent) => {
+    onActivityLifecycle: async (ev: ActivityLifecycleEvent) => {
       const activityType =
         ev.target.type === ActivityType.Game ? "game" : "survey";
+
+      if (ev.type === EventType.ActivityStart) {
+        console.log(`🟢 started activity (${activityType}) ${ev.target.name}`);
+      }
+
       if (
-        ev.type === EventType.ActivityEnd ||
-        ev.type === EventType.ActivityCancel
+        ev.type === EventType.ActivityCancel ||
+        ev.type === EventType.ActivityEnd
       ) {
         const status =
           ev.type === EventType.ActivityEnd ? "🔴 ended" : "🚫 canceled";
         console.log(`${status} activity (${activityType}) ${ev.target.name}`);
         if (session.nextActivity) {
-          session.advanceToNextActivity();
+          await session.goToNextActivity();
         } else {
           session.end();
         }
-      }
-      if (ev.type === EventType.ActivityStart) {
-        console.log(`🟢 started activity (${activityType}) ${ev.target.name}`);
       }
     },
   },

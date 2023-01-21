@@ -95,7 +95,7 @@ describe("actions", () => {
     await session.init();
   });
 
-  it("shape completes move from 200, 200 to 50, 50", () => {
+  it("shape completes move from 200, 200 to 50, 50", async () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
@@ -104,7 +104,7 @@ describe("actions", () => {
       throw new Error("rect1 undefined");
     }
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
-    session.start();
+    await session.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, ellapsed virtual milliseconds: ${TestHelpers.perfCounter}`
     );
@@ -155,33 +155,33 @@ describe("Game start", () => {
     await session.init();
   });
 
-  it("scales down on smaller screen that is half the size", () => {
+  it("scales down on smaller screen that is half the size", async () => {
     global.window.innerWidth = 200;
     global.window.innerHeight = 400;
-    session.start();
+    await session.start();
     expect(Globals.rootScale).toBe(0.5);
   });
 
-  it("scales down on smaller screen with different aspect ratio", () => {
+  it("scales down on smaller screen with different aspect ratio", async () => {
     global.window.innerWidth = 400;
     global.window.innerHeight = 200;
-    session.start();
+    await session.start();
     expect(Globals.rootScale).toBe(0.25);
   });
 
-  it("scales up on larger screen that is double the size when stretch is true", () => {
+  it("scales up on larger screen that is double the size when stretch is true", async () => {
     global.window.innerWidth = 800;
     global.window.innerHeight = 1600;
-    session.start();
-    session.advanceToNextActivity();
+    await session.start();
+    await session.advanceToNextActivity();
     expect(Globals.rootScale).toBe(2);
   });
 
-  it("scales up on larger screen with different aspect ratio when stretch is true", () => {
+  it("scales up on larger screen with different aspect ratio when stretch is true", async () => {
     global.window.innerWidth = 1200;
     global.window.innerHeight = 1200;
-    session.start();
-    session.advanceToNextActivity();
+    await session.start();
+    await session.advanceToNextActivity();
     expect(Globals.rootScale).toBe(1.5);
   });
 });
@@ -313,65 +313,65 @@ describe("addTrialData", () => {
     await session.init();
   });
 
-  it("adds boolean data", () => {
-    session.start();
+  it("adds boolean data", async () => {
+    await session.start();
     g3.addTrialData("boolean_data", true);
   });
 
-  it("adds string data", () => {
-    session.start();
+  it("adds string data", async () => {
+    await session.start();
     g3.addTrialData("string_data", "hello");
   });
 
-  it("adds integer data", () => {
-    session.start();
+  it("adds integer data", async () => {
+    await session.start();
     g3.addTrialData("integer_data", 10);
   });
 
-  it("adds number data", () => {
-    session.start();
+  it("adds number data", async () => {
+    await session.start();
     g3.addTrialData("number_data", 5.5);
   });
 
-  it("adds object data", () => {
-    session.start();
+  it("adds object data", async () => {
+    await session.start();
     g3.addTrialData("object_data", { a: 1, b: 2 });
   });
 
-  it("adds array data", () => {
-    session.start();
+  it("adds array data", async () => {
+    await session.start();
     g3.addTrialData("array_data", [1, 2, 3]);
   });
 
-  it("adds null data", () => {
-    session.start();
+  it("adds null data", async () => {
+    await session.start();
     g3.addTrialData("null_data", null);
   });
 
-  it("adds undefined data", () => {
-    session.start();
+  it("adds undefined data", async () => {
+    await session.start();
     g3.addTrialData("null_data", undefined);
   });
 
-  it("adds string data to string | null schema", () => {
-    session.start();
+  it("adds string data to string | null schema", async () => {
+    await session.start();
     g3.addTrialData("string_or_null_data", "hello");
   });
 
-  it("throws error when adding string data to boolean schema", () => {
-    session.start();
+  it("throws error when adding string data to boolean schema", async () => {
+    await session.start();
     const t = () => g3.addTrialData("boolean_data", "hello");
     expect(t).toThrow(Error);
   });
 
-  it("throws error when adding null data to boolean schema", () => {
-    session.start();
+  it("throws error when adding null data to boolean schema", async () => {
+    await session.start();
     const t = () => g3.addTrialData("boolean_data", null);
     expect(t).toThrowError();
   });
 
-  it("throws error when adding non-integer number to integer schema", () => {
-    session.start();
+  it("throws error when adding non-integer number to integer schema", async () => {
+    await session.start();
     const t = () => g3.addTrialData("integer_data", 5.5);
     expect(t).toThrowError();
   });

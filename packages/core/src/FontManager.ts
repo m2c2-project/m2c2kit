@@ -21,7 +21,7 @@ class GameTypefaces {
 export class FontManager {
   canvasKit?: CanvasKit;
   fontMgr?: FontMgr;
-  private gameTypefaces = new GameTypefaces();
+  gameTypefaces = new GameTypefaces();
   private allGamesFontData?: FontData[];
 
   /**

@@ -61,7 +61,7 @@ export class RandomDraws {
    * grid location to be along the diagonal, the predicate would be:
    * (row, column) => row === column
    * @returns Array of grid cells. Each cell is object in form of:
-   * {row: number, column: number}. Grid cell locations are zero-based
+   * \{ row: number, column: number \}. Grid cell locations are zero-based
    */
   public static FromGridWithoutReplacement(
     n: number,

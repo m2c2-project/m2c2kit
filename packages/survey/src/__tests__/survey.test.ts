@@ -33,7 +33,8 @@ describe("survey start", () => {
     session = new Session(options);
   });
 
-  test("throws error if m2c2kit-survey-div not found", () => {
+  // https://stackoverflow.com/a/69372861 for async test that expect toThrow
+  test("throws error if m2c2kit-survey-div not found", async () => {
     const html = `<!DOCTYPE html>
     <html>
       <head>
@@ -46,9 +47,9 @@ describe("survey start", () => {
     </html>`;
     document.documentElement.innerHTML = html;
 
-    expect(() => {
-      session.start();
-    }).toThrow();
+    await expect(async () => {
+      await session.start();
+    }).rejects.toThrow();
   });
 
   test("starts the survey", () => {
@@ -65,8 +66,8 @@ describe("survey start", () => {
     </html>`;
     document.documentElement.innerHTML = html;
 
-    expect(() => {
-      session.start();
+    expect(async () => {
+      await session.start();
     }).not.toThrow();
   });
 });

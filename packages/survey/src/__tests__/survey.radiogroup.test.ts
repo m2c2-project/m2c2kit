@@ -69,9 +69,9 @@ describe("radiogroup behavior", () => {
     jest.clearAllMocks();
   });
 
-  test("adds skipped radiogroup variable as null to newData and Data on page change", () => {
+  test("adds skipped radiogroup variable as null to newData and Data on page change", async () => {
     // begins on page 1, goes to page 2
-    session.start();
+    await session.start();
     const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];

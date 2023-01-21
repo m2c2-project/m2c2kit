@@ -79,6 +79,7 @@ export class Game implements Activity {
   private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
   private loaderElementsRemoved = false;
   private _dataStore?: IDataStore;
+  additionalParameters?: unknown;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -287,18 +288,27 @@ export class Game implements Activity {
     return locale !== undefined && locale !== null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setParameters(newParameters: any): void {
+  setParameters(additionalParameters: unknown): void {
     const { parameters } = this.options;
-    Object.keys(newParameters).forEach((key) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Object.keys(additionalParameters as any).forEach((key) => {
       if (!parameters || !(key in parameters)) {
         console.warn(
-          `game ${this.options.name} does not have a parameter named ${key}. attempt to set parameter ${key} to value ${newParameters[key]} will be ignored`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          `game ${
+            this.options.name
+          } does not have a parameter named ${key}. attempt to set parameter ${key} to value ${
+            (additionalParameters as any)[key]
+          } will be ignored`
         );
       } else if (this.options.parameters && this.options.parameters[key]) {
-        this.options.parameters[key].default = newParameters[key];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.options.parameters[key].default = (additionalParameters as any)[
+          key
+        ];
       }
     });
+    this.additionalParameters = additionalParameters;
   }
 
   get canvasKit(): CanvasKit {
@@ -583,10 +593,12 @@ export class Game implements Activity {
    * the game will start with the first scene in the game object's scenes.
    * If there are no scenes in the game object's scenes, it will throw
    * an error.
+   * Although the method has no awaitable calls, we will likely do
+   * so in the future. Thus this method is async.
    *
    * @param entryScene - The scene (Scene object or its string name) to display when the game starts
    */
-  start(entryScene?: Scene | string): void {
+  async start(entryScene?: Scene | string) {
     const gameInitOptions = this.options;
     this.unitTesting = gameInitOptions._unitTesting ?? false;
 
@@ -893,7 +905,9 @@ export class Game implements Activity {
     const loadedImages = this.session.imageManager.loadedImages[this.uuid];
     // loadedImages may be undefined/null if the game does not have images
     if (loadedImages) {
-      const imageNames = Object.keys(loadedImages);
+      const imageNames = Object.keys(loadedImages).filter(
+        (name) => name !== "__outgoingSceneSnapshot"
+      );
       imageNames.forEach((imageName) => {
         if (!warmupedImageNames.includes(imageName)) {
           const image = loadedImages[imageName].image;
@@ -918,6 +932,7 @@ export class Game implements Activity {
       this.currentScene._active = false;
     }
     this.gameStopRequested = true;
+    Timer.removeAll();
     this.dispose();
   }
 
@@ -1219,10 +1234,10 @@ export class Game implements Activity {
     const gameParams: GameParameters = JSON.parse(JSON.stringify(parameters));
     // don't include the parameters used for localization
     const {
-      locale,
-      fallback_locale,
-      missing_translation_font_color,
-      translations,
+      locale, // eslint-disable-line @typescript-eslint/no-unused-vars
+      fallback_locale, // eslint-disable-line @typescript-eslint/no-unused-vars
+      missing_translation_font_color, // eslint-disable-line @typescript-eslint/no-unused-vars
+      translations, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...result
     } = gameParams;
 
@@ -1242,10 +1257,10 @@ export class Game implements Activity {
     const gameParams: GameParameters = JSON.parse(JSON.stringify(parameters));
     // don't include the parameters used for localization
     const {
-      locale,
-      fallback_locale,
-      missing_translation_font_color,
-      translations,
+      locale, // eslint-disable-line @typescript-eslint/no-unused-vars
+      fallback_locale, // eslint-disable-line @typescript-eslint/no-unused-vars
+      missing_translation_font_color, // eslint-disable-line @typescript-eslint/no-unused-vars
+      translations, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...result
     } = gameParams;
 

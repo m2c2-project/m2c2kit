@@ -20,9 +20,12 @@ module.exports = {
     ".eslintrc.cjs",
     "jest*.js",
     "dist",
+    "dist-webview",
     "build",
     "build-umd",
     "build-nobundler",
     "node_modules",
+    ".rollup.cache",
+    "examples/no-js-bundler-development/lib",
   ],
 };

@@ -66,9 +66,9 @@ describe("checkbox behavior on survey completion, multiresponse", () => {
     jest.clearAllMocks();
   });
 
-  test("adds skipped multiresponse checkbox dummy variables as null to newData and Data on survey completion", () => {
+  test("adds skipped multiresponse checkbox dummy variables as null to newData and Data on survey completion", async () => {
     // begins on page 1, goes to page 2
-    session.start();
+    await session.start();
     // _survey is private, so use bracket notation to access it
     const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);

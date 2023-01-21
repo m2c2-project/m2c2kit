@@ -2,8 +2,8 @@
 //
 // Tips:
 // - This code is editable. Try:
-//     On line 27, change the default number_of_congruent_trials from 4 to 2.
-//     On line 95, change the red color from WebColors.Red to WebColors.DarkRed
+//     On line 37, change the default number_of_congruent_trials from 4 to 2.
+//     On line 106, change the red color from WebColors.Red to WebColors.DarkRed
 // - Open your browser developer console to see diagnostics and data.
 // - This website's interactive tutorials show how to create your own assessments.
 // - Changes made here are saved, automatically, to your local browser storage.
@@ -103,7 +103,7 @@ class Stroop extends Game {
     const game = this;
 
     const wordColors = [
-      { text: "Red", color: WebColors.DarkRed },
+      { text: "Red", color: WebColors.Red },
       { text: "Green", color: WebColors.Green },
       { text: "Blue", color: WebColors.Blue },
     ];
@@ -372,14 +372,14 @@ const session = new Session({
   canvasKitWasmUrl: "assets/canvaskit.wasm",
   activities: [activity],
   activityCallbacks: {
-    onActivityLifecycle: (ev) => {
+    onActivityLifecycle: async (ev) => {
       if (
         ev.type === EventType.ActivityEnd ||
         ev.type === EventType.ActivityCancel
       ) {
         const nextActivity = session.nextActivity;
         if (nextActivity) {
-          session.advanceToNextActivity();
+          await session.goToNextActivity();
         } else {
           session.end();
         }
@@ -392,9 +392,9 @@ const session = new Session({
     },
   },
   sessionCallbacks: {
-    onSessionLifecycle: (ev) => {
+    onSessionLifecycle: async (ev) => {
       if (ev.type === EventType.SessionInitialize) {
-        session.start();
+        await session.start();
       }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");

@@ -21,14 +21,13 @@ export class Session {
   currentActivity?: Activity;
   uuid: string;
   dataStore?: IDataStore;
+  private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private canvasKit?: CanvasKit;
   private version = "__PACKAGE_JSON_VERSION__";
 
   /**
-   * A Session contains one or more activities; currently, the only
-   * class that implements Activity is Game, but Survey is planned.
-   * The session manages the start and stop of activities, and
-   * advancement to next activity
+   * A Session contains one or more activities. The session manages the start
+   * and stop of activities, and advancement to next activity
    *
    * @param options
    */
@@ -91,11 +90,11 @@ export class Session {
   /**
    * Starts the session and starts the first activity.
    */
-  start(): void {
+  async start(): Promise<void> {
     this.currentActivity = this.options.activities.find(Boolean);
     if (this.currentActivity) {
       DomHelpers.configureDomForActivity(this.currentActivity);
-      this.currentActivity.start();
+      await this.currentActivity.start();
     }
   }
 
@@ -134,10 +133,95 @@ export class Session {
   }
 
   /**
-   * Stops the current activity and advances to next activity in the session.
-   * If there is no activity after the current activity, throws error
+   * Stops the current activity and goes to the activity with the provided id.
+   *
+   * @param options
    */
-  advanceToNextActivity(): void {
+  async goToActivity(options: GoToActivityOptions): Promise<void> {
+    const nextActivity = this.options.activities
+      .filter((activity) => activity.id === options.id)
+      .find(Boolean);
+    if (!nextActivity) {
+      throw new Error(
+        `Error in goToActivity(): Session does not contain an activity with id ${options.id}.`
+      );
+    }
+    if (this.currentActivity) {
+      this.currentActivity.stop();
+    }
+
+    /**
+     * From this point on, the phrase "currentActivity" refers to the activity
+     * that we are going to, not the one we are leaving.
+     * currentActivityOldObject is an instance of the activity that has been
+     * fully initialized previously. We use currentActivityOldObject as a
+     * blueprint to create a new instance.
+     */
+    const currentActivityOldObject = nextActivity;
+
+    /**
+     * It is possible the current activity is one we have executed before. In
+     * that case, we need to reset everything about this activity. The cleanest
+     * way to do that is create a new instance of it. The below factory
+     * function does that.
+     * see https://stackoverflow.com/a/14378462
+     */
+    const activityFactoryFunction =
+      currentActivityOldObject.constructor.bind.apply(
+        currentActivityOldObject.constructor,
+        [null]
+      );
+    this.currentActivity = new activityFactoryFunction() as Activity;
+
+    const indexOfCurrentActivity = this.options.activities.indexOf(
+      currentActivityOldObject
+    );
+    this.options.activities[indexOfCurrentActivity] = this.currentActivity;
+    DomHelpers.configureDomForActivity(this.currentActivity);
+
+    /**
+     * Because the current activity has been newly created, it needs properties
+     * assigned to it that it would have received in the Session.init()
+     * method. Also, if the old instance had new parameters set via
+     * Game.SetParameters(), we must apply them.
+     */
+    this.currentActivity.session = this;
+    this.currentActivity.dataStore = this.dataStore;
+    if (this.currentActivity instanceof Game && this.canvasKit) {
+      this.currentActivity.canvasKit = this.canvasKit;
+    }
+    if (currentActivityOldObject.additionalParameters) {
+      this.currentActivity.setParameters(
+        currentActivityOldObject.additionalParameters
+      );
+    }
+
+    /**
+     * In Session.init(), async assets were loaded. Once processed, they were
+     * stored in a dictionary, with the activity uuid as the key. When a new
+     * instance of the activity is created, the object has a different uuid.
+     * We must update the uuid in the dictionaries (if it exists).
+     */
+    if (this.imageManager.loadedImages[currentActivityOldObject.uuid]) {
+      this.imageManager.loadedImages[this.currentActivity.uuid] =
+        this.imageManager.loadedImages[currentActivityOldObject.uuid];
+      delete this.imageManager.loadedImages[currentActivityOldObject.uuid];
+    }
+    if (this.fontManager.gameTypefaces[currentActivityOldObject.uuid]) {
+      this.fontManager.gameTypefaces[this.currentActivity.uuid] =
+        this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
+      delete this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
+    }
+
+    await this.currentActivity.init();
+    await this.currentActivity.start();
+  }
+
+  /**
+   * Stops the current activity and advances to next activity in the session.
+   * If there is no activity after the current activity, throws error.
+   */
+  async goToNextActivity(): Promise<void> {
     if (!this.currentActivity) {
       throw new Error("error in advanceToNextActivity(): no current activity");
     }
@@ -148,8 +232,18 @@ export class Session {
     this.currentActivity = this.nextActivity;
     if (this.currentActivity) {
       DomHelpers.configureDomForActivity(this.currentActivity);
-      this.currentActivity.start();
+      await this.currentActivity.start();
     }
+  }
+
+  /**
+   * Stops the current activity and advances to next activity in the session.
+   * If there is no activity after the current activity, throws error.
+   *
+   * @deprecated Use goToNextActivity() instead.
+   */
+  async advanceToNextActivity(): Promise<void> {
+    await this.goToNextActivity();
   }
 
   /**
@@ -168,6 +262,62 @@ export class Session {
       this.currentActivity
     );
     return this.options.activities[currentActivityIndex + 1];
+  }
+
+  /**
+   * Saves an item to the session's key-value dictionary.
+   *
+   * @remarks The session dictionary is not persisted. It is available only
+   * during the actively running session. It is useful for storing temporary
+   * data to coordinate between activities.
+   *
+   * @param key - item key
+   * @param value - item value
+   */
+  dictionarySetItem(key: string, value: SessionDictionaryValues): void {
+    this.sessionDictionary.set(key, value);
+  }
+
+  /**
+   * Gets an item value from the session's key-value dictionary.
+   *
+   * @remarks The session dictionary is not persisted. It is available only
+   * during the actively running session. It is useful for storing temporary
+   * data to coordinate between activities.
+   *
+   * @param key - item key
+   * @returns value of the item
+   */
+  dictionaryGetItem<T extends SessionDictionaryValues>(key: string) {
+    return this.sessionDictionary.get(key) as T;
+  }
+
+  /**
+   * Deletes an item value from the session's key-value dictionary.
+   *
+   * @remarks The session dictionary is not persisted. It is available only
+   * during the actively running session. It is useful for storing temporary
+   * data to coordinate between activities.
+   *
+   * @param key - item key
+   * @returns true if the item was deleted, false if it did not exist
+   */
+  dictionaryDeleteItem(key: string) {
+    return this.sessionDictionary.delete(key);
+  }
+
+  /**
+   * Determines if a key exists in the activity's key-value dictionary.
+   *
+   * @remarks The session dictionary is not persisted. It is available only
+   * during the actively running session. It is useful for storing temporary
+   * data to coordinate between activities.
+   *
+   * @param key - item key
+   * @returns true if the key exists, false otherwise
+   */
+  dictionaryItemExists(key: string) {
+    return this.sessionDictionary.has(key);
   }
 
   /**
@@ -235,3 +385,19 @@ export class Session {
       });
   }
 }
+
+export interface GoToActivityOptions {
+  /** ActivityId of the activity to go to. */
+  id: string;
+}
+
+/**
+ * Types of values that can be stored in the session dictonary.
+ */
+export type SessionDictionaryValues =
+  | string
+  | number
+  | boolean
+  | object
+  | null
+  | undefined;

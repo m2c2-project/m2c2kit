@@ -65,6 +65,7 @@ export class Survey implements Activity {
     }
   }
 
+  // Provide init() method to satisfy Activity interface
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async init() {}
 
@@ -88,7 +89,11 @@ export class Survey implements Activity {
     }
   }
 
-  start(): void {
+  get additionalParameters(): unknown {
+    return this._surveyJson;
+  }
+
+  async start() {
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
     this.logConfigurationWarnings();
