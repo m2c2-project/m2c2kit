@@ -22,6 +22,7 @@ import { Uuid } from "./Uuid";
 import { EventType } from "./EventBase";
 import { Game } from "./Game";
 import { ActionType } from "./ActionType";
+import { M2DragEvent } from "./M2DragEvent";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -72,6 +73,7 @@ export abstract class Entity implements EntityOptions {
   position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
   scale = 1.0;
   isUserInteractionEnabled = false;
+  draggable = false;
   hidden = false;
   layout: Layout = {};
 
@@ -92,8 +94,23 @@ export abstract class Entity implements EntityOptions {
   userData: any = {};
   loopMessages = new Set<string>();
 
+  /** Is the entity in a pressed state? E.g., did the user put the pointer
+   * down on the entity and not yet release it? */
   pressed = false;
-  pressedInHitArea = false;
+  /** Is the entity in a pressed state AND is the pointer within the entity's
+   * hit area? For example, a user may put the pointer down on the entity, but
+   * then move the pointer, while still down, beyond the entity's hit area. In
+   * this case, pressed = true, but pressedAndWithinHitArea = false. */
+  pressedAndWithinHitArea = false;
+  /** When the entity initially enters the pressed state, what is the pointer
+   * offset? (offset from the canvas's origin to the pointer position). We
+   * save this because it will be needed if this press then led to a drag. */
+  pressedInitialPointerOffset: Point = { x: NaN, y: NaN };
+  /** What was the previous pointer offset when the entity was in a dragging
+   * state? */
+  draggingLastPointerOffset: Point = { x: NaN, y: NaN };
+  /** Is the entity in a dragging state? */
+  dragging = false;
 
   constructor(options: EntityOptions = {}) {
     if (options.name === undefined) {
@@ -109,6 +126,9 @@ export abstract class Entity implements EntityOptions {
     }
     if (options.isUserInteractionEnabled) {
       this.isUserInteractionEnabled = options.isUserInteractionEnabled;
+    }
+    if (options.draggable) {
+      this.draggable = options.draggable;
     }
     if (options.hidden) {
       this.hidden = options.hidden;
@@ -491,6 +511,69 @@ export abstract class Entity implements EntityOptions {
   ): void {
     this.addEventListener(
       EventType.PointerMove,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user begins dragging an entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onDragStart(
+    callback: (m2DragEvent: M2DragEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.DragStart,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user continues dragging an entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onDrag(
+    callback: (m2DragEvent: M2DragEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.Drag,
+      <(ev: EntityEvent) => void>callback,
+      replaceExistingCallback
+    );
+  }
+
+  /**
+   * Executes a callback when the user stop dragging an entity.
+   *
+   * @param callback - function to execute
+   * @param replaceExistingCallback  - should the provided callback replace
+   * any existing callbacks of the same event type on this entity? Usually
+   * there should be only one callback defined, instead of chaining multiple
+   * ones. It is strongly recommended not to change this, unless you have a
+   * special use case. Default is true.
+   */
+  onDragEnd(
+    callback: (m2DragEvent: M2DragEvent) => void,
+    replaceExistingCallback = true
+  ): void {
+    this.addEventListener(
+      EventType.DragEnd,
       <(ev: EntityEvent) => void>callback,
       replaceExistingCallback
     );

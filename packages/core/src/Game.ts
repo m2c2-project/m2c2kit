@@ -12,6 +12,7 @@ import { Entity } from "./Entity";
 import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
+import { Shape } from "./Shape";
 import { Action } from "./Action";
 import { LoadedImage } from "./LoadedImage";
 import { Scene } from "./Scene";
@@ -43,6 +44,8 @@ import { WebColors } from "./WebColors";
 import { DomHelpers } from "./DomHelpers";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { IDataStore } from "./IDataStore";
+import { ShapeType } from "./ShapeType";
+import { M2DragEvent } from "./M2DragEvent";
 
 interface BoundingBox {
   xMin: number;
@@ -298,6 +301,7 @@ export class Game implements Activity {
           `game ${
             this.options.name
           } does not have a parameter named ${key}. attempt to set parameter ${key} to value ${
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (additionalParameters as any)[key]
           } will be ignored`
         );
@@ -1578,6 +1582,10 @@ export class Game implements Activity {
     this.htmlCanvas.addEventListener("touchstart", (e) => {
       e.preventDefault();
     });
+    this.htmlCanvas.addEventListener(
+      "pointerleave",
+      this.htmlCanvasPointerLeaveHandler.bind(this)
+    );
   }
 
   private loop(canvas: Canvas): void {
@@ -2228,12 +2236,12 @@ export class Game implements Activity {
       type: EventType.PointerDown,
       handled: false,
     };
+    this.processDomPointerDown(scene, m2Event, domPointerEvent);
     this.processDomPointerDown(
       this.freeEntitiesScene,
       m2Event,
       domPointerEvent
     );
-    this.processDomPointerDown(scene, m2Event, domPointerEvent);
   }
 
   private htmlCanvasPointerUpHandler(domPointerEvent: PointerEvent): void {
@@ -2247,8 +2255,8 @@ export class Game implements Activity {
       type: EventType.PointerUp,
       handled: false,
     };
-    this.processDomPointerUp(this.freeEntitiesScene, m2Event, domPointerEvent);
     this.processDomPointerUp(scene, m2Event, domPointerEvent);
+    this.processDomPointerUp(this.freeEntitiesScene, m2Event, domPointerEvent);
   }
 
   private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
@@ -2262,12 +2270,44 @@ export class Game implements Activity {
       type: EventType.PointerMove,
       handled: false,
     };
+    this.processDomPointerMove(scene, m2Event, domPointerEvent);
     this.processDomPointerMove(
       this.freeEntitiesScene,
       m2Event,
       domPointerEvent
     );
-    this.processDomPointerMove(scene, m2Event, domPointerEvent);
+  }
+
+  /**
+   * Adjusts dragging behavior when the pointer leaves the canvas
+   *
+   * @remarks This is necessary because the pointerup event is not fired when
+   * the pointer leaves the canvas. On desktop, this means that the user might
+   * lift the pointer outside the canvas, but the entity will still be dragged
+   * when the pointer is moved back into the canvas.
+   *
+   * @param domPointerEvent
+   * @returns
+   */
+  private htmlCanvasPointerLeaveHandler(domPointerEvent: PointerEvent): void {
+    if (!this.currentScene) {
+      return;
+    }
+    this.currentScene.children.forEach((entity) => {
+      if (entity.dragging) {
+        const m2Event: EventBase = {
+          target: entity,
+          type: EventType.DragEnd,
+          handled: false,
+        };
+
+        entity.dragging = false;
+        entity.pressed = false;
+        entity.pressedAndWithinHitArea = false;
+        this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
+        return;
+      }
+    });
   }
 
   /**
@@ -2296,7 +2336,11 @@ export class Game implements Activity {
       )
     ) {
       entity.pressed = true;
-      entity.pressedInHitArea = true;
+      entity.pressedAndWithinHitArea = true;
+      entity.pressedInitialPointerOffset = {
+        x: domPointerEvent.offsetX,
+        y: domPointerEvent.offsetY,
+      };
       this.raiseM2PointerDownEvent(entity, m2Event, domPointerEvent);
       this.raiseTapDownEvent(entity, m2Event, domPointerEvent);
     }
@@ -2328,31 +2372,40 @@ export class Game implements Activity {
       return;
     }
 
+    if (entity.dragging) {
+      entity.dragging = false;
+      entity.pressed = false;
+      entity.pressedAndWithinHitArea = false;
+      this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
+      m2Event.handled = true;
+      return;
+    }
+
     if (
       entity.isUserInteractionEnabled &&
       entity.pressed &&
-      entity.pressedInHitArea
+      entity.pressedAndWithinHitArea
     ) {
       /**
        * released pointer within hit area after pointer had been earlier
        * been pressed in the hit area and never left the hit area
        */
       entity.pressed = false;
-      entity.pressedInHitArea = false;
+      entity.pressedAndWithinHitArea = false;
       this.raiseTapUpEvent(entity, m2Event, domPointerEvent);
       this.raiseTapUpAny(entity, m2Event, domPointerEvent);
       this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
     } else if (
       entity.isUserInteractionEnabled &&
       entity.pressed &&
-      entity.pressedInHitArea == false
+      entity.pressedAndWithinHitArea == false
     ) {
       /**
        * released pointer anywhere after pointer had been earlier
        * been pressed in the hit area
        */
       entity.pressed = false;
-      entity.pressedInHitArea = false;
+      entity.pressedAndWithinHitArea = false;
       this.raiseTapUpAny(entity, m2Event, domPointerEvent);
     } else if (
       entity.isUserInteractionEnabled &&
@@ -2366,7 +2419,7 @@ export class Game implements Activity {
        * released pointer in the hit area
        */
       entity.pressed = false;
-      entity.pressedInHitArea = false;
+      entity.pressedAndWithinHitArea = false;
       this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
     }
 
@@ -2398,18 +2451,46 @@ export class Game implements Activity {
       return;
     }
 
+    if (entity.isUserInteractionEnabled && entity.draggable && entity.pressed) {
+      let firstMoveOfDrag = false;
+      let deltaX: number;
+      let deltaY: number;
+      if (entity.dragging === false) {
+        entity.dragging = true;
+        firstMoveOfDrag = true;
+        deltaX = domPointerEvent.offsetX - entity.pressedInitialPointerOffset.x;
+        deltaY = domPointerEvent.offsetY - entity.pressedInitialPointerOffset.y;
+      } else {
+        deltaX = domPointerEvent.offsetX - entity.draggingLastPointerOffset.x;
+        deltaY = domPointerEvent.offsetY - entity.draggingLastPointerOffset.y;
+      }
+      entity.position.x += deltaX;
+      entity.position.y += deltaY;
+      entity.draggingLastPointerOffset = {
+        x: domPointerEvent.offsetX,
+        y: domPointerEvent.offsetY,
+      };
+      m2Event.handled = true;
+      if (firstMoveOfDrag) {
+        this.raiseM2DragStartEvent(entity, m2Event, domPointerEvent);
+      } else {
+        this.raiseM2DragEvent(entity, m2Event, domPointerEvent);
+      }
+      return;
+    }
+
     // note: offsetX and offsetY are relative to the HTML canvas element
     if (
       entity.isUserInteractionEnabled &&
       entity.pressed &&
-      entity.pressedInHitArea &&
+      entity.pressedAndWithinHitArea &&
       !this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY
       )
     ) {
-      entity.pressedInHitArea = false;
+      entity.pressedAndWithinHitArea = false;
       this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
     }
     if (
@@ -2539,16 +2620,72 @@ export class Game implements Activity {
     );
   }
 
+  private raiseM2DragStartEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.target = entity;
+    m2Event.type = EventType.DragStart;
+    this.raiseEventOnListeningEntities<M2DragEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseM2DragEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.target = entity;
+    m2Event.type = EventType.Drag;
+    this.raiseEventOnListeningEntities<M2DragEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseM2DragEndEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.target = entity;
+    m2Event.type = EventType.DragEnd;
+    this.raiseEventOnListeningEntities<M2DragEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
   private calculatePointWithinEntityFromDomPointerEvent(
     entity: Entity,
     domPointerEvent: PointerEvent
   ): Point {
+    let width = entity.size.width;
+    let height = entity.size.height;
+
+    if (
+      entity.type === EntityType.Shape &&
+      (entity as Shape).shapeType === ShapeType.Circle
+    ) {
+      const radius = (entity as Shape).circleOfRadius;
+      if (!radius) {
+        throw "circleOfRadius is undefined";
+      }
+      width = radius * 2;
+      height = radius * 2;
+    }
+
     const x = domPointerEvent.offsetX;
     const y = domPointerEvent.offsetY;
     const bb = this.calculateEntityAbsoluteBoundingBox(entity);
-    const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * entity.size.width;
-    const relativeY =
-      ((y - bb.yMin) / (bb.yMax - bb.yMin)) * entity.size.height;
+    const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * width;
+    const relativeY = ((y - bb.yMin) / (bb.yMax - bb.yMin)) * height;
     return { x: relativeX, y: relativeY };
   }
 
@@ -2593,6 +2730,18 @@ export class Game implements Activity {
 
               listener.callback(m2Event as T);
               break;
+            case EventType.DragStart:
+            case EventType.Drag:
+            case EventType.DragEnd:
+              (m2Event as M2DragEvent).position = {
+                x: entity.position.x,
+                y: entity.position.y,
+              };
+              (m2Event as M2DragEvent).buttons = (
+                domEvent as PointerEvent
+              ).buttons;
+              listener.callback(m2Event as T);
+              break;
           }
         }
       });
@@ -2630,6 +2779,21 @@ export class Game implements Activity {
     if (!entity.isDrawable) {
       throw "only drawable entities can receive pointer events";
     }
+    if (
+      entity.type === EntityType.Shape &&
+      (entity as Shape).shapeType === ShapeType.Circle
+    ) {
+      const bb = this.calculateEntityAbsoluteBoundingBox(entity);
+      const radius = (entity as Shape).circleOfRadius;
+      if (!radius) {
+        throw "circleOfRadius is undefined";
+      }
+      const center = { x: bb.xMin + radius, y: bb.yMin + radius };
+      const distance = Math.sqrt(
+        Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2)
+      );
+      return distance <= radius;
+    }
 
     if (entity.size.width === 0 || entity.size.height === 0) {
       // console.warn(
@@ -2666,16 +2830,28 @@ export class Game implements Activity {
     const scale = entity.absoluteScale;
     // TODO: NEEDS TO BE FIXED FOR ANCHOR POINTS OTHER THAN (.5, .5)
     // TODO: TEST THIS FURTHER
-    const xMin =
-      entity.absolutePosition.x - entity.size.width * anchorPoint.x * scale;
+
+    let width = entity.size.width;
+    let height = entity.size.height;
+
+    if (
+      entity.type === EntityType.Shape &&
+      (entity as Shape).shapeType === ShapeType.Circle
+    ) {
+      const radius = (entity as Shape).circleOfRadius;
+      if (!radius) {
+        throw "circleOfRadius is undefined";
+      }
+      width = radius * 2;
+      height = radius * 2;
+    }
+
+    const xMin = entity.absolutePosition.x - width * anchorPoint.x * scale;
     const xMax =
-      entity.absolutePosition.x +
-      entity.size.width * (1 - anchorPoint.x) * scale;
-    const yMin =
-      entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
+      entity.absolutePosition.x + width * (1 - anchorPoint.x) * scale;
+    const yMin = entity.absolutePosition.y - height * anchorPoint.y * scale;
     const yMax =
-      entity.absolutePosition.y +
-      entity.size.height * (1 - anchorPoint.y) * scale;
+      entity.absolutePosition.y + height * (1 - anchorPoint.y) * scale;
     // const xMin = entity.absolutePosition.x - entity.size.width * anchorPoint.x * scale;
     // const xMax = entity.absolutePosition.x + entity.size.width * anchorPoint.x * scale;
     // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;

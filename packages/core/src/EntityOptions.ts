@@ -10,6 +10,8 @@ export interface EntityOptions {
   scale?: number;
   /** Does the entity respond to user events, such as taps? Default is false */
   isUserInteractionEnabled?: boolean;
+  /** Can the entity be dragged? */
+  draggable?: boolean;
   /** Is the entity, and its children, hidden? (not displayed). Default is false */
   hidden?: boolean;
   /** FOR INTERNAL USE ONLY */

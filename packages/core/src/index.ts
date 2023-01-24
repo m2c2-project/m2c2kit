@@ -42,6 +42,7 @@ export * from "./LayoutConstraint";
 export * from "./LoadedImage";
 export * from "./MoveActionOptions";
 export * from "./MutablePath";
+export * from "./M2DragEvent";
 export * from "./M2Path";
 export * from "./Point";
 export * from "./RandomDraws";

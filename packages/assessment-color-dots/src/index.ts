@@ -17,6 +17,7 @@ import {
   RgbaColor,
   Equals,
   Sprite,
+  Point,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -772,7 +773,9 @@ appeared.",
     // ==============================================================
     // SCENE: locationSelection
 
-    const locationSelectionScene = new Scene();
+    const locationSelectionScene = new Scene({
+      isUserInteractionEnabled: true,
+    });
     game.addScene(locationSelectionScene);
 
     const locationSelectionSquare = new Shape({
@@ -796,7 +799,7 @@ appeared.",
       fontSize: 24,
       position: { x: 200, y: 530 },
     });
-    locationSelectionSquare.addChild(touchToMoveLabel);
+    locationSelectionScene.addChild(touchToMoveLabel);
 
     let locationSelectionDot: Shape;
     let location_target: {
@@ -805,6 +808,85 @@ appeared.",
       color_name: string;
       color_rgba: RgbaColor;
     };
+
+    /**
+     * Determines if dot is fully within bounds of the square, and not
+     * touching the edge of the square.
+     *
+     * @returns true if fully within bounds, false otherwise.
+     */
+    function dotPositionIsFullyWithinSquare(dotPosition: Point) {
+      const dotLocation = calculatePositionWithinSquare(dotPosition);
+      if (
+        dotLocation.x < dotDiameter / 2 ||
+        dotLocation.x + dotDiameter / 2 > SQUARE_SIDE_LENGTH ||
+        dotLocation.y < dotDiameter / 2 ||
+        dotLocation.y + dotDiameter / 2 > SQUARE_SIDE_LENGTH
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    /**
+     * Determines if dot center is within bounds of the square.
+     *
+     * @returns true if dot center is within bounds, false otherwise.
+     */
+    function dotPositionIsWithinSquare(dotPosition: Point) {
+      const dotLocation = calculatePositionWithinSquare(dotPosition);
+      if (
+        dotLocation.x < 0 ||
+        dotLocation.x > SQUARE_SIDE_LENGTH ||
+        dotLocation.y < 0 ||
+        dotLocation.y > SQUARE_SIDE_LENGTH
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    /**
+     * Calculates a position relative to the square's coordinate system.
+     *
+     * @remarks This function is needed because the dot's position is
+     * relative to the scene's coordinate system.
+     *
+     * @returns location Point
+     */
+    function calculatePositionWithinSquare(position: Point): Point {
+      // upper left corner of square on the scene's coordinate system
+      const squareOrigin =
+        locationSelectionSquare.position.x - SQUARE_SIDE_LENGTH / 2;
+      const squareOriginY =
+        locationSelectionSquare.position.y - SQUARE_SIDE_LENGTH / 2;
+      const x = position.x - squareOrigin;
+      const y = position.y - squareOriginY;
+      return { x, y };
+    }
+
+    let currentInteractionIsDrag = false;
+
+    locationSelectionScene.onPointerUp((pointerEvent) => {
+      if (currentInteractionIsDrag) {
+        return;
+      }
+      if (!dotPositionIsWithinSquare(pointerEvent.point)) {
+        return;
+      }
+
+      locationSelectionDot.position = {
+        x: pointerEvent.point.x,
+        y: pointerEvent.point.y,
+      };
+      if (dotPositionIsFullyWithinSquare(locationSelectionDot.position)) {
+        locationSelectionDoneButton.hidden = false;
+      } else {
+        locationSelectionDoneButton.hidden = true;
+      }
+    });
 
     locationSelectionScene.onSetup(() => {
       const trialConfiguration = trialConfigurations[game.trialIndex];
@@ -854,6 +936,8 @@ appeared.",
         circleOfRadius: dotDiameter / 2,
         fillColor: trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
         position: { x: 300, y: 60 },
+        isUserInteractionEnabled: true,
+        draggable: true,
       });
       locationSelectionScene.addChild(locationSelectionDot);
 
@@ -892,18 +976,39 @@ appeared.",
         throw new Error("no selected color!");
       }
       priorColorSelectedDot.fillColor = selectedRgba;
-      locationSelectionSquare.isUserInteractionEnabled = true;
 
-      locationSelectionSquare.onTapDown((tapEvent) => {
-        if (locationSelectionScene.children.includes(locationSelectionDot)) {
-          locationSelectionScene.removeChild(locationSelectionDot);
-          locationSelectionSquare.addChild(locationSelectionDot);
+      locationSelectionSquare.onPointerDown(() => {
+        currentInteractionIsDrag = false;
+      });
+
+      locationSelectionDot.onTapDown((tapEvent) => {
+        /** Prevent other entities from receiving the tap event.
+         * Specifically, this prevents the quit button from being pressed if
+         * the user taps on the dot. Note: the dot placement on the
+         * square listens for PointerDown, so that will not be affected. */
+        tapEvent.handled = true;
+      });
+
+      locationSelectionDot.onDragStart(() => {
+        currentInteractionIsDrag = true;
+      });
+
+      locationSelectionDot.onDrag(() => {
+        if (dotPositionIsFullyWithinSquare(locationSelectionDot.position)) {
           locationSelectionDoneButton.hidden = false;
+        } else {
+          locationSelectionDoneButton.hidden = true;
         }
-        locationSelectionDot.position = {
-          x: tapEvent.point.x - SQUARE_SIDE_LENGTH / 2,
-          y: tapEvent.point.y - SQUARE_SIDE_LENGTH / 2,
-        };
+      });
+
+      locationSelectionDot.onDragEnd(() => {
+        currentInteractionIsDrag = false;
+
+        if (dotPositionIsFullyWithinSquare(locationSelectionDot.position)) {
+          locationSelectionDoneButton.hidden = false;
+        } else {
+          locationSelectionDoneButton.hidden = true;
+        }
       });
     });
 
@@ -925,10 +1030,11 @@ appeared.",
       Timer.remove("locationRt");
       game.addTrialData("location_selection_response_time_ms", locationRt);
 
-      const location_selected = {
-        x: locationSelectionDot.position.x + SQUARE_SIDE_LENGTH / 2,
-        y: locationSelectionDot.position.y + SQUARE_SIDE_LENGTH / 2,
-      };
+      locationSelectionScene.removeChild(locationSelectionDot);
+
+      const location_selected = calculatePositionWithinSquare(
+        locationSelectionDot.position
+      );
       game.addTrialData("location_selected", location_selected);
       game.addTrialData("square_side_length", SQUARE_SIDE_LENGTH);
       const delta = Math.sqrt(

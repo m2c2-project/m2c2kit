@@ -35,5 +35,8 @@ export enum EventType {
   PointerDown = "PointerDown",
   PointerUp = "PointerUp",
   PointerMove = "PointerMove",
+  Drag = "Drag",
+  DragStart = "DragStart",
+  DragEnd = "DragEnd",
   CompositeCustom = "CompositeCustom",
 }
