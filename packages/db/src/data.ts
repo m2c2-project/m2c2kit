@@ -40,13 +40,16 @@ db.activityResults.count().then((totalCount) => {
       const button = document.createElement("button");
       button.innerHTML = "delete data";
       button.onclick = () => {
-        if (confirm("PERMANENTLY delete all data (m2c2db)?")) {
-          db.delete()
+        if (
+          confirm("PERMANENTLY delete all activity data (activityResults)?")
+        ) {
+          db.activityResults
+            .clear()
             .then(() => {
-              console.log("m2c2db deleted");
+              console.log("activityResults deleted");
             })
             .catch((err) => {
-              console.error("Could not delete m2c2db. err: " + err);
+              console.error("Could not delete activityResults. err: " + err);
             });
         }
       };
