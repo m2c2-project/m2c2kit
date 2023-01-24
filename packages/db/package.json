@@ -34,6 +34,6 @@
   },
   "dependencies": {
     "@m2c2kit/core": "0.3.4",
-    "dexie": "3.2.2"
+    "dexie": "3.2.3"
   }
 }
