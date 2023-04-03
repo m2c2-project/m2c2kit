@@ -1,18 +1,11 @@
-FROM node:18.13.0
+FROM node:18.15.0
 
 WORKDIR /usr/src/m2c2kit
 
 COPY . .
 
-RUN npm install -g npm@9.2.0
-RUN npm install -g concurrently
 RUN npm install
-
-RUN concurrently "npm run build -w @m2c2kit/build-helpers" "npm run build -w @m2c2kit/core" "npm run build -w @m2c2kit/cli"
-RUN concurrently "npm run build -w @m2c2kit/addons" "npm run build -w @m2c2kit/survey" "npm run build -w @m2c2kit/sage-research" "npm run build -w @m2c2kit/db"
-RUN concurrently "npm run build -w @m2c2kit/assessment-cli-starter" "npm run build -w @m2c2kit/assessment-color-dots" "npm run build -w @m2c2kit/assessment-color-shapes" "npm run build -w @m2c2kit/assessment-grid-memory" "npm run build -w @m2c2kit/assessment-symbol-search"
-RUN concurrently "npm run build -w @m2c2kit/assessments-demo" "npm run build-webview -w @m2c2kit/assessments-demo"
-
+RUN npm run build
 RUN npm test
 
 CMD ["/bin/bash"]

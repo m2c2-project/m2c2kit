@@ -33,18 +33,18 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.49.0",
-    "@typescript-eslint/parser": "5.49.0",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
     "chalk": "^5.2.0",
-    "concurrently": "^7.3.0",
+    "concurrently": "8.0.1",
     "cpy-cli": "4.2.0",
-    "eslint": "^8.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint": "^8.37.0",
+    "eslint-config-prettier": "^8.8.0",
     "find-up": "6.3.0",
     "http-server": "14.1.1",
     "husky": "8.0.3",
-    "lint-staged": "^13.1.0",
-    "prettier": "2.8.3"
+    "lint-staged": "^13.2.0",
+    "prettier": "2.8.7"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
