@@ -24,10 +24,10 @@
     "@m2c2kit/core": "0.3.4"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "15.0.1",
+    "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-replace": "5.0.2",
     "@rollup/plugin-terser": "0.4.0",
-    "@rollup/plugin-typescript": "11.0.0",
+    "@rollup/plugin-typescript": "11.1.0",
     "cpy-cli": "4.2.0",
     "rimraf": "4.4.1",
     "rollup": "3.20.2",
