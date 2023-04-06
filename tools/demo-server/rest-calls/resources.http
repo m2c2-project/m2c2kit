@@ -1,2 +1,0 @@
-GET /api/studies/abcd/resources HTTP/1.1
-Host: localhost:7071
