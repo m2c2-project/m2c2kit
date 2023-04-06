@@ -10,7 +10,7 @@ import ExampleAssessment from '@site/src/components/ExampleAssessment';
 Symbol Search is a speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can. (Construct: Attention, speeded performance)
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/example-template.html';
-export const code = `import { SymbolSearch } from "/m2c2kit/lib/m2c2kit.assessment-symbol-search.esm.min.js";
+export const code = `import { SymbolSearch } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.assessment-symbol-search.esm.min.js";
 const activity = new SymbolSearch();
 activity.setParameters({show_quit_button: false});`;
 

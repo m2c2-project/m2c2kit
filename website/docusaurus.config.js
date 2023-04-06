@@ -1,23 +1,50 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line no-undef
 const lightCodeTheme = require("prism-react-renderer/themes/github");
+// eslint-disable-next-line no-undef
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+// eslint-disable-next-line no-undef
+const process = require("process");
+
+/**
+ * Ensure baseURL ends with a slash and starts with a slash.
+ * Do this by removing all leading and trailing slashes,
+ * and then adding slashes. An empty baseUrl should be a
+ * single slash, according to the Docusaurus docs.
+ *
+ * BASE_URL must be defined in deploy-docs.yml GitHub Action.
+ *
+ * See the plugin \src\plugins\plugin-m2c2kit-modify-base-url.js
+ * for full explanation.
+ */
+const baseUrl =
+  process.env.BASE_URL === undefined || process.env.BASE_URL === null
+    ? "/"
+    : "/" + process.env.BASE_URL.replace(/^\/+|\/+$/g, "") + `/`;
+
+const url =
+  process.env.GITHUB_REPOSITORY_OWNER === undefined ||
+  process.env.GITHUB_REPOSITORY_OWNER === null
+    ? "https://m2c2-project.github.io"
+    : "https://" + process.env.GITHUB_REPOSITORY_OWNER + `.github.io`;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "m2c2kit",
   tagline: "a library for cross-platform cognitive assessments",
-  url: "https://your-docusaurus-test-site.com",
-  baseUrl: "/",
+  url: url,
+  baseUrl: baseUrl,
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  organizationName: "m2c2-project", // Usually your GitHub org/user name.
+  projectName: "m2c2kit", // Usually your repo name.
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -33,6 +60,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          // eslint-disable-next-line no-undef
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -48,6 +76,7 @@ const config = {
         //     "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
         // },
         theme: {
+          // eslint-disable-next-line no-undef
           customCss: require.resolve("./src/css/custom.css"),
         },
       }),
@@ -56,6 +85,7 @@ const config = {
 
   themes: [
     [
+      // eslint-disable-next-line no-undef
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {
         hashed: true,
@@ -195,6 +225,12 @@ const config = {
       },
     ],
     [
+      "./src/plugins/plugin-m2c2kit-modify-base-url.js",
+      {
+        baseUrl: baseUrl,
+      },
+    ],
+    [
       "./src/plugins/plugin-m2c2kit-copy-assets.js",
       {
         folders: [
@@ -280,4 +316,5 @@ const config = {
   ],
 };
 
+// eslint-disable-next-line no-undef
 module.exports = config;

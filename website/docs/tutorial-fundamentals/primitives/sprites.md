@@ -96,7 +96,7 @@ code: `class DocsDemo extends Game {
         sceneOne.addChild(earthSprite);
     }
 }`},
-{ description: <>By setting the `height`and`width`, you can [resize] the image. The original resolution of the JPG is square, but we'll make it appear very skinny.</>,
+{ description: <>By setting the `height` and `width`, you can [resize] the image. The original resolution of the JPG is square, but we'll make it appear very skinny.</>,
 code: `class DocsDemo extends Game {
     constructor() {
         const options = {
@@ -120,7 +120,7 @@ code: `class DocsDemo extends Game {
         sceneOne.addChild(earthSprite);
     }
 }`},
-{ description: <>The same image `url`can be used to create [multiple] sprites.</>,
+{ description: <>The same image `url` can be used to create [multiple] sprites.</>,
 code:`class DocsDemo extends Game {
     constructor() {
         const options = {

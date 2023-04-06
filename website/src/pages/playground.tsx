@@ -79,7 +79,6 @@ export default function Home(): JSX.Element {
   };
 
   const runCode = (c?) => {
-    // https://stackoverflow.com/a/71108399
     const replacement = c === undefined ? code : c;
     let fullCode = template.replace(
       /\/\/ _-_BEGIN_CODE_REPLACEMENT_BLOCK_-_([\s\S]*?)\/\/ _-_END_CODE_REPLACEMENT_BLOCK_-_/,
@@ -87,18 +86,22 @@ export default function Home(): JSX.Element {
     );
     fullCode = fullCode.replace(
       'from "@m2c2kit/core";',
-      'from "/m2c2kit/lib/m2c2kit.core.esm.js";'
+      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.core.esm.js";'
     );
     fullCode = fullCode.replace(
       'from "@m2c2kit/addons";',
-      'from "/m2c2kit/lib/m2c2kit.addons.esm.js";'
+      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.addons.esm.js";'
     );
     setSrcdoc(fullCode);
+    /**
+     * Force the iframe to reload by setting rnd to a new value. The key
+     * property on the SimpleIFrame component is bound to rnd.
+     * https://stackoverflow.com/a/71108399
+     */
     setRnd(Math.random().toString());
   };
 
   function calcIframeWidth(width: number) {
-    console.log("calcIframeWidth: " + width);
     if (width > 1080) {
       return 400;
     }
@@ -106,7 +109,6 @@ export default function Home(): JSX.Element {
   }
 
   function calcIframeHeight(height: number) {
-    console.log("calcIframeHeight: " + height);
     return Math.min(height - 60 - 145 - 8 - 40, 800);
   }
 

@@ -8,8 +8,8 @@ export default function MonacoEditor(props) {
     editorRef.current = editor;
 
     const definitionUrls = [
-      "/m2c2kit/declarations/m2c2kit/core/index.d.ts",
-      "/m2c2kit/declarations/m2c2kit/addons/index.d.ts",
+      "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/core/index.d.ts",
+      "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/addons/index.d.ts",
     ];
 
     definitionUrls.map((url) =>

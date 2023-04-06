@@ -8,7 +8,7 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 
 /**
- * This Docusarus plugin copys the m2c2kit assets needed for the interactive
+ * This Docusaurus plugin copys the m2c2kit assets needed for the interactive
  * code examples. Thus, "npm run build" must be run in the monorepo root
  * before building the website. Otherwise, the assets are not available.
  */

@@ -1,41 +1,27 @@
-# Website
+# website
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
-### Installation
+## Build
+
+Before the website can be built, the m2c2kit library must be built. To build the website, run the following from the repository root (not this `website` directory):
 
 ```
-$ yarn
+npm install # if not run previously
+npm run build
+npm run build -w website
 ```
 
-### Local Development
+## Deployment
+
+The GitHub Actions workflow in `/.github/workflows/deploy-docs.yml` will build and deploy the website to GitHub Pages at https://m2c2-project.github.io/m2c2kit when a commit is pushed to the `main` branch.
+
+**Important**: The environment variable `BASE_URL` in `deploy-docs.yml` must be set to the correct subpath, which for GitHub Pages is the name of the repository. It currently assumes the repository is named `m2c2kit`.
+
+## Local Development
+
+Assuming the m2c2kit library has been built, the website can be run locally with the following command from this directory :
 
 ```
-$ yarn start
+npm start
 ```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
