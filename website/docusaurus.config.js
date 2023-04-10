@@ -15,15 +15,15 @@ const process = require("process");
  * and then adding slashes. An empty baseUrl should be a
  * single slash, according to the Docusaurus docs.
  *
- * BASE_URL must be defined in deploy-docs.yml GitHub Action.
+ * DOCS_BASE_URL must be defined in the GitHub Action.
  *
  * See the plugin \src\plugins\plugin-m2c2kit-modify-base-url.js
  * for full explanation.
  */
 const baseUrl =
-  process.env.BASE_URL === undefined || process.env.BASE_URL === null
+  process.env.DOCS_BASE_URL === undefined || process.env.DOCS_BASE_URL === null
     ? "/"
-    : "/" + process.env.BASE_URL.replace(/^\/+|\/+$/g, "") + `/`;
+    : "/" + process.env.DOCS_BASE_URL.replace(/^\/+|\/+$/g, "") + `/`;
 
 const url =
   process.env.GITHUB_REPOSITORY_OWNER === undefined ||

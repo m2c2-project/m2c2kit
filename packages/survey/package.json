@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/survey",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@m2c2kit/core": "0.3.4",
+    "@m2c2kit/core": "0.3.5",
     "bootstrap-datepicker": "1.9.0",
     "bootstrap-slider": "11.0.2",
     "jquery": "3.6.0",

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-grid-memory",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "scripts": {
     "build": "npm run clean && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
@@ -20,8 +20,8 @@
     "post-install.mjs"
   ],
   "dependencies": {
-    "@m2c2kit/addons": "0.3.1",
-    "@m2c2kit/core": "0.3.4"
+    "@m2c2kit/addons": "0.3.2",
+    "@m2c2kit/core": "0.3.5"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.0.2",

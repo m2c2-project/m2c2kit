@@ -41,7 +41,7 @@ export default [
     plugins: [
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
-      typescript({ outputToFilesystem: true }),
+      typescript({ outputToFilesystem: true, declaration: true }),
       prependToBundle("index.js", codeToPrepend),
     ],
     external: ["fs/promises"],
