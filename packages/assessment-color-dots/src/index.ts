@@ -265,7 +265,11 @@ class ColorDots extends Game {
       name: "Color Dots",
       id: "color-dots",
       version: "__PACKAGE_JSON_VERSION__",
-      shortDescription: "A short description of Color Dots goes here...",
+      shortDescription:
+        "Color Dots is cued-recall, item-location memory \
+binding task, where after viewing 3 dots for a brief period of time, \
+participants report: (1) the color at a cued location; (2) the location of \
+a cued color.",
       longDescription:
         "Participants are asked to remember the location and color of three \
 briefly presented, and uniquely colored dots. Each trial of this task \

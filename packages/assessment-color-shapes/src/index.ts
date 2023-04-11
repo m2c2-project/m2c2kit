@@ -261,8 +261,19 @@ class ColorShapes extends Game {
       name: "Color Shapes",
       id: "color-shapes",
       version: "__PACKAGE_JSON_VERSION__",
-      shortDescription: "A short description of Color Shapes goes here...",
-      longDescription: `Color Shapes is a change detection paradigm used to measure visual short-term memory binding (Parra et al., 2009). Participants are asked to memorize the shapes and colors of three different polygons for 3 seconds. The three polygons are then removed from the screen and re-displayed at different locations, either having the same or different colors. Participants are then asked to decide whether the combination of colors and shapes are the "Same" or "Different" between the study and test phases.`,
+      shortDescription:
+        "Color Shapes is a visual array change detection \
+task, measuring intra-item feature binding, where participants determine \
+if shapes change color across two sequential presentations of shape \
+stimuli.",
+      longDescription: `Color Shapes is a change detection paradigm used \
+to measure visual short-term memory binding (Parra et al., 2009). \
+Participants are asked to memorize the shapes and colors of three different \
+polygons for 3 seconds. The three polygons are then removed from the screen \
+and re-displayed at different locations, either having the same or different \
+colors. Participants are then asked to decide whether the combination of \
+colors and shapes are the "Same" or "Different" between the study and test \
+phases.`,
       showFps: defaultParameters.show_fps.default,
       width: 400,
       height: 800,

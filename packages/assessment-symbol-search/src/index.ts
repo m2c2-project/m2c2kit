@@ -215,9 +215,9 @@ top. (2 unique symbols.)",
       id: "symbol-search",
       version: "__PACKAGE_JSON_VERSION__",
       shortDescription:
-        "Symbol Search is a test of processing speed, where \
-participants see a row of symbol pairs at the top of the screen and match \
-them to symbol pairs at the bottom of the screen.",
+        "Symbol Search is a speeded continuous performance test of \
+conjunctive feature search in which respondents identify matching symbol \
+pairs as quickly and as accurately as they can.",
       longDescription:
         'On each trial of the symbol search task, participants saw a row of \
 three symbol pairs at the top of the screen and were presented with two \

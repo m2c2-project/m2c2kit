@@ -268,7 +268,10 @@ class GridMemory extends Game {
       name: "Grid Memory",
       id: "grid-memory",
       version: "__PACKAGE_JSON_VERSION__",
-      shortDescription: "A short description of Grid Memory goes here...",
+      shortDescription:
+        "Grid Memory is a visuospatial working memory task, \
+with delayed free recall. After a brief exposure, and a short distraction \
+phase, participants report the location of dots on a grid.",
       longDescription:
         'Each trial of the dot memory task consisted of 3 phases: encoding, \
   distraction, and retrieval. During the encoding phase, the participant was \

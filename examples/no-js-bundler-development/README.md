@@ -6,9 +6,8 @@ It is **highly** recommended to use `npm` and the full TypeScript/JavaScript too
 
 If, however, you cannot do that, this example shows how to use `m2c2kit` without TypeScript or a JavaScript bundler. This is not an optimal development approach. Nevertheless, to run this example:
 
-1. You _must_ build the repository first (`npm install` then `npm run build` from the repository root), because it will copy required static assets to this folder.
-2. Run `npx http-server` from this folder to start a local web server on port 8080. Open http://localhost:8080 in your browser.
-3. Alternatively, this folder (`examples/no-js-bundler-development`) can be directly copied and served from a web server.
+1. You _must_ build the repository first (`npm install` then `npm run build` from the repository root), because it will copy required static assets to the `assets` and `lib` folder.
+2. Run `npx http-server` from this folder to start a local web server on port 8080. Open http://localhost:8080 in your browser. Alternatively, this folder (`examples/no-js-bundler-development`) can be directly copied and served from a web server.
 
 ## Explanation
 

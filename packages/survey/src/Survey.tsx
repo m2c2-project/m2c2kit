@@ -28,7 +28,9 @@ import { SurveyVariable } from "./SurveyVariable";
 import { ConfirmationSkipModalConfiguration } from "./ConfirmationSkipModalConfiguration";
 
 // TODO: this will have to be handled specially for i18n
-const CONFIRM_SKIP_TEXT = "Are you sure you want to skip these questions?";
+let CONFIRM_SKIP_TEXT = "Are you sure you want to skip these questions?";
+let CONFIRM_SKIP_AFFIRMATIVE = "Yes";
+let CONFIRM_SKIP_NEGATIVE = "No";
 
 type SurveyVariables = Array<SurveyVariable>;
 
@@ -78,6 +80,10 @@ export class Survey implements Activity {
    */
   setParameters(surveyJson: unknown): void {
     this._surveyJson = surveyJson;
+    const locale: string | undefined = (surveyJson as any)?.locale;
+    if (locale === "auto") {
+      (surveyJson as any).locale = this.getEnvironmentLocale();
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.name = (surveyJson as any)?.name ?? "unnamed survey";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +92,59 @@ export class Survey implements Activity {
     if ((surveyJson as any)?.confirmSkipping !== undefined) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.confirmSkipping = (surveyJson as any)?.confirmSkipping;
+      if ((surveyJson as any)?.confirmSkippingText?.message !== undefined) {
+        const message = (surveyJson as any)?.confirmSkippingText?.message;
+        if (typeof message === "string") {
+          CONFIRM_SKIP_TEXT = message as string;
+        } else if (typeof message === "object") {
+          if (locale === undefined) {
+            CONFIRM_SKIP_TEXT = message["default"] ?? "MISSING DEFAULT TEXT";
+          } else {
+            CONFIRM_SKIP_TEXT =
+              message[locale] ?? message["default"] ?? "MISSING ${locale} TEXT";
+          }
+        }
+      }
+      if ((surveyJson as any)?.confirmSkippingText?.affirmative !== undefined) {
+        const affirmativeText = (surveyJson as any)?.confirmSkippingText
+          ?.affirmative;
+        if (typeof affirmativeText === "string") {
+          CONFIRM_SKIP_AFFIRMATIVE = affirmativeText as string;
+        } else if (typeof affirmativeText === "object") {
+          if (locale === undefined) {
+            CONFIRM_SKIP_AFFIRMATIVE =
+              affirmativeText["default"] ?? "MISSING DEFAULT TEXT";
+          } else {
+            CONFIRM_SKIP_AFFIRMATIVE =
+              affirmativeText[locale] ??
+              affirmativeText["default"] ??
+              "MISSING ${locale} TEXT";
+          }
+        }
+      }
+      if ((surveyJson as any)?.confirmSkippingText?.negative !== undefined) {
+        const negativeText = (surveyJson as any)?.confirmSkippingText?.negative;
+        if (typeof negativeText === "string") {
+          CONFIRM_SKIP_NEGATIVE = negativeText as string;
+        } else if (typeof negativeText === "object") {
+          if (locale === undefined) {
+            CONFIRM_SKIP_NEGATIVE =
+              negativeText["default"] ?? "MISSING DEFAULT TEXT";
+          } else {
+            CONFIRM_SKIP_NEGATIVE =
+              negativeText[locale] ??
+              negativeText["default"] ??
+              "MISSING ${locale} TEXT";
+          }
+        }
+      }
     }
+  }
+
+  private getEnvironmentLocale(): string {
+    return navigator.languages && navigator.languages.length
+      ? navigator.languages[0]
+      : navigator.language;
   }
 
   get additionalParameters(): unknown {
@@ -220,10 +278,10 @@ export class Survey implements Activity {
             }}
           >
             <button style={modalButtonStyle} onClick={yesClicked}>
-              Yes
+              {CONFIRM_SKIP_AFFIRMATIVE}
             </button>
             <button style={modalButtonStyle} onClick={noClicked}>
-              No
+              {CONFIRM_SKIP_NEGATIVE}
             </button>
           </div>
         </div>

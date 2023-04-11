@@ -1,4 +1,6 @@
 # these are built or copied from other packages, so ignore
-assets
-lib
+assets/*
+!assets/.gitkeep
+lib/*
+!lib/.gitkeep
 index.html
