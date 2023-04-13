@@ -80,7 +80,7 @@ See the [`@m2c2kit/cli`](packages/cli) package for more information on using the
 
 The installation steps above are all you need to start using m2c2kit and creating assessments.
 
-If you want to explore m2c2kit in detail, you can build the library from source. m2c2kit is a mono repository. Assuming you have installed [Node.js](https://nodejs.org), execute the following from the respository root:
+To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. Assuming you have installed [Node.js](https://nodejs.org), execute the following from the respository root:
 
 ```
 npm install

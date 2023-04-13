@@ -12,13 +12,6 @@
       "webRoot": "${workspaceFolder}/packages/assessments-demo/build"
     },
     {
-      "name": "playground",
-      "request": "launch",
-      "type": "chrome",
-      "url": "http://localhost:4200",
-      "webRoot": "${workspaceFolder}/packages/playground"
-    },
-    {
       "type": "chrome",
       "request": "launch",
       "name": "Scratch Launch Chrome against localhost",

@@ -32,7 +32,7 @@ When creating a project with `m2 new`, the CLI will configure the project for de
 
 ## Adding more cognitive assessments
 
-m2c2kit has a rich API for writing your own cognitive assessments. In addition, the m2c2kit team has developed cognitive assessments in ready-to-use form, which are available as separate packages (`@m2c2kit/assessment-symbol-search`, `@m2c2kit/assessment-color-dots`, `@m2c2kit/assessment-grid-memory`). Once you have scaffolded the demo app, to add additional assessments:
+m2c2kit has a rich API for writing your own cognitive assessments. In addition, the m2c2kit team has developed cognitive assessments in ready-to-use form, which are available as separate packages (`@m2c2kit/assessment-symbol-search`, `@m2c2kit/assessment-color-dots`, `@m2c2kit/assessment-grid-memory`, `@m2c2kit/assessment-color-shapes`). Once you have scaffolded the demo app, to add additional assessments:
 
 1. Install the package for the assessment. For example, if you scaffolded your app above with `m2 new myapp`, and now you want to add the m2c2kit Symbol Search assessment, execute the following from the `myapp` directory: `npm install @m2c2kit/assessment-symbol-search`.
 2. Update your app's source code to import the Symbol Search assessment. In the file `src/index.ts`, add to the top: `import { SymbolSearch } from '@m2c2kit/assessment-symbol-search';`

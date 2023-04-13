@@ -35,19 +35,19 @@
   "license": "MIT",
   "devDependencies": {
     "@types/semver": "7.3.13",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
     "chalk": "^5.2.0",
     "concurrently": "8.0.1",
     "cpy-cli": "4.2.0",
-    "eslint": "^8.37.0",
+    "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
     "find-up": "6.3.0",
     "http-server": "14.1.1",
     "husky": "8.0.3",
-    "lint-staged": "^13.2.0",
+    "lint-staged": "^13.2.1",
     "prettier": "2.8.7",
-    "semver": "7.3.8"
+    "semver": "7.4.0"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
