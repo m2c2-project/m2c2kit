@@ -9,11 +9,11 @@ contains() {  if    [ "$1" ] &&            # Is there a source string.
               fi;
             }
 
-s="$(timeout 1 npm search @m2c2kit 2>&1)"
+s="$(timeout 5 npm search @m2c2kit 2>&1)"
 while [ $(contains "$s" "@m2c2kit/core") -eq 1 ] || [ $(contains "$s" "@m2c2kit/addons") -eq 1 ] || [ $(contains "$s" "@m2c2kit/cli") -eq 1 ] || [ $(contains "$s" "@m2c2kit/build-helpers") -eq 1 ]
 do
     sleep 2
-    s="$(timeout 1 npm search @m2c2kit 2>&1)"
+    s="$(timeout 5 npm search @m2c2kit 2>&1)"
     echo "packages not yet published in container registry"
 done
 echo "container registry has @m2c2kit/core, @m2c2kit/addons, @m2c2kit/cli, @m2c2kit/build-helpers"
