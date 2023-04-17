@@ -10,7 +10,7 @@
     "dist/index.d.ts"
   ],
   "devDependencies": {
-    "@rollup/plugin-commonjs": "24.0.1",
+    "@rollup/plugin-commonjs": "24.1.0",
     "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-typescript": "11.1.0",
     "@types/estree": "1.0.0",
@@ -18,7 +18,7 @@
     "cpy-cli": "4.2.0",
     "findup-sync": "5.0.0",
     "rimraf": "5.0.0",
-    "rollup": "3.20.2",
+    "rollup": "3.20.4",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-dts": "5.3.0",
     "typescript": "5.0.4"

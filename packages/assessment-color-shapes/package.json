@@ -31,7 +31,7 @@
     "@rollup/plugin-typescript": "11.1.0",
     "cpy-cli": "4.2.0",
     "rimraf": "5.0.0",
-    "rollup": "3.20.2",
+    "rollup": "3.20.4",
     "tslib": "2.5.0",
     "typescript": "5.0.4"
   }
