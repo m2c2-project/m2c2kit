@@ -1,9 +1,8 @@
-import typescript from "@rollup/plugin-typescript";
+import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-import sourcemaps from "rollup-plugin-sourcemaps";
-import copy from "rollup-plugin-copy";
 import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
@@ -20,16 +19,13 @@ export default (commandLineArgs) => {
       output: [
         {
           file: `./${outputFolder}/index.js`,
-          format: "esm",
+          format: "es",
           sourcemap: isDebug,
         },
       ],
       plugins: [
         nodeResolve(),
-        typescript({
-          sourceMap: commandLineArgs.configServe && true,
-        }),
-        sourcemaps(),
+        esbuild(),
         copy({
           targets: [
             {

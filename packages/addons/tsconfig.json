@@ -8,6 +8,7 @@
     "target": "es6",
     "lib": ["es6", "dom", "dom.iterable"],
     "declaration": true,
+    "emitDeclarationOnly": true,
     "sourceMap": true,
     "declarationMap": true,
     "module": "es6",

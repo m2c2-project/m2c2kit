@@ -1,30 +1,56 @@
-import typescript from "@rollup/plugin-typescript";
-import nodeResolve from "@rollup/plugin-node-resolve";
+import esbuild from "rollup-plugin-esbuild";
+import { minify } from "rollup-plugin-esbuild";
 import copy from "rollup-plugin-copy";
-import babel from "@rollup/plugin-babel";
-import del from "rollup-plugin-delete";
+import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import dts from "rollup-plugin-dts";
-import terser from "@rollup/plugin-terser";
-import sourcemaps from "rollup-plugin-sourcemaps";
+
+// I could not get @rollup/plugin-typescript to work with the
+// emitDeclarationOnly option. Thus, as part of the build script in
+// package.json, before rollup is run, tsc is run to generate the
+// declaration files used by rollup-plugin-dts.
 
 export default [
   {
     input: ["./src/index.ts"],
-    // the output is build because we need a later step to
-    // combine all declaration files
-    output: [{ dir: "./build", format: "es", sourcemap: true }],
     external: ["@m2c2kit/core"],
-    plugins: [
-      del({
-        targets: ["dist/*", "build/*", "build-umd/*", "build-nobundler/*"],
-      }),
-      nodeResolve(),
-      typescript({
-        outputToFilesystem: true,
-      }),
-      sourcemaps(),
-      terser(),
+    output: [
+      { file: "./build/index.js", format: "es", sourcemap: true },
+      {
+        file: "./build-nobundler/m2c2kit.addons.esm.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.js",
+        },
+        sourcemap: false,
+      },
+      {
+        file: "./build-nobundler/m2c2kit.addons.esm.min.js",
+        format: "es",
+        paths: {
+          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
+        },
+        sourcemap: false,
+        plugins: [minify()],
+      },
+      // Make a UMD bundle only to use for testing (jest), because jest support
+      // for esm modules is still incomplete
+      {
+        file: "./build-umd/index.js",
+        format: "umd",
+        name: "m2c2kit",
+        globals: {
+          "@m2c2kit/core": "core",
+        },
+        plugins: [
+          getBabelOutputPlugin({
+            allowAllFormats: true,
+            presets: ["@babel/preset-env"],
+          }),
+        ],
+        sourcemap: true,
+      },
     ],
+    plugins: [esbuild()],
   },
   {
     // bundle all declaration files and place the declaration
@@ -34,125 +60,24 @@ export default [
     plugins: [
       dts(),
       copy({
+        // hook must be 'closeBundle' because we need dist/index.d.ts to
+        // be created before we can copy it
+        hook: "closeBundle",
         targets: [
           {
-            // copy the bundled esm module and sourcemap to dist
-            src: "build/index.*",
-            dest: ["dist/"],
+            src: "build/index.js*",
+            dest: "dist",
           },
-        ],
-      }),
-    ],
-  },
-
-  // Make a UMD bundle only to use for testing (jest), because jest support
-  // for esm modules is still incomplete
-  {
-    input: "./src/index.ts",
-    output: [
-      {
-        dir: "./build-umd",
-        format: "umd",
-        name: "m2c2kit",
-        esModule: false,
-        exports: "named",
-        sourcemap: true,
-        globals: {
-          "@m2c2kit/core": "core",
-        },
-      },
-    ],
-    external: ["@m2c2kit/core"],
-    plugins: [
-      nodeResolve(),
-      typescript({
-        outputToFilesystem: true,
-        // tsconfig.json defined the outDir as build, so we must
-        // use a different one for this umd build
-        outDir: "./build-umd",
-      }),
-      babel({
-        babelHelpers: "bundled",
-      }),
-      copy({
-        targets: [
           {
-            // copy the bundled declarations to build-umd
             src: "dist/index.d.ts",
-            dest: ["build-umd/"],
+            dest: "build-umd/",
           },
-        ],
-      }),
-    ],
-  },
-
-  // Make esm bundle for development without a bundler
-  {
-    input: "./src/index.ts",
-    output: [
-      {
-        file: "./build-nobundler/m2c2kit.addons.esm.js",
-        format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.js",
-        },
-      },
-    ],
-    external: ["@m2c2kit/core"],
-    plugins: [
-      nodeResolve(),
-      typescript({
-        outputToFilesystem: true,
-        // tsconfig.json defined the outDir as build, so we must
-        // use a different one for this umd build
-        outDir: "./build-nobundler",
-        sourceMap: false,
-      }),
-      babel({
-        babelHelpers: "bundled",
-      }),
-      copy({
-        targets: [
           {
-            // copy the bundled declarations to build-nobundler
             src: "dist/index.d.ts",
             dest: "build-nobundler/",
             rename: () => "m2c2kit.addons.esm.d.ts",
           },
-        ],
-      }),
-    ],
-  },
-
-  // Make minified esm bundle for development without a bundler
-  {
-    input: "./src/index.ts",
-    output: [
-      {
-        file: "./build-nobundler/m2c2kit.addons.esm.min.js",
-        format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
-        },
-      },
-    ],
-    external: ["@m2c2kit/core"],
-    plugins: [
-      typescript({
-        outputToFilesystem: true,
-        // tsconfig.json defined the outDir as build, so we must
-        // use a different one for this build
-        outDir: "./build-nobundler",
-        sourceMap: false,
-      }),
-      babel({
-        babelHelpers: "bundled",
-      }),
-      terser(),
-      copy({
-        targets: [
           {
-            // copy the bundled declarations to build-nobundler
             src: "dist/index.d.ts",
             dest: "build-nobundler/",
             rename: () => "m2c2kit.addons.esm.min.d.ts",

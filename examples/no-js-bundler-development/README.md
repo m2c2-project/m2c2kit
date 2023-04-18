@@ -27,9 +27,9 @@ import { Game } from "./lib/m2c2kit.core.esm.js";
 
 The import path is relative to the current file (`index.js`). The `lib` folder is where the ES modules were copied to by the build script (they came from the packages' `build-nobundler` folders).
 
-**Important**: In addition to these ES modules, you must copy the supporting static assets (CSS, images, fonts, etc.) from the packages _and_ preserve the proper folder structure. The build script did this for you, but you will have to do it yourself for other assessments not used in this example.
+**Important**: In addition to these ES modules, you must copy the supporting static assets (CSS, images, fonts, etc.) from the packages _and_ preserve the proper folder structure. The repository-level build script did this for you, but you will have to do it yourself for other assessments.
 
-For development of new assessments, use the `@m2c2kit/core`, `@m2c2kit/addons`, and `@m2c2kit/survey` library files that are not minified, because they have comments that VS Code can use to provide type checking and intellisense. For production, use the minified files:
+For development of new assessments, use the `@m2c2kit/core`, `@m2c2kit/addons`, and `@m2c2kit/survey` library files that are not minified, because stepping through the code may be helpful. For production, use the minified files:
 
 ```
 import { Game } from "./lib/m2c2kit.core.esm.min.js";

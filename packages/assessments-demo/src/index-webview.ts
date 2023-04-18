@@ -31,7 +31,7 @@ const session = new Session({
      *
      * Once initialized, the below code will start the session.
      */
-    onSessionLifecycle: async (ev: SessionLifecycleEvent) => {
+    onSessionLifecycle: async function (ev: SessionLifecycleEvent) {
       //#region to support m2c2kit in WebView
       if (SageResearch.contextIsWebView()) {
         SageResearch.sendEventToWebView(ev);
@@ -77,7 +77,7 @@ const session = new Session({
      * The schema for all of the above are in JSON Schema format.
      * Currently, only games generate schema.
      */
-    onActivityResults: (ev: ActivityResultsEvent) => {
+    onActivityResults: function (ev: ActivityResultsEvent) {
       //#region to support m2c2kit in WebView
       if (SageResearch.contextIsWebView()) {
         SageResearch.sendEventToWebView(ev);
@@ -108,7 +108,7 @@ const session = new Session({
      * Usually, however, we want to know when all the activities are done,
      * so we'll look for the session ending via onSessionLifecycleChange
      */
-    onActivityLifecycle: async (ev: ActivityLifecycleEvent) => {
+    onActivityLifecycle: async function (ev: ActivityLifecycleEvent) {
       //#region to support m2c2kit in WebView
       if (SageResearch.contextIsWebView()) {
         SageResearch.sendEventToWebView(ev);

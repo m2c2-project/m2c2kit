@@ -11,7 +11,7 @@ _a library for cross-platform cognitive assessments_
 
 </div>
 
-m2c2kit is a library for creating cross-platform cognitive assessments. It is produced by the Ambulatory Methods for Measuring Cognitive Change research project (Award #U2CAG060408), sponsored by the National Institute on Aging.
+m2c2kit is a library for creating cross-platform cognitive assessments. It is produced by the Ambulatory Methods for Measuring Cognitive Change research project (Award #U2CAG060408), sponsored by the [National Institute on Aging](https://www.nia.nih.gov/).
 
 Features:
 

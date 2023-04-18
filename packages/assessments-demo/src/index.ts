@@ -34,7 +34,7 @@ const session = new Session({
      *
      * Once initialized, the below code will start the session.
      */
-    onSessionLifecycle: async (ev: SessionLifecycleEvent) => {
+    onSessionLifecycle: async function (ev: SessionLifecycleEvent) {
       if (ev.type === EventType.SessionInitialize) {
         await session.start();
       }
@@ -64,7 +64,7 @@ const session = new Session({
      * The schema for all of the above are in JSON Schema format.
      * Currently, only games generate schema.
      */
-    onActivityResults: (ev: ActivityResultsEvent) => {
+    onActivityResults: function (ev: ActivityResultsEvent) {
       if (ev.target.type === ActivityType.Game) {
         console.log(`✅ trial complete:`);
       } else if (ev.target.type === ActivityType.Survey) {
@@ -93,7 +93,7 @@ const session = new Session({
      * Usually, however, we want to know when all the activities are done,
      * so we'll look for the session ending via onSessionLifecycleChange
      */
-    onActivityLifecycle: async (ev: ActivityLifecycleEvent) => {
+    onActivityLifecycle: async function (ev: ActivityLifecycleEvent) {
       const activityType =
         ev.target.type === ActivityType.Game ? "game" : "survey";
 

@@ -1,14 +1,5 @@
-export { Grid, GridOptions } from "./composites/grid";
-export { Button, ButtonOptions } from "./composites/button";
-export { Dialog, DialogOptions, DialogResult } from "./composites/dialog";
-export {
-  VirtualKeyboard,
-  VirtualKeyboardOptions,
-  VirtualKeyboardRow,
-  KeyConfiguration,
-} from "./composites/virtual-keyboard";
-export {
-  Instructions,
-  InstructionsOptions,
-  InstructionScene,
-} from "./stories/instructions";
+export * from "./composites/grid";
+export * from "./composites/button";
+export * from "./composites/dialog";
+export * from "./composites/virtual-keyboard";
+export * from "./stories/instructions";

@@ -2,8 +2,7 @@
   "name": "@m2c2kit/assessment-color-shapes",
   "version": "0.8.3",
   "scripts": {
-    "serve": "rollup -c rollup.config.mjs --watch --configServe",
-    "build": "npm run clean && rollup -c",
+    "build": "npm run clean && tsc && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
     "postinstall": "node post-install.mjs"
   },
@@ -27,12 +26,10 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-replace": "5.0.2",
-    "@rollup/plugin-terser": "0.4.1",
-    "@rollup/plugin-typescript": "11.1.0",
-    "cpy-cli": "4.2.0",
     "rimraf": "5.0.0",
-    "rollup": "3.20.4",
-    "tslib": "2.5.0",
+    "rollup": "3.20.6",
+    "rollup-plugin-copy": "3.4.0",
+    "rollup-plugin-esbuild": "5.0.0",
     "typescript": "5.0.4"
   }
 }
