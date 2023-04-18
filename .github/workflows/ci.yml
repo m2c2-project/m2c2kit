@@ -37,7 +37,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 18.15.0
           cache: npm
       - run: npm config set registry $REGISTRY_URL
       # remove the scheme from the URL; needs to be in the format of //registry.npmjs.org/:_authToken=...
