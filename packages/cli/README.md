@@ -4,8 +4,10 @@ This package contains a command line interface (CLI) for developing m2c2kit cogn
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) (version >=16)
-- [Visual Studio Code](https://code.visualstudio.com/download) is highly recommended
+- [Node.js](https://nodejs.org/en/download) (version >=18; LTS release suggested). **Required**.
+- [Visual Studio Code](https://code.visualstudio.com/download). Recommended.
+- [Google Chrome](https://www.google.com/chrome). Recommended.
+- [Git](https://git-scm.com/downloads). Recommended.
 
 ## Creating a cognitive assessment
 
