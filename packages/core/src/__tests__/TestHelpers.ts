@@ -1,19 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 export class TestHelpers {
-  static cryptoGetRandomValuesPolyfill(): void {
-    // @ts-ignore
-    global.crypto = {
-      // @ts-ignore
-      getRandomValues: function (buffer: Array<T>) {
-        const result = new Array<number>(buffer.length);
-        for (let i = 0; i < buffer.length; i++) {
-          result.push(Math.floor(Math.random() * 256));
-        }
-        return result;
-      },
-    };
-  }
-
   static setupDomAndGlobals(): void {
     const html = `<!DOCTYPE html>
     <html>
@@ -45,6 +31,8 @@ export class TestHelpers {
   static performance = {
     now: () => this.perfCounter,
   };
+
+  static sleep = (ms: number) => (this.perfCounter = this.perfCounter + ms);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static createM2c2KitMock(): any {

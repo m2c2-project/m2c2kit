@@ -10,7 +10,6 @@ import {
   Shape,
 } from "../../build-umd";
 
-TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
 
 class Game1 extends Game {

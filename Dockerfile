@@ -1,4 +1,4 @@
-FROM node:18.15.0
+FROM node:18
 
 WORKDIR /usr/src/m2c2kit
 

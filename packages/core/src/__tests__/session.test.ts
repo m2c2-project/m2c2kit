@@ -10,7 +10,6 @@ import {
   Scene,
 } from "../../build-umd";
 
-TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => {
   return TestHelpers.createM2c2KitMock();
 });

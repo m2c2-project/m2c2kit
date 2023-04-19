@@ -11,7 +11,6 @@ import {
   WebColors,
 } from "../../build-umd";
 
-TestHelpers.cryptoGetRandomValuesPolyfill();
 jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
 
 let session: Session;
