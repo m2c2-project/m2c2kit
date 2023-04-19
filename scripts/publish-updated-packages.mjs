@@ -117,7 +117,7 @@ async function publishPackagesIfNewer(packageDictionary) {
     .map(async (packageName) => {
       return new Promise((resolve) => {
         child_process.exec(
-          `npm publish -w ${packageName} --registry ${REGISTRY_URL}`,
+          `npm publish -w ${packageName} --registry ${REGISTRY_URL} --access public`,
           (error) => {
             if (error) {
               resolve({
