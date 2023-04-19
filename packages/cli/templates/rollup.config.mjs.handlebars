@@ -7,9 +7,10 @@ import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
+  const isProduction = commandLineArgs.configProd ? true : false;
 
   let outputFolder = "build";
-  if (commandLineArgs.configProd) {
+  if (isProduction) {
     outputFolder = "dist";
   }
 
@@ -19,14 +20,15 @@ export default (commandLineArgs) => {
       output: [
         {
           file: `./${outputFolder}/index.js`,
-          format: "esm",
+          format: "es",
           sourcemap: isDebug,
+          sourcemapExcludeSources: true
         },
       ],
       plugins: [
         nodeResolve(),
         typescript({
-          sourceMap: commandLineArgs.configServe && true,
+          sourceMap: isDebug && true,
         }),
         copy({
           targets: [
@@ -40,10 +42,10 @@ export default (commandLineArgs) => {
             },
           ],
         }),
-        commandLineArgs.configProd &&
+        isProduction &&
           !commandLineArgs.configNoHash &&
           hashM2c2kitAssets(outputFolder),
-        commandLineArgs.configServe &&
+        isDebug &&
           serve({
             /**
              * Start development server and automatically open browser with
@@ -58,7 +60,7 @@ export default (commandLineArgs) => {
             host: "localhost",
             port: 3000,
           }),
-        commandLineArgs.configServe &&
+        isDebug &&
           /**
            * Try a shorter delay for quicker reloads, but increase it if
            * the browser reloads before the new build is fully ready.

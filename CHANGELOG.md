@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/cli` [0.3.4] - 2023-04-19
+
+### Changed
+
+- Updated templates.
+
+### Fixed
+
+- Added `sourcemapExcludeSources: true` to rollup config to prevent debugger from crashing.
+
 ## `@m2c2kit/core` [0.3.5] - 2023-04-18
 
 ### Added
@@ -139,7 +149,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- runDuringTransition option is now being respected .
+- runDuringTransition option is now being respected.
 
 ## `@m2c2kit/addons` [0.3.1] - 2023-01-17
 
