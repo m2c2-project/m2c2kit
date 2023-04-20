@@ -340,9 +340,7 @@ export class ImageManager {
         fetch(browserImage.url)
           .then((response) => response.arrayBuffer())
           .then((data) => {
-            const base64String = btoa(
-              String.fromCharCode(...new Uint8Array(data))
-            );
+            const base64String = this.arrayBufferToBase64String(data);
             const subtype = this.inferImageSubtypeFromUrl(browserImage.url);
             image.src = "data:image/" + subtype + ";base64," + base64String;
           });
@@ -352,6 +350,15 @@ export class ImageManager {
         );
       }
     });
+  }
+
+  private arrayBufferToBase64String(buffer: ArrayBuffer): string {
+    let binary = "";
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
   }
 
   private inferImageSubtypeFromUrl(url?: string) {

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessments-demo",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build": "npm run clean && rollup -c --configProd",
@@ -11,19 +11,19 @@
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.3.2",
-    "@m2c2kit/assessment-cli-starter": "0.8.3",
-    "@m2c2kit/assessment-color-dots": "0.8.3",
-    "@m2c2kit/assessment-color-shapes": "0.8.3",
-    "@m2c2kit/assessment-grid-memory": "0.8.3",
-    "@m2c2kit/assessment-symbol-search": "0.8.3",
-    "@m2c2kit/core": "0.3.5",
-    "@m2c2kit/db": "0.3.2",
-    "@m2c2kit/sage-research": "0.3.2",
-    "@m2c2kit/survey": "0.3.2"
+    "@m2c2kit/addons": "^0.3.3",
+    "@m2c2kit/assessment-cli-starter": "^0.8.4",
+    "@m2c2kit/assessment-color-dots": "^0.8.4",
+    "@m2c2kit/assessment-color-shapes": "^0.8.4",
+    "@m2c2kit/assessment-grid-memory": "^0.8.4",
+    "@m2c2kit/assessment-symbol-search": "^0.8.4",
+    "@m2c2kit/core": "^0.3.6",
+    "@m2c2kit/db": "^0.3.3",
+    "@m2c2kit/sage-research": "^0.3.3",
+    "@m2c2kit/survey": "^0.3.3"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.2",
+    "@m2c2kit/build-helpers": "0.3.3",
     "@rollup/plugin-node-resolve": "15.0.2",
     "rollup": "3.20.6",
     "rollup-plugin-copy": "3.4.0",

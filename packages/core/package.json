@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -28,7 +28,7 @@
     "@rollup/plugin-commonjs": "24.1.0",
     "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-replace": "5.0.2",
-    "@types/jest": "29.5.0",
+    "@types/jest": "29.5.1",
     "@types/jsdom": "21.1.1",
     "canvas": "2.11.2",
     "canvaskit-wasm": "0.38.0",
