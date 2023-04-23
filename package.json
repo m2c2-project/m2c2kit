@@ -39,13 +39,13 @@
     "chalk": "^5.2.0",
     "concurrently": "8.0.1",
     "cpy-cli": "4.2.0",
-    "eslint": "^8.38.0",
+    "eslint": "^8.39.0",
     "eslint-config-prettier": "^8.8.0",
     "find-up": "6.3.0",
     "http-server": "14.1.1",
     "husky": "8.0.3",
     "lint-staged": "^13.2.1",
-    "prettier": "2.8.7",
+    "prettier": "^2.8.8",
     "semver": "7.5.0"
   },
   "lint-staged": {
