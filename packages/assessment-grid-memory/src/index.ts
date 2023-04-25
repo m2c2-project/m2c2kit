@@ -126,6 +126,11 @@ class GridMemory extends Game {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
       },
+      response_time_duration_ms: {
+        type: ["number", "null"],
+        description:
+          "Milliseconds from the when the empty grid is shown in the recall phase until the user has placed all dots and taps the done button. Null if trial was skipped.",
+      },
       presented_cells: {
         type: ["array", "null"],
         description:
@@ -884,8 +889,9 @@ phase, participants report the location of dots on a grid.",
 
     recallDoneButton.isUserInteractionEnabled = true;
     recallDoneButton.onTapDown(() => {
+      const doneButtonElapsedMs = Timer.elapsed("responseTime");
       userDotActions.push({
-        elapsed_duration_ms: Timer.elapsed("responseTime"),
+        elapsed_duration_ms: doneButtonElapsedMs,
         action_type: "done",
         cell: null,
       });
@@ -910,6 +916,7 @@ phase, participants report the location of dots on a grid.",
         Timer.stop("responseTime");
         Timer.remove("responseTime");
 
+        game.addTrialData("response_time_duration_ms", doneButtonElapsedMs);
         game.addTrialData("presented_cells", presentedCells);
         game.addTrialData("selected_cells", selectedCells);
         game.addTrialData("user_dot_actions", userDotActions);
