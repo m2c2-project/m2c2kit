@@ -1071,6 +1071,9 @@ export class Game implements Activity {
         activity_uuid: this.uuid,
         activity_id: this.options.id,
         activity_version: this.options.version,
+        device_timezone:
+          Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? "",
+        device_timezone_offset_minutes: new Date().getTimezoneOffset(),
         ...emptyTrial,
         device_metadata: this.getDeviceMetadata(),
       });
@@ -1179,6 +1182,16 @@ export class Game implements Activity {
     activity_version: {
       type: "string",
       description: "Version of the activity.",
+    },
+    device_timezone: {
+      type: "string",
+      description:
+        "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone.",
+    },
+    device_timezone_offset_minutes: {
+      type: "integer",
+      description:
+        "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset().",
     },
   };
 
