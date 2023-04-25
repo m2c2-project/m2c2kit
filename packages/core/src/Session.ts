@@ -3,7 +3,7 @@ import { EventType } from "./EventBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
 import { FontManager } from "./FontManager";
-import { CanvasKit, CanvasKitInit } from "./CanvasKitInit";
+import CanvasKitInit, { CanvasKit } from "canvaskit-wasm";
 import { Game } from "./Game";
 import { GameFontUrls } from "./GameFontUrls";
 import { GameImages } from "./GameImages";
@@ -345,7 +345,8 @@ export class Session {
   // call CanvasKitInit through loadCanvasKit so we can mock
   // loadCanvasKit using jest
   private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
-    return CanvasKitInit(canvasKitWasmUrl);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return CanvasKitInit({ locateFile: (_file) => canvasKitWasmUrl });
   }
 
   private loadAssets(canvasKit: CanvasKit) {
