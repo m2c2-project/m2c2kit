@@ -80,7 +80,7 @@ See the [`@m2c2kit/cli`](packages/cli) package for more information on using the
 
 The installation steps above are all you need to start using m2c2kit and creating assessments.
 
-To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. Assuming you have installed [Node.js](https://nodejs.org), execute the following from the respository root:
+To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. Assuming you have installed [Node.js](https://nodejs.org), execute the following from the repository root:
 
 ```
 npm install
@@ -105,6 +105,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 - [`@m2c2kit/assessment-cli-starter`](packages/assessment-cli-starter) - The assessment that is created when the CLI scaffolds a new app. It is a simple implementation of a [Stroop](https://en.wikipedia.org/wiki/Stroop_effect) assessment.
 - [`@m2c2kit/sage-research`](packages/sage-research) - Utility functions for embedding m2c2kit assessments in iOS and Android apps developed by [Sage Bionetworks](https://sagebionetworks.org/). End users will not need to install this.
 - [`@m2c2kit/build-helpers`](packages/build-helpers) - Utility functions for building m2c2kit apps. End users will not need to install this explicitly. It is automatically installed by the CLI as a dependency.
+- [`@m2c2kit/schema-util`](packages/schema-util) - Utility tool to extract the schema used in m2c2kit assessment TypeScript source files. End users do not need this.
 
 ## Testing
 
@@ -118,7 +119,7 @@ Using [Jest](https://jestjs.io/), some unit tests have been written to provide i
 
 m2c2kit is flexible and can be integrated into many use cases:
 
-- [`no-js-bundler-development`](examples/no-js-bundler-development/) - How to use m2c2kit in simple JavaScript without bundlers or TypeScript transplilation.
+- [`no-js-bundler-development`](examples/no-js-bundler-development/) - How to use m2c2kit in simple JavaScript without bundlers or TypeScript transpilation.
 
 - [`android-simple-webview`](examples/android-simple-webview/) - Android Studio project showing m2c2kit assessments integrated into a native Android app. Assessments are bundled into the app and do not require an internet connection.
 
