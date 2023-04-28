@@ -310,14 +310,14 @@ export class Survey implements Activity {
   /**
    * Hooks into SurveyJS callbacks based on user interaction.
    *
-   * @remarks SurveyJS has many callbacks, so there could be more functionalty
+   * @remarks SurveyJS has many callbacks, so there could be more functionally
    * we could tap into.
    */
   private addSurveyJsEventCallbacks() {
     /**
      * SurveyJS raises a value changed event only when an element receives
      * user interaction. Non-required elements that are skipped will not
-     * raise events. Thus, to record skippped elements, we hook into an
+     * raise events. Thus, to record skipped elements, we hook into an
      * event when the page is about to change or the survey is about to
      * complete. We look at all the elements on the page, find elements whose
      * values are undefined, and assign null values to them.

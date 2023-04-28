@@ -176,7 +176,7 @@ export abstract class Entity implements EntityOptions {
   };
 
   /**
-   * Adds a child to this parent entity. Thows exception if the child's name
+   * Adds a child to this parent entity. Throws exception if the child's name
    * is not unique with respect to other children of this parent.
    *
    * @param child - The child entity to add
@@ -619,7 +619,7 @@ export abstract class Entity implements EntityOptions {
     // constraints object has that type. If it does, create a
     // LayoutConstraint object that describes it.
     // (a layoutConstraint object, which is an instance of the
-    // LayoutConstraintr CLASS, is easier to work with than the values in
+    // LayoutConstraint CLASS, is easier to work with than the values in
     // the constraints object, which is defined by the Constraints INTERFACE)
     //
     constraintTypes.forEach((constraintType) => {
@@ -862,7 +862,7 @@ export abstract class Entity implements EntityOptions {
     //
     // We can solve this by modeling sibling constraint dependencies as a
     // Directed acyclic graph (DAG) and applying a topological sort.
-    // We then update the siblings in the topolgical sort reverse order
+    // We then update the siblings in the topological sort reverse order
     // (Why reverse order? The topological sort is ordered so that vertexes
     // with in degree 0 come first; these are the vertexes whose positions
     // depend on others, but no other vertexes depend on them for
@@ -913,7 +913,7 @@ export abstract class Entity implements EntityOptions {
 
           if (siblingConstraint === undefined) {
             throw new Error(
-              "error getting uuid of sibling contraint" +
+              "error getting uuid of sibling constraint" +
                 additionalExceptionMessage
             );
           }

@@ -57,7 +57,7 @@ export interface VirtualKeyboardOptions extends CompositeOptions {
   /** Comma-separated list of keys to hide. */
   hiddenKeys?: string;
   /** If true, only capital letters will be shown. */
-  captialLettersOnly?: boolean;
+  capitalLettersOnly?: boolean;
   /** Color of keys. */
   keyColor?: RgbaColor;
   /** Color of keys when pressed. */
@@ -92,7 +92,7 @@ export class VirtualKeyboard extends Composite {
   private keysPerRow: number;
   private fontSize: number;
   private hiddenKeys: string;
-  private captialLettersOnly: boolean;
+  private capitalLettersOnly: boolean;
   private keyColor: RgbaColor;
   private keyDownColor: RgbaColor;
   private specialKeyDownColor: RgbaColor;
@@ -124,7 +124,7 @@ export class VirtualKeyboard extends Composite {
     this.keysPerRow = options.keysPerRow ?? NaN;
     this.fontSize = options.fontSize ?? NaN;
     this.hiddenKeys = options.hiddenKeys ?? "";
-    this.captialLettersOnly = options.captialLettersOnly ?? false;
+    this.capitalLettersOnly = options.capitalLettersOnly ?? false;
     this.keyColor = options.keyColor ?? WebColors.White;
     this.keyDownColor = options.keyDownColor ?? WebColors.Transparent;
     this.specialKeyDownColor =
@@ -245,7 +245,7 @@ export class VirtualKeyboard extends Composite {
         let isShift = false;
         if (typeof key === "string") {
           code = key;
-          if (this.captialLettersOnly) {
+          if (this.capitalLettersOnly) {
             label = code.toUpperCase();
           } else {
             label = code;
@@ -284,9 +284,9 @@ export class VirtualKeyboard extends Composite {
       (this.keyboardVerticalPaddingPercent ?? 0.025) * this.size.height;
     const keyboardHorizontalPadding =
       (this.keyboardHorizontalPaddingPercent ?? 0.02) * this.size.width;
-    const keyboxHeight =
+    const keyBoxHeight =
       (this.size.height - 2 * keyboardVerticalPadding) / rows.length;
-    const keyboxWidth =
+    const keyBoxWidth =
       (this.size.width - 2 * keyboardHorizontalPadding) / this.keysPerRow;
 
     for (let r = 0; r < rows.length; r++) {
@@ -303,7 +303,7 @@ export class VirtualKeyboard extends Composite {
         extraPadding =
           (this.size.width -
             2 * keyboardHorizontalPadding -
-            keyboxWidth * rowSumKeyWidths) /
+            keyBoxWidth * rowSumKeyWidths) /
           2;
       }
 
@@ -319,12 +319,12 @@ export class VirtualKeyboard extends Composite {
         }
         const keyBoxWidthsSoFar =
           row.slice(0, k).reduce((sum, key) => sum + (key.widthRatio ?? 1), 0) *
-          keyboxWidth;
+          keyBoxWidth;
         const keyBox = new Shape({
           rect: {
             size: {
-              width: keyboxWidth * (key.widthRatio ?? 1),
-              height: keyboxHeight,
+              width: keyBoxWidth * (key.widthRatio ?? 1),
+              height: keyBoxHeight,
             },
           },
           fillColor: WebColors.Transparent,
@@ -336,23 +336,23 @@ export class VirtualKeyboard extends Composite {
               keyboardOrigin.x +
               keyboardHorizontalPadding +
               keyBoxWidthsSoFar +
-              ((key.widthRatio ?? 1) * keyboxWidth) / 2,
+              ((key.widthRatio ?? 1) * keyBoxWidth) / 2,
             y:
               keyboardOrigin.y +
               keyboardVerticalPadding +
-              r * keyboxHeight +
-              keyboxHeight / 2,
+              r * keyBoxHeight +
+              keyBoxHeight / 2,
           },
           isUserInteractionEnabled: true,
         });
 
         const keyWidth =
-          keyboxWidth * (key.widthRatio ?? 1) -
-          2 * this.keyHorizontalPaddingPercent * keyboxWidth;
+          keyBoxWidth * (key.widthRatio ?? 1) -
+          2 * this.keyHorizontalPaddingPercent * keyBoxWidth;
         const keyHeight =
-          keyboxHeight -
+          keyBoxHeight -
           (key.heightRatio ?? 1) -
-          2 * this.keyVerticalPaddingPercent * keyboxHeight;
+          2 * this.keyVerticalPaddingPercent * keyBoxHeight;
         const keyShape = new Shape({
           rect: { size: { width: keyWidth, height: keyHeight } },
           cornerRadius: 4,

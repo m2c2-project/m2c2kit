@@ -81,31 +81,31 @@ export interface InstructionsOptions extends StoryOptions {
   postInstructionsScene?: string;
   /** Array of instruction scenes that form the instructions */
   instructionScenes: Array<InstructionScene>;
-  /** Background color for instruction scenes. Can be overriden within a single instruction scene */
+  /** Background color for instruction scenes. Can be overridden within a single instruction scene */
   backgroundColor?: RgbaColor;
-  /** Scene transition when advancing to the next instruction scene. Default is push transition, to the left, 500 milliseconds duration. Can be overriden within a single instruction scene */
+  /** Scene transition when advancing to the next instruction scene. Default is push transition, to the left, 500 milliseconds duration. Can be overridden within a single instruction scene */
   nextSceneTransition?: Transition;
-  /** Scene transition when returning to the previous instruction scene. Default is push transition, to the right, 500 milliseconds duration. Can be overriden within a single instruction scene */
+  /** Scene transition when returning to the previous instruction scene. Default is push transition, to the right, 500 milliseconds duration. Can be overridden within a single instruction scene */
   backSceneTransition?: Transition;
-  /** Button text for the back button. Default is "Back". Can be overriden within a single instruction scene */
+  /** Button text for the back button. Default is "Back". Can be overridden within a single instruction scene */
   backButtonText?: string;
-  /** Button text for the next button. Default is "Next". Can be overriden within a single instruction scene */
+  /** Button text for the next button. Default is "Next". Can be overridden within a single instruction scene */
   nextButtonText?: string;
-  /** Width of back button. Default is 125. Can be overriden within a single instruction scene */
+  /** Width of back button. Default is 125. Can be overridden within a single instruction scene */
   backButtonWidth?: number;
-  /** Width of next button. Default is 125. Can be overriden within a single instruction scene */
+  /** Width of next button. Default is 125. Can be overridden within a single instruction scene */
   nextButtonWidth?: number;
-  /** Height of back button. Default is 50. Can be overriden within a single instruction scene */
+  /** Height of back button. Default is 50. Can be overridden within a single instruction scene */
   backButtonHeight?: number;
-  /** Height of next button. Default is 50. Can be overriden within a single instruction scene */
+  /** Height of next button. Default is 50. Can be overridden within a single instruction scene */
   nextButtonHeight?: number;
-  /** Color of back button. Default is WebColors.Black. Can be overriden within a single instruction scene */
+  /** Color of back button. Default is WebColors.Black. Can be overridden within a single instruction scene */
   backButtonBackgroundColor?: RgbaColor;
-  /** Color of back button text. Default is WebColors.White. Can be overriden within a single instruction scene */
+  /** Color of back button text. Default is WebColors.White. Can be overridden within a single instruction scene */
   backButtonFontColor?: RgbaColor;
-  /** Color of next button. Default is WebColors.Black. Can be overriden within a single instruction scene */
+  /** Color of next button. Default is WebColors.Black. Can be overridden within a single instruction scene */
   nextButtonBackgroundColor?: RgbaColor;
-  /** Color of next button text. Default is WebColors.White. Can be overriden within a single instruction scene */
+  /** Color of next button text. Default is WebColors.White. Can be overridden within a single instruction scene */
   nextButtonFontColor?: RgbaColor;
 }
 

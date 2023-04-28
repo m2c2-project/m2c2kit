@@ -75,7 +75,7 @@ top. (2 unique symbols.)",
         default: 500,
         type: "number",
         description:
-          "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears.",
+          "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherwise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears.",
       },
       instruction_type: {
         default: "long",
@@ -596,14 +596,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
     countdownCircle.addChild(countdownNumber);
 
-    const getreadyLabel = new Label({
+    const getReadyLabel = new Label({
       text: "GET READY",
       fontSize: 50,
       preferredMaxLayoutWidth: 300,
       horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
       position: { x: 200, y: 500 },
     });
-    countdownScene.addChild(getreadyLabel);
+    countdownScene.addChild(getReadyLabel);
 
     const countdownSequence = new Array<Action>();
 
@@ -1034,7 +1034,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     });
 
     // ==================================================
-    // SCENE: done. Show done messgae, with a button to exit.
+    // SCENE: done. Show done message, with a button to exit.
     const doneScene = new Scene();
     game.addScene(doneScene);
 

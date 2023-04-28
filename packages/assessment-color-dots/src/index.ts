@@ -115,7 +115,7 @@ class ColorDots extends Game {
       },
       instruction_type: {
         default: "long",
-        description: "Type of intructions to show, 'short' or 'long'.",
+        description: "Type of instructions to show, 'short' or 'long'.",
         type: "string",
         enum: ["short", "long"],
       },
@@ -1069,7 +1069,7 @@ appeared.",
     locationSelectionScene.addChild(locationSelectionDoneButton);
 
     // ==============================================================
-    // SCENE: done. Show done messgae, with a button to exit.
+    // SCENE: done. Show done message, with a button to exit.
     const doneScene = new Scene();
     game.addScene(doneScene);
 

@@ -2,7 +2,7 @@ import { EntityEvent } from "./EntityEvent";
 import { Point } from "./Point";
 
 /**
- * Desrcibes an interaction of a pointer (mouse, touches) pressing an entity.
+ * Describes an interaction of a pointer (mouse, touches) pressing an entity.
  *
  * @remarks Unlike M2PointerEvent, TapEvent considers how the pointer, while
  * in the down state, moves in relation to the bounds of the entity.

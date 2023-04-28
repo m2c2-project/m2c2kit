@@ -381,7 +381,7 @@ export class Game implements Activity {
    *
    * @remarks Once added to the game, a free entity will always be drawn,
    * and it will not be part of any scene transitions. This is useful if
-   * an entity must persisently be drawn and not move with scene
+   * an entity must persistently be drawn and not move with scene
    * transitions. The appearance of the free entity must be managed
    * by the programmer. Note: internally, the free entities are part of a
    * special scene (named "__freeEntitiesScene"), but this scene is handled
@@ -903,9 +903,9 @@ export class Game implements Activity {
      * that are not yet added to a sprite have not been warmed up.
      * Thus, warmup these not-yet-added images.
      */
-    const warmupedImageNames = this.entities
+    const warmedUpImageNames = this.entities
       .filter((entity) => entity.type === EntityType.Sprite)
-      .map((entitity) => (entitity as Sprite).imageName);
+      .map((entity) => (entity as Sprite).imageName);
     const loadedImages = this.session.imageManager.loadedImages[this.uuid];
     // loadedImages may be undefined/null if the game does not have images
     if (loadedImages) {
@@ -913,7 +913,7 @@ export class Game implements Activity {
         (name) => name !== "__outgoingSceneSnapshot"
       );
       imageNames.forEach((imageName) => {
-        if (!warmupedImageNames.includes(imageName)) {
+        if (!warmedUpImageNames.includes(imageName)) {
           const image = loadedImages[imageName].image;
           canvas.drawImage(image, 0, 0);
         }
@@ -1006,7 +1006,7 @@ export class Game implements Activity {
     const screen = window.screen;
     if (!screen.orientation) {
       // we're likely running unit tests in node, so
-      // screen.orientation was not avaiable and not mocked
+      // screen.orientation was not available and not mocked
       return {
         userAgent: navigator.userAgent,
         devicePixelRatio: window.devicePixelRatio,
@@ -1571,7 +1571,7 @@ export class Game implements Activity {
     if (this.htmlCanvas === undefined) {
       throw new Error("main html canvas is undefined");
     }
-    // When the callback is executed, within the execuion of the callback code
+    // When the callback is executed, within the execution of the callback code
     // we want 'this' to be this game object, not the html canvas to which the event listener is attached.
     // Thus, we use "this.htmlCanvasPointerDownHandler.bind(this)" instead of the usual "htmlCanvasPointerDownHandler"
     this.htmlCanvas.addEventListener(
@@ -1739,7 +1739,7 @@ export class Game implements Activity {
       // screenshot of the current scene.
       this.currentSceneSnapshot = this.snapshots.shift();
       if (!this.currentSceneSnapshot) {
-        throw new Error("No snapshop available for outgoing scene");
+        throw new Error("No snapshot available for outgoing scene");
       }
       const outgoingScene = this.createOutgoingScene(this.currentSceneSnapshot);
       outgoingScene._active = true;
@@ -1891,7 +1891,7 @@ export class Game implements Activity {
    * @param sx - Upper left coordinate of screenshot
    * @param sy - Upper right coordinate of screenshot
    * @param sw - width of area to screenshot
-   * @param sh - hegith of area to screenshot
+   * @param sh - height of area to screenshot
    * @returns Promise of Uint8Array of image data
    */
   takeScreenshot(
@@ -2170,7 +2170,7 @@ export class Game implements Activity {
    *
    * @remarks Typically, event listeners will be created using a method specific to the event, such as onTapDown(). This alternative allows creation with entity name.
    *
-   * @param type - the type of event to listen for, e.g., "tapdown"
+   * @param type - the type of event to listen for, e.g., "tapDown"
    * @param entityName - the entity name for which an event will be listened
    * @param callback
    * @param replaceExistingCallback
@@ -2362,7 +2362,7 @@ export class Game implements Activity {
         // a hidden entity (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
         .filter((entity) => !entity.hidden)
-        // only drawables have z-postion
+        // only drawables have z-position
         .filter((entity) => entity.isDrawable)
         // process taps on children by zPosition order
         .sort(
@@ -2441,7 +2441,7 @@ export class Game implements Activity {
         // a hidden entity (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
         .filter((entity) => !entity.hidden)
-        // only drawables have z-postion
+        // only drawables have z-position
         .filter((entity) => entity.isDrawable)
         // process taps on children by zPosition order
         .sort(
@@ -2521,7 +2521,7 @@ export class Game implements Activity {
         // a hidden entity (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
         .filter((entity) => !entity.hidden)
-        // only drawables have z-postion
+        // only drawables have z-position
         .filter((entity) => entity.isDrawable)
         // process taps on children by zPosition order
         .sort(
@@ -2819,7 +2819,7 @@ export class Game implements Activity {
 
     if (entity.type === EntityType.TextLine && isNaN(entity.size.width)) {
       // console.warn(
-      //   `warning: entity ${entity.toString()} is a textline with width = NaN. A textline must have its width manually set.`
+      //   `warning: entity ${entity.toString()} is a TextLine with width = NaN. A TextLine must have its width manually set.`
       // );
       return false;
     }

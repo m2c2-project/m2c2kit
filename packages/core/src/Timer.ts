@@ -5,7 +5,7 @@ export class Timer {
   private stopped = true;
   /**
    * cumulativeElapsed is a cumulative total of elapsed time while the timer
-   * was in previous started (running) states, NOT INCLUDING the possibily
+   * was in previous started (running) states, NOT INCLUDING the possibly
    * active run's duration
    */
   private cumulativeElapsed = NaN;

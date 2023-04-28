@@ -26,7 +26,7 @@ export class I18n {
         fallback_locale: {
           type: ["string", "null"],
           default: null,
-          description: `Locale to use if requested locale translation is not availble, or if "auto" locale was requested and environment cannot provide a locale.`,
+          description: `Locale to use if requested locale translation is not available, or if "auto" locale was requested and environment cannot provide a locale.`,
         },
         missing_translation_font_color: {
           type: ["array", "null"],

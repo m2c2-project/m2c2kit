@@ -8,6 +8,6 @@ export interface MoveActionOptions {
   duration: number;
   /** Easing function for movement; default is linear */
   easing?: EasingFunction;
-  /** Should the action run during screen trnsitions? Default is no */
+  /** Should the action run during screen transitions? Default is no */
   runDuringTransition?: boolean;
 }

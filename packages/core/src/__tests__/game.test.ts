@@ -105,7 +105,7 @@ describe("actions", () => {
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
     await session.start();
     console.debug(
-      `frames requested: ${TestHelpers.requestedFrames}, ellapsed virtual milliseconds: ${TestHelpers.perfCounter}`
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`
     );
     expect(rect1.position).toEqual({ x: 50, y: 50 });
   });
@@ -133,7 +133,7 @@ describe("actions", () => {
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
     session.start();
     console.debug(
-      `frames requested: ${TestHelpers.requestedFrames}, ellapsed virtual milliseconds: ${TestHelpers.perfCounter}`
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`
     );
     expect(Math.round(rect1.position.x)).toEqual(125);
     expect(Math.round(rect1.position.y)).toEqual(125);

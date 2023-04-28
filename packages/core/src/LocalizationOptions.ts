@@ -7,7 +7,7 @@ import { RgbaColor } from "./RgbaColor";
 export interface LocalizationOptions {
   /** Locale to use for localization, or "auto" to request from the environment. */
   locale: string;
-  /** Locale to use if requested locale translation is not availble, or if "auto" locale was requested and environment cannot provide a locale. */
+  /** Locale to use if requested locale translation is not available, or if "auto" locale was requested and environment cannot provide a locale. */
   fallbackLocale?: string;
   /** Font color for strings that are missing translation and use the fallback locale or untranslated string. */
   missingTranslationFontColor?: RgbaColor;

@@ -10,7 +10,7 @@ export class Uuid {
     try {
       return crypto.randomUUID();
     } catch {
-      // pollyfill if randomUUID() or getRandomValues() are not available
+      // polyfill if randomUUID() or getRandomValues() are not available
 
       let randomValue: () => number;
       try {

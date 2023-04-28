@@ -89,7 +89,7 @@ class GridMemory extends Game {
       instruction_type: {
         type: "string",
         default: "long",
-        description: "Type of intructions to show, 'short' or 'long'.",
+        description: "Type of instructions to show, 'short' or 'long'.",
       },
       show_quit_button: {
         type: "boolean",
@@ -282,7 +282,7 @@ phase, participants report the location of dots on a grid.",
   distraction, and retrieval. During the encoding phase, the participant was \
   asked to remember the location three red dots appear on a 5 x 5 grid. After \
   a 3-second study period, the grid was removed and the distraction phase \
-  began, during which the participant wasrequired to locate and touch Fs among \
+  began, during which the participant was required to locate and touch Fs among \
   an array of Es. After performing the distraction task for 8 seconds, and \
   empty 5 x 5 grid reappeared on the screen and participants were then \
   prompted to recall the locations of the 3 dots presented initially and press \
@@ -291,11 +291,11 @@ phase, participants report the location of dots on a grid.",
   1-second delay between trials. The dependent variable was an error score with \
   partial credit given based on the deviation from the correct positions. If \
   all dots were recalled in their correct location, the participant received a \
-  score ofzero. In the case of one or more retrieval errors, Euclidean distance \
+  score of zero. In the case of one or more retrieval errors, Euclidean distance \
   of the location of the incorrect dot to the correct grid location was \
   calculated, with higher scores indicating less accurate placement and poorer \
   performance (Siedlecki, 2007). The rationale for our use of this task as an \
-  indicator of working memory has both an empirical and theoreticalbasis. \
+  indicator of working memory has both an empirical and theoretical basis. \
   Previous research (Miyake, Friedman, Rettinger, Shah, & Hegarty, 2001) has \
   demonstrated that a similar dotmemory task loaded on a factor representing \
   working memory. The authors of this study reasoned that the spatial dot \
@@ -699,7 +699,7 @@ phase, participants report the location of dots on a grid.",
                 }
                 /**
                  * There is an edge case in which the interference_duration_ms
-                 * has ellapsed and we auto-advance to the next scene, but
+                 * has elapsed and we auto-advance to the next scene, but
                  * then the user taps a target. In that case, the
                  * "interferenceResponseTime" timer has been removed, and thus
                  * a call to Timer.elapsed() will throw an error.
@@ -956,7 +956,7 @@ phase, participants report the location of dots on a grid.",
     });
 
     // ==============================================================
-    // SCENE: done. Show done messgae, with a button to exit.
+    // SCENE: done. Show done message, with a button to exit.
     const doneScene = new Scene();
     game.addScene(doneScene);
 

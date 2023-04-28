@@ -393,7 +393,7 @@ export interface GoToActivityOptions {
 }
 
 /**
- * Types of values that can be stored in the session dictonary.
+ * Types of values that can be stored in the session dictionary.
  */
 export type SessionDictionaryValues =
   | string

@@ -8,7 +8,7 @@ import { JsonSchema } from "./JsonSchema";
  *
  * @remarks Event contains all the data created by an activity, with
  * separate properties for the newly created data. ActivityResultsEvent
- * inherts "data" from ActivityResults, which contains the complete data
+ * inherits "data" from ActivityResults, which contains the complete data
  * up to this point (both new and existing data).
  */
 export interface ActivityResultsEvent extends ActivityEvent, ActivityResults {
@@ -22,6 +22,6 @@ export interface ActivityResultsEvent extends ActivityEvent, ActivityResults {
   // activityConfiguration: unknown;
   // activityConfigurationSchema: JsonSchema;
   // activityMetrics?: Array<ActivityMetric>;
-  /** ISO 8601 timestamp of the event. Specifically, value of "new Date().toISOString()" executed on the device when the ActivityResultsEvent occured. */
+  /** ISO 8601 timestamp of the event. Specifically, value of "new Date().toISOString()" executed on the device when the ActivityResultsEvent occurred. */
   iso8601Timestamp: string;
 }

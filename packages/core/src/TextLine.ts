@@ -48,7 +48,7 @@ export class TextLine
 
     this.size.height = this.fontSize;
     // width is merely for bounds when checking onTap
-    // textline will be drawn without regards to the setting for wiedth
+    // TextLine will be drawn without regards to the setting for width
     // TODO: explore using ShapedText in canvas.drawText(), because
     // ShapedText will report its own bounds?
     this.size.width = options.width ?? NaN;
@@ -210,14 +210,14 @@ export class TextLine
         textForDraw = this._translatedText;
         if (this._translatedText === "") {
           console.warn(
-            `warning: empty translated text in textline "${this.name}"`
+            `warning: empty translated text in TextLine "${this.name}"`
           );
         }
       } else {
         textForDraw = this.text;
         this._translatedText = "";
         if (this.text === "") {
-          console.warn(`warning: empty text in textline "${this.name}"`);
+          console.warn(`warning: empty text in TextLine "${this.name}"`);
         }
       }
 

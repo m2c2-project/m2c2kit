@@ -176,7 +176,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
      * If label has a relative layout, then use the calculated width as the
      * label's size. Otherwise, we have to do the layout again to find out
      * the true size of this paragraph: the first paragraph.layout() (above)
-     * computed the longest line length based on the max width contraint given.
+     * computed the longest line length based on the max width constraint given.
      * We do the layout again with the (now) known longest line length
      * as the max width constraint. Use Math.ceil() to round up because it
      * seems like fractional widths are not respected. Now when we call

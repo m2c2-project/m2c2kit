@@ -207,7 +207,7 @@ export class ImageManager {
          * they will be set to 0. Having a height or width attribute of 0 will
          * disable rendering of the image."
          *
-         * In any case, it is not uncommon to encounter valid svgs that do not
+         * In any case, it is not uncommon to encounter valid SVGs that do not
          * have height and width attributes.
          *
          * To mitigate this, once an image is loaded by the native webview,

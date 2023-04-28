@@ -183,7 +183,7 @@ export const surveyJson = {
     },
   ],
   /**
-   * Uncomment to supress questions numbers
+   * Uncomment to suppress questions numbers
    */
   // showQuestionNumbers: "off",
 

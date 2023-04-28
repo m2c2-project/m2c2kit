@@ -287,7 +287,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
 
     /**
      * For entities that are persistent across trials, such as the
-     * scenes themsevles and labels that are always displayed, we create
+     * scenes themselves and labels that are always displayed, we create
      * them here.
      */
     const preparationScene = new Scene();

@@ -1,6 +1,6 @@
 {
   // tsconfig.json for m2c2kit/survey is identical to the one for m2c2mit/core,
-  // except survey must also have a reference to core, otherwise intelliense
+  // except survey must also have a reference to core, otherwise intellisense
   // in vs code won't work
   "references": [{ "path": "../core" }],
   "compilerOptions": {

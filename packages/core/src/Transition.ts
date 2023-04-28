@@ -5,7 +5,7 @@ import { Scene } from "./Scene";
 export interface SlideTransitionOptions {
   /** Direction in which the slide action goes */
   direction: TransitionDirection;
-  /** Duration, in millis, of the transition */
+  /** Duration, in milliseconds, of the transition */
   duration: number;
   /** Easing function for movement; default is linear */
   easing?: EasingFunction;

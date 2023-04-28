@@ -483,7 +483,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
      * running, because it can cause visible jank. I found that a new shader
      * program might be created for antialiased circles as they are animated.
      * (This was not the case for rectangles, though. Skia uses different
-     * antialiasing techniques, depending on the shape primitive:
+     * anti-aliasing techniques, depending on the shape primitive:
      * https://groups.google.com/g/skia-discuss/c/OUzwQqxsCmo/m/P_BroOJBDgAJ
      * https://groups.google.com/g/skia-discuss/c/TuRfkQ7u_kU/m/ZEhxAT0zBAAJ)
      */

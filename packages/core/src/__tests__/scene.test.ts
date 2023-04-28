@@ -102,7 +102,7 @@ describe("test duplicate method", () => {
     });
   });
 
-  it("scene2's backgroundcolor to equal scene1's background", () => {
+  it("scene2's background color to equal scene1's background", () => {
     return session.init().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.backgroundColor).toEqual(scene1.backgroundColor);

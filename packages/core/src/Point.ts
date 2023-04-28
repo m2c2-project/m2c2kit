@@ -3,7 +3,7 @@
  */
 
 export interface Point {
-  /** Horizonal coordinate */
+  /** Horizontal coordinate */
   x: number;
   /** Vertical coordinate */
   y: number;

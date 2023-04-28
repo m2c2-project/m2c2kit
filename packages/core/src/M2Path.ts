@@ -8,6 +8,6 @@ import { Size } from "./Size";
 export interface M2Path {
   /** The subpath that compose up the path */
   subpaths: Array<Array<Point>>;
-  /** The size of the path. This is neeeded to properly position the shape that is drawn by the path */
+  /** The size of the path. This is needed to properly position the shape that is drawn by the path */
   size: Size;
 }

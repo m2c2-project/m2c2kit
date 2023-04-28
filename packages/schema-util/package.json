@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "devDependencies": {
+    "@types/node": "18.16.2",
     "esbuild": "0.17.18"
   },
   "scripts": {
@@ -16,6 +17,6 @@
   "dependencies": {
     "csv": "6.2.10",
     "ts-morph": "18.0.0",
-    "yargs": "17.7.1"
+    "yargs": "17.7.2"
   }
 }

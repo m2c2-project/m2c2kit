@@ -19,12 +19,12 @@ export interface ShapeOptions extends EntityOptions, DrawableOptions {
   fillColor?: RgbaColor;
   /** Color with which to outline shape. Default is no color for rectangle and circle, red for path. */
   strokeColor?: RgbaColor;
-  /** Width of outline. Default is undefined for rectangle and cricle, 2 for path. */
+  /** Width of outline. Default is undefined for rectangle and circle, 2 for path. */
   lineWidth?: number;
   /** A path from which to create the shape */
   path?: M2Path | SvgStringPath;
-  /** Size of container "viewbox" for path shapes. Leave undefined for circle and rectangle shapes. */
+  /** Size of container "view box" for path shapes. Leave undefined for circle and rectangle shapes. */
   size?: Size;
-  /** Should the shape be drawn with antialiasing. Default is yes. */
+  /** Should the shape be drawn with anti-aliasing. Default is yes. */
   isAntialiased?: boolean;
 }

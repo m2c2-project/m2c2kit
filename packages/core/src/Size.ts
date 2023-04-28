@@ -3,7 +3,7 @@
  */
 
 export interface Size {
-  /** Horizonal width, x-axis */
+  /** Horizontal width, x-axis */
   width: number;
   /** Vertical height, y-axis */
   height: number;

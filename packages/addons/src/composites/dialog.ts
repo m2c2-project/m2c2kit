@@ -108,8 +108,8 @@ export class Dialog extends Composite {
     this.hidden = false;
   }
 
-  onDialolgResult(
-    callback: (dailogResultEvent: DialogEvent) => void,
+  onDialogResult(
+    callback: (dialogResultEvent: DialogEvent) => void,
     replaceExistingCallback = true
   ): void {
     // By default, we'll replace the existing callback if there is one

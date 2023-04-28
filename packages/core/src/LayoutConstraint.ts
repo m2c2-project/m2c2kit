@@ -3,7 +3,7 @@ import { ConstraintType } from "./ConstraintType";
 
 /**
  * This class is used internally for processing layout constraints that
- * have been defined according to the Contraints interface.
+ * have been defined according to the Constraints interface.
  *
  * Imagine we have two entities, A and B. B's position is set
  * using its position property. A's position is set using the layout
@@ -15,7 +15,7 @@ import { ConstraintType } from "./ConstraintType";
 export class LayoutConstraint {
   // the constraint, e.g., bottomToTopOf
   type: ConstraintType;
-  // alter is the other entity that the focal entity is contrained to.
+  // alter is the other entity that the focal entity is constrained to.
   // in the example above, A is the focal entity, B is the alter
   // thus the alter entity property is B
   alterEntity: Entity;
@@ -66,9 +66,9 @@ export class LayoutConstraint {
     this.type = type;
     this.alterEntity = alterEntity;
 
-    // If it's not a vertical constraint, it's a horizontal contraint
-    // similarly, if it's not a focal entitity minimum constraint,
-    // it's a focal entitity maximum constraint. All of these are binary,
+    // If it's not a vertical constraint, it's a horizontal constraint
+    // similarly, if it's not a focal entity minimum constraint,
+    // it's a focal entity maximum constraint. All of these are binary,
     // so we can use a series of if/else to completely assign values to
     // verticalConstraint, focalEntityMinimum, and alterEntityMinimum
     //

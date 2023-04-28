@@ -112,7 +112,7 @@ class ColorShapes extends Game {
       },
       instruction_type: {
         default: "long",
-        description: "Type of intructions to show, 'short' or 'long'.",
+        description: "Type of instructions to show, 'short' or 'long'.",
         type: "string",
         enum: ["short", "long"],
       },
