@@ -6,7 +6,8 @@
     { "path": "../assessment-grid-memory" },
     { "path": "../assessment-symbol-search" },
     { "path": "../survey" },
-    { "path": "../db" }
+    { "path": "../db" },
+    { "path": "../embedding" }
   ],
   "compilerOptions": {
     "composite": true,

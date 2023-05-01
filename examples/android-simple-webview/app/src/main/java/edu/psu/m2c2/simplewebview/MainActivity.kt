@@ -99,9 +99,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // the name of this interface, "Android", must match the declared namespace in our
-        // TypeScript code
-        webView.addJavascriptInterface(M2c2Interface(this), "Android")
+        // the name of this interface, "AndroidM2c2", must match the declared namespace in our
+        // TypeScript code in the @m2c2kit/embedding package.
+        webView.addJavascriptInterface(M2c2Interface(this), "AndroidM2c2")
 
         // see https://developer.android.com/guide/webapps/load-local-content for loading
         // WebView content from app assets
@@ -110,6 +110,10 @@ class MainActivity : AppCompatActivity() {
             .build()
         webView.webViewClient = LocalContentWebViewClient(assetLoader)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
+
+        // alternatively, if assets are not bundled in the app, comment out the lines above (from
+        // val assetLoader... through webView.loadUrl()) and load the m2c2kit URL into the web view:
+        // webView.loadUrl("https://<replace with the m2c2kit url>")
     }
 
     // below code is taken from https://developer.android.com/guide/webapps/load-local-content#assetloader

@@ -2,7 +2,13 @@
   "name": "@m2c2kit/embedding",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.0.2",
     "rimraf": "5.0.0",

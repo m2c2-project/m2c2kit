@@ -6,7 +6,7 @@ import {
   ActivityType,
   EventType,
 } from "@m2c2kit/core";
-import { SageResearch } from "@m2c2kit/sage-research";
+import { Embedding } from "@m2c2kit/embedding";
 
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
 import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
@@ -33,17 +33,14 @@ const session = new Session({
      */
     onSessionLifecycle: async function (ev: SessionLifecycleEvent) {
       //#region to support m2c2kit in WebView
-      if (SageResearch.contextIsWebView()) {
-        SageResearch.sendEventToWebView(ev);
+      if (Embedding.contextIsWebView()) {
+        Embedding.sendEventToWebView(ev);
       }
       //#endregion
 
       if (ev.type === EventType.SessionInitialize) {
         //#region to support m2c2kit in WebView
-        if (
-          SageResearch.contextIsWebView() &&
-          SageResearch.sessionManualStart()
-        ) {
+        if (Embedding.contextIsWebView() && Embedding.sessionManualStart()) {
           // don't automatically start! Let the native code
           // set game parameters and start the game when desired.
           return;
@@ -79,8 +76,8 @@ const session = new Session({
      */
     onActivityResults: function (ev: ActivityResultsEvent) {
       //#region to support m2c2kit in WebView
-      if (SageResearch.contextIsWebView()) {
-        SageResearch.sendEventToWebView(ev);
+      if (Embedding.contextIsWebView()) {
+        Embedding.sendEventToWebView(ev);
       }
       //#endregion
 
@@ -110,8 +107,8 @@ const session = new Session({
      */
     onActivityLifecycle: async function (ev: ActivityLifecycleEvent) {
       //#region to support m2c2kit in WebView
-      if (SageResearch.contextIsWebView()) {
-        SageResearch.sendEventToWebView(ev);
+      if (Embedding.contextIsWebView()) {
+        Embedding.sendEventToWebView(ev);
       }
       //#endregion
 
@@ -139,7 +136,7 @@ const session = new Session({
 /**
  * Needed to support loading wasm from file in iOS WKWebView
  */
-SageResearch.ConfigureWasmFetchInterceptor();
+Embedding.ConfigureWasmFetchInterceptor();
 /**
  * Make session also available on window in case we want to control
  * the session through another means, such as other javascript or

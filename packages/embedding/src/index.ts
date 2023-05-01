@@ -1,51 +1,4 @@
-/**
- * This code uses EventBase, EventType from the @m2c2kit/core package.
- * Originally, these were imported with:
- *   import { EventBase, EventType } from "@m2c2kit/core";
- * This works fine, but when bundling, these imports bring in a lot more
- * extra code that is not needed. So, instead, we copy the definitions
- * here. This is not ideal because it means that if the definitions
- * change in the core package, we have to remember to update them here.
- *
- * TODO: Figure out a way to import these definitions without bringing
- * in all the extra code. Or, write a script that will check if the
- * EventType enum has changed in the core package and throw an error
- * if it they are different.
- */
-
-interface EventBase {
-  /** Type of event. */
-  type: EventType;
-  /** The object on which the event occurred. */
-  target: {
-    type: string;
-    /** Name of the entity */
-    name: string;
-  };
-  /** Has the event been taken care of by the listener and not be dispatched to other targets? */
-  handled?: boolean;
-}
-
-enum EventType {
-  SessionInitialize = "SessionInitialize",
-  SessionStart = "SessionStart",
-  SessionEnd = "SessionEnd",
-  ActivityStart = "ActivityStart",
-  ActivityEnd = "ActivityEnd",
-  ActivityCancel = "ActivityCancel",
-  ActivityData = "ActivityData",
-  TapDown = "TapDown",
-  TapUp = "TapUp",
-  TapUpAny = "TapUpAny",
-  TapLeave = "TapLeave",
-  PointerDown = "PointerDown",
-  PointerUp = "PointerUp",
-  PointerMove = "PointerMove",
-  Drag = "Drag",
-  DragStart = "DragStart",
-  DragEnd = "DragEnd",
-  CompositeCustom = "CompositeCustom",
-}
+import { EventBase, EventType } from "@m2c2kit/core";
 
 const version = "__PACKAGE_JSON_VERSION__";
 console.log(`@m2c2kit/embedding version ${version}`);
@@ -55,12 +8,12 @@ console.log(`@m2c2kit/embedding version ${version}`);
  * can communicate events back to the native Android app. Note: names of this Android
  * namespace and its functions must match the corresponding Android code
  * in addJavascriptInterface() and @JavascriptInterface
- * In the Android code you can see that we called the namespace "Android" and it
+ * In the Android code you can see that we called the namespace "AndroidM2c2" and it
  * matches our declared namespace here, but it could have been called anything,
  * as long as they match.
- * */
+ */
 // eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Android {
+declare namespace AndroidM2c2 {
   function onActivityResults(activityResultsEventAsString: string): void;
   function onActivityLifecycle(activityLifecycleEventAsString: string): void;
   function onSessionLifecycle(sessionLifecycleEventAsString: string): void;
@@ -68,20 +21,30 @@ declare namespace Android {
    * If the Android native app will control the session execution and be
    * able to set custom game parameters (which is probably what you want),
    * be sure that sessionManualStart() in the native code returns true
-   * */
+   */
   function sessionManualStart(): boolean;
 }
 
 /**
- * When running on iOS, webkit is available on window, and
- * iOSSessionManualStart() is defined by the iOS app.
+ * When running on iOS, webkit is available on window.
+ * The message handler "iOSM2c2" and function IOSM2c2.sessionManualStart() is defined
+ * by the iOS app. Message handler could have been called anything, but the
+ * iOS app defined it as "iOSM2c2".
  */
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    webkit: any;
+    webkit: {
+      messageHandlers: {
+        iOSM2c2: {
+          postMessage: (event: EventBase) => void;
+        };
+      };
+    };
   }
-  function iOSSessionManualStart(): boolean;
+}
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace IOSM2c2 {
+  function sessionManualStart(): boolean;
 }
 
 export class Embedding {
@@ -91,7 +54,7 @@ export class Embedding {
    * @returns true if Android WebView
    */
   public static contextIsAndroidWebView(): boolean {
-    return typeof Android !== "undefined";
+    return typeof AndroidM2c2 !== "undefined";
   }
 
   /**
@@ -105,17 +68,17 @@ export class Embedding {
       case EventType.SessionStart:
       case EventType.SessionEnd:
       case EventType.SessionInitialize: {
-        Android.onSessionLifecycle(JSON.stringify(event));
+        AndroidM2c2.onSessionLifecycle(JSON.stringify(event));
         break;
       }
       case EventType.ActivityData: {
-        Android.onActivityResults(JSON.stringify(event));
+        AndroidM2c2.onActivityResults(JSON.stringify(event));
         break;
       }
       case EventType.ActivityStart:
       case EventType.ActivityEnd:
       case EventType.ActivityCancel: {
-        Android.onActivityLifecycle(JSON.stringify(event));
+        AndroidM2c2.onActivityLifecycle(JSON.stringify(event));
         break;
       }
       default:
@@ -134,7 +97,7 @@ export class Embedding {
     return (
       window.webkit &&
       window.webkit.messageHandlers &&
-      window.webkit.messageHandlers.iOS
+      window.webkit.messageHandlers.iOSM2c2 !== undefined
     );
   }
 
@@ -145,7 +108,7 @@ export class Embedding {
    */
   public static sendEventToIOS(event: EventBase): void {
     this.removeCircularReferencesFromEvent(event);
-    window.webkit.messageHandlers.iOS.postMessage(event);
+    window.webkit.messageHandlers.iOSM2c2.postMessage(event);
   }
 
   /**
@@ -191,16 +154,16 @@ export class Embedding {
    * signal to the javascript code NOT to automatically call Session.start(),
    * so that the native app can set the parameters and then call
    * Session.start() when it wants to. In sum, the native functions that are
-   * mapped to Android.sessionManualStart() and iOSSessionManualStart() should
-   * in nearly all situations return TRUE.
+   * mapped to AndroidM2c2.sessionManualStart() and IOSM2c2.SessionManualStart()
+   * should in nearly all situations return TRUE.
    *
    * @returns true if the game should be started manually
    */
   public static sessionManualStart(): boolean {
     if (Embedding.contextIsAndroidWebView()) {
-      return Android.sessionManualStart();
+      return AndroidM2c2.sessionManualStart();
     } else if (Embedding.contextIsIOSWebView()) {
-      return iOSSessionManualStart();
+      return IOSM2c2.sessionManualStart();
     } else {
       return false;
     }
@@ -253,9 +216,11 @@ export class Embedding {
       if (
         window.webkit &&
         window.webkit.messageHandlers &&
-        window.webkit.messageHandlers.iOS &&
+        window.webkit.messageHandlers.iOSM2c2 &&
         args.length > 0 &&
-        (args[0] as string).toLowerCase().endsWith(".wasm")
+        (args[0] as string).toLowerCase().endsWith(".wasm") &&
+        // if wasm is inlined as data URL, do not modify response
+        !(args[0] as string).toLowerCase().startsWith("data:application/wasm")
       ) {
         const response: Response = await origFetch(...args).catch((error) => {
           return new Promise(function (resolve) {

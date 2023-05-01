@@ -16,7 +16,7 @@ struct SwiftUIWebView: UIViewRepresentable  {
         let userContentController = WKUserContentController()
         config.userContentController = userContentController
         
-        let manualStartSource = "function iOSManualStart() { return true; }"
+        let manualStartSource = "const IOSM2c2 = { sessionManualStart: () => { return true; } };"
         let manualStartScript = WKUserScript(source: manualStartSource, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         userContentController.addUserScript(manualStartScript)
         
@@ -31,12 +31,17 @@ struct SwiftUIWebView: UIViewRepresentable  {
         let webView = WKWebView(frame: .zero, configuration: config)
         
         let messageHandler = ScriptMessageHandler(webView: webView)
-        // name is "iOS" because in the JavaScript code we post messages with
-        // window.webkit.messageHandlers.iOS.postMessage(event);
-        webView.configuration.userContentController.add(messageHandler, name: "iOS")
+        // name is "iOSM2c2" because in the @m2c2kit/embedding package we post messages with
+        // window.webkit.messageHandlers.iOSM2c2.postMessage(event);
+        webView.configuration.userContentController.add(messageHandler, name: "iOSM2c2")
         
         let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "dist-webview")!
         webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        // alternatively, if assets are not bundled in the app, comment out the 2 lines above
+        // and load the m2c2kit URL into the web view:
+        // let url = URL(string: "https://<replace with the m2c2kit url>")!
+        // webView.load(URLRequest(url: url, cachePolicy: .reloadRevalidatingCacheData ))
+
         return webView
     }
     
@@ -64,7 +69,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler, ObservableObject {
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if message.name == "iOS" {
+        if message.name == "iOSM2c2" {
             
             guard let dictionary = message.body as? [String : Any] else {
                 assertionFailure("Received message from JavaScript with unexpected format.")
@@ -77,7 +82,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler, ObservableObject {
             if (eventType == "SessionInitialize") {
                 // After initialization is complete, you can modify the default parameters before starting the session.
                 // For example, if we uncomment the below, we can change the number of trials for the first activity
-                // to be only 1. See the source code for each assesment for its configurable parameters and defaults.
+                // to be only 1. See the source code for each assessment for its configurable parameters and defaults.
                 //self.webView.evaluateJavaScript("window.session.options.activities[0].setParameters({\"number_of_trials\": 1});", completionHandler: nil)
                 
                 self.webView.evaluateJavaScript("window.session.start();", completionHandler: nil)
