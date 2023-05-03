@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Timer } from "../../build-umd";
+import { Timer } from "..";
 import { TestHelpers } from "./TestHelpers";
 
 beforeEach(() => {

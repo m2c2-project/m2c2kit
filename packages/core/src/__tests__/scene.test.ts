@@ -9,9 +9,9 @@ import {
   Label,
   Shape,
   WebColors,
-} from "../../build-umd";
+} from "..";
 
-jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
+TestHelpers.createM2c2KitMock();
 
 let session: Session;
 let g1: Game1;

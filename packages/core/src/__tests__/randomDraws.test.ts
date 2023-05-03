@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { RandomDraws } from "../../build-umd";
+import { RandomDraws } from "..";
 
 describe("test SingleFromRange", () => {
   it("draw is an integer from the range (1000 iterations)", () => {

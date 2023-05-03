@@ -10,11 +10,9 @@ import {
   Shape,
   TrialSchema,
   Label,
-} from "../../build-umd";
+} from "..";
 
-jest.mock("../../build-umd", () => {
-  return TestHelpers.createM2c2KitMock();
-});
+TestHelpers.createM2c2KitMock();
 
 class Game1 extends Game {
   constructor() {

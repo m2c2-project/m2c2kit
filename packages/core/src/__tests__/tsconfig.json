@@ -10,6 +10,7 @@
     "moduleResolution": "node",
     "allowJs": true,
     "outDir": "build",
+    "rootDir": "..",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -18,5 +19,5 @@
     // and a separate tsconfig for jest
     "types": ["jest", "node"]
   },
-  "include": ["**/__tests__", "**/*.test.ts", "TestHelpers.ts"]
+  "include": ["**/__tests__", "**/*.test.ts", "TestHelpers.ts", ".."]
 }

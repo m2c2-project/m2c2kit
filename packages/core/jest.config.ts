@@ -1,7 +1,15 @@
+import type { JestConfigWithTsJest } from "ts-jest";
+
 // see https://stackoverflow.com/a/57825692
-module.exports = {
+const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
-  setupFilesAfterEnv: ["./jestSetupFilesAfterEnv.js"],
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "src/**/*.{js,jsx,ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/__tests__/TestHelpers.ts",
+  ],
+  // setupFilesAfterEnv: ["./jestSetupFilesAfterEnv.ts"],
   watchPathIgnorePatterns: [
     "/examples/",
     "/dist/",
@@ -19,8 +27,14 @@ module.exports = {
       "ts-jest",
       // required due to custom location of tsconfig.json configuration file
       // https://kulshekhar.github.io/ts-jest/docs/getting-started/options/tsconfig
-      { tsconfig: "./src/__tests__/tsconfig.json" },
+      {
+        useESM: true,
+        tsconfig: "./src/__tests__/tsconfig.json",
+      },
     ],
   },
   testEnvironment: "jsdom",
+  extensionsToTreatAsEsm: [".ts"],
 };
+
+export default jestConfig;

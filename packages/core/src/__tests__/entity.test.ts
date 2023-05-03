@@ -8,9 +8,9 @@ import {
   Scene,
   Label,
   Shape,
-} from "../../build-umd";
+} from "..";
 
-jest.mock("../../build-umd", () => TestHelpers.createM2c2KitMock());
+TestHelpers.createM2c2KitMock();
 
 class Game1 extends Game {
   constructor() {
