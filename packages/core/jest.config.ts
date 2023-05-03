@@ -25,10 +25,17 @@ const jestConfig: JestConfigWithTsJest = {
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
-      // required due to custom location of tsconfig.json configuration file
-      // https://kulshekhar.github.io/ts-jest/docs/getting-started/options/tsconfig
       {
         useESM: true,
+        /**
+         * The below line was needed to get the tests working with the
+         * vscode-jest extension. For some reason, when the extension ran,
+         * the --testLocationInResults option was causing the test runner to
+         * fail.
+         */
+        testLocationInResults: false,
+        // required due to custom location of tsconfig.json configuration file
+        // https://kulshekhar.github.io/ts-jest/docs/getting-started/options/tsconfig
         tsconfig: "./src/__tests__/tsconfig.json",
       },
     ],
