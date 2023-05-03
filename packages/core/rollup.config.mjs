@@ -4,7 +4,6 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
-import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import dts from "rollup-plugin-dts";
 import findup from "findup-sync";
 import replace from "@rollup/plugin-replace";
@@ -41,20 +40,6 @@ export default [
         format: "es",
         plugins: [minify()],
       },
-      // Make a UMD bundle only to use for testing (jest), because jest support
-      // for esm modules is still incomplete
-      {
-        file: "./build-umd/index.js",
-        format: "umd",
-        name: "m2c2kit",
-        plugins: [
-          getBabelOutputPlugin({
-            allowAllFormats: true,
-            presets: ["@babel/preset-env"],
-          }),
-        ],
-        sourcemap: true,
-      },
     ],
     plugins: [
       replace({
@@ -86,10 +71,6 @@ export default [
           {
             src: canvaskitWasmPath,
             dest: "assets",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-umd/",
           },
           {
             src: "build/index.js",
