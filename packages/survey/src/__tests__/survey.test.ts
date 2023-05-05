@@ -1,5 +1,5 @@
 import { Session, SessionOptions } from "@m2c2kit/core";
-import { Survey } from "../../build-umd";
+import { Survey } from "..";
 
 let session: Session;
 let s1: Survey;

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-
-import { ActivityKeyValueData } from "@m2c2kit/core";
+import { ActivityKeyValueData, Session } from "@m2c2kit/core";
 import * as SurveyReact from "survey-react";
 import {
   CompletingOptions,
   CurrentPageChangingOptions,
   Survey,
   ValueChangedOptions,
-} from "../../build-umd";
+} from "..";
 
 export interface surveyJsCallbacks {
   onCurrentPageChangingCallback: (
@@ -25,20 +24,6 @@ export interface surveyJsCallbacks {
 }
 
 export class TestHelpers {
-  static cryptoGetRandomValuesPolyfill(): void {
-    // @ts-ignore
-    global.crypto = {
-      // @ts-ignore
-      getRandomValues: function (buffer: Array<T>) {
-        const result = new Array<number>(buffer.length);
-        for (let i = 0; i < buffer.length; i++) {
-          result.push(Math.floor(Math.random() * 256));
-        }
-        return result;
-      },
-    };
-  }
-
   static setupDomAndGlobals(): void {
     const html = `<!DOCTYPE html>
     <html>
@@ -85,9 +70,8 @@ export class TestHelpers {
       return undefined;
     };
 
-    const m2c2kit = jest.requireActual("../../build-umd");
-
-    m2c2kit.Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+    // @ts-ignore
+    Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
       Promise.resolve({
         PaintStyle: {
           Fill: undefined,
@@ -162,7 +146,6 @@ export class TestHelpers {
         },
       })
     );
-    return m2c2kit;
   }
 
   static callOnActivityResultsCallbackSpy?: jest.SpyInstance;

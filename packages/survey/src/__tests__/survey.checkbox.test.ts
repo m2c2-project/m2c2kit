@@ -1,5 +1,5 @@
 import { Session, SessionOptions, ActivityKeyValueData } from "@m2c2kit/core";
-import { Survey, SurveyVariable } from "../../build-umd";
+import { Survey, SurveyVariable } from "..";
 import { TestHelpers } from "./TestHelpers";
 import * as SurveyReact from "survey-react";
 
@@ -80,7 +80,11 @@ describe("checkbox behavior, multiresponse", () => {
     // begins on page 1, goes to page 2
     await session.start();
     // _survey is private, so use bracket notation to access it
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
 
@@ -117,7 +121,11 @@ describe("checkbox behavior, multiresponse", () => {
     function onActivityResultsCallback() {
       return;
     }
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
 
@@ -130,7 +138,11 @@ describe("checkbox behavior, multiresponse", () => {
 
   test("adds all multiresponse checkbox dummy variables to newData and Data when answering a previously skipped question", () => {
     // begins on page 2, back to page 1
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
     surveyModel.prevPage();
@@ -165,7 +177,11 @@ describe("checkbox behavior, multiresponse", () => {
 
   test("adds only changed multiresponse checkbox dummy variables to newData on next selection", () => {
     // begins on page 1
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
 
@@ -193,7 +209,11 @@ describe("checkbox behavior, multiresponse", () => {
 
   test("adds all multiresponse checkbox dummy variables as null to newData and Data on clearing selections", () => {
     // begins on page 1
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
 
@@ -227,7 +247,11 @@ describe("checkbox behavior, multiresponse", () => {
 
   test("adds none multiresponse checkbox selection and removes other existing selections on selecting none option", () => {
     // begins on page 1
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, () => {
       return;
     });

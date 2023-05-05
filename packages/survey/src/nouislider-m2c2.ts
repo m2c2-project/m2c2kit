@@ -2,7 +2,7 @@
 import noUiSlider from "nouislider";
 import * as Survey from "survey-react";
 
-function initnouisliderm2c2() {
+export function initnouisliderm2c2() {
   const iconId = "icon-nouislider";
   //Survey.SvgRegistry && Survey.SvgRegistry.registerIconFromSvg(iconId, require('svg-inline-loader?classPrefix!./images/nouislider.svg'), "");
   const widget = {
@@ -281,5 +281,3 @@ function initnouisliderm2c2() {
   };
   Survey.CustomWidgetCollection.Instance.addCustomWidget(widget, "customtype");
 }
-
-export default initnouisliderm2c2;

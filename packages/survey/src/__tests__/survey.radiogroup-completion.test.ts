@@ -1,5 +1,5 @@
 import { Session, SessionOptions, ActivityKeyValueData } from "@m2c2kit/core";
-import { Survey, SurveyVariable } from "../../build-umd";
+import { Survey, SurveyVariable } from "..";
 import { TestHelpers } from "./TestHelpers";
 import * as SurveyReact from "survey-react";
 
@@ -72,7 +72,11 @@ describe("radiogroup behavior on completion", () => {
   test("adds skipped radiogroup variable as null to newData and Data on survey completion", async () => {
     // begins on page 1, goes to page 2
     await session.start();
-    const surveyModel: SurveyReact.SurveyModel = s1["_survey"];
+    const surveyModel: SurveyReact.SurveyModel =
+      s1["_survey"] ??
+      (() => {
+        throw new Error("surveyModel is nullish");
+      })();
     TestHelpers.spyOnSurveyReactModel(surveyModel, onActivityResultsCallback);
     const responseIndex = s1["responseIndex"];
 

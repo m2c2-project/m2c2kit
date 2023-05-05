@@ -1,4 +1,4 @@
-import { ttfInfo } from "./ttfInfo.js";
+import ttfInfo from "./ttfInfo";
 import { CanvasKit, FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
 import { GameFontUrls } from "./GameFontUrls";

@@ -1,8 +1,28 @@
 {
-  // "files.exclude": {
-  //   // these will show in their own root folders, so hide from this root folder
-  //   "examples/grid-memory": true,
-  //   "tools": true
-  // },
-  "npm.exclude": "**/packages/playground/dist/**"
+  /**
+   * Setting NODE_OPTIONS=--experimental-vm-modules before running the test
+   * was difficult. This is because the way to set environment variables
+   * before running a command is different on Windows and Linux. This
+   * works on windows:
+   *   "jest.jestCommandLine": "set NODE_OPTIONS=--experimental-vm-modules&&npx jest"
+   * But this would not work on Linux/MacOS.
+   *
+   * I tried the following:
+   * 1. The below setting for "jest.nodeEnv" does not seem to apply the
+   * environment variable before running jest.
+   * "jest.nodeEnv": {
+   *  "NODE_OPTIONS": "--experimental-vm-modules"
+   * },
+   *
+   * 2. Using the cross-env package does not work; there is an issue with
+   * backslashes (see https://github.com/jest-community/vscode-jest/issues/838)
+   *
+   * 3. The package env-cmd works. It requires a .env file, which I've renamed
+   * jest-env and placed in the repository root. Alternatively, because I've
+   * put the below into the test script for the root package.json, the below
+   * line could also be: "npm run test --" (note the -- at the end to pass
+   * arguments to the script).
+   */
+  "jest.jestCommandLine": "npx env-cmd -f .env.jest jest",
+  "jest.autoRun": "off"
 }

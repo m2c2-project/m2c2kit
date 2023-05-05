@@ -1,3 +1,11 @@
+/**
+ * Previously, this file was ttfInto.js, but it was renamed to ttfInfo.ts
+ * and TypeScript checking was disabled for this file because using this
+ * file as JavaScript was causing Jest to fail.
+ */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 // this synchronous, read from buffer only version is adapted from
 // https://github.com/khensolomon/ttfmeta/tree/master/lib
 //
@@ -284,7 +292,7 @@ export function view(data) {
  * @param {*} data
  * @param {{(error:string|null,meta?:typeof result):void}} callback
  */
-export function ttfInfo(data) {
+export default function ttfInfo(data) {
   try {
     // let dataview = new DataView(data.buffer, 0, data.length);
     resultTables(data);

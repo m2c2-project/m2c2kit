@@ -7,18 +7,13 @@ import {
   EventType,
   Timer,
 } from "@m2c2kit/core";
-import $ from "jquery";
 import React from "react";
 import Modal from "react-modal";
 import * as SurveyReact from "survey-react";
 import { createRoot } from "react-dom/client";
-import widgets from "surveyjs-widgets";
-import select2 from "select2";
-import "bootstrap-datepicker";
-import "sortablejs";
-import "bootstrap-slider";
-import initbootstrapsliderm2c2 from "./bootstrapslider-m2c2";
-import initnouisliderm2c2 from "./nouislider-m2c2";
+import "surveyjs-widgets";
+import { initbootstrapsliderm2c2 } from "./bootstrapslider-m2c2";
+import { initnouisliderm2c2 } from "./nouislider-m2c2";
 import { IElement, ISurveyElement, IQuestion } from "survey-react";
 import { ValueChangedOptions } from "./ValueChangedOptions";
 import { CurrentPageChangingOptions } from "./CurrentPageChangingOptions";
@@ -753,11 +748,7 @@ export class Survey implements Activity {
 
   private initializeCustomWidgets() {
     // custom widgets need to be separately initialized by widget
-    select2($);
-    widgets.select2tagbox(SurveyReact, $);
-    widgets.sortablejs(SurveyReact);
-    widgets.bootstrapdatepicker(SurveyReact, $);
-    // we use the versions customized for m2c2
+    // versions customized for m2c2
     initbootstrapsliderm2c2();
     initnouisliderm2c2();
   }

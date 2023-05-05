@@ -3,8 +3,7 @@
   "version": "0.8.4",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
-    "postinstall": "node post-install.mjs"
+    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -16,8 +15,7 @@
   "files": [
     "dist/index.js",
     "dist/index.d.ts",
-    "assets/**",
-    "post-install.mjs"
+    "assets/**"
   ],
   "dependencies": {
     "@m2c2kit/addons": "^0.3.3",

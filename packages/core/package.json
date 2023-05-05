@@ -20,7 +20,7 @@
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo coverage",
-    "test": "npx env-cmd -f ./src/__tests__/test-env jest",
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/core",
     "postinstall": "node post-install.mjs"
   },
   "license": "MIT",

@@ -1,0 +1,39 @@
+{
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/__tests__",
+    "**/*.test*",
+    "**/*.spec*",
+    "**/coverage",
+    "**/website/static"
+  ],
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "target": "es6",
+    "module": "es6",
+    "lib": ["dom", "es6"],
+    "jsx": "react",
+    "rootDir": ".",
+    "outDir": "build",
+    "downlevelIteration": true,
+    // "strict": true,
+    // "removeComments": false,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noImplicitReturns": true,
+    // "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    // https://github.com/RyanCavanaugh/learn-a/#tsconfigsettingsjson
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
+}

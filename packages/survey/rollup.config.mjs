@@ -1,7 +1,6 @@
 import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import copy from "rollup-plugin-copy";
-import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import dts from "rollup-plugin-dts";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -63,24 +62,6 @@ export default [
           prependToBundle("m2c2kit.survey.esm.min.js", codeToPrepend),
         ],
       },
-      // Make a UMD bundle only to use for testing (jest), because jest support
-      // for esm modules is still incomplete
-      {
-        file: "./build-umd/index.js",
-        format: "umd",
-        name: "m2c2kit",
-        globals: {
-          "@m2c2kit/core": "core",
-        },
-        plugins: [
-          getBabelOutputPlugin({
-            compact: false,
-            allowAllFormats: true,
-            presets: ["@babel/preset-env"],
-          }),
-        ],
-        sourcemap: true,
-      },
     ],
     plugins: [nodeResolve(), commonjs(), esbuild()],
   },
@@ -99,10 +80,6 @@ export default [
           {
             src: "build/index.js*",
             dest: "dist",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-umd/",
           },
           {
             src: "dist/index.d.ts",

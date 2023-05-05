@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js"
@@ -15,8 +16,8 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler build-umd dist .rollup.cache tsconfig.tsbuildinfo",
-    "test": "jest"
+    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/survey"
   },
   "license": "MIT",
   "dependencies": {
@@ -34,7 +35,6 @@
     "surveyjs-widgets": "1.9.47"
   },
   "devDependencies": {
-    "@rollup/plugin-babel": "6.0.3",
     "@rollup/plugin-commonjs": "24.1.0",
     "@rollup/plugin-node-resolve": "15.0.2",
     "@types/bootstrap-datepicker": "0.0.16",

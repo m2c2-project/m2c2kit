@@ -15,7 +15,7 @@ class bootstrapsliderQuestion extends Survey.Question {
   bootstrapSlider?: Slider | null;
 }
 
-function initbootstrapsliderm2c2() {
+export function initbootstrapsliderm2c2() {
   const widget = {
     name: "bootstrapslider-m2c2",
     title: "Bootstrap Slider-m2c2",
@@ -198,5 +198,3 @@ function initbootstrapsliderm2c2() {
 
   Survey.CustomWidgetCollection.Instance.addCustomWidget(widget, "customtype");
 }
-
-export default initbootstrapsliderm2c2;
