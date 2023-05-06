@@ -1,0 +1,28 @@
+{
+  "name": "@m2c2kit/schematics",
+  "version": "0.1.0",
+  "description": "Schematics for m2c2kit",
+  "main": "index.js",
+  "keywords": [
+    "schematics"
+  ],
+  "schematics": "./src/collection.json",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && jasmine src/**/*_spec.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@angular-devkit/core": "^15.2.6",
+    "@angular-devkit/schematics": "^15.2.8",
+    "@m2c2kit/core": "^0.3.5",
+    "findup-sync": "5.0.0",
+    "typescript": "~4.9.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/schematics-cli": "15.2.6",
+    "@schematics/angular": "15.2.6",
+    "jasmine": "^4.0.0"
+  }
+}

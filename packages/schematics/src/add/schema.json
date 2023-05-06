@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicAdd",
+  "title": "Add Schema",
+  "type": "object",
+  "properties": {
+    "package": {
+      "type": "string",
+      "description": "Package name"
+    }
+  },
+  "required": ["package"]
+}

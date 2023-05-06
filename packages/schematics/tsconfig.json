@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": "tsconfig",
+    "lib": ["es2018", "dom"],
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    //"noUnusedParameters": true,
+    //"noUnusedLocals": true,
+    "rootDir": "src/",
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "target": "es6",
+    // the schematics cli scaffolds the project with jasmine, and in
+    // package.json @types/jasmine is a dev dependency. However, this was
+    // conflicting with jest, so I removed it and added jest types
+    // below.
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/*/files/**/*"]
+}

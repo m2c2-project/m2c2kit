@@ -1,0 +1,17 @@
+{
+  "$schema": "./collection-schema.json",
+  "schematics": {
+    "add": {
+      "description": "A schematic to add a package to m2c2kit",
+      "factory": "./add/index#add"
+    },
+    "new": {
+      "description": "A schematic to create a new m2c2kit app",
+      "factory": "./new/index#m2New"
+    },
+    "npm-install": {
+      "description": "A schematic to install a package from npm",
+      "factory": "./install/index#npmInstall"
+    }
+  }
+}
