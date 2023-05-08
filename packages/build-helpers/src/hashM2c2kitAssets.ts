@@ -131,48 +131,78 @@ export function hashM2c2kitAssets(rootDir: string) {
               }
             }
 
-            if (ancestors.length >= 3) {
-              const maybeArrayExpression = ancestors.slice(-2)[0];
+            // we'll be looking back 5 levels
+            if (ancestors.length >= 5) {
+              const maybeProperty = ancestors.slice(-2)[0];
 
-              if (maybeArrayExpression.type === "ArrayExpression") {
-                const maybeProperty = ancestors.slice(-3)[0];
+              if (maybeProperty.type === "Property") {
+                const property = maybeProperty as unknown as estree.Property;
 
-                if (maybeProperty.type === "Property") {
-                  const property = maybeProperty as unknown as estree.Property;
+                if (
+                  property.key.type === "Identifier" &&
+                  (property.key as estree.Identifier).name == "url"
+                ) {
+                  // property is url
+                  const maybeObjExpression = ancestors.slice(-3)[0];
+                  if (maybeObjExpression.type === "ObjectExpression") {
+                    const objExpression =
+                      maybeObjExpression as unknown as estree.ObjectExpression;
 
-                  if (
-                    property.key.type === "Identifier" &&
-                    (property.key as estree.Identifier).name == "fontUrls"
-                  ) {
-                    // property is fontUrls
-                    const literal = node as unknown as estree.Literal;
-                    const originalUrlValue = literal.value as string;
+                    const properties = objExpression.properties
+                      .filter((p) => p.type === "Property")
+                      .map((p) => p as estree.Property);
 
-                    try {
-                      const hashedUrlValue = addHashToUrl(
-                        originalUrlValue,
-                        rootDir
-                      );
+                    const identifiers = properties
+                      .filter((p) => p.key.type === "Identifier")
+                      .map((p) => (p.key as estree.Identifier).name);
 
-                      literal.value = (literal.value as string).replace(
-                        originalUrlValue,
-                        hashedUrlValue
-                      );
-                      literal.raw = (literal.raw as string).replace(
-                        originalUrlValue,
-                        hashedUrlValue
-                      );
+                    const urlFontAssetProperties = ["fontName", "url"];
 
-                      addFileToFilesToBeRenamed(
-                        rootDir,
-                        originalUrlValue,
-                        hashedUrlValue,
-                        fileRenames
-                      );
-                    } catch {
-                      console.log(
-                        `warning: could not hash a font url resource because it was not found at ${originalUrlValue}`
-                      );
+                    const propCount = identifiers.filter(
+                      (i) => urlFontAssetProperties.indexOf(i) !== -1
+                    ).length;
+                    if (propCount === 2) {
+                      // the object expression has the 2 properties
+                      const maybeArrayExpression = ancestors.slice(-4)[0];
+                      if (maybeArrayExpression.type === "ArrayExpression") {
+                        const maybeProperty = ancestors.slice(-5)[0];
+                        if (maybeProperty.type === "Property") {
+                          const property =
+                            maybeProperty as unknown as estree.Property;
+                          if (
+                            property.key.type === "Identifier" &&
+                            (property.key as estree.Identifier).name == "fonts"
+                          ) {
+                            // property is fonts
+                            const literal = node as unknown as estree.Literal;
+                            const originalUrlValue = literal.value as string;
+
+                            try {
+                              const hashedUrlValue = addHashToUrl(
+                                originalUrlValue,
+                                rootDir
+                              );
+
+                              literal.value = (literal.value as string).replace(
+                                originalUrlValue,
+                                hashedUrlValue
+                              );
+                              literal.raw = (literal.raw as string).replace(
+                                originalUrlValue,
+                                hashedUrlValue
+                              );
+                              addFileToFilesToBeRenamed(
+                                rootDir,
+                                originalUrlValue,
+                                hashedUrlValue,
+                                fileRenames
+                              );
+                            } catch {
+                              `warning: could not hash a font resource because it was not found at ${originalUrlValue} `;
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
