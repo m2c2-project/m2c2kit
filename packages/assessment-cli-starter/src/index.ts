@@ -114,24 +114,31 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       trialSchema: cliStarterTrialSchema,
       parameters: defaultParameters,
       /**
-       * IMPORTANT: fontUrls must be an array of string literals. If you
-       * use anything else, the cache busting functionality will not work
-       * when building for production. The following are examples of what
-       * should NOT be used, even though they are syntactically correct:
+       * IMPORTANT: fonts is an array of FontAsset objects. The url for each
+       * fontAsset must be a string literal. If you use anything else, the
+       * cache busting functionality will not work when building for
+       * production.
+       * The following are examples of what should NOT be used, even though
+       * they are syntactically correct:
        *
-       *   fontUrls: ["assets/cli-starter/" + "fonts/roboto/Roboto-Regular.ttf"]
+       *   url: "assets/cli-starter/" + "fonts/roboto/Roboto-Regular.ttf"
        *
        *   const prefix = "assets/cli-starter/";
        *   ...
-       *   fontUrls: [prefix + "fonts/roboto/Roboto-Regular.ttf"]
+       *   url: prefix + "fonts/roboto/Roboto-Regular.ttf"
        */
       /**
        * The Roboto-Regular.ttf font is licensed under the Apache License,
        * and its LICENSE.TXT will be copied as part of the build.
        */
-      fontUrls: ["assets/cli-starter/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/cli-starter/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
       /**
-       * IMPORTANT: Similar to fontUrls, the url for an image must be
+       * IMPORTANT: Similar to FontAsset.url, the url for an image must be
        * a string literal.
        */
       images: [

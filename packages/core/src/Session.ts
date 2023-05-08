@@ -5,7 +5,6 @@ import { ImageManager } from "./ImageManager";
 import { FontManager } from "./FontManager";
 import CanvasKitInit, { CanvasKit } from "canvaskit-wasm";
 import { Game } from "./Game";
-import { GameFontUrls } from "./GameFontUrls";
 import { GameImages } from "./GameImages";
 import { Timer } from "./Timer";
 import { SessionOptions } from "./SessionOptions";
@@ -326,10 +325,12 @@ export class Session {
    * of images
    * @returns
    */
-  private async getAsynchronousAssets(): Promise<[CanvasKit, void, void[]]> {
+  private async getAsynchronousAssets(): Promise<[CanvasKit, void[], void[]]> {
     const canvasKitPromise = this.loadCanvasKit(this.options.canvasKitWasmUrl);
     const fetchFontsPromise = this.fontManager.fetchFonts(
-      this.getFontsConfigurationFromGames()
+      this.options.activities
+        .filter((activity) => activity instanceof Game)
+        .map((activity) => activity as Game)
     );
     const renderImagesPromise = this.imageManager.renderImages(
       this.getImagesConfigurationFromGames()
@@ -365,15 +366,6 @@ export class Session {
       .forEach((activity) => {
         const game = activity as unknown as Game;
         game.canvasKit = canvasKit;
-      });
-  }
-
-  private getFontsConfigurationFromGames(): GameFontUrls[] {
-    return this.options.activities
-      .filter((activity) => activity.type == ActivityType.Game)
-      .map((activity) => {
-        const game = activity as unknown as Game;
-        return { uuid: game.uuid, fontUrls: game.options.fontUrls ?? [] };
       });
   }
 

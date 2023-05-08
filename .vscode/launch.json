@@ -16,7 +16,7 @@
       "request": "launch",
       "name": "Scratch Launch Chrome against localhost",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/packages/core/scratch/scratch-build"
+      "webRoot": "${workspaceFolder}/packages/core/scratch-build"
     },
     {
       "type": "chrome",

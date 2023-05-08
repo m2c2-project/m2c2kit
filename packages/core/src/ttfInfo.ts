@@ -114,7 +114,7 @@ function name(data) {
     /**
      * @type {string}
      */
-    // var platformId = u16(data,o);
+    var platformId = u16(data, o);
 
     /**
      * @type {string}

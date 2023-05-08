@@ -283,7 +283,12 @@ appeared.",
       bodyBackgroundColor: WebColors.White,
       trialSchema: colorDotsTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["assets/color-dots/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/color-dots/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
       images: [
         {
           imageName: "cd1",

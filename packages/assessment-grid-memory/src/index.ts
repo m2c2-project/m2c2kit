@@ -315,7 +315,12 @@ phase, participants report the location of dots on a grid.",
       height: 800,
       trialSchema: gridMemoryTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["assets/grid-memory/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/grid-memory/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
       images: [
         {
           imageName: "grid",

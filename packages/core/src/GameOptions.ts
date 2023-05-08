@@ -3,6 +3,7 @@ import { BrowserImage } from "./BrowserImage";
 import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
 import { Translations } from "./Translations";
+import { FontAsset } from "./FontAsset";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
@@ -32,8 +33,8 @@ export interface GameOptions {
   trialSchema?: TrialSchema;
   /** Default game parameters; JSON object where key is the game parameter, value is default value */
   parameters?: GameParameters;
-  /** String array of urls from which to load fonts. The first element will be the default font */
-  fontUrls?: Array<string>;
+  /** Font assets to use. The first element will be the default font */
+  fonts?: Array<FontAsset>;
   /** Array of BrowserImage objects to render and load */
   images?: Array<BrowserImage>;
   /** Show FPS in upper left corner? Default is false */

@@ -279,7 +279,12 @@ phases.`,
       height: 800,
       trialSchema: colorShapesTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["assets/color-shapes/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/color-shapes/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
       images: [
         {
           imageName: "instructions-1",

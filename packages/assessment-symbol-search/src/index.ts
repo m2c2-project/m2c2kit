@@ -238,7 +238,12 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       height: 800,
       trialSchema: symbolSearchTrialSchema,
       parameters: defaultParameters,
-      fontUrls: ["assets/symbol-search/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/symbol-search/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
       bodyBackgroundColor: WebColors.White,
       images: [
         {

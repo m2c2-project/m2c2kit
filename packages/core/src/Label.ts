@@ -119,6 +119,35 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this._translatedText = "";
     }
 
+    const session = (this.parentSceneAsEntity as Scene).game.session;
+    if (!session) {
+      throw new Error("session is undefined");
+    }
+    const fontManager = session.fontManager;
+    if (fontManager.fontMgr === undefined) {
+      throw new Error("no fonts loaded");
+    }
+
+    const fontFamilies = new Array<string>();
+    if (this.fontName) {
+      if (
+        fontManager.gameTypefaces[this.game.uuid][this.fontName] === undefined
+      ) {
+        throw new Error(`font ${this.fontName} not found.`);
+      }
+      fontFamilies.push(
+        fontManager.gameTypefaces[this.game.uuid][this.fontName].fontFamily
+      );
+    } else {
+      // if no fontName provided, use default fontName, which is the
+      // first in the list of fontAssets for this game.
+      fontFamilies.push(
+        Object.values(fontManager.gameTypefaces[this.game.uuid])
+          .filter((f) => f.isDefault)
+          .find(Boolean).fontFamily
+      );
+    }
+
     this.paraStyle = new this.canvasKit.ParagraphStyle({
       textStyle: {
         color: textColor,
@@ -130,20 +159,11 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
               this.backgroundColor[3]
             )
           : undefined,
-        fontFamilies: this.fontName ? [this.fontName] : undefined,
+        fontFamilies: fontFamilies,
         fontSize: this.fontSize * Globals.canvasScale,
       },
       textAlign: ckTextAlign,
     });
-
-    const session = (this.parentSceneAsEntity as Scene).game.session;
-    if (!session) {
-      throw new Error("session is undefined");
-    }
-    const fontManager = session.fontManager;
-    if (fontManager.fontMgr === undefined) {
-      throw new Error("no fonts loaded");
-    }
 
     this.builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
