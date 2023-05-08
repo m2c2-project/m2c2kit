@@ -27,6 +27,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   // Text options
   private _text = ""; // public getter/setter is below
   private _fontName: string | undefined; // public getter/setter is below
+  private _fontNames: Array<string> | undefined; // public getter/setter is below
   private _fontColor = Constants.DEFAULT_FONT_COLOR; // public getter/setter is below
   private _fontSize = Constants.DEFAULT_FONT_SIZE; // public getter/setter is below
 
@@ -59,6 +60,9 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
     if (options.backgroundColor) {
       this.backgroundColor = options.backgroundColor;
+    }
+    if (options.fontNames) {
+      this.fontNames = options.fontNames;
     }
   }
 
@@ -128,8 +132,20 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       throw new Error("no fonts loaded");
     }
 
+    if (this.fontName && this.fontNames) {
+      throw new Error("cannot specify both fontName and fontNames");
+    }
     const fontFamilies = new Array<string>();
-    if (this.fontName) {
+    if (this.fontNames) {
+      this.fontNames.forEach((fn) => {
+        if (fontManager.gameTypefaces[this.game.uuid][fn] === undefined) {
+          throw new Error(`font ${fn} not found.`);
+        }
+        fontFamilies.push(
+          fontManager.gameTypefaces[this.game.uuid][fn].fontFamily
+        );
+      });
+    } else if (this.fontName) {
       if (
         fontManager.gameTypefaces[this.game.uuid][this.fontName] === undefined
       ) {
@@ -237,6 +253,14 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
   set fontName(fontName: string | undefined) {
     this._fontName = fontName;
+    this.needsInitialization = true;
+  }
+
+  get fontNames(): Array<string> | undefined {
+    return this._fontNames;
+  }
+  set fontNames(fontNames: Array<string> | undefined) {
+    this._fontNames = fontNames;
     this.needsInitialization = true;
   }
 

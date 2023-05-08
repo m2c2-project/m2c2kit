@@ -14,4 +14,6 @@ export interface LabelOptions
   preferredMaxLayoutWidth?: number;
   /** Background color  of label text. Default is no background color */
   backgroundColor?: RgbaColor;
+  /** Names of multiple fonts to use for text. For example, if a text font and an emoji font are to be used together. Must have been previously loaded */
+  fontNames?: Array<string>;
 }
