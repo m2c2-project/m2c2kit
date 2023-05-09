@@ -30,7 +30,7 @@ In addition, the each image must have *one* of the following:
 
 :::info
 
-Because this tutorial runs in the browser, you cannot alter the image assets on the server hosting the assessment. The URL of `assets/docs/img/blue-marble.jpg` has been set up beforehand with this image. Other local file URLs will not work. You can, of course, edit the tutorial to use any image URL on the internet, e.g., `https://via.placeholder.com/150.jpg`
+Because this tutorial runs in the browser, you cannot alter the image assets on the server hosting the assessment. The URL of `assets/docs/img/blue-marble.jpg` has been set up beforehand with this image. Other local file URLs will not work. You can, of course, edit the tutorial to use another image URL on the internet, e.g., `https://upload.wikimedia.org/wikipedia/commons/7/70/Black_tricolor_Australian_Shepherd.jpg`, as long as the server hosting the image allows [cross-origin requests (CORS)](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
 :::
 
