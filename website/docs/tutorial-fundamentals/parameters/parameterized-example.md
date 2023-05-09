@@ -41,7 +41,10 @@ We've named the variable for the parameters object as `defaultParameters`. You c
 ```js
 const options = {
     width: 200, height: 400,
-    fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+    fonts: [{
+	    fontName: "roboto",
+	    url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+    }],
     trialSchema: demoSchema,
     parameters: defaultParameters
 };
@@ -108,7 +111,10 @@ export const code = `class DocsDemo extends Game {
  
         const options = {
             width: 200, height: 400,
-            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            fonts: [{
+	            fontName: "roboto",
+	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+            }],            
             trialSchema: demoSchema,
             parameters: defaultParameters
         };
@@ -205,7 +211,10 @@ code: `class DocsDemo extends Game {
  
         const options = {
             width: 200, height: 400,
-            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            fonts: [{
+	            fontName: "roboto",
+	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+            }],            
             trialSchema: demoSchema,
             parameters: defaultParameters
         };

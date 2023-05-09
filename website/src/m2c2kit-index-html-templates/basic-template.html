@@ -138,7 +138,12 @@
             trialSchema: starterTrialSchema,
             parameters: defaultParameters,
             bodyBackgroundColor: WebColors.White,
-            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "assets/docs/fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
           };
           super(options);
         }

@@ -63,7 +63,10 @@ export const code = `class DocsDemo extends Game {
   
         const options = {
             width: 400, height: 800,
-            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            fonts: [{
+	            fontName: "roboto",
+	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+            }],
             images: [{
                 imageName: "stroop-screenshot",
                 height: 336, width: 384, url: "assets/docs/img/stroop.png"

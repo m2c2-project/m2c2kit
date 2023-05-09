@@ -40,13 +40,14 @@ interface FileRename {
  * finding the asset urls in the AST assumes that there will be no
  * user code with the same structure as the asset urls. In other words:
  * Don't use a define a property named "canvasKitWasmUrl" that refers to
- * a string literal, don't define a property named "fontUrls" that refers
- * to an array expression of string literals, and don't define a property
- * called "images" that refers to an array expression of object expressions
- * with properties named "imageName", "height", "width", and "url". Otherwise,
- * this plugin may alter your code in unexpected ways (although most likely
- * it will simply give warnings, because it's unlikely there will be valid
- * file assets that will be found and hashed).
+ * a string literal, don't define a property named "fonts" that that refers
+ * to an array expression of object expressions with properties named
+ * "fontName" and "url", and don't define a property called "images" that
+ * refers to an array expression of object expressions with properties named
+ * "imageName", "height", "width", and "url". Otherwise, this plugin may alter
+ * your code in unexpected ways (although most likely it will simply give
+ * warnings, because it's unlikely there will be valid file assets that will
+ * be found and hashed).
  *
  * @param rootDir - root directory of build, usually "dist" because you
  * usually hash only production builds

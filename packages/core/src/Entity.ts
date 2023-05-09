@@ -627,7 +627,7 @@ export abstract class Entity implements EntityOptions {
         let entity: Entity | undefined;
         let additionalExceptionMessage = "";
 
-        if (constraints[constraintType] instanceof Entity) {
+        if (typeof constraints[constraintType] === "object") {
           entity = constraints[constraintType] as Entity;
         } else {
           const entityName = constraints[constraintType] as string;
@@ -891,7 +891,7 @@ export abstract class Entity implements EntityOptions {
           let siblingConstraint: Entity | undefined;
           let additionalExceptionMessage = "";
 
-          if (constraints[constraint] instanceof Entity) {
+          if (typeof constraints[constraint] === "object") {
             siblingConstraint = constraints[constraint] as Entity;
           } else {
             const entityName = constraints[constraint] as string;

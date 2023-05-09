@@ -475,7 +475,7 @@ export class Game implements Activity {
    * @param scene - the scene to remove or its name as a string
    */
   removeScene(scene: Scene | string): void {
-    if (scene instanceof Scene) {
+    if (typeof scene === "object") {
       if (this.scenes.includes(scene)) {
         this.scenes = this.scenes.filter((s) => s !== scene);
       } else {
@@ -624,7 +624,7 @@ export class Game implements Activity {
     let startingScene: Scene | undefined;
 
     if (entryScene !== undefined) {
-      if (entryScene instanceof Scene) {
+      if (typeof entryScene === "object") {
         startingScene = entryScene;
         if (!this.scenes.includes(startingScene)) {
           throw new Error(

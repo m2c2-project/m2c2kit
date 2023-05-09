@@ -37,7 +37,12 @@ class NoBundler extends Game {
       trialSchema: starterTrialSchema,
       parameters: defaultParameters,
       bodyBackgroundColor: WebColors.WhiteSmoke,
-      fontUrls: ["assets/no-bundler-example/fonts/roboto/Roboto-Regular.ttf"],
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "assets/no-bundler-example/fonts/roboto/Roboto-Regular.ttf",
+        },
+      ],
     };
 
     super(options);
@@ -163,7 +168,7 @@ const survey = new Survey(surveyJson);
 
 const session = new Session({
   canvasKitWasmUrl: "assets/canvaskit.wasm",
-  activities: [symbolSearch, activity, survey],
+  activities: [symbolSearch],
   activityCallbacks: {
     onActivityLifecycle: async (ev) => {
       if (

@@ -60,7 +60,10 @@ const demoSchema = {
 ```js
 const options = {
     width: 200, height: 400,
-    fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+    fonts: [{
+	    fontName: "roboto",
+	    url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+    }],
     trialSchema: demoSchema
 };
 ```
@@ -97,7 +100,10 @@ export const code = `class DocsDemo extends Game {
  
         const options = {
             width: 200, height: 400,
-            fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+            fonts: [{
+	            fontName: "roboto",
+	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+            }],            
             trialSchema: demoSchema
         };
         super(options);

@@ -52,7 +52,10 @@ In the tutorial, we've been using a screen size of 200 width x 400 height. This 
 ```js
 const options = {
   width: 400, height: 800,
-  fontUrls: ["assets/docs/fonts/roboto/Roboto-Regular.ttf"],
+  fonts: [{
+	  fontName: "roboto",
+	  url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+  }],
 };
 ```
 

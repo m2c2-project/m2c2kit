@@ -186,8 +186,15 @@ export class Session {
      */
     this.currentActivity.session = this;
     this.currentActivity.dataStore = this.dataStore;
-    if (this.currentActivity instanceof Game && this.canvasKit) {
-      this.currentActivity.canvasKit = this.canvasKit;
+    /**
+     * IMPORTANT: Originally, we checked if the current activity was a game
+     * by checking if it was an instance of Game. However, if we are mixing
+     * code bundles, the Game class in one bundle will not be the same as the
+     * Game class in another bundle. Instead, we must check the type property
+     * of the activity.
+     */
+    if (this.currentActivity.type === ActivityType.Game && this.canvasKit) {
+      (this.currentActivity as Game).canvasKit = this.canvasKit;
     }
     if (currentActivityOldObject.additionalParameters) {
       this.currentActivity.setParameters(
@@ -329,7 +336,8 @@ export class Session {
     const canvasKitPromise = this.loadCanvasKit(this.options.canvasKitWasmUrl);
     const fetchFontsPromise = this.fontManager.fetchFonts(
       this.options.activities
-        .filter((activity) => activity instanceof Game)
+        // see note above why we must check type property and not instance type
+        .filter((activity) => activity.type === ActivityType.Game)
         .map((activity) => activity as Game)
     );
     const renderImagesPromise = this.imageManager.renderImages(
