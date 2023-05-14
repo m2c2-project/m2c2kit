@@ -28,7 +28,7 @@ describe("survey start", () => {
 
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
   });

@@ -105,7 +105,12 @@ export function hashM2c2kitAssets(rootDir: string) {
                   try {
                     const hashedUrlValue = addHashToUrl(
                       originalUrlValue,
-                      rootDir
+                      /**
+                       * by our convention, the wasm file will be served from
+                       * the assets directory, so the location is
+                       * `assets/${canvasKitWasmUrl}` not `${canvasKitWasmUrl}`
+                       */
+                      `${rootDir}/assets`
                     );
 
                     literal.value = (literal.value as string).replace(
@@ -118,7 +123,7 @@ export function hashM2c2kitAssets(rootDir: string) {
                     );
 
                     addFileToFilesToBeRenamed(
-                      rootDir,
+                      `${rootDir}/assets`,
                       originalUrlValue,
                       hashedUrlValue,
                       fileRenames

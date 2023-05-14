@@ -284,7 +284,7 @@ const config = {
           },
           {
             source: "../packages/assessment-symbol-search/assets",
-            destination: "static/m2c2kit/assets",
+            destination: "static/m2c2kit/assets/symbol-search",
           },
           {
             source: "../packages/assessment-color-dots/build-nobundler",
@@ -292,7 +292,7 @@ const config = {
           },
           {
             source: "../packages/assessment-color-dots/assets",
-            destination: "static/m2c2kit/assets",
+            destination: "static/m2c2kit/assets/color-dots",
           },
           {
             source: "../packages/assessment-color-shapes/build-nobundler",
@@ -300,7 +300,7 @@ const config = {
           },
           {
             source: "../packages/assessment-color-shapes/assets",
-            destination: "static/m2c2kit/assets",
+            destination: "static/m2c2kit/assets/color-shapes",
           },
           {
             source: "../packages/assessment-grid-memory/build-nobundler",
@@ -308,7 +308,7 @@ const config = {
           },
           {
             source: "../packages/assessment-grid-memory/assets",
-            destination: "static/m2c2kit/assets",
+            destination: "static/m2c2kit/assets/grid-memory",
           },
         ],
       },

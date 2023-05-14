@@ -131,7 +131,7 @@
           const options = {
             name: "Documentation Examples",
             version: "1.0.0",
-            id: "docs-examples",
+            id: "docs",
             showFps: false,
             width: 200,
             height: 400,
@@ -141,7 +141,7 @@
             fonts: [
               {
                 fontName: "roboto",
-                url: "assets/docs/fonts/roboto/Roboto-Regular.ttf",
+                url: "fonts/roboto/Roboto-Regular.ttf",
               },
             ],
           };
@@ -159,7 +159,7 @@
       const activity = new DocsDemo();
 
       const session = new Session({
-        canvasKitWasmUrl: "assets/canvaskit.wasm",
+        canvasKitWasmUrl: "canvaskit.wasm",
         activities: [activity],
         activityCallbacks: {
           onActivityLifecycle: async (ev) => {

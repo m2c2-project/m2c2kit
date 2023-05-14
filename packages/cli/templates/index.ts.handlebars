@@ -93,7 +93,7 @@ class {{className}} extends Game {
 
     const options: GameOptions = {
       name: "{{appName}}",
-      id: "{{className}}",
+      id: "{{appName}}",
       version: "1.0.0",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
@@ -132,11 +132,11 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        * The following are examples of what should NOT be used, even though
        * they are syntactically correct:
        *
-       *   url: "assets/{{appName}}/" + "fonts/roboto/Roboto-Regular.ttf"
+       *   url: "fonts/" + "roboto/Roboto-Regular.ttf"
        *
-       *   const prefix = "assets/{{appName}}/";
+       *   const prefix = "fonts/";
        *   ...
-       *   url: prefix + "fonts/roboto/Roboto-Regular.ttf"
+       *   url: prefix + "roboto/Roboto-Regular.ttf"
        */
       /**
        * The Roboto-Regular.ttf font is licensed under the Apache License,
@@ -145,7 +145,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       fonts: [
         {
           fontName: "roboto",          
-          url: "assets/{{appName}}/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       /**
@@ -164,7 +164,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
            * The image url must match the location of the image under the
            * src folder.
            */
-          url: "assets/{{appName}}/img/assessmentExample.png",
+          url: "images/assessmentExample.png",
         },
       ],
     };
@@ -487,7 +487,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
 const activity = new {{className}}();
 const session = new Session({
   activities: [activity],
-  canvasKitWasmUrl: "assets/canvaskit.wasm",
+  canvasKitWasmUrl: "canvaskit.wasm",
   sessionCallbacks: {
     /**
      * onSessionLifecycle() will be called on events such

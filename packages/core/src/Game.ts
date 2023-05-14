@@ -90,6 +90,9 @@ export class Game implements Activity {
    * @param options - {@link GameOptions}
    */
   constructor(options: GameOptions) {
+    if (!options.id || options.id.trim() === "") {
+      throw new Error("id is required in GameOptions");
+    }
     this.options = options;
     this.name = options.name;
     this.id = options.id;
@@ -2870,5 +2873,21 @@ export class Game implements Activity {
     // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
     // const yMax = entity.absolutePosition.y + entity.size.height * anchorPoint.y * scale;
     return { xMin, xMax, yMin, yMax };
+  }
+
+  prependAssetsGameIdUrl(url: string): string {
+    function hasUrlScheme(str: string): boolean {
+      return /^[a-z]+:\/\//i.test(str);
+    }
+
+    if (hasUrlScheme(url)) {
+      return url;
+    }
+    if (!this.options.assetsUrl) {
+      return `assets/${this.id}/${url}`;
+    }
+    return (
+      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
+    );
   }
 }

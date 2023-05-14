@@ -88,8 +88,15 @@
       class ReloadMessage extends Game {
         constructor() {
           const options = {
+            id: "docs",
             width: 400,
             height: 800,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
           };
           super(options);
         }
@@ -108,7 +115,7 @@
       const reload = new ReloadMessage();
 
       const session = new Session({
-        canvasKitWasmUrl: "assets/canvaskit.wasm",
+        canvasKitWasmUrl: "canvaskit.wasm",
         activities: [activity, reload],
         activityCallbacks: {
           onActivityLifecycle: async (ev) => {

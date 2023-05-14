@@ -40,10 +40,11 @@ We've named the variable for the parameters object as `defaultParameters`. You c
 
 ```js
 const options = {
+    id: "docs",
     width: 200, height: 400,
     fonts: [{
 	    fontName: "roboto",
-	    url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	    url: "fonts/roboto/Roboto-Regular.ttf"
     }],
     trialSchema: demoSchema,
     parameters: defaultParameters
@@ -110,10 +111,11 @@ export const code = `class DocsDemo extends Game {
         }
  
         const options = {
+            id: "docs",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
-	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	            url: "fonts/roboto/Roboto-Regular.ttf"
             }],            
             trialSchema: demoSchema,
             parameters: defaultParameters
@@ -210,10 +212,11 @@ code: `class DocsDemo extends Game {
         }
  
         const options = {
+            id: "docs",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
-	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	            url: "fonts/roboto/Roboto-Regular.ttf"
             }],            
             trialSchema: demoSchema,
             parameters: defaultParameters
@@ -276,6 +279,3 @@ code: `class DocsDemo extends Game {
 }`},];
 
 <CodeExample code={code} template={template} more={more} console={"true"}/>
-
-[^1]: For the tutorials, however, *do not* change the name! This tutorial website engine expect the class name to be `DocsDemo`, and it will not work if you rename it.
-

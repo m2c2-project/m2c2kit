@@ -40,24 +40,24 @@ export default (commandLineArgs) => {
               dest: outputFolder,
             },
             {
-              src: "../assessment-cli-starter/assets/cli-starter",
-              dest: `${outputFolder}/assets`,
+              src: "../assessment-cli-starter/assets/*",
+              dest: `${outputFolder}/assets/cli-starter`,
             },
             {
-              src: "../assessment-color-dots/assets/color-dots",
-              dest: `${outputFolder}/assets`,
+              src: "../assessment-color-dots/assets/*",
+              dest: `${outputFolder}/assets/color-dots`,
             },
             {
-              src: "../assessment-grid-memory/assets/grid-memory",
-              dest: `${outputFolder}/assets`,
+              src: "../assessment-grid-memory/assets/*",
+              dest: `${outputFolder}/assets/grid-memory`,
             },
             {
-              src: "../assessment-symbol-search/assets/symbol-search",
-              dest: `${outputFolder}/assets`,
+              src: "../assessment-symbol-search/assets/*",
+              dest: `${outputFolder}/assets/symbol-search`,
             },
             {
-              src: "../assessment-color-shapes/assets/color-shapes",
-              dest: `${outputFolder}/assets`,
+              src: "../assessment-color-shapes/assets/*",
+              dest: `${outputFolder}/assets/color-shapes`,
             },
             {
               src: "../db/data.html",

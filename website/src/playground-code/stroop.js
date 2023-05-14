@@ -81,12 +81,13 @@ class Stroop extends Game {
     };
 
     const options = {
+      id: "docs",
       width: 400,
       height: 800,
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/docs/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       images: [
@@ -94,7 +95,7 @@ class Stroop extends Game {
           imageName: "stroop-screenshot",
           height: 336,
           width: 384,
-          url: "./assets/docs/img/stroop.png",
+          url: "images/stroop.png",
         },
       ],
       trialSchema: schema,
@@ -374,7 +375,7 @@ class Stroop extends Game {
 
 const activity = new Stroop();
 const session = new Session({
-  canvasKitWasmUrl: "assets/canvaskit.wasm",
+  canvasKitWasmUrl: "canvaskit.wasm",
   activities: [activity],
   activityCallbacks: {
     onActivityLifecycle: async (ev) => {

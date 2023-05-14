@@ -85,7 +85,7 @@ describe("actions", () => {
 
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -145,7 +145,7 @@ describe("Game start", () => {
 
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -191,7 +191,7 @@ describe("free entities", () => {
     g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -303,7 +303,7 @@ describe("addTrialData", () => {
     g3 = new Game3();
     const options: SessionOptions = {
       activities: [g3],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();

@@ -318,7 +318,7 @@ phase, participants report the location of dots on a grid.",
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/grid-memory/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       images: [
@@ -326,13 +326,13 @@ phase, participants report the location of dots on a grid.",
           imageName: "grid",
           height: img_default_size,
           width: img_default_size,
-          url: "assets/grid-memory/img/dotmem1_grid.png",
+          url: "images/dotmem1_grid.png",
         },
         {
           imageName: "fs",
           height: img_default_size,
           width: img_default_size,
-          url: "assets/grid-memory/img/dotmem2_fs.png",
+          url: "images/dotmem2_fs.png",
         },
         {
           imageName: "circle-x",
@@ -340,7 +340,7 @@ phase, participants report the location of dots on a grid.",
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
           // Universal (Public Domain). see https://www.patreon.com/evericons
-          url: "assets/grid-memory/img/circle-x.svg",
+          url: "images/circle-x.svg",
         },
       ],
     };

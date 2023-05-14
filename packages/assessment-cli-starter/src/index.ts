@@ -134,7 +134,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/cli-starter/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       /**
@@ -153,7 +153,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
            * The image url must match the location of the image under the
            * src folder.
            */
-          url: "assets/cli-starter/img/assessmentExample.png",
+          url: "images/assessmentExample.png",
         },
       ],
     };

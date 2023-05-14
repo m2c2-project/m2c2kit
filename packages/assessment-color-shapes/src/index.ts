@@ -282,7 +282,7 @@ phases.`,
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/color-shapes/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       images: [
@@ -290,19 +290,19 @@ phases.`,
           imageName: "instructions-1",
           height: 256,
           width: 256,
-          url: "assets/color-shapes/img/cs-instructions-1.png",
+          url: "images/cs-instructions-1.png",
         },
         {
           imageName: "instructions-2",
           height: 256,
           width: 256,
-          url: "assets/color-shapes/img/cs-instructions-2.png",
+          url: "images/cs-instructions-2.png",
         },
         {
           imageName: "instructions-3",
           height: 330,
           width: 256,
-          url: "assets/color-shapes/img/cs-instructions-3.png",
+          url: "images/cs-instructions-3.png",
         },
         {
           imageName: "circle-x",
@@ -310,7 +310,7 @@ phases.`,
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
           // Universal (Public Domain). see https://www.patreon.com/evericons
-          url: "assets/color-shapes/img/circle-x.svg",
+          url: "images/circle-x.svg",
         },
       ],
     };

@@ -39,8 +39,8 @@ export class Session {
         );
       }
     }
-    this.fontManager = new FontManager();
-    this.imageManager = new ImageManager();
+    this.fontManager = new FontManager(this);
+    this.imageManager = new ImageManager(this);
     this.options.activities.forEach((activity) => (activity.session = this));
     if (this.options.sessionUuid) {
       this.uuid = this.options.sessionUuid;
@@ -354,8 +354,9 @@ export class Session {
   // call CanvasKitInit through loadCanvasKit so we can mock
   // loadCanvasKit using jest
   private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
+    const fullUrl = this.prependAssetsUrl(canvasKitWasmUrl);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return CanvasKitInit({ locateFile: (_file) => canvasKitWasmUrl });
+    return CanvasKitInit({ locateFile: (_file) => fullUrl });
   }
 
   private loadAssets(canvasKit: CanvasKit) {
@@ -384,6 +385,22 @@ export class Session {
         const game = activity as unknown as Game;
         return { uuid: game.uuid, images: game.options.images ?? [] };
       });
+  }
+
+  prependAssetsUrl(url: string): string {
+    function hasUrlScheme(str: string): boolean {
+      return /^[a-z]+:\/\//i.test(str);
+    }
+
+    if (hasUrlScheme(url)) {
+      return url;
+    }
+    if (!this.options.assetsUrl) {
+      return `assets/${url}`;
+    }
+    return (
+      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
+    );
   }
 }
 

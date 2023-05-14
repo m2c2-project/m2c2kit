@@ -286,7 +286,7 @@ appeared.",
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/color-dots/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
       images: [
@@ -294,19 +294,19 @@ appeared.",
           imageName: "cd1",
           height: 250,
           width: 250,
-          url: "assets/color-dots/img/cd1.png",
+          url: "images/cd1.png",
         },
         {
           imageName: "cd2",
           height: 357,
           width: 250,
-          url: "assets/color-dots/img/cd2.png",
+          url: "images/cd2.png",
         },
         {
           imageName: "cd3",
           height: 345,
           width: 250,
-          url: "assets/color-dots/img/cd3.png",
+          url: "images/cd3.png",
         },
         {
           imageName: "circle-x",
@@ -314,7 +314,7 @@ appeared.",
           width: 32,
           // the svg is from evericons and is licensed under CC0 1.0
           // Universal (Public Domain). see https://www.patreon.com/evericons
-          url: "assets/color-dots/img/circle-x.svg",
+          url: "images/circle-x.svg",
         },
       ],
     };

@@ -74,7 +74,7 @@ beforeEach(async () => {
 
   const options: SessionOptions = {
     activities: [g1, g2],
-    canvasKitWasmUrl: "assets/canvaskit.wasm",
+    canvasKitWasmUrl: "canvaskit.wasm",
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();

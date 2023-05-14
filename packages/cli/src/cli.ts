@@ -117,6 +117,7 @@ await yarg
         type: "string",
       });
     },
+    // WIP: app name should be lower case, not the class-case name
     async (argv) => {
       const appName = argv["name"] as string;
 

@@ -89,10 +89,11 @@ export const code = `class DocsDemo extends Game {
         }
   
         const options = {
+            id: "docs",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
-	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	            url: "fonts/roboto/Roboto-Regular.ttf"
             }],
             trialSchema: demoSchema
         };
@@ -155,10 +156,11 @@ code: `class DocsDemo extends Game {
         }
   
         const options = {
+            id: "docs",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
-	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	            url: "fonts/roboto/Roboto-Regular.ttf"
             }],            
             trialSchema: demoSchema
         };
@@ -219,10 +221,11 @@ code: `class DocsDemo extends Game {
         }
   
         const options = {
+            id: "docs",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
-	            url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	            url: "fonts/roboto/Roboto-Regular.ttf"
             }],            
             trialSchema: demoSchema
         };

@@ -30,7 +30,7 @@ class NoBundler extends Game {
     const options = {
       name: "No JavaScript Bundler Development Example",
       version: "0.0.1",
-      id: "no-js-bundler-survey",
+      id: "no-bundler-example",
       showFps: false,
       width: 400,
       height: 800,
@@ -40,7 +40,7 @@ class NoBundler extends Game {
       fonts: [
         {
           fontName: "roboto",
-          url: "assets/no-bundler-example/fonts/roboto/Roboto-Regular.ttf",
+          url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
     };
@@ -167,8 +167,8 @@ const surveyJson = {
 const survey = new Survey(surveyJson);
 
 const session = new Session({
-  canvasKitWasmUrl: "assets/canvaskit.wasm",
-  activities: [symbolSearch],
+  canvasKitWasmUrl: "canvaskit.wasm",
+  activities: [symbolSearch, activity, survey],
   activityCallbacks: {
     onActivityLifecycle: async (ev) => {
       if (

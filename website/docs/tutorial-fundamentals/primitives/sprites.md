@@ -49,10 +49,11 @@ import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-
 export const code = `class DocsDemo extends Game {
     constructor() {
         const options = {
+            id: "docs",
             width: 200, height: 400,
             images: [{
                 imageName: "earth", height: 128, width: 128,
-                url: "assets/docs/img/blue-marble.jpg",
+                url: "images/blue-marble.jpg",
             }]
         };
         super(options);
@@ -75,6 +76,7 @@ export const more = [
 code: `class DocsDemo extends Game {
     constructor() {
         const options = {
+            id: "docs",
             width: 200, height: 400,
             images: [{
                 imageName: "overlappingrectangles", height: 128, width: 128,
@@ -100,10 +102,11 @@ code: `class DocsDemo extends Game {
 code: `class DocsDemo extends Game {
     constructor() {
         const options = {
+            id: "docs",
             width: 200, height: 400,
             images: [{
                 imageName: "earth", height: 256, width: 64,
-                url: "assets/docs/img/blue-marble.jpg",
+                url: "images/blue-marble.jpg",
             }]
         };
         super(options);
@@ -124,14 +127,15 @@ code: `class DocsDemo extends Game {
 code:`class DocsDemo extends Game {
     constructor() {
         const options = {
+            id: "docs",
             width: 200, height: 400,
             images: [{
                 imageName: "bigEarth", height: 200, width: 200,
-                url: "assets/docs/img/blue-marble.jpg",
+                url: "images/blue-marble.jpg",
             },
             {
                 imageName: "smallEarth", height: 32, width: 32,
-                url: "assets/docs/img/blue-marble.jpg",
+                url: "images/blue-marble.jpg",
             }]
         };
         super(options);

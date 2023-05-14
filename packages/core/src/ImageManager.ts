@@ -4,6 +4,9 @@ import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { BrowserImage } from "./BrowserImage";
 import { GameImages } from "./GameImages";
+import { Session } from "./Session";
+import { ActivityType } from "./ActivityType";
+import { Game } from "./Game";
 
 class RenderedImages {
   [gameUuid: string]: {
@@ -24,6 +27,11 @@ export class ImageManager {
   private _scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;
+  private session: Session;
+
+  constructor(session: Session) {
+    this.session = session;
+  }
 
   /**
    * Returns a CanvasKit Image that was previously rendered by the ImageManager.
@@ -285,7 +293,15 @@ export class ImageManager {
             ).documentElement;
             reloadImageUsingViewBoxWidthHeight(svgElement);
           } else if (browserImage.url) {
-            fetch(browserImage.url)
+            const game = this.session.options.activities
+              .filter((a) => a.type === ActivityType.Game)
+              .filter((g) => g.uuid === gameUuid)
+              .map((g) => g as Game)
+              .find(Boolean);
+            const browserImageUrl = game.prependAssetsGameIdUrl(
+              browserImage.url
+            );
+            fetch(browserImageUrl)
               .then((res) => res.text())
               .then((body) => {
                 const svgElement = new DOMParser().parseFromString(
@@ -337,7 +353,14 @@ export class ImageManager {
          * So, now we fetch the image ourselves and set the image src
          * to the data url.
          */
-        fetch(browserImage.url)
+
+        const game = this.session.options.activities
+          .filter((a) => a.type === ActivityType.Game)
+          .filter((g) => g.uuid === gameUuid)
+          .map((g) => g as Game)
+          .find(Boolean);
+        const browserImageUrl = game.prependAssetsGameIdUrl(browserImage.url);
+        fetch(browserImageUrl)
           .then((response) => response.arrayBuffer())
           .then((data) => {
             const base64String = this.arrayBufferToBase64String(data);

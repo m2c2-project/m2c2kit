@@ -47,14 +47,15 @@ There are many variations of the Stroop task. We'll use a simple version. Our as
 
 ## A note about screen size
 
-In the tutorial, we've been using a screen size of 200 width x 400 height. This is a small size so the examples fit next to the code editor. For a real task, you'll  use a larger screen size. In the the Stroop task options, you will define a screen size of 400 width x 800 height:
+In the tutorial, we've been using a screen size of 200 width x 400 height. This is a small size so the examples fit next to the code editor. For a real task, you'll use a larger screen size. In the the Stroop task options, you will define a screen size of 400 width x 800 height:
 
 ```js
 const options = {
+  id: "docs",
   width: 400, height: 800,
   fonts: [{
 	  fontName: "roboto",
-	  url: "assets/docs/fonts/roboto/Roboto-Regular.ttf"
+	  url: "fonts/roboto/Roboto-Regular.ttf"
   }],
 };
 ```

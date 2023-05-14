@@ -58,7 +58,7 @@ describe("radiogroup behavior", () => {
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "assets/canvaskit.wasm",
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     // note: we are not running await session.init() here because these survey

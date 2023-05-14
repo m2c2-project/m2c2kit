@@ -2,6 +2,7 @@ import ttfInfo from "./ttfInfo";
 import { CanvasKit, FontMgr, Typeface } from "canvaskit-wasm";
 import { FontData } from "./FontData";
 import { Game } from "./Game";
+import { Session } from "./Session";
 
 /**
  * This class contains all the fonts for all the games in the activity.
@@ -32,7 +33,12 @@ export class FontManager {
   fontMgr?: FontMgr;
   gameTypefaces = new GameTypefaces();
   fontData: Array<FontData> = new Array<FontData>();
+  session: Session;
   games?: Array<Game>;
+
+  constructor(session: Session) {
+    this.session = session;
+  }
 
   /**
    * Gets a typeface that was previously loaded for the specified game.
@@ -92,8 +98,11 @@ export class FontManager {
       return Promise.all([Promise.resolve()]);
     }
 
-    const fetchFontsPromises = fontsToFetch.map((font) =>
-      fetch(font.fontUrl)
+    const fetchFontsPromises = fontsToFetch.map((font) => {
+      const game = games.filter((g) => g.uuid === font.gameUuid).find(Boolean);
+      const fontUrl = game.prependAssetsGameIdUrl(font.fontUrl);
+
+      return fetch(fontUrl)
         .then((response) => response.arrayBuffer())
         .then((arrayBuffer) => {
           this.fontData.push({
@@ -104,8 +113,8 @@ export class FontManager {
             fontArrayBuffer: arrayBuffer,
             isDefault: font.isDefault,
           });
-        })
-    );
+        });
+    });
     return Promise.all(fetchFontsPromises);
   }
 

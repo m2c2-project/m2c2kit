@@ -53,4 +53,6 @@ export interface GameOptions {
   translations?: Translations;
   /** Show logs for WebGl activity? */
   logWebGl?: boolean;
+  /** URL of game assets folder, if not the default location of "assets/id of game from GameOptions" */
+  assetsUrl?: string;
 }
