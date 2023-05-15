@@ -106,16 +106,16 @@ describe("Session init", () => {
 });
 
 describe("Session start", () => {
-  it("starts first activity", () => {
-    session.start();
+  it("starts first activity", async () => {
+    await session.start();
     expect(session.currentActivity).toBe(g1);
   });
 });
 
 describe("Session advanceToNextActivity", () => {
-  it("advances to next activity", () => {
-    session.start();
-    session.advanceToNextActivity();
+  it("advances to next activity", async () => {
+    await session.start();
+    session.goToNextActivity();
     expect(session.currentActivity).toBe(g2);
   });
 });

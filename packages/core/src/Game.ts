@@ -629,28 +629,27 @@ export class Game implements Activity {
     if (entryScene !== undefined) {
       if (typeof entryScene === "object") {
         startingScene = entryScene;
-        if (!this.scenes.includes(startingScene)) {
-          throw new Error(
-            `cannot start game. scene named "${entryScene}" has not been added to the game object`
-          );
-        }
       } else {
         startingScene = this.scenes
           .filter((scene) => scene.name === entryScene)
           .find(Boolean);
-        if (startingScene === undefined) {
-          throw new Error(
-            `cannot start game. scene named "${entryScene}" has not been added to the game object`
-          );
-        }
+      }
+    } else if (this.entryScene !== undefined) {
+      if (typeof this.entryScene === "object") {
+        startingScene = this.entryScene;
+      } else {
+        startingScene = this.scenes
+          .filter((scene) => scene.name === this.entryScene)
+          .find(Boolean);
       }
     } else {
       startingScene = this.scenes.find(Boolean);
-      if (startingScene === undefined) {
-        throw new Error(
-          `cannot start game. no scenes have been added to the game object`
-        );
-      }
+    }
+
+    if (startingScene === undefined) {
+      throw new Error(
+        "cannot start game. entry scene has not been added to the game object."
+      );
     }
 
     this.presentScene(startingScene);
