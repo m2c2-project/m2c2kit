@@ -15,8 +15,7 @@
   "files": [
     "dist/index.js",
     "dist/index.d.ts",
-    "assets/**",
-    "post-install.mjs"
+    "assets/**"
   ],
   "dependencies": {
     "@m2c2kit/addons": "^0.3.3",

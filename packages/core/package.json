@@ -14,14 +14,12 @@
     "dist/index.js",
     "dist/index.d.ts",
     "assets/**",
-    "index.html",
-    "post-install.mjs"
+    "index.html"
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo coverage",
-    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/core",
-    "postinstall": "node post-install.mjs"
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/core"
   },
   "license": "MIT",
   "devDependencies": {
