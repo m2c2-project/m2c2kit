@@ -39,3 +39,16 @@ export type JsonSchemaDataType =
   | "array"
   | "boolean"
   | "null";
+
+export type JsonSchemaDataTypeScriptTypes =
+  | string
+  | number
+  | object
+  | boolean
+  | null
+  | undefined
+  | Array<string>
+  | Array<number>
+  | Array<object>
+  | Array<boolean>
+  | Array<null>;

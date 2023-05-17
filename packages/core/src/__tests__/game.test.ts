@@ -518,38 +518,47 @@ describe("addTrialData", () => {
 
   it("adds boolean data", () => {
     g3.addTrialData("boolean_data", true);
+    expect(g3.data.trials[0].boolean_data).toBe(true);
   });
 
   it("adds string data", () => {
     g3.addTrialData("string_data", "hello");
+    expect(g3.data.trials[0].string_data).toBe("hello");
   });
 
   it("adds integer data", () => {
     g3.addTrialData("integer_data", 10);
+    expect(g3.data.trials[0].integer_data).toBe(10);
   });
 
   it("adds number data", () => {
     g3.addTrialData("number_data", 5.5);
+    expect(g3.data.trials[0].number_data).toBeCloseTo(5.5);
   });
 
   it("adds object data", () => {
     g3.addTrialData("object_data", { a: 1, b: 2 });
+    expect(g3.data.trials[0].object_data).toEqual({ a: 1, b: 2 });
   });
 
   it("adds array data", () => {
     g3.addTrialData("array_data", [1, 2, 3]);
+    expect(g3.data.trials[0].array_data).toEqual([1, 2, 3]);
   });
 
   it("adds null data", () => {
     g3.addTrialData("null_data", null);
+    expect(g3.data.trials[0].null_data).toBe(null);
   });
 
   it("adds undefined data", () => {
     g3.addTrialData("null_data", undefined);
+    expect(g3.data.trials[0].null_data).toBe(undefined);
   });
 
   it("adds string data to string | null schema", () => {
     g3.addTrialData("string_or_null_data", "hello");
+    expect(g3.data.trials[0].string_or_null_data).toBe("hello");
   });
 
   it("throws error when adding string data to boolean schema", () => {
@@ -630,5 +639,80 @@ describe("time stepping", () => {
     // @ts-ignore
     g5.removeTimeSteppingControlsFromDom();
     expect(document.getElementById("m2c2kit-time-stepping-div")).toBeNull();
+  });
+});
+
+describe("custom trial schema", () => {
+  beforeEach(async () => {
+    g3 = new Game3();
+    const options: SessionOptions = {
+      activities: [g3],
+      canvasKitWasmUrl: "canvaskit.wasm",
+    };
+    session = new Session(options);
+    TestHelpers.setupDomAndGlobals();
+  });
+
+  it("addTrialSchema adds custom trial schema", async () => {
+    g3.addTrialSchema({
+      dog_name: {
+        type: "string",
+        description: "Name of dog",
+      },
+      dog_age: {
+        type: "integer",
+        description: "Age of dog",
+      },
+    });
+    await session.init();
+    await session.start();
+    if (!g3.options.trialSchema) {
+      throw new Error("trialSchema is null");
+    }
+    expect(Object.keys(g3.options.trialSchema)).toContain("dog_name");
+    expect(Object.keys(g3.options.trialSchema)).toContain("dog_age");
+  });
+
+  it("addTrialData adds data to custom trial schema", async () => {
+    g3.addTrialSchema({
+      dog_name: {
+        type: "string",
+        description: "Name of dog",
+      },
+      dog_age: {
+        type: "integer",
+        description: "Age of dog",
+      },
+    });
+    await session.init();
+    await session.start();
+    g3.addTrialData("dog_name", "Fido");
+    expect(g3.data.trials[0].dog_name).toBe("Fido");
+    g3.addTrialData("dog_age", 13);
+    expect(g3.data.trials[0].dog_age).toBe(13);
+  });
+
+  it("addStaticTrialData adds custom static data", async () => {
+    g3.addTrialSchema({
+      dog_name: {
+        type: "string",
+        description: "Name of dog",
+      },
+      dog_age: {
+        type: "integer",
+        description: "Age of dog",
+      },
+    });
+
+    await session.init();
+    await session.start();
+    g3.addStaticTrialData("dog_name", "Fido");
+    g3.addStaticTrialData("dog_age", 13);
+    g3.trialComplete();
+    expect(g3.data.trials[0].dog_name).toBe("Fido");
+    expect(g3.data.trials[0].dog_age).toBe(13);
+    g3.trialComplete();
+    expect(g3.data.trials[1].dog_name).toBe("Fido");
+    expect(g3.data.trials[1].dog_age).toBe(13);
   });
 });

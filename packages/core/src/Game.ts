@@ -31,7 +31,11 @@ import { EventType } from "./EventBase";
 import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
-import { JsonSchema, JsonSchemaDataType } from "./JsonSchema";
+import {
+  JsonSchema,
+  JsonSchemaDataType,
+  JsonSchemaDataTypeScriptTypes,
+} from "./JsonSchema";
 import { DeviceMetadata, deviceMetadataSchema } from "./DeviceMetadata";
 import { TrialSchema } from "./TrialSchema";
 import { GameMetric } from "./GameMetrics";
@@ -83,6 +87,7 @@ export class Game implements Activity {
   private loaderElementsRemoved = false;
   private _dataStore?: IDataStore;
   additionalParameters?: unknown;
+  staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
 
   /**
    * The base class for all games. New games should extend this class.
@@ -1053,8 +1058,10 @@ export class Game implements Activity {
    * @param variableName - variable to be set
    * @param value - value of the variable to set
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  addTrialData(variableName: string, value: any): void {
+  addTrialData(
+    variableName: string,
+    value: JsonSchemaDataTypeScriptTypes
+  ): void {
     if (!this.options.trialSchema) {
       throw new Error(
         "no trial schema were provided in GameOptions. cannot add trial data"
@@ -1122,6 +1129,58 @@ export class Game implements Activity {
   }
 
   /**
+   * Adds custom trial schema to the game's trialSchema object.
+   *
+   * @param schema - Trial schema to add
+   *
+   * @remarks This is useful if you want to add custom trial variables.
+   * This must be done before Session.start() is called, because
+   * Session.start() will call Game.start(), which will initialize
+   * the trial schema.
+   */
+  addTrialSchema(schema: TrialSchema): void {
+    const keys = Object.keys(schema);
+    keys.forEach((key) => {
+      this.options.trialSchema[key] = schema[key];
+    });
+  }
+
+  /**
+   * Sets the value of a variable that will be the same for all trials.
+   *
+   * @remarks This sets the value of a variable that is the same across
+   * all trials ("static"). This is useful for variables that are not
+   * part of the trial schema, but that you want to save for each trial in
+   * your use case. For example, you might want to save the subject's
+   * participant ID for each trial, but this is not part of the trial schema.
+   * Rather than modify the source code for the game, you can do the following
+   * to ensure that the participant ID is saved for each trial:
+   *
+   *   game.addTrialSchema({
+   *     participant_id: {
+   *       type: "string",
+   *       description: "ID of the participant",
+   *     }
+   *   });
+   *   game.addStaticTrialData("participant_id", "12345");
+   *
+   *  When Game.trialComplete() is called, the participant_id variable will
+   *  be saved for the trial with the value "12345".
+   *
+   * @param variableName - variable to be set
+   * @param value - value of the variable to set
+   */
+  addStaticTrialData(
+    variableName: string,
+    value: JsonSchemaDataTypeScriptTypes
+  ) {
+    if (this.options.trialSchema[variableName] === undefined) {
+      throw new Error(`trial variable ${variableName} not defined in schema`);
+    }
+    this.staticTrialSchema[variableName] = value;
+  }
+
+  /**
    * Should be called when the current trial has completed. It will
    * also increment the trial index.
    *
@@ -1132,6 +1191,13 @@ export class Game implements Activity {
    * the appropriate time. It is not triggered automatically.
    */
   trialComplete(): void {
+    if (Object.keys(this.staticTrialSchema).length > 0) {
+      this.data.trials[this.trialIndex] = {
+        ...this.data.trials[this.trialIndex],
+        ...this.staticTrialSchema,
+      };
+    }
+
     this.trialIndex++;
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.session.options.activityCallbacks.onActivityResults({
