@@ -6,7 +6,7 @@
   "main": "index.js",
   "devDependencies": {
     "@types/node": "18.16.2",
-    "esbuild": "0.17.18"
+    "esbuild": "0.17.19"
   },
   "scripts": {
     "build": "node esbuild.mjs",
@@ -15,7 +15,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "csv": "6.2.10",
+    "csv": "6.3.0",
     "ts-morph": "18.0.0",
     "yargs": "17.7.2"
   }
