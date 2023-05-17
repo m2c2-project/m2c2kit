@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/survey",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",

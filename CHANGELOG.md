@@ -4,6 +4,106 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/cli` [0.3.6] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+- Updated templates.
+
+## `@m2c2kit/core` [0.3.7] - 2023-05-17
+
+### Added
+
+- `addTrialSchema` adds Custom trial schema.
+- `addStaticTrialData` adds static (shared across all trials) trial data.
+- `GameOptions` has property `assetsUrl` to specify location of game assets.
+- `SessionOptions` has property `assetsUrl` to specify location of session-wide assets.
+- `Label` `fontNames` property allows use of multiple fonts.
+
+### Changed
+
+- `GameOptions` `fontUrls` property is now fonts with new different structure.
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.0] - 2023-05-17
+
+### Added
+
+- This is a new package to help with templating and modifying code.
+
+## `@m2c2kit/embedding` [1.0.0] - 2023-05-17
+
+### Added
+
+- This is a new package to help with embedding m2c2kit into different types of deployments (e.g., native mobile webview).
+
+## `@m2c2kit/addons` [0.3.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.5] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.5] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.5] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.5] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.5] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.4] - 2023-05-17
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/cli` [0.3.5] - 2023-04-20
 
 ### Changed

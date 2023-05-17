@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Additions to m2c2kit core functionalty, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
