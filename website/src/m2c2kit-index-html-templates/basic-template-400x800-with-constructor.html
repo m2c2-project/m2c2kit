@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/m2c2kit.css"
+      rel="preload"
+      as="style"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/m2c2kit.css"
+      rel="stylesheet"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/defaultV2.css"
+      rel="stylesheet"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/nouislider.css"
+      rel="stylesheet"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/select2.css"
+      rel="stylesheet"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/bootstrap-datepicker.standalone.css"
+      rel="stylesheet"
+    />
+    <link
+      href="/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/css/bootstrap-slider.css"
+      rel="stylesheet"
+    />
+    <script type="module">
+      const origLog = window.console.log;
+      window.console.log = function (str) {
+        origLog(str);
+        const msg = {
+          sender: "m2c2kitmsg",
+          text: str,
+        };
+        window.top.postMessage(msg, "*");
+      };
+
+      window.onerror = function (message, source, lineno, colno, error) {
+        const msg = {
+          sender: "m2c2kitmsg",
+          text: message,
+          type: "error",
+        };
+        window.top.postMessage(msg, "*");
+      };
+
+      const { fetch: origFetch } = window;
+      window.fetch = async (...args) => {
+        if (args[0].startsWith("./assets/")) {
+          args[0] = args[0].replace(
+            "./assets/",
+            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/"
+          );
+        } else if (args[0].startsWith("assets/")) {
+          args[0] = args[0].replace(
+            "assets/",
+            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/"
+          );
+        }
+        return await origFetch(...args);
+      };
+
+      import {
+        Action,
+        ActivityType,
+        CanvasKitHelpers,
+        Composite,
+        ConstraintType,
+        CustomAction,
+        Dimensions,
+        Easings,
+        Entity,
+        EntityType,
+        Equals,
+        EventType,
+        FontManager,
+        Game,
+        GlobalVariables,
+        GroupAction,
+        I18n,
+        ImageManager,
+        Label,
+        LabelHorizontalAlignmentMode,
+        LayoutConstraint,
+        LoadedImage,
+        MoveAction,
+        MutablePath,
+        NoneTransition,
+        RandomDraws,
+        ScaleAction,
+        Scene,
+        SceneTransition,
+        SequenceAction,
+        Session,
+        Shape,
+        ShapeType,
+        SlideTransition,
+        Sprite,
+        Story,
+        TextLine,
+        Timer,
+        Transition,
+        TransitionDirection,
+        TransitionType,
+        Uuid,
+        WaitAction,
+        WebColors,
+        WebGlInfo,
+      } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.core.esm.js";
+      import {
+        Button,
+        Grid,
+        Instructions,
+        VirtualKeyboard,
+      } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.addons.esm.js";
+
+      // _-_BEGIN_CODE_REPLACEMENT_BLOCK_-_
+      class DocsDemo extends Game {
+        constructor() {
+          const defaultParameters = {};
+          const starterTrialSchema = {};
+          const options = {
+            name: "Documentation Examples",
+            version: "1.0.0",
+            id: "docs",
+            showFps: false,
+            width: 200,
+            height: 400,
+            trialSchema: starterTrialSchema,
+            parameters: defaultParameters,
+            bodyBackgroundColor: WebColors.LightGray,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+          };
+          super(options);
+        }
+        async init() {
+          await super.init();
+          const game = this;
+          const sceneOne = new Scene({ backgroundColor: WebColors.SkyBlue });
+          game.addScene(sceneOne);
+        }
+      }
+      // _-_END_CODE_REPLACEMENT_BLOCK_-_
+      const activity = new DocsDemo();
+
+      const session = new Session({
+        canvasKitWasmUrl: "canvaskit.wasm",
+        activities: [activity],
+        activityCallbacks: {
+          onActivityLifecycle: async (ev) => {
+            if (
+              ev.type === EventType.ActivityEnd ||
+              ev.type === EventType.ActivityCancel
+            ) {
+              const nextActivity = session.nextActivity;
+              if (nextActivity) {
+                await session.goToNextActivity();
+              } else {
+                session.end();
+              }
+            }
+          },
+          onActivityResults: (ev) => {
+            // if (ev.target.type === ActivityType.Game) {
+            //   console.log(`✅ trial complete:`);
+            // } else if (ev.target.type === ActivityType.Survey) {
+            //   console.log(`✅ survey response:`);
+            // }
+            console.log("Trial Data: " + JSON.stringify(ev.newData) + "\n");
+            //console.log("  data: " + JSON.stringify(ev.data));
+          },
+        },
+        sessionCallbacks: {
+          onSessionLifecycle: async (ev) => {
+            if (ev.type === EventType.SessionInitialize) {
+              await session.start();
+            }
+            if (ev.type === EventType.SessionEnd) {
+              console.log("🔴 ended session");
+            }
+          },
+        },
+      });
+      window.session = session;
+      session.init();
+    </script>
+  </head>
+
+  <body class="m2c2kit-background-color m2c2kit-no-margin">
+    <div id="m2c2kit-survey-div"></div>
+    <div
+      class="m2c2kit-full-viewport m2c2kit-flex-container"
+      id="m2c2kit-container-div"
+    >
+      <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+    </div>
+  </body>
+</html>

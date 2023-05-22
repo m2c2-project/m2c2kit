@@ -12,6 +12,7 @@ import {
   EventType,
   IDrawable,
   EntityEventListener,
+  ShapeOptions,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -30,12 +31,23 @@ export interface KeyConfiguration {
   blank?: boolean;
   /** True is the key is a shift key. */
   isShift?: boolean;
+  /** ShapeOptions of the optional icon to show on the key. */
+  keyIconShapeOptions?: ShapeOptions;
+}
+
+interface InternalKeyConfiguration
+  extends KeyConfiguration,
+    Omit<KeyConfiguration, "keyIconShapeOptions"> {
   /** Icon to show on the key. */
   keyIcon?: Shape;
 }
 
 export type VirtualKeyboardRow = Array<
   KeyConfiguration | string | Array<string>
+>;
+
+type InternalVirtualKeyboardRow = Array<
+  InternalKeyConfiguration | string | Array<string>
 >;
 
 export interface VirtualKeyboardOptions extends CompositeOptions {
@@ -54,6 +66,8 @@ export interface VirtualKeyboardOptions extends CompositeOptions {
   keysPerRow?: number;
   /** Size of font for keys. */
   fontSize?: number;
+  /** The fonts for the key labels, if not the default font. */
+  fontNames?: Array<string> | undefined;
   /** Comma-separated list of keys to hide. */
   hiddenKeys?: string;
   /** If true, only capital letters will be shown. */
@@ -77,9 +91,20 @@ export interface VirtualKeyboardEvent extends EntityEvent {
   code: string;
   /** True if the Shift key is pressed. */
   shiftKey: boolean;
+  /** Metadata related to the key tap. */
+  keyTapMetadata: KeyTapMetadata;
 }
 
-interface Key extends KeyConfiguration {
+export interface KeyTapMetadata {
+  /** Size of the key. */
+  size: Size;
+  /** Point on the key where the tap event occurred. */
+  point: Point;
+  /** Buttons pressed when the key was tapped. */
+  buttons: number;
+}
+
+interface Key extends InternalKeyConfiguration {
   keyLabel?: Label;
 }
 
@@ -88,9 +113,10 @@ export class VirtualKeyboard extends Composite {
   private keyboardVerticalPaddingPercent: number;
   private keyHorizontalPaddingPercent: number;
   private keyVerticalPaddingPercent: number;
-  private rowsConfiguration = new Array<VirtualKeyboardRow>();
+  private rowsConfiguration = new Array<InternalVirtualKeyboardRow>();
   private keysPerRow: number;
   private fontSize: number;
+  private fontNames: Array<string> | undefined;
   private hiddenKeys: string;
   private capitalLettersOnly: boolean;
   private keyColor: RgbaColor;
@@ -119,10 +145,33 @@ export class VirtualKeyboard extends Composite {
       options.keyHorizontalPaddingPercent ?? 0.1;
     this.keyVerticalPaddingPercent = options.keyVerticalPaddingPercent ?? 0.1;
     if (options.rows !== undefined) {
-      this.rowsConfiguration = options.rows;
+      /**
+       * Map the KeyConfiguration objects to InternalKeyConfiguration objects.
+       * KeyConfiguration objects are used by the user to configure the
+       * keyboard. The icon, optionally, is provided as a ShapeOptions
+       * object. InternalKeyConfiguration has the icon as a ready-to-use Shape
+       * object.
+       */
+      this.rowsConfiguration = options.rows.map((row) => {
+        const internalRow = row.map((key) => {
+          if (key instanceof Object && !Array.isArray(key)) {
+            const internalKeyConfig = key as InternalKeyConfiguration;
+            if (key.keyIconShapeOptions) {
+              internalKeyConfig.keyIcon = new Shape(key.keyIconShapeOptions);
+              (internalKeyConfig as KeyConfiguration).keyIconShapeOptions =
+                undefined;
+            }
+            return internalKeyConfig;
+          } else {
+            return key;
+          }
+        });
+        return internalRow;
+      });
     }
     this.keysPerRow = options.keysPerRow ?? NaN;
     this.fontSize = options.fontSize ?? NaN;
+    this.fontNames = options.fontNames;
     this.hiddenKeys = options.hiddenKeys ?? "";
     this.capitalLettersOnly = options.capitalLettersOnly ?? false;
     this.keyColor = options.keyColor ?? WebColors.White;
@@ -134,31 +183,8 @@ export class VirtualKeyboard extends Composite {
   }
 
   override initialize(): void {
-    const shiftArrowShape = new Shape({
-      path: {
-        // Public Domain from https://www.freesvg.org
-        svgString: "m288-6.6849e-14 -288 288h144v288h288v-288h144l-288-288z",
-        width: 24,
-      },
-      lineWidth: 2,
-      strokeColor: WebColors.Black,
-      fillColor: WebColors.Transparent,
-    });
-
-    const backspaceShape = new Shape({
-      path: {
-        // CC0 from https://www.svgrepo.com
-        svgString:
-          "M10.625 5.09 0 22.09l10.625 17H44.18v-34H10.625zm31.555 32H11.734l-9.375-15 9.375-15H42.18v30zm-23.293-6.293 7.293-7.293 7.293 7.293 1.414-1.414-7.293-7.293 7.293-7.293-1.414-1.414-7.293 7.293-7.293-7.293-1.414 1.414 7.293 7.293-7.293 7.293",
-        width: 24,
-      },
-      lineWidth: 1,
-      strokeColor: WebColors.Black,
-      fillColor: WebColors.Red,
-    });
-
     if (this.rowsConfiguration.length === 0) {
-      const numKeys: VirtualKeyboardRow = [
+      const numKeys: InternalVirtualKeyboardRow = [
         ["1", "!"],
         ["2", "@"],
         ["3", "#"],
@@ -170,7 +196,7 @@ export class VirtualKeyboard extends Composite {
         ["9", "("],
         ["0", ")"],
       ];
-      const row1: VirtualKeyboardRow = [
+      const row1: InternalVirtualKeyboardRow = [
         "q",
         "w",
         "e",
@@ -182,7 +208,7 @@ export class VirtualKeyboard extends Composite {
         "o",
         "p",
       ];
-      const row2: VirtualKeyboardRow = [
+      const row2: InternalVirtualKeyboardRow = [
         "a",
         "s",
         "d",
@@ -193,12 +219,33 @@ export class VirtualKeyboard extends Composite {
         "k",
         "l",
       ];
-      const row3: VirtualKeyboardRow = [
+      const shiftArrowShapeOptions: ShapeOptions = {
+        path: {
+          // Public Domain from https://www.freesvg.org
+          svgString: "m288-6.6849e-14 -288 288h144v288h288v-288h144l-288-288z",
+          width: 24,
+        },
+        lineWidth: 2,
+        strokeColor: WebColors.Black,
+        fillColor: WebColors.Transparent,
+      };
+      const backspaceShapeOptions: ShapeOptions = {
+        path: {
+          // CC0 from https://www.svgrepo.com
+          svgString:
+            "M10.625 5.09 0 22.09l10.625 17H44.18v-34H10.625zm31.555 32H11.734l-9.375-15 9.375-15H42.18v30zm-23.293-6.293 7.293-7.293 7.293 7.293 1.414-1.414-7.293-7.293 7.293-7.293-1.414-1.414-7.293 7.293-7.293-7.293-1.414 1.414 7.293 7.293-7.293 7.293",
+          width: 24,
+        },
+        lineWidth: 1,
+        strokeColor: WebColors.Black,
+        fillColor: WebColors.Red,
+      };
+      const row3: InternalVirtualKeyboardRow = [
         {
           code: "Shift",
           isShift: true,
           widthRatio: 1.5,
-          keyIcon: shiftArrowShape,
+          keyIcon: new Shape(shiftArrowShapeOptions),
         },
         "z",
         "x",
@@ -207,7 +254,11 @@ export class VirtualKeyboard extends Composite {
         "b",
         "n",
         "m",
-        { code: "Backspace", widthRatio: 1.5, keyIcon: backspaceShape },
+        {
+          code: "Backspace",
+          widthRatio: 1.5,
+          keyIcon: new Shape(backspaceShapeOptions),
+        },
       ];
       const row4: VirtualKeyboardRow = [
         { code: " ", labelText: "SPACE", widthRatio: 5 },
@@ -343,7 +394,6 @@ export class VirtualKeyboard extends Composite {
               r * keyBoxHeight +
               keyBoxHeight / 2,
           },
-          isUserInteractionEnabled: true,
         });
 
         const keyWidth =
@@ -358,17 +408,20 @@ export class VirtualKeyboard extends Composite {
           cornerRadius: 4,
           fillColor: this.keyColor,
           lineWidth: 0,
+          isUserInteractionEnabled: true,
         });
         keyBox.addChild(keyShape);
 
-        keyBox.onTapUp(() => {
+        keyShape.onTapUp((tapEvent) => {
           let keyAsString = "";
           if (!key.isShift) {
             if (this.shiftActivated) {
               this.shiftActivated = false;
               if (this.shiftKeyShape) {
                 this.shiftKeyShape.fillColor = this.keyColor;
-                shiftArrowShape.fillColor = WebColors.Transparent;
+                if (key.keyIcon) {
+                  key.keyIcon.fillColor = WebColors.Transparent;
+                }
               }
               rows
                 .flatMap((k) => k)
@@ -410,18 +463,25 @@ export class VirtualKeyboard extends Composite {
                   key: keyAsString,
                   code: key.code,
                   shiftKey: this.shiftActivated,
+                  keyTapMetadata: {
+                    size: keyShape.size,
+                    point: tapEvent.point,
+                    buttons: tapEvent.buttons,
+                  },
                 };
                 listener.callback(virtualKeyboardEvent);
               });
           }
         });
 
-        keyBox.onTapDown(() => {
+        keyShape.onTapDown((tapEvent) => {
           if (key.isShift) {
             this.shiftActivated = !this.shiftActivated;
             if (this.shiftActivated) {
               keyShape.fillColor = this.specialKeyDownColor;
-              shiftArrowShape.fillColor = WebColors.Black;
+              if (key.keyIcon) {
+                key.keyIcon.fillColor = WebColors.Black;
+              }
               rows
                 .flatMap((k) => k)
                 .forEach((k) => {
@@ -431,7 +491,9 @@ export class VirtualKeyboard extends Composite {
                 });
             } else {
               keyShape.fillColor = this.keyColor;
-              shiftArrowShape.fillColor = WebColors.Transparent;
+              if (key.keyIcon) {
+                key.keyIcon.fillColor = WebColors.Transparent;
+              }
               rows
                 .flatMap((k) => k)
                 .forEach((k) => {
@@ -479,13 +541,18 @@ export class VirtualKeyboard extends Composite {
                   key: keyAsString,
                   code: key.code,
                   shiftKey: this.shiftActivated,
+                  keyTapMetadata: {
+                    size: keyShape.size,
+                    point: tapEvent.point,
+                    buttons: tapEvent.buttons,
+                  },
                 };
                 listener.callback(virtualKeyboardEvent);
               });
           }
         });
 
-        keyBox.onTapLeave(() => {
+        keyShape.onTapLeave(() => {
           keyShape.fillColor = this.keyColor;
           letterCircle.hidden = true;
         });
@@ -493,6 +560,7 @@ export class VirtualKeyboard extends Composite {
         const keyLabel = new Label({
           text: key.labelText,
           fontSize: this.fontSize,
+          fontNames: this.fontNames,
         });
         keyBox.addChild(keyLabel);
         key.keyLabel = keyLabel;
@@ -518,6 +586,7 @@ export class VirtualKeyboard extends Composite {
     const letterCircleLabel = new Label({
       text: "",
       fontSize: this.fontSize,
+      fontNames: this.fontNames,
     });
     letterCircle.addChild(letterCircleLabel);
 

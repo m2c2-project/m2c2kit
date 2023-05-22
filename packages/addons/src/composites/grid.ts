@@ -152,7 +152,15 @@ export class Grid extends Composite {
           -this.size.height / 2 +
           this.cellHeight / 2 +
           gridChild.row * this.cellHeight;
-        gridChild.entity.position = { x: x, y: y };
+        /**
+         * Above x, y is the center of the grid cell. We need to add the
+         * x, y of the grid child entity in case the user wants to offset
+         * the grid child within the cell.
+         */
+        gridChild.entity.position = {
+          x: x + gridChild.entity.position.x,
+          y: y + gridChild.entity.position.y,
+        };
         this.gridBackground.addChild(gridChild.entity);
       });
     }

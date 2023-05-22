@@ -33,12 +33,29 @@ myGrid.addAtCell(hiLabel, 0, 2);
 const square = new Shape({
     rect: { size: { height: 40, width: 40 } },
     fillColor: WebColors.RebeccaPurple,
-    position: { x: 80, y: 90 }
 });
 myGrid.addAtCell(square, 1, 1);
 `;
 
 export const more = [
+{ description: <>Set the position of the object you are adding to the grid to [offset] the object instead of centering it in the grid cell.</>,
+code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+game.addScene(sceneOne);
+const myGrid = new Grid({
+    rows: 3, columns: 3,
+    size: { width: 180, height: 180 },
+    gridLineColor: WebColors.Brown,
+    gridLineWidth: 2,
+    backgroundColor: WebColors.White,
+    position: { x: 100, y: 200 }
+});
+sceneOne.addChild(myGrid);
+ 
+const offsetLabel = new Label({
+    text: "Offset",
+    position: { x: -5, y: 16 }
+});
+myGrid.addAtCell(offsetLabel, 0, 2);`},
 { description: <>Grids can be useful for aligning things when you [hide] the grid lines.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
@@ -79,7 +96,6 @@ const smallGrid = new Grid({
     gridLineColor: WebColors.Brown,
     gridLineWidth: 2,    
     backgroundColor: WebColors.White,
-    position: { x: 100, y: 200 }
 });
 bigGrid.addAtCell(smallGrid, 1, 1);
  
