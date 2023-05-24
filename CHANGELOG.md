@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Changed to using Angular Schematics as underlying engine.
+- Using Angular Schematics as underlying engine.
 - Updated dependencies.
 
 ## `@m2c2kit/core` [0.3.8] - 2023-05-24
@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Made to work with @m2c2kit/cli
+- Made to work with `@m2c2kit/cli`
 
 ### Changed
 
@@ -37,8 +37,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## `@m2c2kit/addons` [0.3.5] - 2023-05-24
 
+### Fixed
+
+- In Grid, grid children position is now respected.
+
+### Added
+
+- `VirtualKeyboardEvent` has `keyTapMetadata` property.
+
 ### Changed
 
+- `KeyConfiguration` takes `keyIconShapeOptions` instead of `keyIconShape`.
 - Updated dependencies.
 
 ## `@m2c2kit/assessment-cli-starter` [0.8.6] - 2023-05-24
