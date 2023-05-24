@@ -25,5 +25,8 @@
     "inquirer": "8.2.4",
     "symbol-observable": "4.0.0",
     "yargs-parser": "21.1.1"
+  },
+  "devDependencies": {
+    "rimraf": "5.0.1"
   }
 }

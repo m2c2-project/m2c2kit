@@ -4,6 +4,97 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/cli` [0.3.7] - 2023-05-24
+
+### Changed
+
+- Changed to using Angular Schematics as underlying engine.
+- Updated dependencies.
+
+## `@m2c2kit/core` [0.3.8] - 2023-05-24
+
+### Added
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.1] - 2023-05-24
+
+### Added
+
+- Made to work with @m2c2kit/cli
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.1] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.5] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.6] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.6] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.6] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.6] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.6] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.5] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.5] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.5] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.5] - 2023-05-24
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/cli` [0.3.6] - 2023-05-17
 
 ### Changed

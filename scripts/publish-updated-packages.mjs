@@ -34,6 +34,7 @@ const packageNamesToPublish = [
   "@m2c2kit/addons",
   "@m2c2kit/db",
   "@m2c2kit/cli",
+  "@m2c2kit/schematics",
   "@m2c2kit/build-helpers",
   "@m2c2kit/survey",
   "@m2c2kit/assessment-color-dots",

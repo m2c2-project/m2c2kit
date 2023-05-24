@@ -54,10 +54,10 @@ export function m2New(options: m2NewOptions): Rule {
   "private": true,
   "dependencies": {
     "@m2c2kit/addons": "0.3.5",
-    "@m2c2kit/core": "0.3.7"
+    "@m2c2kit/core": "0.3.8"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.4",
+    "@m2c2kit/build-helpers": "0.3.5",
     "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-typescript": "11.1.0",
     "rimraf": "5.0.1",
