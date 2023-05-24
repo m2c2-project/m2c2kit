@@ -9,6 +9,10 @@ import {
 
 export function add(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    context.logger.info("in the add schematic");
+
+    return tree;
+
     console.log(`in the add schematic. The package is ${options.package}`);
     console.log(JSON.stringify(tree));
 

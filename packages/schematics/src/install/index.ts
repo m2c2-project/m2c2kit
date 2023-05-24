@@ -6,27 +6,42 @@ import {
   getPackageJsonDependency,
   addPackageJsonDependency,
 } from "@schematics/angular/utility/dependencies";
+import * as path from "path";
 
-export interface npmInstallOptions {
-  dependencies: Array<NodeDependency>;
+export interface NpmInstallOptions {
+  dependencies?: Array<NodeDependency>;
+  packageJsonContents?: string;
+  directory?: string;
 }
 
-export function npmInstall(options: npmInstallOptions): Rule {
+export function npmInstall(options: NpmInstallOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    console.log(
-      `Installing ${options.dependencies.length} ${
-        options.dependencies.length !== 1 ? "dependencies" : "dependency"
-      }: ${options.dependencies
-        .map((d) => d.name + ` (${d.version})`)
-        .join(", ")}`
-    );
+    if (options.dependencies?.length) {
+      console.log(
+        `Installing ${options.dependencies.length} ${
+          options.dependencies.length !== 1 ? "dependencies" : "dependency"
+        }: ${options.dependencies
+          .map((d) => d.name + ` (${d.version})`)
+          .join(", ")}`
+      );
+    }
 
-    options.dependencies.forEach((d) => {
+    const directory = options.directory || ".";
+
+    if (options.packageJsonContents) {
+      tree.create(
+        path.join(directory, "package.json"),
+        options.packageJsonContents
+      );
+    }
+
+    options.dependencies?.forEach((d) => {
       addPackageJsonDependency(tree, d);
     });
 
     context.addTask(
       new NodePackageInstallTask({
+        workingDirectory: options.directory,
         quiet: false,
         hideOutput: false,
       }),

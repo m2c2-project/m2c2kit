@@ -3,109 +3,181 @@ import {
   SchematicContext,
   Tree,
   url,
-  template,
   strings,
   apply,
   mergeWith,
   move,
   SchematicsException,
   chain,
-  schematic,
-  callRule,
+  Source,
+  applyTemplates,
 } from "@angular-devkit/schematics";
-import {
-  NodePackageInstallTask,
-  RunSchematicTask,
-} from "@angular-devkit/schematics/tasks";
-import {
-  buildDefaultPath,
-  getWorkspace,
-} from "@schematics/angular/utility/workspace";
-import { relativePathToWorkspaceRoot } from "@schematics/angular/utility/paths";
 import findup = require("findup-sync");
 import fs = require("fs");
 import path = require("path");
-import { NodeDependencyType } from "@schematics/angular/utility/dependencies";
-import { npmInstallOptions } from "../install";
+import { NpmInstallOptions } from "../install";
+import { lastValueFrom } from "rxjs";
+import { Constants } from "../constants";
 
-export function m2New(options: any): Rule {
-  return async (tree: Tree, context: SchematicContext) => {
-    console.log(`executing m2New schematic. The name is ${options.name}`);
+interface m2NewOptions {
+  name?: string;
+}
 
-    const sourceTemplates = url("./files");
-    const sourceParameterizedTemplates = apply(sourceTemplates, [
-      template({
-        ...strings,
-        ...options,
-      }),
-      move("."),
-    ]);
+export function m2New(options: m2NewOptions): Rule {
+  return async (_tree: Tree, context: SchematicContext) => {
+    if (!options.name) {
+      throw new SchematicsException("name is required.");
+    }
+
+    const directory = strings.dasherize(options.name);
+
+    /**
+     * First, install the npm packages
+     */
 
     const workflow = context.engine.workflow;
     if (!workflow) {
       throw new SchematicsException("Workflow is not available.");
     }
 
-    // execute the package install right now, so we have access to the package files
-    // TODO: scan the package.json file and install the packages we need.
-    await workflow
-      .execute({
+    const npmInstallOptions: NpmInstallOptions = {
+      directory: directory,
+      dependencies: [],
+      packageJsonContents: `{
+  "name": "${strings.dasherize(options.name)}",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "rollup -c rollup.config.mjs --watch --configServe",
+    "build": "npm run clean && rollup -c rollup.config.mjs --configProd",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
+  },
+  "private": true,
+  "dependencies": {
+    "@m2c2kit/addons": "0.3.5",
+    "@m2c2kit/core": "0.3.7"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "0.3.4",
+    "@rollup/plugin-node-resolve": "15.0.2",
+    "@rollup/plugin-typescript": "11.1.1",
+    "rimraf": "5.0.1",
+    "rollup": "3.23.0",
+    "rollup-plugin-copy": "3.4.0",
+    "rollup-plugin-livereload": "2.0.5",
+    "rollup-plugin-serve": "2.0.2",
+    "tslib": "2.5.0",
+    "typescript": "5.0.4"
+  }
+}`,
+    };
+
+    /**
+     * npm install is executed immediately with workflow.execute() because we need
+     * files from these packages in later rules. If we tried to add the below as
+     * a rule, the npm package files would not exist in the tree before the rule
+     * was executed, and thus the rule would fail.
+     */
+    await lastValueFrom(
+      workflow.execute({
         // collection: "@m2c2kit/schematics",
         // collection: "c:\\github\\m2c2kit\\packages\\schematics",
         collection: workflow.context.collection,
         schematic: "npm-install",
-        options: <npmInstallOptions>{
-          dependencies: [
-            {
-              type: NodeDependencyType.Default,
-              name: "@m2c2kit/core",
-              version: "^0.3.5",
-              overwrite: true,
-            },
-            {
-              type: NodeDependencyType.Default,
-              name: "@m2c2kit/addons",
-              version: "^0.3.3",
-              overwrite: true,
-            },
-          ],
-        },
+        options: npmInstallOptions,
       })
-      .toPromise();
+    );
 
     const rules: Rule[] = [];
 
-    // below is another way to call the install schematic. we use
-    // callRule, and it returns a tree.
-    // const installRule = schematic("install", {});
-    // const t = await callRule(installRule, tree, context).toPromise()
-    // examine the tree.
-    // t.visit((path, entry) => {
-    //   console.log(`path: ${path}, entry: ${entry}`)
-    // });
-    // rules.push(installRule);
-    // question: should we do this above code, which returns a new tree
-    // and then provide THAT tree to the below rules?  or do the below
-    // rules already receive the updated tree?
+    /**
+     * Second, copy the files from the schematics template
+     */
+    const schematicsVersion = Constants.M2C2KIT_SCHEMATICS_PACKAGE_VERSION;
+    const sourceTemplates: Source = url("./files");
+    const sourceParameterizedTemplates = apply(sourceTemplates, [
+      applyTemplates({
+        classify: strings.classify,
+        dasherize: strings.dasherize,
+        appName: options.name,
+        schematicsVersion: schematicsVersion,
+      }),
+      move(directory),
+    ]);
+    const mergeWithSourceTemplates = mergeWith(sourceParameterizedTemplates);
+    rules.push(mergeWithSourceTemplates);
 
-    rules.push(mergeWith(sourceParameterizedTemplates));
+    /**
+     * Third, copy required assets from the @m2c2kit/core package
+     */
     rules.push((tree: Tree) => {
       const findUps: FindUps[] = [
         {
           findUp: "node_modules/@m2c2kit/core/assets/canvaskit.wasm",
-          dest: "src/assets/canvaskit.wasm",
+          dest: path.join(directory, "src/assets/canvaskit.wasm"),
+          cwd: directory,
+        },
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/css/m2c2kit.css",
+          dest: path.join(directory, "src/assets/css/m2c2kit.css"),
+          cwd: directory,
+        },
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/css/defaultV2.css",
+          dest: path.join(directory, "src/assets/css/defaultV2.css"),
+          cwd: directory,
+        },
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/css/nouislider.css",
+          dest: path.join(directory, "src/assets/css/nouislider.css"),
+          cwd: directory,
+        },
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/css/select2.css",
+          dest: path.join(directory, "src/assets/css/select2.css"),
+          cwd: directory,
+        },
+        {
+          findUp:
+            "node_modules/@m2c2kit/core/assets/css/bootstrap-datepicker.standalone.css",
+          dest: path.join(
+            directory,
+            "src/assets/css/bootstrap-datepicker.standalone.css"
+          ),
+          cwd: directory,
+        },
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/css/bootstrap-slider.css",
+          dest: path.join(directory, "src/assets/css/bootstrap-slider.css"),
+          cwd: directory,
         },
         {
           findUp: "node_modules/@m2c2kit/core/index.html",
-          dest: "src/index.html",
+          dest: path.join(directory, "src/index.html"),
+          cwd: directory,
         },
       ];
       copyFindUps(findUps, tree);
-      // see question above...
-      // copyFindUps(findups, t);
-      // return t;
       return tree;
     });
+
+    process.on("exit", (exitCode) => {
+      if (exitCode === 0) {
+        console.log("");
+        console.log(`Created app in directory ${directory}`);
+        console.log("Inside that directory, you can run several commands:\n");
+        console.log(`  npm run serve`);
+        console.log("    Starts the development server.\n");
+        console.log(`  npm run build`);
+        console.log("    Bundles the app for production.\n");
+        console.log("We suggest you begin by typing:\n");
+        console.log(`  cd ${directory}`);
+        console.log(`  npm run serve`);
+      } else {
+        console.log("");
+        console.log("Error creating app.");
+      }
+    });
+
     return chain(rules);
   };
 }
@@ -113,22 +185,17 @@ export function m2New(options: any): Rule {
 interface FindUps {
   findUp: string;
   dest: string;
+  cwd: string;
 }
 
 function copyFindUps(findUps: FindUps[], tree: Tree): void {
   findUps.forEach((fu) => {
-    const filePath = findup(fu.findUp);
+    const filePath = findup(fu.findUp, { cwd: fu.cwd });
     if (!filePath) {
       throw new SchematicsException(`Could not find ${fu.findUp}`);
     }
-    console.log("found " + filePath);
+    // console.log("found " + filePath);
     const buf = fs.readFileSync(filePath);
     tree.create(path.join(fu.dest), buf);
   });
 }
-
-// how to run the above
-// (do this in another folder, because it changes the files in the current folder)
-// schematics c:\github\m2c2kit\packages\schematics:new --name=hello
-
-// build our CLI from this: https://github.com/angular/angular-cli/blob/main/packages/angular_devkit/schematics_cli/bin/schematics.ts

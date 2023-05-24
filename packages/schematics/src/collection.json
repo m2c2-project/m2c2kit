@@ -7,7 +7,8 @@
     },
     "new": {
       "description": "A schematic to create a new m2c2kit app",
-      "factory": "./new/index#m2New"
+      "factory": "./new/index#m2New",
+      "schema": "./new/schema.json"
     },
     "npm-install": {
       "description": "A schematic to install a package from npm",

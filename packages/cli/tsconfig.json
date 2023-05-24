@@ -1,14 +1,19 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "target": "es2020",
-    "module": "node16",
-    "moduleResolution": "node16",
-    "outDir": "./build",
+    "declaration": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "experimentalDecorators": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "outDir": "./dist",
+    "skipLibCheck": true,
     "strict": true,
-    "skipLibCheck": true
+    "target": "es2020",
+    "lib": ["es2020"],
+    "rootDir": "src"
   },
-  "exclude": ["dist", "build", "node_modules", "write-dotenv.js"]
+  "exclude": ["**/node_modules/**/*", "dist"]
 }

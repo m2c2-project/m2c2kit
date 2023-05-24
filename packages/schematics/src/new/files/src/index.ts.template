@@ -19,7 +19,7 @@ import {
 } from "@m2c2kit/core";
 import { Button, Instructions } from "@m2c2kit/addons";
 
-class {{className}} extends Game {
+class <%= classify(appName) %> extends Game {
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
@@ -92,8 +92,8 @@ class {{className}} extends Game {
     };
 
     const options: GameOptions = {
-      name: "{{appName}}",
-      id: "{{appName}}",
+      name: "<%= appName %>",
+      id: "<%= dasherize(appName) %>",
       version: "1.0.0",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
@@ -275,13 +275,13 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     const instructionsScenes = Instructions.Create({
       instructionScenes: [
         {
-          title: "{{appName}}",
+          title: "<%= appName %>",
           text: `Select the color that matches the font color. This is commonly known as the Stroop task.`,
           textFontSize: 20,
           titleFontSize: 30,
         },
         {
-          title: "{{appName}}",
+          title: "<%= appName %>",
           text: `For example, the word Blue is colored Orange, so the correct response is Orange.`,
           textFontSize: 20,
           titleFontSize: 30,
@@ -459,7 +459,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: "You have completed all the cli starter trials",
+      text: "You have completed all the <%= appName %> trials",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
@@ -484,7 +484,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
   }
 }
 
-const activity = new {{className}}();
+const activity = new <%= classify(appName) %>();
 const session = new Session({
   activities: [activity],
   canvasKitWasmUrl: "canvaskit.wasm",
