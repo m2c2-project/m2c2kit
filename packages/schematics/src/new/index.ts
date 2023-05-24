@@ -59,9 +59,9 @@ export function m2New(options: m2NewOptions): Rule {
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.4",
     "@rollup/plugin-node-resolve": "15.0.2",
-    "@rollup/plugin-typescript": "11.1.1",
+    "@rollup/plugin-typescript": "11.1.0",
     "rimraf": "5.0.1",
-    "rollup": "3.23.0",
+    "rollup": "3.21.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2",
