@@ -23,7 +23,7 @@
     "@m2c2kit/survey": "^0.3.3"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.4",
+    "@m2c2kit/build-helpers": "^0.3.5",
     "@rollup/plugin-node-resolve": "15.0.2",
     "rollup": "3.21.0",
     "rollup-plugin-copy": "3.4.0",

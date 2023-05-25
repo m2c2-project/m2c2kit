@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/schematics` [0.1.2] - 2023-05-25
+
+### Fixed
+
+- Generated README missing schematics version.
+- `launch.json` not copied.
+
+## `@m2c2kit/embedding` [1.0.2] - 2023-05-25
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/cli` [0.3.7] - 2023-05-24
 
 ### Changed

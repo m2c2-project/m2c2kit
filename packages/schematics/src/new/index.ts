@@ -65,7 +65,7 @@ export function m2New(options: m2NewOptions): Rule {
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2",
-    "tslib": "2.5.0",
+    "tslib": "2.5.2",
     "typescript": "5.0.4"
   }
 }`,

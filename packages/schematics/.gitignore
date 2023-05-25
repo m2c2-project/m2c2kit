@@ -7,7 +7,8 @@ src/**/*.d.ts
 # IDEs
 .idea/
 jsconfig.json
-.vscode/
+# ignore .vscode in package root, but not in subfolders
+./.vscode
 
 # Misc
 node_modules/
