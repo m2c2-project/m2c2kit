@@ -57,7 +57,7 @@ export function m2New(options: m2NewOptions): Rule {
     "@m2c2kit/core": "0.3.8"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.5",
+    "@m2c2kit/build-helpers": "0.3.6",
     "@rollup/plugin-node-resolve": "15.0.2",
     "@rollup/plugin-typescript": "11.1.0",
     "rimraf": "5.0.1",

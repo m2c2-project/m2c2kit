@@ -51,11 +51,12 @@ interface FileRename {
  *
  * @param rootDir - root directory of build, usually "dist" because you
  * usually hash only production builds
+ * @param cwd - current working directory; used only for testing.
  * @returns
  */
-export function hashM2c2kitAssets(rootDir: string) {
-  const indexHtmlFile = path.join(rootDir, "index.html");
-  const indexJsFile = path.join(rootDir, "index.js");
+export function hashM2c2kitAssets(rootDir: string, cwd = "") {
+  const indexHtmlFile = path.join(cwd, rootDir, "index.html");
+  const indexJsFile = path.join(cwd, rootDir, "index.js");
 
   return {
     name: "hash-m2c2kit-assets",
@@ -63,7 +64,6 @@ export function hashM2c2kitAssets(rootDir: string) {
       sequential: true,
       async handler() {
         const fileRenames = new Array<FileRename>();
-
         // Parse index.js using acorn and acorn-walk
         let indexjs: string;
         try {
@@ -110,7 +110,8 @@ export function hashM2c2kitAssets(rootDir: string) {
                        * the assets directory, so the location is
                        * `assets/${canvasKitWasmUrl}` not `${canvasKitWasmUrl}`
                        */
-                      `${rootDir}/assets`
+                      `${rootDir}/assets`,
+                      cwd
                     );
 
                     literal.value = (literal.value as string).replace(
@@ -183,10 +184,30 @@ export function hashM2c2kitAssets(rootDir: string) {
                             const literal = node as unknown as estree.Literal;
                             const originalUrlValue = literal.value as string;
 
+                            const optionsDeclarator = ancestors.slice(
+                              -7
+                            )[0] as unknown as estree.VariableDeclarator;
+                            const objExpression =
+                              optionsDeclarator.init as unknown as estree.ObjectExpression;
+                            const properties = objExpression.properties;
+                            const gameIdProperty = properties.filter(
+                              (p) =>
+                                (p as estree.Property).key.type ===
+                                  "Identifier" &&
+                                (
+                                  (p as estree.Property)
+                                    .key as estree.Identifier
+                                ).name == "id"
+                            )[0] as unknown as estree.Property;
+                            const gameId = (
+                              gameIdProperty.value as estree.Literal
+                            ).value as string;
+
                             try {
                               const hashedUrlValue = addHashToUrl(
                                 originalUrlValue,
-                                rootDir
+                                path.join(rootDir, "assets", gameId),
+                                cwd
                               );
 
                               literal.value = (literal.value as string).replace(
@@ -198,7 +219,7 @@ export function hashM2c2kitAssets(rootDir: string) {
                                 hashedUrlValue
                               );
                               addFileToFilesToBeRenamed(
-                                rootDir,
+                                path.join(rootDir, "assets", gameId),
                                 originalUrlValue,
                                 hashedUrlValue,
                                 fileRenames
@@ -266,10 +287,30 @@ export function hashM2c2kitAssets(rootDir: string) {
                             const literal = node as unknown as estree.Literal;
                             const originalUrlValue = literal.value as string;
 
+                            const optionsDeclarator = ancestors.slice(
+                              -7
+                            )[0] as unknown as estree.VariableDeclarator;
+                            const objExpression =
+                              optionsDeclarator.init as unknown as estree.ObjectExpression;
+                            const properties = objExpression.properties;
+                            const gameIdProperty = properties.filter(
+                              (p) =>
+                                (p as estree.Property).key.type ===
+                                  "Identifier" &&
+                                (
+                                  (p as estree.Property)
+                                    .key as estree.Identifier
+                                ).name == "id"
+                            )[0] as unknown as estree.Property;
+                            const gameId = (
+                              gameIdProperty.value as estree.Literal
+                            ).value as string;
+
                             try {
                               const hashedUrlValue = addHashToUrl(
                                 originalUrlValue,
-                                rootDir
+                                path.join(rootDir, "assets", gameId),
+                                cwd
                               );
 
                               literal.value = (literal.value as string).replace(
@@ -281,7 +322,7 @@ export function hashM2c2kitAssets(rootDir: string) {
                                 hashedUrlValue
                               );
                               addFileToFilesToBeRenamed(
-                                rootDir,
+                                path.join(rootDir, "assets", gameId),
                                 originalUrlValue,
                                 hashedUrlValue,
                                 fileRenames
@@ -323,7 +364,8 @@ export function hashM2c2kitAssets(rootDir: string) {
               try {
                 link.attribs["href"] = addHashToUrl(
                   link.attribs["href"],
-                  rootDir
+                  rootDir,
+                  cwd
                 );
                 addFileToFilesToBeRenamed(
                   rootDir,
@@ -349,7 +391,7 @@ export function hashM2c2kitAssets(rootDir: string) {
               !(script.attribs["hash"]?.toLowerCase() === "false")
             ) {
               try {
-                const hashedFilename = addHashToUrl("index.js", rootDir);
+                const hashedFilename = addHashToUrl("index.js", rootDir, cwd);
                 script.attribs["src"] = "./" + path.basename(hashedFilename);
                 addFileToFilesToBeRenamed(
                   rootDir,
@@ -369,12 +411,12 @@ export function hashM2c2kitAssets(rootDir: string) {
 
         fileRenames.forEach((fr) => {
           // we must check existsSync because a file may be included twice
-          if (existsSync(fr.original)) {
-            renameSync(fr.original, fr.new);
+          if (existsSync(path.join(cwd, fr.original))) {
+            renameSync(path.join(cwd, fr.original), path.join(cwd, fr.new));
           }
         });
 
-        await writeHashManifest(rootDir, fileRenames);
+        await writeHashManifest(rootDir, fileRenames, cwd);
       },
     },
   };
@@ -386,9 +428,9 @@ const getFileHash = (filePath: string): string => {
   return hash.slice(0, HASH_CHARACTER_LENGTH);
 };
 
-const addHashToUrl = (url: string, rootDir: string) => {
+const addHashToUrl = (url: string, rootDir: string, cwd = "") => {
   const ext = path.extname(url);
-  const hash = getFileHash(path.join(rootDir, url));
+  const hash = getFileHash(path.join(cwd, rootDir, url));
   if (ext) {
     url = url.replace(ext, `.${hash}${ext}`);
   } else {
@@ -397,8 +439,12 @@ const addHashToUrl = (url: string, rootDir: string) => {
   return url;
 };
 
-async function writeHashManifest(rootDir: string, fileRenames: FileRename[]) {
-  const manifestFilename = path.join(rootDir, "hash-manifest.json");
+async function writeHashManifest(
+  rootDir: string,
+  fileRenames: FileRename[],
+  cwd = ""
+) {
+  const manifestFilename = path.join(cwd, rootDir, "hash-manifest.json");
   const manifest: { [originalName: string]: string } = {};
 
   fileRenames.forEach((fr) => {
