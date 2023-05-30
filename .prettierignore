@@ -1,6 +1,7 @@
 .vscode-test/
 out/
 dist/
+dist-test/
 build/
 test-fixtures/
 node_modules/
