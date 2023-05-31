@@ -19,8 +19,7 @@
     "wdio-docker-service": "^3.2.0"
   },
   "scripts": {
-    "test": "wdio run ./wdio.conf.ts",
-    "docker:compose-up": "docker-compose up --force-recreate"
+    "test": "wdio run ./wdio.conf.ts --hostname selenium --port 4444"
   },
   "license": "MIT"
 }

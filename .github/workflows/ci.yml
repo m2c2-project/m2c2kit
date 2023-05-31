@@ -34,6 +34,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up docker compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: "2.18.1"
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -48,6 +52,8 @@ jobs:
         run: npm run build
       - name: Test
         run: npm run test
+      - name: Integration test
+        run: npm run integration-test
       - name: Publish updated packages
         run: npm run publish-updated
         # publish-updated will set an environment variable to indicate if 1) there were updated packages, and 2) all updated packages were successfully published to the registry

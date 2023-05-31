@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  registry:
+    build:
+      context: ./integration-tests/cli-test/dockerfiles/registry
+    ports:
+      - "4873:4873"
+
+  publish:
+    build:
+      context: ./integration-tests/cli-test/dockerfiles/publish
+    depends_on:
+      - m2c2kit
+      - registry
+
+  testapp:
+    build:
+      context: ./integration-tests/cli-test/dockerfiles/testapp
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    depends_on:
+      - publish
+
+  selenium:
+    image: selenium/standalone-chrome:113.0
+    ports:
+      - "4444:4444"
+
+  m2c2kit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: scripts/wait-for-it.sh -t 240 testapp:3000 -- npm run test -w cli-test

@@ -1,8 +1,5 @@
 # cli integration tests
 
-To run these tests:
+These tests are meant to run along with other services specified by `docker-compose.yml` to test the cli. From the repository root, execute `npm run integration-test`.
 
-1. Execute `docker-compose up` to bring up a container that serves a simple test app built with the cli as well as a container running selenium/standalone-chrome.
-2. Execute `npm run test`.
-
-These tests will check that the cli built an app that has a canvas of the correct size and that the first and second scenes match, pixel for pixel, what is expected.
+The `publish` service will publish the m2c2kit packages to a local npm registry running in the `registry` service. The `testapp` service will install the cli from the registry, create a test app with the cli, and serve the app. The `selenium` service will run `selenium/standalone-chrome`. The `m2c2kit` service will run the tests in this package to control selenium and check that the cli built an app that has a canvas of the correct size and that the first and second scenes match, pixel for pixel, what is expected.
