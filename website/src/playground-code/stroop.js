@@ -399,9 +399,6 @@ const session = new Session({
   },
   sessionCallbacks: {
     onSessionLifecycle: async (ev) => {
-      if (ev.type === EventType.SessionInitialize) {
-        await session.start();
-      }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
         // The assessments are complete. This is where you could

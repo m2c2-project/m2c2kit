@@ -35,9 +35,6 @@ const session = new Session({
      * Once initialized, the below code will start the session.
      */
     onSessionLifecycle: async function (ev: SessionLifecycleEvent) {
-      if (ev.type === EventType.SessionInitialize) {
-        await session.start();
-      }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
       }

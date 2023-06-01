@@ -14,6 +14,8 @@ export interface SessionOptions {
   sessionUuid?: string;
   /** URL of session assets folder (which contains wasm binary), if not the default location of "assets" */
   assetsUrl?: string;
+  /** After the session initializes, should the session automatically start? Default is true */
+  autoStartAfterInit?: boolean;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

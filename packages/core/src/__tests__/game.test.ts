@@ -134,6 +134,8 @@ describe("parameters", () => {
     const options: SessionOptions = {
       activities: [g4],
       canvasKitWasmUrl: "canvaskit.wasm",
+      // don't autostart; we need to set parameters before starting
+      autoStartAfterInit: false,
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -281,6 +283,8 @@ describe("actions", () => {
     const options: SessionOptions = {
       activities: [g1, g2],
       canvasKitWasmUrl: "canvaskit.wasm",
+      // don't autostart; we need to set frame counters and actions before starting
+      autoStartAfterInit: false,
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();

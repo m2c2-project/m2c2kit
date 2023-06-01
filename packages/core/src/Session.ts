@@ -84,6 +84,9 @@ export class Session {
         type: EventType.SessionInitialize,
       });
     }
+    if (this.options.autoStartAfterInit !== false) {
+      await this.start();
+    }
   }
 
   /**

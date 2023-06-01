@@ -23,6 +23,9 @@ const a5 = new CliStarter();
 const session = new Session({
   activities: [a1, a2, a3, a4, a5],
   canvasKitWasmUrl: "canvaskit.wasm",
+  autoStartAfterInit: !(
+    Embedding.contextIsWebView() && Embedding.sessionManualStart() === true
+  ),
   sessionCallbacks: {
     /**
      * onSessionLifecycle() will be called on events such
@@ -38,16 +41,6 @@ const session = new Session({
       }
       //#endregion
 
-      if (ev.type === EventType.SessionInitialize) {
-        //#region to support m2c2kit in WebView
-        if (Embedding.contextIsWebView() && Embedding.sessionManualStart()) {
-          // don't automatically start! Let the native code
-          // set game parameters and start the game when desired.
-          return;
-        }
-        //#endregion
-        await session.start();
-      }
       if (ev.type === EventType.SessionEnd) {
         console.log("🔴 ended session");
       }
