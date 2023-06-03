@@ -19,7 +19,9 @@ yargs(hideBin(process.argv))
       const filePaths = (argv.files as string)
         .split(",")
         .map((f) => path.resolve(process.cwd(), f));
+      const outputFormat = argv.format as string;
       const data: Input = [];
+      const dataJson: Array<M2c2Schema> = [];
 
       filePaths.forEach((f) => {
         if (!fs.existsSync(f)) {
@@ -34,6 +36,12 @@ yargs(hideBin(process.argv))
 
         const schema = getSchemaFromSourceFile(f, argv.schema as string);
 
+        if (outputFormat === "json") {
+          dataJson.push(schema);
+          return;
+        }
+
+        // csv format
         Object.keys(schema).forEach((k) => {
           const type = schema[k].type;
           let typeString;
@@ -75,6 +83,12 @@ yargs(hideBin(process.argv))
           }
         });
       });
+
+      if (outputFormat === "json") {
+        process.stdout.write(JSON.stringify(dataJson, null, 2));
+        return;
+      }
+      // csv
       process.stdout.write(stringify(data, { header: true }) + EOL);
     }
   )
@@ -91,7 +105,7 @@ yargs(hideBin(process.argv))
   .option("format", {
     type: "string",
     default: "csv",
-    description: "output format",
+    description: "output format: csv or json",
   })
   .demandCommand(1, "You need at least one command")
   .parse();
