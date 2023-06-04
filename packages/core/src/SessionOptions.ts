@@ -16,6 +16,10 @@ export interface SessionOptions {
   assetsUrl?: string;
   /** After the session initializes, should the session automatically start? Default is true */
   autoStartAfterInit?: boolean;
+  /** When an activity ends or is canceled, should the session automatically go to the next activity? Default is true */
+  autoGoToNextActivity?: boolean;
+  /** After the last activity ends or is canceled, should the session automatically end? Default is true */
+  autoEndAfterLastActivity?: boolean;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

@@ -99,7 +99,14 @@ export class FontManager {
     }
 
     const fetchFontsPromises = fontsToFetch.map((font) => {
+      if (!font) {
+        throw new Error("font undefined");
+      }
       const game = games.filter((g) => g.uuid === font.gameUuid).find(Boolean);
+
+      if (!game) {
+        throw new Error("game undefined");
+      }
       const fontUrl = game.prependAssetsGameIdUrl(font.fontUrl);
 
       return fetch(fontUrl)
@@ -141,7 +148,7 @@ export class FontManager {
     }
 
     this.fontData.forEach((font) => {
-      const result = ttfInfo(new DataView(font.fontArrayBuffer));
+      const result = ttfInfo(new DataView(font.fontArrayBuffer)) as any;
       /**
        * The TTF file contains metadata about the font, including the
        * font-family. The font-family, and other information such as

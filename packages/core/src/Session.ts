@@ -1,5 +1,6 @@
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
-import { EventType } from "./EventBase";
+import { EventBase, EventType } from "./EventBase";
+import { EventListenerBase } from "./EventListenerBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
 import { FontManager } from "./FontManager";
@@ -12,6 +13,10 @@ import { Uuid } from "./Uuid";
 import { ActivityType } from "./ActivityType";
 import { DomHelpers } from "./DomHelpers";
 import { IDataStore } from "./IDataStore";
+import { CallbackOptions } from "./CallbackOptions";
+import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
+import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
+import { ActivityResultsEvent } from "./ActivityResultsEvent";
 
 export class Session {
   options: SessionOptions;
@@ -20,6 +25,7 @@ export class Session {
   currentActivity?: Activity;
   uuid: string;
   dataStore?: IDataStore;
+  private eventListeners = new Array<EventListenerBase>();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private canvasKit?: CanvasKit;
   private version = "__PACKAGE_JSON_VERSION__";
@@ -50,11 +56,187 @@ export class Session {
   }
 
   /**
+   * Executes a callback when the session initializes.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onInitialize(
+    callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.SessionInitialize,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the session starts.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onStart(
+    callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.SessionStart,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the session ends.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onEnd(
+    callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.SessionEnd,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when any activity in the session generates data.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onActivityData(
+    callback: (activityResultsEvent: ActivityResultsEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityData,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  private addEventListener(
+    type: EventType,
+    callback: (ev: EventBase) => void,
+    options?: CallbackOptions
+  ): void {
+    const eventListener: EventListenerBase = {
+      type: type,
+      callback: callback,
+      key: options?.key,
+    };
+
+    if (options?.replaceExisting) {
+      this.eventListeners = this.eventListeners.filter(
+        (listener) => !(listener.type === eventListener.type)
+      );
+    }
+    this.eventListeners.push(eventListener);
+  }
+
+  private raiseEventOnListeners(event: EventBase, extra?: unknown): void {
+    if (extra) {
+      event = {
+        ...event,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(extra as any),
+      };
+    }
+    this.eventListeners
+      .filter((listener) => listener.type === event.type)
+      .forEach((listener) => {
+        listener.callback(event);
+      });
+  }
+
+  private async sessionActivityStartHandler(event: ActivityLifecycleEvent) {
+    const activityType =
+      event.target.type === ActivityType.Game ? "game" : "survey";
+    console.log(`🟢 started activity (${activityType}) ${event.target.name}`);
+  }
+
+  private async sessionActivityCancelHandler(event: ActivityLifecycleEvent) {
+    const activityType =
+      event.target.type === ActivityType.Game ? "game" : "survey";
+    console.log(`🚫 canceled activity (${activityType}) ${event.target.name}`);
+
+    if (this.nextActivity && this.options.autoGoToNextActivity !== false) {
+      await this.goToNextActivity();
+      // Note: important to return here, because now this.nextActivity refers
+      // to the activity AFTER the one we have just advanced to.
+      return;
+    }
+    if (!this.nextActivity && this.options.autoEndAfterLastActivity !== false) {
+      this.end();
+    }
+  }
+
+  private async sessionActivityEndHandler(event: ActivityLifecycleEvent) {
+    const activityType =
+      event.target.type === ActivityType.Game ? "game" : "survey";
+    console.log(`🔴 ended activity (${activityType}) ${event.target.name}`);
+    if (this.nextActivity && this.options.autoGoToNextActivity !== false) {
+      await this.goToNextActivity();
+      // Note: important to return here, because now this.nextActivity refers
+      // to the activity AFTER the one we have just advanced to.
+      return;
+    }
+    if (!this.nextActivity && this.options.autoEndAfterLastActivity !== false) {
+      this.end();
+    }
+  }
+
+  private async sessionActivityLifecycleHandler(event: ActivityLifecycleEvent) {
+    if (event.type === EventType.ActivityStart) {
+      await this.sessionActivityStartHandler(event);
+      return;
+    }
+
+    if (event.type === EventType.ActivityCancel) {
+      await this.sessionActivityCancelHandler(event);
+      return;
+    }
+
+    if (event.type === EventType.ActivityEnd) {
+      await this.sessionActivityEndHandler(event);
+      return;
+    }
+
+    throw new Error("unknown activity lifecycle event type");
+  }
+
+  private activityResultsEventHandler(event: ActivityResultsEvent) {
+    this.raiseEventOnListeners(event);
+  }
+
+  /**
    * Asynchronously initializes the m2c2kit engine and loads assets
+   *
+   * @deprecated Use Session.initialize() instead.
    */
   async init(): Promise<void> {
+    return this.initialize();
+  }
+
+  /**
+   * Asynchronously initializes the m2c2kit engine and loads assets
+   */
+  async initialize(): Promise<void> {
     console.log(`⚪ @m2c2kit/core version ${this.version}`);
     Timer.start("sessionInit");
+    const sessionInitializeEvent: SessionLifecycleEvent = {
+      target: this,
+      type: EventType.SessionInitialize,
+    };
+    this.raiseEventOnListeners(sessionInitializeEvent);
     DomHelpers.addLoadingElements();
     DomHelpers.setSpinnerVisibility(true);
     DomHelpers.setCanvasOverlayVisibility(true);
@@ -64,6 +246,13 @@ export class Session {
         // IDataStore implementation is provided by another library and must
         // be set in the session before calling session.init()
         activity.dataStore = this.dataStore;
+        activity.onStart(this.sessionActivityLifecycleHandler.bind(this));
+        activity.onCancel(this.sessionActivityLifecycleHandler.bind(this));
+        activity.onEnd(this.sessionActivityLifecycleHandler.bind(this));
+        activity.onData((event: ActivityResultsEvent) => {
+          this.activityResultsEventHandler(event);
+        });
+
         return activity.init();
       })
     );
@@ -76,14 +265,6 @@ export class Session {
       `⚪ Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
     );
     Timer.remove("sessionInit");
-    const sessionLifecycleChangeCallback =
-      this.options.sessionCallbacks?.onSessionLifecycle;
-    if (sessionLifecycleChangeCallback) {
-      sessionLifecycleChangeCallback({
-        target: this,
-        type: EventType.SessionInitialize,
-      });
-    }
     if (this.options.autoStartAfterInit !== false) {
       await this.start();
     }
@@ -93,10 +274,20 @@ export class Session {
    * Starts the session and starts the first activity.
    */
   async start(): Promise<void> {
+    console.log("🟢 started session");
+    const sessionStartEvent: SessionLifecycleEvent = {
+      target: this,
+      type: EventType.SessionStart,
+    };
+    this.raiseEventOnListeners(sessionStartEvent);
     this.currentActivity = this.options.activities.find(Boolean);
     if (this.currentActivity) {
       DomHelpers.configureDomForActivity(this.currentActivity);
       await this.currentActivity.start();
+    } else {
+      // no activities, so immediately end the session
+      console.warn("no activities in session.");
+      this.end();
     }
   }
 
@@ -104,16 +295,14 @@ export class Session {
    * Declares the session ended and sends callback.
    */
   end(): void {
-    const sessionLifecycleChangeCallback =
-      this.options.sessionCallbacks?.onSessionLifecycle;
-    if (sessionLifecycleChangeCallback) {
-      sessionLifecycleChangeCallback({
-        target: this,
-        type: EventType.SessionEnd,
-      });
-    }
+    console.log("🔴 ended session");
     DomHelpers.hideAll();
     this.stop();
+    const sessionEndEvent: SessionLifecycleEvent = {
+      target: this,
+      type: EventType.SessionEnd,
+    };
+    this.raiseEventOnListeners(sessionEndEvent);
   }
 
   private stop(): void {
@@ -239,10 +428,9 @@ export class Session {
     }
     this.currentActivity.stop();
     this.currentActivity = this.nextActivity;
-    if (this.currentActivity) {
-      DomHelpers.configureDomForActivity(this.currentActivity);
-      await this.currentActivity.start();
-    }
+
+    DomHelpers.configureDomForActivity(this.currentActivity);
+    await this.currentActivity.start();
   }
 
   /**

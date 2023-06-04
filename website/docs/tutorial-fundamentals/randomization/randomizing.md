@@ -35,6 +35,8 @@ Below, we randomly choose two unique words from a word bank of 8 possible words.
 
 Arrays in JavaScript are 0-based. For example, to choose 2 words from a word bank of 8 words, we need to choose 2 integers between 0 and 7, inclusive. These two random integers are then used to index into the word bank array.
 
+Click the "Run" button multiple times to see how the words and colors change.
+
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.Azure });
 game.addScene(sceneOne);

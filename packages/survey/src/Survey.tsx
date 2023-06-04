@@ -6,6 +6,11 @@ import {
   ActivityType,
   EventType,
   Timer,
+  EventListenerBase,
+  ActivityLifecycleEvent,
+  CallbackOptions,
+  EventBase,
+  ActivityResultsEvent,
 } from "@m2c2kit/core";
 import React from "react";
 import Modal from "react-modal";
@@ -55,6 +60,7 @@ export class Survey implements Activity {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     show: () => {},
   };
+  private eventListeners = new Array<EventListenerBase>();
 
   constructor(surveyJson?: unknown) {
     if (surveyJson) {
@@ -62,9 +68,22 @@ export class Survey implements Activity {
     }
   }
 
+  async init(): Promise<void> {
+    return this.initialize();
+  }
+
   // Provide init() method to satisfy Activity interface
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async init() {}
+  async initialize() {
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.onStart(this.session.options.activityCallbacks.onActivityLifecycle);
+      this.onCancel(this.session.options.activityCallbacks.onActivityLifecycle);
+      this.onEnd(this.session.options.activityCallbacks.onActivityLifecycle);
+    }
+    if (this.session.options.activityCallbacks?.onActivityResults) {
+      this.onData(this.session.options.activityCallbacks.onActivityResults);
+    }
+  }
 
   /**
    * Sets the JSON survey definition, if it was not already set in
@@ -146,6 +165,108 @@ export class Survey implements Activity {
     return this._surveyJson;
   }
 
+  /**
+   * Executes a callback when the survey starts.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onStart(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityStart,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the survey is canceled.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onCancel(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityCancel,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the survey ends.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onEnd(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityEnd,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the survey generates data.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onData(
+    callback: (activityResultsEvent: ActivityResultsEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityData,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  private addEventListener(
+    type: EventType,
+    callback: (ev: EventBase) => void,
+    options?: CallbackOptions
+  ): void {
+    const eventListener: EventListenerBase = {
+      type: type,
+      callback: callback,
+      key: options?.key,
+    };
+
+    if (options?.replaceExisting) {
+      this.eventListeners = this.eventListeners.filter(
+        (listener) => !(listener.type === eventListener.type)
+      );
+    }
+    this.eventListeners.push(eventListener);
+  }
+
+  private raiseEventOnListeners(event: EventBase, extra?: unknown): void {
+    if (extra) {
+      event = {
+        ...event,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(extra as any),
+      };
+    }
+    this.eventListeners
+      .filter((listener) => listener.type === event.type)
+      .forEach((listener) => {
+        listener.callback(event);
+      });
+  }
+
   async start() {
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
@@ -157,8 +278,12 @@ export class Survey implements Activity {
 
     this.modifyDefaultSurveyJsConfiguration();
     this.addSurveyJsEventCallbacks();
-    this.addM2c2kitEventCallbacks();
     this.renderSurveyJs();
+    const activityStartEvent: ActivityLifecycleEvent = {
+      target: this,
+      type: EventType.ActivityStart,
+    };
+    this.raiseEventOnListeners(activityStartEvent);
   }
 
   stop(): void {
@@ -293,15 +418,6 @@ export class Survey implements Activity {
     );
   };
 
-  private addM2c2kitEventCallbacks() {
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.session.options.activityCallbacks.onActivityLifecycle({
-        type: EventType.ActivityStart,
-        target: this,
-      });
-    }
-  }
-
   /**
    * Hooks into SurveyJS callbacks based on user interaction.
    *
@@ -371,12 +487,11 @@ export class Survey implements Activity {
     );
 
     this.survey.onComplete.add(() => {
-      if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-        this.session.options.activityCallbacks.onActivityLifecycle({
-          type: EventType.ActivityEnd,
-          target: this,
-        });
-      }
+      const activityEndEvent: ActivityLifecycleEvent = {
+        target: this,
+        type: EventType.ActivityEnd,
+      };
+      this.raiseEventOnListeners(activityEndEvent);
     });
   }
 
@@ -655,19 +770,18 @@ export class Survey implements Activity {
     newData: ActivityKeyValueData,
     data: ActivityKeyValueData
   ) {
-    if (this.session.options.activityCallbacks?.onActivityResults) {
-      this.session.options.activityCallbacks.onActivityResults({
-        type: EventType.ActivityData,
-        iso8601Timestamp: new Date().toISOString(),
-        target: this,
-        newData: newData,
-        newDataSchema: {},
-        data: data,
-        dataSchema: {},
-        activityConfiguration: {},
-        activityConfigurationSchema: {},
-      });
-    }
+    const resultsEvent: ActivityResultsEvent = {
+      type: EventType.ActivityData,
+      iso8601Timestamp: new Date().toISOString(),
+      target: this,
+      newData: newData,
+      newDataSchema: {},
+      data: data,
+      dataSchema: {},
+      activityConfiguration: {},
+      activityConfigurationSchema: {},
+    };
+    this.raiseEventOnListeners(resultsEvent);
   }
 
   private shouldShowSkipConfirmation(

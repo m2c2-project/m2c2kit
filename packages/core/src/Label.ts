@@ -157,11 +157,17 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     } else {
       // if no fontName provided, use default fontName, which is the
       // first in the list of fontAssets for this game.
-      fontFamilies.push(
-        Object.values(fontManager.gameTypefaces[this.game.uuid])
-          .filter((f) => f.isDefault)
-          .find(Boolean).fontFamily
+
+      const typefaces = Object.values(
+        fontManager.gameTypefaces[this.game.uuid]
       );
+      const defaultTypeface = typefaces
+        .filter((f) => f.isDefault)
+        .find(Boolean);
+      if (!defaultTypeface) {
+        throw new Error("no default font");
+      }
+      fontFamilies.push(defaultTypeface.fontFamily);
     }
 
     this.paraStyle = new this.canvasKit.ParagraphStyle({

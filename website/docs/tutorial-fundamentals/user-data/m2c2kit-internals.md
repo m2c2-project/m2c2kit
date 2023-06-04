@@ -55,10 +55,11 @@ const demoSchema = {
 }
 ```
 
-- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs`, we define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
+- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs`, its `name` is `Documentation Example`, we define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
 
 ```js
 const options = {
+    name: "Documentation Example",
     id: "docs",
     width: 200, height: 400,
     fonts: [{
@@ -100,6 +101,7 @@ export const code = `class DocsDemo extends Game {
         }
  
         const options = {
+            name: "Documentation Example",
             id: "docs",
             width: 200, height: 400,
             fonts: [{
@@ -121,5 +123,5 @@ export const code = `class DocsDemo extends Game {
 
 <CodeExample code={code} template={template} console={"true"}/>
 
-[^1]: For the tutorials, however, *do not* change the name! This tutorial website engine expect the class name to be `DocsDemo`, and it will not work if you rename it.
+[^1]: For the tutorials, however, *do not* change the class name (`DocsDemo`) or the value of `id` specified in `options`! This tutorial website engine expect the class name to be `DocsDemo`, and the value of `id` to be `docs`, and it will not work if you rename these.
 

@@ -34,7 +34,7 @@ const defaultParameters = {
     show_feedback: {
         type: "boolean",
         default: false,
-        description: "Should feedback, in the form of the user's perfomance, be shown at the end of the assessment? Default is true.",
+        description: "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
     }
 };
 ```
@@ -124,7 +124,7 @@ export const code = `class DocsDemo extends Game {
             show_feedback: {
                 type: "boolean",
                 default: true,
-                description: "Should feedback, in the form of the user's perfomance, be shown at the end of the assessment? Default is true.",
+                description: "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
             }
         };
  
@@ -148,6 +148,7 @@ export const code = `class DocsDemo extends Game {
         };
   
         const options = {
+            name: "Documentation Example",
             id: "docs",
             width: 400, height: 800,
             fonts: [{

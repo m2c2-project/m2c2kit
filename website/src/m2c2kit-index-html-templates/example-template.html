@@ -88,6 +88,7 @@
       class ReloadMessage extends Game {
         constructor() {
           const options = {
+            name: "reload",
             id: "docs",
             width: 400,
             height: 800,
@@ -117,37 +118,15 @@
       const session = new Session({
         canvasKitWasmUrl: "canvaskit.wasm",
         activities: [activity, reload],
-        activityCallbacks: {
-          onActivityLifecycle: async (ev) => {
-            if (
-              ev.type === EventType.ActivityEnd ||
-              ev.type === EventType.ActivityCancel
-            ) {
-              const nextActivity = session.nextActivity;
-              if (nextActivity) {
-                await session.goToNextActivity();
-              } else {
-                session.end();
-              }
-            }
-          },
-          onActivityResults: (ev) => {
-            if (ev.target.type === ActivityType.Game) {
-              console.log(`✅ trial complete:`);
-            } else if (ev.target.type === ActivityType.Survey) {
-              console.log(`✅ survey response:`);
-            }
-            console.log("  newData: " + JSON.stringify(ev.newData));
-            console.log("  data: " + JSON.stringify(ev.data));
-          },
-        },
-        sessionCallbacks: {
-          onSessionLifecycle: async (ev) => {
-            if (ev.type === EventType.SessionEnd) {
-              console.log("🔴 ended session");
-            }
-          },
-        },
+      });
+      session.onActivityData((ev) => {
+        if (ev.target.type === ActivityType.Game) {
+          console.log(`✅ trial completed:`);
+        } else if (ev.target.type === ActivityType.Survey) {
+          console.log(`✅ survey response completed:`);
+        }
+        console.log("  newData: " + JSON.stringify(ev.newData));
+        console.log("  data: " + JSON.stringify(ev.data));
       });
       window.session = session;
       session.init();

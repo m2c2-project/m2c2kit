@@ -50,6 +50,12 @@ import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { IDataStore } from "./IDataStore";
 import { ShapeType } from "./ShapeType";
 import { M2DragEvent } from "./M2DragEvent";
+import { ActivityEvent } from "./ActivityEvent";
+import { ActivityEventListener } from "./ActivityEventListener";
+import { ActivityResults } from "./ActivityResults";
+import { CallbackOptions } from "./CallbackOptions";
+import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
+import { ActivityResultsEvent } from "./ActivityResultsEvent";
 
 interface BoundingBox {
   xMin: number;
@@ -77,6 +83,7 @@ export class Game implements Activity {
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
+  private eventListeners = new Array<ActivityEventListener>();
   private gameMetrics: Array<GameMetric> = new Array<GameMetric>();
   private fpsMetricReportThreshold: number;
   private maximumRecordedActivityMetrics: number;
@@ -109,6 +116,9 @@ export class Game implements Activity {
       options.maximumRecordedActivityMetrics ??
       Constants.MAXIMUM_RECORDED_ACTIVITY_METRICS;
     this.addLocalizationParametersToGameParameters();
+    if (!this.options.trialSchema) {
+      this.options.trialSchema = {};
+    }
   }
 
   private addLocalizationParametersToGameParameters(): void {
@@ -118,10 +128,22 @@ export class Game implements Activity {
     };
   }
 
-  async init() {
+  async init(): Promise<void> {
+    return this.initialize();
+  }
+
+  async initialize() {
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
       this.i18n = new I18n(options);
+    }
+    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
+      this.onStart(this.session.options.activityCallbacks.onActivityLifecycle);
+      this.onCancel(this.session.options.activityCallbacks.onActivityLifecycle);
+      this.onEnd(this.session.options.activityCallbacks.onActivityLifecycle);
+    }
+    if (this.session.options.activityCallbacks?.onActivityResults) {
+      this.onData(this.session.options.activityCallbacks.onActivityResults);
     }
   }
 
@@ -686,12 +708,11 @@ export class Game implements Activity {
 
     this.surface.requestAnimationFrame(this.loop.bind(this));
 
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.session.options.activityCallbacks.onActivityLifecycle({
-        type: EventType.ActivityStart,
-        target: this,
-      });
-    }
+    const activityStartEvent: ActivityLifecycleEvent = {
+      target: this,
+      type: EventType.ActivityStart,
+    };
+    this.raiseActivityEventOnListeners(activityStartEvent);
   }
 
   private addTimeSteppingControlsToDom() {
@@ -1141,6 +1162,9 @@ export class Game implements Activity {
   addTrialSchema(schema: TrialSchema): void {
     const keys = Object.keys(schema);
     keys.forEach((key) => {
+      if (!this.options.trialSchema) {
+        throw new Error("trial schema is undefined");
+      }
       this.options.trialSchema[key] = schema[key];
     });
   }
@@ -1174,6 +1198,9 @@ export class Game implements Activity {
     variableName: string,
     value: JsonSchemaDataTypeScriptTypes
   ) {
+    if (!this.options.trialSchema) {
+      throw new Error("trial schema is undefined");
+    }
     if (this.options.trialSchema[variableName] === undefined) {
       throw new Error(`trial variable ${variableName} not defined in schema`);
     }
@@ -1199,26 +1226,26 @@ export class Game implements Activity {
     }
 
     this.trialIndex++;
-    if (this.session.options.activityCallbacks?.onActivityResults) {
-      this.session.options.activityCallbacks.onActivityResults({
-        type: EventType.ActivityData,
-        iso8601Timestamp: new Date().toISOString(),
-        target: this,
-        /** newData is only the trial that recently completed */
-        newData: this.data.trials[this.trialIndex - 1],
-        newDataSchema: this.makeNewGameDataSchema(),
-        /** data is all the data collected so far in the game */
-        data: this.data,
-        dataSchema: this.makeGameDataSchema(),
-        activityConfiguration: this.makeGameActivityConfiguration(
-          this.options.parameters ?? {}
-        ),
-        activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-          this.options.parameters ?? {}
-        ),
-        activityMetrics: this.gameMetrics,
-      });
-    }
+
+    const resultsEvent: ActivityResultsEvent = {
+      type: EventType.ActivityData,
+      iso8601Timestamp: new Date().toISOString(),
+      target: this,
+      /** newData is only the trial that recently completed */
+      newData: this.data.trials[this.trialIndex - 1],
+      newDataSchema: this.makeNewGameDataSchema(),
+      /** data is all the data collected so far in the game */
+      data: this.data,
+      dataSchema: this.makeGameDataSchema(),
+      activityConfiguration: this.makeGameActivityConfiguration(
+        this.options.parameters ?? {}
+      ),
+      activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+        this.options.parameters ?? {}
+      ),
+      activityMetrics: this.gameMetrics,
+    };
+    this.raiseActivityEventOnListeners(resultsEvent);
   }
 
   /**
@@ -1381,59 +1408,59 @@ export class Game implements Activity {
   /**
    * Should be called when current game has ended successfully.
    *
-   * @remarks This will trigger the onActivityLifecycleChange callback function,
-   * if one was provided in SessionOptions. This is how the game can communicate
-   * its state to the parent session. It is the responsibility of the the game
-   * programmer to call this at the appropriate time. It is not triggered
-   * automatically.
+   * @remarks This will send an ActivityEnd event to any listeners, such as
+   * a function provided to Game.onEnd() or a callback defined in
+   * SessionOptions.activityCallbacks.onActivityLifecycle. This is how the
+   * game can communicate changes in activity state to the parent session.
+   * It is the responsibility of the the game programmer to call this at the
+   * appropriate time. It is not triggered automatically.
    */
   end(): void {
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.session.options.activityCallbacks.onActivityLifecycle({
-        type: EventType.ActivityEnd,
-        target: this,
-        results: {
-          data: this.data,
-          dataSchema: this.makeGameDataSchema(),
-          activityConfiguration: this.makeGameActivityConfiguration(
-            this.options.parameters ?? {}
-          ),
-          activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-            this.options.parameters ?? {}
-          ),
-          activityMetrics: this.gameMetrics,
-        },
-      });
-    }
+    const activityEndEvent: ActivityLifecycleEvent = {
+      target: this,
+      type: EventType.ActivityEnd,
+    };
+    const results: ActivityResults = {
+      data: this.data,
+      dataSchema: this.makeGameDataSchema(),
+      activityConfiguration: this.makeGameActivityConfiguration(
+        this.options.parameters ?? {}
+      ),
+      activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+        this.options.parameters ?? {}
+      ),
+      activityMetrics: this.gameMetrics,
+    };
+    this.raiseActivityEventOnListeners(activityEndEvent, results);
   }
 
   /**
    * Should be called when current game has been canceled by a user action.
    *
-   * @remarks This will trigger the onActivityLifecycleChange callback function,
-   * if one was provided in SessionOptions. This is how the game can communicate
-   * its state to the parent session. It is the responsibility of the the game
-   * programmer to call this at the appropriate time. It is not triggered
-   * automatically.
+   * @remarks This will send an ActivityCancel event to any listeners, such as
+   * a function provided to Game.onCancel() or a callback defined in
+   * SessionOptions.activityCallbacks.onActivityLifecycle. This is how the
+   * game can communicate changes in activity state to the parent session.
+   * It is the responsibility of the the game programmer to call this at the
+   * appropriate time. It is not triggered automatically.
    */
   cancel(): void {
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.session.options.activityCallbacks.onActivityLifecycle({
-        type: EventType.ActivityCancel,
-        target: this,
-        results: {
-          data: this.data,
-          dataSchema: this.makeGameDataSchema(),
-          activityConfiguration: this.makeGameActivityConfiguration(
-            this.options.parameters ?? {}
-          ),
-          activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-            this.options.parameters ?? {}
-          ),
-          activityMetrics: this.gameMetrics,
-        },
-      });
-    }
+    const activityCancelEvent: ActivityLifecycleEvent = {
+      target: this,
+      type: EventType.ActivityCancel,
+    };
+    const results: ActivityResults = {
+      data: this.data,
+      dataSchema: this.makeGameDataSchema(),
+      activityConfiguration: this.makeGameActivityConfiguration(
+        this.options.parameters ?? {}
+      ),
+      activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+        this.options.parameters ?? {}
+      ),
+      activityMetrics: this.gameMetrics,
+    };
+    this.raiseActivityEventOnListeners(activityCancelEvent, results);
   }
 
   private setupHtmlCanvases(
@@ -2768,6 +2795,103 @@ export class Game implements Activity {
     const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * width;
     const relativeY = ((y - bb.yMin) / (bb.yMax - bb.yMin)) * height;
     return { x: relativeX, y: relativeY };
+  }
+
+  /**
+   * Executes a callback when the game starts.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onStart(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(EventType.ActivityStart, callback, options);
+  }
+
+  /**
+   * Executes a callback when the game is canceled.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onCancel(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(EventType.ActivityCancel, callback, options);
+  }
+
+  /**
+   * Executes a callback when the game ends.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onEnd(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(EventType.ActivityEnd, callback, options);
+  }
+
+  /**
+   * Executes a callback when the game generates data.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onData(
+    callback: (activityResultsEvent: ActivityResultsEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.ActivityData,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
+  private addEventListener(
+    type: EventType,
+    callback: (ev: ActivityEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    const eventListener: ActivityEventListener = {
+      type: type,
+      activityUuid: this.uuid,
+      callback: callback,
+    };
+
+    if (options?.replaceExisting) {
+      this.eventListeners = this.eventListeners.filter(
+        (listener) =>
+          !(
+            listener.activityUuid === eventListener.activityUuid &&
+            listener.type === eventListener.type
+          )
+      );
+    }
+    this.eventListeners.push(eventListener);
+  }
+
+  private raiseActivityEventOnListeners(
+    activityEvent: ActivityEvent,
+    extra?: unknown
+  ): void {
+    if (extra) {
+      activityEvent = {
+        ...activityEvent,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(extra as any),
+      };
+    }
+    this.eventListeners
+      .filter((listener) => listener.type === activityEvent.type)
+      .forEach((listener) => {
+        listener.callback(activityEvent);
+      });
   }
 
   private raiseEventOnListeningEntities<T extends EntityEvent>(

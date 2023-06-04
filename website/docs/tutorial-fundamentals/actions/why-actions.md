@@ -22,7 +22,7 @@ Animation is moving an entity from one position to another. Actions make it easy
 
 <details>
   <summary>Where is the game loop?</summary>
-  <p>Each time a device updates its screen, it draws a <a href="https://en.wikipedia.org/wiki/Film_frame">frame</a>. To make it appear that an entity is smoothly moving across the screen, you simply update it's position a little bit when you draw the next frame.
+  <p>Each time a device updates its screen, it draws a <a href="https://en.wikipedia.org/wiki/Film_frame">frame</a>. To make it appear that an entity is smoothly moving across the screen, you simply update its position a little bit when you draw the next frame.
   </p>
 
   <p>In many videogame libraries, there is a concept of a <a href="https://en.wikipedia.org/wiki/Video_game_programming#Game_structure">game loop</a>, which usually executes 60 times per second because most devices update their screen 60 times per second. To move the entity, you adjust its position 60 times per second. You need to keep track of the entity's current position, the position it's moving to, and the amount of time it should take to get there. You also need to keep track of how much time has passed since the entity started moving. This is a lot of work!

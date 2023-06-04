@@ -1,15 +1,61 @@
+import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityType } from "./ActivityType";
 import { IDataStore } from "./IDataStore";
 import { Session } from "./Session";
+import { CallbackOptions } from "./CallbackOptions";
+import { ActivityResultsEvent } from "./ActivityResultsEvent";
+
 export interface Activity {
   /** The type of activity: Game or Survey */
   type: ActivityType;
-  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.init()`. */
+  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.initialize()`. */
+  initialize(): Promise<void>;
+  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.init()`. @deprecated use Game.initialize instead. */
   init(): Promise<void>;
   /** Starts the activity */
   start(): Promise<void>;
   /** Stops the activity */
   stop(): void;
+  /**
+   * Executes a callback when the activity starts.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onStart(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void;
+  /**
+   * Executes a callback when the activity is canceled.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onCancel(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void;
+  /**
+   * Executes a callback when the activity ends.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onEnd(
+    callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
+    options?: CallbackOptions
+  ): void;
+  /**
+   * Executes a callback when the activity generates data.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onData(
+    callback: (activityResultsEvent: ActivityResultsEvent) => void,
+    options?: CallbackOptions
+  ): void;
   /** The activity's parent session */
   session: Session;
   /** The activity's unique identifier. NOTE: This is newly generated each session. The uuid for an activity will vary across sessions. */

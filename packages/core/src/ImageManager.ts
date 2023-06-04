@@ -298,6 +298,9 @@ export class ImageManager {
               .filter((g) => g.uuid === gameUuid)
               .map((g) => g as Game)
               .find(Boolean);
+            if (!game) {
+              throw new Error("game undefined");
+            }
             const browserImageUrl = game.prependAssetsGameIdUrl(
               browserImage.url
             );
@@ -359,6 +362,9 @@ export class ImageManager {
           .filter((g) => g.uuid === gameUuid)
           .map((g) => g as Game)
           .find(Boolean);
+        if (!game) {
+          throw new Error("game undefined");
+        }
         const browserImageUrl = game.prependAssetsGameIdUrl(browserImage.url);
         fetch(browserImageUrl)
           .then((response) => response.arrayBuffer())

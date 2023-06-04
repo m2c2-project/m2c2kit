@@ -57,6 +57,7 @@ export const code = `class DocsDemo extends Game {
         };
   
         const options = {
+            name: "Documentation Example",
             id: "docs",
             width: 400, height: 800,
             fonts: [{

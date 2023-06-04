@@ -27,5 +27,6 @@ module.exports = {
     "node_modules",
     ".rollup.cache",
     "examples/no-js-bundler-development/lib",
+    "packages/build-helpers/src/__tests__/dist-test",
   ],
 };

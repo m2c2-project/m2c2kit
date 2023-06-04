@@ -348,8 +348,8 @@ phase, participants report the location of dots on a grid.",
     super(options);
   }
 
-  override async init() {
-    await super.init();
+  override async initialize() {
+    await super.initialize();
     // just for convenience, alias the variable game to "this"
     // (even though eslint doesn't like it)
     // eslint-disable-next-line @typescript-eslint/no-this-alias

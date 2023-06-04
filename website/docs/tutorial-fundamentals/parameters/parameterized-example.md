@@ -40,6 +40,7 @@ We've named the variable for the parameters object as `defaultParameters`. You c
 
 ```js
 const options = {
+    name: "Documentation Example",
     id: "docs",
     width: 200, height: 400,
     fonts: [{
@@ -77,6 +78,8 @@ yesButton.onTapDown(() => {
 });
 ```
 
+Try changing the default value of `affirmative_text` from `Yep!` to `Yes`, click "Run", and see how the button text changes.
+
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 export const code = `class DocsDemo extends Game {
     constructor() {
@@ -111,6 +114,7 @@ export const code = `class DocsDemo extends Game {
         }
  
         const options = {
+            name: "Documentation Example",
             id: "docs",
             width: 200, height: 400,
             fonts: [{

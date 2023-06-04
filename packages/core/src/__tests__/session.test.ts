@@ -75,13 +75,17 @@ beforeEach(async () => {
   const options: SessionOptions = {
     activities: [g1, g2],
     canvasKitWasmUrl: "canvaskit.wasm",
+    autoStartAfterInit: false,
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.init();
 });
 
 describe("Session", () => {
+  beforeEach(async () => {
+    await session.init();
+  });
+
   it("creates a FontManager", () => {
     expect(session.fontManager).toBeInstanceOf(FontManager);
   });
@@ -95,7 +99,8 @@ describe("Session init", () => {
     return session.init().then((result) => expect(result).toBe(undefined));
   });
 
-  it("assigns canvaskit", () => {
+  it("assigns canvaskit", async () => {
+    await session.init();
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
     expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
@@ -107,6 +112,7 @@ describe("Session init", () => {
 
 describe("Session start", () => {
   it("starts first activity", async () => {
+    await session.init();
     await session.start();
     expect(session.currentActivity).toBe(g1);
   });
@@ -114,8 +120,25 @@ describe("Session start", () => {
 
 describe("Session advanceToNextActivity", () => {
   it("advances to next activity", async () => {
+    await session.init();
     await session.start();
     session.goToNextActivity();
     expect(session.currentActivity).toBe(g2);
+  });
+
+  it("automatically advances to next activity when autoGoToNextActivity = true", async () => {
+    session.options.autoGoToNextActivity = true;
+    await session.init();
+    await session.start();
+    g1.end();
+    expect(session.currentActivity).toBe(g2);
+  });
+
+  it("does not automatically advance to next activity when autoGoToNextActivity = false", async () => {
+    session.options.autoGoToNextActivity = false;
+    await session.init();
+    await session.start();
+    g1.end();
+    expect(session.currentActivity).toBe(g1);
   });
 });

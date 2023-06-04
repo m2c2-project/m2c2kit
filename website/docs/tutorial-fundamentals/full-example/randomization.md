@@ -30,7 +30,11 @@ While this would work, it would be inadequate for most assessments. Although unl
 
 In nearly all cases, you should randomize the trial configurations in advance. This ensures that you can achieve the desired variation for your assessments across the repeated trials.
 
+:::note
+
 This is probably the most complicated part of programming an assessment. It's a lot of data structures, arrays, indexes, and loops. But, it's worth it to get the randomization right.
+
+:::
 
 ## Prepare the groundwork for randomization
 
@@ -93,7 +97,7 @@ for (let i = 0; i < numberOfTrials; i++) {
 
 ## Use the trial configuration to set the word and color
 
-The code to set the word and color is similar to what we propsed at the top of this page. The important difference is that instead of randomizing within this Action, we draw upon the trial configuration we already created. We placed all our trials' configurations in the array `trialConfigurations`. We can use the variable `game.trialIndex` to access the configuration for our current trial.
+The code to set the word and color is similar to what we proposed at the top of this page. The important difference is that instead of randomizing within this Action, we draw upon the trial configuration we already created. We placed all our trials' configurations in the array `trialConfigurations`. We can use the variable `game.trialIndex` to access the configuration for our current trial.
 
 ```js
 Action.custom( {callback: () => {
@@ -141,6 +145,7 @@ export const code = `class DocsDemo extends Game {
     constructor() {
  
         const options = {
+            name: "Documentation Example",
             id: "docs",
             width: 400, height: 800,
             fonts: [{

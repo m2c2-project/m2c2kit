@@ -1,4 +1,3 @@
-import { readFile } from "fs/promises";
 import { hashM2c2kitAssets } from "..";
 import cpy from "cpy";
 import { rimrafSync } from "rimraf";

@@ -11,7 +11,6 @@
 import {
   Action,
   Easings,
-  EventType,
   Game,
   Label,
   RandomDraws,
@@ -54,7 +53,7 @@ class Stroop extends Game {
         type: "boolean",
         default: true,
         description:
-          "Should feedback, in the form of the user's perfomance, be shown at the end of the assessment? Default is true.",
+          "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
       },
     };
 
@@ -81,6 +80,7 @@ class Stroop extends Game {
     };
 
     const options = {
+      name: "Stroop Documentation Example",
       id: "docs",
       width: 400,
       height: 800,
@@ -104,8 +104,8 @@ class Stroop extends Game {
     super(options);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     const game = this;
 
     const wordColors = [
@@ -377,35 +377,10 @@ const activity = new Stroop();
 const session = new Session({
   canvasKitWasmUrl: "canvaskit.wasm",
   activities: [activity],
-  activityCallbacks: {
-    onActivityLifecycle: async (ev) => {
-      if (
-        ev.type === EventType.ActivityEnd ||
-        ev.type === EventType.ActivityCancel
-      ) {
-        const nextActivity = session.nextActivity;
-        if (nextActivity) {
-          await session.goToNextActivity();
-        } else {
-          session.end();
-        }
-      }
-    },
-    onActivityResults: (ev) => {
-      // Data are printed to the console for demonstration purposes, but
-      // this is where you would typically send the data to your server.
-      console.log("  data: " + JSON.stringify(ev.data));
-    },
-  },
-  sessionCallbacks: {
-    onSessionLifecycle: async (ev) => {
-      if (ev.type === EventType.SessionEnd) {
-        console.log("🔴 ended session");
-        // The assessments are complete. This is where you could
-        // redirect the participant to another page in your study.
-      }
-    },
-  },
 });
 
-session.init();
+session.onActivityData((ev) => {
+  console.log("  newData: " + JSON.stringify(ev.newData));
+  console.log("  data: " + JSON.stringify(ev.data));
+});
+session.initialize();

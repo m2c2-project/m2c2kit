@@ -133,8 +133,8 @@ Embedding.ConfigureWasmFetchInterceptor();
 /**
  * Make session also available on window in case we want to control
  * the session through another means, such as other javascript or
- * browser code, or a mobile WebView's invocation of session.start().
- * */
+ * browser code, or a mobile WebView.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-session.init();
+session.initialize();

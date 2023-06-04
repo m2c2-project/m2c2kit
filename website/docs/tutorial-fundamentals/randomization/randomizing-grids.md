@@ -28,6 +28,8 @@ The `cells` object might look like this
 
 Below, we create a 6 x 6 grid. We randomly place an X on 4 grid cells. The cell positions are also printed to the console.
 
+Click the "Run" button multiple times to see how the positions of the X change.
+
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 export const code = `const sceneOne = new Scene({ backgroundColor: WebColors.Azure });
 game.addScene(sceneOne);
