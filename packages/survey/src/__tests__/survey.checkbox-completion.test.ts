@@ -58,7 +58,7 @@ describe("checkbox behavior on survey completion, multiresponse", () => {
       canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
-    // note: we are not running await session.init() here because these survey
+    // note: we are not running await session.initialize() here because these survey
     // methods do not need our m2c2 DOM elements to test their functionality.
   });
 

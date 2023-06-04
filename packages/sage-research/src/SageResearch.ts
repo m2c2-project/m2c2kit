@@ -129,13 +129,13 @@ export class SageResearch {
    * Determines if the session should be started manually by the native app.
    *
    * @remarks To begin a session, the javascript code must first call
-   * Session.init() to initialize resources. When this is finished, a callback
+   * Session.initialize() to initialize resources. When this is finished, a callback
    * is made to whatever function was passed into onSessionLifecycleChange in
    * the SessionOptions. When running in a browser, we typically immediately
    * call Session.start() to start the session. However, when running in a
    * native app, we might want to set some per-user parameters for the
    * activities (games), if we don't want to use the built-in default
-   * parameters. Game parameters can be set AFTER Session.init() but
+   * parameters. Game parameters can be set AFTER Session.initialize() but
    * BEFORE Session.start(). When sessionManualStart() returns true, it is a
    * signal to the javascript code NOT to automatically call Session.start(),
    * so that the native app can set the parameters and then call
@@ -177,7 +177,7 @@ export class SageResearch {
    * @remarks WKWebView doesn't receive the proper MIME type and status code
    * when fetch() gets resources from local bundle. Normally, this is OK,
    * but WebAssembly binaries must be application/wasm, otherwise they cannot
-   * be compiled and instantiated. Run this method before session.init() to
+   * be compiled and instantiated. Run this method before session.initialize() to
    * ensure that when m2c2kit fetches a WebAssembly resource, it has the
    * proper reponse. The method will not make any modifications when fetching
    * non-wasm resources or when running on Android.

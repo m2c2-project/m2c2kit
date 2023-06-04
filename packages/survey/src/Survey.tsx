@@ -72,8 +72,6 @@ export class Survey implements Activity {
     return this.initialize();
   }
 
-  // Provide init() method to satisfy Activity interface
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async initialize() {
     if (this.session.options.activityCallbacks?.onActivityLifecycle) {
       this.onStart(this.session.options.activityCallbacks.onActivityLifecycle);

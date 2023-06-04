@@ -29,8 +29,8 @@ class Game1 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -63,8 +63,8 @@ class Game2 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -139,7 +139,7 @@ describe("parameters", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("setParameters sets a game parameter", () => {
@@ -192,7 +192,7 @@ describe("scene add/remove", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("addScene adds a scene", () => {
@@ -258,7 +258,7 @@ describe("presentScene", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("presentScene throws error if non-added scene is presented by name", () => {
@@ -288,7 +288,7 @@ describe("actions", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("shape completes move from 200, 200 to 50, 50", async () => {
@@ -348,7 +348,7 @@ describe("Game start", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("throws error if entryScene as object has not been added to game", async () => {
@@ -404,7 +404,7 @@ describe("free entities", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
   });
 
   it("removes all free entities", () => {
@@ -493,8 +493,8 @@ class Game3 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -516,7 +516,7 @@ describe("addTrialData", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
     await session.start();
   });
 
@@ -602,8 +602,8 @@ describe("time stepping", () => {
       super(gameOptions);
     }
 
-    async init() {
-      await super.init();
+    async initialize() {
+      await super.initialize();
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const game = this;
       const s = new Scene({
@@ -631,7 +631,7 @@ describe("time stepping", () => {
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.init();
+    await session.initialize();
     await session.start();
   });
 
@@ -668,7 +668,7 @@ describe("custom trial schema", () => {
         description: "Age of dog",
       },
     });
-    await session.init();
+    await session.initialize();
     await session.start();
     if (!g3.options.trialSchema) {
       throw new Error("trialSchema is null");
@@ -688,7 +688,7 @@ describe("custom trial schema", () => {
         description: "Age of dog",
       },
     });
-    await session.init();
+    await session.initialize();
     await session.start();
     g3.addTrialData("dog_name", "Fido");
     expect(g3.data.trials[0].dog_name).toBe("Fido");
@@ -708,7 +708,7 @@ describe("custom trial schema", () => {
       },
     });
 
-    await session.init();
+    await session.initialize();
     await session.start();
     g3.addStaticTrialData("dog_name", "Fido");
     g3.addStaticTrialData("dog_age", 13);

@@ -16,7 +16,7 @@ import { ActivityResultsEvent } from "./ActivityResultsEvent";
  * ...
  * const db: IDataStore = new LocalDatabase();
  * session.dataStore = db;
- * session.init();
+ * session.initialize();
  * ```
  */
 export interface IDataStore {

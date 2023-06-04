@@ -8,9 +8,27 @@ import { ActivityResultsEvent } from "./ActivityResultsEvent";
 export interface Activity {
   /** The type of activity: Game or Survey */
   type: ActivityType;
-  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.initialize()`. */
+  /**
+   * Initializes the activity.
+   *
+   * @remarks All code to create the activity's appearance and behavior must
+   * be placed in this method. This method is asynchronous, and must be
+   * awaited. When writing a new game by extending the `Game` class, this
+   * method will be overridden, but the base method must still be called with
+   * `await super.initialize()`.
+   */
   initialize(): Promise<void>;
-  /** Initializes the activity. All code to create the activity's appearance and behavior must be placed in this method. This method is asynchronous, and must be awaited. When writing a new game by extending the `Game` class, this method will be overridden, but the base method must still be called with `await super.init()`. @deprecated use Game.initialize instead. */
+  /**
+   * Initializes the activity.
+   *
+   * @remarks All code to create the activity's appearance and behavior must
+   * be placed in this method. This method is asynchronous, and must be
+   * awaited. When writing a new game by extending the `Game` class, this
+   * method will be overridden, but the base method must still be called with
+   * `await super.init()`.
+   *
+   * @deprecated use Game.initialize() instead.
+   */
   init(): Promise<void>;
   /** Starts the activity */
   start(): Promise<void>;

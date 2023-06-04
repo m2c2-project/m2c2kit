@@ -155,7 +155,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    * @param key - item key
    * @param value - item value
@@ -182,7 +182,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not
@@ -206,7 +206,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not
@@ -226,7 +226,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    */
   storeClearItems() {
@@ -241,7 +241,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    * @param globalStore - if true, treat the item as "global" and not
    * associated with a specific activity; global items can be accessed
@@ -259,7 +259,7 @@ export class Game implements Activity {
    * ```
    * const db: IDataStore = new LocalDatabase();
    * session.dataStore = db;
-   * session.init();
+   * session.initialize();
    * ```
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not

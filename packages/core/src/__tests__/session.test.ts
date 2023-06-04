@@ -26,8 +26,8 @@ class Game1 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -52,8 +52,8 @@ class Game2 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -83,7 +83,7 @@ beforeEach(async () => {
 
 describe("Session", () => {
   beforeEach(async () => {
-    await session.init();
+    await session.initialize();
   });
 
   it("creates a FontManager", () => {
@@ -96,11 +96,13 @@ describe("Session", () => {
 
 describe("Session init", () => {
   it("executes", () => {
-    return session.init().then((result) => expect(result).toBe(undefined));
+    return session
+      .initialize()
+      .then((result) => expect(result).toBe(undefined));
   });
 
   it("assigns canvaskit", async () => {
-    await session.init();
+    await session.initialize();
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
     expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
@@ -112,7 +114,7 @@ describe("Session init", () => {
 
 describe("Session start", () => {
   it("starts first activity", async () => {
-    await session.init();
+    await session.initialize();
     await session.start();
     expect(session.currentActivity).toBe(g1);
   });
@@ -120,7 +122,7 @@ describe("Session start", () => {
 
 describe("Session advanceToNextActivity", () => {
   it("advances to next activity", async () => {
-    await session.init();
+    await session.initialize();
     await session.start();
     session.goToNextActivity();
     expect(session.currentActivity).toBe(g2);
@@ -128,7 +130,7 @@ describe("Session advanceToNextActivity", () => {
 
   it("automatically advances to next activity when autoGoToNextActivity = true", async () => {
     session.options.autoGoToNextActivity = true;
-    await session.init();
+    await session.initialize();
     await session.start();
     g1.end();
     expect(session.currentActivity).toBe(g2);
@@ -136,7 +138,7 @@ describe("Session advanceToNextActivity", () => {
 
   it("does not automatically advance to next activity when autoGoToNextActivity = false", async () => {
     session.options.autoGoToNextActivity = false;
-    await session.init();
+    await session.initialize();
     await session.start();
     g1.end();
     expect(session.currentActivity).toBe(g1);

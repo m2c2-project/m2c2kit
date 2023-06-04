@@ -33,8 +33,8 @@ class Game1 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
@@ -65,7 +65,7 @@ beforeEach(async () => {
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.init();
+  await session.initialize();
 
   rect1 = g1.entities
     .filter((e) => e.name === "myRect1")
@@ -96,35 +96,35 @@ describe("test duplicate method", () => {
   });
 
   it("scene2's game is scene1's game", () => {
-    return session.init().then(() => {
+    return session.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.game).toEqual(scene1.game);
     });
   });
 
   it("scene2's background color to equal scene1's background", () => {
-    return session.init().then(() => {
+    return session.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.backgroundColor).toEqual(scene1.backgroundColor);
     });
   });
 
   it("scene2's name is not equal to scene1's name when no new name is given", () => {
-    return session.init().then(() => {
+    return session.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.name).not.toEqual(scene1.name);
     });
   });
 
   it("scene2's name is equal to the new name provided", () => {
-    return session.init().then(() => {
+    return session.initialize().then(() => {
       const scene2 = scene1.duplicate("my new scene2");
       expect(scene2.name).toEqual("my new scene2");
     });
   });
 
   it("scene2's children is duplicated deep copy of scene1's children", () => {
-    return session.init().then(() => {
+    return session.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.children[0]).toBeInstanceOf(Label);
       expect(scene2.children[0]).not.toEqual(label1);

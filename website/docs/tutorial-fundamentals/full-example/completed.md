@@ -79,8 +79,8 @@ export const code = `class DocsDemo extends Game {
         super(options);
     }
  
-    async init() {
-        await super.init();
+    async initialize() {
+        await super.initialize();
         const game = this;
      
         const wordColors = [

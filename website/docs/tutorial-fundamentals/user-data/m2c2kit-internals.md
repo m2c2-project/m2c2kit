@@ -22,11 +22,11 @@ To write m2c2kit assessments, we build upon (extend) a class called `Game`. Up t
 There are two important methods (a group of code that can be called) on the `Game` class:
 
 - `constructor()` - This is where you define the options, including the trial schema, for your assessment.
-- `init()` - This is where you set up (or initialize) your assessment.
+- `initialize()` - This is where you set up (or initialize) your assessment.
 
 :::note
 
-All the example code you've seen up to this point has simply been the code that was inside the `init()` method. You've been coding this method all along, without even realizing it!
+All the example code you've seen up to this point has simply been the code that was inside the `initialize()` method. You've been coding this method all along, without even realizing it!
 
 :::
 
@@ -72,11 +72,11 @@ const options = {
 
 - The last line of the constructor has the code `super(options)`. This is how we get all the built-in functionality of the `Game` class. Just always remember to include this at the end of your constructor.
 
-- Within the `init()`, we write our assessment code, as we have been doing all along. The only difference is the first two lines: `await super.init()` runs some built-in setup code. `const game = this` allows us to conveniently refer to the game object (this was hidden from you in the previous examples). 
+- Within the `initialize()`, we write our assessment code, as we have been doing all along. The only difference is the first two lines: `await super.initialize()` runs some built-in setup code. `const game = this` allows us to conveniently refer to the game object (this was hidden from you in the previous examples). 
 
 ```js
-async init() {
-    await super.init();
+async initialize() {
+    await super.initialize();
     const game = this;
     const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
     game.addScene(sceneOne);
@@ -113,8 +113,8 @@ export const code = `class DocsDemo extends Game {
         super(options);
     }
  
-    async init() {
-        await super.init();
+    async initialize() {
+        await super.initialize();
         const game = this;
         const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
         game.addScene(sceneOne);

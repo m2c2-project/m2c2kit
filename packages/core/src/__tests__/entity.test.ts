@@ -26,8 +26,8 @@ class Game1 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
@@ -64,7 +64,7 @@ beforeEach(async () => {
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.init();
+  await session.initialize();
 });
 
 describe("test descendants", () => {

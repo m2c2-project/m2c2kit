@@ -101,8 +101,8 @@
           };
           super(options);
         }
-        async init() {
-          await super.init();
+        async initialize() {
+          await super.initialize();
           const game = this;
           const sceneOne = new Scene();
           game.addScene(sceneOne);
@@ -129,7 +129,7 @@
         console.log("  data: " + JSON.stringify(ev.data));
       });
       window.session = session;
-      session.init();
+      session.initialize();
     </script>
   </head>
 

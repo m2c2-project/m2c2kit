@@ -127,8 +127,8 @@ export const code = `class DocsDemo extends Game {
         super(options);
     }
  
-    async init() {
-        await super.init();
+    async initialize() {
+        await super.initialize();
         const game = this;
         const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
         game.addScene(sceneOne);
@@ -228,8 +228,8 @@ code: `class DocsDemo extends Game {
         super(options);
     }
  
-    async init() {
-        await super.init();
+    async initialize() {
+        await super.initialize();
         const game = this;
         const sceneOne = new Scene({ backgroundColor: WebColors.PaleTurquoise });
         game.addScene(sceneOne);

@@ -149,8 +149,8 @@
           };
           super(options);
         }
-        async init() {
-          await super.init();
+        async initialize() {
+          await super.initialize();
           const game = this;
           const sceneOne = new Scene({ backgroundColor: WebColors.SkyBlue });
           game.addScene(sceneOne);
@@ -172,7 +172,7 @@
         console.log("Trial Data: " + JSON.stringify(ev.newData) + "\n");
       });
       window.session = session;
-      session.init();
+      session.initialize();
     </script>
   </head>
 

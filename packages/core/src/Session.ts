@@ -231,7 +231,7 @@ export class Session {
    */
   async initialize(): Promise<void> {
     console.log(`⚪ @m2c2kit/core version ${this.version}`);
-    Timer.start("sessionInit");
+    Timer.start("sessionInitialize");
     const sessionInitializeEvent: SessionLifecycleEvent = {
       target: this,
       type: EventType.SessionInitialize,
@@ -244,7 +244,7 @@ export class Session {
     await Promise.all(
       this.options.activities.map((activity) => {
         // IDataStore implementation is provided by another library and must
-        // be set in the session before calling session.init()
+        // be set in the session before calling session.initialize()
         activity.dataStore = this.dataStore;
         activity.onStart(this.sessionActivityLifecycleHandler.bind(this));
         activity.onCancel(this.sessionActivityLifecycleHandler.bind(this));
@@ -253,7 +253,7 @@ export class Session {
           this.activityResultsEventHandler(event);
         });
 
-        return activity.init();
+        return activity.initialize();
       })
     );
 
@@ -262,9 +262,11 @@ export class Session {
     this.imageManager.removeScratchCanvas();
 
     console.log(
-      `⚪ Session.init() took ${Timer.elapsed("sessionInit").toFixed(0)} ms`
+      `⚪ Session.sessionInitialize() took ${Timer.elapsed(
+        "sessionInitialize"
+      ).toFixed(0)} ms`
     );
-    Timer.remove("sessionInit");
+    Timer.remove("sessionInitialize");
     if (this.options.autoStartAfterInit !== false) {
       await this.start();
     }
@@ -372,7 +374,7 @@ export class Session {
 
     /**
      * Because the current activity has been newly created, it needs properties
-     * assigned to it that it would have received in the Session.init()
+     * assigned to it that it would have received in the Session.initialize()
      * method. Also, if the old instance had new parameters set via
      * Game.SetParameters(), we must apply them.
      */
@@ -395,7 +397,7 @@ export class Session {
     }
 
     /**
-     * In Session.init(), async assets were loaded. Once processed, they were
+     * In Session.initialize(), async assets were loaded. Once processed, they were
      * stored in a dictionary, with the activity uuid as the key. When a new
      * instance of the activity is created, the object has a different uuid.
      * We must update the uuid in the dictionaries (if it exists).
@@ -411,7 +413,7 @@ export class Session {
       delete this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
     }
 
-    await this.currentActivity.init();
+    await this.currentActivity.initialize();
     await this.currentActivity.start();
   }
 

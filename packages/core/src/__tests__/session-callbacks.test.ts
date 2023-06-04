@@ -35,8 +35,8 @@ class Game1 extends Game {
     super(gameOptions);
   }
 
-  async init() {
-    await super.init();
+  async initialize() {
+    await super.initialize();
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
     const s = new Scene({
@@ -71,20 +71,20 @@ describe("Session event handlers", () => {
   it("calls session.onInitialize callback when session initializes", async () => {
     const handler = jest.fn();
     session.onInitialize(() => handler());
-    await session.init();
+    await session.initialize();
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
   it("session.onInitialize callback is provided correct event type", async () => {
     session.onInitialize(genericHandler);
-    await session.init();
+    await session.initialize();
     expect(genericEvent.type).toBe(EventType.SessionInitialize);
   });
 
   it("calls session.onStart callback when session starts", async () => {
     const handler = jest.fn();
     session.onStart(() => handler());
-    await session.init();
+    await session.initialize();
     await session.start();
     expect(handler).toHaveBeenCalledTimes(1);
   });
@@ -93,7 +93,7 @@ describe("Session event handlers", () => {
     const handler = jest.fn();
     session.onStart(() => handler());
     session.options.autoStartAfterInit = true;
-    await session.init();
+    await session.initialize();
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
@@ -101,13 +101,13 @@ describe("Session event handlers", () => {
     const handler = jest.fn();
     session.onStart(() => handler());
     session.options.autoStartAfterInit = false;
-    await session.init();
+    await session.initialize();
     expect(handler).toHaveBeenCalledTimes(0);
   });
 
   it("session.onStart callback is provided correct event type", async () => {
     session.onStart(genericHandler);
-    await session.init();
+    await session.initialize();
     await session.start();
     expect(genericEvent.type).toBe(EventType.SessionStart);
   });
@@ -115,7 +115,7 @@ describe("Session event handlers", () => {
   it("calls session.onEnd callback when session ends", async () => {
     const handler = jest.fn();
     session.onEnd(() => handler());
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -134,7 +134,7 @@ describe("Session event handlers", () => {
     const handler = jest.fn();
     session.onEnd(() => handler());
     session.options.autoEndAfterLastActivity = false;
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -151,7 +151,7 @@ describe("Session event handlers", () => {
 
   it("session.onEnd callback is provided correct event type", async () => {
     session.onEnd(genericHandler);
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -171,7 +171,7 @@ describe("Session event handlers", () => {
     session.onEnd(() => handler());
     const handler2 = jest.fn();
     session.onEnd(() => handler2());
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -192,7 +192,7 @@ describe("Session event handlers", () => {
     session.onEnd(() => handler());
     const handler2 = jest.fn();
     session.onEnd(() => handler2(), { replaceExisting: true });
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -211,7 +211,7 @@ describe("Session event handlers", () => {
   it("calls session.onActivityData callback when an activity generates data", async () => {
     const handler = jest.fn();
     session.onActivityData(() => handler());
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
@@ -228,7 +228,7 @@ describe("Session event handlers", () => {
 
   it("session.onActivityData callback is provided correct event type", async () => {
     session.onActivityData(genericHandler);
-    await session.init();
+    await session.initialize();
     (g1.entryScene as Scene).run(
       Action.custom({
         callback: () => {
