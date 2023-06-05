@@ -255,6 +255,12 @@ export class Session {
           this.activityResultsEventHandler(event);
         });
 
+        if (activity.init) {
+          console.warn(
+            `game ${activity.id}: Activity.init() is deprecated. Use Activity.initialize() instead.`
+          );
+          return activity.init();
+        }
         return activity.initialize();
       })
     );
