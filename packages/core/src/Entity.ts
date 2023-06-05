@@ -23,6 +23,8 @@ import { EventType } from "./EventBase";
 import { Game } from "./Game";
 import { ActionType } from "./ActionType";
 import { M2DragEvent } from "./M2DragEvent";
+import { CallbackOptions } from "./CallbackOptions";
+import { Composite } from "./Composite";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -168,10 +170,15 @@ export abstract class Entity implements EntityOptions {
    * @remarks Inspiration from https://stackoverflow.com/a/35361695
    */
   public toString = (): string => {
+    let type = this.type.toString();
+    if (this.type == EntityType.Composite) {
+      type = (this as unknown as Composite).compositeType;
+    }
+
     if (this.name !== this.uuid) {
-      return `"${this.name}" (${this.type}, ${this.uuid})`;
+      return `"${this.name}" (${type}, ${this.uuid})`;
     } else {
-      return `"${this.type} (${this.uuid})`;
+      return `"${type} (${this.uuid})`;
     }
   };
 
@@ -353,7 +360,7 @@ export abstract class Entity implements EntityOptions {
    */
   onTapDown(
     callback: (tapEvent: TapEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     // cast <(ev: EntityEvent) => void> is needed because callback parameter
     // in this onTapDown method has argument of type TapEvent, but
@@ -361,7 +368,7 @@ export abstract class Entity implements EntityOptions {
     this.addEventListener(
       EventType.TapDown,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -382,12 +389,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapUp(
     callback: (tapEvent: TapEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapUp,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -409,12 +416,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapUpAny(
     callback: (tapEvent: TapEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapUpAny,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -435,12 +442,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapLeave(
     callback: (tapEvent: TapEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapLeave,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -459,12 +466,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerDown(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerDown,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -485,12 +492,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerUp(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerUp,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -507,12 +514,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerMove(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerMove,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -528,12 +535,12 @@ export abstract class Entity implements EntityOptions {
    */
   onDragStart(
     callback: (m2DragEvent: M2DragEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.DragStart,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -549,12 +556,12 @@ export abstract class Entity implements EntityOptions {
    */
   onDrag(
     callback: (m2DragEvent: M2DragEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.Drag,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
@@ -570,19 +577,19 @@ export abstract class Entity implements EntityOptions {
    */
   onDragEnd(
     callback: (m2DragEvent: M2DragEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.DragEnd,
       <(ev: EntityEvent) => void>callback,
-      replaceExistingCallback
+      callbackOptions
     );
   }
 
-  private addEventListener(
+  addEventListener(
     type: EventType,
     callback: (ev: EntityEvent) => void,
-    replaceExistingCallback: boolean
+    callbackOptions?: CallbackOptions
   ): void {
     const eventListener: EntityEventListener = {
       type: type,
@@ -590,11 +597,7 @@ export abstract class Entity implements EntityOptions {
       callback: callback,
     };
 
-    // By default, we'll replace the existing callback if there is one
-    // Why? If the same setup code is called more than once for a scene that repeats, it could
-    // add the same callback again. Usually, this is not the intent.
-
-    if (replaceExistingCallback) {
+    if (callbackOptions?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
@@ -603,6 +606,13 @@ export abstract class Entity implements EntityOptions {
           )
       );
     }
+
+    if (this.eventListeners.some((listener) => listener.type == type)) {
+      console.warn(
+        `game {${this.game.id}}: listener for event ${type} has already been added to this entity {${this}}. This is usually not intended.`
+      );
+    }
+
     this.eventListeners.push(eventListener);
   }
 

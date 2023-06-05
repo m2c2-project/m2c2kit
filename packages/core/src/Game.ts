@@ -2267,14 +2267,14 @@ export class Game implements Activity {
    *
    * @param type - the type of event to listen for, e.g., "tapDown"
    * @param entityName - the entity name for which an event will be listened
-   * @param callback
-   * @param replaceExistingCallback
+   * @param callback - the callback to be invoked when the event occurs
+   * @param callbackOptions
    */
   createEventListener(
     type: EventType,
     entityName: string,
     callback: (event: EntityEvent) => void,
-    replaceExistingCallback = true
+    callbackOptions?: CallbackOptions
   ): void {
     const entities = this.entities.filter(
       (entity) => entity.name === entityName
@@ -2293,17 +2293,12 @@ export class Game implements Activity {
       );
     }
 
-    switch (type) {
-      case EventType.PointerDown: {
-        entity.onPointerDown(callback, replaceExistingCallback);
-        break;
-      }
-      default: {
-        throw new Error(
-          `could not create event listener: event type ${type} is not known`
-        );
-      }
+    if (!Object.values(EventType).includes(type)) {
+      throw new Error(
+        `game ${this.id}: could not create event listener. event type ${type} is not known`
+      );
     }
+    entity.addEventListener(type, callback, callbackOptions);
   }
 
   /**
