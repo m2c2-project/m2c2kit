@@ -1,4 +1,5 @@
-name: Build/test/deploy packages and docs
+# Build/test/deploy packages to npm and docs to GitHub Pages
+name: CI/CD
 
 on:
   # Runs on pushes targeting the default branch

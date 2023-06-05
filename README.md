@@ -6,6 +6,7 @@ _a library for cross-platform cognitive assessments_
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/m2c2-project/m2c2kit.svg?style=social)](https://GitHub.com/m2c2-project/m2c2kit/stargazers/)
 [![GitHub watchers](https://img.shields.io/github/watchers/m2c2-project/m2c2kit.svg?style=social)](https://GitHub.com/m2c2-project/m2c2kit/watchers/)
 
@@ -80,7 +81,7 @@ See the [`@m2c2kit/cli`](packages/cli) package for more information on using the
 
 The installation steps above are all you need to start using m2c2kit and creating assessments.
 
-To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. Assuming you have installed [Node.js](https://nodejs.org), execute the following from the repository root:
+To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. After you have installed the prerequisites for building and testing the repository ([Node.js](https://nodejs.org), [Git](https://git-scm.com/), and [Docker](https://www.docker.com/)), execute the following from the repository root:
 
 ```
 npm install
@@ -114,7 +115,21 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 
 ---
 
-Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core) and [`@m2c2kit/survey`](packages/survey) libraries. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
+Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core), [`@m2c2kit/survey`](packages/survey), and [`@m2c2kit/build-helpers`](packages/build-helpers) packages. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
+
+To run the tests, execute the following from the repository root:
+
+```
+npm run test
+```
+
+Using [Selenium](https://www.selenium.dev/), [WebdriverIO](https://webdriver.io/), [Verdaccio](https://verdaccio.org/), and Docker Compose, some integration tests have been written to test the [`@m2c2kit/cli`](packages/cli) package. The integration tests build and publish m2c2kit packages to a local npm registry, install the CLI, scaffold a new app with the CLI, and test the new app's appearance and interactivity. The integration tests are fully containerized; you can run them without affecting your local system.
+
+To run the containerized integration tests, execute the following from the repository root:
+
+```
+npm run integration-test
+```
 
 ## Integrations
 
