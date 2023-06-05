@@ -225,6 +225,9 @@ export class Session {
    * @deprecated Use Session.initialize() instead.
    */
   async init(): Promise<void> {
+    console.warn(
+      `The init() method of Session is deprecated. Use initialize() instead.`
+    );
     return this.initialize();
   }
 
