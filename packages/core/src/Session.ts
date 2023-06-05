@@ -229,6 +229,21 @@ export class Session {
   }
 
   /**
+   * Check if the Activity uses the deprecated init() method.
+   *
+   * @remarks Activity.init() is deprecated and should be replaced with
+   * Activity.initialize().
+   *
+   * @param activity
+   * @returns true if the activity defines its own init() method, false otherwise.
+   */
+  private activityUsesDeprecatedInit(activity: Activity): boolean {
+    const activityPrototype = Object.getPrototypeOf(activity);
+    const gamePrototype = Object.getPrototypeOf(activityPrototype);
+    return activityPrototype?.init !== gamePrototype?.init;
+  }
+
+  /**
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async initialize(): Promise<void> {
@@ -255,9 +270,9 @@ export class Session {
           this.activityResultsEventHandler(event);
         });
 
-        if (activity.init) {
+        if (this.activityUsesDeprecatedInit(activity)) {
           console.warn(
-            `game ${activity.id}: Activity.init() is deprecated. Use Activity.initialize() instead.`
+            `game ${activity.id}: Activity.init() is deprecated. In the assessment class that extends Game, use Activity.initialize() instead:\n  async initialize() {\n    await super.initialize();\n    ...\n  }\n`
           );
           return activity.init();
         }
