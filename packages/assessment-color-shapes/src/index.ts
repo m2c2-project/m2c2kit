@@ -441,18 +441,7 @@ phases.`,
         "shape_colors"
       );
 
-    interface PresentShape {
-      shape: Shape;
-      shapeIndex: number;
-      color: RgbaColor;
-      colorName: string;
-      location: {
-        row: number;
-        column: number;
-      };
-    }
-
-    interface ResponseShape {
+    interface DisplayShape {
       shape: Shape;
       shapeIndex: number;
       color: RgbaColor;
@@ -464,8 +453,8 @@ phases.`,
     }
 
     interface TrialConfiguration {
-      presentShapes: Array<PresentShape>;
-      responseShapes: Array<ResponseShape>;
+      presentShapes: Array<DisplayShape>;
+      responseShapes: Array<DisplayShape>;
       numberOfShapesWithDifferentColors: number;
     }
 
@@ -482,8 +471,8 @@ phases.`,
     );
 
     for (let i = 0; i < numberOfTrials; i++) {
-      const presentShapes = new Array<PresentShape>();
-      const responseShapes = new Array<PresentShape>();
+      const presentShapes = new Array<DisplayShape>();
+      const responseShapes = new Array<DisplayShape>();
       const shapesToShowIndexes = RandomDraws.FromRangeWithoutReplacement(
         numberOfShapesShown,
         0,
@@ -567,7 +556,7 @@ phases.`,
         }
       } while (!presentLocationsOk);
       for (let j = 0; j < numberOfShapesShown; j++) {
-        const presentShape: PresentShape = {
+        const presentShape: DisplayShape = {
           shape: shapeLibrary[shapesToShowIndexes[j]],
           shapeIndex: shapesToShowIndexes[j],
           color: shapeColors[shapeColorsIndexes[j]].rgbaColor,
@@ -597,7 +586,7 @@ phases.`,
         }
       } while (!responseLocationsOk);
       for (let j = 0; j < numberOfShapesShown; j++) {
-        const responseShape: PresentShape = {
+        const responseShape: DisplayShape = {
           shape: presentShapes[j].shape,
           shapeIndex: shapesToShowIndexes[j],
           color: presentShapes[j].color,
@@ -719,6 +708,13 @@ phases.`,
       for (let i = 0; i < trialConfiguration.presentShapes.length; i++) {
         const presentShape = trialConfiguration.presentShapes[i].shape;
         presentShape.fillColor = trialConfiguration.presentShapes[i].color;
+        /**
+         * Because we are repositioning children of a grid, we need to
+         * set its position back to zero, because in the grid, it recalculates
+         * the position. If we don't do this, the shapes will be positioned
+         * incorrectly if they are positioned a second time.
+         */
+        presentShape.position = { x: 0, y: 0 };
         presentationGrid.addAtCell(
           presentShape,
           trialConfiguration.presentShapes[i].location.row,
@@ -777,6 +773,13 @@ phases.`,
       for (let i = 0; i < trialConfiguration.responseShapes.length; i++) {
         const responseShape = trialConfiguration.responseShapes[i].shape;
         responseShape.fillColor = trialConfiguration.responseShapes[i].color;
+        /**
+         * Because we are repositioning children of a grid, we need to
+         * set its position back to zero, because in the grid, it recalculates
+         * the position. If we don't do this, the shapes will be positioned
+         * incorrectly if they are positioned a second time.
+         */
+        responseShape.position = { x: 0, y: 0 };
         responseGrid.addAtCell(
           responseShape,
           trialConfiguration.responseShapes[i].location.row,
