@@ -796,6 +796,10 @@ appeared.",
     });
     locationSelectionScene.addChild(locationSelectionSquare);
 
+    locationSelectionSquare.onPointerDown(() => {
+      currentInteractionIsDrag = false;
+    });
+
     const whereDotText = new TextLine({
       text: "Where was this dot?",
       fontSize: 24,
@@ -985,10 +989,6 @@ appeared.",
         throw new Error("no selected color!");
       }
       priorColorSelectedDot.fillColor = selectedRgba;
-
-      locationSelectionSquare.onPointerDown(() => {
-        currentInteractionIsDrag = false;
-      });
 
       locationSelectionDot.onTapDown((tapEvent) => {
         /** Prevent other entities from receiving the tap event.
