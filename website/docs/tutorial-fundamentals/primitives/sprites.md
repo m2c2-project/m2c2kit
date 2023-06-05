@@ -82,7 +82,7 @@ code: `class DocsDemo extends Game {
             id: "docs",
             width: 200, height: 400,
             images: [{
-                imageName: "overlappingrectangles",
+                imageName: "overlappingRectangles",
                 height: 128,
                 width: 128,
                 url: "https://upload.wikimedia.org/wikipedia/commons/e/e8/Svg_example3.svg",
@@ -97,7 +97,7 @@ code: `class DocsDemo extends Game {
         const sceneOne = new Scene({ backgroundColor: WebColors.SkyBlue });
         game.addScene(sceneOne);
         const earthSprite = new Sprite({
-            imageName: "overlappingrectangles",
+            imageName: "overlappingRectangles",
             position: { x: 100, y: 200 }
         });
         sceneOne.addChild(earthSprite);

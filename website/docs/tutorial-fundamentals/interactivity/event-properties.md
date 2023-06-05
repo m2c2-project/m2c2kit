@@ -9,14 +9,14 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Events have properties that describe the event.
 
-In the event handler code for an event, you know what event has occured. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the entity. But what if you need to know where the user tapped down?
+In the event handler code for an event, you know what event has occurred. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the entity. But what if you need to know where the user tapped down?
 
 The Tap and Pointer events all contain these additional properties:
 
-- `point` - the point on the entity where the event occured.
-- `buttons` - the buttons that were pressed when the event occured.
-- `type` - the type of event that occured, as a string, such as `TapDown` or `PointerMove`.
-- `target` - the entity that received the event.
+- `point` - the point on the entity where the event occurred.
+- `buttons` - the buttons that were pressed when the event occurred.
+- `type` - the type of event that occurred, as a string, such as `TapDown` or `PointerMove`.
+- `target` - the entity on which the event occurred.[^1]
 - `handled` - a boolean value that indicates whether the event has been handled. If the event has been handled, then the event will not be passed to any other entities. This is useful for preventing the event from being handled by multiple entities.
 
 :::note
@@ -25,7 +25,7 @@ The event's `point` property is the most useful Tap and Pointer event property. 
 
 :::
 
-The below example prints where on the button the user tapped down. To access the event properties, you provide a variable to represent the event in the event handler code. The variable name can be anything you want, but by convention it is common to use the name `e` or `event`.
+The below example prints where on the button the user tapped down. To access the event properties, you provide a variable to represent the event in the event handler code. The variable name can be anything you want, but by convention it is common to use the name `e`, `ev`, or `event`.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
@@ -46,7 +46,7 @@ tapDownButton.onTapDown((e) => {
 });`;
 
 export const more = [
-{ description: <>A more advanced example: use a [single] event handler, called `buttonEventHandler()` for different buttons and events. Examine the event's `type` property to know which event occured and the `target` property to know which button had the event.</>,
+{ description: <>A more advanced example: use a [single] event handler, called `buttonEventHandler()` for different buttons and events. Examine the event's `type` property to know which event occurred and the `target` property to know which button had the event.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.DeepSkyBlue });
 game.addScene(sceneOne);
 const buttonOne = new Button({
@@ -84,3 +84,5 @@ buttonTwo.onTapLeave(buttonEventHandler);`},
 ]
 
 <CodeExample code={code} more={more} template={template} console="true"/>
+
+[^1]: `target` is similar to the concept of `sender` in C# event handling and the object returned by `EventObject.getSource()` in Java.

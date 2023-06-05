@@ -11,7 +11,7 @@ A `Grid` holds other entities in rows and columns.
 
 Grids are common in assessments. A grid is a convenient way to position things on the screen. For example, if you had a 3x3 tic-tac-toe grid, you could manually calculate the centers the cells. But it would be easier simply to specify by row and column: the pre-built `Grid` does this.
 
-Below, we create a 3x3 `Grid`. We also create a `Label` that says "Hi!" and a purple reactangle `Shape`. To place them in the grid, we don't have to calculate their coordinates on the scene. We simply insert them into the grid at the row and column in which we want them to appear using the `addAtCell()` method.
+Below, we create a 3x3 `Grid`. We also create a `Label` that says "Hi!" and a purple rectangle `Shape`. To place them in the grid, we don't have to calculate their coordinates on the scene. We simply insert them into the grid at the row and column in which we want them to appear using the `addAtCell()` method.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 

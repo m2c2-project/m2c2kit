@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Randomizing Assessments
 
-Rarely is everthing in an assessment the same across repeated administrations or trials. Experiments often need variations in the stimuli, the order of the stimuli, or the timing of the stimuli. m2c2kit has helper randomization methods for common randomization tasks. These methods are available in the `RandomDraws` class.
+Rarely is everything in an assessment the same across repeated administrations or trials. Experiments often need variations in the stimuli, the order of the stimuli, or the timing of the stimuli. m2c2kit has helper randomization methods for common randomization tasks. These methods are available in the `RandomDraws` class.
 
 ## A single random integer
 

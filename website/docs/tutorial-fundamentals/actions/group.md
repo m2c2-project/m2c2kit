@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Group
 
-The `Group` Action runs multiple Actions simulataneously. All Actions begin at the same time. The `Group` Action is considered finished when the Action with the longest duration has completed.
+The `Group` Action runs multiple Actions simultaneously. All Actions begin at the same time. The `Group` Action is considered finished when the Action with the longest duration has completed.
 
 ## Running two Actions as a group
 

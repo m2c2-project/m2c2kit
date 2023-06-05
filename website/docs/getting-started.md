@@ -88,7 +88,7 @@ import launchDebugging from "@site/static/img/vs-code-launch-debugging.png";
 
 <img src={launchDebugging} style={{width: 220}} />
 
-Note: the m2c2kit CLI configured VS Code to use the Chrome debugger. If Chrome is not installed, the launch will faill. To use a different browser, edit the `launch.json` file in the `.vscode` folder: For Edge, set the `type` to `msedge`. For Firefox, install the [Debugger for Firefox](https://marketplace.visualstudio.com/items?itemName=firefox-devtools.vscode-firefox-debug) and follow the instructions to edit `launch.json`.
+Note: the m2c2kit CLI configured VS Code to use the Chrome debugger. If Chrome is not installed, the launch will fail. To use a different browser, edit the `launch.json` file in the `.vscode` folder: For Edge, set the `type` to `msedge`. For Firefox, install the [Debugger for Firefox](https://marketplace.visualstudio.com/items?itemName=firefox-devtools.vscode-firefox-debug) and follow the instructions to edit `launch.json`.
 
 ### Watch mode
 

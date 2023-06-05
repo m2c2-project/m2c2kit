@@ -133,4 +133,4 @@ backButton.onTapDown(() => {
 
 <CodeExample code={code} template={template} console="true"/>
 
-[^1]: If a scene is presented without any transition, the `Setup` event ocurs and the `Appear` event immediately follows.
+[^1]: If a scene is presented without any transition, the `Setup` event occurs and the `Appear` event immediately follows.

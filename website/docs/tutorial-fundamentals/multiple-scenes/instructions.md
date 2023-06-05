@@ -7,13 +7,13 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Instructions
 
-One of the most common uses of multiple scenes is to create intructions. Instructions typically have headings, text, and images, as well as navigation buttons to move to the next or previous page.
+One of the most common uses of multiple scenes is to create instructions. Instructions typically have headings, text, and images, as well as navigation buttons to move to the next or previous page.
 
 Multiple instruction scenes can created with primitives (labels, buttons, images), button event handlers, and transitions, but this is tedious. m2c2kit has a helper method to make this easier: `Instructions.Create()`.
 
 ## Customizing the instructions
 
-The `Instructions.Create()` method takes an [options object](/docs/reference/api-addons/interfaces/InstructionsOptions) with many properties for customizing the instructions. The options are applied to all instruction scenes, but these can be overriden and customized for each [individual instruction scene](/docs/reference/api-addons/interfaces/InstructionScene). The most important property on the options object is `instructionScenes`, which is an array that takes multiple objects that define the content of each instruction scene.
+The `Instructions.Create()` method takes an [options object](/docs/reference/api-addons/interfaces/InstructionsOptions) with many properties for customizing the instructions. The options are applied to all instruction scenes, but these can be overridden and customized for each [individual instruction scene](/docs/reference/api-addons/interfaces/InstructionScene). The most important property on the options object is `instructionScenes`, which is an array that takes multiple objects that define the content of each instruction scene.
 
 The method returns an *array* of scenes that can be added to the game using the `Game.addScenes()` method -- **not** `Game.addScene()`.
 

@@ -126,7 +126,7 @@ backButton.onTapDown(() => {
     game.presentScene("Intro scene");
 });
 `},
-{ description: <>Using the scene's `name` property, however, can be error-prone because it is easy to misspell the name (and this will not be caught by the code editor syntax checking). In [this example], the forward button handler uses `game.presentScene("action scene")`, which forgets to captialize the word "action." If you try it, you will get an error when you click the button.</>,
+{ description: <>Using the scene's `name` property, however, can be error-prone because it is easy to misspell the name (and this will not be caught by the code editor syntax checking). In [this example], the forward button handler uses `game.presentScene("action scene")`, which forgets to capitalize the word "action." If you try it, you will get an error when you click the button.</>,
 code: `const sceneOne = new Scene({
     name: "Intro scene",
     backgroundColor: WebColors.WhiteSmoke

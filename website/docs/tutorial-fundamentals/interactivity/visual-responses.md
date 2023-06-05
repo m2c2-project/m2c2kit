@@ -39,7 +39,7 @@ square.onTapDown(() => {
 });
 ```
 
-This example is non-sensical. It demonstrates, however, the many different ways to respond to user events, and it hints at how a real assessment could be built using the concepts shown here.
+This example is nonsensical. It demonstrates, however, the many different ways to respond to user events, and it hints at how a real assessment could be built using the concepts shown here.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 

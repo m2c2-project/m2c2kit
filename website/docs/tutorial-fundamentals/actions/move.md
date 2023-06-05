@@ -31,7 +31,7 @@ clickMeButton.onTapDown(() => {
 
 ## Actions are asynchronous
 
-Note that the message, "Circle move action has begun," will be printed to the console *immediately* after the button is clicked and does not wait until the move animation is done. This is because Actions are asynchronous. The `run()` method schedules the `Action.move()` Action to begin running in the background, and then the `run()` method finishes becuase it does not wait for the Action to complete. Execution proceeds to the next line: `console.log()` prints the message.
+Note that the message, "Circle move action has begun," will be printed to the console *immediately* after the button is clicked and does not wait until the move animation is done. This is because Actions are asynchronous. The `run()` method schedules the `Action.move()` Action to begin running in the background, and then the `run()` method finishes because it does not wait for the Action to complete. Execution proceeds to the next line: `console.log()` prints the message.
 
 Once the circle has finished moving, repeated clicks will run the move action again, but because the circle is already at its destination of `{ x: 50, y: 50 }`, there will be no visible change.
 

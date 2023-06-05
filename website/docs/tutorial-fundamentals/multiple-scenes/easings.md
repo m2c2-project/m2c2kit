@@ -15,7 +15,7 @@ The `easing` property of a transition defines the rate of change over time. The 
 
 Modern user interfaces use a variety of easings to make animations appear more natural. Along with linear, available easings in m2c2kit[^1] are:
 
-- qudratic
+- quadratic
 - cubic
 - quartic
 - quintic
