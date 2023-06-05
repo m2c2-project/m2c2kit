@@ -307,7 +307,7 @@ describe("actions", () => {
     expect(rect1.position).toEqual({ x: 50, y: 50 });
   });
 
-  it("shape is exactly midway halfway through move from 200, 200 to 50, 50", () => {
+  it("shape is exactly midway halfway through move from 200, 200 to 50, 50", async () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     /**
@@ -328,7 +328,7 @@ describe("actions", () => {
     }
 
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
-    session.start();
+    await session.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`
     );

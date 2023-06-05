@@ -1,5 +1,8 @@
 import { Session, SessionOptions } from "@m2c2kit/core";
 import { Survey } from "..";
+import { TestHelpers } from "./TestHelpers";
+
+TestHelpers.createM2c2KitMock();
 
 let session: Session;
 let s1: Survey;
@@ -23,16 +26,15 @@ const surveyJson = {
 };
 
 describe("survey start", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     s1 = new Survey(surveyJson);
 
     const options: SessionOptions = {
       activities: [s1],
       canvasKitWasmUrl: "canvaskit.wasm",
+      autoStartAfterInit: false,
     };
     session = new Session(options);
-    // note: we are not running await session.initialize() here because these survey
-    // methods do not need our m2c2 DOM elements to test their functionality.
   });
 
   // https://stackoverflow.com/a/69372861 for async test that expect toThrow
@@ -44,17 +46,24 @@ describe("survey start", () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-          <canvas style="height: 100vh; width: 100vw"></canvas>
+          <!-- <div id="m2c2kit-survey-div"></div> -->
+          <div
+            class="m2c2kit-full-viewport m2c2kit-flex-container"
+            id="m2c2kit-container-div"
+          >
+          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+        </div>
       </body>
     </html>`;
     document.documentElement.innerHTML = html;
+    await session.initialize();
 
     await expect(async () => {
       await session.start();
     }).rejects.toThrow();
   });
 
-  test("starts the survey", () => {
+  test("starts the survey", async () => {
     const html = `<!DOCTYPE html>
     <html>
       <head>
@@ -62,13 +71,19 @@ describe("survey start", () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-          <div id="m2c2kit-survey-div"></div>         
-          <canvas style="height: 100vh; width: 100vw"></canvas>
+          <div id="m2c2kit-survey-div"></div>
+          <div
+            class="m2c2kit-full-viewport m2c2kit-flex-container"
+            id="m2c2kit-container-div"
+          >
+          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+        </div>
       </body>
     </html>`;
     document.documentElement.innerHTML = html;
+    await session.initialize();
 
-    expect(async () => {
+    await expect(async () => {
       await session.start();
     }).not.toThrow();
   });

@@ -3,6 +3,8 @@ import { Survey, SurveyVariable } from "..";
 import { TestHelpers } from "./TestHelpers";
 import * as SurveyReact from "survey-react";
 
+TestHelpers.createM2c2KitMock();
+
 let session: Session;
 let s1: Survey;
 
@@ -49,7 +51,7 @@ const surveyJson = {
 };
 
 describe("nouislider-m2c2 behavior", () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     TestHelpers.setupDomAndGlobals();
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
@@ -57,8 +59,7 @@ describe("nouislider-m2c2 behavior", () => {
       canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
-    // note: we are not running await session.initialize() here because these survey
-    // methods do not need our m2c2 DOM elements to test their functionality.
+    await session.initialize();
   });
 
   afterEach(() => {
@@ -67,7 +68,6 @@ describe("nouislider-m2c2 behavior", () => {
 
   test("adds skipped nouislider-m2c2 variable as null to newData and Data on page change", async () => {
     // begins on page 1, goes to page 2
-    await session.start();
     const surveyModel: SurveyReact.SurveyModel =
       s1["_survey"] ??
       (() => {

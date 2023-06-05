@@ -32,8 +32,13 @@ export class TestHelpers {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-          <div id="m2c2kit-survey-div"></div>      
-          <canvas style="height: 100vh; width: 100vw"></canvas>
+        <div id="m2c2kit-survey-div"></div>
+          <div
+            class="m2c2kit-full-viewport m2c2kit-flex-container"
+            id="m2c2kit-container-div"
+          >
+          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+        </div>
       </body>
     </html>`;
     document.documentElement.innerHTML = html;
@@ -56,6 +61,9 @@ export class TestHelpers {
     const skiaCanvas = {
       save: () => undefined,
       scale: () => undefined,
+      drawImage: () => undefined,
+      drawCircle: () => undefined,
+      drawRect: () => undefined,
       drawRRect: () => undefined,
       restore: () => undefined,
       drawText: () => undefined,
@@ -131,6 +139,7 @@ export class TestHelpers {
             setColor: () => undefined,
             setAntiAlias: () => undefined,
             setStyle: () => undefined,
+            setStrokeWidth: () => undefined,
             delete: () => undefined,
             isDeleted: () => undefined,
           };

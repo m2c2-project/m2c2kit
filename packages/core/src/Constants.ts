@@ -32,4 +32,5 @@ export class Constants {
   public static readonly OUTGOING_SCENE_NAME = "__outgoingScene";
   public static readonly OUTGOING_SCENE_SPRITE_NAME = "__outgoingSceneSprite";
   public static readonly OUTGOING_SCENE_IMAGE_NAME = "__outgoingSceneSnapshot";
+  public static readonly SESSION_INITIALIZATION_POLLING_INTERVAL_MS = 50;
 }

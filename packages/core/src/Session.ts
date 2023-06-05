@@ -17,6 +17,7 @@ import { CallbackOptions } from "./CallbackOptions";
 import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
+import { Constants } from "./Constants";
 
 export class Session {
   options: SessionOptions;
@@ -28,6 +29,7 @@ export class Session {
   private eventListeners = new Array<EventListenerBase>();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private canvasKit?: CanvasKit;
+  private initialized = false;
   private version = "__PACKAGE_JSON_VERSION__";
 
   /**
@@ -267,8 +269,29 @@ export class Session {
       ).toFixed(0)} ms`
     );
     Timer.remove("sessionInitialize");
+    this.initialized = true;
     if (this.options.autoStartAfterInit !== false) {
       await this.start();
+    }
+  }
+
+  /**
+   * Waits for the session to be initialized.
+   *
+   * @remarks Session.initialize() is asynchronous, and it should be awaited
+   * so that the session is fully initialized before calling Session.start().
+   * If it is not awaited (or it cannot be awaited because the target
+   * environment does not support top-level await), this function ensures that
+   * the session has been initialized.
+   */
+  private async waitForSessionInitialization(): Promise<void> {
+    while (!this.initialized) {
+      await new Promise((resolve) =>
+        setTimeout(
+          resolve,
+          Constants.SESSION_INITIALIZATION_POLLING_INTERVAL_MS
+        )
+      );
     }
   }
 
@@ -276,6 +299,7 @@ export class Session {
    * Starts the session and starts the first activity.
    */
   async start(): Promise<void> {
+    await this.waitForSessionInitialization();
     console.log("🟢 started session");
     const sessionStartEvent: SessionLifecycleEvent = {
       target: this,
