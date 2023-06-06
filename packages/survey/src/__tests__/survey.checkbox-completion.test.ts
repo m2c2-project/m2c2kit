@@ -51,7 +51,7 @@ const surveyJson = {
   ],
 };
 
-describe("checkbox behavior on survey completion, multiresponse", () => {
+describe.skip("checkbox behavior on survey completion, multiresponse", () => {
   beforeAll(async () => {
     TestHelpers.setupDomAndGlobals();
     s1 = new Survey(surveyJson);

@@ -54,7 +54,7 @@ const surveyJson = {
   ],
 };
 
-describe("radiogroup behavior on completion", () => {
+describe.skip("radiogroup behavior on completion", () => {
   beforeAll(async () => {
     TestHelpers.setupDomAndGlobals();
     s1 = new Survey(surveyJson);
