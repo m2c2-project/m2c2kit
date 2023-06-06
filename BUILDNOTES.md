@@ -6,7 +6,7 @@ These steps are optional, but if you observe text distortion, you can make a cus
 
 1. Clone the repository from within your home directory: `git clone https://github.com/google/skia.git`
 
-2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.38.0 was deployed from commit 9e51c2c. To use this: `git -C ~/skia checkout 9e51c2c`
+2. Optional: To build from a specific release of `canvaskit-wasm`, rather than the most recent skia commits, checkout the commit from that release. For example, `canvaskit-wasm` 0.38.1 was deployed from commit 644e199. To use this: `git -C ~/skia checkout 644e199`
 
 3. One of the docker files refers to an image in an inaccessible registry. Edit the file `~/skia/infra/canvaskit/docker/canvaskit-emsdk/Dockerfile` and change the line that says
 
