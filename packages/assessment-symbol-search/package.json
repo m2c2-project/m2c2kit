@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-symbol-search",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo"
@@ -22,12 +22,12 @@
     "@m2c2kit/core": "^0.3.6"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "15.0.2",
+    "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-replace": "5.0.2",
     "rimraf": "5.0.1",
     "rollup": "3.21.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-esbuild": "5.0.0",
-    "typescript": "5.0.4"
+    "typescript": "5.1.3"
   }
 }

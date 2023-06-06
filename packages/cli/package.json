@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "m2c2kit command line interface",
   "files": [
     "dist/**"
@@ -16,10 +16,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@angular-devkit/core": "^16.0.2",
-    "@angular-devkit/schematics": "^16.0.2",
+    "@angular-devkit/core": "^16.0.4",
+    "@angular-devkit/schematics": "^16.0.4",
     "@m2c2kit/schematics": "^0.1.0",
-    "@schematics/angular": "^16.0.2",
+    "@schematics/angular": "^16.0.4",
     "@types/inquirer": "^8.2.4",
     "ansi-colors": "4.1.3",
     "inquirer": "8.2.4",
@@ -27,6 +27,7 @@
     "yargs-parser": "21.1.1"
   },
   "devDependencies": {
-    "rimraf": "5.0.1"
+    "rimraf": "5.0.1",
+    "typescript": "5.1.3"
   }
 }

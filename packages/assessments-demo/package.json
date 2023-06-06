@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessments-demo",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build": "npm run clean && rollup -c --configProd",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.5",
-    "@rollup/plugin-node-resolve": "15.0.2",
+    "@rollup/plugin-node-resolve": "15.1.0",
     "rollup": "3.21.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-esbuild": "5.0.0",

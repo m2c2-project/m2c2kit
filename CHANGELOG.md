@@ -4,6 +4,129 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/core` [0.3.9] - 2023-06-06
+
+### Added
+
+- `SessionOptions` has `autoStartAfterInit`, `autoGoToNextActivity`, and `autoEndAfterLastActivity` to automatically handle game and session lifecycle.
+- `Session` can set handler for session events using `onInitialize`, `onStart()`, `onCancel()`, and `onEnd()` and all activity data events using `onActivityData()`.
+- `Activity` can set handler for activity events using `onStart()`, `onCancel()`, `onEnd()`, and `onData()`.
+- Check for session initialization before starting session.
+
+### Changed
+
+- Adding another callback for the same event on an entity no longer replaces the existing callback by default; `CallbackOptions` specifies this behavior.
+- `Session.init()` is now `Session.initialize()`. Calling `Session.init()` will generate warning.
+- `Activity.init()` is now `Activity.initialize()`. Calling `Session.init()` will generate warning.
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.6] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.8] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.4] - 2023-06-06
+
+### Changed
+
+- Updated templates.
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.3] - 2023-06-06
+
+### Added
+
+- `Embedding.initialize()` configures the m2c2kit session to be hosted.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.7] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.6] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.6] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.1] - 2023-06-06
+
+### Added
+
+- JSON output.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.7] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.7] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.7] - 2023-06-06
+
+### Fixed
+
+- Bug in shape positioning that was introduced when grid allowed children to be positioned.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.7] - 2023-06-06
+
+### Fixed
+
+- Bug with event handler added multiple times.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.5] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.7] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.6] - 2023-06-06
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/schematics` [0.1.3] - 2023-05-30
 
 ### Changed

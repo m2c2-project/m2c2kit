@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schema-util",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "type": "module",
   "main": "index.js",
@@ -15,7 +15,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "csv": "6.3.0",
+    "csv": "6.3.1",
     "ts-morph": "18.0.0",
     "yargs": "17.7.2"
   }

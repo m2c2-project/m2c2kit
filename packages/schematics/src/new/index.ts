@@ -53,20 +53,20 @@ export function m2New(options: m2NewOptions): Rule {
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.3.5",
-    "@m2c2kit/core": "0.3.8"
+    "@m2c2kit/addons": "0.3.6",
+    "@m2c2kit/core": "0.3.9"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.6",
-    "@rollup/plugin-node-resolve": "15.0.2",
-    "@rollup/plugin-typescript": "11.1.0",
+    "@m2c2kit/build-helpers": "0.3.7",
+    "@rollup/plugin-node-resolve": "15.1.0",
+    "@rollup/plugin-typescript": "11.1.1",
     "rimraf": "5.0.1",
     "rollup": "3.21.0",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2",
     "tslib": "2.5.2",
-    "typescript": "5.0.4"
+    "typescript": "5.1.3"
   }
 }`,
     };
