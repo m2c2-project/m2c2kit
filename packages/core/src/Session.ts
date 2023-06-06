@@ -241,6 +241,9 @@ export class Session {
    * @returns true if the activity defines its own init() method, false otherwise.
    */
   private activityUsesDeprecatedInit(activity: Activity): boolean {
+    if (activity.type === ActivityType.Survey) {
+      return false;
+    }
     const activityPrototype = Object.getPrototypeOf(activity);
     const gamePrototype = Object.getPrototypeOf(activityPrototype);
     return activityPrototype?.init !== gamePrototype?.init;
