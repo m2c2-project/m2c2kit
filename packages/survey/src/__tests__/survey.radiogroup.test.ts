@@ -10,7 +10,7 @@ let s1: Survey;
 
 const surveyJson = {
   title: "m2c2kit testing json",
-  name: "testing-survey",
+  name: "testing-survey radiogroup",
   confirmSkipping: false,
   pages: [
     {
