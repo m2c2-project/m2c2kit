@@ -122,6 +122,12 @@ class GridMemory extends Game {
         description:
           "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
       },
+      trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the end of the trial (when user presses 'Done' after placing the three objects). Null if trial was skipped.",
+      },
       trial_index: {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
@@ -921,6 +927,10 @@ phase, participants report the location of dots on a grid.",
         Timer.stop("responseTime");
         Timer.remove("responseTime");
 
+        game.addTrialData(
+          "trial_end_iso8601_timestamp",
+          new Date().toISOString()
+        );
         game.addTrialData("response_time_duration_ms", doneButtonElapsedMs);
         game.addTrialData("presented_cells", presentedCells);
         game.addTrialData("selected_cells", selectedCells);

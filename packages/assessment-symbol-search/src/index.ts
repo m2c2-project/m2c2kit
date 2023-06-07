@@ -131,6 +131,12 @@ top. (2 unique symbols.)",
         description:
           "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
       },
+      trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the end of the trial (when user selects a card). Null if trial was skipped.",
+      },
       trial_index: {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
@@ -955,6 +961,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         const response_time = Timer.elapsed("rt");
         Timer.remove("rt");
 
+        game.addTrialData(
+          "trial_end_iso8601_timestamp",
+          new Date().toISOString()
+        );
         game.addTrialData("trial_type", trialConfiguration.trial_type);
         game.addTrialData("response_time_duration_ms", response_time);
         game.addTrialData(

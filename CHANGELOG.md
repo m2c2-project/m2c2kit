@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## `@m2c2kit/assessment-symbol-search` [0.8.8] - 2023-06-07
+
+### Added
+
+- `trial_end_iso8601_timestamp` added to trial schema.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.8] - 2023-06-07
+
+### Added
+
+- `trial_end_iso8601_timestamp` added to trial schema.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.8] - 2023-06-07
+
+### Added
+
+- `trial_end_iso8601_timestamp` added to trial schema.
+
+## `@m2c2kit/assessment-color-dots` [0.8.8] - 2023-06-07
+
+### Added
+
+- `trial_end_iso8601_timestamp` added to trial schema.
+
 ## `@m2c2kit/core` [0.3.9] - 2023-06-06
 
 ### Added

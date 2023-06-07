@@ -150,6 +150,12 @@ class ColorDots extends Game {
         description:
           "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped.",
       },
+      trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the end of the trial (when user presses 'Done' after placing the dot). Null if trial was skipped.",
+      },
       trial_index: {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
@@ -1038,7 +1044,10 @@ appeared.",
       locationRt = Timer.elapsed("locationRt");
       Timer.remove("locationRt");
       game.addTrialData("location_selection_response_time_ms", locationRt);
-
+      game.addTrialData(
+        "trial_end_iso8601_timestamp",
+        new Date().toISOString()
+      );
       locationSelectionScene.removeChild(locationSelectionDot);
 
       const location_selected = calculatePositionWithinSquare(
