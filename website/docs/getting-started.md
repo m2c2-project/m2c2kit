@@ -29,11 +29,16 @@ Local install of a full m2c2kit development environment is recommended to create
 
 The CLI quickly scaffolds a demo app and serves it on your local machine.
 
-First, install the CLI globally. You need to do this only once:
+First, install the CLI globally. You need to do this only once. From your command line:
 
 ```
 npm install -g @m2c2kit/cli
 ```
+
+<details style={{ backgroundColor: '#fdf6f6', border: '1px solid #f0b2b2' }}>
+    <summary>😕 Problems?</summary>
+    <p>If you saw a message similar to <code>Command 'npm' not found</code> or <code>'npm' is not recognized as an internal or external command, operable program or batch file.</code>, make sure you installed <a href="https://nodejs.org/en/download">Node.js</a>. You may need administrator privileges to do this.</p>
+</details>
 
 Second, create a new app. The executable name for the CLI is `m2`. We'll name this demo app `myapp`:
 
@@ -44,6 +49,18 @@ npm run serve
 ```
 
 You can now browse to `http://localhost:3000` to view the demo app.
+
+<details style={{ backgroundColor: '#fdf6f6', border: '1px solid #f0b2b2' }}>
+    <summary>😕 Problems?</summary>
+    <p>If you saw error messages after you typed <code>m2 new myapp</code>, make sure you installed the CLI in the first step above. Then, make sure you are not in a special, protected directory. For example, on Windows, the command line prompt might start in <code>c:\windows</code> or <code>c:\</code>, which you may not be able to write to. Try this:</p>
+    <pre><code>
+    mkdir c:\m2c2kit<br/>
+    cd c:\m2c2kit<br/>
+    m2 new myapp<br/>
+    cd myapp<br/>
+    npm run serve<br/>
+    </code></pre>
+</details>
 
 ## Local Development with Visual Studio Code
 
