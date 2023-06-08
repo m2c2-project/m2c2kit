@@ -4,6 +4,9 @@
   "description": "",
   "type": "module",
   "main": "index.js",
+  "bin": {
+    "schema-util": "./build/index.js"
+  },
   "devDependencies": {
     "@types/node": "18.16.2",
     "esbuild": "0.17.19"
