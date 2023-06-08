@@ -22,6 +22,7 @@ yargs(hideBin(process.argv))
       const outputFormat = argv.format as string;
       const data: Input = [];
       const dataJson: Array<M2c2Schema> = [];
+      let jsonSchema = {};
 
       filePaths.forEach((f) => {
         if (!fs.existsSync(f)) {
@@ -38,6 +39,30 @@ yargs(hideBin(process.argv))
 
         if (outputFormat === "json") {
           dataJson.push(schema);
+          return;
+        }
+
+        if (outputFormat === "json-schema") {
+          let title: string | undefined = argv.title as string;
+          if (!title) {
+            title = undefined;
+          } else {
+            title = title.replace("__VERSION__", assessmentVersion);
+          }
+          let description = "";
+          if (argv.schema === "TrialSchema") {
+            description = "Trial data schema";
+          } else if (argv.schema === "GameParameters") {
+            description = "Game parameters schema";
+          }
+
+          jsonSchema = {
+            $schema: "http://json-schema.org/draft-07/schema",
+            title: title,
+            type: "object",
+            description: description,
+            properties: schema,
+          };
           return;
         }
 
@@ -88,6 +113,11 @@ yargs(hideBin(process.argv))
         process.stdout.write(JSON.stringify(dataJson, null, 2));
         return;
       }
+
+      if (outputFormat === "json-schema") {
+        process.stdout.write(JSON.stringify(jsonSchema, null, 2));
+        return;
+      }
       // csv
       process.stdout.write(stringify(data, { header: true }) + EOL);
     }
@@ -106,6 +136,11 @@ yargs(hideBin(process.argv))
     type: "string",
     default: "csv",
     description: "output format: csv or json",
+  })
+  .option("title", {
+    type: "string",
+    default: "",
+    description: "title of json schema",
   })
   .demandCommand(1, "You need at least one command")
   .parse();
