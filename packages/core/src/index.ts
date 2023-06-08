@@ -66,6 +66,7 @@ export * from "./Story";
 export * from "./StoryOptions";
 export * from "./BrowserImage";
 export * from "./EntityEventListener";
+export * from "./TapEvent";
 export * from "./TrialSchema";
 export * from "./TextLine";
 export * from "./TextLineOptions";

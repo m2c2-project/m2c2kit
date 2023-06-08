@@ -1,10 +1,10 @@
-# @m2c2kit/db
+# @m2c2kit/assessment-color-shapes
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@m2c2kit/db.svg)](https://www.npmjs.com/package/@m2c2kit/db)
+[![npm version](https://img.shields.io/npm/v/@m2c2kit/assessment-color-shapes.svg)](https://www.npmjs.com/package/@m2c2kit/assessment-color-shapes)
 
-This package is a local database for storing m2c2kit data on the device. It uses [Dexie.js](https://www.npmjs.com/package/dexie), and the underlying client-side storage is IndexedDB.
+This package contains the m2c2kit Color Shapes assessment, which is a visual array change detection task, measuring intra-item feature binding. [Live Demo](https://m2c2-project.github.io/m2c2kit/docs/examples/color-shapes/)
 
 **m2c2kit** is a library for cross-platform cognitive assessments. Features:
 

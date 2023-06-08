@@ -1,10 +1,10 @@
-# @m2c2kit/db
+# @m2c2kit/survey
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@m2c2kit/db.svg)](https://www.npmjs.com/package/@m2c2kit/db)
+[![npm version](https://img.shields.io/npm/v/@m2c2kit/survey.svg)](https://www.npmjs.com/package/@m2c2kit/survey)
 
-This package is a local database for storing m2c2kit data on the device. It uses [Dexie.js](https://www.npmjs.com/package/dexie), and the underlying client-side storage is IndexedDB.
+This package contains survey functionality that can be added to m2c2kit apps, using the MIT-licensed [survey-js](https://www.npmjs.com/package/surveyjs) library and [React](https://www.npmjs.com/package/react).
 
 **m2c2kit** is a library for cross-platform cognitive assessments. Features:
 

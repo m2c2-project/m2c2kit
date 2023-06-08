@@ -1,10 +1,10 @@
-# @m2c2kit/db
+# @m2c2kit/build-helpers
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@m2c2kit/db.svg)](https://www.npmjs.com/package/@m2c2kit/db)
+[![npm version](https://img.shields.io/npm/v/@m2c2kit/build-helpers.svg)](https://www.npmjs.com/package/@m2c2kit/build-helpers)
 
-This package is a local database for storing m2c2kit data on the device. It uses [Dexie.js](https://www.npmjs.com/package/dexie), and the underlying client-side storage is IndexedDB.
+This package contains utility functions for building m2c2kit apps.
 
 **m2c2kit** is a library for cross-platform cognitive assessments. Features:
 
