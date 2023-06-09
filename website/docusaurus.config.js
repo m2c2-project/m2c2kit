@@ -84,6 +84,7 @@ const config = {
   ],
 
   themes: [
+    "docusaurus-json-schema-plugin",
     [
       // eslint-disable-next-line no-undef
       require.resolve("@easyops-cn/docusaurus-search-local"),
