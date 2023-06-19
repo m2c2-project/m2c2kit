@@ -16,7 +16,7 @@ node build/index.js list --schema=GameParameters --files=../assessment-color-dot
 or
 
 ```
-node build/index.js list --schema=TrialSchema --files=../assessment-grid-memory/src/index.ts,../assessment-symbol-search/src/index.ts,../assessment-color-shapes/src/index.ts,../assessment-color-dots/src/index.ts > schemas.csv
+node build/index.js list --schema=TrialSchema --game-class=../core/src/Game.ts --files=../assessment-grid-memory/src/index.ts,../assessment-symbol-search/src/index.ts,../assessment-color-shapes/src/index.ts,../assessment-color-dots/src/index.ts > schemas.csv
 ```
 
 or
@@ -29,7 +29,7 @@ or
 
 ```
 node build/index.js list --schema=GameParameters --files=../assessment-grid-memory/src/index.ts --format=json-schema --title="Configurable game parameters for Grid Memory version __VERSION__"
-node build/index.js list --schema=TrialSchema --files=../assessment-grid-memory/src/index.ts --format=json-schema --title="Trial data for Grid Memory version __VERSION__"
+node build/index.js list --schema=TrialSchema --game-class=../core/src/Game.ts --files=../assessment-grid-memory/src/index.ts --format=json-schema --title="Trial data for Grid Memory version __VERSION__"
 ```
 
 License: MIT

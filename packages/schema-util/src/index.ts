@@ -9,6 +9,19 @@ import path from "path";
 import fs from "fs";
 import "process";
 import { EOL } from "os";
+import child_process from "child_process";
+
+let shortCommitHash: string;
+try {
+  shortCommitHash = child_process
+    .execSync("git rev-parse HEAD")
+    .toString()
+    .trim()
+    .slice(0, 8);
+} catch {
+  // in case it is being run outside of a git repo
+  shortCommitHash = "";
+}
 
 yargs(hideBin(process.argv))
   .command(
@@ -32,12 +45,27 @@ yargs(hideBin(process.argv))
           process.exit(1);
         }
 
-        const assessmentVersion = getAssessmentVersion(f);
+        const assessmentVersion = `${getAssessmentVersion(
+          f
+        )}, ${shortCommitHash}`;
         const assessmentName = `${getAssessmentNameFromSourceFile(
           f
         )} (${assessmentVersion})`;
 
-        const schema = getSchemaFromSourceFile(f, argv.schema as string);
+        let schema = getSchemaFromSourceFile(f, argv.schema as string);
+
+        if (argv.schema === "TrialSchema") {
+          if (!argv["game-class"]) {
+            process.stderr.write(
+              "--game-class option is required for TrialSchema"
+            );
+            process.exit(1);
+          }
+          const automaticTrialSchema = getAutomaticTrialSchemaFromSourceFile(
+            argv["game-class"].toString()
+          );
+          schema = { ...automaticTrialSchema, ...schema };
+        }
 
         if (outputFormat === "json") {
           dataJson.push(schema);
@@ -134,6 +162,10 @@ yargs(hideBin(process.argv))
     description: "comma-delimited list of assessment sources",
     demandOption: true,
   })
+  .option("game-class", {
+    type: "string",
+    description: "Game.ts assessment source. Required for --schema=TrialSchema",
+  })
   .option("format", {
     type: "string",
     default: "csv",
@@ -147,6 +179,34 @@ yargs(hideBin(process.argv))
   .demandCommand(1, "You need at least one command")
   .parse();
 
+function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
+  const project = new Project();
+  const file = project.addSourceFileAtPath(sourceFile);
+  const gameClass = file
+    .getClasses()
+    .filter((c) => c.getName() === "Game")
+    .find(Boolean);
+  if (!gameClass) {
+    process.stderr.write(`No Game class found in ${sourceFile}` + EOL);
+    process.exit(1);
+  }
+  const automaticTrialSchemaDeclaration = gameClass
+    .getChildrenOfKind(SyntaxKind.PropertyDeclaration)
+    .filter((d) => d.getName() === "automaticTrialSchema")
+    .find(Boolean);
+  if (!automaticTrialSchemaDeclaration) {
+    process.stderr.write(
+      "No automaticTrialSchema property found in Game class at " + sourceFile
+    );
+    process.exit(1);
+  }
+  const schemaString = automaticTrialSchemaDeclaration
+    .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+    .getText();
+  const schema = eval("(" + schemaString + ")");
+  return schema;
+}
+
 function getSchemaFromSourceFile(
   sourceFile: string,
   schemaName: string
@@ -155,7 +215,7 @@ function getSchemaFromSourceFile(
   const file = project.addSourceFileAtPath(sourceFile);
   const gameClass = file
     .getClasses()
-    .filter((c) => c.getBaseClass()?.getName() == "Game")
+    .filter((c) => c.getBaseClass()?.getName() === "Game")
     .find(Boolean);
   if (!gameClass) {
     process.stderr.write(`No Game class found in ${sourceFile}` + EOL);
@@ -167,7 +227,7 @@ function getSchemaFromSourceFile(
     process.exit(1);
   }
   const declaration = ctor.getVariableDeclaration(
-    (f) => f.getTypeNode()?.getText() == schemaName
+    (f) => f.getTypeNode()?.getText() === schemaName
   );
   if (!declaration) {
     process.stderr.write(`No declaration found in ${sourceFile}` + EOL);
@@ -185,7 +245,7 @@ function getAssessmentNameFromSourceFile(sourceFile: string): string {
   const file = project.addSourceFileAtPath(sourceFile);
   const gameClass = file
     .getClasses()
-    .filter((c) => c.getBaseClass()?.getName() == "Game")
+    .filter((c) => c.getBaseClass()?.getName() === "Game")
     .find(Boolean);
   if (!gameClass) {
     process.stderr.write(`No Game class found in ${sourceFile}` + EOL);
@@ -197,7 +257,7 @@ function getAssessmentNameFromSourceFile(sourceFile: string): string {
     process.exit(1);
   }
   const declaration = ctor.getVariableDeclaration(
-    (f) => f.getTypeNode()?.getText() == "GameOptions"
+    (f) => f.getTypeNode()?.getText() === "GameOptions"
   );
   if (!declaration) {
     process.stderr.write(`No declaration found in ${sourceFile}` + EOL);
