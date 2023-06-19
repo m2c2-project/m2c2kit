@@ -4,12 +4,18 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
 import replace from "@rollup/plugin-replace";
 import { readFileSync } from "fs";
+import child_process from "child_process";
 
 const pkg = JSON.parse(
   readFileSync(new URL("./package.json", import.meta.url), "utf8")
 );
+const shortCommitHash = child_process
+  .execSync("git rev-parse HEAD")
+  .toString()
+  .trim()
+  .slice(0, 8);
 const insertVersionString = replace({
-  __PACKAGE_JSON_VERSION__: pkg.version,
+  __PACKAGE_JSON_VERSION__: `${pkg.version} (${shortCommitHash})`,
   preventAssignment: true,
 });
 

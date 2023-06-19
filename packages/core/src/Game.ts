@@ -1272,7 +1272,7 @@ export class Game implements Activity {
     },
     activity_id: {
       type: "string",
-      description: "Identifier of the activity.",
+      description: "Human-readable identifier of the activity.",
     },
     activity_version: {
       type: "string",
