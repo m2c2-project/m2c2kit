@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schema-util",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "type": "module",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "18.16.2",
-    "esbuild": "0.17.19"
+    "esbuild": "0.18.5"
   },
   "scripts": {
     "build": "node esbuild.mjs",
@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "csv": "6.3.1",
-    "ts-morph": "18.0.0",
+    "ts-morph": "19.0.0",
     "yargs": "17.7.2"
   }
 }

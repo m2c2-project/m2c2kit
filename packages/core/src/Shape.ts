@@ -59,11 +59,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     super(options);
     handleInterfaceOptions(this, options);
 
-    if ((options?.path as SvgStringPath)?.svgString !== undefined) {
+    if ((options?.path as SvgStringPath)?.svgPathString !== undefined) {
       this.shapeType = ShapeType.Path;
       this.pathIsSvgStringPath = true;
 
-      this.pathSvgString = (options.path as SvgStringPath).svgString;
+      this.pathSvgString = (options.path as SvgStringPath).svgPathString;
       this.svgPathRequestedWidth = (options.path as SvgStringPath).width;
       this.svgPathRequestedHeight = (options.path as SvgStringPath).height;
 

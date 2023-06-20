@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Additions to m2c2kit core functionalty, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@rollup/plugin-babel": "6.0.3",
     "rimraf": "5.0.1",
-    "rollup": "3.21.0",
+    "rollup": "3.25.1",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-dts": "5.3.0",
     "rollup-plugin-esbuild": "5.0.0",

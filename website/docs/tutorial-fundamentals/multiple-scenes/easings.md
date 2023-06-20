@@ -9,7 +9,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Control the rate of change over time.
 
-The purpose of animations isn't simply to look nice. Well-chosen animations help users understand the flow of the assessment, and the animations can mimic physical movement across space. In the real world, however, the rate of change over time is not constant. For example, when you throw a ball, it starts out slowly, accelerates, and then slows down as it approaches the ground. Similarly, when you walk, you start out slowly, accelerate, and then slow down as you approach your destination.
+The purpose of animations isn't simply to look nice. Well-chosen animations help users understand the flow of the assessment, and the animations can mimic physical movement across space. In the real world, however, the rate of change over time is not constant. For example, when you drop a ball, it starts out slowly, but due to gravity it accelerates as it approaches the ground. Similarly, when you walk, you start out slowly, accelerate, and then slow down as you approach your destination.
 
 The `easing` property of a transition defines the rate of change over time. The default is `Easings.linear`, which is a constant speed over time. This appears unnatural to the human eye because it doesn't mimic the real world. It gives a "conveyor belt" effect, where everything moves at the same speed.
 

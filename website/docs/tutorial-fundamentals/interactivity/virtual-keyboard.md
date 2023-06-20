@@ -151,7 +151,7 @@ code: `class DocsDemo extends Game {
         const backspaceShapeOptions = {
             path: {
                 // CC0 from https://www.svgrepo.com
-                svgString:
+                svgPathString:
                     "M10.625 5.09 0 22.09l10.625 17H44.18v-34H10.625zm31.555 32H11.734l-9.375-15 9.375-15H42.18v30zm-23.293-6.293 7.293-7.293 7.293 7.293 1.414-1.414-7.293-7.293 7.293-7.293-1.414-1.414-7.293 7.293-7.293-7.293-1.414 1.414 7.293 7.293-7.293 7.293",
                 width: 24,
             },
