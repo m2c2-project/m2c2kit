@@ -1,0 +1,60 @@
+---
+sidebar_position: 3
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Positioning Problems
+
+You might try to position or center a sprite, but for some reason it doesn't work -- it is drawn in the wrong position. This may be because the image that the sprite uses has extra padding within it.
+
+In the example below, the white circle is positioned at the center of the scene at `{ x: 100, y: 200}`. The sprite, which is created from an SVG, is also positioned in the center of the scene at `{ x: 100, y: 200}`, but the sprite appears off-center.
+
+What happened? Within the SVG, there is a separate coordinate system, with additional bounds and padding that may not be apparent. This SVG already has padding around the circled X. When the sprite is drawn, it *is* centered -- but this centering includes the padding within the SVG!
+
+## How to fix this?
+
+There are two options:
+
+- Remove the padding from the SVG. This is the best option, because you can then reliably position the sprite. To do this, you will need specialized image editing software, such as Adobe Illustrator.
+- Reposition the sprite to account for the padding. If you change the sprite position to `{ x: 81, y: 181 }`, it will appear centered. Although this is a quick fix, it is not recommended because this requires trial and error to get it right, and if you use the sprite in a different scene, you may need to reposition it again.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            width: 200, height: 400,
+            images: [{
+                imageName: "circleX",
+                height: 64,
+                width: 64,
+                svgString: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64" xml:space="preserve"><path d="M50.5 62c-6.1 0-11-4.9-11-11s4.9-11 11-11 11 4.9 11 11-4.9 11-11 11zm0-2c5 0 9-4 9-9s-4-9-9-9-9 4-9 9 4 9 9 9zm0-7.6-3.3 3.3-1.4-1.4 3.3-3.3-3.3-3.3 1.4-1.4 3.3 3.3 3.3-3.3 1.4 1.4-3.3 3.3 3.3 3.3-1.4 1.4-3.3-3.3z" style="fill:#000000"/></svg>',
+            }]
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({ backgroundColor: WebColors.SkyBlue });
+        game.addScene(sceneOne);
+ 
+        const circle = new Shape({
+            circleOfRadius: 16,
+            fillColor: WebColors.White,
+            position: { x: 100, y: 200 }
+        });
+        sceneOne.addChild(circle);
+ 
+        const offCenterSprite = new Sprite({
+            imageName: "circleX",
+            position: { x: 100, y: 200 }
+        });
+        sceneOne.addChild(offCenterSprite);
+    }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

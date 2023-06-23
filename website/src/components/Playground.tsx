@@ -19,10 +19,17 @@ export default function Playground(props) {
   const runCode = (c?) => {
     // https://stackoverflow.com/a/71108399
     const replacement = c === undefined ? code : c;
-    const fullCode = props.template.replace(
+    let fullCode = props.template.replace(
       /\/\/ _-_BEGIN_CODE_REPLACEMENT_BLOCK_-_([\s\S]*?)\/\/ _-_END_CODE_REPLACEMENT_BLOCK_-_/,
       replacement
     );
+    if (props.consoleId) {
+      fullCode = fullCode.replaceAll(
+        "consoleId: undefined",
+        `consoleId: "${props.consoleId}"`
+      );
+    }
+
     setSrcdoc(fullCode);
     setRnd(Math.random().toString());
   };
@@ -54,6 +61,7 @@ export default function Playground(props) {
           border={props.iframeBorder}
         />
         <MonacoEditor
+          consoleId={props.consoleId}
           updateCode={updateCode}
           runCode={runCode}
           monacoCode={props.editorCode}

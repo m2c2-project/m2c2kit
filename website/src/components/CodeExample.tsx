@@ -140,7 +140,12 @@ export function Console(props) {
   const textarea = useRef(null);
 
   const handleConsoleLog = (event) => {
-    if (event.data.sender === "m2c2kitmsg") {
+    if (
+      event.data.sender === "m2c2kitmsg" &&
+      (props.consoleId === undefined ||
+        (props.consoleId !== undefined &&
+          event.data.consoleId === props.consoleId))
+    ) {
       setConsoleOutput((current) => {
         textarea.current.scrollTop = textarea.current.scrollHeight;
         const symbol = event.data.type === "error" ? "❌ " : "";
@@ -249,8 +254,11 @@ export default function CodeExample(props) {
           iframeWidth={props.iframeWidth}
           iframeHeight={props.iframeHeight}
           iframeBorder={props.iframeBorder}
+          consoleId={props.consoleId}
         />
-        {props.console === "true" && <Console width="100%" />}
+        {props.console === "true" && (
+          <Console width="100%" consoleId={props.consoleId} />
+        )}
       </div>
       <Explore examples={props.more} changeCode={changeCode} />
     </div>

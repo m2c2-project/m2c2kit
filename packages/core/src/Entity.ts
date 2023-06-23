@@ -165,6 +165,36 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
+   * Determines if the entity has been added to the game object.
+   *
+   * @returns true if entity has been added
+   */
+  private isPartOfGame(): boolean {
+    /**
+     * getter this.game throws error if undefined; thus, to check if this.game
+     * is undefined we must check the backing variable, _game.
+     */
+    if (this.type === EntityType.Scene && this._game === undefined) {
+      return false;
+    }
+    if (this.type === EntityType.Scene && this._game !== undefined) {
+      return true;
+    }
+
+    const findParentScene = (entity: Entity): Scene | undefined => {
+      if (!entity.parent) {
+        return undefined;
+      } else if (entity.parent.type === EntityType.Scene) {
+        return entity.parent as Scene;
+      } else {
+        return findParentScene(entity.parent);
+      }
+    };
+
+    return findParentScene(this)?._game !== undefined;
+  }
+
+  /**
    * Overrides toString() and returns a human-friendly description of the entity.
    *
    * @remarks Inspiration from https://stackoverflow.com/a/35361695
@@ -176,34 +206,86 @@ export abstract class Entity implements EntityOptions {
     }
 
     if (this.name !== this.uuid) {
-      return `"${this.name}" (${type}, ${this.uuid})`;
+      return `${this.name} (${type}, ${this.uuid})`;
     } else {
-      return `"${type} (${this.uuid})`;
+      return `${type} (${this.uuid})`;
     }
   };
 
   /**
    * Adds a child to this parent entity. Throws exception if the child's name
-   * is not unique with respect to other children of this parent.
+   * is not unique with respect to other children of this parent, or if the
+   * child has already been added to another parent.
    *
    * @param child - The child entity to add
    */
   addChild(child: Entity): void {
+    // Do not allow a child to be added to itself
+    if (child === this) {
+      throw new Error(
+        `Cannot add entity ${child.toString()} as a child to itself.`
+      );
+    }
+
     // Do not allow a scene to be child of another entity.
     if (child.type == EntityType.Scene) {
       throw new Error(
-        "A scene cannot be the child of an entity. A scene can only be added to a game object"
+        `Cannot add scene ${child.toString()} as a child to entity ${this.toString()}. A scene cannot be the child of an entity. A scene can only be added to a game object.`
       );
     }
-    child.parent = this;
-    if (this.children.map((c) => c.name).includes(child.name)) {
+
+    // Do not allow duplicate child names; but do not check if this child has
+    // a duplicate name because itself has already been added to this parent.
+    // We check that condition later.
+    if (
+      this.children
+        .filter((c) => c !== child)
+        .map((c) => c.name)
+        .includes(child.name)
+    ) {
       throw new Error(
         `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. A child with name "${
           child.name
-        }" already exists on parent.`
+        }" already exists on this parent.`
       );
     }
-    this.children.push(child);
+
+    // Type is Entity | undefined because a scene has an undefined parent.
+    let otherParents = new Array<Entity | undefined>();
+
+    if (this.isPartOfGame()) {
+      // entity has been added to game; can check all the other game entities.
+      otherParents = this.game.entities.filter((e) =>
+        e.children.includes(child)
+      );
+    } else {
+      // entity not added to game; can check only this entity's descendants.
+      const descendants = this.descendants;
+      if (descendants.includes(child)) {
+        otherParents = descendants
+          .filter((d) => d.children.includes(child))
+          .map((d) => d.parent ?? undefined);
+      }
+    }
+
+    // Allow child to be added only if it has no other parents.
+    if (otherParents.length === 0) {
+      child.parent = this;
+      this.children.push(child);
+      return;
+    }
+
+    const firstOtherParent = otherParents.find(Boolean);
+
+    if (firstOtherParent === this) {
+      throw new Error(
+        `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on this parent. The child cannot be added again.`
+      );
+    }
+
+    throw new Error(
+      `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on other parent entity: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`
+    );
   }
 
   /**
@@ -211,7 +293,10 @@ export abstract class Entity implements EntityOptions {
    */
   removeAllChildren(): void {
     while (this.children.length) {
-      this.children.pop();
+      const child = this.children.pop();
+      if (child) {
+        child.parent = undefined;
+      }
     }
   }
 
@@ -223,6 +308,7 @@ export abstract class Entity implements EntityOptions {
    */
   removeChild(child: Entity): void {
     if (this.children.includes(child)) {
+      child.parent = undefined;
       this.children = this.children.filter((c) => c !== child);
     } else {
       throw new Error(
@@ -244,6 +330,7 @@ export abstract class Entity implements EntityOptions {
           `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`
         );
       }
+      child.parent = undefined;
     });
     this.children = this.children.filter((child) => !children.includes(child));
   }

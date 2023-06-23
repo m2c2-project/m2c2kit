@@ -41,6 +41,7 @@
         origLog(str);
         const msg = {
           sender: "m2c2kitmsg",
+          consoleId: undefined, // replace with console id
           text: str,
         };
         window.top.postMessage(msg, "*");
@@ -49,6 +50,7 @@
       window.onerror = function (message, source, lineno, colno, error) {
         const msg = {
           sender: "m2c2kitmsg",
+          consoleId: undefined, // replace with console id
           text: message,
           type: "error",
         };

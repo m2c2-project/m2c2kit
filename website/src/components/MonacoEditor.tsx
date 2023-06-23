@@ -51,7 +51,8 @@ export default function MonacoEditor(props) {
       <Editor
         height="400px"
         width={props.monacoWidth}
-        path="index.ts"
+        // We need a unique path for each instance of the editor
+        path={`index${props.consoleId}.ts`}
         defaultLanguage="javascript"
         value={props.monacoCode}
         onMount={handleEditorDidMount}

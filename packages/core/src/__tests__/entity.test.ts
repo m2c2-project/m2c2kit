@@ -100,8 +100,12 @@ describe("test descendant", () => {
 
 describe("test removeAllChildren", () => {
   it("removes all children from scene1", () => {
+    const children = scene1.children;
     scene1.removeAllChildren();
     expect(scene1.children).toHaveLength(0);
+    expect(children.map((c) => c.parent === undefined).every((c) => c)).toBe(
+      true
+    );
   });
 });
 
@@ -109,6 +113,8 @@ describe("removeChildren", () => {
   it("removes the children from scene1", () => {
     scene1.removeChildren([label1, label2]);
     expect(scene1.children).toHaveLength(0);
+    expect(label1.parent).toBeUndefined();
+    expect(label2.parent).toBeUndefined();
   });
 
   it("throws Error when removing a child that is not added to the parent", () => {
@@ -117,6 +123,21 @@ describe("removeChildren", () => {
       scene1.removeChildren([l3]);
     };
     expect(t).toThrowError();
+  });
+});
+
+describe("removeChild", () => {
+  it("removes child from parent", () => {
+    label1.removeChild(rect1);
+    expect(label1.children).not.toContain(rect1);
+    expect(rect1.parent).toBeUndefined();
+  });
+
+  it("throws Error when removing child that does not exist on parent", () => {
+    const t = () => {
+      label1.removeChild(label2);
+    };
+    expect(t).toThrow(Error);
   });
 });
 
@@ -135,10 +156,66 @@ describe("test addChild", () => {
     expect(t).toThrow(Error);
   });
 
-  it("should throw Error if try to add child with a duplicated name", () => {
+  it("throws Error when adding scene to another entity", () => {
+    const newScene = new Scene({ name: "myNewScene" });
+    const t = () => {
+      label1.addChild(newScene);
+    };
+    expect(t).toThrow(Error);
+  });
+
+  it("throws Error when adding child with a duplicated name", () => {
     const newLabel = new Label({ text: "words", name: "myLabel1" });
     const t = () => {
       scene1.addChild(newLabel);
+    };
+    expect(t).toThrow(Error);
+  });
+
+  it("throws Error when adding child to parent again", () => {
+    const t = () => {
+      scene1.addChild(label1);
+    };
+    expect(t).toThrow(Error);
+  });
+
+  it("throws Error when adding child to another parent without removing it from the original parent", () => {
+    const t = () => {
+      label2.addChild(rect1);
+    };
+    expect(t).toThrow(Error);
+  });
+
+  it("throws Error when adding entity as a child to itself", () => {
+    const t = () => {
+      label1.addChild(label1);
+    };
+    expect(t).toThrow(Error);
+  });
+
+  it("adds child to another parent after removing child from prior parent", () => {
+    label1.removeChild(rect1);
+    label2.addChild(rect1);
+    expect(label2.children).toContain(rect1);
+    expect(label1.children).not.toContain(rect1);
+  });
+
+  it("adds child to another parent even if parent is not part of game", () => {
+    const newLabel1 = new Label({ text: "words", name: "myLabel1" });
+    const newLabel2 = new Label({ text: "words", name: "myLabel2" });
+    newLabel1.addChild(newLabel2);
+    expect(newLabel1.children).toContain(newLabel2);
+    expect(newLabel2.parent).toBe(newLabel1);
+  });
+
+  it("throws Error when adding child to parent, not yet added to game object, without removing it from another parent", () => {
+    const newLabel1 = new Label({ text: "words", name: "myLabel1" });
+    const newLabel2 = new Label({ text: "words", name: "myLabel2" });
+    const newLabel3 = new Label({ text: "words", name: "myLabel3" });
+    newLabel1.addChild(newLabel2);
+    newLabel2.addChild(newLabel3);
+    const t = () => {
+      newLabel1.addChild(newLabel3);
     };
     expect(t).toThrow(Error);
   });
