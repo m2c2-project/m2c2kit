@@ -39,4 +39,5 @@ export enum EventType {
   DragStart = "DragStart",
   DragEnd = "DragEnd",
   CompositeCustom = "CompositeCustom",
+  FrameDidSimulatePhysics = "FrameDidSimulatePhysics",
 }

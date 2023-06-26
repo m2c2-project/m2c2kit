@@ -56,6 +56,7 @@ import { ActivityResults } from "./ActivityResults";
 import { CallbackOptions } from "./CallbackOptions";
 import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
+import { FrameCycleEvent } from "./FrameCycleEvent";
 
 interface BoundingBox {
   xMin: number;
@@ -1899,11 +1900,35 @@ export class Game implements Activity {
     return outgoingScene;
   }
 
+  /**
+   * Executes a callback when the frame has finished simulating physics.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onFrameDidSimulatePhysics(
+    callback: (frameCycleEvent: FrameCycleEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.FrameDidSimulatePhysics,
+      callback as (ev: EventBase) => void,
+      options
+    );
+  }
+
   private update(): void {
     this.scenes
       .filter((scene) => scene._active)
       .forEach((scene) => scene.update());
     this.freeEntitiesScene.update();
+
+    const frameDidSimulatePhysicsEvent: FrameCycleEvent = {
+      target: this,
+      type: EventType.FrameDidSimulatePhysics,
+      deltaTime: Globals.deltaTime,
+    };
+    this.raiseActivityEventOnListeners(frameDidSimulatePhysicsEvent);
   }
 
   private draw(canvas: Canvas): void {
