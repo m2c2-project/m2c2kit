@@ -26,6 +26,13 @@
       "webRoot": "${workspaceFolder}/packages/addons/scratch/scratch-build"
     },
     {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Scratch-physics Launch Chrome against localhost",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/packages/physics/scratch-build"
+    },
+    {
       "type": "node",
       "name": "vscode-jest-tests.v2",
       "request": "launch",
