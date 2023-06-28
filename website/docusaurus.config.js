@@ -251,6 +251,11 @@ const config = {
             extensions: [".js", ".ts"],
           },
           {
+            source: "../packages/db/build-nobundler",
+            destination: "static/m2c2kit/lib",
+            extensions: [".js", ".ts"],
+          },
+          {
             source: "../packages/core/assets",
             destination: "static/m2c2kit/assets",
           },

@@ -1,4 +1,4 @@
-import { Session, ActivityType, IDataStore } from "@m2c2kit/core";
+import { Session, ActivityType } from "@m2c2kit/core";
 import { LocalDatabase } from "@m2c2kit/db";
 import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
 import { ColorDots } from "@m2c2kit/assessment-color-dots";
@@ -17,9 +17,12 @@ const survey = new Survey(surveyJson);
 
 const activities = [a1, a2, a3, a4, a5, survey];
 
+const db = new LocalDatabase();
+
 const session = new Session({
   activities: activities,
   canvasKitWasmUrl: "canvaskit.wasm",
+  dataStores: [db],
 });
 
 /**
@@ -75,6 +78,4 @@ session.onActivityData((ev) => {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as unknown as any).session = session;
-const db: IDataStore = new LocalDatabase();
-session.dataStore = db;
 session.initialize();

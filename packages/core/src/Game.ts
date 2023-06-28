@@ -152,12 +152,13 @@ export class Game implements Activity {
    * Saves an item to the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    * @param key - item key
    * @param value - item value
    * @param globalStore - if true, treat the item as "global" and not
@@ -179,12 +180,13 @@ export class Game implements Activity {
    * Gets an item value from the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not
    * associated with a specific activity; global items can be accessed
@@ -203,12 +205,13 @@ export class Game implements Activity {
    * Deletes an item value from the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not
    * associated with a specific activity; global items can be accessed
@@ -223,12 +226,13 @@ export class Game implements Activity {
    * Deletes all items from the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    */
   storeClearItems() {
     return this.dataStores[0].clearItemsByActivityId(this.id);
@@ -238,12 +242,13 @@ export class Game implements Activity {
    * Returns keys of all items in the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    * @param globalStore - if true, treat the item as "global" and not
    * associated with a specific activity; global items can be accessed
    * by any activity. Default is false.
@@ -256,12 +261,13 @@ export class Game implements Activity {
    * Determines if a key exists in the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
-   * be previously set in the activity's `Session` before use:
-   * ```
-   * const db: IDataStore = new LocalDatabase();
-   * session.dataStore = db;
-   * session.initialize();
-   * ```
+   * have been previously provided in `SessionOptions`.
+   * @example
+   * import { LocalDatabase } from "@m2c2kit/db";
+   * const session = new Session({
+   *   dataStores: [new LocalDatabase()]
+   *   ...
+   * });
    * @param key - item key
    * @param globalStore - if true, treat the item as "global" and not
    * associated with a specific activity; global items can be accessed
