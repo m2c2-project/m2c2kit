@@ -246,6 +246,11 @@ const config = {
             extensions: [".js", ".ts"],
           },
           {
+            source: "../packages/physics/build-nobundler",
+            destination: "static/m2c2kit/lib",
+            extensions: [".js", ".ts"],
+          },
+          {
             source: "../packages/survey/build-nobundler",
             destination: "static/m2c2kit/lib",
             extensions: [".js", ".ts"],
@@ -270,8 +275,18 @@ const config = {
             extensions: [".d.ts"],
           },
           {
+            source: "../packages/physics/dist",
+            destination: "static/m2c2kit/declarations/m2c2kit/physics",
+            extensions: [".d.ts"],
+          },
+          {
             source: "../packages/survey/dist",
             destination: "static/m2c2kit/declarations/m2c2kit/survey",
+            extensions: [".d.ts"],
+          },
+          {
+            source: "../packages/db/dist",
+            destination: "static/m2c2kit/declarations/m2c2kit/db",
             extensions: [".d.ts"],
           },
           {

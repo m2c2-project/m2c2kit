@@ -21,6 +21,14 @@ export default function CodeEditor(props) {
         url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/addons/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/addons/index.d.ts",
       },
+      {
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/db/index.d.ts",
+        monacoUri: "file:///node_modules/@m2c2kit/db/index.d.ts",
+      },
+      {
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/physics/index.d.ts",
+        monacoUri: "file:///node_modules/@m2c2kit/physics/index.d.ts",
+      },
     ];
 
     m2c2Modules.map((m2c2Module) =>

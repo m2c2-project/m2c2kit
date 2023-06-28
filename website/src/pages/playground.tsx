@@ -92,6 +92,14 @@ export default function Home(): JSX.Element {
       'from "@m2c2kit/addons";',
       'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.addons.esm.js";'
     );
+    fullCode = fullCode.replace(
+      'from "@m2c2kit/db";',
+      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.db.esm.js";'
+    );
+    fullCode = fullCode.replace(
+      'from "@m2c2kit/physics";',
+      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.physics.esm.js";'
+    );
     setSrcdoc(fullCode);
     /**
      * Force the iframe to reload by setting rnd to a new value. The key
