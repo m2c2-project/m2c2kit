@@ -93,7 +93,7 @@ export class Game implements Activity {
   i18n?: I18n;
   private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
   private loaderElementsRemoved = false;
-  private _dataStore?: IDataStore;
+  private _dataStores?: IDataStore[];
   additionalParameters?: unknown;
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
 
@@ -172,7 +172,7 @@ export class Game implements Activity {
   ): Promise<string> {
     const k = globalStore ? key : this.id.concat(":", key);
     const activityId = globalStore ? "" : this.id;
-    return this.dataStore.setItem(k, value, activityId);
+    return this.dataStores[0].setItem(k, value, activityId);
   }
 
   /**
@@ -196,7 +196,7 @@ export class Game implements Activity {
     globalStore = false
   ): Promise<T> {
     const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStore.getItem<T>(k);
+    return this.dataStores[0].getItem<T>(k);
   }
 
   /**
@@ -216,7 +216,7 @@ export class Game implements Activity {
    */
   storeDeleteItem(key: string, globalStore = false) {
     const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStore.deleteItem(k);
+    return this.dataStores[0].deleteItem(k);
   }
 
   /**
@@ -231,7 +231,7 @@ export class Game implements Activity {
    * ```
    */
   storeClearItems() {
-    return this.dataStore.clearItemsByActivityId(this.id);
+    return this.dataStores[0].clearItemsByActivityId(this.id);
   }
 
   /**
@@ -249,7 +249,7 @@ export class Game implements Activity {
    * by any activity. Default is false.
    */
   storeItemsKeys(globalStore = false) {
-    return this.dataStore.itemsKeysByActivityId(globalStore ? "" : this.id);
+    return this.dataStores[0].itemsKeysByActivityId(globalStore ? "" : this.id);
   }
 
   /**
@@ -270,18 +270,18 @@ export class Game implements Activity {
    */
   storeItemExists(key: string, globalStore = false) {
     const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStore.itemExists(k);
+    return this.dataStores[0].itemExists(k);
   }
 
-  get dataStore(): IDataStore {
-    if (!this._dataStore) {
-      throw new Error("dataStore is undefined");
+  get dataStores(): IDataStore[] {
+    if (!this._dataStores) {
+      throw new Error("dataStores is undefined");
     }
-    return this._dataStore;
+    return this._dataStores;
   }
 
-  set dataStore(dataStore: IDataStore) {
-    this._dataStore = dataStore;
+  set dataStores(dataStores: IDataStore[]) {
+    this._dataStores = dataStores;
   }
 
   private getLocalizationOptionsFromGameParameters() {

@@ -25,7 +25,7 @@ export class Session {
   imageManager: ImageManager;
   currentActivity?: Activity;
   uuid: string;
-  dataStore?: IDataStore;
+  dataStores?: IDataStore[];
   private eventListeners = new Array<EventListenerBase>();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private canvasKit?: CanvasKit;
@@ -264,11 +264,18 @@ export class Session {
     DomHelpers.setSpinnerVisibility(true);
     DomHelpers.setCanvasOverlayVisibility(true);
 
+    this.dataStores = this.options.dataStores;
+    if (this.dataStores?.length === 0) {
+      throw new Error(
+        "Session.initialize(): dataStores must be undefined or a non-zero array of datastores."
+      );
+    }
+
     await Promise.all(
       this.options.activities.map((activity) => {
         // IDataStore implementation is provided by another library and must
         // be set in the session before calling session.initialize()
-        activity.dataStore = this.dataStore;
+        activity.dataStores = this.dataStores;
         activity.onStart(this.sessionActivityLifecycleHandler.bind(this));
         activity.onCancel(this.sessionActivityLifecycleHandler.bind(this));
         activity.onEnd(this.sessionActivityLifecycleHandler.bind(this));
@@ -430,7 +437,7 @@ export class Session {
      * Game.SetParameters(), we must apply them.
      */
     this.currentActivity.session = this;
-    this.currentActivity.dataStore = this.dataStore;
+    this.currentActivity.dataStores = this.dataStores;
     /**
      * IMPORTANT: Originally, we checked if the current activity was a game
      * by checking if it was an instance of Game. However, if we are mixing

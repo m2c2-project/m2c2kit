@@ -90,6 +90,6 @@ export interface Activity {
   setParameters(additionalParameters: unknown): void;
   /** Additional activity parameters that were set. */
   readonly additionalParameters?: unknown;
-  /** Optional store to use for saving data. The implementation of the store is not provided by the \@m2c2kit/core library. */
-  dataStore?: IDataStore;
+  /** Optional stores to use for saving data. The implementation of the store is not provided by the \@m2c2kit/core library. */
+  dataStores?: IDataStore[];
 }

@@ -1,6 +1,8 @@
 import { ActivityCallbacks } from "./ActivityCallbacks";
 import { SessionCallbacks } from "./SessionCallbacks";
 import { Activity } from "./Activity";
+import { IDataStore } from "./IDataStore";
+
 export interface SessionOptions {
   /** The activities that compose this session */
   activities: Array<Activity>;
@@ -14,6 +16,8 @@ export interface SessionOptions {
   sessionUuid?: string;
   /** URL of session assets folder (which contains wasm binary), if not the default location of "assets" */
   assetsUrl?: string;
+  /** Array of one or more optional databases that implement the IDataStore interface for persisting data. For store item operations, the first data store will be used. */
+  dataStores?: IDataStore[];
   /** After the session initializes, should the session automatically start? Default is true */
   autoStartAfterInit?: boolean;
   /** When an activity ends or is canceled, should the session automatically go to the next activity? Default is true */
