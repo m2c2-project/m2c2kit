@@ -22,7 +22,6 @@ module.exports = {
     "dist",
     "dist-webview",
     "build",
-    "build-umd",
     "build-nobundler",
     "node_modules",
     ".rollup.cache",

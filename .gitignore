@@ -4,7 +4,6 @@
 
 .rollup.cache
 build/
-build-umd/
 build-nobundler/
 
 packages/core/assets/canvaskit.wasm

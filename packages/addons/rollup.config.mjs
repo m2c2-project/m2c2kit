@@ -1,7 +1,6 @@
 import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import copy from "rollup-plugin-copy";
-import { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import dts from "rollup-plugin-dts";
 
 // I could not get @rollup/plugin-typescript to work with the
@@ -32,23 +31,6 @@ export default [
         sourcemap: false,
         plugins: [minify()],
       },
-      // Make a UMD bundle only to use for testing (jest), because jest support
-      // for esm modules is still incomplete
-      {
-        file: "./build-umd/index.js",
-        format: "umd",
-        name: "m2c2kit",
-        globals: {
-          "@m2c2kit/core": "core",
-        },
-        plugins: [
-          getBabelOutputPlugin({
-            allowAllFormats: true,
-            presets: ["@babel/preset-env"],
-          }),
-        ],
-        sourcemap: true,
-      },
     ],
     plugins: [esbuild()],
   },
@@ -67,10 +49,6 @@ export default [
           {
             src: "build/index.js*",
             dest: "dist",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-umd/",
           },
           {
             src: "dist/index.d.ts",

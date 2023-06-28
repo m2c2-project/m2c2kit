@@ -75,10 +75,6 @@ export default [
           },
           {
             src: "dist/index.d.ts",
-            dest: "build-umd/",
-          },
-          {
-            src: "dist/index.d.ts",
             dest: "build-nobundler/",
             rename: () => "m2c2kit.physics.esm.d.ts",
           },

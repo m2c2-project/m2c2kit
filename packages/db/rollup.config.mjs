@@ -13,7 +13,7 @@ export default [
     plugins: [
       nodeResolve(),
       del({
-        targets: ["dist/*", "build/*", "build-umd/*", "build-nobundler/*"],
+        targets: ["dist/*", "build/*", "build-nobundler/*"],
       }),
       typescript({
         // I was getting errors when defining include and exclude

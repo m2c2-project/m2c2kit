@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc --build && rollup -c",
-    "clean": "rimraf build build-nobundler build-umd dist .rollup.cache tsconfig.tsbuildinfo",
+    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
