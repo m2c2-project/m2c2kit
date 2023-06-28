@@ -19,4 +19,4 @@ This package contains the command line interface (CLI) for developing m2c2kit ap
 - [Website](https://m2c2-project.github.io/m2c2kit/)
 - [Live Examples](https://m2c2-project.github.io/m2c2kit/docs/category/examples)
 - [Getting Started](https://m2c2-project.github.io/m2c2kit/docs/getting-started)
-- [Interactive Tutorial](https://m2c2-project.github.io/m2c2kit/docs/tutorial-fundamentals/fundamentals)
+- [Interactive Tutorials](https://m2c2-project.github.io/m2c2kit/docs/category/tutorials)

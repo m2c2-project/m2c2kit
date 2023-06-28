@@ -1,10 +1,10 @@
-# @m2c2kit/assessment-color-shapes
+# @m2c2kit/physics
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@m2c2kit/assessment-color-shapes.svg)](https://www.npmjs.com/package/@m2c2kit/assessment-color-shapes)
+[![npm version](https://img.shields.io/npm/v/@m2c2kit/physics.svg)](https://www.npmjs.com/package/@m2c2kit/physics)
 
-This package contains the m2c2kit Color Shapes assessment, which is a visual array change detection task, measuring intra-item feature binding. [Live Demo](https://m2c2-project.github.io/m2c2kit/docs/examples/color-shapes/)
+This package contains a physics engine for m2c2kit, based on the [Matter.js](https://www.npmjs.com/package/matter-js) engine.
 
 **m2c2kit** is a library for cross-platform cognitive assessments. Features:
 

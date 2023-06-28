@@ -19,4 +19,4 @@ This package contains the m2c2kit Grid Memory assessment, which is a visuospatia
 - [Website](https://m2c2-project.github.io/m2c2kit/)
 - [Live Examples](https://m2c2-project.github.io/m2c2kit/docs/category/examples)
 - [Getting Started](https://m2c2-project.github.io/m2c2kit/docs/getting-started)
-- [Interactive Tutorial](https://m2c2-project.github.io/m2c2kit/docs/tutorial-fundamentals/fundamentals)
+- [Interactive Tutorials](https://m2c2-project.github.io/m2c2kit/docs/category/tutorials)

@@ -23,7 +23,7 @@ It's up to you to decide what aspects of an assessment should be configurable pa
 
 On the other hand, you create unnecessary complexity if you make every aspect of an assessment a parameter. For example, do the font colors for every `Label` need to be parameters? Probably not -- You Ain't Gonna Need It! ([YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it)).
 
-These are some of the parameters (from a total of 15 parameters) in the [Symbol Search](../../examples/symbol-search.md) assessment:
+These are some of the parameters (from a total of 15 parameters) in the [Symbol Search](../../../examples/symbol-search.md) assessment:
 
 ```js
 left_correct_percent: {

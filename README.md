@@ -100,6 +100,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 - [`@m2c2kit/cli`](packages/cli) - Command line interface for scaffolding new m2c2kit apps.
 - [`@m2c2kit/schematics`](packages/schematics) - Rules for the m2c2kit CLI to generate new apps. End users will not need to install this explicitly. It is automatically installed by the CLI as a dependency.
 - [`@m2c2kit/db`](packages/db) - A local database for storing m2c2kit data on the device.
+- [`@m2c2kit/physics`](packages/physics) - Physics for m2c2kit, based on the [Matter.js](https://www.npmjs.com/package/matter-js) engine.
 - [`@m2c2kit/embedding`](packages/embedding) - Utility functions for embedding m2c2kit assessments in other delivery mechanisms, such as native apps and services like Qualtrics.
 - [`@m2c2kit/assessments-demo`](packages/assessments-demo) - Demonstration app that shows the assessments created by the m2c2kit team.
 - [`@m2c2kit/assessment-color-dots`](packages/assessment-color-dots) - Color Dots is cued-recall, item-location memory binding task, where after viewing 3 dots for a brief period of time, participants report: (1) the color at a cued location; (2) the location of a cued color.

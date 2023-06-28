@@ -1,12 +1,12 @@
 ---
-id: fundamentals
+id: introduction
 sidebar_position: 1
 hide_table_of_contents: true
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
 
-# Fundamentals
+# Introduction
 
 This tutorial introduces you to the fundamentals of m2c2kit:
 

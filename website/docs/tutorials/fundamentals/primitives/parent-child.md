@@ -11,11 +11,12 @@ Entities can contain other entities. This is called a parent-child relationship.
 
 But every entity can be the parent of another entity. For example, a `Scene` can be the parent of a `Shape`. That `Shape` can be the parent of another `Shape`. And that `Shape` can be the parent of a `Label`.
 
-## Three things to know about parent-child relationships
+## Four things to know about parent-child relationships
 
 1. A `Scene` can't be the child of another entity. A `Scene` is the top of the hierarchy and can only be a parent.
-2. When positioning children within a parent `Scene`, the `{ x: 0, y: 0 }` position is the upper-left corner of the `Scene` -- we've seen this already.
-3. When positioning children within a parent of any other kind of entity, the `{ x: 0, y: 0 }` position is the _center of the parent entity_.
+2. A parent can have zero or more children, but a child can have only one parent.
+3. When positioning children within a parent `Scene`, the `{ x: 0, y: 0 }` position is the upper-left corner of the `Scene` -- we've seen this already.
+4. When positioning children within a parent of any other kind of entity, the `{ x: 0, y: 0 }` position is the _center of the parent entity_.
 
 Why a different coordinate system for children when the parent is a `Scene` versus when the parent is any other kind of entity? Because the `Scene` represents the entire display area, it's useful to have a coordinate system that starts in the upper-left corner. But when positioning children within a parent entity, it's more useful to have a coordinate system that starts in the center of the parent entity: usually, you want to position the child in the center of the parent.
 

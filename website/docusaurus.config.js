@@ -148,8 +148,8 @@ const config = {
             to: "/docs/getting-started",
           },
           {
-            label: "Tutorial",
-            to: "/docs/tutorial-fundamentals/fundamentals",
+            label: "Tutorials",
+            to: "/docs/category/tutorials",
           },
           {
             label: "Reference",
