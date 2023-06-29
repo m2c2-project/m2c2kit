@@ -1,7 +1,7 @@
 {
   "name": "cli-test",
   "version": "0.5.0",
-  "description": "",
+  "description": "Integration tests for the m2c2kit CLI",
   "main": "index.js",
   "devDependencies": {
     "@types/pixelmatch": "^5.2.4",
@@ -14,12 +14,17 @@
     "pixelmatch": "^5.2.1",
     "pngjs": "^7.0.0",
     "ts-node": "^10.7.0",
-    "typescript": "5.1.3",
+    "typescript": "5.1.6",
     "wdio-chromedriver-service": "^8.1.1",
     "wdio-docker-service": "^3.2.0"
   },
   "scripts": {
     "test": "wdio run ./wdio.conf.ts --hostname selenium --port 4444"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit"
 }

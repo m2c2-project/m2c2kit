@@ -41,6 +41,7 @@ let pkgJsonFiles = pkgJsonFilePaths.map((file) => {
 const packageOrder = [
   "@m2c2kit/core",
   "@m2c2kit/addons",
+  "@m2c2kit/physics",
   "@m2c2kit/cli",
   "@m2c2kit/schematics",
   "@m2c2kit/embedding",

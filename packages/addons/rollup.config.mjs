@@ -2,6 +2,19 @@ import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
+import replace from "@rollup/plugin-replace";
+import { readFileSync } from "fs";
+import child_process from "child_process";
+
+const pkg = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf8")
+);
+
+const shortCommitHash = child_process
+  .execSync("git rev-parse HEAD")
+  .toString()
+  .trim()
+  .slice(0, 8);
 
 // I could not get @rollup/plugin-typescript to work with the
 // emitDeclarationOnly option. Thus, as part of the build script in
@@ -32,7 +45,13 @@ export default [
         plugins: [minify()],
       },
     ],
-    plugins: [esbuild()],
+    plugins: [
+      replace({
+        __PACKAGE_JSON_VERSION__: `${pkg.version} (${shortCommitHash})`,
+        preventAssignment: true,
+      }),
+      esbuild(),
+    ],
   },
   {
     // bundle all declaration files and place the declaration

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -22,6 +22,16 @@
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/core"
   },
   "license": "MIT",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
     "@rollup/plugin-commonjs": "25.0.2",
     "@rollup/plugin-node-resolve": "15.1.0",
@@ -37,12 +47,15 @@
     "jest-environment-jsdom": "29.5.0",
     "jsdom": "22.1.0",
     "rimraf": "5.0.1",
-    "rollup": "3.25.1",
+    "rollup": "3.25.3",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-dts": "5.3.0",
     "rollup-plugin-esbuild": "5.0.0",
     "rollup-plugin-polyfill-node": "0.12.0",
     "ts-jest": "29.1.0",
-    "typescript": "5.1.3"
+    "typescript": "5.1.6"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

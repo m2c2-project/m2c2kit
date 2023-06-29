@@ -1,6 +1,7 @@
 {
   "name": "@m2c2kit/assessments-demo",
-  "version": "0.8.6",
+  "description": "A demo of several m2c2kit assessments",
+  "version": "0.8.7",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build": "npm run clean && rollup -c --configProd",
@@ -9,6 +10,17 @@
     "clean": "rimraf build dist .rollup.cache",
     "clean-webview": "rimraf build dist-webview .rollup.cache"
   },
+  "license": "MIT",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/assessments-demo"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
   "private": true,
   "dependencies": {
     "@m2c2kit/addons": "^0.3.3",
@@ -25,10 +37,13 @@
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.5",
     "@rollup/plugin-node-resolve": "15.1.0",
-    "rollup": "3.25.1",
+    "rollup": "3.25.3",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-esbuild": "5.0.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

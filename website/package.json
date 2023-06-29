@@ -1,6 +1,7 @@
 {
   "name": "website",
   "version": "0.1.0",
+  "description": "m2c2kit documentation website",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
@@ -16,6 +17,17 @@
     "test-links": "linkinator ./build --recurse --url-rewrite-search https://m2c2-project.github.io/ --url-rewrite-replace https://m2c2-project.github.io/m2c2kit/ --verbosity error",
     "schemas": "npm install -g ../packages/schema-util && schema-util list --schema=GameParameters --files=../packages/assessment-grid-memory/src/index.ts --format=json-schema --title=\"Grid Memory version __VERSION__\" > static/schemas/grid-memory-parameter-schema.json && schema-util list --schema=TrialSchema --game-class=../packages/core/src/Game.ts --files=../packages/assessment-grid-memory/src/index.ts --format=json-schema --title=\"Grid Memory version __VERSION__\" > static/schemas/grid-memory-trial-schema.json && schema-util list --schema=GameParameters --files=../packages/assessment-symbol-search/src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > static/schemas/symbol-search-parameter-schema.json && schema-util list --schema=TrialSchema --game-class=../packages/core/src/Game.ts --files=../packages/assessment-symbol-search/src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > static/schemas/symbol-search-trial-schema.json && schema-util list --schema=GameParameters --files=../packages/assessment-color-shapes/src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" > static/schemas/color-shapes-parameter-schema.json && schema-util list --schema=TrialSchema --game-class=../packages/core/src/Game.ts --files=../packages/assessment-color-shapes/src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" > static/schemas/color-shapes-trial-schema.json && schema-util list --schema=GameParameters --files=../packages/assessment-color-dots/src/index.ts --format=json-schema --title=\"Color Dots version __VERSION__\" > static/schemas/color-dots-parameter-schema.json && schema-util list --schema=TrialSchema --game-class=../packages/core/src/Game.ts --files=../packages/assessment-color-dots/src/index.ts --format=json-schema --title=\"Color Dots version __VERSION__\" > static/schemas/color-dots-trial-schema.json"
   },
+  "license": "MIT",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "website"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
     "@docusaurus/core": "^2.4.1",
     "@docusaurus/preset-classic": "^2.4.1",
@@ -29,14 +41,14 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^2.4.1",
-    "@tsconfig/docusaurus": "1.0.7",
+    "@tsconfig/docusaurus": "2.0.0",
     "@webgpu/types": "0.1.31",
     "docusaurus-json-schema-plugin": "1.6.1",
     "docusaurus-plugin-typedoc": "^0.19.2",
     "raw-loader": "4.0.2",
     "typedoc": "0.24.8",
     "typedoc-plugin-markdown": "^3.15.3",
-    "typescript": "5.1.3"
+    "typescript": "5.1.6"
   },
   "browserslist": {
     "production": [
