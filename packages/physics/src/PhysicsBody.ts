@@ -1,51 +1,8 @@
-import { Entity, Shape, Size, WebColors } from "@m2c2kit/core";
+import { Entity, Shape, WebColors } from "@m2c2kit/core";
 import Matter from "matter-js";
 import { Physics } from "./Physics";
-
-export interface PhysicsBodyOptions {
-  /**
-   * A circular physics body of the given radius centered on the entity.
-   */
-  circleOfRadius?: number;
-  /**
-   * A rectangular physics body of the given size centered on the entity.
-   */
-  rect?: Size;
-  /**
-   * A region that physics bodies cannot penetrate.
-   */
-  edgeLoop?: Size & {
-    /**
-     * The thickness of the edge loop. Defaults to 10.
-     *
-     * @remarks If body A is moving rapidly and/or is small, and body B is
-     * also small, collisions between the two bodies may not be detected.
-     * This can manifest as body A "passing through" body B. This is called
-     * "tunneling". If body B is an edge loop, one way to reduce tunneling
-     * is to increase the thickness of the edge loop.
-     * See https://github.com/liabru/matter-js/issues/5
-     */
-    thickness?: number;
-  };
-  /**
-   * Whether or not the physics body moves in response to forces. Defaults to true.
-   *
-   * @remarks Once set, this property cannot be changed. This is negated and mapped to the Matter.js `static` property.
-   */
-  isDynamic?: boolean;
-  /**
-   * Whether or not the physics body currently moves in response to forces. Defaults to false.
-   *
-   * @remarks Unlike `isDynamic`, this property can be changed after the body is created. This is mapped to the Matter.js `sleeping` property.
-   */
-  resting?: boolean;
-  /**
-   * How elastic (bouncy) the body is.
-   *
-   * @remarks Range is 0 to 1. 0 means collisions are not elastic at all (no bouncing), 1 means collisions are perfectly elastic. Defaults to 0. This is mapped to the Matter.js `restitution` property.
-   */
-  restitution?: number;
-}
+import { Vector } from "./Vector";
+import { PhysicsBodyOptions } from "./PhysicsBodyOptions";
 
 /**
  * A rigid body model added to an entity to enable physics simulation.
@@ -54,25 +11,45 @@ export interface PhysicsBodyOptions {
  *
  * @param options - {@link PhysicsBodyOptions}
  */
-export class PhysicsBody {
+export class PhysicsBody implements PhysicsBodyOptions {
   _entity?: Entity;
   _body?: Matter.Body;
   options: PhysicsBodyOptions;
   needsInitialization = true;
   private _isDynamic = true;
-  private _resting = false;
-  private _restitution = 0;
   private readonly EDGE_LOOP_DEFAULT_THICKNESS = 10;
 
-  get body() {
+  private get body() {
     if (!this._body) {
       throw new Error("PhysicsBody.entity is undefined");
     }
     return this._body;
   }
 
-  set body(body: Matter.Body) {
+  private set body(body: Matter.Body) {
     this._body = body;
+  }
+
+  get velocity(): Vector {
+    /**
+     * declaration files are incomplete and do not contain getVelocity
+     */
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const matterVector = Matter.Body.getVelocity(this.body) as Matter.Vector;
+    return { dx: matterVector.x, dy: matterVector.y };
+  }
+
+  set velocity(velocity: Vector) {
+    if (!this.isDynamic) {
+      throw new Error(
+        "PhysicsBody.velocity cannot be set when PhysicsBody.isDynamic is false"
+      );
+    }
+    Matter.Body.setVelocity(
+      this.body,
+      Matter.Vector.create(velocity.dx, velocity.dy)
+    );
   }
 
   get entity() {
@@ -101,21 +78,35 @@ export class PhysicsBody {
   }
 
   set resting(resting: boolean) {
-    this._resting = resting;
     Matter.Sleeping.set(this.body, resting);
   }
 
   get resting() {
-    return this._resting;
+    return this.body.isSleeping;
   }
 
   set restitution(restitution: number) {
-    this._restitution = restitution;
     this.body.restitution = restitution;
   }
 
   get restitution() {
-    return this._restitution;
+    return this.body.restitution;
+  }
+
+  set friction(friction: number) {
+    this.body.friction = friction;
+  }
+
+  get friction() {
+    return this.body.friction;
+  }
+
+  set damping(damping: number) {
+    this.body.frictionAir = damping;
+  }
+
+  get damping() {
+    return this.body.frictionAir;
   }
 
   constructor(options: PhysicsBodyOptions) {
@@ -125,157 +116,14 @@ export class PhysicsBody {
 
   initialize() {
     if (this.options.circleOfRadius) {
-      this.body = Matter.Bodies.circle(
-        this.entity.position.x,
-        this.entity.position.y,
-        this.options.circleOfRadius
-      );
-      if (Physics.options.showsPhysics) {
-        const circleOutline = new Shape({
-          circleOfRadius: this.options.circleOfRadius,
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-          name: "PhysicsBodyOutline",
-        });
-        this.entity.addChild(circleOutline);
-      }
+      this.body = this.createCircleBody(this.options);
     } else if (this.options.rect) {
-      this.body = Matter.Bodies.rectangle(
-        this.entity.position.x,
-        this.entity.position.y,
-        this.options.rect.width,
-        this.options.rect.height
-      );
-      if (Physics.options.showsPhysics) {
-        const rectOutline = new Shape({
-          rect: {
-            width: this.options.rect.width,
-            height: this.options.rect.height,
-          },
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-        });
-        this.entity.addChild(rectOutline);
-      }
+      this.body = this.createRectBody(this.options);
     } else if (this.options.edgeLoop) {
-      const thickness =
-        this.options.edgeLoop.thickness ?? this.EDGE_LOOP_DEFAULT_THICKNESS;
-
-      const partA = Matter.Bodies.rectangle(
-        this.entity.position.x,
-        this.entity.position.y -
-          this.options.edgeLoop.height / 2 -
-          thickness / 2,
-        this.options.edgeLoop.width + thickness * 2,
-        thickness
-      );
-      const partB = Matter.Bodies.rectangle(
-        this.entity.position.x,
-        this.entity.position.y +
-          this.options.edgeLoop.height / 2 +
-          thickness / 2,
-        this.options.edgeLoop.width + thickness * 2,
-        thickness
-      );
-      const partC = Matter.Bodies.rectangle(
-        this.entity.position.x -
-          this.options.edgeLoop.width / 2 -
-          thickness / 2,
-        this.entity.position.y,
-        thickness,
-        this.options.edgeLoop.height
-      );
-      const partD = Matter.Bodies.rectangle(
-        this.entity.position.x +
-          this.options.edgeLoop.width / 2 +
-          thickness / 2,
-        this.entity.position.y,
-        thickness,
-        this.options.edgeLoop.height
-      );
-      this.body = Matter.Body.create({
-        parts: [partA, partB, partC, partD],
-        isStatic: true,
-      });
-
-      if (Physics.options.showsPhysics) {
-        const rectOutlineA = new Shape({
-          position: {
-            x: 0,
-            y: -this.options.edgeLoop.height / 2 - thickness / 2,
-          },
-          rect: {
-            width: this.options.edgeLoop.width + thickness * 2,
-            height: thickness,
-          },
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-        });
-        this.entity.addChild(rectOutlineA);
-
-        const rectOutlineB = new Shape({
-          position: {
-            x: 0,
-            y: this.options.edgeLoop.height / 2 + thickness / 2,
-          },
-          rect: {
-            width: this.options.edgeLoop.width + thickness * 2,
-            height: thickness,
-          },
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-        });
-        this.entity.addChild(rectOutlineB);
-
-        const rectOutlineC = new Shape({
-          position: {
-            x: -this.options.edgeLoop.width / 2 - thickness / 2,
-            y: 0,
-          },
-          rect: {
-            width: thickness,
-            height: this.options.edgeLoop.height,
-          },
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-        });
-        this.entity.addChild(rectOutlineC);
-
-        const rectOutlineD = new Shape({
-          position: {
-            x: this.options.edgeLoop.width / 2 + thickness / 2,
-            y: 0,
-          },
-          rect: {
-            width: thickness,
-            height: this.options.edgeLoop.height,
-          },
-          fillColor: WebColors.Transparent,
-          strokeColor:
-            Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
-          lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
-          zPosition: Number.MAX_SAFE_INTEGER,
-        });
-        this.entity.addChild(rectOutlineD);
-      }
+      this.body = this.createEdgeLoopBody(this.options);
     } else {
       throw new Error(
-        "PhysicsBodyOptions are invalid; must specify either circleOfRadius or rect"
+        "PhysicsBodyOptions are invalid; must specify either circleOfRadius, rect, or edgeLoop"
       );
     }
 
@@ -297,8 +145,182 @@ export class PhysicsBody {
       this.restitution = this.options.restitution;
     }
 
+    if (this.options.friction) {
+      this.friction = this.options.friction;
+    }
+
+    if (this.options.damping) {
+      this.damping = this.options.damping;
+    }
+
+    if (this.options.velocity) {
+      this.velocity = this.options.velocity;
+    }
+
+    this.body.frictionStatic = 1;
+
     Matter.World.add(Physics.engine.world, this.body);
     Physics.bodiesDictionary[this.entity.uuid] = this.body;
     this.needsInitialization = false;
+  }
+
+  private createCircleBody(options: PhysicsBodyOptions) {
+    if (!options.circleOfRadius) {
+      throw new Error(
+        "PhysicsBody.createCircleBody requires options.circleOfRadius"
+      );
+    }
+
+    if (Physics.options.showsPhysics) {
+      const circleOutline = new Shape({
+        circleOfRadius: options.circleOfRadius,
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+        name: "PhysicsBodyOutline",
+      });
+      this.entity.addChild(circleOutline);
+    }
+
+    return Matter.Bodies.circle(
+      this.entity.position.x,
+      this.entity.position.y,
+      options.circleOfRadius
+    );
+  }
+
+  private createRectBody(options: PhysicsBodyOptions) {
+    if (!options.rect) {
+      throw new Error("PhysicsBody.createRectBody requires options.rect");
+    }
+
+    if (Physics.options.showsPhysics) {
+      const rectOutline = new Shape({
+        rect: {
+          width: options.rect.width,
+          height: options.rect.height,
+        },
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+      });
+      this.entity.addChild(rectOutline);
+    }
+
+    return Matter.Bodies.rectangle(
+      this.entity.position.x,
+      this.entity.position.y,
+      options.rect.width,
+      options.rect.height
+    );
+  }
+
+  private createEdgeLoopBody(options: PhysicsBodyOptions) {
+    if (!options.edgeLoop) {
+      throw new Error(
+        "PhysicsBody.createEdgeLoopBody requires options.edgeLoop"
+      );
+    }
+
+    const thickness =
+      options.edgeLoop.thickness ?? this.EDGE_LOOP_DEFAULT_THICKNESS;
+
+    if (Physics.options.showsPhysics) {
+      const rectOutlineA = new Shape({
+        position: {
+          x: 0,
+          y: -options.edgeLoop.height / 2 - thickness / 2,
+        },
+        rect: {
+          width: options.edgeLoop.width + thickness * 2,
+          height: thickness,
+        },
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+      });
+      this.entity.addChild(rectOutlineA);
+
+      const rectOutlineB = new Shape({
+        position: {
+          x: 0,
+          y: options.edgeLoop.height / 2 + thickness / 2,
+        },
+        rect: {
+          width: options.edgeLoop.width + thickness * 2,
+          height: thickness,
+        },
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+      });
+      this.entity.addChild(rectOutlineB);
+
+      const rectOutlineC = new Shape({
+        position: {
+          x: -options.edgeLoop.width / 2 - thickness / 2,
+          y: 0,
+        },
+        rect: {
+          width: thickness,
+          height: options.edgeLoop.height,
+        },
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+      });
+      this.entity.addChild(rectOutlineC);
+
+      const rectOutlineD = new Shape({
+        position: {
+          x: options.edgeLoop.width / 2 + thickness / 2,
+          y: 0,
+        },
+        rect: {
+          width: thickness,
+          height: options.edgeLoop.height,
+        },
+        fillColor: WebColors.Transparent,
+        strokeColor: Physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
+        lineWidth: Physics.options.showsPhysicsLineWidth ?? 1,
+        zPosition: Number.MAX_SAFE_INTEGER,
+      });
+      this.entity.addChild(rectOutlineD);
+    }
+
+    const partA = Matter.Bodies.rectangle(
+      this.entity.position.x,
+      this.entity.position.y - options.edgeLoop.height / 2 - thickness / 2,
+      options.edgeLoop.width + thickness * 2,
+      thickness
+    );
+    const partB = Matter.Bodies.rectangle(
+      this.entity.position.x,
+      this.entity.position.y + options.edgeLoop.height / 2 + thickness / 2,
+      options.edgeLoop.width + thickness * 2,
+      thickness
+    );
+    const partC = Matter.Bodies.rectangle(
+      this.entity.position.x - options.edgeLoop.width / 2 - thickness / 2,
+      this.entity.position.y,
+      thickness,
+      options.edgeLoop.height
+    );
+    const partD = Matter.Bodies.rectangle(
+      this.entity.position.x + options.edgeLoop.width / 2 + thickness / 2,
+      this.entity.position.y,
+      thickness,
+      options.edgeLoop.height
+    );
+    const body = Matter.Body.create({
+      parts: [partA, partB, partC, partD],
+      isStatic: true,
+    });
+    return body;
   }
 }

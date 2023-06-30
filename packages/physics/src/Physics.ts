@@ -1,27 +1,19 @@
-import { Engine, World, Bodies, Composite, Composites } from "matter-js";
-import { Game, Entity, RgbaColor } from "@m2c2kit/core";
+import {
+  Engine,
+  Resolver,
+  Events,
+  World,
+  Bodies,
+  Composite,
+  Composites,
+} from "matter-js";
+import Matter from "matter-js";
+import { Game, Entity } from "@m2c2kit/core";
+import { Vector } from "./Vector";
+import { PhysicsOptions } from "./PhysicsOptions";
 
-export interface PhysicsBodiesDictionary {
+interface PhysicsBodiesDictionary {
   [entityUuid: string]: Matter.Body;
-}
-
-export interface PhysicsOptions {
-  /**
-   * Whether or not to show the physics bodies in the game by drawing an outline around them.
-   */
-  showsPhysics?: boolean;
-  /**
-   * The color of the physics body outline. Defaults to green.
-   */
-  showsPhysicsStrokeColor?: RgbaColor;
-  /**
-   * The width of the physics body outline. Defaults to 1.
-   */
-  showsPhysicsLineWidth?: number;
-  /**
-   * Whether to log the average time it takes to update the physics engine each frame.
-   */
-  logEngineStats?: boolean;
 }
 
 /**
@@ -32,6 +24,7 @@ export class Physics {
   static bodiesDictionary: PhysicsBodiesDictionary = {};
   static options: PhysicsOptions = {};
 
+  private static _gravity: Vector = { dx: 0, dy: 1 };
   private static framesSimulatedCount = 0;
   private static cumulativeFrameSimulationTime = 0;
 
@@ -53,7 +46,40 @@ export class Physics {
     console.log("⚪ @m2c2kit/physics version __PACKAGE_JSON_VERSION__");
     this.engine = Engine.create();
     this.options = options || {};
+    if (this.options.gravity) {
+      Physics.gravity = this.options.gravity;
+    }
     Physics.addEngineUpdateCallback(game);
+  }
+
+  /**
+   * Vector that specifies the gravity to apply to all physics bodies. Default is { dx: 0, dy: 1 }
+   */
+  static get gravity(): Vector {
+    /**
+     * We return getters and setter because we need to inform the engine of
+     * change even when only one of the dx or dy values is changed.
+     */
+    return {
+      get dx(): number {
+        return Physics._gravity.dx;
+      },
+      set dx(dx: number) {
+        Physics.gravity = { dx, dy: Physics.gravity.dy };
+      },
+      get dy(): number {
+        return Physics._gravity.dy;
+      },
+      set dy(dy: number) {
+        Physics.gravity = { dx: Physics.gravity.dx, dy };
+      },
+    };
+  }
+
+  static set gravity(gravity: Vector) {
+    Physics._gravity = gravity;
+    Physics.engine.gravity.x = gravity.dx;
+    Physics.engine.gravity.y = gravity.dy;
   }
 
   private static addEngineUpdateCallback(game: Game) {
