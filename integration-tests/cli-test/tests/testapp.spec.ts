@@ -47,17 +47,27 @@ async function getM2c2Canvas(browser: Browser): Promise<Locator> {
   const page = await browser.newPage({
     viewport: { width: 1200, height: 1200 },
   });
+
   /**
-   * Both the m2c2 test app being served AND the playwright tests will be
-   * running in docker containers on a shared network. Thus, when
-   * we direct Playwright to navigate to the m2c2 test app, we must use
-   * the test app service name as defined within docker-compose.yaml,
-   * NOT localhost.
+   * Originally, ths was:
+   *   await page.goto()...
+   *   await page.waitForEvent()...
+   * But, that was not reliable. Sometimes, the page would load before
+   * the console event listener was set up, and the event would be missed.
    */
-  await page.goto("http://testapp:3000");
-  await page.waitForEvent("console", (msg) =>
-    msg.text().includes("started activity")
-  );
+  await Promise.all([
+    page.waitForEvent("console", (msg) =>
+      msg.text().includes("started activity")
+    ),
+    /**
+     * Both the m2c2 test app being served AND the playwright tests will be
+     * running in docker containers on a shared network. Thus, when
+     * we direct Playwright to navigate to the m2c2 test app, we must use
+     * the test app service name as defined within docker-compose.yaml,
+     * NOT localhost.
+     */
+    page.goto("http://testapp:3000"),
+  ]);
   // wait, because the canvas may not yet be sized and ready
   await page.waitForTimeout(500);
   return page.locator("#m2c2kit-canvas");
