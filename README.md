@@ -124,7 +124,7 @@ To run the tests, execute the following from the repository root:
 npm run test
 ```
 
-Using [Selenium](https://www.selenium.dev/), [WebdriverIO](https://webdriver.io/), [Verdaccio](https://verdaccio.org/), and Docker Compose, some integration tests have been written to test the [`@m2c2kit/cli`](packages/cli) package. The integration tests build and publish m2c2kit packages to a local npm registry, install the CLI, scaffold a new app with the CLI, and test the new app's appearance and interactivity. The integration tests are fully containerized; you can run them without affecting your local system.
+Using [Playwright](https://playwright.dev/), [Verdaccio](https://verdaccio.org/), and Docker Compose, some integration tests have been written to test the [`@m2c2kit/cli`](packages/cli) package. The integration tests build and publish m2c2kit packages to a local npm registry, install the CLI, scaffold a new app with the CLI, and test the new app's appearance and interactivity. The integration tests are fully containerized; you can run them without affecting your local system.
 
 To run the containerized integration tests, execute the following from the repository root:
 

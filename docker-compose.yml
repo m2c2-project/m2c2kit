@@ -22,11 +22,6 @@ services:
     depends_on:
       - publish
 
-  selenium:
-    image: selenium/standalone-chrome:113.0
-    ports:
-      - "4444:4444"
-
   m2c2kit:
     build:
       context: .
