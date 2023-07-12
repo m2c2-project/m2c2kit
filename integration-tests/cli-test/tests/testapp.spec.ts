@@ -37,12 +37,11 @@ test.describe("m2c2 cli integration test", () => {
      * { x, y } position to click is OFFSETS from TOP LEFT of canvas
      * Thus, { x: 310, y: 692 } is in the hit area of the NEXT button
      */
-    canvas.click({ position: { x: 310, y: 692 } });
+    await canvas.click({ position: { x: 310, y: 692 } });
     // wait for the scene to transition to complete
     await canvas.page().waitForTimeout(1000);
     const buffer = await canvas.screenshot();
     const canvasPng = PNG.sync.read(buffer);
-    fs.writeFileSync("scene2.png", buffer);
     const scene2Png = readPngFromFile("./images/testAppScene2.png");
     expect(diffPixelCount(canvasPng, scene2Png)).toBe(0);
   });
