@@ -4,6 +4,11 @@ import pixelmatch from "pixelmatch";
 import * as fs from "fs";
 
 test.describe("m2c2 cli integration test", () => {
+  test.beforeAll(async () => {
+    console.log("Waiting 4s before starting playwright tests...");
+    await new Promise((r) => setTimeout(r, 4000));
+  });
+
   test("starter app creates canvas 400px wide, 800px high", async ({
     browser,
   }) => {
@@ -55,20 +60,21 @@ async function getM2c2Canvas(browser: Browser): Promise<Locator> {
    * But, that was not reliable. Sometimes, the page would load before
    * the console event listener was set up, and the event would be missed.
    */
-  const consoleWaiter = page.waitForEvent("console", (msg) =>
-    msg.text().includes("started activity")
-  );
-  /**
-   * Both the m2c2 test app being served AND the playwright tests will be
-   * running in docker containers on a shared network. Thus, when
-   * we direct Playwright to navigate to the m2c2 test app, we must use
-   * the test app service name as defined within docker-compose.yaml,
-   * NOT localhost.
-   */
-  await page.goto("http://testapp:3000");
-  await consoleWaiter;
+  await Promise.all([
+    page.waitForEvent("console", (msg) =>
+      msg.text().includes("started activity")
+    ),
+    /**
+     * Both the m2c2 test app being served AND the playwright tests will be
+     * running in docker containers on a shared network. Thus, when
+     * we direct Playwright to navigate to the m2c2 test app, we must use
+     * the test app service name as defined within docker-compose.yaml,
+     * NOT localhost.
+     */
+    page.goto("http://testapp:3000"),
+  ]);
   // wait, because the canvas may not yet be sized and ready
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(500);
   return page.locator("#m2c2kit-canvas");
 }
 
