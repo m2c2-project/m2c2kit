@@ -17,7 +17,7 @@ struct SwiftUIWebView: UIViewRepresentable  {
         config.userContentController = userContentController
         
         let manualStartSource = "const IOSM2c2 = { sessionManualStart: () => { return true; } };"
-        let manualStartScript = WKUserScript(source: manualStartSource, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        let manualStartScript = WKUserScript(source: manualStartSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         userContentController.addUserScript(manualStartScript)
         
         // setting allowFileAccessFromFileURLs is needed so that index.html (which we load in webView.loadFileURL)
