@@ -45,7 +45,7 @@ export class Grid extends Composite {
   cellWidth: number;
   cellHeight: number;
   gridChildren = new Array<GridChild>();
-  private gridBackground?: Shape;
+  private _gridBackground?: Shape;
 
   /**
    * A rectangular grid that supports placement of entities within the grid's
@@ -167,6 +167,17 @@ export class Grid extends Composite {
     this.needsInitialization = false;
   }
 
+  private get gridBackground(): Shape {
+    if (!this._gridBackground) {
+      throw new Error("gridBackground is null or undefined");
+    }
+    return this._gridBackground;
+  }
+
+  private set gridBackground(gridBackground: Shape) {
+    this._gridBackground = gridBackground;
+  }
+
   // all entities that make up grid are added as children, so they
   // have their own dispose methods
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -225,17 +236,18 @@ export class Grid extends Composite {
 
   // override Entity.RemoveAllChildren() so that when RemoveAllChildren() is called on a Grid,
   // it removes only entities added to the grid cells (what we call grid children), not the grid lines!
-  // note: when we upgrade to typescript 4.3+, we can mark this with override keyword to make intention explicit
   /**
    * Removes all children from the grid, but retains grid lines.
-   *
    */
   override removeAllChildren(): void {
     if (this.gridChildren.length === 0) {
       return;
     }
     while (this.gridChildren.length) {
-      this.gridChildren.pop();
+      const gridChild = this.gridChildren.pop();
+      if (gridChild) {
+        this.gridBackground.removeChild(gridChild.entity);
+      }
     }
     this.needsInitialization = true;
   }
@@ -264,8 +276,17 @@ export class Grid extends Composite {
    * @param column - column position within grid at which to remove children; zero-based indexing
    */
   removeAllAtCell(row: number, column: number): void {
+    const gridChildrenToRemove = this.gridChildren.filter(
+      (gridChild) => gridChild.row === row && gridChild.column === column
+    );
+    if (gridChildrenToRemove.length === 0) {
+      return;
+    }
+    this.gridBackground.removeChildren(
+      gridChildrenToRemove.map((gridChild) => gridChild.entity)
+    );
     this.gridChildren = this.gridChildren.filter(
-      (gridChild) => gridChild.row != row && gridChild.column != column
+      (gridChild) => gridChild.row !== row && gridChild.column !== column
     );
     this.needsInitialization = true;
   }
@@ -278,9 +299,6 @@ export class Grid extends Composite {
    * @param entity - entity to remove
    */
   override removeChild(entity: Entity): void {
-    if (!this.gridBackground) {
-      throw new Error("gridBackground is null or undefined");
-    }
     this.gridBackground.removeChild(entity);
     this.gridChildren = this.gridChildren.filter(
       (gridChild) => gridChild.entity != entity
