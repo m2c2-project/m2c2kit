@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/schematics` [0.1.7] - 2023-08-01
+
+### Changed
+
+- Updated templates.
+
 ## `@m2c2kit/addons` [0.3.9] - 2023-08-01
 
 ### Fixed

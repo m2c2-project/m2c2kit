@@ -53,7 +53,7 @@ export function m2New(options: m2NewOptions): Rule {
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.3.8",
+    "@m2c2kit/addons": "0.3.9",
     "@m2c2kit/core": "0.3.11"
   },
   "devDependencies": {
