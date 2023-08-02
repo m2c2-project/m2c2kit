@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/embedding` [1.0.6] - 2023-08-02
+
+### Fixed
+
+- Could not stringify event in console warning message.
+
 ## `@m2c2kit/schematics` [0.1.7] - 2023-08-01
 
 ### Changed

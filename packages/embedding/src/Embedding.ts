@@ -126,7 +126,6 @@ export class Embedding {
    * @param event - the m2c2kit event to send to the Android app.
    */
   public static sendEventToAndroid(event: EventBase): void {
-    this.removeCircularReferencesFromEvent(event);
     switch (event.type) {
       case EventType.SessionStart:
       case EventType.SessionEnd:
@@ -170,7 +169,6 @@ export class Embedding {
    * @param event - the m2c2kit event to send to the iOS app.
    */
   public static sendEventToIOS(event: EventBase): void {
-    this.removeCircularReferencesFromEvent(event);
     window.webkit.messageHandlers.iOSM2c2.postMessage(event);
   }
 
@@ -191,6 +189,7 @@ export class Embedding {
    * @param event - the m2c2kit event to send to the native app.
    */
   public static sendEventToWebView(event: EventBase): void {
+    this.removeCircularReferencesFromEvent(event);
     if (Embedding.contextIsAndroidWebView()) {
       Embedding.sendEventToAndroid(event);
     } else if (Embedding.contextIsIOSWebView()) {

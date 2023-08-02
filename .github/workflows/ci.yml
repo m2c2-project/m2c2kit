@@ -65,13 +65,13 @@ jobs:
         run: npm run build -w website
       - name: Setup Pages
         if: env.PUBLISHED_UPDATED_PACKAGES=='true'
-        uses: actions/configure-pages@v1
+        uses: actions/configure-pages@v3
       - name: Upload artifact
         if: env.PUBLISHED_UPDATED_PACKAGES=='true'
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: website/build
       - name: Deploy to GitHub Pages
         if: env.PUBLISHED_UPDATED_PACKAGES=='true'
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2
