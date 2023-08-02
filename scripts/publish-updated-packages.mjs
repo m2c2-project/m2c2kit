@@ -33,6 +33,7 @@ const packageNamesToPublish = [
   "@m2c2kit/core",
   "@m2c2kit/addons",
   "@m2c2kit/physics",
+  "@m2c2kit/embedding",
   "@m2c2kit/db",
   "@m2c2kit/cli",
   "@m2c2kit/schematics",

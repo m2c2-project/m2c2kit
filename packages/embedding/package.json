@@ -10,6 +10,10 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
   "devDependencies": {
     "@m2c2kit/core": "^0.3.8",
     "@rollup/plugin-node-resolve": "15.1.0",
