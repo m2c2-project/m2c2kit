@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.12] - 2023-10-23
+
+### Added
+
+- Path shapes can be created from points.
+- `PointerLeave` event added for entities.
+
+### Fixed
+
+- Scale action for path shapes is now correct.
+- Pointer events for scaled circles is now correct.
+
+## `@m2c2kit/addons` [0.3.10] - 2023-10-23
+
+### Added
+
+- `DrawPad` composite.
+
+## `@m2c2kit/schematics` [0.1.8] - 2023-10-23
+
+### Changed
+
+- Updated templates.
+
 ## `@m2c2kit/embedding` [1.0.6] - 2023-08-02
 
 ### Fixed

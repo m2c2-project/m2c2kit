@@ -99,6 +99,7 @@ export abstract class Entity implements EntityOptions {
   /** Is the entity in a pressed state? E.g., did the user put the pointer
    * down on the entity and not yet release it? */
   pressed = false;
+  withinHitArea = false;
   /** Is the entity in a pressed state AND is the pointer within the entity's
    * hit area? For example, a user may put the pointer down on the entity, but
    * then move the pointer, while still down, beyond the entity's hit area. In
@@ -439,15 +440,11 @@ export abstract class Entity implements EntityOptions {
    * the bounds of the entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onTapDown(
     callback: (tapEvent: TapEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     // cast <(ev: EntityEvent) => void> is needed because callback parameter
     // in this onTapDown method has argument of type TapEvent, but
@@ -455,7 +452,7 @@ export abstract class Entity implements EntityOptions {
     this.addEventListener(
       EventType.TapDown,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -468,20 +465,16 @@ export abstract class Entity implements EntityOptions {
    * beyond the bounds of the entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}ue.
    */
   onTapUp(
     callback: (tapEvent: TapEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapUp,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -495,20 +488,16 @@ export abstract class Entity implements EntityOptions {
    * release.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onTapUpAny(
     callback: (tapEvent: TapEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapUpAny,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -521,20 +510,16 @@ export abstract class Entity implements EntityOptions {
    * before the press release.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onTapLeave(
     callback: (tapEvent: TapEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.TapLeave,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -545,20 +530,16 @@ export abstract class Entity implements EntityOptions {
    * the bounds of the entity. It occurs under the same conditions as TapDown.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onPointerDown(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerDown,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -571,20 +552,16 @@ export abstract class Entity implements EntityOptions {
    * previous PointerDown on the entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onPointerUp(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerUp,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -593,20 +570,34 @@ export abstract class Entity implements EntityOptions {
    * within the bounds of the entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onPointerMove(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.PointerMove,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
+    );
+  }
+
+  /**
+   * Executes a callback when the user moves the pointer (mouse or touches)
+   * outside the bounds of the entity.
+   *
+   * @param callback - function to execute
+   * @param options - {@link CallbackOptions}
+   */
+  onPointerLeave(
+    callback: (m2PointerEvent: M2PointerEvent) => void,
+    options?: CallbackOptions
+  ): void {
+    this.addEventListener(
+      EventType.PointerLeave,
+      <(ev: EntityEvent) => void>callback,
+      options
     );
   }
 
@@ -614,20 +605,16 @@ export abstract class Entity implements EntityOptions {
    * Executes a callback when the user begins dragging an entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onDragStart(
     callback: (m2DragEvent: M2DragEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.DragStart,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -635,20 +622,16 @@ export abstract class Entity implements EntityOptions {
    * Executes a callback when the user continues dragging an entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onDrag(
     callback: (m2DragEvent: M2DragEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.Drag,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
@@ -656,25 +639,21 @@ export abstract class Entity implements EntityOptions {
    * Executes a callback when the user stop dragging an entity.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options - {@link CallbackOptions}
    */
   onDragEnd(
     callback: (m2DragEvent: M2DragEvent) => void,
-    callbackOptions?: CallbackOptions
+    options?: CallbackOptions
   ): void {
     this.addEventListener(
       EventType.DragEnd,
       <(ev: EntityEvent) => void>callback,
-      callbackOptions
+      options
     );
   }
 
   addEventListener(
-    type: EventType,
+    type: EventType | string,
     callback: (ev: EntityEvent) => void,
     callbackOptions?: CallbackOptions
   ): void {

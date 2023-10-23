@@ -2635,6 +2635,19 @@ export class Game implements Activity {
       )
     ) {
       this.raiseM2PointerMoveEvent(entity, m2Event, domPointerEvent);
+      entity.withinHitArea = true;
+    }
+    if (
+      !this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY
+      )
+    ) {
+      if (entity.withinHitArea) {
+        this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
+        entity.withinHitArea = false;
+      }
     }
 
     if (entity.children) {
@@ -2747,6 +2760,20 @@ export class Game implements Activity {
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.PointerMove;
+    this.raiseEventOnListeningEntities<M2PointerEvent>(
+      entity,
+      m2Event,
+      domPointerEvent
+    );
+  }
+
+  private raiseM2PointerLeaveEvent(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent
+  ): void {
+    m2Event.target = entity;
+    m2Event.type = EventType.PointerLeave;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
       m2Event,
@@ -2935,6 +2962,7 @@ export class Game implements Activity {
             case EventType.PointerDown:
             case EventType.PointerMove:
             case EventType.PointerUp:
+            case EventType.PointerLeave:
               (m2Event as M2PointerEvent).point =
                 this.calculatePointWithinEntityFromDomPointerEvent(
                   entity,
@@ -3019,11 +3047,14 @@ export class Game implements Activity {
       if (!radius) {
         throw "circleOfRadius is undefined";
       }
-      const center = { x: bb.xMin + radius, y: bb.yMin + radius };
+      const center = {
+        x: bb.xMin + radius * entity.absoluteScale,
+        y: bb.yMin + radius * entity.absoluteScale,
+      };
       const distance = Math.sqrt(
         Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2)
       );
-      return distance <= radius;
+      return distance <= radius * entity.absoluteScale;
     }
 
     if (entity.size.width === 0 || entity.size.height === 0) {

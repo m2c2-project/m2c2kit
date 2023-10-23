@@ -28,7 +28,6 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   ckPath: Path | null = null;
   ckPathWidth?: number;
   ckPathHeight?: number;
-  pathSvgString?: string;
   cornerRadius = 0;
   private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR;
   private _strokeColor?: RgbaColor | undefined;
@@ -45,10 +44,9 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private svgPathScaleForResizing = 1;
   private svgPathWidth = 0;
   private svgPathHeight = 0;
-  private svgPreviousAbsoluteScale = NaN;
   private svgPreviousAbsoluteX = NaN;
   private svgPreviousAbsoluteY = NaN;
-  private pathIsSvgStringPath = false;
+  private svgFirstPathDraw = true;
 
   /**
    * Rectangular, circular, or path-based shape
@@ -59,11 +57,15 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     super(options);
     handleInterfaceOptions(this, options);
 
-    if ((options?.path as SvgStringPath)?.svgPathString !== undefined) {
+    if (options.path !== undefined) {
+      this.path = options.path;
       this.shapeType = ShapeType.Path;
-      this.pathIsSvgStringPath = true;
 
-      this.pathSvgString = (options.path as SvgStringPath).svgPathString;
+      if ((this.path as M2Path).size !== undefined) {
+        this.size.height = (this.path as M2Path).size.height;
+        this.size.width = (this.path as M2Path).size.width;
+      }
+
       this.svgPathRequestedWidth = (options.path as SvgStringPath).width;
       this.svgPathRequestedHeight = (options.path as SvgStringPath).height;
 
@@ -152,34 +154,38 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   }
 
   override initialize(): void {
-    if (this.shapeType === ShapeType.Path && this.pathIsSvgStringPath) {
-      if (!this.pathSvgString) {
-        throw new Error("SVG Path string is null/undefined");
+    if (this.shapeType === ShapeType.Path) {
+      if (this.shapeIsSvgStringPath()) {
+        const pathSvgString = (this.path as SvgStringPath).svgPathString;
+        if (!pathSvgString) {
+          throw new Error("SVG Path string is null/undefined");
+        }
+
+        this.ckPath = this.canvasKit.Path.MakeFromSVGString(pathSvgString);
+        if (!this.ckPath) {
+          throw new Error("could not make CanvasKit Path from SVG string");
+        }
+
+        const bounds = this.ckPath.getBounds();
+        this.svgPathWidth =
+          bounds[2] + (bounds[0] < 0 ? Math.abs(bounds[0]) : 0);
+        this.svgPathHeight =
+          bounds[3] + (bounds[1] < 0 ? Math.abs(bounds[1]) : 0);
+
+        if (this.svgPathRequestedHeight !== undefined) {
+          this.svgPathScaleForResizing =
+            this.svgPathRequestedHeight / this.svgPathHeight;
+        } else if (this.svgPathRequestedWidth !== undefined) {
+          this.svgPathScaleForResizing =
+            this.svgPathRequestedWidth / this.svgPathWidth;
+        }
+
+        this.size.width = this.svgPathWidth * this.svgPathScaleForResizing;
+        this.size.height = this.svgPathHeight * this.svgPathScaleForResizing;
+
+        this.svgPreviousAbsoluteX = 0;
+        this.svgPreviousAbsoluteY = 0;
       }
-      this.ckPath = this.canvasKit.Path.MakeFromSVGString(this.pathSvgString);
-      if (!this.ckPath) {
-        throw new Error("could not make CanvasKit Path from SVG string");
-      }
-
-      const bounds = this.ckPath.getBounds();
-      this.svgPathWidth = bounds[2] + (bounds[0] < 0 ? Math.abs(bounds[0]) : 0);
-      this.svgPathHeight =
-        bounds[3] + (bounds[1] < 0 ? Math.abs(bounds[1]) : 0);
-
-      this.size.width = this.size.width ?? this.svgPathWidth;
-      this.size.height = this.size.height ?? this.svgPathHeight;
-
-      if (this.svgPathRequestedHeight !== undefined) {
-        this.svgPathScaleForResizing =
-          this.svgPathRequestedHeight / this.svgPathHeight;
-      } else if (this.svgPathRequestedWidth !== undefined) {
-        this.svgPathScaleForResizing =
-          this.svgPathRequestedWidth / this.svgPathWidth;
-      }
-
-      this.svgPreviousAbsoluteScale = 1;
-      this.svgPreviousAbsoluteX = 0;
-      this.svgPreviousAbsoluteY = 0;
     }
 
     if (this.fillColor) {
@@ -211,6 +217,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         false
       );
     }
+    this.svgFirstPathDraw = true;
     this.needsInitialization = false;
   }
 
@@ -268,11 +275,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
 
-    if (this.shapeType === ShapeType.Path && !this.pathIsSvgStringPath) {
+    if (this.shapeIsM2Path()) {
       this.drawPathFromM2Path(canvas);
     }
 
-    if (this.shapeType === ShapeType.Path && this.pathIsSvgStringPath) {
+    if (this.shapeIsSvgStringPath()) {
       this.drawPathFromSvgString(canvas);
     }
 
@@ -307,19 +314,17 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this.lineWidth
     ) {
       // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-      this.strokeColorPaintAntialiased.setStrokeWidth(
-        this.lineWidth * drawScale
-      );
+      this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth);
 
       const subpaths = (this.path as M2Path).subpaths;
       for (const subpath of subpaths) {
         const points = subpath.flat();
         for (let i = 0; i < points.length - 1; i++) {
           canvas.drawLine(
-            pathOriginX + points[i].x * drawScale,
-            pathOriginY + points[i].y * drawScale,
-            pathOriginX + points[i + 1].x * drawScale,
-            pathOriginY + points[i + 1].y * drawScale,
+            pathOriginX + points[i].x * Globals.canvasScale,
+            pathOriginY + points[i].y * Globals.canvasScale,
+            pathOriginX + points[i + 1].x * Globals.canvasScale,
+            pathOriginY + points[i + 1].y * Globals.canvasScale,
             this.strokeColorPaintAntialiased
           );
         }
@@ -332,16 +337,27 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       return;
     }
 
+    /**
+     * A canvaskit path made from an SVG string is initialized to start at
+     * position (0, 0) and is unscaled.
+     * We calculate what should be the position of the path, taking into
+     * consideration scaling, anchor point, and device pixel ratio.
+     */
     const x = this.calculateSvgPathX();
     const y = this.calculateSvgPathY();
-    const drawScale = Globals.canvasScale / this.absoluteScale;
-    const pathScale =
-      drawScale * this.svgPathScaleForResizing * Globals.rootScale;
 
-    if (this.pathNeedsTransform(pathScale, x, y)) {
+    /**
+     * The path will need a transformation if any of the following is true:
+     *   - this is the first time the path is drawn
+     *   - the path has moved since the last draw
+     */
+    if (this.pathNeedsTransform(x, y)) {
+      const drawScale = Globals.canvasScale / this.absoluteScale;
+      const pathScale =
+        drawScale * this.svgPathScaleForResizing * Globals.rootScale;
       const matrix = this.calculateTransformationMatrix(pathScale, x, y);
       this.ckPath = this.ckPath.transform(matrix);
-      this.saveSvgPathDrawParameters(pathScale, x, y);
+      this.saveSvgPathAbsolutePosition(x, y);
     }
 
     if (this.fillColor) {
@@ -358,13 +374,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private calculateSvgPathY() {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     return (
-      (this.absolutePosition.y +
-        (this.size.height -
-          this.svgPathHeight *
-            this.svgPathScaleForResizing *
-            Globals.rootScale) /
-          2 -
-        this.anchorPoint.y * this.size.height) *
+      (this.absolutePosition.y - (this.size.height * this.absoluteScale) / 2) *
       drawScale
     );
   }
@@ -372,19 +382,12 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private calculateSvgPathX() {
     const drawScale = Globals.canvasScale / this.absoluteScale;
     return (
-      (this.absolutePosition.x +
-        (this.size.width -
-          this.svgPathWidth *
-            this.svgPathScaleForResizing *
-            Globals.rootScale) /
-          2 -
-        this.anchorPoint.x * this.size.width) *
+      (this.absolutePosition.x - (this.size.width * this.absoluteScale) / 2) *
       drawScale
     );
   }
 
-  private saveSvgPathDrawParameters(pathScale: number, x: number, y: number) {
-    this.svgPreviousAbsoluteScale = pathScale;
+  private saveSvgPathAbsolutePosition(x: number, y: number) {
     this.svgPreviousAbsoluteX = x;
     this.svgPreviousAbsoluteY = y;
   }
@@ -394,18 +397,43 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     x: number,
     y: number
   ) {
-    const dScale = pathScale / this.svgPreviousAbsoluteScale;
+    let dScale: number;
+    if (this.svgFirstPathDraw) {
+      /**
+       * The first time the path is drawn, we need to scale it to the correct
+       * size to account for device pixel ratio and other "global" scaling
+       * factors.
+       */
+      dScale = pathScale;
+      this.svgFirstPathDraw = false;
+    } else {
+      /**
+       * Scaling related to the **scale action** is handled in
+       * the draw() loop with the canvas.scale() method. Thus, for
+       * transformations after the first draw, the dScale is always 1
+       * (no scaling applied).
+       */
+      dScale = 1;
+    }
+
     const dX = x - this.svgPreviousAbsoluteX;
     const dY = y - this.svgPreviousAbsoluteY;
     return [dScale, 0, dX, 0, dScale, dY, 0, 0, 1];
   }
 
-  private pathNeedsTransform(pathScale: number, x: number, y: number) {
+  private pathNeedsTransform(x: number, y: number) {
     return (
-      pathScale !== this.svgPreviousAbsoluteScale ||
+      this.svgFirstPathDraw === true ||
       x !== this.svgPreviousAbsoluteX ||
       y !== this.svgPreviousAbsoluteY
     );
+  }
+
+  private shapeIsSvgStringPath() {
+    return (this.path as SvgStringPath)?.svgPathString !== undefined;
+  }
+  private shapeIsM2Path() {
+    return (this.path as M2Path)?.subpaths !== undefined;
   }
 
   private drawCircle(canvas: Canvas) {

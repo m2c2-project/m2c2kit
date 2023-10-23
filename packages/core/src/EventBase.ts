@@ -10,7 +10,7 @@ import { Session } from "./Session";
  */
 export interface EventBase {
   /** Type of event. */
-  type: EventType;
+  type: EventType | string;
   /** The object on which the event occurred. */
   target: Entity | Session | Activity;
   /** Has the event been taken care of by the listener and not be dispatched to other targets? */
@@ -18,26 +18,29 @@ export interface EventBase {
 }
 
 /**
- * The different events that are dispatched by m2c2kit.
+ * The different events that are dispatched by m2c2kit core.
  */
-export enum EventType {
-  SessionInitialize = "SessionInitialize",
-  SessionStart = "SessionStart",
-  SessionEnd = "SessionEnd",
-  ActivityStart = "ActivityStart",
-  ActivityEnd = "ActivityEnd",
-  ActivityCancel = "ActivityCancel",
-  ActivityData = "ActivityData",
-  TapDown = "TapDown",
-  TapUp = "TapUp",
-  TapUpAny = "TapUpAny",
-  TapLeave = "TapLeave",
-  PointerDown = "PointerDown",
-  PointerUp = "PointerUp",
-  PointerMove = "PointerMove",
-  Drag = "Drag",
-  DragStart = "DragStart",
-  DragEnd = "DragEnd",
-  CompositeCustom = "CompositeCustom",
-  FrameDidSimulatePhysics = "FrameDidSimulatePhysics",
-}
+export const EventType = {
+  SessionInitialize: "SessionInitialize",
+  SessionStart: "SessionStart",
+  SessionEnd: "SessionEnd",
+  ActivityStart: "ActivityStart",
+  ActivityEnd: "ActivityEnd",
+  ActivityCancel: "ActivityCancel",
+  ActivityData: "ActivityData",
+  TapDown: "TapDown",
+  TapUp: "TapUp",
+  TapUpAny: "TapUpAny",
+  TapLeave: "TapLeave",
+  PointerDown: "PointerDown",
+  PointerUp: "PointerUp",
+  PointerMove: "PointerMove",
+  PointerLeave: "PointerLeave",
+  Drag: "Drag",
+  DragStart: "DragStart",
+  DragEnd: "DragEnd",
+  CompositeCustom: "CompositeCustom",
+  FrameDidSimulatePhysics: "FrameDidSimulatePhysics",
+} as const;
+
+export type EventType = (typeof EventType)[keyof typeof EventType];
