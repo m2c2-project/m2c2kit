@@ -4,6 +4,7 @@ export * from "./ActivityLifecycleEvent";
 export * from "./ActivityKeyValueData";
 export * from "./ActivityResultsEvent";
 export * from "./ActivityType";
+export * from "./FadeAlphaActionOptions";
 export * from "./CallbackOptions";
 export * from "./CanvasKitHelpers";
 export * from "./Composite";

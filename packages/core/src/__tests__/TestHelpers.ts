@@ -123,6 +123,7 @@ export class TestHelpers {
             setStrokeWidth: () => undefined,
             delete: () => undefined,
             isDeleted: () => undefined,
+            setAlphaf: () => undefined,
           };
         },
         Color: function () {

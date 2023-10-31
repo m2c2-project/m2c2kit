@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Scale
 
-The `Scale` action the entity's scale over time.
+The `Scale` action changes the entity's scale over time.
 
 The options object for the `Scale` action has the following properties:
 

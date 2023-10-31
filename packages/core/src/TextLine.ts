@@ -90,11 +90,14 @@ export class TextLine
     this.needsInitialization = true;
   }
 
-  update(): void {
+  override update(): void {
     super.update();
   }
 
   override initialize(): void {
+    if (this.paint) {
+      this.paint.delete();
+    }
     this.paint = new this.canvasKit.Paint();
     this.paint.setColor(
       this.canvasKit.Color(
@@ -136,6 +139,9 @@ export class TextLine
       if (fontNames.length > 0) {
         this.typeface = fontManager.getTypeface(gameUuid, fontNames[0]);
       }
+    }
+    if (this.font) {
+      this.font.delete();
     }
     this.font = new this.canvasKit.Font(
       this.typeface,
@@ -225,6 +231,10 @@ export class TextLine
         throw new Error(
           `in TextLine entity ${this}, Paint or Font is undefined.`
         );
+      }
+
+      if (this.absoluteAlphaChange !== 0) {
+        paintForDraw.setAlphaf(this.absoluteAlpha);
       }
 
       canvas.drawText(textForDraw, x, y, paintForDraw, this.font);

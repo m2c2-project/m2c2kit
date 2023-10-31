@@ -37,7 +37,7 @@ export class CanvasKitHelpers {
         >
     >
   ): void {
-    objects.filter((o) => !o?.isDeleted).forEach((o) => o?.delete());
+    objects.filter((o) => !o?.isDeleted()).forEach((o) => o?.delete());
   }
 
   static makePaint(

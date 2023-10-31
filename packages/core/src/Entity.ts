@@ -33,21 +33,21 @@ function handleDrawableOptions(
   if (options.anchorPoint) {
     drawable.anchorPoint = options.anchorPoint;
   }
-  if (options.zPosition) {
+  if (options.zPosition !== undefined) {
     drawable.zPosition = options.zPosition;
   }
 }
 function handleTextOptions(text: IText, options: TextOptions): void {
-  if (options.text) {
+  if (options.text !== undefined) {
     text.text = options.text;
   }
-  if (options.fontName) {
+  if (options.fontName !== undefined) {
     text.fontName = options.fontName;
   }
   if (options.fontColor) {
     text.fontColor = options.fontColor;
   }
-  if (options.fontSize) {
+  if (options.fontSize !== undefined) {
     text.fontSize = options.fontSize;
   }
 }
@@ -74,6 +74,7 @@ export abstract class Entity implements EntityOptions {
   name: string;
   position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
   scale = 1.0;
+  alpha = 1.0;
   isUserInteractionEnabled = false;
   draggable = false;
   hidden = false;
@@ -85,6 +86,8 @@ export abstract class Entity implements EntityOptions {
   absolutePosition: Point = { x: 0, y: 0 }; // position within the root coordinate system
   size: Size = { width: 0, height: 0 };
   absoluteScale = 1.0;
+  absoluteAlpha = 1.0;
+  absoluteAlphaChange = 0;
   actions = new Array<Action>();
   queuedAction?: Action;
   originalActions = new Array<Action>();
@@ -121,22 +124,25 @@ export abstract class Entity implements EntityOptions {
     } else {
       this.name = options.name;
     }
-    if (options.position) {
+    if (options.position !== undefined) {
       this.position = options.position;
     }
-    if (options.scale) {
+    if (options.scale !== undefined) {
       this.scale = options.scale;
     }
-    if (options.isUserInteractionEnabled) {
+    if (options.alpha !== undefined) {
+      this.alpha = options.alpha;
+    }
+    if (options.isUserInteractionEnabled !== undefined) {
       this.isUserInteractionEnabled = options.isUserInteractionEnabled;
     }
-    if (options.draggable) {
+    if (options.draggable !== undefined) {
       this.draggable = options.draggable;
     }
-    if (options.hidden) {
+    if (options.hidden !== undefined) {
       this.hidden = options.hidden;
     }
-    if (options.layout) {
+    if (options.layout !== undefined) {
       this.layout = options.layout;
     }
   }
@@ -795,6 +801,23 @@ export abstract class Entity implements EntityOptions {
     return x;
   }
 
+  /**
+   * Calculates the absolute alpha of the entity, taking into account the
+   * alpha of all ancestor parent entities.
+   *
+   * @remarks Alpha has multiplicative inheritance from all ancestors.
+   *
+   * @param alpha - Opacity of the entity
+   * @param ancestors - Array of ancestor parent entities
+   * @returns
+   */
+  private calculateAbsoluteAlpha(alpha: number, ancestors: Entity[]): number {
+    const inheritedAlpha = ancestors.reduce((acc, ancestor) => {
+      return acc * ancestor.alpha;
+    }, 1);
+    return alpha * inheritedAlpha;
+  }
+
   update(): void {
     if (this.needsInitialization) {
       // note: the below initialize() function will be called on the DERIVED CLASS's initialize(),
@@ -802,6 +825,11 @@ export abstract class Entity implements EntityOptions {
       this.initialize();
       this.needsInitialization = false;
     }
+
+    this.absoluteAlphaChange =
+      this.calculateAbsoluteAlpha(this.alpha, this.ancestors) -
+      this.absoluteAlpha;
+    this.absoluteAlpha += this.absoluteAlphaChange;
 
     if (this.parent === undefined) {
       // if there's no parent, then this entity is a screen

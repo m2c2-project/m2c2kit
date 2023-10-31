@@ -126,7 +126,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       }
     }
 
-    if (options.cornerRadius) {
+    if (options.cornerRadius !== undefined) {
       this.cornerRadius = options.cornerRadius;
     }
     if (options.fillColor) {
@@ -141,9 +141,9 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     if (options.isAntialiased !== undefined) {
       this.isAntialiased = options.isAntialiased;
     }
-    if (options.strokeColor && options.lineWidth === undefined) {
+    if (options.strokeColor && !options.lineWidth) {
       console.warn(
-        `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is undefined. In normal usage, both would be set or both would be undefined.`
+        `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is non-zero. In normal usage, both would be set or both would be undefined.`
       );
     }
     if (options.strokeColor === undefined && options.lineWidth) {
@@ -223,6 +223,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
   dispose(): void {
     CanvasKitHelpers.Dispose([
+      // use backing fields, since paints may be undefined
       this._strokeColorPaintAntialiased,
       this._strokeColorPaintNotAntialiased,
       this._fillColorPaintAntialiased,
@@ -266,7 +267,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     return dest;
   }
 
-  update(): void {
+  override update(): void {
     super.update();
   }
 
@@ -274,6 +275,19 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
+
+    /**
+     * Not all paints may be used, and thus some paints may not be initialized,
+     * so we reference the backing field.
+     */
+    if (this.absoluteAlphaChange !== 0) {
+      this.applyAlphaToPaints(this.absoluteAlpha, [
+        this._fillColorPaintAntialiased,
+        this._fillColorPaintNotAntialiased,
+        this._strokeColorPaintAntialiased,
+        this._strokeColorPaintNotAntialiased,
+      ]);
+    }
 
     if (this.shapeIsM2Path()) {
       this.drawPathFromM2Path(canvas);
@@ -293,6 +307,17 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
     canvas.restore();
     super.drawChildren(canvas);
+  }
+
+  private applyAlphaToPaints(
+    alpha: number,
+    paints: (Paint | undefined)[]
+  ): void {
+    paints.forEach((paint) => {
+      if (paint) {
+        paint.setAlphaf(alpha);
+      }
+    });
   }
 
   private drawPathFromM2Path(canvas: Canvas) {

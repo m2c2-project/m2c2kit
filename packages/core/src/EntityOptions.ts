@@ -8,6 +8,8 @@ export interface EntityOptions {
   position?: Point;
   /** Scale of the entity. Default is 1.0 */
   scale?: number;
+  /** Opacity of the entity. 0 is fully transparent, 1 is fully opaque. Default is 1.0. Alpha has multiplicative in inheritance. For example, if the entity's parent is alpha .5 and this entity's is alpha .4, then the entity will appear with alpha .2. */
+  alpha?: number;
   /** Does the entity respond to user events, such as taps? Default is false */
   isUserInteractionEnabled?: boolean;
   /** Can the entity be dragged? */

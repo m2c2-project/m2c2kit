@@ -43,17 +43,15 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     this.scale = Globals.rootScale;
     this.size.width = this.game.canvasCssWidth;
     this.size.height = this.game.canvasCssHeight;
-
-    this.backgroundPaint = new this.canvasKit.Paint();
-    this.backgroundPaint.setColor(
-      this.canvasKit.Color(
-        this.backgroundColor[0],
-        this.backgroundColor[1],
-        this.backgroundColor[2],
-        this.backgroundColor[3]
-      )
+    if (this.backgroundPaint) {
+      this.backgroundPaint.delete();
+    }
+    this.backgroundPaint = CanvasKitHelpers.makePaint(
+      this.canvasKit,
+      this.backgroundColor,
+      this.canvasKit.PaintStyle.Fill,
+      false
     );
-    this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.needsInitialization = false;
   }
 
@@ -141,6 +139,10 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     this._appearCallback = callback;
   }
 
+  override update(): void {
+    super.update();
+  }
+
   draw(canvas: Canvas): void {
     // Except for its children, a scene itself only draws a background rectangle to "clear" the screen
     // Due to transition animations, this background rectangle may be beyond the viewable canvas bounds
@@ -150,6 +152,11 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     if (!this.backgroundPaint) {
       throw new Error(`in Scene ${this}, background paint is undefined.`);
     }
+
+    if (this.absoluteAlphaChange !== 0) {
+      this.backgroundPaint.setAlphaf(this.absoluteAlpha);
+    }
+
     canvas.drawRect(
       [
         this.position.x * drawScale * Globals.rootScale,

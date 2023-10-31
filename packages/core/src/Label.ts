@@ -5,6 +5,7 @@ import {
   EmbindEnumEntity,
   ParagraphStyle,
   ParagraphBuilder,
+  Paint,
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -39,7 +40,8 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   private paragraph?: Paragraph;
   private paraStyle?: ParagraphStyle;
   private builder?: ParagraphBuilder;
-
+  private _fontPaint?: Paint;
+  private _backgroundPaint?: Paint;
   private _translatedText = "";
 
   /**
@@ -86,6 +88,12 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.text = "";
     }
 
+    /**
+     * We use a local variable, textColor, rather than this.fontColor, because
+     * because we will override this.fontColor to another color
+     * (missingTranslationFontColor) if the translation is missing. We don't
+     * want to change this.fontColor, because that would be a side effect.
+     */
     let textColor = this.canvasKit.Color(
       this.fontColor[0],
       this.fontColor[1],
@@ -170,29 +178,79 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       fontFamilies.push(defaultTypeface.fontFamily);
     }
 
+    /**
+     * Previously, we set color, backgroundColor, fontFamilies, and fontSize
+     * in the textStyle property of the ParagraphStyle. However, to support
+     * alpha, we must now set the alpha on the Paint objects used in
+     * pushPaintStyle(), not the textStyle here. But we must still pass in the
+     * textStyle to the ParagraphStyle constructor, otherwise we get errors.
+     */
     this.paraStyle = new this.canvasKit.ParagraphStyle({
-      textStyle: {
-        color: textColor,
-        backgroundColor: this.backgroundColor
-          ? this.canvasKit.Color(
-              this.backgroundColor[0],
-              this.backgroundColor[1],
-              this.backgroundColor[2],
-              this.backgroundColor[3]
-            )
-          : undefined,
-        fontFamilies: fontFamilies,
-        fontSize: this.fontSize * Globals.canvasScale,
-      },
+      textStyle: {},
       textAlign: ckTextAlign,
     });
 
+    /**
+     * If we are doing a fadeAlpha action, we will create a new builder for
+     * each different alpha value. Thus, delete the old builder if it exists
+     * to avoid memory leaks. Same for paragraph, several lines below.
+     */
+    if (this.builder) {
+      this.builder.delete();
+    }
     this.builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
       fontManager.fontMgr
     );
 
+    if (!this._backgroundPaint) {
+      this._backgroundPaint = new this.canvasKit.Paint();
+    }
+    if (!this._fontPaint) {
+      this._fontPaint = new this.canvasKit.Paint();
+    }
+
+    this.fontPaint.setColor(textColor);
+    this.fontPaint.setAlphaf(this.absoluteAlpha);
+    if (this.backgroundColor) {
+      this.backgroundPaint.setColor(this.backgroundColor);
+      this.backgroundPaint.setAlphaf(this.absoluteAlpha);
+    } else {
+      this.backgroundPaint.setColor(this.canvasKit.Color(0, 0, 0, 0));
+    }
+
+    /**
+     * fontFamilies and fontSize are the properties that we must set because
+     * we are not using the defaults. However, there are other properties
+     * that we must set as well, otherwise we get errors. So we set them to
+     * the defaults.
+     */
+    this.builder.pushPaintStyle(
+      {
+        fontFamilies: fontFamilies,
+        fontSize: this.fontSize * Globals.canvasScale,
+        // set default values for below properties as well.
+        fontStyle: {
+          weight: this.canvasKit.FontWeight.Normal,
+          width: this.canvasKit.FontWidth.Normal,
+          slant: this.canvasKit.FontSlant.Oblique,
+        }, // Normal font style
+        decoration: 0, // No decoration
+        decorationThickness: 1.0, // Default decoration thickness
+        decorationStyle: this.canvasKit.DecorationStyle.Solid, // Solid decoration style
+        heightMultiplier: -1, // Providing -1, rather than 1.0, gives default height multiplier
+        halfLeading: false, // Default half leading
+        letterSpacing: 0.0, // Default letter spacing
+        wordSpacing: 0.0, // Default word spacing
+      },
+      this.fontPaint,
+      this.backgroundPaint
+    );
+
     this.builder.addText(textForParagraph);
+    if (this.paragraph) {
+      this.paragraph.delete();
+    }
     this.paragraph = this.builder.build();
     const preferredWidth =
       //this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
@@ -238,7 +296,12 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
 
   dispose(): void {
-    CanvasKitHelpers.Dispose([this.paragraph, this.builder]);
+    CanvasKitHelpers.Dispose([
+      this.paragraph,
+      this.builder,
+      this._fontPaint, // use backing field since it may be undefined
+      this._backgroundPaint, // use backing field since it may be undefined
+    ]);
     // Note: ParagraphStyle has no delete() method, so nothing to dispose
   }
 
@@ -312,6 +375,26 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     this.needsInitialization = true;
   }
 
+  private get backgroundPaint(): Paint {
+    if (!this._backgroundPaint) {
+      throw new Error("backgroundPaint cannot be undefined");
+    }
+    return this._backgroundPaint;
+  }
+  private set backgroundPaint(backgroundPaint: Paint) {
+    this._backgroundPaint = backgroundPaint;
+  }
+
+  private get fontPaint(): Paint {
+    if (!this._fontPaint) {
+      throw new Error("fontPaint cannot be undefined");
+    }
+    return this._fontPaint;
+  }
+  private set fontPaint(fontPaint: Paint) {
+    this._fontPaint = fontPaint;
+  }
+
   /**
    * Duplicates an entity using deep copy.
    *
@@ -344,8 +427,22 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     return dest;
   }
 
-  update(): void {
+  override update(): void {
     super.update();
+    /**
+     * In most cases, when a property on an entity changes such that the
+     * entity must be initialized again, we set needsInitialization = true in
+     * the entity's setter for that property. However, in the case of alpha,
+     * the entity's absolute alpha change may be caused by a change in an
+     * ancestor alpha (not a setter on this entity). To ensure that these
+     * absolute alpha changes are handled on this update cycle, we must
+     * check for them here and run the initialization if needed (if we only
+     * set needsInitialization = true, it would not be run until the next
+     * update cycle).
+     */
+    if (this.absoluteAlphaChange !== 0) {
+      this.initialize();
+    }
   }
 
   draw(canvas: Canvas): void {

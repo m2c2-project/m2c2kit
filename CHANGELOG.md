@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.13] - 2023-10-31
+
+### Added
+
+- Alpha property for entities.
+- FadeAlpha Action.
+
+## `@m2c2kit/schematics` [0.1.9] - 2023-10-31
+
+### Changed
+
+- Updated templates.
+
 ## `@m2c2kit/core` [0.3.12] - 2023-10-23
 
 ### Added

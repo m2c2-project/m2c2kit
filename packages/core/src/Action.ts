@@ -3,6 +3,7 @@ import { MoveActionOptions } from "./MoveActionOptions";
 import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
 import { ScaleActionOptions } from "./ScaleActionOptions";
+import { FadeAlphaActionOptions } from "./FadeAlphaActionOptions";
 import { IActionContainer } from "./IActionContainer";
 import { ActionType } from "./ActionType";
 import { Point } from "./Point";
@@ -86,6 +87,22 @@ export abstract class Action {
   public static scale(options: ScaleActionOptions): Action {
     return new ScaleAction(
       options.scale,
+      options.duration,
+      options.runDuringTransition
+    );
+  }
+
+  /**
+   * Creates an action that will change the entity's alpha (opacity).
+   *
+   * @remarks Alpha has multiplicative inheritance. For example, if the entity's parent is alpha .5 and this entity's action fades alpha to .4, then the entity will appear with alpha .2.
+   *
+   * @param options - {@link FadeAlphaActionOptions}
+   * @returns The fadeAlpha action
+   */
+  public static fadeAlpha(options: FadeAlphaActionOptions): Action {
+    return new FadeAlphaAction(
+      options.alpha,
       options.duration,
       options.runDuringTransition
     );
@@ -196,6 +213,15 @@ export abstract class Action {
         });
         break;
       }
+      case ActionType.FadeAlpha: {
+        const fadeAlpha = action as FadeAlphaAction;
+        cloned = Action.fadeAlpha({
+          alpha: fadeAlpha.alpha,
+          duration: fadeAlpha.duration,
+          runDuringTransition: fadeAlpha.runDuringTransition,
+        });
+        break;
+      }
       case ActionType.Wait: {
         const wait = action as WaitAction;
         cloned = Action.wait({
@@ -303,6 +329,25 @@ export abstract class Action {
         entity.scale = scaleAction.scale;
         scaleAction.running = false;
         scaleAction.completed = true;
+      }
+    }
+
+    if (action.type === ActionType.FadeAlpha) {
+      const fadeAlphaAction = action as FadeAlphaAction;
+
+      if (!fadeAlphaAction.started) {
+        fadeAlphaAction.delta = fadeAlphaAction.alpha - entity.alpha;
+        fadeAlphaAction.started = true;
+      }
+
+      if (elapsed < fadeAlphaAction.duration) {
+        entity.alpha =
+          entity.alpha +
+          fadeAlphaAction.delta * (dt / fadeAlphaAction.duration);
+      } else {
+        entity.alpha = fadeAlphaAction.alpha;
+        fadeAlphaAction.running = false;
+        fadeAlphaAction.completed = true;
       }
     }
   }
@@ -547,6 +592,18 @@ export class ScaleAction extends Action {
     super(runDuringTransition);
     this.duration = duration;
     this.scale = scale;
+    this.isParent = false;
+  }
+}
+
+export class FadeAlphaAction extends Action {
+  type = ActionType.FadeAlpha;
+  alpha: number;
+  delta = 0;
+  constructor(alpha: number, duration: number, runDuringTransition = false) {
+    super(runDuringTransition);
+    this.duration = duration;
+    this.alpha = alpha;
     this.isParent = false;
   }
 }

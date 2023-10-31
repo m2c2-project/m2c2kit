@@ -1,5 +1,5 @@
 import "./Globals";
-import { Canvas } from "canvaskit-wasm";
+import { Canvas, Paint } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
@@ -18,6 +18,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   private _imageName = ""; // public getter/setter is below
 
   private loadedImage?: LoadedImage;
+  private _paint?: Paint;
 
   /**
    * Visual image displayed on the screen.
@@ -29,7 +30,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   constructor(options: SpriteOptions = {}) {
     super(options);
     handleInterfaceOptions(this, options);
-    if (options.imageName) {
+    if (options.imageName !== undefined) {
       this.imageName = options.imageName;
     }
   }
@@ -50,11 +51,15 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     }
     this.size.width = this.loadedImage.width;
     this.size.height = this.loadedImage.height;
+    if (!this._paint) {
+      this.paint = new this.canvasKit.Paint();
+    }
     this.needsInitialization = false;
   }
 
   dispose(): void {
-    CanvasKitHelpers.Dispose([this.loadedImage?.image]);
+    // use paint backing field since it may be undefined
+    CanvasKitHelpers.Dispose([this.loadedImage?.image, this._paint]);
   }
 
   set imageName(imageName: string) {
@@ -64,6 +69,18 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
   get imageName(): string {
     return this._imageName;
+  }
+
+  private set paint(paint: Paint) {
+    this._paint = paint;
+  }
+  private get paint(): Paint {
+    if (!this._paint) {
+      throw new Error(
+        `in paint getter: Sprite entity ${this.toString()} paint is undefined.`
+      );
+    }
+    return this._paint;
   }
 
   /**
@@ -95,7 +112,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     return dest;
   }
 
-  update(): void {
+  override update(): void {
     super.update();
   }
 
@@ -115,7 +132,11 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
             this.size.height * this.anchorPoint.y * this.absoluteScale) *
           drawScale;
 
-        canvas.drawImage(this.loadedImage.image, x, y);
+        if (this.absoluteAlphaChange !== 0) {
+          this.paint.setAlphaf(this.absoluteAlpha);
+        }
+
+        canvas.drawImage(this.loadedImage.image, x, y, this.paint);
         canvas.restore();
       }
 
