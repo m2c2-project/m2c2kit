@@ -23,16 +23,16 @@
     "matter-js": "0.19.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "25.0.2",
-    "@rollup/plugin-node-resolve": "15.1.0",
-    "@rollup/plugin-replace": "5.0.2",
-    "@types/matter-js": "0.18.5",
-    "rimraf": "5.0.1",
-    "rollup": "3.25.3",
-    "rollup-plugin-copy": "3.4.0",
-    "rollup-plugin-dts": "5.3.0",
-    "rollup-plugin-esbuild": "5.0.0",
-    "typescript": "5.1.6"
+    "@rollup/plugin-commonjs": "25.0.7",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-replace": "5.0.5",
+    "@types/matter-js": "0.19.4",
+    "rimraf": "5.0.5",
+    "rollup": "4.4.1",
+    "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-dts": "6.1.0",
+    "rollup-plugin-esbuild": "6.1.0",
+    "typescript": "5.2.2"
   },
   "license": "MIT",
   "author": {

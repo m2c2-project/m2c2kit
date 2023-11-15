@@ -58,15 +58,15 @@ export function m2New(options: m2NewOptions): Rule {
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.9",
-    "@rollup/plugin-node-resolve": "15.1.0",
-    "@rollup/plugin-typescript": "11.1.2",
-    "rimraf": "5.0.1",
-    "rollup": "3.25.3",
-    "rollup-plugin-copy": "3.4.0",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-typescript": "11.1.5",
+    "rimraf": "5.0.5",
+    "rollup": "4.4.1",
+    "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2",
-    "tslib": "2.6.0",
-    "typescript": "5.1.5"
+    "tslib": "2.6.2",
+    "typescript": "5.2.2"
   }
 }`,
     };
@@ -84,7 +84,7 @@ export function m2New(options: m2NewOptions): Rule {
         collection: workflow.context.collection,
         schematic: "npm-install",
         options: npmInstallOptions,
-      })
+      }),
     );
 
     const rules: Rule[] = [];
@@ -141,7 +141,7 @@ export function m2New(options: m2NewOptions): Rule {
             "node_modules/@m2c2kit/core/assets/css/bootstrap-datepicker.standalone.css",
           dest: path.join(
             directory,
-            "src/assets/css/bootstrap-datepicker.standalone.css"
+            "src/assets/css/bootstrap-datepicker.standalone.css",
           ),
           cwd: directory,
         },

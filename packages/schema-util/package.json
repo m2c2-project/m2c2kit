@@ -8,8 +8,8 @@
     "schema-util": "./build/index.js"
   },
   "devDependencies": {
-    "@types/node": "18.16.2",
-    "esbuild": "0.18.10"
+    "@types/node": "20.9.0",
+    "esbuild": "0.19.5"
   },
   "scripts": {
     "build": "node esbuild.mjs",
@@ -27,8 +27,8 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "csv": "6.3.1",
-    "ts-morph": "19.0.0",
+    "csv": "6.3.5",
+    "ts-morph": "20.0.0",
     "yargs": "17.7.2"
   },
   "engines": {

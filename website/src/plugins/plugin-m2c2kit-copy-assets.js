@@ -1,19 +1,13 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
-// eslint-disable-next-line no-undef
-const path = require("path");
-// eslint-disable-next-line no-undef
-const fs = require("fs");
-// eslint-disable-next-line no-undef
-const fsp = require("fs/promises");
+import { resolve, join, dirname } from "path";
+import { existsSync } from "fs";
+import { readdir, mkdir, readFile, writeFile } from "fs/promises";
 
 /**
- * This Docusaurus plugin copys the m2c2kit assets needed for the interactive
+ * This Docusaurus plugin copies the m2c2kit assets needed for the interactive
  * code examples. Thus, "npm run build" must be run in the monorepo root
  * before building the website. Otherwise, the assets are not available.
  */
-// eslint-disable-next-line no-undef
-module.exports = async function pluginM2c2kitCopyAssets(_context, options) {
+export default async function pluginM2c2kitCopyAssets(_context, options) {
   return {
     name: "plugin-m2c2kit-copy-assets",
     async loadContent() {
@@ -30,16 +24,16 @@ module.exports = async function pluginM2c2kitCopyAssets(_context, options) {
       }
     },
   };
-};
+}
 
 async function copyFolderRecursive(options) {
   async function getFilePathsRecursive(dir) {
-    const dirents = await fsp.readdir(dir, { withFileTypes: true });
+    const dirents = await readdir(dir, { withFileTypes: true });
     const files = await Promise.all(
       dirents.map((dirent) => {
-        const res = path.resolve(dir, dirent.name);
+        const res = resolve(dir, dirent.name);
         return dirent.isDirectory() ? getFilePathsRecursive(res) : res;
-      })
+      }),
     );
     return Array.prototype.concat(...files);
   }
@@ -47,25 +41,25 @@ async function copyFolderRecursive(options) {
   let filePaths = await getFilePathsRecursive(options.sourceFolder);
   if (options.extensions) {
     filePaths = filePaths.filter((f) =>
-      options.extensions.some((ext) => f.endsWith(ext))
+      options.extensions.some((ext) => f.endsWith(ext)),
     );
   }
 
   filePaths.forEach(async (filePath) => {
-    const destinationFilePath = path.join(
+    const destinationFilePath = join(
       options.destinationFolder,
-      filePath.replace(path.resolve(options.sourceFolder), options.baseFolder)
+      filePath.replace(resolve(options.sourceFolder), options.baseFolder),
     );
-    if (!options.overwrite && fs.existsSync(destinationFilePath)) {
+    if (!options.overwrite && existsSync(destinationFilePath)) {
       return;
     }
 
-    const folder = path.dirname(destinationFilePath);
-    if (!fs.existsSync(folder)) {
-      await fsp.mkdir(folder, { recursive: true });
+    const folder = dirname(destinationFilePath);
+    if (!existsSync(folder)) {
+      await mkdir(folder, { recursive: true });
     }
 
-    const content = await fsp.readFile(filePath);
-    await fsp.writeFile(destinationFilePath, content);
+    const content = await readFile(filePath);
+    await writeFile(destinationFilePath, content);
   });
 }

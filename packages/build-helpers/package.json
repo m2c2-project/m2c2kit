@@ -10,19 +10,18 @@
     "dist/index.d.ts"
   ],
   "devDependencies": {
-    "@rollup/plugin-commonjs": "25.0.2",
-    "@rollup/plugin-node-resolve": "15.1.0",
-    "@types/estree": "1.0.1",
-    "@types/findup-sync": "4.0.2",
+    "@rollup/plugin-commonjs": "25.0.7",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@types/estree": "1.0.5",
+    "@types/findup-sync": "4.0.4",
     "cpy": "10.1.0",
-    "cpy-cli": "4.2.0",
     "findup-sync": "5.0.0",
-    "rimraf": "5.0.1",
-    "rollup": "3.25.3",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-dts": "5.3.0",
-    "rollup-plugin-esbuild": "5.0.0",
-    "typescript": "5.1.6"
+    "rimraf": "5.0.5",
+    "rollup": "4.4.1",
+    "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-dts": "6.1.0",
+    "rollup-plugin-esbuild": "6.1.0",
+    "typescript": "5.2.2"
   },
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
@@ -41,8 +40,8 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "acorn": "8.9.0",
-    "acorn-walk": "8.2.0",
+    "acorn": "8.11.2",
+    "acorn-walk": "8.3.0",
     "astring": "1.8.6",
     "css-select": "5.1.0",
     "dom-serializer": "2.0.0",

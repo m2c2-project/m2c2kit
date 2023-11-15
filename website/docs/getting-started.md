@@ -20,7 +20,7 @@ Local install of a full m2c2kit development environment is recommended to create
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/download) (version >=18; LTS release suggested). **Required**.
+- [Node.js](https://nodejs.org/en/download) (version >=18; version 20 LTS recommended). **Required**.
 - [Visual Studio Code](https://code.visualstudio.com/download). Recommended.
 - [Google Chrome](https://www.google.com/chrome). Recommended.
 - [Git](https://git-scm.com/downloads). Recommended.
@@ -52,7 +52,7 @@ You can now browse to `http://localhost:3000` to view the demo app.
 
 <details style={{ backgroundColor: '#fdf6f6', border: '1px solid #f0b2b2' }}>
     <summary>😕 Problems?</summary>
-    <p>If you saw error messages after you typed <code>m2 new myapp</code>, make sure you installed the CLI in the first step above. Then, make sure you are not in a special, protected directory. For example, on Windows, the command line prompt might start in <code>c:\windows</code> or <code>c:\</code>, which you may not be able to write to. Try this:</p>
+    <p>If you saw error messages after you typed <code>m2 new myapp</code>, make sure you installed the CLI in the first step above. Then, make sure you are not in a special, protected directory. For example, on Windows, the command line prompt might start in <code>c:\\windows</code> or <code>c:\\</code>, which you may not be able to write to. Try this:</p>
     <pre><code>
     mkdir c:\m2c2kit<br/>
     cd c:\m2c2kit<br/>

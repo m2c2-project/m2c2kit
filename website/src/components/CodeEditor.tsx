@@ -4,6 +4,13 @@ import Editor from "@monaco-editor/react";
 // @ts-ignore
 import stroopExample from "!!raw-loader!@site/src/playground-code/stroop.js";
 
+/**
+ * The CodeEditor component is used in the playground to display and edit
+ * code.
+ *
+ * @param props
+ * @returns CodeEditor component
+ */
 export default function CodeEditor(props) {
   const [monacoCode, setMonacoCode] = useState("");
 
@@ -37,9 +44,9 @@ export default function CodeEditor(props) {
         .then((data) => {
           monaco.languages.typescript.javascriptDefaults.addExtraLib(
             data,
-            m2c2Module.monacoUri
+            m2c2Module.monacoUri,
           );
-        })
+        }),
     );
 
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions({

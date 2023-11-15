@@ -24,7 +24,7 @@
  * The string "_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_" is a long
  * ugly string that is unlikely to be used in the codebase.
  *
- * Orginally, this plugin ran in the Docusaurus postBuild hook. This hook,
+ * Originally, this plugin ran in the Docusaurus postBuild hook. This hook,
  * however, is called only in a production build. This plugin needs to run
  * for both production and development builds. The plugin now runs in the
  * webpack compilation hook.
@@ -32,10 +32,10 @@
 
 const pattern = "_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_";
 
-// eslint-disable-next-line no-undef
-module.exports = function pluginM2c2kitModifyBaseUrl(_context, options) {
+export default function pluginM2c2kitModifyBaseUrl(_context, options) {
   return {
     name: "plugin-m2c2kit-modify-base-url-new",
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     configureWebpack(config, isServer, utils, content) {
       config.plugins?.push({
         apply: (compiler) => {
@@ -63,17 +63,17 @@ module.exports = function pluginM2c2kitModifyBaseUrl(_context, options) {
                       const re = new RegExp(pattern, "g");
                       compilation.updateAsset(asset.name, function (source) {
                         return new RawSource(
-                          source.source().replace(re, baseUrl)
+                          source.source().replace(re, baseUrl),
                         );
                       });
                     }
                   }
-                }
+                },
               );
-            }
+            },
           );
         },
       });
     },
   };
-};
+}

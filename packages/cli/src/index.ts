@@ -3,32 +3,25 @@
 /**
  * The code in this file is adapted from a reference CLI implementation from
  * the Angular devkit repository:
- *   https://github.com/angular/angular-cli/blob/b674bd2c3c3e63693881ba502493bc803a820772/packages/angular_devkit/schematics_cli/bin/schematics.ts
- *
+ *   https://github.com/angular/angular-cli/blob/e1d6ee2b5cc5ee34e4e5b67aaa8c34662a315007/packages/angular_devkit/schematics_cli/bin/schematics.ts
  * The license for that code is as follows:
  *
- * The MIT License
- * Copyright (c) 2010-2023 Google LLC. http://angular.io/license
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 
 // symbol polyfill must go first
 import "symbol-observable";
-import {
-  JsonArray,
-  JsonObject,
-  logging,
-  schema,
-  tags,
-} from "@angular-devkit/core";
+import { logging, schema, tags } from "@angular-devkit/core";
 import { ProcessOutput, createConsoleLogger } from "@angular-devkit/core/node";
 import { UnsuccessfulWorkflowExecution } from "@angular-devkit/schematics";
 import { NodeWorkflow } from "@angular-devkit/schematics/tools";
 import * as ansiColors from "ansi-colors";
 import { existsSync } from "fs";
-import * as inquirer from "inquirer";
+import type { Question, QuestionCollection } from "inquirer";
 import * as path from "path";
 import yargsParser, { camelCase, decamelize } from "yargs-parser";
 
@@ -74,7 +67,7 @@ export interface MainOptions {
 function _listSchematics(
   workflow: NodeWorkflow,
   collectionName: string,
-  logger: logging.Logger
+  logger: logging.Logger,
 ) {
   try {
     const collection = workflow.engine.createCollection(collectionName);
@@ -89,71 +82,71 @@ function _listSchematics(
 }
 
 function _createPromptProvider(): schema.PromptProvider {
-  return (definitions) => {
-    const questions: inquirer.QuestionCollection = definitions.map(
-      (definition) => {
-        const question: inquirer.Question = {
-          name: definition.id,
-          message: definition.message,
-          default: definition.default,
-        };
+  return async (definitions) => {
+    const questions: QuestionCollection = definitions.map((definition) => {
+      const question: Question = {
+        name: definition.id,
+        message: definition.message,
+        default: definition.default,
+      };
 
-        const validator = definition.validator;
-        if (validator) {
-          question.validate = (input) => validator(input);
+      const validator = definition.validator;
+      if (validator) {
+        question.validate = (input) => validator(input);
 
-          // Filter allows transformation of the value prior to validation
-          question.filter = async (input) => {
-            for (const type of definition.propertyTypes) {
-              let value;
-              switch (type) {
-                case "string":
-                  value = String(input);
-                  break;
-                case "integer":
-                case "number":
-                  value = Number(input);
-                  break;
-                default:
-                  value = input;
-                  break;
-              }
-              // Can be a string if validation fails
-              const isValid = (await validator(value)) === true;
-              if (isValid) {
-                return value;
-              }
+        // Filter allows transformation of the value prior to validation
+        question.filter = async (input) => {
+          for (const type of definition.propertyTypes) {
+            let value;
+            switch (type) {
+              case "string":
+                value = String(input);
+                break;
+              case "integer":
+              case "number":
+                value = Number(input);
+                break;
+              default:
+                value = input;
+                break;
             }
+            // Can be a string if validation fails
+            const isValid = (await validator(value)) === true;
+            if (isValid) {
+              return value;
+            }
+          }
 
-            return input;
-          };
-        }
-
-        switch (definition.type) {
-          case "confirmation":
-            return { ...question, type: "confirm" };
-          case "list":
-            return {
-              ...question,
-              type: definition.multiselect ? "checkbox" : "list",
-              choices:
-                definition.items &&
-                definition.items.map((item) => {
-                  if (typeof item == "string") {
-                    return item;
-                  } else {
-                    return {
-                      name: item.label,
-                      value: item.value,
-                    };
-                  }
-                }),
-            };
-          default:
-            return { ...question, type: definition.type };
-        }
+          return input;
+        };
       }
-    );
+
+      switch (definition.type) {
+        case "confirmation":
+          return { ...question, type: "confirm" };
+        case "list":
+          return {
+            ...question,
+            type: definition.multiselect ? "checkbox" : "list",
+            choices:
+              definition.items &&
+              definition.items.map((item) => {
+                if (typeof item == "string") {
+                  return item;
+                } else {
+                  return {
+                    name: item.label,
+                    value: item.value,
+                  };
+                }
+              }),
+          };
+        default:
+          return { ...question, type: definition.type };
+      }
+    });
+    const { default: inquirer } =
+      await loadEsmModule<typeof import("inquirer")>("inquirer");
 
     return inquirer.prompt(questions);
   };
@@ -263,7 +256,7 @@ export async function main({
     logger.info(
       `Debug mode enabled${
         isLocalCollection ? " by default for local collections" : ""
-      }.`
+      }.`,
     );
   }
 
@@ -308,14 +301,14 @@ export async function main({
         loggingQueue.push(
           `${colors.cyan("UPDATE")} ${eventPath} (${
             event.content.length
-          } bytes)`
+          } bytes)`,
         );
         break;
       case "create":
         loggingQueue.push(
           `${colors.green("CREATE")} ${eventPath} (${
             event.content.length
-          } bytes)`
+          } bytes)`,
         );
         break;
       case "delete":
@@ -327,7 +320,7 @@ export async function main({
           ? event.to.slice(1)
           : event.to;
         loggingQueue.push(
-          `${colors.blue("RENAME")} ${eventPath} => ${eventToPath}`
+          `${colors.blue("RENAME")} ${eventPath} => ${eventToPath}`,
         );
         break;
     }
@@ -353,7 +346,7 @@ export async function main({
 
   // Pass the rest of the arguments as the smart default "argv". Then delete it.
   workflow.registry.addSmartDefaultProvider("argv", (schema) =>
-    "index" in schema ? _[Number(schema["index"])] : _
+    "index" in schema ? _[Number(schema["index"])] : _,
   );
 
   // Add prompts.
@@ -387,7 +380,7 @@ export async function main({
       logger.info(
         `Dry run enabled${
           dryRunPresent ? "" : " by default in debug mode"
-        }. No files written to disk.`
+        }. No files written to disk.`,
       );
     }
 
@@ -397,7 +390,7 @@ export async function main({
       // "See above" because we already printed the error.
       logger.fatal("The Schematic workflow failed. See above.");
     } else if (debug && err instanceof Error) {
-      logger.fatal(`An error occured:\n${err.stack}`);
+      logger.fatal(`An error occurred:\n${err.stack}`);
     } else {
       logger.fatal(`Error: ${err instanceof Error ? err.message : err}`);
     }
@@ -487,14 +480,14 @@ function parseArgs(args: string[]): Options {
   const cliOptions: Options["cliOptions"] = {};
 
   const isCliOptions = (
-    key: ElementType<typeof booleanArgs> | string
+    key: ElementType<typeof booleanArgs> | string,
   ): key is ElementType<typeof booleanArgs> =>
     booleanArgs.includes(key as ElementType<typeof booleanArgs>);
 
   for (const [key, value] of Object.entries(options)) {
     if (/[A-Z]/.test(key)) {
       throw new Error(
-        `Unknown argument ${key}. Did you mean ${decamelize(key)}?`
+        `Unknown argument ${key}. Did you mean ${decamelize(key)}?`,
       );
     }
 
@@ -536,4 +529,30 @@ if (require.main === module) {
     .catch((e) => {
       throw e;
     });
+}
+
+/**
+ * Lazily compiled dynamic import loader function.
+ */
+let load: (<T>(modulePath: string | URL) => Promise<T>) | undefined;
+
+/**
+ * This uses a dynamic import to load a module which may be ESM.
+ * CommonJS code can load ESM code via a dynamic import. Unfortunately, TypeScript
+ * will currently, unconditionally downlevel dynamic import into a require call.
+ * require calls cannot load ESM code and will result in a runtime error. To workaround
+ * this, a Function constructor is used to prevent TypeScript from changing the dynamic import.
+ * Once TypeScript provides support for keeping the dynamic import this workaround can
+ * be dropped.
+ *
+ * @param modulePath The path of the module to load.
+ * @returns A Promise that resolves to the dynamically imported module.
+ */
+export function loadEsmModule<T>(modulePath: string | URL): Promise<T> {
+  load ??= new Function("modulePath", `return import(modulePath);`) as Exclude<
+    typeof load,
+    undefined
+  >;
+
+  return load(modulePath);
 }

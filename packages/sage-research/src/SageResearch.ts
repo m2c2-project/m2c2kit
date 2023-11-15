@@ -70,7 +70,7 @@ export class SageResearch {
       }
       default:
         throw new Error(
-          `attempt to send unknown event ${event.type} to Android`
+          `attempt to send unknown event ${event.type} to Android`,
         );
     }
   }
@@ -206,13 +206,15 @@ export class SageResearch {
         args.length > 0 &&
         (args[0] as string).toLowerCase().endsWith(".wasm")
       ) {
+        // TODO: remove ts-expect-error and add correct typing
+        // @ts-expect-error Upgrading @types/node from 18.x to 20.x causes a type error with ...args. Ignore this for now.
         const response: Response = await origFetch(...args).catch((error) => {
           return new Promise(function (resolve) {
             resolve(
               new Response(null, {
                 status: 500,
                 statusText: JSON.stringify(error),
-              })
+              }),
             );
           });
         });
@@ -228,13 +230,15 @@ export class SageResearch {
                 status: 200,
                 statusText: response.statusText,
                 headers: headers,
-              })
+              }),
             );
           });
         });
       } else {
         // Not fetching WebAssembly binary from local bundle for WKWebView.
         // Proceed as normal.
+        // TODO: remove ts-expect-error and add correct typing
+        // @ts-expect-error Upgrading @types/node from 18.x to 20.x causes a type error with ...args. Ignore this for now.
         return await origFetch(...args);
       }
     };

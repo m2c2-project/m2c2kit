@@ -9,7 +9,7 @@ export class RandomDraws {
    */
   public static SingleFromRange(
     minimumInclusive: number,
-    maximumInclusive: number
+    maximumInclusive: number,
   ): number {
     const sampledNumber =
       Math.floor(Math.random() * (maximumInclusive - minimumInclusive + 1)) +
@@ -29,18 +29,18 @@ export class RandomDraws {
   public static FromRangeWithoutReplacement(
     n: number,
     minimumInclusive: number,
-    maximumInclusive: number
+    maximumInclusive: number,
   ): Array<number> {
     if (n > maximumInclusive - minimumInclusive + 1) {
       throw new Error(
-        `number of requested draws (n = ${n}) is greater than number of integers in range [ ${minimumInclusive}, ${maximumInclusive}]`
+        `number of requested draws (n = ${n}) is greater than number of integers in range [ ${minimumInclusive}, ${maximumInclusive}]`,
       );
     }
     const result = new Array<number>();
     for (let i = 0; i < n; i++) {
       const sampledNumber = RandomDraws.SingleFromRange(
         minimumInclusive,
-        maximumInclusive
+        maximumInclusive,
       );
       result.includes(sampledNumber) ? n++ : result.push(sampledNumber);
     }
@@ -61,13 +61,13 @@ export class RandomDraws {
    * grid location to be along the diagonal, the predicate would be:
    * (row, column) => row === column
    * @returns Array of grid cells. Each cell is object in form of:
-   * \{ row: number, column: number \}. Grid cell locations are zero-based
+   * &#123 row: number, column: number &#125;. Grid cell locations are zero-based
    */
   public static FromGridWithoutReplacement(
     n: number,
     rows: number,
     columns: number,
-    predicate?: (row: number, column: number) => boolean
+    predicate?: (row: number, column: number) => boolean,
   ): Array<{ row: number; column: number }> {
     const result = new Array<{ row: number; column: number }>();
     const maximumInclusive = rows * columns - 1;
@@ -88,7 +88,7 @@ export class RandomDraws {
           replacementCell = this.FromRangeWithoutReplacement(
             1,
             0,
-            maximumInclusive
+            maximumInclusive,
           )[0];
         } while (draws.includes(replacementCell));
         draws[i] = replacementCell;

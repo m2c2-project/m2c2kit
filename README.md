@@ -62,7 +62,7 @@ Go to the m2c2kit [playground](https://m2c2-project.github.io/m2c2kit/playground
 
 ### Local install
 
-Make sure you have installed [Node.js](https://nodejs.org) (version >=18). The CLI can quickly scaffold a demo app and serve it on your local machine:
+Make sure you have installed [Node.js](https://nodejs.org) (version >=18; version 20 LTS recommended). The CLI can quickly scaffold a demo app and serve it on your local machine:
 
 ```
 npm install -g @m2c2kit/cli

@@ -169,7 +169,7 @@ export class Game implements Activity {
   storeSetItem(
     key: string,
     value: string | number | boolean | object | undefined | null,
-    globalStore = false
+    globalStore = false,
   ): Promise<string> {
     const k = globalStore ? key : this.id.concat(":", key);
     const activityId = globalStore ? "" : this.id;
@@ -195,7 +195,7 @@ export class Game implements Activity {
    */
   storeGetItem<T extends string | number | boolean | object | undefined | null>(
     key: string,
-    globalStore = false
+    globalStore = false,
   ): Promise<T> {
     const k = globalStore ? key : this.id.concat(":", key);
     return this.dataStores[0].getItem<T>(k);
@@ -294,7 +294,7 @@ export class Game implements Activity {
     const locale = this.getParameter<string>("locale");
     const fallbackLocale = this.getParameterOrFallback<string, undefined>(
       "fallback_locale",
-      undefined
+      undefined,
     );
     const missingTranslationColor = this.getParameterOrFallback<
       RgbaColor,
@@ -317,12 +317,12 @@ export class Game implements Activity {
   private isLocalizationRequested(): boolean {
     const locale = this.getParameterOrFallback<string, undefined>(
       "locale",
-      undefined
+      undefined,
     );
 
     if (locale === "") {
       throw new Error(
-        "Empty string in locale. Leave locale undefined or null to prevent localization."
+        "Empty string in locale. Leave locale undefined or null to prevent localization.",
       );
     }
     return locale !== undefined && locale !== null;
@@ -340,7 +340,7 @@ export class Game implements Activity {
           } does not have a parameter named ${key}. attempt to set parameter ${key} to value ${
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (additionalParameters as any)[key]
-          } will be ignored`
+          } will be ignored`,
         );
       } else if (this.options.parameters && this.options.parameters[key]) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -446,20 +446,20 @@ export class Game implements Activity {
           .includes(entity)
       ) {
         throw new Error(
-          `cannot remove free entity named "${entity}" because it is not currently part of the game's free entities. `
+          `cannot remove free entity named "${entity}" because it is not currently part of the game's free entities. `,
         );
       }
       this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
-        (child) => child.name !== entity
+        (child) => child.name !== entity,
       );
     } else {
       if (!this.freeEntitiesScene.children.includes(entity)) {
         throw new Error(
-          `cannot remove free entity "${entity.toString()}" because it is not currently part of the game's free entities. `
+          `cannot remove free entity "${entity.toString()}" because it is not currently part of the game's free entities. `,
         );
       }
       this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
-        (child) => child !== entity
+        (child) => child !== entity,
       );
     }
   }
@@ -517,7 +517,7 @@ export class Game implements Activity {
         this.scenes = this.scenes.filter((s) => s !== scene);
       } else {
         throw new Error(
-          `cannot remove scene ${scene} from game because the scene is not currently added to the game`
+          `cannot remove scene ${scene} from game because the scene is not currently added to the game`,
         );
       }
     } else {
@@ -525,7 +525,7 @@ export class Game implements Activity {
         this.scenes = this.scenes.filter((s) => s.name !== scene);
       } else {
         throw new Error(
-          `cannot remove scene named "${scene}" from game because the scene is not currently added to the game`
+          `cannot remove scene named "${scene}" from game because the scene is not currently added to the game`,
         );
       }
     }
@@ -554,7 +554,7 @@ export class Game implements Activity {
     } else {
       if (!this.scenes.some((scene_) => scene_ === scene)) {
         throw new Error(
-          `scene ${scene} exists, but it has not been added to the game object`
+          `scene ${scene} exists, but it has not been added to the game object`,
         );
       }
       incomingScene = scene;
@@ -647,7 +647,7 @@ export class Game implements Activity {
       gameInitOptions.canvasId,
       gameInitOptions.width,
       gameInitOptions.height,
-      gameInitOptions.stretch
+      gameInitOptions.stretch,
     );
     this.showFps = gameInitOptions.showFps ?? false;
     this.bodyBackgroundColor = gameInitOptions.bodyBackgroundColor;
@@ -682,7 +682,7 @@ export class Game implements Activity {
 
     if (startingScene === undefined) {
       throw new Error(
-        "cannot start game. entry scene has not been added to the game object."
+        "cannot start game. entry scene has not been added to the game object.",
       );
     }
 
@@ -770,13 +770,13 @@ export class Game implements Activity {
 
   private updateTimeSteppingOutput(): void {
     const stepsInput = document.getElementById(
-      "time-stepping-steps-input"
+      "time-stepping-steps-input",
     ) as HTMLInputElement;
     if (stepsInput) {
       stepsInput.value = this.stepCount.toString();
     }
     const nowInput = document.getElementById(
-      "time-stepping-now-input"
+      "time-stepping-now-input",
     ) as HTMLInputElement;
     if (nowInput) {
       nowInput.value = this.steppingNow.toFixed(2);
@@ -823,7 +823,7 @@ export class Game implements Activity {
    */
   private warmupShadersWithPrimitives(
     canvas: Canvas,
-    positionOffset = 0
+    positionOffset = 0,
   ): void {
     canvas.save();
     if (positionOffset == 0) {
@@ -831,7 +831,7 @@ export class Game implements Activity {
     } else {
       canvas.scale(
         (1 / Globals.canvasScale) * 1.13,
-        (1 / Globals.canvasScale) * 1.13
+        (1 / Globals.canvasScale) * 1.13,
       );
     }
 
@@ -849,32 +849,32 @@ export class Game implements Activity {
       this.canvasKit,
       WebColors.White,
       this.canvasKit.PaintStyle.Fill,
-      true
+      true,
     );
     canvas.drawRect(
       [0, 0, this.surface.width(), this.surface.height()],
-      backgroundPaint
+      backgroundPaint,
     );
 
     const fillColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
       this.canvasKit,
       WebColors.Black,
       this.canvasKit.PaintStyle.Fill,
-      false
+      false,
     );
 
     const fillColorPaintAntialiased = CanvasKitHelpers.makePaint(
       this.canvasKit,
       WebColors.Black,
       this.canvasKit.PaintStyle.Fill,
-      true
+      true,
     );
 
     const strokeColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
       this.canvasKit,
       WebColors.Black,
       this.canvasKit.PaintStyle.Stroke,
-      false
+      false,
     );
     strokeColorPaintNotAntialiased.setStrokeWidth(2);
 
@@ -882,7 +882,7 @@ export class Game implements Activity {
       this.canvasKit,
       WebColors.Black,
       this.canvasKit.PaintStyle.Stroke,
-      true
+      true,
     );
     strokeColorPaintAntialiased.setStrokeWidth(2);
 
@@ -901,7 +901,7 @@ export class Game implements Activity {
         centerX,
         centerY,
         fillColorPaintNotAntialiased,
-        font
+        font,
       );
       canvas.drawText("abc", centerX, centerY, fillColorPaintAntialiased, font);
     }
@@ -945,7 +945,7 @@ export class Game implements Activity {
     // loadedImages may be undefined/null if the game does not have images
     if (loadedImages) {
       const imageNames = Object.keys(loadedImages).filter(
-        (name) => name !== "__outgoingSceneSnapshot"
+        (name) => name !== "__outgoingSceneSnapshot",
       );
       imageNames.forEach((imageName) => {
         if (!warmedUpImageNames.includes(imageName)) {
@@ -962,7 +962,7 @@ export class Game implements Activity {
     }
     canvas.drawRect(
       [0, 0, this.surface.width(), this.surface.height()],
-      whitePaint
+      whitePaint,
     );
   }
 
@@ -1003,14 +1003,14 @@ export class Game implements Activity {
         //!validDataTypes.includes(propertySchema.type)
       ) {
         throw new Error(
-          `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`
+          `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`,
         );
       }
     }
   }
 
   private propertySchemaDataTypeIsValid(
-    propertySchemaType: JsonSchemaDataType | JsonSchemaDataType[]
+    propertySchemaType: JsonSchemaDataType | JsonSchemaDataType[],
   ): boolean {
     const validDataTypes = [
       "string",
@@ -1088,11 +1088,11 @@ export class Game implements Activity {
    */
   addTrialData(
     variableName: string,
-    value: JsonSchemaDataTypeScriptTypes
+    value: JsonSchemaDataTypeScriptTypes,
   ): void {
     if (!this.options.trialSchema) {
       throw new Error(
-        "no trial schema were provided in GameOptions. cannot add trial data"
+        "no trial schema were provided in GameOptions. cannot add trial data",
       );
     }
 
@@ -1150,7 +1150,7 @@ export class Game implements Activity {
       )
     ) {
       throw new Error(
-        `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`
+        `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`,
       );
     }
     this.data.trials[this.trialIndex][variableName] = value;
@@ -1187,12 +1187,12 @@ export class Game implements Activity {
    * Rather than modify the source code for the game, you can do the following
    * to ensure that the participant ID is saved for each trial:
    *
-   *   game.addTrialSchema({
-   *     participant_id: {
+   *   game.addTrialSchema(&#123
+   *     participant_id: &#123
    *       type: "string",
    *       description: "ID of the participant",
-   *     }
-   *   });
+   *     &#125;
+   *   &#125;);
    *   game.addStaticTrialData("participant_id", "12345");
    *
    *  When Game.trialComplete() is called, the participant_id variable will
@@ -1203,7 +1203,7 @@ export class Game implements Activity {
    */
   addStaticTrialData(
     variableName: string,
-    value: JsonSchemaDataTypeScriptTypes
+    value: JsonSchemaDataTypeScriptTypes,
   ) {
     if (!this.options.trialSchema) {
       throw new Error("trial schema is undefined");
@@ -1245,10 +1245,10 @@ export class Game implements Activity {
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
       activityConfiguration: this.makeGameActivityConfiguration(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityMetrics: this.gameMetrics,
     };
@@ -1371,7 +1371,7 @@ export class Game implements Activity {
   }
 
   private makeGameActivityConfigurationSchema(
-    parameters: GameParameters
+    parameters: GameParameters,
   ): JsonSchema {
     const gameParams: GameParameters = JSON.parse(JSON.stringify(parameters));
     // don't include the parameters used for localization
@@ -1431,10 +1431,10 @@ export class Game implements Activity {
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
       activityConfiguration: this.makeGameActivityConfiguration(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityMetrics: this.gameMetrics,
     };
@@ -1460,10 +1460,10 @@ export class Game implements Activity {
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
       activityConfiguration: this.makeGameActivityConfiguration(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
-        this.options.parameters ?? {}
+        this.options.parameters ?? {},
       ),
       activityMetrics: this.gameMetrics,
     };
@@ -1474,7 +1474,7 @@ export class Game implements Activity {
     canvasId: string | undefined,
     width: number,
     height: number,
-    stretch: boolean | undefined
+    stretch: boolean | undefined,
   ): void {
     Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
 
@@ -1487,7 +1487,7 @@ export class Game implements Activity {
         canvases.push(canvasCollection[i]);
       }
       canvases = canvases.filter(
-        (canvas) => canvas.id !== "m2c2kitscratchcanvas"
+        (canvas) => canvas.id !== "m2c2kitscratchcanvas",
       );
 
       if (canvases.length === 0) {
@@ -1496,7 +1496,7 @@ export class Game implements Activity {
         console.warn("warning: more than one html canvas was found.");
       }
       const m2c2kitCanvas = canvases.filter(
-        (c) => c.id === "m2c2kit-canvas"
+        (c) => c.id === "m2c2kit-canvas",
       )[0];
       if (m2c2kitCanvas) {
         htmlCanvas = m2c2kitCanvas;
@@ -1513,7 +1513,7 @@ export class Game implements Activity {
       htmlCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (htmlCanvas === undefined) {
         throw new Error(
-          `could not find canvas HTML element with id "${canvasId}"`
+          `could not find canvas HTML element with id "${canvasId}"`,
         );
       }
     }
@@ -1561,14 +1561,14 @@ export class Game implements Activity {
     const surface = this.canvasKit.MakeWebGLCanvasSurface(this.htmlCanvas);
     if (surface === null) {
       throw new Error(
-        `could not make CanvasKit surface from canvas HTML element`
+        `could not make CanvasKit surface from canvas HTML element`,
       );
     }
     this.surface = surface;
     console.log(
       `⚪ CanvasKit surface is backed by ${
         this.surface.reportBackendTypeIsGPU() ? "GPU" : "CPU"
-      }`
+      }`,
     );
     this.surface.getCanvas().scale(Globals.canvasScale, Globals.canvasScale);
   }
@@ -1590,7 +1590,7 @@ export class Game implements Activity {
         // @ts-ignore
         if (window.logWebGl) {
           console.log(
-            `🔼 getContext(${args.map((a) => a.toString()).join(", ")})`
+            `🔼 getContext(${args.map((a) => a.toString()).join(", ")})`,
           );
         }
         const context = getContextOriginal.apply(this, [...args]);
@@ -1655,7 +1655,7 @@ export class Game implements Activity {
   private setupFpsFont(): void {
     this.fpsTextFont = new this.canvasKit.Font(
       null,
-      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale
+      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale,
     );
     this.fpsTextPaint = new this.canvasKit.Paint();
     this.fpsTextPaint.setColor(
@@ -1663,8 +1663,8 @@ export class Game implements Activity {
         Constants.FPS_DISPLAY_TEXT_COLOR[0],
         Constants.FPS_DISPLAY_TEXT_COLOR[1],
         Constants.FPS_DISPLAY_TEXT_COLOR[2],
-        Constants.FPS_DISPLAY_TEXT_COLOR[3]
-      )
+        Constants.FPS_DISPLAY_TEXT_COLOR[3],
+      ),
     );
     this.fpsTextPaint.setAntiAlias(true);
   }
@@ -1678,15 +1678,15 @@ export class Game implements Activity {
     // Thus, we use "this.htmlCanvasPointerDownHandler.bind(this)" instead of the usual "htmlCanvasPointerDownHandler"
     this.htmlCanvas.addEventListener(
       "pointerdown",
-      this.htmlCanvasPointerDownHandler.bind(this)
+      this.htmlCanvasPointerDownHandler.bind(this),
     );
     this.htmlCanvas.addEventListener(
       "pointerup",
-      this.htmlCanvasPointerUpHandler.bind(this)
+      this.htmlCanvasPointerUpHandler.bind(this),
     );
     this.htmlCanvas.addEventListener(
       "pointermove",
-      this.htmlCanvasPointerMoveHandler.bind(this)
+      this.htmlCanvasPointerMoveHandler.bind(this),
     );
     /**
      * on some (all?) mobile devices, even if the page is has no scrollable
@@ -1699,7 +1699,7 @@ export class Game implements Activity {
     });
     this.htmlCanvas.addEventListener(
       "pointerleave",
-      this.htmlCanvasPointerLeaveHandler.bind(this)
+      this.htmlCanvasPointerLeaveHandler.bind(this),
     );
   }
 
@@ -1798,7 +1798,7 @@ export class Game implements Activity {
   }
 
   private handleIncomingSceneTransitions(
-    incomingSceneTransitions: Array<SceneTransition>
+    incomingSceneTransitions: Array<SceneTransition>,
   ): void {
     if (incomingSceneTransitions.length === 0) {
       return;
@@ -1883,7 +1883,7 @@ export class Game implements Activity {
       Constants.OUTGOING_SCENE_IMAGE_NAME,
       outgoingSceneImage,
       this.canvasCssWidth,
-      this.canvasCssHeight
+      this.canvasCssHeight,
     );
     this.session.imageManager.addLoadedImage(loadedImage, this.uuid);
 
@@ -1914,12 +1914,12 @@ export class Game implements Activity {
    */
   onFrameDidSimulatePhysics(
     callback: (frameCycleEvent: FrameCycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.FrameDidSimulatePhysics,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
@@ -2024,7 +2024,7 @@ export class Game implements Activity {
     sx?: number,
     sy?: number,
     sw?: number,
-    sh?: number
+    sh?: number,
   ): Promise<Uint8Array | null> {
     if (!this.surface) {
       throw new Error("no canvaskit surface. unable to take screenshot.");
@@ -2057,7 +2057,7 @@ export class Game implements Activity {
         }
         default: {
           reject(
-            "Exactly 0 or 4 arguments must be supplied to takeScreenshot()"
+            "Exactly 0 or 4 arguments must be supplied to takeScreenshot()",
           );
         }
       }
@@ -2067,7 +2067,7 @@ export class Game implements Activity {
   private animateSceneTransition(
     incomingScene: Scene,
     transition: Transition,
-    outgoingScene: Scene
+    outgoingScene: Scene,
   ): void {
     // animateSceneTransition will be called as the first step of the game loop, for reasons described above
     // in presentScene()
@@ -2112,7 +2112,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             outgoingScene.run(
               Action.sequence([
@@ -2132,7 +2132,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             break;
           case TransitionDirection.Right:
@@ -2155,7 +2155,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             outgoingScene.run(
               Action.sequence([
@@ -2175,7 +2175,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             break;
           case TransitionDirection.Up:
@@ -2198,7 +2198,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             outgoingScene.run(
               Action.sequence([
@@ -2218,7 +2218,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             break;
           case TransitionDirection.Down:
@@ -2241,7 +2241,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             outgoingScene.run(
               Action.sequence([
@@ -2261,7 +2261,7 @@ export class Game implements Activity {
                   },
                   runDuringTransition: true,
                 }),
-              ])
+              ]),
             );
             break;
           default:
@@ -2286,7 +2286,7 @@ export class Game implements Activity {
       0,
       0 + Constants.FPS_DISPLAY_TEXT_FONT_SIZE * drawScale,
       this.fpsTextPaint,
-      this.fpsTextFont
+      this.fpsTextFont,
     );
     canvas.restore();
   }
@@ -2305,14 +2305,14 @@ export class Game implements Activity {
     type: EventType,
     entityName: string,
     callback: (event: EntityEvent) => void,
-    callbackOptions?: CallbackOptions
+    callbackOptions?: CallbackOptions,
   ): void {
     const entities = this.entities.filter(
-      (entity) => entity.name === entityName
+      (entity) => entity.name === entityName,
     );
     if (entities.length > 1) {
       console.warn(
-        `warning: createEventListener() found more than one entity with name ${entityName}. Event listener will be attached to first entity found. All entities that receive tap events should be uniquely named`
+        `warning: createEventListener() found more than one entity with name ${entityName}. Event listener will be attached to first entity found. All entities that receive tap events should be uniquely named`,
       );
     }
     const entity = entities
@@ -2320,13 +2320,13 @@ export class Game implements Activity {
       .find(Boolean);
     if (entity === undefined) {
       throw new Error(
-        `could not create event listener. entity with name ${entityName} could not be found in the game entity tree`
+        `could not create event listener. entity with name ${entityName} could not be found in the game entity tree`,
       );
     }
 
     if (!Object.values(EventType).includes(type)) {
       throw new Error(
-        `game ${this.id}: could not create event listener. event type ${type} is not known`
+        `game ${this.id}: could not create event listener. event type ${type} is not known`,
       );
     }
     entity.addEventListener(type, callback, callbackOptions);
@@ -2338,17 +2338,17 @@ export class Game implements Activity {
   get entities(): Array<Entity> {
     function getChildEntitiesRecursive(
       entity: Entity,
-      entities: Array<Entity>
+      entities: Array<Entity>,
     ): void {
       entities.push(entity);
       entity.children.forEach((child) =>
-        getChildEntitiesRecursive(child, entities)
+        getChildEntitiesRecursive(child, entities),
       );
     }
 
     const entities = new Array<Entity>();
     [...this.scenes, this.freeEntitiesScene].forEach((scene) =>
-      getChildEntitiesRecursive(scene, entities)
+      getChildEntitiesRecursive(scene, entities),
     );
     return entities;
   }
@@ -2374,7 +2374,7 @@ export class Game implements Activity {
     this.processDomPointerDown(
       this.freeEntitiesScene,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
@@ -2408,7 +2408,7 @@ export class Game implements Activity {
     this.processDomPointerMove(
       this.freeEntitiesScene,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
@@ -2454,7 +2454,7 @@ export class Game implements Activity {
   private processDomPointerDown(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     if (m2Event.handled) {
       return;
@@ -2466,7 +2466,7 @@ export class Game implements Activity {
       this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
-        domPointerEvent.offsetY
+        domPointerEvent.offsetY,
       )
     ) {
       entity.pressed = true;
@@ -2489,10 +2489,10 @@ export class Game implements Activity {
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition
+            (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerDown(entity, m2Event, domPointerEvent)
+          this.processDomPointerDown(entity, m2Event, domPointerEvent),
         );
     }
   }
@@ -2500,7 +2500,7 @@ export class Game implements Activity {
   private processDomPointerUp(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     if (m2Event.handled) {
       return;
@@ -2546,7 +2546,7 @@ export class Game implements Activity {
       this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
-        domPointerEvent.offsetY
+        domPointerEvent.offsetY,
       )
     ) {
       /**
@@ -2568,10 +2568,10 @@ export class Game implements Activity {
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition
+            (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerUp(entity, m2Event, domPointerEvent)
+          this.processDomPointerUp(entity, m2Event, domPointerEvent),
         );
     }
   }
@@ -2579,7 +2579,7 @@ export class Game implements Activity {
   private processDomPointerMove(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     if (m2Event.handled) {
       return;
@@ -2621,7 +2621,7 @@ export class Game implements Activity {
       !this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
-        domPointerEvent.offsetY
+        domPointerEvent.offsetY,
       )
     ) {
       entity.pressedAndWithinHitArea = false;
@@ -2631,7 +2631,7 @@ export class Game implements Activity {
       this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
-        domPointerEvent.offsetY
+        domPointerEvent.offsetY,
       )
     ) {
       this.raiseM2PointerMoveEvent(entity, m2Event, domPointerEvent);
@@ -2641,7 +2641,7 @@ export class Game implements Activity {
       !this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
-        domPointerEvent.offsetY
+        domPointerEvent.offsetY,
       )
     ) {
       if (entity.withinHitArea) {
@@ -2661,10 +2661,10 @@ export class Game implements Activity {
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition
+            (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerMove(entity, m2Event, domPointerEvent)
+          this.processDomPointerMove(entity, m2Event, domPointerEvent),
         );
     }
   }
@@ -2672,160 +2672,160 @@ export class Game implements Activity {
   private raiseM2PointerDownEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.PointerDown;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseTapDownEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.TapDown;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseTapLeaveEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.TapLeave;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2PointerUpEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.PointerUp;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseTapUpEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.TapUp;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseTapUpAny(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.TapUpAny;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2PointerMoveEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.PointerMove;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2PointerLeaveEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.PointerLeave;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2DragStartEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.DragStart;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2DragEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.Drag;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private raiseM2DragEndEvent(
     entity: Entity,
     m2Event: EventBase,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): void {
     m2Event.target = entity;
     m2Event.type = EventType.DragEnd;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
       m2Event,
-      domPointerEvent
+      domPointerEvent,
     );
   }
 
   private calculatePointWithinEntityFromDomPointerEvent(
     entity: Entity,
-    domPointerEvent: PointerEvent
+    domPointerEvent: PointerEvent,
   ): Point {
     let width = entity.size.width;
     let height = entity.size.height;
@@ -2858,7 +2858,7 @@ export class Game implements Activity {
    */
   onStart(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(EventType.ActivityStart, callback, options);
   }
@@ -2871,7 +2871,7 @@ export class Game implements Activity {
    */
   onCancel(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(EventType.ActivityCancel, callback, options);
   }
@@ -2884,7 +2884,7 @@ export class Game implements Activity {
    */
   onEnd(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(EventType.ActivityEnd, callback, options);
   }
@@ -2897,19 +2897,19 @@ export class Game implements Activity {
    */
   onData(
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.ActivityData,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
   private addEventListener(
     type: EventType,
     callback: (ev: ActivityEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     const eventListener: ActivityEventListener = {
       type: type,
@@ -2923,7 +2923,7 @@ export class Game implements Activity {
           !(
             listener.activityUuid === eventListener.activityUuid &&
             listener.type === eventListener.type
-          )
+          ),
       );
     }
     this.eventListeners.push(eventListener);
@@ -2931,7 +2931,7 @@ export class Game implements Activity {
 
   private raiseActivityEventOnListeners(
     activityEvent: ActivityEvent,
-    extra?: unknown
+    extra?: unknown,
   ): void {
     if (extra) {
       activityEvent = {
@@ -2950,7 +2950,7 @@ export class Game implements Activity {
   private raiseEventOnListeningEntities<T extends EntityEvent>(
     entity: Entity,
     m2Event: EventBase,
-    domEvent: Event
+    domEvent: Event,
   ): void {
     entity.eventListeners
       .filter((listener) => listener.type === m2Event.type)
@@ -2966,7 +2966,7 @@ export class Game implements Activity {
               (m2Event as M2PointerEvent).point =
                 this.calculatePointWithinEntityFromDomPointerEvent(
                   entity,
-                  domEvent as PointerEvent
+                  domEvent as PointerEvent,
                 );
               (m2Event as M2PointerEvent).buttons = (
                 domEvent as PointerEvent
@@ -2980,7 +2980,7 @@ export class Game implements Activity {
               (m2Event as TapEvent).point =
                 this.calculatePointWithinEntityFromDomPointerEvent(
                   entity,
-                  domEvent as PointerEvent
+                  domEvent as PointerEvent,
                 );
 
               (m2Event as TapEvent).buttons = (
@@ -3033,7 +3033,7 @@ export class Game implements Activity {
   private IsCanvasPointWithinEntityBounds(
     entity: Entity,
     x: number,
-    y: number
+    y: number,
   ): boolean {
     if (!entity.isDrawable) {
       throw "only drawable entities can receive pointer events";
@@ -3052,7 +3052,7 @@ export class Game implements Activity {
         y: bb.yMin + radius * entity.absoluteScale,
       };
       const distance = Math.sqrt(
-        Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2)
+        Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2),
       );
       return distance <= radius * entity.absoluteScale;
     }
