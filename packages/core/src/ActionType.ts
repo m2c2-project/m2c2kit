@@ -7,4 +7,5 @@ export enum ActionType {
   Move = "Move",
   Scale = "Scale",
   FadeAlpha = "FadeAlpha",
+  Rotate = "Rotate",
 }

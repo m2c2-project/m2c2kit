@@ -4,11 +4,13 @@ import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
 import { ScaleActionOptions } from "./ScaleActionOptions";
 import { FadeAlphaActionOptions } from "./FadeAlphaActionOptions";
+import { RotateActionOptions } from "./RotateActionOptions";
 import { IActionContainer } from "./IActionContainer";
 import { ActionType } from "./ActionType";
 import { Point } from "./Point";
 import { EasingFunction } from "./Easings";
 import { Easings } from "./Easings";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 /**
  * The Action class has static methods for creating actions to be executed by
@@ -46,7 +48,7 @@ export abstract class Action {
       options.point,
       options.duration,
       options.easing ?? Easings.linear,
-      options.runDuringTransition ?? false
+      options.runDuringTransition ?? false,
     );
   }
 
@@ -59,7 +61,7 @@ export abstract class Action {
   public static wait(options: WaitActionOptions): Action {
     return new WaitAction(
       options.duration,
-      options.runDuringTransition ?? false
+      options.runDuringTransition ?? false,
     );
   }
 
@@ -72,7 +74,7 @@ export abstract class Action {
   public static custom(options: CustomActionOptions): Action {
     return new CustomAction(
       options.callback,
-      options.runDuringTransition ?? false
+      options.runDuringTransition ?? false,
     );
   }
 
@@ -88,7 +90,7 @@ export abstract class Action {
     return new ScaleAction(
       options.scale,
       options.duration,
-      options.runDuringTransition
+      options.runDuringTransition,
     );
   }
 
@@ -104,7 +106,45 @@ export abstract class Action {
     return new FadeAlphaAction(
       options.alpha,
       options.duration,
-      options.runDuringTransition
+      options.runDuringTransition,
+    );
+  }
+
+  /**
+   * Creates an action that will rotate the entity.
+   *
+   * @remarks Rotate actions are applied to their children. In addition to this entity's rotate action, all ancestors' rotate actions will also be applied.
+   *
+   * @param options - {@link RotateActionOptions}
+   * @returns The rotate action
+   */
+  public static rotate(options: RotateActionOptions): Action {
+    if (options.byAngle !== undefined && options.toAngle !== undefined) {
+      throw new Error("rotate Action: cannot specify both byAngle and toAngle");
+    }
+    if (options.byAngle === undefined && options.toAngle === undefined) {
+      throw new Error("rotate Action: must specify either byAngle or toAngle");
+    }
+    if (
+      options.toAngle === undefined &&
+      options.shortestUnitArc !== undefined
+    ) {
+      throw new Error(
+        "rotate Action: shortestUnitArc can only be specified when toAngle is provided",
+      );
+    }
+    if (
+      options.toAngle !== undefined &&
+      options.shortestUnitArc === undefined
+    ) {
+      options.shortestUnitArc = true;
+    }
+    return new RotateAction(
+      options.byAngle,
+      options.toAngle,
+      options.shortestUnitArc,
+      options.duration,
+      options.runDuringTransition,
     );
   }
 
@@ -141,7 +181,7 @@ export abstract class Action {
     this.assignParents(this, this, key);
     const actions = this.flattenActions(this);
     actions.forEach(
-      (action) => (action.duration = this.calculateDuration(action))
+      (action) => (action.duration = this.calculateDuration(action)),
     );
     this.calculateStartEndOffsets(this);
 
@@ -154,7 +194,7 @@ export abstract class Action {
       .filter(
         (action) =>
           action.type !== ActionType.Group &&
-          action.type !== ActionType.Sequence
+          action.type !== ActionType.Sequence,
       )
       .map((action) => {
         // to prevent circular references, set parent to defined
@@ -173,7 +213,7 @@ export abstract class Action {
       case ActionType.Sequence: {
         const sequence = action as SequenceAction;
         const sequenceChildren = sequence.children.map((child) =>
-          Action.cloneAction(child, key)
+          Action.cloneAction(child, key),
         );
         cloned = Action.sequence(sequenceChildren);
         break;
@@ -181,7 +221,7 @@ export abstract class Action {
       case ActionType.Group: {
         const group = action as SequenceAction;
         const groupChildren = group.children.map((child) =>
-          Action.cloneAction(child, key)
+          Action.cloneAction(child, key),
         );
         cloned = Action.sequence(groupChildren);
         break;
@@ -222,6 +262,17 @@ export abstract class Action {
         });
         break;
       }
+      case ActionType.Rotate: {
+        const rotate = action as RotateAction;
+        cloned = Action.rotate({
+          byAngle: rotate.byAngle,
+          toAngle: rotate.toAngle,
+          shortestUnitArc: rotate.shortestUnitArc,
+          duration: rotate.duration,
+          runDuringTransition: rotate.runDuringTransition,
+        });
+        break;
+      }
       case ActionType.Wait: {
         const wait = action as WaitAction;
         cloned = Action.wait({
@@ -245,7 +296,7 @@ export abstract class Action {
     action: Action,
     entity: Entity,
     now: number,
-    dt: number
+    dt: number,
   ): void {
     // action should not start yet
     if (now < action.runStartTime + action.startOffset) {
@@ -298,13 +349,13 @@ export abstract class Action {
           elapsed,
           moveAction.startPoint.x,
           moveAction.dx,
-          moveAction.duration
+          moveAction.duration,
         );
         entity.position.y = moveAction.easing(
           elapsed,
           moveAction.startPoint.y,
           moveAction.dy,
-          moveAction.duration
+          moveAction.duration,
         );
       } else {
         entity.position.x = moveAction.point.x;
@@ -348,6 +399,65 @@ export abstract class Action {
         entity.alpha = fadeAlphaAction.alpha;
         fadeAlphaAction.running = false;
         fadeAlphaAction.completed = true;
+      }
+    }
+
+    if (action.type === ActionType.Rotate) {
+      const rotateAction = action as RotateAction;
+
+      if (!rotateAction.started) {
+        if (rotateAction.byAngle !== undefined) {
+          rotateAction.delta = rotateAction.byAngle;
+        }
+        if (rotateAction.toAngle !== undefined) {
+          rotateAction.toAngle = M2c2KitHelpers.normalizeAngleRadians(
+            rotateAction.toAngle,
+          );
+          entity.zRotation = M2c2KitHelpers.normalizeAngleRadians(
+            entity.zRotation,
+          );
+
+          rotateAction.delta = rotateAction.toAngle - entity.zRotation;
+          /**
+           * If shortestUnitArc is true (default), we need to check if reaching
+           * the final value is a clockwise or counter-clockwise rotation and
+           * thus changing the sign and value of the delta.
+           */
+          if (
+            rotateAction.shortestUnitArc === true &&
+            Math.abs(rotateAction.delta) > Math.PI
+          ) {
+            rotateAction.delta = 2 * Math.PI - Math.abs(rotateAction.delta);
+          }
+        }
+        rotateAction.started = true;
+        rotateAction.finalValue = entity.zRotation + rotateAction.delta;
+      }
+
+      if (elapsed < rotateAction.duration) {
+        entity.zRotation =
+          entity.zRotation + rotateAction.delta * (dt / rotateAction.duration);
+        /**
+         * Check if action has overshot the final value. If so, set to final
+         * value. Check will vary depending on whether the delta is positive
+         * or negative.
+         */
+        if (
+          rotateAction.delta <= 0 &&
+          entity.zRotation < rotateAction.finalValue
+        ) {
+          entity.zRotation = rotateAction.finalValue;
+        }
+        if (
+          rotateAction.delta > 0 &&
+          entity.zRotation > rotateAction.finalValue
+        ) {
+          entity.zRotation = rotateAction.finalValue;
+        }
+      } else {
+        entity.zRotation = rotateAction.finalValue;
+        rotateAction.running = false;
+        rotateAction.completed = true;
       }
     }
   }
@@ -413,7 +523,7 @@ export abstract class Action {
       parentStartOffset = action.parent.startOffset;
     }
 
-    if (action.parent?.type! === ActionType.Group) {
+    if (action.parent?.type === ActionType.Group) {
       /**
        * If the action's parent is a group, this action's start offset
        * is the parent's start offset.
@@ -446,7 +556,7 @@ export abstract class Action {
 
     if (action.isParent) {
       (action as IActionContainer).children?.forEach((child) =>
-        this.calculateStartEndOffsets(child)
+        this.calculateStartEndOffsets(child),
       );
     }
   }
@@ -464,7 +574,7 @@ export abstract class Action {
    */
   private flattenActions(
     action: Action,
-    actions?: Array<Action>
+    actions?: Array<Action>,
   ): Array<Action> {
     // if first call, create the accumulator array of flattened actions
     if (!actions) {
@@ -498,7 +608,7 @@ export abstract class Action {
   private assignParents(
     action: Action,
     rootAction: Action,
-    key?: string
+    key?: string,
   ): void {
     if (key !== undefined) {
       action.key = key;
@@ -573,7 +683,7 @@ export class MoveAction extends Action {
     point: Point,
     duration: number,
     easing: EasingFunction,
-    runDuringTransition: boolean
+    runDuringTransition: boolean,
   ) {
     super(runDuringTransition);
     this.duration = duration;
@@ -604,6 +714,29 @@ export class FadeAlphaAction extends Action {
     super(runDuringTransition);
     this.duration = duration;
     this.alpha = alpha;
+    this.isParent = false;
+  }
+}
+
+export class RotateAction extends Action {
+  type = ActionType.Rotate;
+  byAngle?: number;
+  toAngle?: number;
+  shortestUnitArc?: boolean;
+  delta = 0;
+  finalValue = NaN;
+  constructor(
+    byAngle: number | undefined,
+    toAngle: number | undefined,
+    shortestUnitArc: boolean | undefined,
+    duration: number,
+    runDuringTransition = false,
+  ) {
+    super(runDuringTransition);
+    this.duration = duration;
+    this.byAngle = byAngle;
+    this.toAngle = toAngle;
+    this.shortestUnitArc = shortestUnitArc;
     this.isParent = false;
   }
 }

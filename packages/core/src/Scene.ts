@@ -8,6 +8,7 @@ import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class Scene extends Entity implements IDrawable, SceneOptions {
   readonly type = EntityType.Scene;
@@ -50,7 +51,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
       this.canvasKit,
       this.backgroundColor,
       this.canvasKit.PaintStyle.Fill,
-      false
+      false,
     );
     this.needsInitialization = false;
   }
@@ -149,6 +150,8 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
+    M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+
     if (!this.backgroundPaint) {
       throw new Error(`in Scene ${this}, background paint is undefined.`);
     }
@@ -164,7 +167,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
         (this.position.x + this.size.width) * drawScale * Globals.rootScale,
         (this.position.y + this.size.height) * drawScale * Globals.rootScale,
       ],
-      this.backgroundPaint
+      this.backgroundPaint,
     );
     canvas.restore();
 
@@ -187,7 +190,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
         (this.position.x + this.size.width) * drawScale * Globals.rootScale,
         (this.position.y + this.size.height) * drawScale * Globals.rootScale,
       ],
-      this.backgroundPaint
+      this.backgroundPaint,
     );
     canvas.restore();
 

@@ -11,6 +11,7 @@ import { SvgStringPath } from "./SvgStringPath";
 import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class Shape extends Entity implements IDrawable, ShapeOptions {
   readonly type = EntityType.Shape;
@@ -74,7 +75,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.svgPathRequestedWidth !== undefined
       ) {
         throw new Error(
-          "Cannot specify both width and height for SVG string path."
+          "Cannot specify both width and height for SVG string path.",
         );
       }
 
@@ -86,7 +87,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       }
       if (options.circleOfRadius || options.rect) {
         throw new Error(
-          "Shape must specify only one of: path, circleOfRadius, or rect"
+          "Shape must specify only one of: path, circleOfRadius, or rect",
         );
       }
     }
@@ -99,7 +100,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       }
       if (options.path || options.rect) {
         throw new Error(
-          "Shape must specify only one of: path, circleOfRadius, or rect"
+          "Shape must specify only one of: path, circleOfRadius, or rect",
         );
       }
     }
@@ -143,12 +144,12 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     }
     if (options.strokeColor && !options.lineWidth) {
       console.warn(
-        `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is non-zero. In normal usage, both would be set or both would be undefined.`
+        `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is non-zero. In normal usage, both would be set or both would be undefined.`,
       );
     }
     if (options.strokeColor === undefined && options.lineWidth) {
       console.warn(
-        `warning: for entity ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`
+        `warning: for entity ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`,
       );
     }
   }
@@ -193,13 +194,13 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.canvasKit,
         this.fillColor,
         this.canvasKit.PaintStyle.Fill,
-        true
+        true,
       );
       this.fillColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
         this.canvasKit,
         this.fillColor,
         this.canvasKit.PaintStyle.Fill,
-        false
+        false,
       );
     }
 
@@ -208,13 +209,13 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.canvasKit,
         this.strokeColor,
         this.canvasKit.PaintStyle.Stroke,
-        true
+        true,
       );
       this.strokeColorPaintNotAntialiased = CanvasKitHelpers.makePaint(
         this.canvasKit,
         this.strokeColor,
         this.canvasKit.PaintStyle.Stroke,
-        false
+        false,
       );
     }
     this.svgFirstPathDraw = true;
@@ -275,6 +276,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
+    M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
 
     /**
      * Not all paints may be used, and thus some paints may not be initialized,
@@ -311,7 +313,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
 
   private applyAlphaToPaints(
     alpha: number,
-    paints: (Paint | undefined)[]
+    paints: (Paint | undefined)[],
   ): void {
     paints.forEach((paint) => {
       if (paint) {
@@ -350,7 +352,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
             pathOriginY + points[i].y * Globals.canvasScale,
             pathOriginX + points[i + 1].x * Globals.canvasScale,
             pathOriginY + points[i + 1].y * Globals.canvasScale,
-            this.strokeColorPaintAntialiased
+            this.strokeColorPaintAntialiased,
           );
         }
       }
@@ -420,7 +422,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private calculateTransformationMatrix(
     pathScale: number,
     x: number,
-    y: number
+    y: number,
   ) {
     let dScale: number;
     if (this.svgFirstPathDraw) {
@@ -522,10 +524,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         (this.absolutePosition.y +
           this.size.height * this.absoluteScale -
           this.anchorPoint.y * this.size.height * this.absoluteScale) *
-          drawScale
+          drawScale,
       ),
       this.cornerRadius * drawScale,
-      this.cornerRadius * drawScale
+      this.cornerRadius * drawScale,
     );
   }
 
@@ -614,7 +616,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
     this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
-      this.lineWidth * drawScale
+      this.lineWidth * drawScale,
     );
     this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintNotAntialiased);
   }
@@ -632,11 +634,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
     this.drawRectangleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
-      this.lineWidth * drawScale
+      this.lineWidth * drawScale,
     );
     this.drawRectangleWithCanvasKit(
       canvas,
-      this.strokeColorPaintNotAntialiased
+      this.strokeColorPaintNotAntialiased,
     );
   }
 

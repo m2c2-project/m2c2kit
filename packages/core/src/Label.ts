@@ -17,6 +17,7 @@ import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.Label;
@@ -98,7 +99,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.fontColor[0],
       this.fontColor[1],
       this.fontColor[2],
-      this.fontColor[3]
+      this.fontColor[3],
     );
 
     let textForParagraph: string;
@@ -117,7 +118,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
             i18n.options.missingTranslationFontColor[0],
             i18n.options.missingTranslationFontColor[1],
             i18n.options.missingTranslationFontColor[2],
-            i18n.options.missingTranslationFontColor[3]
+            i18n.options.missingTranslationFontColor[3],
           );
         }
       }
@@ -150,7 +151,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
           throw new Error(`font ${fn} not found.`);
         }
         fontFamilies.push(
-          fontManager.gameTypefaces[this.game.uuid][fn].fontFamily
+          fontManager.gameTypefaces[this.game.uuid][fn].fontFamily,
         );
       });
     } else if (this.fontName) {
@@ -160,14 +161,14 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
         throw new Error(`font ${this.fontName} not found.`);
       }
       fontFamilies.push(
-        fontManager.gameTypefaces[this.game.uuid][this.fontName].fontFamily
+        fontManager.gameTypefaces[this.game.uuid][this.fontName].fontFamily,
       );
     } else {
       // if no fontName provided, use default fontName, which is the
       // first in the list of fontAssets for this game.
 
       const typefaces = Object.values(
-        fontManager.gameTypefaces[this.game.uuid]
+        fontManager.gameTypefaces[this.game.uuid],
       );
       const defaultTypeface = typefaces
         .filter((f) => f.isDefault)
@@ -200,7 +201,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     }
     this.builder = this.canvasKit.ParagraphBuilder.Make(
       this.paraStyle,
-      fontManager.fontMgr
+      fontManager.fontMgr,
     );
 
     if (!this._backgroundPaint) {
@@ -244,7 +245,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
         wordSpacing: 0.0, // Default word spacing
       },
       this.fontPaint,
-      this.backgroundPaint
+      this.backgroundPaint,
     );
 
     this.builder.addText(textForParagraph);
@@ -262,7 +263,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       // TODO: implement match parent on more properties
       if (this.parent === undefined) {
         throw new Error(
-          "width is set to match parent, but entity has no parent"
+          "width is set to match parent, but entity has no parent",
         );
       }
       const marginStart = this.layout.marginStart ?? 0;
@@ -353,7 +354,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     return this._horizontalAlignmentMode;
   }
   set horizontalAlignmentMode(
-    horizontalAlignmentMode: LabelHorizontalAlignmentMode
+    horizontalAlignmentMode: LabelHorizontalAlignmentMode,
   ) {
     this._horizontalAlignmentMode = horizontalAlignmentMode;
     this.needsInitialization = true;
@@ -450,6 +451,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
+      M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
 
       const x =
         (this.absolutePosition.x -
@@ -481,7 +483,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this.initialize();
       if (!this.paragraph) {
         throw new Error(
-          `warmup Label entity ${this.toString()}: paragraph is undefined`
+          `warmup Label entity ${this.toString()}: paragraph is undefined`,
         );
       }
       canvas.drawParagraph(this.paragraph, 0, 0);

@@ -57,13 +57,8 @@ import { CallbackOptions } from "./CallbackOptions";
 import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
 import { FrameCycleEvent } from "./FrameCycleEvent";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
-interface BoundingBox {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-}
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
 }
@@ -2844,7 +2839,7 @@ export class Game implements Activity {
 
     const x = domPointerEvent.offsetX;
     const y = domPointerEvent.offsetY;
-    const bb = this.calculateEntityAbsoluteBoundingBox(entity);
+    const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
     const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * width;
     const relativeY = ((y - bb.yMin) / (bb.yMax - bb.yMin)) * height;
     return { x: relativeX, y: relativeY };
@@ -3042,7 +3037,7 @@ export class Game implements Activity {
       entity.type === EntityType.Shape &&
       (entity as Shape).shapeType === ShapeType.Circle
     ) {
-      const bb = this.calculateEntityAbsoluteBoundingBox(entity);
+      const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
       const radius = (entity as Shape).circleOfRadius;
       if (!radius) {
         throw "circleOfRadius is undefined";
@@ -3073,52 +3068,13 @@ export class Game implements Activity {
       return false;
     }
 
-    const bb = this.calculateEntityAbsoluteBoundingBox(entity);
-
-    if (
+    const points = M2c2KitHelpers.calculateRotatedPoints(
+      entity as unknown as IDrawable & Entity,
+    );
+    return (
       entity.isUserInteractionEnabled &&
-      x >= bb.xMin &&
-      x <= bb.xMax &&
-      y >= bb.yMin &&
-      y <= bb.yMax
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  private calculateEntityAbsoluteBoundingBox(entity: Entity): BoundingBox {
-    const anchorPoint = (entity as unknown as IDrawable).anchorPoint;
-    const scale = entity.absoluteScale;
-    // TODO: NEEDS TO BE FIXED FOR ANCHOR POINTS OTHER THAN (.5, .5)
-    // TODO: TEST THIS FURTHER
-
-    let width = entity.size.width;
-    let height = entity.size.height;
-
-    if (
-      entity.type === EntityType.Shape &&
-      (entity as Shape).shapeType === ShapeType.Circle
-    ) {
-      const radius = (entity as Shape).circleOfRadius;
-      if (!radius) {
-        throw "circleOfRadius is undefined";
-      }
-      width = radius * 2;
-      height = radius * 2;
-    }
-
-    const xMin = entity.absolutePosition.x - width * anchorPoint.x * scale;
-    const xMax =
-      entity.absolutePosition.x + width * (1 - anchorPoint.x) * scale;
-    const yMin = entity.absolutePosition.y - height * anchorPoint.y * scale;
-    const yMax =
-      entity.absolutePosition.y + height * (1 - anchorPoint.y) * scale;
-    // const xMin = entity.absolutePosition.x - entity.size.width * anchorPoint.x * scale;
-    // const xMax = entity.absolutePosition.x + entity.size.width * anchorPoint.x * scale;
-    // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
-    // const yMax = entity.absolutePosition.y + entity.size.height * anchorPoint.y * scale;
-    return { xMin, xMax, yMin, yMax };
+      M2c2KitHelpers.isPointInsideRectangle({ x, y }, points)
+    );
   }
 
   prependAssetsGameIdUrl(url: string): string {

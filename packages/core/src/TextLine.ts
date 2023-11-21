@@ -9,6 +9,7 @@ import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
 import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class TextLine
   extends Entity
@@ -104,8 +105,8 @@ export class TextLine
         this.fontColor[0],
         this.fontColor[1],
         this.fontColor[2],
-        this.fontColor[3]
-      )
+        this.fontColor[3],
+      ),
     );
     this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
@@ -118,8 +119,8 @@ export class TextLine
           i18n.options.missingTranslationFontColor[0],
           i18n.options.missingTranslationFontColor[1],
           i18n.options.missingTranslationFontColor[2],
-          i18n.options.missingTranslationFontColor[3]
-        )
+          i18n.options.missingTranslationFontColor[3],
+        ),
       );
       this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
       this.paint.setAntiAlias(true);
@@ -145,7 +146,7 @@ export class TextLine
     }
     this.font = new this.canvasKit.Font(
       this.typeface,
-      this.fontSize * Globals.canvasScale
+      this.fontSize * Globals.canvasScale,
     );
     this.needsInitialization = false;
   }
@@ -189,6 +190,7 @@ export class TextLine
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
+      M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
 
       const x = this.absolutePosition.x * drawScale;
       const y =
@@ -216,7 +218,7 @@ export class TextLine
         textForDraw = this._translatedText;
         if (this._translatedText === "") {
           console.warn(
-            `warning: empty translated text in TextLine "${this.name}"`
+            `warning: empty translated text in TextLine "${this.name}"`,
           );
         }
       } else {
@@ -229,7 +231,7 @@ export class TextLine
 
       if (paintForDraw === undefined || this.font === undefined) {
         throw new Error(
-          `in TextLine entity ${this}, Paint or Font is undefined.`
+          `in TextLine entity ${this}, Paint or Font is undefined.`,
         );
       }
 
@@ -248,7 +250,7 @@ export class TextLine
     this.initialize();
     if (this.paint === undefined || this.font === undefined) {
       throw new Error(
-        `warmup TextLine entity ${this.toString()}: Paint or Font is undefined.`
+        `warmup TextLine entity ${this.toString()}: Paint or Font is undefined.`,
       );
     }
     canvas.drawText(this.text, 0, 0, this.paint, this.font);

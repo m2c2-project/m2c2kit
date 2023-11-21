@@ -28,7 +28,7 @@ import { Composite } from "./Composite";
 
 function handleDrawableOptions(
   drawable: IDrawable,
-  options: DrawableOptions
+  options: DrawableOptions,
 ): void {
   if (options.anchorPoint) {
     drawable.anchorPoint = options.anchorPoint;
@@ -53,12 +53,12 @@ function handleTextOptions(text: IText, options: TextOptions): void {
 }
 export function handleInterfaceOptions(
   entity: Entity,
-  options: EntityOptions
+  options: EntityOptions,
 ): void {
   if (entity.isDrawable) {
     handleDrawableOptions(
       entity as unknown as IDrawable,
-      options as DrawableOptions
+      options as DrawableOptions,
     );
   }
   if (entity.isText) {
@@ -75,6 +75,7 @@ export abstract class Entity implements EntityOptions {
   position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
   scale = 1.0;
   alpha = 1.0;
+  zRotation = 0;
   isUserInteractionEnabled = false;
   draggable = false;
   hidden = false;
@@ -132,6 +133,9 @@ export abstract class Entity implements EntityOptions {
     }
     if (options.alpha !== undefined) {
       this.alpha = options.alpha;
+    }
+    if (options.zRotation !== undefined) {
+      this.zRotation = options.zRotation;
     }
     if (options.isUserInteractionEnabled !== undefined) {
       this.isUserInteractionEnabled = options.isUserInteractionEnabled;
@@ -230,14 +234,14 @@ export abstract class Entity implements EntityOptions {
     // Do not allow a child to be added to itself
     if (child === this) {
       throw new Error(
-        `Cannot add entity ${child.toString()} as a child to itself.`
+        `Cannot add entity ${child.toString()} as a child to itself.`,
       );
     }
 
     // Do not allow a scene to be child of another entity.
     if (child.type == EntityType.Scene) {
       throw new Error(
-        `Cannot add scene ${child.toString()} as a child to entity ${this.toString()}. A scene cannot be the child of an entity. A scene can only be added to a game object.`
+        `Cannot add scene ${child.toString()} as a child to entity ${this.toString()}. A scene cannot be the child of an entity. A scene can only be added to a game object.`,
       );
     }
 
@@ -253,7 +257,7 @@ export abstract class Entity implements EntityOptions {
       throw new Error(
         `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. A child with name "${
           child.name
-        }" already exists on this parent.`
+        }" already exists on this parent.`,
       );
     }
 
@@ -263,7 +267,7 @@ export abstract class Entity implements EntityOptions {
     if (this.isPartOfGame()) {
       // entity has been added to game; can check all the other game entities.
       otherParents = this.game.entities.filter((e) =>
-        e.children.includes(child)
+        e.children.includes(child),
       );
     } else {
       // entity not added to game; can check only this entity's descendants.
@@ -286,12 +290,12 @@ export abstract class Entity implements EntityOptions {
 
     if (firstOtherParent === this) {
       throw new Error(
-        `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on this parent. The child cannot be added again.`
+        `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on this parent. The child cannot be added again.`,
       );
     }
 
     throw new Error(
-      `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on other parent entity: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`
+      `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on other parent entity: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`,
     );
   }
 
@@ -319,7 +323,7 @@ export abstract class Entity implements EntityOptions {
       this.children = this.children.filter((c) => c !== child);
     } else {
       throw new Error(
-        `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`
+        `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`,
       );
     }
   }
@@ -334,7 +338,7 @@ export abstract class Entity implements EntityOptions {
     children.forEach((child) => {
       if (!this.children.includes(child)) {
         throw new Error(
-          `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`
+          `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`,
         );
       }
       child.parent = undefined;
@@ -357,7 +361,7 @@ export abstract class Entity implements EntityOptions {
       .find(Boolean);
     if (descendant === undefined) {
       throw new Error(
-        `descendant with name ${name} not found on parent ${this.toString()}`
+        `descendant with name ${name} not found on parent ${this.toString()}`,
       );
     }
     return descendant as T;
@@ -371,16 +375,16 @@ export abstract class Entity implements EntityOptions {
   get descendants(): Array<Entity> {
     function getChildEntitiesRecursive(
       entity: Entity,
-      entities: Array<Entity>
+      entities: Array<Entity>,
     ): void {
       entities.push(entity);
       entity.children.forEach((child) =>
-        getChildEntitiesRecursive(child, entities)
+        getChildEntitiesRecursive(child, entities),
       );
     }
     const entities = new Array<Entity>();
     this.children.forEach((child) =>
-      getChildEntitiesRecursive(child, entities)
+      getChildEntitiesRecursive(child, entities),
     );
     return entities;
   }
@@ -391,7 +395,7 @@ export abstract class Entity implements EntityOptions {
   get ancestors(): Array<Entity> {
     function getAncestorsRecursive(
       entity: Entity,
-      entities: Array<Entity>
+      entities: Array<Entity>,
     ): Array<Entity> {
       if (entity.type == EntityType.Scene || !entity.parent) {
         return entities;
@@ -419,7 +423,7 @@ export abstract class Entity implements EntityOptions {
     return actions.some(
       (action) =>
         action.running &&
-        (action.type === ActionType.Move || action.type === ActionType.Scale)
+        (action.type === ActionType.Move || action.type === ActionType.Scale),
     );
   }
 
@@ -450,7 +454,7 @@ export abstract class Entity implements EntityOptions {
    */
   onTapDown(
     callback: (tapEvent: TapEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     // cast <(ev: EntityEvent) => void> is needed because callback parameter
     // in this onTapDown method has argument of type TapEvent, but
@@ -458,7 +462,7 @@ export abstract class Entity implements EntityOptions {
     this.addEventListener(
       EventType.TapDown,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -475,12 +479,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapUp(
     callback: (tapEvent: TapEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.TapUp,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -498,12 +502,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapUpAny(
     callback: (tapEvent: TapEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.TapUpAny,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -520,12 +524,12 @@ export abstract class Entity implements EntityOptions {
    */
   onTapLeave(
     callback: (tapEvent: TapEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.TapLeave,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -540,12 +544,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerDown(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.PointerDown,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -562,12 +566,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerUp(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.PointerUp,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -580,12 +584,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerMove(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.PointerMove,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -598,12 +602,12 @@ export abstract class Entity implements EntityOptions {
    */
   onPointerLeave(
     callback: (m2PointerEvent: M2PointerEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.PointerLeave,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -615,12 +619,12 @@ export abstract class Entity implements EntityOptions {
    */
   onDragStart(
     callback: (m2DragEvent: M2DragEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.DragStart,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -632,12 +636,12 @@ export abstract class Entity implements EntityOptions {
    */
   onDrag(
     callback: (m2DragEvent: M2DragEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.Drag,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -649,19 +653,19 @@ export abstract class Entity implements EntityOptions {
    */
   onDragEnd(
     callback: (m2DragEvent: M2DragEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.DragEnd,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
   addEventListener(
     type: EventType | string,
     callback: (ev: EntityEvent) => void,
-    callbackOptions?: CallbackOptions
+    callbackOptions?: CallbackOptions,
   ): void {
     const eventListener: EntityEventListener = {
       type: type,
@@ -675,13 +679,13 @@ export abstract class Entity implements EntityOptions {
           !(
             listener.entityUuid === eventListener.entityUuid &&
             listener.type === eventListener.type
-          )
+          ),
       );
     }
 
     if (this.eventListeners.some((listener) => listener.type == type)) {
       console.warn(
-        `game {${this.game.id}}: listener for event ${type} has already been added to this entity {${this}}. This is usually not intended.`
+        `game {${this.game.id}}: listener for event ${type} has already been added to this entity {${this}}. This is usually not intended.`,
       );
     }
 
@@ -690,7 +694,7 @@ export abstract class Entity implements EntityOptions {
 
   private parseLayoutConstraints(
     constraints: Constraints,
-    allGameEntities: Array<Entity>
+    allGameEntities: Array<Entity>,
   ): Array<LayoutConstraint> {
     const layoutConstraints = new Array<LayoutConstraint>();
 
@@ -722,7 +726,7 @@ export abstract class Entity implements EntityOptions {
         if (entity === undefined) {
           throw new Error(
             "could not find sibling entity for constraint" +
-              additionalExceptionMessage
+              additionalExceptionMessage,
           );
         }
 
@@ -738,7 +742,7 @@ export abstract class Entity implements EntityOptions {
     constraint: LayoutConstraint,
     marginTop: number,
     marginBottom: number,
-    scale: number
+    scale: number,
   ): number {
     // no matter what the constraint, we start with the alter's position
     let y = constraint.alterEntity.absolutePosition.y;
@@ -776,7 +780,7 @@ export abstract class Entity implements EntityOptions {
     constraint: LayoutConstraint,
     marginStart: number,
     marginEnd: number,
-    scale: number
+    scale: number,
   ): number {
     let x = constraint.alterEntity.absolutePosition.x;
 
@@ -862,7 +866,7 @@ export abstract class Entity implements EntityOptions {
         const layoutConstraints = this.parseLayoutConstraints(
           this.layout?.constraints,
           //this.parentScene.game.entities
-          this.parentSceneAsEntity.descendants
+          this.parentSceneAsEntity.descendants,
         );
 
         const scale = this.parent.absoluteScale;
@@ -874,8 +878,8 @@ export abstract class Entity implements EntityOptions {
               constraint,
               marginTop,
               marginBottom,
-              scale
-            )
+              scale,
+            ),
           );
 
         if (yPositions.length === 0) {
@@ -897,8 +901,8 @@ export abstract class Entity implements EntityOptions {
               constraint,
               marginStart,
               marginEnd,
-              scale
-            )
+              scale,
+            ),
           );
 
         if (xPositions.length === 0) {
@@ -920,10 +924,10 @@ export abstract class Entity implements EntityOptions {
      * from uncompleted "regular" ones that do not
      */
     const uncompletedTransitionActions = this.actions.filter(
-      (action) => action.runDuringTransition && !action.completed
+      (action) => action.runDuringTransition && !action.completed,
     );
     const uncompletedRegularActions = this.actions.filter(
-      (action) => !action.runDuringTransition && !action.completed
+      (action) => !action.runDuringTransition && !action.completed,
     );
 
     // Evaluate all uncompleted actions that can run during a transition
@@ -935,7 +939,7 @@ export abstract class Entity implements EntityOptions {
         }
       });
       uncompletedTransitionActions.forEach((action) =>
-        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime)
+        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
       );
     }
 
@@ -950,7 +954,7 @@ export abstract class Entity implements EntityOptions {
         }
       });
       uncompletedRegularActions.forEach((action) =>
-        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime)
+        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
       );
     }
 
@@ -983,7 +987,7 @@ export abstract class Entity implements EntityOptions {
      */
     function getSiblingConstraintUuids(
       parent: Entity,
-      constraints: Constraints | undefined
+      constraints: Constraints | undefined,
     ): Array<string> {
       const uuids = new Array<string>();
       if (constraints === undefined) {
@@ -1018,7 +1022,7 @@ export abstract class Entity implements EntityOptions {
           if (siblingConstraint === undefined) {
             throw new Error(
               "error getting uuid of sibling constraint" +
-                additionalExceptionMessage
+                additionalExceptionMessage,
             );
           }
 
@@ -1040,7 +1044,7 @@ export abstract class Entity implements EntityOptions {
     this.children.forEach((child) => {
       adjList.set(
         child.uuid,
-        getSiblingConstraintUuids(this, child.layout?.constraints)
+        getSiblingConstraintUuids(this, child.layout?.constraints),
       );
     });
 
@@ -1144,7 +1148,7 @@ export abstract class Entity implements EntityOptions {
   protected getDrawableOptions(): DrawableOptions {
     if (!this.isDrawable) {
       throw new Error(
-        "getDrawableOptions() called object that is not IDrawable"
+        "getDrawableOptions() called object that is not IDrawable",
       );
     }
     const drawableOptions = {
@@ -1194,7 +1198,7 @@ export abstract class Entity implements EntityOptions {
   get parentSceneAsEntity(): Entity {
     if (this.type === EntityType.Scene) {
       throw new Error(
-        `Entity ${this} is a scene and cannot have a parent scene`
+        `Entity ${this} is a scene and cannot have a parent scene`,
       );
     }
     if (this.parent && this.parent.type === EntityType.Scene) {

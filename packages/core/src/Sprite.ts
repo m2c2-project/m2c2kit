@@ -7,6 +7,7 @@ import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
 import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class Sprite extends Entity implements IDrawable, SpriteOptions {
   readonly type = EntityType.Sprite;
@@ -46,7 +47,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     this.loadedImage = imageManager.getLoadedImage(gameUuid, this._imageName);
     if (!this.loadedImage) {
       throw new Error(
-        `could not create sprite. the image named ${this._imageName} has not been loaded`
+        `could not create sprite. the image named ${this._imageName} has not been loaded`,
       );
     }
     this.size.width = this.loadedImage.width;
@@ -77,7 +78,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   private get paint(): Paint {
     if (!this._paint) {
       throw new Error(
-        `in paint getter: Sprite entity ${this.toString()} paint is undefined.`
+        `in paint getter: Sprite entity ${this.toString()} paint is undefined.`,
       );
     }
     return this._paint;
@@ -122,6 +123,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
         canvas.save();
         const drawScale = Globals.canvasScale / this.absoluteScale;
         canvas.scale(1 / drawScale, 1 / drawScale);
+        M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
 
         const x =
           (this.absolutePosition.x -
@@ -148,7 +150,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
     this.initialize();
     if (!this.loadedImage) {
       throw new Error(
-        `warmup Sprite entity ${this.toString()}: image not loaded.`
+        `warmup Sprite entity ${this.toString()}: image not loaded.`,
       );
     }
     canvas.drawImage(this.loadedImage.image, 0, 0);
