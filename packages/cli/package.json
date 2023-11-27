@@ -25,10 +25,10 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@angular-devkit/core": "^17.0.0",
-    "@angular-devkit/schematics": "^17.0.0",
+    "@angular-devkit/core": "^17.0.3",
+    "@angular-devkit/schematics": "^17.0.3",
     "@m2c2kit/schematics": "^0.1.0",
-    "@schematics/angular": "^17.0.0",
+    "@schematics/angular": "^17.0.3",
     "ansi-colors": "4.1.3",
     "inquirer": "9.2.12",
     "symbol-observable": "4.0.0",
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/inquirer": "9.0.7",
     "rimraf": "5.0.5",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "engines": {
     "node": ">=18"

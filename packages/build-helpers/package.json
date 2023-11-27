@@ -17,11 +17,11 @@
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
     "rimraf": "5.0.5",
-    "rollup": "4.4.1",
+    "rollup": "4.6.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.0",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
@@ -46,7 +46,7 @@
     "css-select": "5.1.0",
     "dom-serializer": "2.0.0",
     "domhandler": "5.0.3",
-    "find-up": "6.3.0",
+    "find-up": "7.0.0",
     "htmlparser2": "9.0.0",
     "recursive-copy": "2.0.14"
   },
