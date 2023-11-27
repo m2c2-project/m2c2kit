@@ -44,7 +44,6 @@ class Game1 extends Game {
     });
     label1.addChild(rect1);
 
-    game.addScene(scene1);
     game.entryScene = scene1;
   }
 }
@@ -104,7 +103,7 @@ describe("test removeAllChildren", () => {
     scene1.removeAllChildren();
     expect(scene1.children).toHaveLength(0);
     expect(children.map((c) => c.parent === undefined).every((c) => c)).toBe(
-      true
+      true,
     );
   });
 });
@@ -122,7 +121,7 @@ describe("removeChildren", () => {
     const t = () => {
       scene1.removeChildren([l3]);
     };
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
@@ -218,5 +217,97 @@ describe("test addChild", () => {
       newLabel1.addChild(newLabel3);
     };
     expect(t).toThrow(Error);
+  });
+});
+
+describe("test scale", () => {
+  it("new label is initialized with correct scale", () => {
+    const newLabel = new Label({
+      text: "words",
+      name: "myNewLabel",
+      scale: 0.5,
+    });
+    scene1.addChild(newLabel);
+    expect(newLabel.scale).toEqual(0.5);
+  });
+
+  it("child of entity inherits parent entity scale", async () => {
+    /**
+     * Once a session is started, labels require a font to be loaded before
+     * they can be drawn. Avoid loading a font, and test alpha with shapes
+     * instead.
+     */
+    scene1.removeChild(label1);
+    scene1.removeChild(label2);
+    const newRect1 = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect1",
+      scale: 0.8,
+    });
+    scene1.addChild(newRect1);
+    const newRect2 = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect2",
+      scale: 0.6,
+    });
+    newRect1.addChild(newRect2);
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 20;
+    await session.start();
+    // .8 parent scale * .6 child scale = child absolute scale .48
+    expect(newRect2.absoluteScale).toEqual(0.48);
+  });
+});
+
+describe("test alpha", () => {
+  it("new label is initialized with correct alpha", () => {
+    const newLabel = new Label({
+      text: "words",
+      name: "myNewLabel",
+      alpha: 0.5,
+    });
+    scene1.addChild(newLabel);
+    expect(newLabel.alpha).toEqual(0.5);
+  });
+
+  it("child of entity inherits parent entity alpha", async () => {
+    /**
+     * Once a session is started, labels require a font to be loaded before
+     * they can be drawn. Avoid loading a font, and test alpha with shapes
+     * instead.
+     */
+    scene1.removeChild(label1);
+    scene1.removeChild(label2);
+    const newRect1 = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect1",
+      alpha: 0.2,
+    });
+    scene1.addChild(newRect1);
+    const newRect2 = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect2",
+      alpha: 0.5,
+    });
+    newRect1.addChild(newRect2);
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 10;
+    await session.start();
+    // .2 parent alpha * .5 child alpha = child absolute alpha .1
+    expect(newRect2.absoluteAlpha).toEqual(0.1);
+  });
+});
+
+describe("test zRotation", () => {
+  it("new label is initialized with correct zRotation", () => {
+    const newLabel = new Label({
+      text: "words",
+      name: "myNewLabel",
+      zRotation: Math.PI / 2,
+    });
+    scene1.addChild(newLabel);
+    expect(newLabel.zRotation).toEqual(Math.PI / 2);
   });
 });

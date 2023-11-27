@@ -25,6 +25,25 @@ export class TestHelpers {
     Object.defineProperty(window, "performance", {
       value: TestHelpers.performance,
     });
+
+    /**
+     * Default window size when using jsdom is 1024w x 768h, but this will
+     * cause m2c2kit to resize the absolute size of entities, which
+     * complicates our tests (which are using 400w x 800h). So make the
+     * window tall enough to fit our typical 400w x 800h game.
+     */
+
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 1000,
+    });
+
+    Object.defineProperty(window, "innerHeight", {
+      writable: true,
+      configurable: true,
+      value: 1200,
+    });
   }
 
   static perfCounter = 0;
@@ -48,6 +67,7 @@ export class TestHelpers {
       drawRRect: () => undefined,
       restore: () => undefined,
       drawText: () => undefined,
+      rotate: () => undefined,
     };
 
     const requestAnimationFrame = (callback: (canvas: object) => void) => {
@@ -135,7 +155,12 @@ export class TestHelpers {
         RRectXY: function () {
           return {};
         },
-      })
+        TextAlign: {
+          Center: undefined,
+          Left: undefined,
+          Right: undefined,
+        },
+      }),
     );
   }
 }

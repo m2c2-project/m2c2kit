@@ -94,7 +94,7 @@ describe("GameOptions", () => {
 
   it("throws error if id is not provided", () => {
     const t = () => new Game3();
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
@@ -160,7 +160,7 @@ describe("parameters", () => {
 
   it("getParameter throws error when getting a non-existent game parameter", () => {
     const t = () => g4.getParameter("number_of_puppies");
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("getParameterOrFallback gets an existing game parameter", () => {
@@ -239,12 +239,12 @@ describe("scene add/remove", () => {
       name: "addedScene",
     });
     const t = () => g1.removeScene(nonAddedScene);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("removeScene throws error when removing a non-added scene by name", () => {
     const t = () => g1.removeScene("not added scene");
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
@@ -263,7 +263,7 @@ describe("presentScene", () => {
 
   it("presentScene throws error if non-added scene is presented by name", () => {
     const t = () => g1.presentScene("not added scene");
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("presentScene throws error if non-added scene is presented by object", () => {
@@ -271,7 +271,7 @@ describe("presentScene", () => {
       name: "nonAddedScene",
     });
     const t = () => g1.presentScene(addedScene);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
@@ -302,7 +302,7 @@ describe("actions", () => {
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
     await session.start();
     console.debug(
-      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
     expect(rect1.position).toEqual({ x: 50, y: 50 });
   });
@@ -330,10 +330,138 @@ describe("actions", () => {
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
     await session.start();
     console.debug(
-      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
     expect(Math.round(rect1.position.x)).toEqual(125);
     expect(Math.round(rect1.position.y)).toEqual(125);
+  });
+
+  it("shape scales from .8 to .5", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.scale = 0.8;
+    rect1.run(Action.scale({ scale: 0.5, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(rect1.scale).toEqual(0.5);
+  });
+
+  it("shape scales from .8 to .5 and inherits parent scale", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.scale = 0.6;
+
+    const newRect = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect",
+      position: { x: 200, y: 200 },
+      scale: 0.8,
+    });
+    rect1.addChild(newRect);
+
+    newRect.run(Action.scale({ scale: 0.5, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    /**
+     * .6 parent scale * child scale to . 5 = .3
+     * may be some rounding error, so use toBeCloseTo 6 digits
+     */
+    expect(newRect.absoluteScale).toBeCloseTo(0.3, 6);
+  });
+
+  it("shape alpha fades from .5 to .1", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.alpha = 0.5;
+    rect1.run(Action.fadeAlpha({ alpha: 0.1, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(rect1.alpha).toEqual(0.1);
+  });
+
+  it("shape alpha fades from .5 to .1 and inherits parent alpha", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.alpha = 0.8;
+
+    const newRect = new Shape({
+      rect: { size: { width: 100, height: 100 } },
+      name: "newRect",
+      position: { x: 200, y: 200 },
+      alpha: 0.5,
+    });
+    rect1.addChild(newRect);
+
+    newRect.run(Action.fadeAlpha({ alpha: 0.1, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    /**
+     * .8 parent alpha * child fadeAlpha to . 1 = .08
+     * may be some rounding error, so use toBeCloseTo 6 digits
+     */
+    expect(newRect.absoluteAlpha).toBeCloseTo(0.08, 6);
+  });
+
+  it("shape rotates from pi/2 to 0 (toAngle)", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.zRotation = Math.PI / 2;
+    rect1.run(Action.rotate({ toAngle: 0, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(rect1.zRotation).toBeCloseTo(0, 6);
+  });
+
+  it("shape rotates additional pi/2 radians (byAngle)", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 66;
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    rect1.zRotation = Math.PI / 2;
+    rect1.run(Action.rotate({ byAngle: Math.PI / 2, duration: 1000 }));
+    await session.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(rect1.zRotation).toBeCloseTo(Math.PI, 6);
   });
 });
 
@@ -353,12 +481,12 @@ describe("Game start", () => {
 
   it("throws error if entryScene as object has not been added to game", async () => {
     g1.entryScene = new Scene();
-    await expect(session.start()).rejects.toThrowError();
+    await expect(session.start()).rejects.toThrow();
   });
 
   it("throws error if entryScene as name has not been added to game", async () => {
     g1.entryScene = "not added scene";
-    await expect(session.start()).rejects.toThrowError();
+    await expect(session.start()).rejects.toThrow();
   });
 
   it("scales down on smaller screen that is half the size", async () => {
@@ -442,13 +570,13 @@ describe("free entities", () => {
     const game = g1;
     const label = new Label({ text: "label text", name: "the-label" });
     const t = () => game.removeFreeEntity(label);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("throws error when attempting to remove entity name that has not been added as a free entity", () => {
     const game = g1;
     const t = () => game.removeFreeEntity("some-entity");
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
@@ -572,17 +700,17 @@ describe("addTrialData", () => {
 
   it("throws error when adding null data to boolean schema", () => {
     const t = () => g3.addTrialData("boolean_data", null);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("throws error when adding non-integer number to integer schema", () => {
     const t = () => g3.addTrialData("integer_data", 5.5);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 
   it("throws error when adding to non-existent variable", () => {
     const t = () => g3.addTrialData("pizzas_eaten", 2);
-    expect(t).toThrowError();
+    expect(t).toThrow();
   });
 });
 
