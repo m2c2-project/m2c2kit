@@ -7,6 +7,7 @@ import { EntityType } from "./EntityType";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
 import { M2Path } from "./M2Path";
+import { M2ColorfulPath } from "./M2ColorfulPath";
 import { SvgStringPath } from "./SvgStringPath";
 import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
@@ -25,7 +26,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   shapeType = ShapeType.Undefined;
   circleOfRadius?: number;
   rect?: RectOptions;
-  path?: M2Path | SvgStringPath;
+  path?: M2Path | M2ColorfulPath | SvgStringPath;
   ckPath: Path | null = null;
   ckPathWidth?: number;
   ckPathHeight?: number;
@@ -49,6 +50,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   private svgPreviousAbsoluteY = NaN;
   private svgFirstPathDraw = true;
 
+  private colorfulPathPaints = new Map<string, Paint>();
   /**
    * Rectangular, circular, or path-based shape
    *
@@ -62,9 +64,18 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this.path = options.path;
       this.shapeType = ShapeType.Path;
 
-      if ((this.path as M2Path).size !== undefined) {
-        this.size.height = (this.path as M2Path).size.height;
-        this.size.width = (this.path as M2Path).size.width;
+      if (this.shapeIsM2Path()) {
+        if (options.size !== undefined) {
+          this.size = options.size;
+        }
+      }
+
+      if (this.shapeIsSvgStringPath()) {
+        if (options.size !== undefined) {
+          throw new Error(
+            "Size cannot be specified when path is SVG string path",
+          );
+        }
       }
 
       this.svgPathRequestedWidth = (options.path as SvgStringPath).width;
@@ -189,6 +200,19 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       }
     }
 
+    if (this.shapeIsM2Path()) {
+      if (
+        this.size.width === 0 ||
+        this.size.height === 0 ||
+        this.size.width === undefined ||
+        this.size.height === undefined
+      ) {
+        throw new Error(
+          "Size of shape must have non-zero height and width when path is M2Path",
+        );
+      }
+    }
+
     if (this.fillColor) {
       this.fillColorPaintAntialiased = CanvasKitHelpers.makePaint(
         this.canvasKit,
@@ -230,6 +254,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
       this._fillColorPaintAntialiased,
       this._fillColorPaintNotAntialiased,
       this.ckPath,
+      ...Array.from(this.colorfulPathPaints.values()),
     ]);
   }
 
@@ -335,13 +360,69 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
         this.anchorPoint.y * this.size.height * this.absoluteScale) *
       drawScale;
 
+    if (this.pathIsM2ColorfulPath(this.path)) {
+      const linePresentations = this.path.linePresentations;
+      let lp = 0;
+      const subpaths = this.path.subpaths;
+
+      let paint: Paint | undefined;
+      for (let s = 0; s < subpaths.length; s++) {
+        const subpath = subpaths[s];
+        const points = subpath.flat();
+        for (let i = 0; i < points.length - 1; i++) {
+          if (
+            linePresentations[lp].subpathIndex === s &&
+            linePresentations[lp].pointIndex === i
+          ) {
+            /**
+             * A M2ColorfulPath may have many different colors and line widths.
+             * We cache paints for each color and line width combination.
+             * The cache key is a string of the form "r,g,b,a,lineWidth".
+             * These paints are later deleted in dispose().
+             */
+            const strokeColor = linePresentations[lp].strokeColor;
+            const lineWidth = linePresentations[lp].lineWidth;
+            const paintKey = [...strokeColor, lineWidth].toString();
+            paint = this.colorfulPathPaints.get(paintKey);
+            if (paint === undefined) {
+              paint = CanvasKitHelpers.makePaint(
+                this.canvasKit,
+                strokeColor,
+                this.canvasKit.PaintStyle.Stroke,
+                true,
+              );
+              paint.setStrokeWidth(lineWidth * Globals.canvasScale);
+              this.colorfulPathPaints.set(paintKey, paint);
+            }
+            if (lp < linePresentations.length - 1) {
+              lp++;
+            }
+          }
+          if (paint === undefined) {
+            throw new Error("paint is undefined");
+          }
+
+          canvas.drawLine(
+            pathOriginX + points[i].x * Globals.canvasScale,
+            pathOriginY + points[i].y * Globals.canvasScale,
+            pathOriginX + points[i + 1].x * Globals.canvasScale,
+            pathOriginY + points[i + 1].y * Globals.canvasScale,
+            paint,
+          );
+        }
+      }
+      return;
+    }
+
     if (
       this.strokeColor &&
       this.strokeColorPaintAntialiased &&
       this.lineWidth
     ) {
       // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-      this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth);
+      this.strokeColorPaintAntialiased.setStrokeWidth(
+        this.lineWidth * Globals.canvasScale,
+      );
 
       const subpaths = (this.path as M2Path).subpaths;
       for (const subpath of subpaths) {
@@ -461,6 +542,12 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   }
   private shapeIsM2Path() {
     return (this.path as M2Path)?.subpaths !== undefined;
+  }
+
+  private pathIsM2ColorfulPath(
+    path: M2Path | M2ColorfulPath | SvgStringPath | undefined,
+  ): path is M2ColorfulPath {
+    return path !== undefined && "linePresentations" in path;
   }
 
   private drawCircle(canvas: Canvas) {

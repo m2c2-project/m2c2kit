@@ -15,7 +15,6 @@ import {
   Easings,
   RgbaColor,
   Sprite,
-  Size,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -333,11 +332,10 @@ phases.`,
 
     const SHAPE_SVG_HEIGHT = 96;
     const SQUARE_SIDE_LENGTH = 350;
-    const SHAPE_SIZE: Size = { width: 116, height: 116 };
     const numberOfShapesShown = game.getParameter<number>(
-      "number_of_shapes_shown"
+      "number_of_shapes_shown",
     );
-    const shapeLibrary = this.makeShapes(SHAPE_SVG_HEIGHT, SHAPE_SIZE);
+    const shapeLibrary = this.makeShapes(SHAPE_SVG_HEIGHT);
 
     // ==============================================================
 
@@ -434,7 +432,7 @@ phases.`,
       // timestamp
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
     });
     game.addScenes(instructionsScenes);
@@ -444,7 +442,7 @@ phases.`,
     const numberOfTrials = game.getParameter<number>("number_of_trials");
     const shapeColors =
       game.getParameter<Array<{ colorName: string; rgbaColor: RgbaColor }>>(
-        "shape_colors"
+        "shape_colors",
       );
 
     interface DisplayShape {
@@ -468,12 +466,12 @@ phases.`,
     const rows = game.getParameter<number>("cells_per_side");
     const columns = rows;
     const numberOfDifferentColorsTrials = game.getParameter<number>(
-      "number_of_different_colors_trials"
+      "number_of_different_colors_trials",
     );
     const differentColorsTrialIndexes = RandomDraws.FromRangeWithoutReplacement(
       numberOfDifferentColorsTrials,
       0,
-      numberOfTrials - 1
+      numberOfTrials - 1,
     );
 
     for (let i = 0; i < numberOfTrials; i++) {
@@ -482,12 +480,12 @@ phases.`,
       const shapesToShowIndexes = RandomDraws.FromRangeWithoutReplacement(
         numberOfShapesShown,
         0,
-        shapeLibrary.length - 1
+        shapeLibrary.length - 1,
       );
       const shapeColorsIndexes = RandomDraws.FromRangeWithoutReplacement(
         numberOfShapesShown,
         0,
-        shapeColors.length - 1
+        shapeColors.length - 1,
       );
 
       // do not allow shapes to be in the same row or column
@@ -496,7 +494,7 @@ phases.`,
         locations: {
           row: number;
           column: number;
-        }[]
+        }[],
       ): boolean => {
         if (
           locations
@@ -531,7 +529,7 @@ phases.`,
         locations: {
           row: number;
           column: number;
-        }[]
+        }[],
       ): boolean => {
         const uniqueRows = new Set(locations.map((l) => l.row)).size;
         const uniqueColumns = new Set(locations.map((l) => l.column)).size;
@@ -552,7 +550,7 @@ phases.`,
         presentLocations = RandomDraws.FromGridWithoutReplacement(
           numberOfShapesShown,
           rows,
-          columns
+          columns,
         );
 
         if (!inLine(presentLocations) && !onDiagonal(presentLocations)) {
@@ -582,7 +580,7 @@ phases.`,
         responseLocations = RandomDraws.FromGridWithoutReplacement(
           numberOfShapesShown,
           rows,
-          columns
+          columns,
         );
 
         if (!inLine(responseLocations) && !onDiagonal(responseLocations)) {
@@ -608,15 +606,15 @@ phases.`,
       if (differentColorTrial) {
         const numberOfShapesToChange = RandomDraws.SingleFromRange(
           2,
-          numberOfShapesShown
+          numberOfShapesShown,
         );
         const shapesToChangeIndexes = RandomDraws.FromRangeWithoutReplacement(
           numberOfShapesToChange,
           0,
-          numberOfShapesShown - 1
+          numberOfShapesShown - 1,
         );
         const shapesToChange = shapesToChangeIndexes.map(
-          (index) => responseShapes[index]
+          (index) => responseShapes[index],
         );
         numberOfShapesWithDifferentColors = shapesToChange.length;
 
@@ -667,11 +665,11 @@ phases.`,
     fixationScene.onAppear(() => {
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
       game.addTrialData(
         "trial_begin_iso8601_timestamp",
-        new Date().toISOString()
+        new Date().toISOString(),
       );
       fixationScene.run(
         Action.sequence([
@@ -681,7 +679,7 @@ phases.`,
               game.presentScene(shapePresentationScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -724,7 +722,7 @@ phases.`,
         presentationGrid.addAtCell(
           presentShape,
           trialConfiguration.presentShapes[i].location.row,
-          trialConfiguration.presentShapes[i].location.column
+          trialConfiguration.presentShapes[i].location.column,
         );
       }
       shapePresentationScene.run(
@@ -746,7 +744,7 @@ phases.`,
               game.presentScene(shapeResponseScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -789,7 +787,7 @@ phases.`,
         responseGrid.addAtCell(
           responseShape,
           trialConfiguration.responseShapes[i].location.row,
-          trialConfiguration.responseShapes[i].location.column
+          trialConfiguration.responseShapes[i].location.column,
         );
       }
       sameButton.isUserInteractionEnabled = true;
@@ -826,17 +824,17 @@ phases.`,
 
       game.addTrialData(
         "trial_end_iso8601_timestamp",
-        new Date().toISOString()
+        new Date().toISOString(),
       );
       const trialConfiguration = trialConfigurations[game.trialIndex];
       game.addTrialData("response_time_duration_ms", rt);
       game.addTrialData(
         "number_of_different_shapes",
-        trialConfiguration.numberOfShapesWithDifferentColors
+        trialConfiguration.numberOfShapesWithDifferentColors,
       );
       game.addTrialData(
         "user_response",
-        differentPressed ? "different" : "same"
+        differentPressed ? "different" : "same",
       );
       const correctResponse =
         (trialConfiguration.numberOfShapesWithDifferentColors === 0 &&
@@ -877,7 +875,7 @@ phases.`,
             direction: TransitionDirection.Left,
             duration: 500,
             easing: Easings.sinusoidalInOut,
-          })
+          }),
         );
       }
     };
@@ -911,13 +909,12 @@ phases.`,
     });
   }
 
-  private makeShapes(svgHeight: number, size: Size) {
+  private makeShapes(svgHeight: number) {
     const shape01 = new Shape({
       path: {
         svgPathString: shapeSvgPathStrings[0],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -926,7 +923,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[1],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -936,7 +932,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[2],
         height: svgHeight * 0.8,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -945,7 +940,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[3],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -955,7 +949,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[4],
         height: svgHeight * 0.8,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -964,7 +957,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[5],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -973,7 +965,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[6],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 
@@ -982,7 +973,6 @@ phases.`,
         svgPathString: shapeSvgPathStrings[7],
         height: svgHeight,
       },
-      size: size,
       lineWidth: 0,
     });
 

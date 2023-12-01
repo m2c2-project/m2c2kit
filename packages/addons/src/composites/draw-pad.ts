@@ -83,7 +83,7 @@ export interface DrawPadItem {
    */
   onStrokeEnter(
     callback: (ev: DrawPadItemEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
   /**
    * Executes a callback when a DrawPad stroke leaves the DrawPadItem.
@@ -93,7 +93,7 @@ export interface DrawPadItem {
    */
   onStrokeLeave(
     callback: (ev: DrawPadItemEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
   /** Is a DrawPad stroke currently within the bounds of the DrawPad item? */
   isStrokeWithinBounds: boolean;
@@ -182,9 +182,9 @@ export class DrawPad extends Composite {
   private initializeDrawShape() {
     if (!this.drawShape) {
       const mutablePath = new MutablePath();
-      mutablePath.size = this.size;
       this.drawShape = new Shape({
         path: mutablePath,
+        size: this.size,
       });
       this.addChild(this.drawShape);
     }
@@ -415,12 +415,12 @@ export class DrawPad extends Composite {
    */
   onStrokeStart(
     callback: (ev: DrawPadEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeStart,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -432,12 +432,12 @@ export class DrawPad extends Composite {
    */
   onStrokeMove(
     callback: (ev: DrawPadEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeMove,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -449,12 +449,12 @@ export class DrawPad extends Composite {
    */
   onStrokeEnd(
     callback: (ev: DrawPadEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeEnd,
       <(ev: EntityEvent) => void>callback,
-      options
+      options,
     );
   }
 
@@ -503,12 +503,12 @@ export class DrawPad extends Composite {
       value: function (
         this: T,
         callback: (ev: DrawPadItemEvent) => void,
-        options?: CallbackOptions
+        options?: CallbackOptions,
       ) {
         this.addEventListener(
           DrawPadItemEventType.StrokeEnter,
           <(ev: EntityEvent) => void>callback,
-          options
+          options,
         );
       },
     });
@@ -516,12 +516,12 @@ export class DrawPad extends Composite {
       value: function (
         this: T,
         callback: (ev: DrawPadItemEvent) => void,
-        options?: CallbackOptions
+        options?: CallbackOptions,
       ) {
         this.addEventListener(
           DrawPadItemEventType.StrokeLeave,
           <(ev: EntityEvent) => void>callback,
-          options
+          options,
         );
       },
     });
@@ -628,7 +628,7 @@ export class DrawPad extends Composite {
     const croppedImage = this.game.canvasKit.MakeImage(
       imageInfo,
       pixelData,
-      pixelData.length / sh
+      pixelData.length / sh,
     );
     if (!croppedImage) {
       throw new Error("no cropped image");

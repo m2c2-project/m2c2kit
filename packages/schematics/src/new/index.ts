@@ -66,7 +66,8 @@ export function m2New(options: m2NewOptions): Rule {
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "2.0.2",
     "tslib": "2.6.2",
-    "typescript": "5.3.2"
+    "typescript": "5.3.2",
+    "mime": "3.0.0"
   }
 }`,
     };

@@ -6,6 +6,7 @@ import { RectOptions } from "./RectOptions";
 import { M2Path } from "./M2Path";
 import { Size } from "./Size";
 import { SvgStringPath } from "./SvgStringPath";
+import { M2ColorfulPath } from "./M2ColorfulPath";
 
 export interface ShapeOptions extends EntityOptions, DrawableOptions {
   shapeType?: ShapeType;
@@ -22,8 +23,8 @@ export interface ShapeOptions extends EntityOptions, DrawableOptions {
   /** Width of outline. Default is undefined for rectangle and circle, 2 for path. */
   lineWidth?: number;
   /** A path from which to create the shape */
-  path?: M2Path | SvgStringPath;
-  /** Size of container "view box" for path shapes. Leave undefined for circle and rectangle shapes. */
+  path?: M2Path | M2ColorfulPath | SvgStringPath;
+  /** Size of container "view box" for M2Path and M2ColorfulPath shapes. Leave undefined for circle, rectangle, and SvgStringPath shapes. */
   size?: Size;
   /** Should the shape be drawn with anti-aliasing. Default is yes. */
   isAntialiased?: boolean;

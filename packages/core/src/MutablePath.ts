@@ -1,13 +1,12 @@
 import { M2Path } from "./M2Path";
 import { Point } from "./Point";
-import { Entity } from "./Entity";
-import { Size } from "./Size";
 
 /**
- * Lines and/or shapes, and methods for creating them.
+ * Subpaths and methods for creating them.
+ *
+ * @remarks Subpaths are an array of lines that are drawn together.
  */
 export class MutablePath implements M2Path {
-  size: Size = { width: 0, height: 0 };
   _subpaths = new Array<Array<Point>>();
 
   get subpaths(): Array<Array<Point>> {
@@ -18,7 +17,7 @@ export class MutablePath implements M2Path {
     }
   }
 
-  private currentPath = new Array<Point>();
+  protected currentPath = new Array<Point>();
 
   /**
    * Starts a new subpath at a given point.
@@ -45,12 +44,23 @@ export class MutablePath implements M2Path {
     this.currentPath.push(point);
   }
 
+  /**
+   * Removes all subpaths from the shape.
+   */
   clear(): void {
     this._subpaths = new Array<Array<Point>>();
     this.currentPath = new Array<Point>();
   }
 
-  duplicate(newName?: string | undefined): Entity {
-    throw new Error("Method not implemented.");
+  /**
+   * Makes a deep copy.
+   *
+   * @returns a deep copy
+   */
+  duplicate(): MutablePath {
+    const newPath = new MutablePath();
+    newPath._subpaths = JSON.parse(JSON.stringify(this._subpaths));
+    newPath.currentPath = JSON.parse(JSON.stringify(this.currentPath));
+    return newPath;
   }
 }
