@@ -29,9 +29,9 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@docusaurus/core": "3.0.0",
-    "@docusaurus/preset-classic": "3.0.0",
-    "@easyops-cn/docusaurus-search-local": "0.38.0",
+    "@docusaurus/core": "3.0.1",
+    "@docusaurus/preset-classic": "3.0.1",
+    "@easyops-cn/docusaurus-search-local": "0.38.1",
     "@mdx-js/react": "^3.0.0",
     "@monaco-editor/react": "4.6.0",
     "clsx": "^2.0.0",
@@ -40,9 +40,9 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.0.0",
-    "@docusaurus/tsconfig": "3.0.0",
-    "@docusaurus/types": "3.0.0",
+    "@docusaurus/module-type-aliases": "3.0.1",
+    "@docusaurus/tsconfig": "3.0.1",
+    "@docusaurus/types": "3.0.1",
     "docusaurus-json-schema-plugin": "1.7.0",
     "docusaurus-plugin-typedoc": "0.21.0",
     "raw-loader": "4.0.2",

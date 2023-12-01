@@ -4,11 +4,11 @@
   "description": "Integration tests for the m2c2kit CLI",
   "main": "index.js",
   "devDependencies": {
-    "@playwright/test": "1.40.0",
+    "@playwright/test": "1.40.1",
     "@types/pixelmatch": "5.2.6",
     "@types/pngjs": "6.0.4",
     "pixelmatch": "^5.2.1",
-    "playwright": "1.40.0",
+    "playwright": "1.40.1",
     "pngjs": "^7.0.0"
   },
   "scripts": {
