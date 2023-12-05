@@ -3,7 +3,9 @@
  */
 
 export interface SvgStringPath {
-  /** SVG string from which to create te path */
+  /** SVG string from which to create the path */
+  pathString?: string;
+  /** SVG string from which to create the path @deprecated Use `pathString` */
   svgPathString?: string;
   /** If provided, scale the SVG path to this height, and scale the width to keep the original SVG proportions */
   height?: number;

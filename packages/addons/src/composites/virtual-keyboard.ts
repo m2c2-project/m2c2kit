@@ -222,8 +222,7 @@ export class VirtualKeyboard extends Composite {
       const shiftArrowShapeOptions: ShapeOptions = {
         path: {
           // Public Domain from https://www.freesvg.org
-          svgPathString:
-            "m288-6.6849e-14 -288 288h144v288h288v-288h144l-288-288z",
+          pathString: "m288-6.6849e-14 -288 288h144v288h288v-288h144l-288-288z",
           width: 24,
         },
         lineWidth: 2,
@@ -233,7 +232,7 @@ export class VirtualKeyboard extends Composite {
       const backspaceShapeOptions: ShapeOptions = {
         path: {
           // CC0 from https://www.svgrepo.com
-          svgPathString:
+          pathString:
             "M10.625 5.09 0 22.09l10.625 17H44.18v-34H10.625zm31.555 32H11.734l-9.375-15 9.375-15H42.18v30zm-23.293-6.293 7.293-7.293 7.293 7.293 1.414-1.414-7.293-7.293 7.293-7.293-1.414-1.414-7.293 7.293-7.293-7.293-1.414 1.414 7.293 7.293-7.293 7.293",
           width: 24,
         },
@@ -275,7 +274,7 @@ export class VirtualKeyboard extends Composite {
       this.rowsConfiguration = keyboardRows;
       this.keysPerRow = this.rowsConfiguration.reduce(
         (max, row) => Math.max(max, row.length),
-        0
+        0,
       );
       this.fontSize = this.size.height / this.rowsConfiguration.length / 2.5;
     }
@@ -345,7 +344,7 @@ export class VirtualKeyboard extends Composite {
       const row = rows[r];
       const rowSumKeyWidths = row.reduce(
         (sum, key) => sum + (key.widthRatio ?? 1),
-        0
+        0,
       );
 
       // extraPadding is additional padding to center the keys in the row
@@ -454,7 +453,7 @@ export class VirtualKeyboard extends Composite {
               .filter(
                 (listener) =>
                   listener.type === EventType.CompositeCustom &&
-                  listener.compositeType === "VirtualKeyboardKeyUp"
+                  listener.compositeType === "VirtualKeyboardKeyUp",
               )
               .forEach((listener) => {
                 const virtualKeyboardEvent: VirtualKeyboardEvent = {
@@ -532,7 +531,7 @@ export class VirtualKeyboard extends Composite {
               .filter(
                 (listener) =>
                   listener.type === EventType.CompositeCustom &&
-                  listener.compositeType === "VirtualKeyboardKeyDown"
+                  listener.compositeType === "VirtualKeyboardKeyDown",
               )
               .forEach((listener) => {
                 const virtualKeyboardEvent: VirtualKeyboardEvent = {
@@ -606,7 +605,7 @@ export class VirtualKeyboard extends Composite {
    */
   onKeyDown(
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
-    replaceExistingCallback = true
+    replaceExistingCallback = true,
   ): void {
     const eventListener: EntityEventListener = {
       type: EventType.CompositeCustom,
@@ -617,7 +616,7 @@ export class VirtualKeyboard extends Composite {
 
     this.addVirtualKeyboardEventListener(
       replaceExistingCallback,
-      eventListener
+      eventListener,
     );
   }
 
@@ -633,7 +632,7 @@ export class VirtualKeyboard extends Composite {
    */
   onKeyUp(
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
-    replaceExistingCallback = true
+    replaceExistingCallback = true,
   ): void {
     const eventListener: EntityEventListener = {
       type: EventType.CompositeCustom,
@@ -644,13 +643,13 @@ export class VirtualKeyboard extends Composite {
 
     this.addVirtualKeyboardEventListener(
       replaceExistingCallback,
-      eventListener
+      eventListener,
     );
   }
 
   private addVirtualKeyboardEventListener(
     replaceExistingCallback: boolean,
-    eventListener: EntityEventListener
+    eventListener: EntityEventListener,
   ) {
     if (replaceExistingCallback) {
       this.eventListeners = this.eventListeners.filter(
@@ -659,7 +658,7 @@ export class VirtualKeyboard extends Composite {
             listener.entityUuid === eventListener.entityUuid &&
             listener.type === eventListener.type &&
             listener.compositeType === eventListener.compositeType
-          )
+          ),
       );
     }
     this.eventListeners.push(eventListener);

@@ -912,7 +912,7 @@ phases.`,
   private makeShapes(svgHeight: number) {
     const shape01 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[0],
+        pathString: shapePathStrings[0],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -920,7 +920,7 @@ phases.`,
 
     const shape02 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[1],
+        pathString: shapePathStrings[1],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -929,7 +929,7 @@ phases.`,
     // note: shape03 is purposively smaller (.8 height of other shapes)
     const shape03 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[2],
+        pathString: shapePathStrings[2],
         height: svgHeight * 0.8,
       },
       lineWidth: 0,
@@ -937,7 +937,7 @@ phases.`,
 
     const shape04 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[3],
+        pathString: shapePathStrings[3],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -946,7 +946,7 @@ phases.`,
     // note: shape05 is purposively smaller (.8 height of other shapes)
     const shape05 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[4],
+        pathString: shapePathStrings[4],
         height: svgHeight * 0.8,
       },
       lineWidth: 0,
@@ -954,7 +954,7 @@ phases.`,
 
     const shape06 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[5],
+        pathString: shapePathStrings[5],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -962,7 +962,7 @@ phases.`,
 
     const shape07 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[6],
+        pathString: shapePathStrings[6],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -970,7 +970,7 @@ phases.`,
 
     const shape08 = new Shape({
       path: {
-        svgPathString: shapeSvgPathStrings[7],
+        pathString: shapePathStrings[7],
         height: svgHeight,
       },
       lineWidth: 0,
@@ -990,7 +990,7 @@ phases.`,
   }
 }
 
-const shapeSvgPathStrings = [
+const shapePathStrings = [
   "M0 89.94v-2L131.95 0h2v88.7c2.34 1.6 4.47 3.11 6.65 4.55 42.77 28.22 85.54 56.42 128.3 84.63v2c-44.65 29.65-89.3 59.29-133.95 88.94h-1v-90.84C89.44 148.72 44.72 119.33 0 89.94Z",
   "M162 188c-.33 27-.67 54-1 81-26.87-26.18-53.74-52.35-80-77.94V269H0C0 180.83 0 92.67.04 4.5.04 3 .67 1.5 1 0c24.64 29.1 49.15 58.31 73.96 87.26 28.88 33.7 58.01 67.17 87.04 100.74Z",
   "M3 148.86V61.12C41.76 40.75 80.52 20.37 119.28 0h2.91c21.32 20.7 42.64 41.4 63.96 62.11v89.71c-38.44 20.04-76.88 40.09-115.31 60.13h-2.91L3.01 148.86Z",

@@ -168,12 +168,19 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   override initialize(): void {
     if (this.shapeType === ShapeType.Path) {
       if (this.shapeIsSvgStringPath()) {
-        const pathSvgString = (this.path as SvgStringPath).svgPathString;
-        if (!pathSvgString) {
+        const pathString =
+          (this.path as SvgStringPath).pathString ??
+          (this.path as SvgStringPath).svgPathString;
+        if (!pathString) {
           throw new Error("SVG Path string is null/undefined");
         }
+        if ((this.path as SvgStringPath).svgPathString !== undefined) {
+          console.warn(
+            `warning: svgPathString is deprecated. Use pathString instead.`,
+          );
+        }
 
-        this.ckPath = this.canvasKit.Path.MakeFromSVGString(pathSvgString);
+        this.ckPath = this.canvasKit.Path.MakeFromSVGString(pathString);
         if (!this.ckPath) {
           throw new Error("could not make CanvasKit Path from SVG string");
         }
@@ -538,7 +545,10 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   }
 
   private shapeIsSvgStringPath() {
-    return (this.path as SvgStringPath)?.svgPathString !== undefined;
+    return (
+      (this.path as SvgStringPath)?.pathString !== undefined ||
+      (this.path as SvgStringPath)?.svgPathString !== undefined
+    );
   }
   private shapeIsM2Path() {
     return (this.path as M2Path)?.subpaths !== undefined;
