@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/survey",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Survey functionality that can be added to m2c2kit apps, using survey-js",
   "main": "dist/index.js",
   "module": "dist/index.js",

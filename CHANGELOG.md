@@ -4,6 +4,118 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.14] - 2023-12-05
+
+### Added
+
+- zRotation property for entities.
+- Rotate Action.
+- Path shape can be multi-colored if path is `M2ColorfulPath`.
+- `ColorfulMutablePath` class for creating multi-colored paths that satisfy `M2ColorfulPath` interface.
+
+### Changed
+
+- Updated dependencies.
+- For path shapes defined by a `SvgStringPath`, the `svgPathString` property is deprecated. Use `pathString` now.
+- Unless it is a `M2ColorfulPath` or `M2Path`, specifying the `size` on other types of shapes will now throw an error. This is to avoid the expectation that setting `size` on these types of shapes will change their size.
+
+## `@m2c2kit/addons` [0.3.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.1] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.10] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+- Updated templates.
+
+## `@m2c2kit/embedding` [1.0.7] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.10] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.9] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.9] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.4] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.11] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.8] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.10] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.9] - 2023-12-05
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.13] - 2023-10-31
 
 ### Added
