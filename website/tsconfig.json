@@ -11,6 +11,6 @@
     //   "@docusaurus/theme-classic",
     //   "docusaurus-json-schema-plugin"
     // ]
-  }
-  // "exclude": ["node_modules", "build", "static"]
+  },
+  "exclude": ["node_modules", "build", "static"]
 }

@@ -2837,9 +2837,33 @@ export class Game implements Activity {
       height = radius * 2;
     }
 
-    const x = domPointerEvent.offsetX;
-    const y = domPointerEvent.offsetY;
+    let x = domPointerEvent.offsetX;
+    let y = domPointerEvent.offsetY;
     const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
+
+    /**
+     * If the entity or any of its ancestors have been rotated, we need to
+     * adjust the point reported on the DOM to account for the rotation. We
+     * do this by calculating the rotation transforms that were used to
+     * display the rotated entity and applying the reverse rotation transforms
+     * to the DOM point.
+     */
+    if (M2c2KitHelpers.entityOrAncestorHasBeenRotated(entity)) {
+      const transforms = M2c2KitHelpers.calculateRotationTransforms(
+        entity as Entity & IDrawable,
+      );
+      transforms.forEach((transform) => {
+        const rotatedPoint = M2c2KitHelpers.rotatePoint(
+          { x, y },
+          // take negative because we are applying the reverse rotation
+          -transform.radians,
+          transform.center,
+        );
+        x = rotatedPoint.x;
+        y = rotatedPoint.y;
+      });
+    }
+
     const relativeX = ((x - bb.xMin) / (bb.xMax - bb.xMin)) * width;
     const relativeY = ((y - bb.yMin) / (bb.yMax - bb.yMin)) * height;
     return { x: relativeX, y: relativeY };

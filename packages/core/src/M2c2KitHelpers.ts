@@ -40,7 +40,7 @@ export class M2c2KitHelpers {
     const entityPointsArray = entities.map((entity) => {
       const boundingBox =
         M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
-      return boundingBoxToPoints(boundingBox);
+      return M2c2KitHelpers.boundingBoxToPoints(boundingBox);
     });
 
     /**
@@ -53,7 +53,7 @@ export class M2c2KitHelpers {
       }
       const entityPoints = entityPointsArray[i];
       const radians = entities[i].zRotation;
-      const center = findCentroid(entityPoints);
+      const center = M2c2KitHelpers.findCentroid(entityPoints);
       for (let j = i; j < entities.length; j++) {
         entityPointsArray[j] = rotateRectangle(
           entityPointsArray[j],
@@ -86,7 +86,8 @@ export class M2c2KitHelpers {
     canvas: Canvas,
     drawableEntity: IDrawable & Entity,
   ) {
-    const rotationTransforms = calculateRotationTransforms(drawableEntity);
+    const rotationTransforms =
+      M2c2KitHelpers.calculateRotationTransforms(drawableEntity);
     if (rotationTransforms.length === 0) {
       return;
     }
@@ -169,7 +170,37 @@ export class M2c2KitHelpers {
   }
 
   /**
+   * Checks if two points are on the same side of a line.
+   *
+   * @remarks The line is defined by two points, a and b. The function uses
+   * the cross product to determine the relative position of the points.
+   *
+   * @param p1 - point to check
+   * @param p2 - point to check
+   * @param a - point that defines one end of the line
+   * @param b - point that defines the other end of the line
+   * @returns true if p1 and p2 are on the same side of the line, or false
+   * otherwise
+   */
+  static arePointsOnSameSideOfLine(
+    p1: Point,
+    p2: Point,
+    a: Point,
+    b: Point,
+  ): boolean {
+    // cross product of (a, b) and (a, p1)
+    const cp1 = (b.x - a.x) * (p1.y - a.y) - (b.y - a.y) * (p1.x - a.x);
+    // cross product of (a, b) and (a, p2)
+    const cp2 = (b.x - a.x) * (p2.y - a.y) - (b.y - a.y) * (p2.x - a.x);
+    // the points are on the same side if the cross products have the same sign
+    return cp1 * cp2 >= 0;
+  }
+
+  /**
    * Checks if a point is inside a rectangle.
+   *
+   * @remarks The rectangle may have been rotated (sides might not be parallel
+   * to the axes).
    *
    * @param point - The Point to check
    * @param rect - An array of four Points representing the vertices of the
@@ -177,24 +208,177 @@ export class M2c2KitHelpers {
    * @returns true if the Point is inside the rectangle
    */
   static isPointInsideRectangle(point: Point, rect: Point[]): boolean {
-    // Loop through the rectangle edges and check if the point is on the right side of each one
-    for (let i = 0; i < 4; i++) {
-      // Get the current and next vertex of the edge
-      const p1 = rect[i];
-      const p2 = rect[(i + 1) % 4];
-
-      // Calculate the cross product of the vector from p1 to p2 and the vector from p1 to the point
-      const cross =
-        (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-
-      // If the cross product is positive, the point is on the right side of the edge
-      // Note: This is because the y-axis is inverted
-      if (cross > 0) {
-        // The point is outside the rectangle
-        return false;
-      }
+    if (rect.length !== 4) {
+      throw new Error("Invalid input: expected an array of four points");
     }
-    return true;
+    /**
+     * The point is inside the rectangle if and only if it is on the same
+     * side of each edge as the opposite vertex.
+     * For example, the point is inside the rectangle if it is on the same
+     * side of the edge (rect[0], rect[1]) as rect[2]
+     */
+    return (
+      M2c2KitHelpers.arePointsOnSameSideOfLine(
+        point,
+        rect[2],
+        rect[0],
+        rect[1],
+      ) &&
+      M2c2KitHelpers.arePointsOnSameSideOfLine(
+        point,
+        rect[3],
+        rect[1],
+        rect[2],
+      ) &&
+      M2c2KitHelpers.arePointsOnSameSideOfLine(
+        point,
+        rect[0],
+        rect[2],
+        rect[3],
+      ) &&
+      M2c2KitHelpers.arePointsOnSameSideOfLine(point, rect[1], rect[3], rect[0])
+    );
+  }
+
+  /**
+   * Checks if the entity or any of its ancestors have been rotated.
+   *
+   * @param entity - entity to check
+   * @returns true if the entity or any of its ancestors have been rotated
+   */
+  static entityOrAncestorHasBeenRotated(entity: Entity): boolean {
+    const entities = entity.ancestors;
+    entities.push(entity);
+    return entities.some((entity) => entityNeedsRotation(entity));
+  }
+
+  /**
+   * Converts a bounding box to an array of four points representing the
+   * vertices of the rectangle.
+   *
+   * @remarks In m2c2kit, the y-axis is inverted: origin is in the upper-left.
+   * Vertices are returned in clockwise order starting from the upper-left.
+   *
+   * @param boundingBox
+   * @returns An array of four points
+   */
+  static boundingBoxToPoints(boundingBox: BoundingBox): Point[] {
+    const { xMin, xMax, yMin, yMax } = boundingBox;
+    const points: Point[] = [
+      { x: xMin, y: yMin }, // Top left
+      { x: xMax, y: yMin }, // Top right
+      { x: xMax, y: yMax }, // Bottom right
+      { x: xMin, y: yMax }, // Bottom left
+    ];
+    return points;
+  }
+
+  /**
+   * Finds the centroid of a rectangle.
+   *
+   * @param points - An array of four points representing the vertices of the
+   * rectangle.
+   * @returns array of points representing the centroid of the rectangle.
+   */
+  static findCentroid(points: Point[]): Point {
+    if (points.length !== 4) {
+      throw new Error("Invalid input: expected an array of four points");
+    }
+
+    // Calculate the sum of the x and y coordinates of the points
+    let xSum = 0;
+    let ySum = 0;
+    for (const point of points) {
+      xSum += point.x;
+      ySum += point.y;
+    }
+
+    // Divide the sums by four to get the average x and y coordinates
+    const xAvg = xSum / 4;
+    const yAvg = ySum / 4;
+
+    return { x: xAvg, y: yAvg };
+  }
+
+  /**
+   * Rotates a point, counterclockwise, around another point by an angle in
+   * radians.
+   *
+   * @param point - Point to rotate
+   * @param radians - angle in radians
+   * @param center - Point to rotate around
+   * @returns rotated point
+   */
+  static rotatePoint(point: Point, radians: number, center: Point): Point {
+    // Calculate the relative position of p to the center
+    const dx = point.x - center.x;
+    const dy = point.y - center.y;
+
+    // Apply the rotation matrix
+    // Note: To rotate counterclockwise, we need to negate the angle
+    const x = dx * Math.cos(-radians) - dy * Math.sin(-radians);
+    const y = dx * Math.sin(-radians) + dy * Math.cos(-radians);
+
+    // Return the new point with the center offset added back
+    return {
+      x: x + center.x,
+      y: y + center.y,
+    };
+  }
+
+  /**
+   * Calculates the rotation transforms to apply to entity, respecting any
+   * ancestor rotations.
+   *
+   * @param drawableEntity - entity to calculate rotation transforms for
+   * @returns array of rotation transforms to apply
+   */
+  static calculateRotationTransforms(
+    drawableEntity: IDrawable & Entity,
+  ): RotationTransform[] {
+    const rotationTransforms: RotationTransform[] = [];
+    const entities = drawableEntity.ancestors;
+    entities.reverse();
+    entities.push(drawableEntity);
+
+    /**
+     * Iterate all entities and, if needed, rotate each around
+     * its anchor point. Save a running list of all rotations in the
+     * array rotationTransforms.
+     */
+    entities.forEach((entity) => {
+      if (entityNeedsRotation(entity)) {
+        const drawable = entity as unknown as IDrawable & Entity;
+        /**
+         * Scenes must be handled specially because they have a different
+         * coordinate system -- (0, 0) is in the upper-left -- and their
+         * anchor point is (0, 0). Despite this, we rotate them around their
+         * center.
+         */
+        if (drawable.type === EntityType.Scene) {
+          const center = {
+            x: drawable.absolutePosition.x + drawable.size.width * 0.5,
+            y: drawable.absolutePosition.y + drawable.size.height * 0.5,
+          };
+          rotationTransforms.push({
+            radians: drawable.zRotation,
+            center,
+          });
+          return;
+        }
+
+        const boundingBox =
+          M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(drawable);
+        const points = M2c2KitHelpers.boundingBoxToPoints(boundingBox);
+        const center = M2c2KitHelpers.findCentroid(points);
+        rotationTransforms.push({
+          radians: drawable.zRotation,
+          center,
+        });
+      }
+    });
+
+    return rotationTransforms;
   }
 }
 
@@ -219,144 +403,11 @@ function applyRotationTransformsToCanvas(
   });
 }
 
-/**
- * Calculates the rotation transforms to apply to the CanvasKit canvas.
- *
- * @param drawableEntity - entity to calculate rotation transforms for
- * @returns array of rotation transforms to apply
- */
-function calculateRotationTransforms(
-  drawableEntity: IDrawable & Entity,
-): RotationTransform[] {
-  const rotationTransforms: RotationTransform[] = [];
-  const entities = drawableEntity.ancestors;
-  entities.reverse();
-  entities.push(drawableEntity);
-
-  /**
-   * Iterate all entities and, if needed, rotate each around
-   * its anchor point. Save a running list of all rotations in the
-   * array rotationTransforms.
-   */
-  entities.forEach((entity) => {
-    if (entityNeedsRotation(entity)) {
-      const drawable = entity as unknown as IDrawable & Entity;
-      /**
-       * Scenes must be handled specially because they have a different
-       * coordinate system -- (0, 0) is in the upper-left -- and their
-       * anchor point is (0, 0). Despite this, we rotate them around their
-       * center.
-       */
-      if (drawable.type === EntityType.Scene) {
-        const center = {
-          x: drawable.absolutePosition.x + drawable.size.width * 0.5,
-          y: drawable.absolutePosition.y + drawable.size.height * 0.5,
-        };
-        rotationTransforms.push({
-          radians: drawable.zRotation,
-          center,
-        });
-        return;
-      }
-
-      const boundingBox =
-        M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(drawable);
-      const points = boundingBoxToPoints(boundingBox);
-      const center = findCentroid(points);
-      rotationTransforms.push({
-        radians: drawable.zRotation,
-        center,
-      });
-    }
-  });
-
-  return rotationTransforms;
-}
-
 function entityNeedsRotation(entity: Entity): boolean {
   return (
     M2c2KitHelpers.normalizeAngleRadians(entity.zRotation) !== 0 &&
     entity.isDrawable
   );
-}
-
-/**
- * Converts a bounding box to an array of four points representing the
- * vertices of the rectangle.
- *
- * @remarks In m2c2kit, the y-axis is inverted: origin is in the upper-left.
- *
- * @param boundingBox
- * @returns An array of four points
- */
-function boundingBoxToPoints(boundingBox: BoundingBox): Point[] {
-  // Extract the coordinates from the bounding box
-  const { xMin, xMax, yMin, yMax } = boundingBox;
-  /**
-   * Create an array of four points, in counterclockwise order from upper
-   * left point in rectangle. Note: in m2c2kit, the y-axis is inverted: origin
-   * is in the upper-left corner.
-   */
-  const points: Point[] = [
-    { x: xMin, y: yMin }, // Top left
-    { x: xMin, y: yMax }, // Bottom left
-    { x: xMax, y: yMax }, // Bottom right
-    { x: xMax, y: yMin }, // Top right
-  ];
-  return points;
-}
-
-/**
- * Finds the centroid of a rectangle.
- *
- * @param points - An array of four points representing the vertices of the
- * rectangle.
- * @returns array of points representing the centroid of the rectangle.
- */
-function findCentroid(points: Point[]): Point {
-  if (points.length !== 4) {
-    throw new Error("Invalid input: expected an array of four points");
-  }
-
-  // Calculate the sum of the x and y coordinates of the points
-  let xSum = 0;
-  let ySum = 0;
-  for (const point of points) {
-    xSum += point.x;
-    ySum += point.y;
-  }
-
-  // Divide the sums by four to get the average x and y coordinates
-  const xAvg = xSum / 4;
-  const yAvg = ySum / 4;
-
-  return { x: xAvg, y: yAvg };
-}
-
-/**
- * Rotates a point, counterclockwise, around another point by an angle in
- * radians.
- *
- * @param point - Point to rotate
- * @param radians - angle in radians
- * @param center - Point to rotate around
- * @returns rotated point
- */
-function rotatePoint(point: Point, radians: number, center: Point): Point {
-  // Calculate the relative position of p to the center
-  const dx = point.x - center.x;
-  const dy = point.y - center.y;
-
-  // Apply the rotation matrix
-  // Note: To rotate counterclockwise, we need to negate the angle
-  const x = dx * Math.cos(-radians) - dy * Math.sin(-radians);
-  const y = dx * Math.sin(-radians) + dy * Math.cos(-radians);
-
-  // Return the new point with the center offset added back
-  return {
-    x: x + center.x,
-    y: y + center.y,
-  };
 }
 
 /**
@@ -380,7 +431,7 @@ function rotateRectangle(
   const rotated: Point[] = [];
   // Rotate each rectangle vertex
   for (const p of rect) {
-    rotated.push(rotatePoint(p, radians, center));
+    rotated.push(M2c2KitHelpers.rotatePoint(p, radians, center));
   }
   return rotated;
 }
