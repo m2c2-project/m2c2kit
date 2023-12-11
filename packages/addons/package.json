@@ -35,7 +35,7 @@
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",
-    "rollup": "4.7.0",
+    "rollup": "4.8.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.0",
