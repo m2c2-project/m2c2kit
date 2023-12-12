@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-symbol-search",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "description": "A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",

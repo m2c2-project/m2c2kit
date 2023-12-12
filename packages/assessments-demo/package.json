@@ -1,7 +1,7 @@
 {
   "name": "@m2c2kit/assessments-demo",
   "description": "A demo of several m2c2kit assessments",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
     "build": "npm run clean && rollup -c --configProd",

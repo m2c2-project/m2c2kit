@@ -53,11 +53,11 @@ export function m2New(options: m2NewOptions): Rule {
   },
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.3.11",
-    "@m2c2kit/core": "0.3.14"
+    "@m2c2kit/addons": "0.3.12",
+    "@m2c2kit/core": "0.3.15"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.10",
+    "@m2c2kit/build-helpers": "0.3.11",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-typescript": "11.1.5",
     "rimraf": "5.0.5",

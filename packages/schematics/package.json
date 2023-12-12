@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schematics",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Rules for the m2c2kit CLI to generate new apps",
   "main": "index.js",
   "keywords": [

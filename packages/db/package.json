@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/db",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "A local database for storing m2c2kit data on the device",
   "main": "dist/index.js",
   "module": "dist/index.js",
