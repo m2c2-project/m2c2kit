@@ -2407,36 +2407,27 @@ export class Game implements Activity {
     );
   }
 
-  /**
-   * Adjusts dragging behavior when the pointer leaves the canvas
-   *
-   * @remarks This is necessary because the pointerup event is not fired when
-   * the pointer leaves the canvas. On desktop, this means that the user might
-   * lift the pointer outside the canvas, but the entity will still be dragged
-   * when the pointer is moved back into the canvas.
-   *
-   * @param domPointerEvent
-   * @returns
-   */
   private htmlCanvasPointerLeaveHandler(domPointerEvent: PointerEvent): void {
     if (!this.currentScene) {
       return;
     }
-    this.currentScene.children.forEach((entity) => {
-      if (entity.dragging) {
-        const m2Event: EventBase = {
-          target: entity,
-          type: EventType.DragEnd,
-          handled: false,
-        };
 
-        entity.dragging = false;
-        entity.pressed = false;
-        entity.pressedAndWithinHitArea = false;
-        this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
-        return;
-      }
-    });
+    domPointerEvent.preventDefault();
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+    const m2Event: EventBase = {
+      target: scene,
+      type: EventType.PointerLeave,
+      handled: false,
+    };
+    this.processDomPointerLeave(scene, m2Event, domPointerEvent);
+    this.processDomPointerLeave(
+      this.freeEntitiesScene,
+      m2Event,
+      domPointerEvent,
+    );
   }
 
   /**
@@ -2608,7 +2599,6 @@ export class Game implements Activity {
       return;
     }
 
-    // note: offsetX and offsetY are relative to the HTML canvas element
     if (
       entity.isUserInteractionEnabled &&
       entity.pressed &&
@@ -2623,6 +2613,7 @@ export class Game implements Activity {
       this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
     }
     if (
+      entity.isUserInteractionEnabled &&
       this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
@@ -2633,16 +2624,16 @@ export class Game implements Activity {
       entity.withinHitArea = true;
     }
     if (
+      entity.isUserInteractionEnabled &&
+      entity.withinHitArea &&
       !this.IsCanvasPointWithinEntityBounds(
         entity,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      if (entity.withinHitArea) {
-        this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
-        entity.withinHitArea = false;
-      }
+      entity.withinHitArea = false;
+      this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
     }
 
     if (entity.children) {
@@ -2660,6 +2651,83 @@ export class Game implements Activity {
         )
         .forEach((entity) =>
           this.processDomPointerMove(entity, m2Event, domPointerEvent),
+        );
+    }
+  }
+
+  private processDomPointerLeave(
+    entity: Entity,
+    m2Event: EventBase,
+    domPointerEvent: PointerEvent,
+  ): void {
+    if (m2Event.handled) {
+      return;
+    }
+
+    /**
+     * Adjust dragging behavior when the pointer leaves the canvas.
+     * This is necessary because the pointerup event is not fired when the
+     * pointer leaves the canvas. On desktop, this means that the user might
+     * lift the pointer outside the canvas, but the entity will still be
+     * dragged when the pointer is moved back into the canvas.
+     */
+    if (entity.dragging) {
+      const m2Event: EventBase = {
+        target: entity,
+        type: EventType.DragEnd,
+        handled: false,
+      };
+
+      entity.dragging = false;
+      entity.pressed = false;
+      entity.pressedAndWithinHitArea = false;
+      this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
+      return;
+    }
+
+    // note: offsetX and offsetY are relative to the HTML canvas element
+    if (
+      entity.isUserInteractionEnabled &&
+      entity.pressed &&
+      entity.pressedAndWithinHitArea &&
+      !this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY,
+      )
+    ) {
+      entity.pressedAndWithinHitArea = false;
+      this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
+    }
+
+    if (
+      entity.isUserInteractionEnabled &&
+      entity.withinHitArea &&
+      !this.IsCanvasPointWithinEntityBounds(
+        entity,
+        domPointerEvent.offsetX,
+        domPointerEvent.offsetY,
+      )
+    ) {
+      entity.withinHitArea = false;
+      this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
+    }
+
+    if (entity.children) {
+      entity.children
+        // a hidden entity (and its children) can't receive taps,
+        // even if isUserInteractionEnabled is true
+        .filter((entity) => !entity.hidden)
+        // only drawables have z-position
+        .filter((entity) => entity.isDrawable)
+        // process taps on children by zPosition order
+        .sort(
+          (a, b) =>
+            (b as unknown as IDrawable).zPosition -
+            (a as unknown as IDrawable).zPosition,
+        )
+        .forEach((entity) =>
+          this.processDomPointerLeave(entity, m2Event, domPointerEvent),
         );
     }
   }

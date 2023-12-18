@@ -70,6 +70,8 @@ export interface StrokeInteraction {
   position: Point;
   /** Device ISO8601 Timestamp of the interaction. */
   iso8601Timestamp: string;
+  /** Was the interaction's position interpolated? (clipped to DrawPad boundary) because the user drew out of bounds? @remarks Only StrokeMove and StrokeEnd can be interpolated. A StrokeStart position can never begin out of bounds. */
+  interpolated: boolean;
 }
 
 export type DrawPadStroke = Array<StrokeInteraction>;
@@ -212,8 +214,8 @@ export class DrawPad extends Composite {
         this.handleTapUpAny();
       });
 
-      this.drawArea.onTapLeave(() => {
-        this.handleTapLeave();
+      this.drawArea.onTapLeave((e) => {
+        this.handleTapLeave(e);
       });
     }
     this.drawArea.fillColor = this.backgroundColor;
@@ -227,11 +229,10 @@ export class DrawPad extends Composite {
 
   private handleTapDown(e: TapEvent) {
     if (this.isUserInteractionEnabled) {
-      const drawShape = this.drawShape;
-      if (!drawShape) {
-        throw new Error("no draw shape");
+      if (!this.drawShape?.path) {
+        throw new Error("DrawPad.handleTapDown(): no drawShape.path");
       }
-      const path = drawShape.path as MutablePath;
+      const path = this.drawShape.path as MutablePath;
 
       if (this.continuousDrawingOnly && path.subpaths.length !== 0) {
         const prevPoint =
@@ -250,6 +251,7 @@ export class DrawPad extends Composite {
         }
       }
 
+      this.currentStrokesNotAllowed = false;
       this.isDrawingPointerDown = true;
       path.move(e.point);
       const drawPadEvent: DrawPadEvent = {
@@ -263,13 +265,49 @@ export class DrawPad extends Composite {
           type: DrawPadEventType.StrokeStart,
           position: e.point,
           iso8601Timestamp: new Date().toISOString(),
+          interpolated: false,
         },
       ]);
       this.raiseDrawPadEvent(drawPadEvent);
     }
   }
 
-  private handleTapLeave() {
+  private addInterpolatedStrokeMove(point: Point): Point {
+    const strokeCount = this.strokes.length;
+    const strokeInteractionCount = this.strokes[strokeCount - 1].length;
+    const previousPoint =
+      this.strokes[this.strokes.length - 1][strokeInteractionCount - 1]
+        .position;
+    const interpolatedPoint = this.interpolateToDrawPadBorder(
+      point,
+      previousPoint,
+      this.size,
+    );
+
+    if (!this.drawShape?.path) {
+      throw new Error("DrawPad.addInterpolatedStrokeMove(): no drawShape.path");
+    }
+    const path = this.drawShape.path as MutablePath;
+    path.addLine(interpolatedPoint);
+
+    const drawPadEvent: DrawPadEvent = {
+      type: DrawPadEventType.StrokeMove,
+      target: this,
+      handled: false,
+      position: interpolatedPoint,
+    };
+    this.strokes[strokeCount - 1].push({
+      type: DrawPadEventType.StrokeMove,
+      position: interpolatedPoint,
+      iso8601Timestamp: new Date().toISOString(),
+      interpolated: true,
+    });
+    this.raiseDrawPadEvent(drawPadEvent);
+
+    return interpolatedPoint;
+  }
+
+  private handleTapLeave(e: TapEvent) {
     if (this.currentStrokesNotAllowed) {
       this.isDrawingPointerDown = false;
       return;
@@ -278,6 +316,20 @@ export class DrawPad extends Composite {
       this.isDrawingPointerDown = false;
       const strokeCount = this.strokes.length;
       const strokeInteractionCount = this.strokes[strokeCount - 1].length;
+
+      let pointWasInterpolated = false;
+      let point = e.point;
+      /**
+       * If moving the pointer quickly when exiting the DrawPad area, we must
+       * interpolate a point on the border of the DrawPad and add a stroke.
+       * Otherwise, the stroke will end abruptly at the last point within the
+       * DrawPad.
+       */
+      if (!this.isPointWithinDrawPad(e.point, this.size)) {
+        point = this.addInterpolatedStrokeMove(e.point);
+        pointWasInterpolated = true;
+      }
+
       const drawPadEvent: DrawPadEvent = {
         type: DrawPadEventType.StrokeEnd,
         position:
@@ -287,11 +339,14 @@ export class DrawPad extends Composite {
       };
       this.strokes[strokeCount - 1].push({
         type: DrawPadEventType.StrokeEnd,
-        position:
-          this.strokes[strokeCount - 1][strokeInteractionCount - 1].position,
+        position: pointWasInterpolated
+          ? point
+          : this.strokes[strokeCount - 1][strokeInteractionCount - 1].position,
         iso8601Timestamp: new Date().toISOString(),
+        interpolated: pointWasInterpolated,
       });
       this.raiseDrawPadEvent(drawPadEvent);
+      this.currentStrokesNotAllowed = true;
     } else {
       this.pointerIsDownAndPointerLeftDrawAreaWhenDown = true;
     }
@@ -319,6 +374,7 @@ export class DrawPad extends Composite {
         position:
           this.strokes[strokeCount - 1][strokeInteractionCount - 1].position,
         iso8601Timestamp: new Date().toISOString(),
+        interpolated: false,
       });
       this.raiseDrawPadEvent(drawPadEvent);
     }
@@ -326,11 +382,10 @@ export class DrawPad extends Composite {
 
   private handlePointerMove(e: M2PointerEvent) {
     if (this.isUserInteractionEnabled && this.isDrawingPointerDown) {
-      const drawShape = this.drawShape;
-      if (!drawShape) {
-        throw new Error("no draw shape");
+      if (!this.drawShape?.path) {
+        throw new Error("DrawPad.handlePointerMove(): no drawShape.path");
       }
-      const path = drawShape.path as MutablePath;
+      const path = this.drawShape.path as MutablePath;
       if (
         this.isDrawingPointerDown &&
         !this.pointerIsDownAndPointerLeftDrawAreaWhenDown
@@ -352,6 +407,7 @@ export class DrawPad extends Composite {
         type: DrawPadEventType.StrokeMove,
         position: e.point,
         iso8601Timestamp: new Date().toISOString(),
+        interpolated: false,
       });
       this.raiseDrawPadEvent(drawPadEvent);
     }
@@ -389,11 +445,10 @@ export class DrawPad extends Composite {
    * Removes all strokes from the DrawPad.
    */
   clear(): void {
-    const drawShape = this.drawShape;
-    if (!drawShape) {
-      throw new Error("no draw shape");
+    if (!this.drawShape?.path) {
+      throw new Error("DrawPad.clear(): no drawShape.path");
     }
-    const path = drawShape.path as MutablePath;
+    const path = this.drawShape.path as MutablePath;
     path.clear();
     this.strokes = new Array<DrawPadStroke>();
   }
@@ -600,13 +655,9 @@ export class DrawPad extends Composite {
    * PNG format.
    */
   takeScreenshot() {
-    const surface = this.game.surface;
-    if (!surface) {
-      throw new Error("no surface");
-    }
     const drawArea = this.drawArea;
     if (!drawArea) {
-      throw new Error("no draw area");
+      throw new Error("DrawPad.takeScreenshot(): no drawArea");
     }
     const sx =
       (drawArea.absolutePosition.x - drawArea.size.width / 2) *
@@ -631,14 +682,131 @@ export class DrawPad extends Composite {
       pixelData.length / sh,
     );
     if (!croppedImage) {
-      throw new Error("no cropped image");
+      throw new Error("DrawPad.takeScreenshot(): no croppedImage");
     }
     const bytes = croppedImage.encodeToBytes();
     if (!bytes) {
-      throw new Error("no bytes");
+      throw new Error(
+        "DrawPad.takeScreenshot(): croppedImage.encodeToBytes() failed",
+      );
     }
     croppedImage.delete();
     return this.arrayBufferToBase64String(bytes);
+  }
+
+  /**
+   * Determines whether a point is within the DrawPad.
+   *
+   * @param point - The point to check
+   * @returns True - if the point is within the DrawPad, false otherwise
+   */
+  private isPointWithinDrawPad(point: Point, drawPadSize: Size): boolean {
+    return (
+      point.x >= 0 &&
+      point.x <= drawPadSize.width &&
+      point.y >= 0 &&
+      point.y <= drawPadSize.height
+    );
+  }
+
+  /**
+   * Interpolates a point to the border of the DrawPad based on a line that
+   * crosses the DrawPad border. The line is formed by the current "out of
+   * bounds" point the and previous "within bounds" point.
+   *
+   * @param currentPoint - The current point
+   * @param previousPoint - The previous point
+   * @param drawPadSize - The size of the DrawPad
+   * @returns A new point on the border of the DrawPad
+   */
+  private interpolateToDrawPadBorder(
+    currentPoint: Point,
+    previousPoint: Point,
+    drawPadSize: Size,
+  ): Point {
+    /** Calculate the slope and intercept of the line passing through the
+     * current and previous points Use the formula y = mx + b, where m
+     * is the slope and b is the intercept.
+     */
+    const slope =
+      (currentPoint.y - previousPoint.y) / (currentPoint.x - previousPoint.x);
+    const intercept = currentPoint.y - slope * currentPoint.x;
+
+    // Initialize the new point to be returned
+    const newPoint: Point = { x: 0, y: 0 };
+
+    // Check if vertical line (slope is undefined)
+    if (!Number.isFinite(slope)) {
+      // Use the current x value as the intersection point
+      newPoint.x = currentPoint.x;
+      // Check if the line segment is going from top to bottom
+      if (currentPoint.y - previousPoint.y > 0) {
+        // Set the new point to be the intersection point on the bottom border
+        newPoint.y = drawPadSize.height;
+        return newPoint;
+      }
+      // Check if the line segment is going from bottom to top
+      if (currentPoint.y - previousPoint.y < 0) {
+        // Set the new point to be the intersection point on the top border
+        newPoint.y = 0;
+        return newPoint;
+      }
+    }
+
+    /**
+     * Check if the line intersects the left or right border of DrawPad.
+     * Use formula y = mx + b and substitute x = 0 or x = drawPadSize.width
+     */
+    const yLeft = slope * 0 + intercept;
+    const yRight = slope * drawPadSize.width + intercept;
+    // Check if the intersection point is within the DrawPad height
+    if (yLeft >= 0 && yLeft <= drawPadSize.height) {
+      // Check if the line segment is going from right to left
+      if (currentPoint.x - previousPoint.x < 0) {
+        // Set the new point to be the intersection point on the left border
+        newPoint.x = 0;
+        newPoint.y = yLeft;
+        return newPoint;
+      }
+    }
+    if (yRight >= 0 && yRight <= drawPadSize.height) {
+      // Check if the line segment is going from left to right
+      if (currentPoint.x - previousPoint.x > 0) {
+        // Set the new point to be the intersection point on the right border
+        newPoint.x = drawPadSize.width;
+        newPoint.y = yRight;
+        return newPoint;
+      }
+    }
+
+    /**
+     * Check if the line intersects the top or bottom border of DrawPad.
+     * Use formula x = (y - b) / m and substitute y = 0 or y = drawPadSize.height
+     */
+    const xTop = (0 - intercept) / slope;
+    const xBottom = (drawPadSize.height - intercept) / slope;
+    // Check if the intersection point is within the DrawPad width
+    if (xTop >= 0 && xTop <= drawPadSize.width) {
+      // Check if the line segment is going from bottom to top
+      if (currentPoint.y - previousPoint.y < 0) {
+        // Set the new point to be the intersection point on the top border
+        newPoint.x = xTop;
+        newPoint.y = 0;
+        return newPoint;
+      }
+    }
+    if (xBottom >= 0 && xBottom <= drawPadSize.width) {
+      // Check if the line segment is going from top to bottom
+      if (currentPoint.y - previousPoint.y > 0) {
+        // Set the new point to be the intersection point on the bottom border
+        newPoint.x = xBottom;
+        newPoint.y = drawPadSize.height;
+        return newPoint;
+      }
+    }
+
+    // If none of the above cases apply, return the current point as fallback
+    return currentPoint;
   }
 
   private arrayBufferToBase64String(buffer: ArrayBuffer): string {
@@ -691,6 +859,6 @@ export class DrawPad extends Composite {
   }
 
   override duplicate(newName?: string): DrawPad {
-    throw new Error("Method not implemented.");
+    throw new Error("DrawPad.duplicate(): Method not implemented.");
   }
 }
