@@ -17,7 +17,7 @@
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
     "rimraf": "5.0.5",
-    "rollup": "4.8.0",
+    "rollup": "4.9.1",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.0",
