@@ -1,12 +1,4 @@
-import {
-  Engine,
-  Resolver,
-  Events,
-  World,
-  Bodies,
-  Composite,
-  Composites,
-} from "matter-js";
+import { Engine } from "matter-js";
 import Matter from "matter-js";
 import { Game, Entity } from "@m2c2kit/core";
 import { Vector } from "./Vector";
@@ -20,114 +12,118 @@ interface PhysicsBodiesDictionary {
  * Physics functionality, based on the Matter.js engine.
  */
 export class Physics {
-  static engine: Engine;
-  static bodiesDictionary: PhysicsBodiesDictionary = {};
-  static options: PhysicsOptions = {};
+  engine: Engine;
+  bodiesDictionary: PhysicsBodiesDictionary = {};
+  options: PhysicsOptions = {};
 
-  private static _gravity: Vector = { dx: 0, dy: 1 };
-  private static framesSimulatedCount = 0;
-  private static cumulativeFrameSimulationTime = 0;
+  private _gravity: Vector = { dx: 0, dy: 1 };
+  private framesSimulatedCount = 0;
+  private cumulativeFrameSimulationTime = 0;
 
   /**
-   * Initializes the physics engine.
+   * Creates an instance of the physics engine.
    *
    * @remarks This must be called early in the game's initialize() method.
+   * @param game - the game instance
+   * @param options - {@link PhysicsOptions}
    * @example
    * async initialize() {
    *   await super.initialize();
    *   const game = this;
-   *   Physics.initialize(game);
+   *   const physics = new Physics(game, { showsPhysics: true });
    *   ...
    * }
-   * @param game - the game instance
-   * @param options - {@link PhysicsOptions}
    */
-  static initialize(game: Game, options?: PhysicsOptions) {
+  constructor(game: Game, options?: PhysicsOptions) {
     console.log("⚪ @m2c2kit/physics version __PACKAGE_JSON_VERSION__");
     this.engine = Engine.create();
     this.options = options || {};
     if (this.options.gravity) {
-      Physics.gravity = this.options.gravity;
+      this.gravity = this.options.gravity;
     }
-    Physics.addEngineUpdateCallback(game);
+    this.addEngineUpdateCallback(game);
   }
 
   /**
-   * Vector that specifies the gravity to apply to all physics bodies. Default is { dx: 0, dy: 1 }
+   * Vector that specifies the gravity to apply to all physics bodies.
+   * Default is { dx: 0, dy: 1 }
    */
-  static get gravity(): Vector {
+  get gravity(): Vector {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const physics = this;
     /**
      * We return getters and setter because we need to inform the engine of
      * change even when only one of the dx or dy values is changed.
      */
     return {
       get dx(): number {
-        return Physics._gravity.dx;
+        return physics._gravity.dx;
       },
       set dx(dx: number) {
-        Physics.gravity = { dx, dy: Physics.gravity.dy };
+        physics.gravity = { dx, dy: physics.gravity.dy };
       },
       get dy(): number {
-        return Physics._gravity.dy;
+        return physics._gravity.dy;
       },
       set dy(dy: number) {
-        Physics.gravity = { dx: Physics.gravity.dx, dy };
+        physics.gravity = { dx: physics.gravity.dx, dy };
       },
     };
   }
 
-  static set gravity(gravity: Vector) {
-    Physics._gravity = gravity;
-    Physics.engine.gravity.x = gravity.dx;
-    Physics.engine.gravity.y = gravity.dy;
+  set gravity(gravity: Vector) {
+    this._gravity = gravity;
+    this.engine.gravity.x = gravity.dx;
+    this.engine.gravity.y = gravity.dy;
   }
 
-  private static addEngineUpdateCallback(game: Game) {
+  private addEngineUpdateCallback(game: Game) {
     game.onFrameDidSimulatePhysics((ev) => {
       const entities = game.entities;
-      Physics.initializePhysicsBodies(entities);
+      this.initializePhysicsBodies(entities);
 
       const engineUpdateStart = performance.now();
-      Engine.update(Physics.engine, ev.deltaTime);
-      Physics.cumulativeFrameSimulationTime =
-        Physics.cumulativeFrameSimulationTime +
+      Engine.update(this.engine, ev.deltaTime);
+      this.cumulativeFrameSimulationTime =
+        this.cumulativeFrameSimulationTime +
         (performance.now() - engineUpdateStart);
-      Physics.framesSimulatedCount++;
-      Physics.logAverageFrameUpdateDuration();
-      Physics.updateEntityPositionsFromPhysicsBodies(entities);
+      this.framesSimulatedCount++;
+      this.logAverageFrameUpdateDuration();
+      this.updateEntitiesFromPhysicsBodies(entities);
     });
   }
 
-  private static updateEntityPositionsFromPhysicsBodies(entities: Entity[]) {
+  private updateEntitiesFromPhysicsBodies(entities: Entity[]) {
     entities.forEach((entity) => {
       if (this.bodiesDictionary[entity.uuid]) {
         entity.position.x = this.bodiesDictionary[entity.uuid].position.x;
         entity.position.y = this.bodiesDictionary[entity.uuid].position.y;
+        entity.zRotation = this.bodiesDictionary[entity.uuid].angle;
       }
     });
   }
 
-  private static initializePhysicsBodies(entities: Entity[]) {
+  private initializePhysicsBodies(entities: Entity[]) {
     entities.forEach((entity) => {
       if (
         entity.physicsBody !== undefined &&
         entity.physicsBody.needsInitialization
       ) {
-        entity.physicsBody.initialize();
+        entity.physicsBody.initialize(this);
       }
     });
   }
 
-  private static logAverageFrameUpdateDuration() {
-    if (Physics.framesSimulatedCount % 60 === 0) {
-      if (Physics.options.logEngineStats) {
+  private logAverageFrameUpdateDuration() {
+    if (this.framesSimulatedCount % 60 === 0) {
+      if (this.options.logEngineStats) {
         console.log(
           `average frame Engine.update() time over last 60 frames: ${(
-            Physics.cumulativeFrameSimulationTime / 60
-          ).toFixed(2)} milliseconds.`
+            this.cumulativeFrameSimulationTime / 60
+          ).toFixed(2)} milliseconds.`,
         );
       }
-      Physics.cumulativeFrameSimulationTime = 0;
+      this.cumulativeFrameSimulationTime = 0;
     }
   }
 }

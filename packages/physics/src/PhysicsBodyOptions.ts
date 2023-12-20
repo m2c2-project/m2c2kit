@@ -56,4 +56,10 @@ export interface PhysicsBodyOptions {
    * Friction due to air forces on the body, in the range [0, 1].
    */
   damping?: number;
+  /**
+   * Whether or not the body can rotate. Defaults to true.
+   *
+   * @remarks If true, this sets the Matter.js `inertia` property to `Infinity`.
+   */
+  allowsRotation?: boolean;
 }

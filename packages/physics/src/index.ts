@@ -22,7 +22,6 @@ Object.defineProperty(Entity.prototype, "physicsBody", {
   set(this: Entity, physicsBody: PhysicsBody) {
     this._physicsBody = physicsBody;
     this._physicsBody.entity = this;
-    this._physicsBody.initialize();
   },
   get(this: Entity) {
     return this._physicsBody;
