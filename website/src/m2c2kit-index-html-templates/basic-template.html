@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -62,12 +62,12 @@
         if (args[0].startsWith("./assets/")) {
           args[0] = args[0].replace(
             "./assets/",
-            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/"
+            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/",
           );
         } else if (args[0].startsWith("assets/")) {
           args[0] = args[0].replace(
             "assets/",
-            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/"
+            "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/assets/",
           );
         }
         return await origFetch(...args);
@@ -127,6 +127,10 @@
         VirtualKeyboard,
         DrawPad,
       } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.addons.esm.js";
+      import {
+        Physics,
+        PhysicsBody,
+      } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.physics.esm.js";
 
       class DocsDemo extends Game {
         constructor() {

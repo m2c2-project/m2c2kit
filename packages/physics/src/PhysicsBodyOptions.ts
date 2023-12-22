@@ -15,7 +15,7 @@ export interface PhysicsBodyOptions {
    */
   edgeLoop?: Size & {
     /**
-     * The thickness of the edge loop. Defaults to 10.
+     * The thickness of the edge loop. Defaults to 50.
      *
      * @remarks If body A is moving rapidly and/or is small, and body B is
      * also small, collisions between the two bodies may not be detected.
@@ -62,4 +62,27 @@ export interface PhysicsBodyOptions {
    * @remarks If true, this sets the Matter.js `inertia` property to `Infinity`.
    */
   allowsRotation?: boolean;
+  /**
+   * The mass of the body.
+   *
+   * @remarks Density will automatically be calculated when mass is set.
+   */
+  mass?: number;
+  /**
+   * Body density (mass per unit area)
+   *
+   * @remarks Mass will automatically be calculated when density is set.
+   */
+  density?: number;
+  /**
+   * Body speed.
+   *
+   * @remarks If speed is set, the direction will be maintained when velocity
+   * is updated.
+   */
+  speed?: number;
+  /**
+   * Body angular velocity.
+   */
+  angularVelocity?: number;
 }

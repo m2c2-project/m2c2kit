@@ -32,7 +32,7 @@ export class Button extends Composite implements IText {
   size = { width: 200, height: 50 };
   cornerRadius = 9;
   fontSize = 20;
-  text = "";
+  private _text = "";
   private _fontColor = WebColors.White;
 
   private backgroundPaint?: Paint;
@@ -57,10 +57,10 @@ export class Button extends Composite implements IText {
     if (options.size) {
       this.size = options.size;
     }
-    if (options.cornerRadius) {
+    if (options.cornerRadius !== undefined) {
       this.cornerRadius = options.cornerRadius;
     }
-    if (options.fontSize) {
+    if (options.fontSize !== undefined) {
       this.fontSize = options.fontSize;
     }
     if (options.fontColor) {
@@ -80,8 +80,8 @@ export class Button extends Composite implements IText {
         this.backgroundColor[0],
         this.backgroundColor[1],
         this.backgroundColor[2],
-        this.backgroundColor[3]
-      )
+        this.backgroundColor[3],
+      ),
     );
     this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
 
@@ -104,6 +104,15 @@ export class Button extends Composite implements IText {
 
   override dispose(): void {
     CanvasKitHelpers.Dispose([this.backgroundPaint]);
+  }
+
+  get text(): string {
+    return this._text;
+  }
+
+  set text(text: string) {
+    this._text = text;
+    this.needsInitialization = true;
   }
 
   get backgroundColor(): RgbaColor {

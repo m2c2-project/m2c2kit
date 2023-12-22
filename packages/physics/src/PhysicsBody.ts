@@ -1,4 +1,4 @@
-import { Entity, Shape, WebColors } from "@m2c2kit/core";
+import { Entity, Point, Shape, WebColors } from "@m2c2kit/core";
 import Matter from "matter-js";
 import { Physics } from "./Physics";
 import { Vector } from "./Vector";
@@ -17,7 +17,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
   options: PhysicsBodyOptions;
   needsInitialization = true;
   private _isDynamic = true;
-  private readonly EDGE_LOOP_DEFAULT_THICKNESS = 10;
+  private readonly EDGE_LOOP_DEFAULT_THICKNESS = 50;
   private _physics?: Physics;
   private _allowsRotation = true;
   private previousInertia = NaN;
@@ -75,11 +75,54 @@ export class PhysicsBody implements PhysicsBodyOptions {
       this.allowsRotation = this.options.allowsRotation;
     }
 
+    if (this.options.mass !== undefined) {
+      this.mass = this.options.mass;
+    }
+
+    if (this.options.density !== undefined) {
+      this.density = this.options.density;
+    }
+
+    if (this.options.speed !== undefined) {
+      this.speed = this.options.speed;
+    }
+
+    if (this.options.angularVelocity !== undefined) {
+      this.angularVelocity = this.options.angularVelocity;
+    }
+
     this.body.frictionStatic = 1;
 
     Matter.World.add(this.physics.engine.world, this.body);
     this.physics.bodiesDictionary[this.entity.uuid] = this.body;
     this.needsInitialization = false;
+  }
+
+  /**
+   * Applies a force to the body in a single time step.
+   *
+   * @remarks if `at` is not specified, the force is applied at the body's current `position`.
+   *
+   * @param impulse - force to apply as a vector.
+   * @param at - the point at which to apply the impulse, relative to the body's position in scene coordinates.
+   */
+  applyImpulse(impulse: Vector, at?: Point) {
+    let atPosition = at;
+    if (!atPosition) {
+      atPosition = this.entity.position;
+    }
+    /**
+     * Matter.js docs note that "If all or part of the force duration is
+     * some fraction of a timestep, first multiply the force by
+     * duration / timestep." Thus, we adjust the force by how many frames
+     * per second we're running at.
+     */
+    const fps = 1000 / Globals.deltaTime;
+    Matter.Body.applyForce(
+      this.body,
+      Matter.Vector.create(atPosition.x, atPosition.y),
+      Matter.Vector.create(impulse.dx / fps, impulse.dy / fps),
+    );
   }
 
   private createCircleBody(options: PhysicsBodyOptions) {
@@ -240,17 +283,23 @@ export class PhysicsBody implements PhysicsBodyOptions {
       options.edgeLoop.width + thickness * 2,
       thickness,
     );
+    /**
+     * Parts C and D are the left and right parts of the edge loop. We add
+     * 2 * thickness to these bodies' heights to ensure that parts C and D
+     * overlap with parts A and B. Otherwise, there were problems with
+     * bodies tunneling out of the edge loop at the "seams" of the parts.
+     */
     const partC = Matter.Bodies.rectangle(
       this.entity.position.x - options.edgeLoop.width / 2 - thickness / 2,
       this.entity.position.y,
       thickness,
-      options.edgeLoop.height,
+      options.edgeLoop.height + 2 * thickness,
     );
     const partD = Matter.Bodies.rectangle(
       this.entity.position.x + options.edgeLoop.width / 2 + thickness / 2,
       this.entity.position.y,
       thickness,
-      options.edgeLoop.height,
+      options.edgeLoop.height + 2 * thickness,
     );
     const body = Matter.Body.create({
       parts: [partA, partB, partC, partD],
@@ -270,19 +319,19 @@ export class PhysicsBody implements PhysicsBodyOptions {
     this._physics = physics;
   }
 
-  private get body() {
+  get body() {
     if (!this._body) {
       throw new Error("PhysicsBody.entity is undefined");
     }
     return this._body;
   }
 
-  private set body(body: Matter.Body) {
+  set body(body: Matter.Body) {
     this._body = body;
   }
 
   get velocity(): Vector {
-    const matterVector = Matter.Body.getVelocity(this.body) as Matter.Vector;
+    const matterVector = Matter.Body.getVelocity(this.body);
     return { dx: matterVector.x, dy: matterVector.y };
   }
 
@@ -369,5 +418,46 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   get allowsRotation() {
     return this._allowsRotation;
+  }
+
+  set mass(mass: number) {
+    Matter.Body.setMass(this.body, mass);
+  }
+
+  get mass() {
+    return this.body.mass;
+  }
+
+  get density() {
+    return this.body.density;
+  }
+
+  set density(density: number) {
+    Matter.Body.setDensity(this.body, density);
+  }
+
+  /**
+   * The area of the body's convex hull.
+   *
+   * @remarks This is a read-only property.
+   */
+  get area() {
+    return this.body.area;
+  }
+
+  get speed() {
+    return this.body.density;
+  }
+
+  set speed(speed: number) {
+    Matter.Body.setSpeed(this.body, speed);
+  }
+
+  get angularVelocity() {
+    return this.body.angularVelocity;
+  }
+
+  set angularVelocity(angularVelocity: number) {
+    Matter.Body.setAngularVelocity(this.body, angularVelocity);
   }
 }

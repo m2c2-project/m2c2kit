@@ -72,10 +72,10 @@ export abstract class Entity implements EntityOptions {
   isText = false;
   // Entity Options
   name: string;
-  position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
-  scale = 1.0;
+  _position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
+  _scale = 1.0;
   alpha = 1.0;
-  zRotation = 0;
+  _zRotation = 0;
   isUserInteractionEnabled = false;
   draggable = false;
   hidden = false;
@@ -1207,6 +1207,45 @@ export abstract class Entity implements EntityOptions {
       return this.parent.parentSceneAsEntity;
     }
     throw new Error(`Entity ${this} has not been added to a scene`);
+  }
+
+  get position(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const entity = this;
+    return {
+      get x(): number {
+        return entity._position.x;
+      },
+      set x(x: number) {
+        entity._position.x = x;
+      },
+      get y(): number {
+        return entity._position.y;
+      },
+      set y(y: number) {
+        entity._position.y = y;
+      },
+    };
+  }
+
+  set position(position: Point) {
+    this._position = position;
+  }
+
+  get zRotation(): number {
+    return this._zRotation;
+  }
+
+  set zRotation(zRotation: number) {
+    this._zRotation = zRotation;
+  }
+
+  get scale(): number {
+    return this._scale;
+  }
+
+  set scale(scale: number) {
+    this._scale = scale;
   }
 
   // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95

@@ -159,6 +159,20 @@ const config: Config = {
       },
     ],
     [
+      "docusaurus-plugin-typedoc",
+      {
+        id: "api-physics",
+        entryPoints: ["../packages/physics/src/index.ts"],
+        tsconfig: "../packages/physics/tsconfig.json",
+        out: "reference/api-physics",
+        sidebar: {
+          categoryLabel: "@m2c2kit/physics",
+          position: 2,
+          fullNames: true,
+        },
+      },
+    ],
+    [
       "./src/plugins/plugin-m2c2kit-modify-base-url.js",
       {
         baseUrl: baseUrl,
