@@ -1,6 +1,7 @@
 import { Activity } from "./Activity";
 import { Entity } from "./Entity";
 import { Session } from "./Session";
+import { Plugin } from "./Plugin";
 
 /**
  * Base interface for all m2c2kit events.
@@ -12,7 +13,7 @@ export interface EventBase {
   /** Type of event. */
   type: EventType | string;
   /** The object on which the event occurred. */
-  target: Entity | Session | Activity;
+  target: Entity | Session | Activity | Plugin;
   /** Has the event been taken care of by the listener and not be dispatched to other targets? */
   handled?: boolean;
 }

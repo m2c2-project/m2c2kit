@@ -7,7 +7,11 @@ import { PhysicsBodyOptions } from "./PhysicsBodyOptions";
 /**
  * A rigid body model added to an entity to enable physics simulation.
  *
- * @remarks This is a wrapper around the Matter.js `Body` class.
+ * @remarks Set to `undefined` to remove the physics body from the entity
+ * and the physics engine world. Note that this will not remove the entity
+ * from the scene. If the entity is visible, setting the physics body to
+ * `undefined` will "freeze" the entity at its current position and
+ * rotation.
  *
  * @param options - {@link PhysicsBodyOptions}
  */
@@ -91,10 +95,17 @@ export class PhysicsBody implements PhysicsBodyOptions {
       this.angularVelocity = this.options.angularVelocity;
     }
 
-    this.body.frictionStatic = 1;
+    if (this.options.categoryBitMask !== undefined) {
+      this.categoryBitMask = this.options.categoryBitMask;
+    }
 
-    Matter.World.add(this.physics.engine.world, this.body);
+    if (this.options.collisionBitMask !== undefined) {
+      this.collisionBitMask = this.options.collisionBitMask;
+    }
+
+    Matter.Composite.add(this.physics.engine.world, this.body);
     this.physics.bodiesDictionary[this.entity.uuid] = this.body;
+    this.body.label = this.entity.uuid;
     this.needsInitialization = false;
   }
 
@@ -103,10 +114,10 @@ export class PhysicsBody implements PhysicsBodyOptions {
    *
    * @remarks if `at` is not specified, the force is applied at the body's current `position`.
    *
-   * @param impulse - force to apply as a vector.
-   * @param at - the point at which to apply the impulse, relative to the body's position in scene coordinates.
+   * @param force - force to apply as a vector.
+   * @param at - the point at which to apply the force, relative to the body's position in scene coordinates.
    */
-  applyImpulse(impulse: Vector, at?: Point) {
+  applyForce(force: Vector, at?: Point) {
     let atPosition = at;
     if (!atPosition) {
       atPosition = this.entity.position;
@@ -121,7 +132,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
     Matter.Body.applyForce(
       this.body,
       Matter.Vector.create(atPosition.x, atPosition.y),
-      Matter.Vector.create(impulse.dx / fps, impulse.dy / fps),
+      Matter.Vector.create(force.dx / fps, force.dy / fps),
     );
   }
 
@@ -140,7 +151,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline for ${this.entity.name}`,
       });
       this.entity.addChild(circleOutline);
       circleOutline.initialize();
@@ -169,7 +180,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline for ${this.entity.name}`,
       });
       this.entity.addChild(rectOutline);
       rectOutline.initialize();
@@ -208,7 +219,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline (Edge Loop A) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop A) for ${this.entity.name}`,
       });
       this.entity.addChild(rectOutlineA);
       rectOutlineA.initialize();
@@ -227,7 +238,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline (Edge Loop B) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop B) for ${this.entity.name}`,
       });
       this.entity.addChild(rectOutlineB);
       rectOutlineB.initialize();
@@ -246,7 +257,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline (Edge Loop C) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop C) for ${this.entity.name}`,
       });
       this.entity.addChild(rectOutlineC);
       rectOutlineC.initialize();
@@ -265,23 +276,32 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `PhysicsBodyOutline (Edge Loop D) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop D) for ${this.entity.name}`,
       });
       this.entity.addChild(rectOutlineD);
       rectOutlineD.initialize();
     }
 
+    /**
+     * Assign the entity UUID as the label for each part of the edge loop.
+     * This is because when there is a collision, Matter.js reports the
+     * collision with the part, not the composite body we later create
+     * from these parts. Parts A and B are top and bottom; parts C and D
+     * are left and right.
+     */
     const partA = Matter.Bodies.rectangle(
       this.entity.position.x,
       this.entity.position.y - options.edgeLoop.height / 2 - thickness / 2,
       options.edgeLoop.width + thickness * 2,
       thickness,
+      { label: this.entity.uuid },
     );
     const partB = Matter.Bodies.rectangle(
       this.entity.position.x,
       this.entity.position.y + options.edgeLoop.height / 2 + thickness / 2,
       options.edgeLoop.width + thickness * 2,
       thickness,
+      { label: this.entity.uuid },
     );
     /**
      * Parts C and D are the left and right parts of the edge loop. We add
@@ -294,12 +314,14 @@ export class PhysicsBody implements PhysicsBodyOptions {
       this.entity.position.y,
       thickness,
       options.edgeLoop.height + 2 * thickness,
+      { label: this.entity.uuid },
     );
     const partD = Matter.Bodies.rectangle(
       this.entity.position.x + options.edgeLoop.width / 2 + thickness / 2,
       this.entity.position.y,
       thickness,
       options.edgeLoop.height + 2 * thickness,
+      { label: this.entity.uuid },
     );
     const body = Matter.Body.create({
       parts: [partA, partB, partC, partD],
@@ -459,5 +481,29 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   set angularVelocity(angularVelocity: number) {
     Matter.Body.setAngularVelocity(this.body, angularVelocity);
+  }
+
+  get categoryBitMask() {
+    if (this.body.collisionFilter.category === undefined) {
+      // default is 1, so this should never happen
+      throw new Error("PhysicsBody.categoryBitMask is undefined");
+    }
+    return this.body.collisionFilter.category;
+  }
+
+  set categoryBitMask(categoryBitMask: number) {
+    this.body.collisionFilter.category = categoryBitMask;
+  }
+
+  get collisionBitMask() {
+    if (this.body.collisionFilter.mask === undefined) {
+      // default is 0xFFFFFFFF, so this should never happen
+      throw new Error("PhysicsBody.collisionBitMask is undefined");
+    }
+    return this.body.collisionFilter.mask;
+  }
+
+  set collisionBitMask(collisionBitMask: number) {
+    this.body.collisionFilter.mask = collisionBitMask;
   }
 }

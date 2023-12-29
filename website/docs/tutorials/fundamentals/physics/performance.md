@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 9
 hide_table_of_contents: true
 ---
 
@@ -13,14 +13,23 @@ To monitor the impact of the physics engine on performance, pass the option `log
 
 When the assessment is running at 60 frames per second, there are 1000 / 60 or about 16 milliseconds maximum available for computation. Usually the physics engine takes only a fraction of a millisecond to update each frame.
 
-The example drops 50 balls, which is probably more physics bodies than you would ever need in a real assessment. Try increasing `NUMBER_OF_BALLS` until it starts to affect performance -- or crashes your web browser!
+After you press "GO", the example drops 50 balls. Click on a ball to apply an upward force to it. 50 is probably more physics bodies than you would ever need in a real assessment, but try increasing `NUMBER_OF_BALLS` until it starts to affect performance -- or crashes your web browser!
+
+:::warning
+
+Usually, a developer's desktop computer can handle many more physics bodies than a mobile device. Always test your assessment on the lowest-powered mobile device you expect your users to have to make sure it performs well.
+
+:::
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
 export const code = `const NUMBER_OF_BALLS = 50;
-const physics = new Physics({ game: game, logEngineStats: true });
+const physics = new Physics({ logEngineStats: true });
+await game.registerPlugin(physics);
  
-const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
+const sceneOne = new Scene({
+    backgroundColor: WebColors.WhiteSmoke
+});
 game.addScene(sceneOne);
  
 const edge = new Shape({
@@ -43,50 +52,56 @@ for (let i = 0; i < NUMBER_OF_BALLS; i++) {
         circleOfRadius: 5,
         fillColor: WebColors.Red,
         strokeColor: WebColors.Black,
-        lineWidth: 1,
+        lineWidth: .5,
         position: {
             x: RandomDraws.SingleFromRange(10, 190),
             y: RandomDraws.SingleFromRange(10, 100)
-        }
+        },
+        isUserInteractionEnabled: true
     });
     ball.physicsBody = new PhysicsBody({
-        circleOfRadius: 5,
-        restitution: .975,
+        circleOfRadius: ball.circleOfRadius,
+        restitution: .2,
         resting: true
+    });
+    ball.onTapDown(() => {
+        ball.physicsBody.applyForce({
+            dx: (Math.random() - .5) / 4, dy: -.125
+        });
     });
     sceneOne.addChild(ball);
     balls.push(ball);
 }
  
-const button = new Button( {
+const button = new Button({
     text: "Go",
-    position: { x: 100, y: 200},
+    position: { x: 100, y: 200 },
     backgroundColor: WebColors.Green,
-    size: { width: 70, height: 30},
+    size: { width: 70, height: 30 },
     isUserInteractionEnabled: true,
 });
 sceneOne.addChild(button);
 button.physicsBody = new PhysicsBody({
-    rect: { width: 70, height: 30},
+    rect: { width: 70, height: 30 },
     restitution: 0,
     resting: true
 });
-button.onTapDown( () => {
-  if (button.text === "Go") {    
-    button.text = "Reset";
-    for (let i = 0; i < NUMBER_OF_BALLS; i++) {
-        balls[i].physicsBody.resting = false;
-    }    
-  } else {
-    button.text = "Go";
-    for (let i = 0; i < NUMBER_OF_BALLS; i++) {
-        balls[i].physicsBody.resting = true;
-        balls[i].position = {
-            x: RandomDraws.SingleFromRange(10, 190),
-            y: RandomDraws.SingleFromRange(10, 100)
+button.onTapDown(() => {
+    if (button.text === "Go") {
+        button.text = "Reset";
+        for (let i = 0; i < NUMBER_OF_BALLS; i++) {
+            balls[i].physicsBody.resting = false;
         }
-    }    
-  }
+    } else {
+        button.text = "Go";
+        for (let i = 0; i < NUMBER_OF_BALLS; i++) {
+            balls[i].physicsBody.resting = true;
+            balls[i].position = {
+                x: RandomDraws.SingleFromRange(10, 190),
+                y: RandomDraws.SingleFromRange(10, 100)
+            }
+        }
+    }
 });
 `
 

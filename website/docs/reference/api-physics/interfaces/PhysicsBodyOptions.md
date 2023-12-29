@@ -24,7 +24,7 @@ If true, this sets the Matter.js `inertia` property to `Infinity`.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:64](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L64)
+[physics/src/PhysicsBodyOptions.ts:64](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L64)
 
 ___
 
@@ -36,7 +36,28 @@ Body angular velocity.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:87](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L87)
+[physics/src/PhysicsBodyOptions.ts:87](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L87)
+
+___
+
+### categoryBitMask
+
+• `Optional` **categoryBitMask**: `number`
+
+A 32-bit mask specifying which categories this physics body belongs to.
+
+**`Remarks`**
+
+There are up to 32 different categories that physics bodies can
+belong to. Each category is represented by a bit in the mask. For example,
+if a body belongs to categories 1 and 3, its category bit mask is
+0b00000000000000000000000000000101. Along with the `collisionBitMask`,
+this property determines which other bodies this physics body can
+collide with. Default category for all physics bodies is 1.
+
+#### Defined in
+
+[physics/src/PhysicsBodyOptions.ts:98](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L98)
 
 ___
 
@@ -48,7 +69,25 @@ A circular physics body of the given radius centered on the entity.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:8](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L8)
+[physics/src/PhysicsBodyOptions.ts:8](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L8)
+
+___
+
+### collisionBitMask
+
+• `Optional` **collisionBitMask**: `number`
+
+A 32-bit mask specifying which categories this physics body can collide with.
+
+**`Remarks`**
+
+This value is a bit mask of the other physics body categories
+that this body can collide with. Default is 0xFFFFFFFF, which means this
+body can collide with all other categories (e.g., all physics bodies).
+
+#### Defined in
+
+[physics/src/PhysicsBodyOptions.ts:106](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L106)
 
 ___
 
@@ -60,7 +99,7 @@ Friction due to air forces on the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:58](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L58)
+[physics/src/PhysicsBodyOptions.ts:58](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L58)
 
 ___
 
@@ -76,7 +115,7 @@ Mass will automatically be calculated when density is set.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:76](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L76)
+[physics/src/PhysicsBodyOptions.ts:76](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L76)
 
 ___
 
@@ -88,7 +127,7 @@ A region that physics bodies cannot penetrate.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:16](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L16)
+[physics/src/PhysicsBodyOptions.ts:16](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L16)
 
 ___
 
@@ -100,7 +139,7 @@ Friction of the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:54](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L54)
+[physics/src/PhysicsBodyOptions.ts:54](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L54)
 
 ___
 
@@ -116,7 +155,7 @@ Once set, this property cannot be changed. This is negated and mapped to the Mat
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:34](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L34)
+[physics/src/PhysicsBodyOptions.ts:34](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L34)
 
 ___
 
@@ -132,7 +171,7 @@ Density will automatically be calculated when mass is set.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:70](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L70)
+[physics/src/PhysicsBodyOptions.ts:70](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L70)
 
 ___
 
@@ -144,7 +183,7 @@ A rectangular physics body of the given size centered on the entity.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:12](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L12)
+[physics/src/PhysicsBodyOptions.ts:12](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L12)
 
 ___
 
@@ -160,7 +199,7 @@ Unlike `isDynamic`, this property can be changed after the body is created. This
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:40](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L40)
+[physics/src/PhysicsBodyOptions.ts:40](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L40)
 
 ___
 
@@ -176,7 +215,7 @@ Range is 0 to 1. 0 means collisions are not elastic at all (no bouncing), 1 mean
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:46](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L46)
+[physics/src/PhysicsBodyOptions.ts:46](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L46)
 
 ___
 
@@ -193,7 +232,7 @@ is updated.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:83](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L83)
+[physics/src/PhysicsBodyOptions.ts:83](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L83)
 
 ___
 
@@ -205,4 +244,4 @@ The velocity of the body.
 
 #### Defined in
 
-[PhysicsBodyOptions.ts:50](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBodyOptions.ts#L50)
+[physics/src/PhysicsBodyOptions.ts:50](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBodyOptions.ts#L50)

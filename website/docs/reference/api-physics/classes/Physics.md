@@ -6,13 +6,21 @@ sidebar_position: 0
 custom_edit_url: null
 ---
 
-Physics functionality, based on the Matter.js engine.
+Physics functionality plugin
+
+**`Remarks`**
+
+Based on the Matter.js engine.
+
+## Implements
+
+- `Plugin`
 
 ## Constructors
 
 ### constructor
 
-• **new Physics**(`options`): [`Physics`](Physics.md)
+• **new Physics**(`options?`): [`Physics`](Physics.md)
 
 Creates an instance of the physics engine.
 
@@ -20,7 +28,7 @@ Creates an instance of the physics engine.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `options` | [`PhysicsOptions`](../interfaces/PhysicsOptions.md) | [PhysicsOptions](../interfaces/PhysicsOptions.md) |
+| `options?` | [`PhysicsOptions`](../interfaces/PhysicsOptions.md) | [PhysicsOptions](../interfaces/PhysicsOptions.md) |
 
 #### Returns
 
@@ -28,7 +36,10 @@ Creates an instance of the physics engine.
 
 **`Remarks`**
 
-This must be called early in the game's initialize() method.
+The constructor must be called early in the game's `initialize()`
+method because it adds properties to the `Entity` class for physics
+functionality. These properties will not be available to entities before
+the physics plugin is created.
 
 **`Example`**
 
@@ -36,16 +47,27 @@ This must be called early in the game's initialize() method.
 async initialize() {
   await super.initialize();
   const game = this;
-  const physics = new Physics(game, { showsPhysics: true });
+  const physics = new Physics({ showsPhysics: true })
+  await game.registerPlugin(physics);
   ...
 }
 ```
 
 #### Defined in
 
-[Physics.ts:53](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L53)
+[physics/src/Physics.ts:73](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L73)
 
 ## Properties
+
+### \_game
+
+• `Private` `Optional` **\_game**: `Game`
+
+#### Defined in
+
+[physics/src/Physics.ts:49](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L49)
+
+___
 
 ### \_gravity
 
@@ -53,7 +75,7 @@ async initialize() {
 
 #### Defined in
 
-[Physics.ts:35](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L35)
+[physics/src/Physics.ts:48](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L48)
 
 ___
 
@@ -63,7 +85,7 @@ ___
 
 #### Defined in
 
-[Physics.ts:32](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L32)
+[physics/src/Physics.ts:45](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L45)
 
 ___
 
@@ -73,7 +95,7 @@ ___
 
 #### Defined in
 
-[Physics.ts:37](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L37)
+[physics/src/Physics.ts:51](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L51)
 
 ___
 
@@ -83,7 +105,17 @@ ___
 
 #### Defined in
 
-[Physics.ts:31](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L31)
+[physics/src/Physics.ts:44](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L44)
+
+___
+
+### eventListeners
+
+• `Private` **eventListeners**: [`PhysicsEventListener`](../interfaces/PhysicsEventListener.md)[]
+
+#### Defined in
+
+[physics/src/Physics.ts:52](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L52)
 
 ___
 
@@ -93,7 +125,21 @@ ___
 
 #### Defined in
 
-[Physics.ts:36](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L36)
+[physics/src/Physics.ts:50](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L50)
+
+___
+
+### id
+
+• **id**: `string` = `"physics-matter-js"`
+
+#### Implementation of
+
+Plugin.id
+
+#### Defined in
+
+[physics/src/Physics.ts:43](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L43)
 
 ___
 
@@ -103,9 +149,39 @@ ___
 
 #### Defined in
 
-[Physics.ts:33](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L33)
+[physics/src/Physics.ts:46](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L46)
 
 ## Accessors
+
+### game
+
+• `get` **game**(): `Game`
+
+#### Returns
+
+`Game`
+
+#### Defined in
+
+[physics/src/Physics.ts:375](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L375)
+
+• `set` **game**(`game`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `game` | `Game` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[physics/src/Physics.ts:382](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L382)
+
+___
 
 ### gravity
 
@@ -120,7 +196,7 @@ Default is &#123; dx: 0, dy: 1 &#125;
 
 #### Defined in
 
-[Physics.ts:191](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L191)
+[physics/src/Physics.ts:390](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L390)
 
 • `set` **gravity**(`gravity`): `void`
 
@@ -136,13 +212,109 @@ Default is &#123; dx: 0, dy: 1 &#125;
 
 #### Defined in
 
-[Physics.ts:214](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L214)
+[physics/src/Physics.ts:413](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L413)
 
 ## Methods
 
-### addEngineUpdateCallback
+### addEventListener
 
-▸ **addEngineUpdateCallback**(`game`): `void`
+▸ **addEventListener**(`type`, `callback`, `callbackOptions?`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `type` | [`PhysicsEventType`](../modules.md#physicseventtype-1) |
+| `callback` | (`ev`: [`PhysicsEvent`](../interfaces/PhysicsEvent.md)) => `void` |
+| `callbackOptions?` | `CallbackOptions` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[physics/src/Physics.ts:102](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L102)
+
+___
+
+### afterUpdate
+
+▸ **afterUpdate**(`game`, `deltaTime`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `game` | `Game` |
+| `deltaTime` | `number` |
+
+#### Returns
+
+`void`
+
+#### Implementation of
+
+Plugin.afterUpdate
+
+#### Defined in
+
+[physics/src/Physics.ts:88](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L88)
+
+___
+
+### configureEventListeners
+
+▸ **configureEventListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[physics/src/Physics.ts:161](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L161)
+
+___
+
+### getPhysicsBodiesFromCollisionEvent
+
+▸ **getPhysicsBodiesFromCollisionEvent**(`event`): `Object`
+
+Returns the Physics Bodies (A & B) involved in a collision event.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `event` | `IEventCollision`\<`Engine`\> | Matter.js collision event |
+
+#### Returns
+
+`Object`
+
+bodyA and bodyB PhysicsBody objects
+
+| Name | Type |
+| :------ | :------ |
+| `bodyA` | [`PhysicsBody`](PhysicsBody.md) |
+| `bodyB` | [`PhysicsBody`](PhysicsBody.md) |
+
+**`Remarks`**
+
+the Matter.js collision event has the the bodies as
+Matter.Body type. This method get their corresponding wrappers as
+PhysicsBody type.
+
+#### Defined in
+
+[physics/src/Physics.ts:205](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L205)
+
+___
+
+### initialize
+
+▸ **initialize**(`game`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -152,11 +324,15 @@ Default is &#123; dx: 0, dy: 1 &#125;
 
 #### Returns
 
-`void`
+`Promise`\<`void`\>
+
+#### Implementation of
+
+Plugin.initialize
 
 #### Defined in
 
-[Physics.ts:220](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L220)
+[physics/src/Physics.ts:84](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L84)
 
 ___
 
@@ -176,7 +352,7 @@ ___
 
 #### Defined in
 
-[Physics.ts:246](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L246)
+[physics/src/Physics.ts:429](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L429)
 
 ___
 
@@ -190,7 +366,7 @@ ___
 
 #### Defined in
 
-[Physics.ts:257](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L257)
+[physics/src/Physics.ts:440](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L440)
 
 ___
 
@@ -204,7 +380,53 @@ ___
 
 #### Defined in
 
-[Physics.ts:64](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L64)
+[physics/src/Physics.ts:229](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L229)
+
+___
+
+### onContactBegin
+
+▸ **onContactBegin**(`callback`, `options?`): `void`
+
+Executes a callback when physics bodies begin to contact each other.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `callback` | (`ev`: [`PhysicsEvent`](../interfaces/PhysicsEvent.md)) => `void` | callback function to be called when a contact begins. |
+| `options?` | `CallbackOptions` | CallbackOptions |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[physics/src/Physics.ts:133](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L133)
+
+___
+
+### onContactEnd
+
+▸ **onContactEnd**(`callback`, `options?`): `void`
+
+Executes a callback when physics bodies end contact with other.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `callback` | (`ev`: [`PhysicsEvent`](../interfaces/PhysicsEvent.md)) => `void` | callback function to be called when a contact ends |
+| `options?` | `CallbackOptions` | CallbackOptions |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[physics/src/Physics.ts:150](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L150)
 
 ___
 
@@ -224,4 +446,4 @@ ___
 
 #### Defined in
 
-[Physics.ts:236](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Physics.ts#L236)
+[physics/src/Physics.ts:419](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Physics.ts#L419)

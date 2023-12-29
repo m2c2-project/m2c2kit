@@ -85,4 +85,23 @@ export interface PhysicsBodyOptions {
    * Body angular velocity.
    */
   angularVelocity?: number;
+  /**
+   * A 32-bit mask specifying which categories this physics body belongs to.
+   *
+   * @remarks There are up to 32 different categories that physics bodies can
+   * belong to. Each category is represented by a bit in the mask. For example,
+   * if a body belongs to categories 1 and 3, its category bit mask is
+   * 0b00000000000000000000000000000101. Along with the `collisionBitMask`,
+   * this property determines which other bodies this physics body can
+   * collide with. Default category for all physics bodies is 1.
+   */
+  categoryBitMask?: number;
+  /**
+   * A 32-bit mask specifying which categories this physics body can collide with.
+   *
+   * @remarks This value is a bit mask of the other physics body categories
+   * that this body can collide with. Default is 0xFFFFFFFF, which means this
+   * body can collide with all other categories (e.g., all physics bodies).
+   */
+  collisionBitMask?: number;
 }

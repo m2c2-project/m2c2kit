@@ -10,7 +10,11 @@ A rigid body model added to an entity to enable physics simulation.
 
 **`Remarks`**
 
-This is a wrapper around the Matter.js `Body` class.
+Set to `undefined` to remove the physics body from the entity
+and the physics engine world. Note that this will not remove the entity
+from the scene. If the entity is visible, setting the physics body to
+`undefined` will "freeze" the entity at its current position and
+rotation.
 
 **`Param`**
 
@@ -38,7 +42,7 @@ This is a wrapper around the Matter.js `Body` class.
 
 #### Defined in
 
-[PhysicsBody.ts:25](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L25)
+[physics/src/PhysicsBody.ts:29](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L29)
 
 ## Properties
 
@@ -48,7 +52,7 @@ This is a wrapper around the Matter.js `Body` class.
 
 #### Defined in
 
-[PhysicsBody.ts:20](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L20)
+[physics/src/PhysicsBody.ts:24](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L24)
 
 ___
 
@@ -58,7 +62,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:22](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L22)
+[physics/src/PhysicsBody.ts:26](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L26)
 
 ___
 
@@ -68,7 +72,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:16](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L16)
+[physics/src/PhysicsBody.ts:20](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L20)
 
 ___
 
@@ -78,7 +82,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:15](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L15)
+[physics/src/PhysicsBody.ts:19](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L19)
 
 ___
 
@@ -88,7 +92,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:19](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L19)
+[physics/src/PhysicsBody.ts:23](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L23)
 
 ___
 
@@ -98,7 +102,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:21](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L21)
+[physics/src/PhysicsBody.ts:25](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L25)
 
 ___
 
@@ -108,7 +112,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:18](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L18)
+[physics/src/PhysicsBody.ts:22](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L22)
 
 ___
 
@@ -118,7 +122,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:17](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L17)
+[physics/src/PhysicsBody.ts:21](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L21)
 
 ___
 
@@ -128,7 +132,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:23](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L23)
+[physics/src/PhysicsBody.ts:27](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L27)
 
 ## Accessors
 
@@ -152,7 +156,7 @@ If true, this sets the Matter.js `inertia` property to `Infinity`.
 
 #### Defined in
 
-[PhysicsBody.ts:419](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L419)
+[physics/src/PhysicsBody.ts:441](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L441)
 
 • `set` **allowsRotation**(`allowsRotation`): `void`
 
@@ -178,7 +182,7 @@ If true, this sets the Matter.js `inertia` property to `Infinity`.
 
 #### Defined in
 
-[PhysicsBody.ts:407](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L407)
+[physics/src/PhysicsBody.ts:429](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L429)
 
 ___
 
@@ -198,7 +202,7 @@ Body angular velocity.
 
 #### Defined in
 
-[PhysicsBody.ts:456](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L456)
+[physics/src/PhysicsBody.ts:478](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L478)
 
 • `set` **angularVelocity**(`angularVelocity`): `void`
 
@@ -220,7 +224,7 @@ Body angular velocity.
 
 #### Defined in
 
-[PhysicsBody.ts:460](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L460)
+[physics/src/PhysicsBody.ts:482](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L482)
 
 ___
 
@@ -240,7 +244,7 @@ This is a read-only property.
 
 #### Defined in
 
-[PhysicsBody.ts:444](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L444)
+[physics/src/PhysicsBody.ts:466](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L466)
 
 ___
 
@@ -254,7 +258,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:322](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L322)
+[physics/src/PhysicsBody.ts:344](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L344)
 
 • `set` **body**(`body`): `void`
 
@@ -270,7 +274,121 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:329](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L329)
+[physics/src/PhysicsBody.ts:351](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L351)
+
+___
+
+### categoryBitMask
+
+• `get` **categoryBitMask**(): `number`
+
+A 32-bit mask specifying which categories this physics body belongs to.
+
+#### Returns
+
+`number`
+
+**`Remarks`**
+
+There are up to 32 different categories that physics bodies can
+belong to. Each category is represented by a bit in the mask. For example,
+if a body belongs to categories 1 and 3, its category bit mask is
+0b00000000000000000000000000000101. Along with the `collisionBitMask`,
+this property determines which other bodies this physics body can
+collide with. Default category for all physics bodies is 1.
+
+#### Implementation of
+
+[PhysicsBodyOptions](../interfaces/PhysicsBodyOptions.md).[categoryBitMask](../interfaces/PhysicsBodyOptions.md#categorybitmask)
+
+#### Defined in
+
+[physics/src/PhysicsBody.ts:486](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L486)
+
+• `set` **categoryBitMask**(`categoryBitMask`): `void`
+
+A 32-bit mask specifying which categories this physics body belongs to.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `categoryBitMask` | `number` |
+
+#### Returns
+
+`void`
+
+**`Remarks`**
+
+There are up to 32 different categories that physics bodies can
+belong to. Each category is represented by a bit in the mask. For example,
+if a body belongs to categories 1 and 3, its category bit mask is
+0b00000000000000000000000000000101. Along with the `collisionBitMask`,
+this property determines which other bodies this physics body can
+collide with. Default category for all physics bodies is 1.
+
+#### Implementation of
+
+[PhysicsBodyOptions](../interfaces/PhysicsBodyOptions.md).[categoryBitMask](../interfaces/PhysicsBodyOptions.md#categorybitmask)
+
+#### Defined in
+
+[physics/src/PhysicsBody.ts:494](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L494)
+
+___
+
+### collisionBitMask
+
+• `get` **collisionBitMask**(): `number`
+
+A 32-bit mask specifying which categories this physics body can collide with.
+
+#### Returns
+
+`number`
+
+**`Remarks`**
+
+This value is a bit mask of the other physics body categories
+that this body can collide with. Default is 0xFFFFFFFF, which means this
+body can collide with all other categories (e.g., all physics bodies).
+
+#### Implementation of
+
+[PhysicsBodyOptions](../interfaces/PhysicsBodyOptions.md).[collisionBitMask](../interfaces/PhysicsBodyOptions.md#collisionbitmask)
+
+#### Defined in
+
+[physics/src/PhysicsBody.ts:498](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L498)
+
+• `set` **collisionBitMask**(`collisionBitMask`): `void`
+
+A 32-bit mask specifying which categories this physics body can collide with.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `collisionBitMask` | `number` |
+
+#### Returns
+
+`void`
+
+**`Remarks`**
+
+This value is a bit mask of the other physics body categories
+that this body can collide with. Default is 0xFFFFFFFF, which means this
+body can collide with all other categories (e.g., all physics bodies).
+
+#### Implementation of
+
+[PhysicsBodyOptions](../interfaces/PhysicsBodyOptions.md).[collisionBitMask](../interfaces/PhysicsBodyOptions.md#collisionbitmask)
+
+#### Defined in
+
+[physics/src/PhysicsBody.ts:506](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L506)
 
 ___
 
@@ -290,7 +408,7 @@ Friction due to air forces on the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBody.ts:403](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L403)
+[physics/src/PhysicsBody.ts:425](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L425)
 
 • `set` **damping**(`damping`): `void`
 
@@ -312,7 +430,7 @@ Friction due to air forces on the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBody.ts:399](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L399)
+[physics/src/PhysicsBody.ts:421](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L421)
 
 ___
 
@@ -336,7 +454,7 @@ Mass will automatically be calculated when density is set.
 
 #### Defined in
 
-[PhysicsBody.ts:431](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L431)
+[physics/src/PhysicsBody.ts:453](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L453)
 
 • `set` **density**(`density`): `void`
 
@@ -362,7 +480,7 @@ Mass will automatically be calculated when density is set.
 
 #### Defined in
 
-[PhysicsBody.ts:435](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L435)
+[physics/src/PhysicsBody.ts:457](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L457)
 
 ___
 
@@ -376,7 +494,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:350](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L350)
+[physics/src/PhysicsBody.ts:372](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L372)
 
 • `set` **entity**(`entity`): `void`
 
@@ -392,7 +510,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:357](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L357)
+[physics/src/PhysicsBody.ts:379](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L379)
 
 ___
 
@@ -412,7 +530,7 @@ Friction of the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBody.ts:395](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L395)
+[physics/src/PhysicsBody.ts:417](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L417)
 
 • `set` **friction**(`friction`): `void`
 
@@ -434,7 +552,7 @@ Friction of the body, in the range [0, 1].
 
 #### Defined in
 
-[PhysicsBody.ts:391](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L391)
+[physics/src/PhysicsBody.ts:413](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L413)
 
 ___
 
@@ -458,7 +576,7 @@ Once set, this property cannot be changed. This is negated and mapped to the Mat
 
 #### Defined in
 
-[PhysicsBody.ts:371](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L371)
+[physics/src/PhysicsBody.ts:393](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L393)
 
 • `set` **isDynamic**(`isDynamic`): `void`
 
@@ -484,7 +602,7 @@ Once set, this property cannot be changed. This is negated and mapped to the Mat
 
 #### Defined in
 
-[PhysicsBody.ts:361](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L361)
+[physics/src/PhysicsBody.ts:383](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L383)
 
 ___
 
@@ -508,7 +626,7 @@ Density will automatically be calculated when mass is set.
 
 #### Defined in
 
-[PhysicsBody.ts:427](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L427)
+[physics/src/PhysicsBody.ts:449](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L449)
 
 • `set` **mass**(`mass`): `void`
 
@@ -534,7 +652,7 @@ Density will automatically be calculated when mass is set.
 
 #### Defined in
 
-[PhysicsBody.ts:423](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L423)
+[physics/src/PhysicsBody.ts:445](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L445)
 
 ___
 
@@ -548,7 +666,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:311](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L311)
+[physics/src/PhysicsBody.ts:333](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L333)
 
 • `set` **physics**(`physics`): `void`
 
@@ -564,7 +682,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:318](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L318)
+[physics/src/PhysicsBody.ts:340](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L340)
 
 ___
 
@@ -588,7 +706,7 @@ Unlike `isDynamic`, this property can be changed after the body is created. This
 
 #### Defined in
 
-[PhysicsBody.ts:379](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L379)
+[physics/src/PhysicsBody.ts:401](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L401)
 
 • `set` **resting**(`resting`): `void`
 
@@ -614,7 +732,7 @@ Unlike `isDynamic`, this property can be changed after the body is created. This
 
 #### Defined in
 
-[PhysicsBody.ts:375](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L375)
+[physics/src/PhysicsBody.ts:397](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L397)
 
 ___
 
@@ -638,7 +756,7 @@ Range is 0 to 1. 0 means collisions are not elastic at all (no bouncing), 1 mean
 
 #### Defined in
 
-[PhysicsBody.ts:387](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L387)
+[physics/src/PhysicsBody.ts:409](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L409)
 
 • `set` **restitution**(`restitution`): `void`
 
@@ -664,7 +782,7 @@ Range is 0 to 1. 0 means collisions are not elastic at all (no bouncing), 1 mean
 
 #### Defined in
 
-[PhysicsBody.ts:383](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L383)
+[physics/src/PhysicsBody.ts:405](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L405)
 
 ___
 
@@ -689,7 +807,7 @@ is updated.
 
 #### Defined in
 
-[PhysicsBody.ts:448](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L448)
+[physics/src/PhysicsBody.ts:470](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L470)
 
 • `set` **speed**(`speed`): `void`
 
@@ -716,7 +834,7 @@ is updated.
 
 #### Defined in
 
-[PhysicsBody.ts:452](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L452)
+[physics/src/PhysicsBody.ts:474](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L474)
 
 ___
 
@@ -736,7 +854,7 @@ The velocity of the body.
 
 #### Defined in
 
-[PhysicsBody.ts:333](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L333)
+[physics/src/PhysicsBody.ts:355](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L355)
 
 • `set` **velocity**(`velocity`): `void`
 
@@ -758,13 +876,13 @@ The velocity of the body.
 
 #### Defined in
 
-[PhysicsBody.ts:338](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L338)
+[physics/src/PhysicsBody.ts:360](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L360)
 
 ## Methods
 
-### applyImpulse
+### applyForce
 
-▸ **applyImpulse**(`impulse`, `at?`): `void`
+▸ **applyForce**(`force`, `at?`): `void`
 
 Applies a force to the body in a single time step.
 
@@ -772,8 +890,8 @@ Applies a force to the body in a single time step.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `impulse` | [`Vector`](../interfaces/Vector.md) | force to apply as a vector. |
-| `at?` | `Point` | the point at which to apply the impulse, relative to the body's position in scene coordinates. |
+| `force` | [`Vector`](../interfaces/Vector.md) | force to apply as a vector. |
+| `at?` | `Point` | the point at which to apply the force, relative to the body's position in scene coordinates. |
 
 #### Returns
 
@@ -785,7 +903,7 @@ if `at` is not specified, the force is applied at the body's current `position`.
 
 #### Defined in
 
-[PhysicsBody.ts:109](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L109)
+[physics/src/PhysicsBody.ts:120](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L120)
 
 ___
 
@@ -805,7 +923,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:128](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L128)
+[physics/src/PhysicsBody.ts:139](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L139)
 
 ___
 
@@ -825,7 +943,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:186](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L186)
+[physics/src/PhysicsBody.ts:197](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L197)
 
 ___
 
@@ -845,7 +963,7 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:156](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L156)
+[physics/src/PhysicsBody.ts:167](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L167)
 
 ___
 
@@ -865,4 +983,4 @@ ___
 
 #### Defined in
 
-[PhysicsBody.ts:30](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/PhysicsBody.ts#L30)
+[physics/src/PhysicsBody.ts:34](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/PhysicsBody.ts#L34)

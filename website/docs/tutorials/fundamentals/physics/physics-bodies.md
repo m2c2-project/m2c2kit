@@ -43,7 +43,8 @@ Note two things in the example:
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
@@ -87,7 +88,8 @@ button.onTapDown( () => {
 
 export const more = [
 { description: <>For development purposes, it can be helpful to show the [outline] of the physics body that has been attached to an entity. To do this, pass the option `showsPhysics: true` into the physics engine constructor. A green outline now appears around the pink ball (because it has a physics body), but not the blue ball.</>,
-code: `const physics = new Physics({ game: game, showsPhysics: true });
+code: `const physics = new Physics({ showsPhysics: true });
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);

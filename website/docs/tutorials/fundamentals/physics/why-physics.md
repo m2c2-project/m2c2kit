@@ -29,7 +29,8 @@ Physics in m2c2kit is experimental, and the API may change in the future.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);

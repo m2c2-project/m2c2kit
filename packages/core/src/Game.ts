@@ -56,8 +56,8 @@ import { ActivityResults } from "./ActivityResults";
 import { CallbackOptions } from "./CallbackOptions";
 import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
-import { FrameCycleEvent } from "./FrameCycleEvent";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { Plugin } from "./Plugin";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -89,6 +89,7 @@ export class Game implements Activity {
   private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
   private loaderElementsRemoved = false;
   private _dataStores?: IDataStore[];
+  private plugins: Array<Plugin> = [];
   additionalParameters?: unknown;
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
 
@@ -1902,34 +1903,41 @@ export class Game implements Activity {
   }
 
   /**
-   * Executes a callback when the frame has finished simulating physics.
+   * Registers a plugin with the game.
    *
-   * @param callback - function to execute.
-   * @param options - options for the callback.
+   * @remarks Upon registration, the plugin's optional asynchronous
+   * `initialize()` method will be called.
+   *
+   * @param plugin - Plugin to register
    */
-  onFrameDidSimulatePhysics(
-    callback: (frameCycleEvent: FrameCycleEvent) => void,
-    options?: CallbackOptions,
-  ): void {
-    this.addEventListener(
-      EventType.FrameDidSimulatePhysics,
-      callback as (ev: EventBase) => void,
-      options,
-    );
+  async registerPlugin(plugin: Plugin) {
+    if (
+      this.plugins.includes(plugin) ||
+      this.plugins.map((p) => p.id).includes(plugin.id)
+    ) {
+      throw new Error(
+        `registerPlugin(): plugin ${plugin.id} already registered.`,
+      );
+    }
+    this.plugins.push(plugin);
+    if (plugin.initialize) {
+      await plugin.initialize(this);
+    }
   }
 
   private update(): void {
+    this.plugins
+      .filter((p) => p.beforeUpdate !== undefined && p.disabled !== true)
+      .forEach((p) => p.beforeUpdate!(this, Globals.deltaTime));
+
     this.scenes
       .filter((scene) => scene._active)
       .forEach((scene) => scene.update());
     this.freeEntitiesScene.update();
 
-    const frameDidSimulatePhysicsEvent: FrameCycleEvent = {
-      target: this,
-      type: EventType.FrameDidSimulatePhysics,
-      deltaTime: Globals.deltaTime,
-    };
-    this.raiseActivityEventOnListeners(frameDidSimulatePhysicsEvent);
+    this.plugins
+      .filter((p) => p.afterUpdate !== undefined && p.disabled !== true)
+      .forEach((p) => p.afterUpdate!(this, Globals.deltaTime));
   }
 
   private draw(canvas: Canvas): void {

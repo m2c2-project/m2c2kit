@@ -25,7 +25,8 @@ The [moon's gravity](https://en.wikipedia.org/wiki/Gravitation_of_the_Moon) is 1
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
 physics.gravity = { dx: 0, dy: .1666 };
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 8
 hide_table_of_contents: true
 ---
 
@@ -20,7 +20,8 @@ The example increases the angular velocity of the label each time the "GO" butto
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
 physics.gravity = { dx: 0, dy: 0 };
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });

@@ -7,15 +7,16 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Arbitrary forces
 
-A physics body is affected by forces of gravity and by interactions with other physics bodies. You can also apply instant, arbitrary forces to a physics body.
+A physics body is affected by forces of gravity and by interactions with other physics bodies. You can also apply arbitrary forces to a physics body.
 
-The `applyImpulse()` method of a `PhysicsBody` applies a force (impulse) to the body. The method takes a `Vector` as an argument. The `dx` and `dy` components of the vector represent the force to apply in the horizontal and vertical directions, respectively. Optionally, it also takes a `Point` as a second argument. The `x` and `y` components of the point represent the position of application of the force. If the position is not specified, the force is applied to the center of the physics body.
+The `applyForce()` method of a `PhysicsBody` applies a force to the body. The method takes a `Vector` as an argument. The `dx` and `dy` components of the vector represent the force to apply in the horizontal and vertical directions, respectively. Optionally, it also takes a `Point` as a second argument. The `x` and `y` components of the point represent the position of application of the force. If the position is not specified, the force is applied to the center of the physics body.
 
 The example is a simple slingshot. Drag the pink ball to aim it and adjust the draw length. Release the ball to fire it. The ball will bounce off the edges of the boundary.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template.html';
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
@@ -86,8 +87,8 @@ aimBall.onDragEnd((e) => {
     dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 10), 1.1)),
     dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 10), 1.1))
   }
-  pinkBall.physicsBody.applyImpulse(force);
-  console.log("Applied impulse: dx = " + force.dx + ", dy = " + force.dy)
+  pinkBall.physicsBody.applyForce(force);
+  console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
   // The position is a Point, which is a reference type. The next line will link
   // the aimBall's position to the pinkBall's position while the pinkBall is moving.
   aimBall.position = pinkBall.position;
@@ -96,7 +97,8 @@ aimBall.onDragEnd((e) => {
 
 export const more = [
 { description: <>If we draw the slingshot back as far as we can, it will apply a lot of force, and the ball will move at a high speed. To avoid tunneling, the `thickness` of the edge loop was set to `1000`. See what happens if you draw the slingshot back as far as you can (to the top of the scene) with the `thickness` option [removed] (which sets it to the default value of `50`). Goodbye ball!</>,
-code: `const physics = new Physics({ game: game });
+code: `const physics = new Physics();
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
@@ -167,8 +169,8 @@ aimBall.onDragEnd((e) => {
     dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 10), 1.1)),
     dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 10), 1.1))
   }
-  pinkBall.physicsBody.applyImpulse(force);
-  console.log("Applied impulse: dx = " + force.dx + ", dy = " + force.dy)
+  pinkBall.physicsBody.applyForce(force);
+  console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
   // The position is a Point, which is a reference type. The next line will link
   // the aimBall's position to the pinkBall's position while the pinkBall is moving.
   aimBall.position = pinkBall.position;

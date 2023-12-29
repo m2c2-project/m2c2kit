@@ -18,7 +18,7 @@ The x component of the vector.
 
 #### Defined in
 
-[Vector.ts:9](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Vector.ts#L9)
+[physics/src/Vector.ts:9](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Vector.ts#L9)
 
 ___
 
@@ -30,4 +30,4 @@ The y component of the vector.
 
 #### Defined in
 
-[Vector.ts:13](https://github.com/m2c2-project/m2c2kit/blob/c6627d5/packages/physics/src/Vector.ts#L13)
+[physics/src/Vector.ts:13](https://github.com/m2c2-project/m2c2kit/blob/58de0ab/packages/physics/src/Vector.ts#L13)

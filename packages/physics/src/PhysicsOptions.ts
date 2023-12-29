@@ -1,11 +1,7 @@
-import { Game, RgbaColor } from "@m2c2kit/core";
+import { RgbaColor } from "@m2c2kit/core";
 import { Vector } from "./Vector";
 
 export interface PhysicsOptions {
-  /**
-   * The game instance to apply physics to.
-   */
-  game: Game;
   /**
    * Whether or not to show the physics bodies in the game by drawing an outline around them.
    */

@@ -50,6 +50,7 @@ export * from "./M2DragEvent";
 export * from "./M2PointerEvent";
 export * from "./M2ColorfulPath";
 export * from "./M2Path";
+export * from "./Plugin";
 export * from "./Point";
 export * from "./RandomDraws";
 export * from "./RectOptions";

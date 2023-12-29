@@ -19,7 +19,8 @@ import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-
 
 If an entity moves too fast, it might pass through the edge loop. This is called [tunneling](https://gamedev.stackexchange.com/a/192403). To prevent tunneling, edge loops have a default thickness of `50`. If you still find that a fast-moving entity penetrates the edge loop, increase the `thickness` property of the edge loop. The thickness is applied to the outside of the edge loop, and thus it will not affect the interior boundary size.
 
-export const code = `const physics = new Physics({ game: game });
+export const code = `const physics = new Physics();
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
@@ -68,7 +69,8 @@ button.onTapDown( () => {
 
 export const more = [
 { description: <>If we show the physics body [outlines], we see that the edge loop is simply a collection of non-dynamic (static) rectangles. You could have assembled this boundary by placing four non-dynamic rectangles, but the edge loop is a convenient shortcut. Note: The rectangle outlines appear as lines instead of full rectangles because portions of the rectangles are beyond the visible scene.</>,
-code: `const physics = new Physics({ game: game, showsPhysics: true });
+code: `const physics = new Physics({ showsPhysics: true });
+await game.registerPlugin(physics);
  
 const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
