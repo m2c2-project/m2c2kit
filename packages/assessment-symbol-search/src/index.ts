@@ -43,6 +43,16 @@ that is found on the top.(1 unique symbol). A non-lure trial is when the \
 incorrect symbol pair contains exactly zero symbols that match the \
 top. (2 unique symbols.)",
       },
+      lure_position_on_card: {
+        default: "either",
+        type: "string",
+        enum: ["top", "bottom", "either"],
+        description:
+          "If a lure trial, must the lure symbol occupy the top position \
+on the the card, the bottom, or either? If either, then the lure symbol \
+will be equally distributed across trials to be in the top and bottom \
+positions.",
+      },
       left_correct_percent: {
         default: 0.5,
         type: "number",
@@ -558,8 +568,8 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       default: {
         throw new Error(
           `invalid value for instruction_type: ${game.getParameter(
-            "instruction_type"
-          )}`
+            "instruction_type",
+          )}`,
         );
       }
     }
@@ -568,7 +578,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       // timestamp
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
     });
 
@@ -595,7 +605,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     countdownScene.addChild(countdownCircle);
 
     const countdownInitialNumber = Math.floor(
-      game.getParameter<number>("preparation_duration_ms") / 1000
+      game.getParameter<number>("preparation_duration_ms") / 1000,
     );
 
     const countdownNumber = new Label({
@@ -625,7 +635,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           callback: () => {
             countdownNumber.text = i.toString();
           },
-        })
+        }),
       );
     }
 
@@ -635,7 +645,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         callback: () => {
           countdownNumber.text = "0";
         },
-      })
+      }),
     );
 
     countdownSequence.push(
@@ -646,13 +656,13 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
             Transition.slide({
               direction: TransitionDirection.Left,
               duration: game.getParameter(
-                "after_preparation_transition_duration_ms"
+                "after_preparation_transition_duration_ms",
               ),
               easing: Easings.sinusoidalInOut,
-            })
+            }),
           );
         },
-      })
+      }),
     );
 
     countdownScene.onAppear(() => {
@@ -716,25 +726,57 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     const numberOfTrials = game.getParameter<number>("number_of_trials");
     const lurePercent = game.getParameter<number>("lure_percent");
     const leftCorrectPercent = game.getParameter<number>(
-      "left_correct_percent"
+      "left_correct_percent",
     );
     const numberOfTopCards = game.getParameter<number>("number_of_top_pairs");
     // TODO: allow number of bottom cards to be configurable
     // const numberOfBottomCards = 2;
     const numberOfLureTrials = Math.round(numberOfTrials * lurePercent);
     const numberOfLeftCorrectTrials = Math.round(
-      numberOfTrials * leftCorrectPercent
+      numberOfTrials * leftCorrectPercent,
     );
     const lureTrialIndexes = RandomDraws.FromRangeWithoutReplacement(
       numberOfLureTrials,
       0,
-      numberOfTrials - 1
+      numberOfTrials - 1,
     );
     const leftCorrectTrialIndexes = RandomDraws.FromRangeWithoutReplacement(
       numberOfLeftCorrectTrials,
       0,
-      numberOfTrials - 1
+      numberOfTrials - 1,
     );
+    /**
+     * For each lure trial, we need to know if the lure symbol should occupy
+     * the top or bottom position on the card. We will pop from this array as
+     * we create lure trials. top = position 0, bottom = position 1
+     */
+    let lurePositions: Array<number>;
+    switch (game.getParameter<string>("lure_position_on_card")) {
+      case "top": {
+        lurePositions = Array(numberOfLureTrials).fill(0);
+        break;
+      }
+      case "bottom": {
+        lurePositions = Array(numberOfLureTrials).fill(1);
+        break;
+      }
+      case "either": {
+        const numberOfTopLurePositions = Math.round(numberOfLureTrials / 2);
+        lurePositions = [
+          ...Array(numberOfTopLurePositions).fill(0),
+          ...Array(numberOfLureTrials - numberOfTopLurePositions).fill(1),
+        ];
+        lurePositions = this.shuffleArray(lurePositions);
+        break;
+      }
+      default: {
+        throw new Error(
+          `invalid value for lure_position_on_card: ${game.getParameter(
+            "lure_position_on_card",
+          )}`,
+        );
+      }
+    }
 
     for (let i = 0; i < numberOfTrials; i++) {
       const isLure = lureTrialIndexes.includes(i);
@@ -750,7 +792,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         symbols = RandomDraws.FromRangeWithoutReplacement(
           numberOfTopCards * 2 + 1,
           1,
-          NUMBER_OF_SYMBOLS
+          NUMBER_OF_SYMBOLS,
         );
       } else {
         /**
@@ -760,7 +802,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         symbols = RandomDraws.FromRangeWithoutReplacement(
           numberOfTopCards * 2 + 2,
           1,
-          NUMBER_OF_SYMBOLS
+          NUMBER_OF_SYMBOLS,
         );
       }
 
@@ -777,7 +819,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       const correctCardIndex = RandomDraws.FromRangeWithoutReplacement(
         1,
         0,
-        numberOfTopCards - 1
+        numberOfTopCards - 1,
       )[0];
       const correctCard = topCards[correctCardIndex];
 
@@ -798,13 +840,26 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         const lureSymbolIndex = RandomDraws.FromRangeWithoutReplacement(
           1,
           0,
-          potentialLureSymbols.length - 1
+          potentialLureSymbols.length - 1,
         )[0];
         const lureSymbol = potentialLureSymbols[lureSymbolIndex];
-        incorrectCard = {
-          top: lureSymbol,
-          bottom: symbols[2 * numberOfTopCards],
-        };
+
+        const lurePosition = lurePositions.shift();
+        if (lurePosition === undefined) {
+          throw new Error("lurePositions is empty");
+        }
+        // top = position 0, bottom = position 1
+        if (lurePosition === 0) {
+          incorrectCard = {
+            top: lureSymbol,
+            bottom: symbols[2 * numberOfTopCards],
+          };
+        } else {
+          incorrectCard = {
+            top: symbols[2 * numberOfTopCards],
+            bottom: lureSymbol,
+          };
+        }
       }
 
       const trial: TrialConfiguration = {
@@ -838,7 +893,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         }
         default: {
           throw new Error(
-            "valid values for number_of_top_pairs are 2, 3, or 4 cards"
+            "valid values for number_of_top_pairs are 2, 3, or 4 cards",
           );
         }
       }
@@ -886,7 +941,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
       function createCardShape(
         topSymbolImageNumber: number,
-        bottomSymbolImageNumber: number
+        bottomSymbolImageNumber: number,
       ): Shape {
         const card = new Shape({
           rect: { size: { width: 80, height: 160 } },
@@ -913,7 +968,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       for (let i = 0; i < topCardsLength; i++) {
         const card = createCardShape(
           trialConfiguration.top_cards_symbols[i].top,
-          trialConfiguration.top_cards_symbols[i].bottom
+          trialConfiguration.top_cards_symbols[i].bottom,
         );
         topCards.push(card);
         if (topCardsLength === 4) {
@@ -927,7 +982,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       for (let i = 0; i < bottomCardsLength; i++) {
         const card = createCardShape(
           trialConfiguration.bottom_cards_symbols[i].top,
-          trialConfiguration.bottom_cards_symbols[i].bottom
+          trialConfiguration.bottom_cards_symbols[i].bottom,
         );
 
         (card.userData as bottomCardUserData) = {
@@ -942,13 +997,13 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           bottomCards.forEach((card) => (card.isUserInteractionEnabled = true));
         } else {
           bottomCards.forEach(
-            (card) => (card.isUserInteractionEnabled = false)
+            (card) => (card.isUserInteractionEnabled = false),
           );
         }
       }
 
       bottomCards.forEach((card) =>
-        card.onTapDown(() => handleCardChoice(card))
+        card.onTapDown(() => handleCardChoice(card)),
       );
 
       function handleCardChoice(card: Shape): void {
@@ -963,17 +1018,17 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
         game.addTrialData(
           "trial_end_iso8601_timestamp",
-          new Date().toISOString()
+          new Date().toISOString(),
         );
         game.addTrialData("trial_type", trialConfiguration.trial_type);
         game.addTrialData("response_time_duration_ms", response_time);
         game.addTrialData(
           "correct_response_index",
-          trialConfiguration.correct_response_index
+          trialConfiguration.correct_response_index,
         );
         game.addTrialData(
           "user_response_index",
-          (card.userData as bottomCardUserData).index
+          (card.userData as bottomCardUserData).index,
         );
 
         // correct_response_index and trial_type are nested in the
@@ -1006,7 +1061,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
                     game.presentScene(chooseCardScene);
                   },
                 }),
-              ])
+              ]),
             );
           }
         } else {
@@ -1023,11 +1078,11 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       chooseCardScene.onAppear(() => {
         game.addTrialData(
           "activity_begin_iso8601_timestamp",
-          this.beginIso8601Timestamp
+          this.beginIso8601Timestamp,
         );
         game.addTrialData(
           "trial_begin_iso8601_timestamp",
-          new Date().toISOString()
+          new Date().toISOString(),
         );
         /** Add the question label free entity, only if not added yet */
         if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
@@ -1076,6 +1131,25 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       // no need to have cancel button, because we're done
       game.removeAllFreeEntities();
     });
+  }
+
+  /**
+   * Returns a new array with the items in random order.
+   *
+   * @param array - The array to shuffle
+   * @returns A new array with the items in random order
+   */
+  private shuffleArray<T>(array: T[]) {
+    // Create a copy of the original array to avoid mutating it
+    const copy = [...array];
+    const shuffled = [];
+    while (copy.length > 0) {
+      // Generate a random index between 0 and the length of the copy array
+      const index = Math.floor(Math.random() * copy.length);
+      // Remove the item at the random index from the copy array and push it to the shuffled array
+      shuffled.push(copy.splice(index, 1)[0]);
+    }
+    return shuffled;
   }
 }
 
