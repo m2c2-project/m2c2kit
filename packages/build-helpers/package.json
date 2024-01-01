@@ -17,7 +17,7 @@
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
     "rimraf": "5.0.5",
-    "rollup": "4.9.1",
+    "rollup": "4.9.2",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.0",
@@ -40,7 +40,7 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "acorn": "8.11.2",
+    "acorn": "8.11.3",
     "acorn-walk": "8.3.1",
     "astring": "1.8.6",
     "css-select": "5.1.0",
