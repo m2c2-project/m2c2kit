@@ -1911,6 +1911,11 @@ export class Game implements Activity {
    * @param plugin - Plugin to register
    */
   async registerPlugin(plugin: Plugin) {
+    if (plugin.type !== ActivityType.Game) {
+      throw new Error(
+        `registerPlugin(): plugin ${plugin.id} is not a game plugin. It is a ${plugin.type} plugin.`,
+      );
+    }
     if (
       this.plugins.includes(plugin) ||
       this.plugins.map((p) => p.id).includes(plugin.id)

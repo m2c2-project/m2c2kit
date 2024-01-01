@@ -6,6 +6,8 @@ import { Game } from "./Game";
 export interface Plugin {
   /** Short identifier of the plugin. */
   id: string;
+  /** What kind of m2c2kit object does the plugin work with? */
+  type: "Game" | "Session" | "Survey";
   /** Initialization code run when the plugin is registered with the game. */
   initialize?: (game: Game) => Promise<void>;
   /** Is the plugin disabled and not to be run? Default is false. @remarks Disabled plugins will still be initialized. */

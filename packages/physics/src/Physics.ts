@@ -48,6 +48,7 @@ export interface PhysicsEvent extends EventBase {
  */
 export class Physics implements Plugin {
   id = "physics-matter-js";
+  readonly type = "Game";
   engine: Engine;
   bodiesDictionary: PhysicsBodiesDictionary = {};
   options: PhysicsOptions;
