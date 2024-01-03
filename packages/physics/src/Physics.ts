@@ -11,14 +11,7 @@ import {
 import { Vector } from "./Vector";
 import { PhysicsOptions } from "./PhysicsOptions";
 import { PhysicsBody } from "./PhysicsBody";
-
-declare module "@m2c2kit/core" {
-  interface Entity {
-    physicsBody?: PhysicsBody;
-    _physicsBody?: PhysicsBody;
-    _engineScale: number;
-  }
-}
+import { EntityExtended } from "./EntityExtended";
 
 interface PhysicsBodiesDictionary {
   [entityUuid: string]: Matter.Body;
@@ -67,7 +60,6 @@ export class Physics implements Plugin {
    * functionality. These properties will not be available to entities before
    * the physics plugin is created.
    *
-   * @param game - the game instance
    * @param options - {@link PhysicsOptions}
    * @example
    * async initialize() {
@@ -215,7 +207,7 @@ export class Physics implements Plugin {
   ) {
     const entityA = this.game.entities.find(
       (e) => e.uuid === event.pairs[0].bodyA.label,
-    );
+    ) as EntityExtended | undefined;
     if (!entityA) {
       throw new Error("bodyA entity not found");
     }
@@ -224,7 +216,7 @@ export class Physics implements Plugin {
     }
     const entityB = this.game.entities.find(
       (e) => e.uuid === event.pairs[0].bodyB.label,
-    );
+    ) as EntityExtended | undefined;
     if (!entityB) {
       throw new Error("bodyB entity not found");
     }
@@ -239,7 +231,7 @@ export class Physics implements Plugin {
     const physics = this;
     // Add the physicsBody property to the Entity class.
     Object.defineProperty(Entity.prototype, "physicsBody", {
-      set(this: Entity, physicsBody: PhysicsBody) {
+      set(this: EntityExtended, physicsBody: PhysicsBody) {
         /**
          * if there is an existing physics body AND there is an existing
          * Matter.js body AND the engine has been created, then remove the
@@ -257,14 +249,23 @@ export class Physics implements Plugin {
         });
         this._physicsBody = physicsBody;
         if (physicsBody !== undefined) {
-          this._physicsBody.entity = this;
+          /**
+           * "as Entity" is not needed to build, but it was added because
+           * Jest fails without it. (related to module augmentation issues).
+           */
+          this._physicsBody.entity = this as Entity;
         } else {
           delete physics.bodiesDictionary[this.uuid];
         }
       },
-      get(this: Entity) {
+      get(this: EntityExtended) {
         return this._physicsBody;
       },
+      /**
+       * Set configurable to true so that the property can be redefined when
+       * running multiple tests in Jest.
+       */
+      configurable: true,
     });
 
     /**
@@ -276,7 +277,7 @@ export class Physics implements Plugin {
     Object.defineProperty(Entity.prototype, "position", {
       set(position: Point) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
+        const entity: EntityExtended = this;
         entity._position = position;
         const body = entity?.physicsBody?.body;
         if (
@@ -288,7 +289,7 @@ export class Physics implements Plugin {
       },
       get() {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
+        const entity: EntityExtended = this;
         return {
           get x(): number {
             return entity._position.x;
@@ -318,6 +319,7 @@ export class Physics implements Plugin {
           },
         };
       },
+      configurable: true,
     });
 
     /**
@@ -329,7 +331,7 @@ export class Physics implements Plugin {
     Object.defineProperty(Entity.prototype, "zRotation", {
       set(zRotation: number) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
+        const entity: EntityExtended = this;
         entity._zRotation = zRotation;
         const body = entity?.physicsBody?.body;
         if (body && body.angle !== zRotation) {
@@ -341,6 +343,7 @@ export class Physics implements Plugin {
         const entity: Entity = this;
         return entity._zRotation;
       },
+      configurable: true,
     });
 
     /**
@@ -352,7 +355,7 @@ export class Physics implements Plugin {
     Object.defineProperty(Entity.prototype, "scale", {
       set(scale: number) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
+        const entity: EntityExtended = this;
         entity._scale = scale;
         const body = entity?.physicsBody?.body;
         if (body) {
@@ -379,6 +382,7 @@ export class Physics implements Plugin {
         const entity: Entity = this;
         return entity._scale;
       },
+      configurable: true,
     });
   }
 
@@ -439,10 +443,10 @@ export class Physics implements Plugin {
   private initializePhysicsBodies(entities: Entity[]) {
     entities.forEach((entity) => {
       if (
-        entity.physicsBody !== undefined &&
-        entity.physicsBody.needsInitialization
+        (entity as EntityExtended).physicsBody !== undefined &&
+        (entity as EntityExtended).physicsBody?.needsInitialization
       ) {
-        entity.physicsBody.initialize(this);
+        (entity as EntityExtended).physicsBody?.initialize(this);
       }
     });
   }

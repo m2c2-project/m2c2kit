@@ -591,7 +591,7 @@ export class Game implements Activity {
    * is not found, then return fallback value
    *
    * @param parameterName - the name of the game parameter whose value is requested
-   * @param fallback - the value to return if parameterName is not found
+   * @param fallbackValue - the value to return if parameterName is not found
    * @returns
    */
   getParameterOrFallback<T, U>(parameterName: string, fallbackValue: U): T | U {

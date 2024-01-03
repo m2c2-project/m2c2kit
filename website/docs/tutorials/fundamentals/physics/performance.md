@@ -13,7 +13,7 @@ To monitor the impact of the physics engine on performance, pass the option `log
 
 When the assessment is running at 60 frames per second, there are 1000 / 60 or about 16 milliseconds maximum available for computation. Usually the physics engine takes only a fraction of a millisecond to update each frame.
 
-After you press "GO", the example drops 50 balls. Click on a ball to apply an upward force to it. 50 is probably more physics bodies than you would ever need in a real assessment, but try increasing `NUMBER_OF_BALLS` until it starts to affect performance -- or crashes your web browser!
+After you press "Go", the example drops 50 balls. Click on a ball to apply an upward force to it. 50 is probably more physics bodies than you would ever need in a real assessment, but try increasing `NUMBER_OF_BALLS` until it starts to affect performance -- or crashes your web browser! (Be sure to click "Run" again after changing `NUMBER_OF_BALLS`).
 
 :::warning
 
