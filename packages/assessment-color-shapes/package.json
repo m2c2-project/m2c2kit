@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-shapes",
-  "version": "0.8.12",
+  "version": "0.8.13",
   "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",

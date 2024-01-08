@@ -84,7 +84,9 @@ rgbBall.physicsBody = new PhysicsBody({
 });
 sceneOne.addChild(rgbBall);
 rgbBall.onTapDown(() => {
-  rgbBall.physicsBody.applyForce({ dx: RandomDraws.SingleFromRange(-3, 3), dy: -5 });
+  rgbBall.physicsBody.applyForce({
+    dx: RandomDraws.SingleFromRange(-5, 5) / 100, dy: -.10
+  });
 });
  
 const emptyBall = new Shape({
@@ -100,7 +102,9 @@ emptyBall.physicsBody = new PhysicsBody({
 });
 sceneOne.addChild(emptyBall);
 emptyBall.onTapDown(() => {
-  emptyBall.physicsBody.applyForce({ dx: RandomDraws.SingleFromRange(-3, 3), dy: -5 });
+  emptyBall.physicsBody.applyForce({
+    dx: RandomDraws.SingleFromRange(-5, 5) / 100, dy: -.10
+  });
 });
  
 physics.onContactBegin((e) => {

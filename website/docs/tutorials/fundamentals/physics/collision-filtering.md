@@ -63,97 +63,97 @@ const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
  
 const edge = new Shape({
-  rect: { width: 180, height: 380 },
-  fillColor: WebColors.Transparent,
-  strokeColor: WebColors.Black,
-  lineWidth: 1,
-  position: { x: 100, y: 200 },
+    rect: { width: 180, height: 380 },
+    fillColor: WebColors.Transparent,
+    strokeColor: WebColors.Black,
+    lineWidth: 1,
+    position: { x: 100, y: 200 },
 });
 edge.physicsBody = new PhysicsBody({
-  edgeLoop: edge.size,
-  restitution: .7,
-  // edge loop is category 1
-  categoryBitMask: 0b0001
+    edgeLoop: edge.size,
+    restitution: .7,
+    // edge loop is category 1
+    categoryBitMask: 0b0001
 });
 sceneOne.addChild(edge);
  
 const umbrella = new Shape({
-  path: {
-    pathString: "M148.2 0c6.8.1 3.1 11.5 4.5 13 62.5 2.9 127.8 52.2 140.7 114.8 2.3 11.2 5.3 26.8-3.2 25.3-1.9-.3-14.2-14.2-33.5-16-30.3-2.9-39.6 15.9-42 16.5-5.7 1.5-8.5-6.3-16-11-15.3-9.6-39.5-8.1-46.8 10.8-1.2 25.6 2 123.1-1 137.5-6.8 32.7-49.5 33.4-56.5-5-.9-4.9-3.6-24.2 3.2-24.2 7.8 0 1.2 15.7 7.8 31.2 8.8 21.1 35.2 17.7 38-8.5 2.2-20.1-1.6-103.4 0-132-8-19-33.5-19-48.3-8.2-4.1 3-8.5 11.1-14 9.5-2.8-.8-16.2-25.4-53-14-16.3 5.1-22.6 17.6-27.2 12.2-2.9-3.4 2-26.7 3.5-32C20.9 61.2 83.2 15.9 143.2 13c1.2-1.2-2.2-13.1 5-13z",
-    width: 80
-  },
-  fillColor: WebColors.Red,
-  position: { x: 100, y: 250 }
+    path: {
+        pathString: "M148.2 0c6.8.1 3.1 11.5 4.5 13 62.5 2.9 127.8 52.2 140.7 114.8 2.3 11.2 5.3 26.8-3.2 25.3-1.9-.3-14.2-14.2-33.5-16-30.3-2.9-39.6 15.9-42 16.5-5.7 1.5-8.5-6.3-16-11-15.3-9.6-39.5-8.1-46.8 10.8-1.2 25.6 2 123.1-1 137.5-6.8 32.7-49.5 33.4-56.5-5-.9-4.9-3.6-24.2 3.2-24.2 7.8 0 1.2 15.7 7.8 31.2 8.8 21.1 35.2 17.7 38-8.5 2.2-20.1-1.6-103.4 0-132-8-19-33.5-19-48.3-8.2-4.1 3-8.5 11.1-14 9.5-2.8-.8-16.2-25.4-53-14-16.3 5.1-22.6 17.6-27.2 12.2-2.9-3.4 2-26.7 3.5-32C20.9 61.2 83.2 15.9 143.2 13c1.2-1.2-2.2-13.1 5-13z",
+        width: 80
+    },
+    fillColor: WebColors.Red,
+    position: { x: 100, y: 250 }
 });
 umbrella.physicsBody = new PhysicsBody({
-  circleOfRadius: 40,
-  // umbrella is category 2
-  categoryBitMask: 0b0010,
-  resting: true
+    circleOfRadius: 40,
+    // umbrella is category 2
+    categoryBitMask: 0b0010,
+    resting: true
 });
 sceneOne.addChild(umbrella);
  
 const rainDrops = [];
 for (let i = 0; i < 50; i++) {
-  const rainDrop = new Shape({
-    path: {
-      pathString: "M169.6 382.3c-.4.2-1 .3-1.5.5-6.9 2.6-15.8 5.3-23 6.5-14.9 2.5-30.1 2.5-45 0-35-5.9-66.8-28.7-84-59.8C-6.2 289-3.4 245.1 12.6 203c14.7-38.6 71.7-126.1 95.5-176.5 2.3-4.9 8.7-25.2 13.2-26.2 9.6-2.1 10.2 9.6 15.8 21.2C143 33.8 149.3 46 155.6 58c28.2 53 86.1 133.9 92.5 189.5 6.6 57.4-24.1 113.4-78.5 134.8z",
-      height: 10
-    },
-    fillColor: WebColors.Blue,
-    lineWidth: 0,
-    // for now, position raindrops off the visible scene
-    position: {
-      x: -100,
-      y: -100
-    },
-  });
-  sceneOne.addChild(rainDrop)
-  rainDrop.physicsBody = new PhysicsBody({
-    circleOfRadius: 5,
-    friction: 0,
-    resting: true,
-    // raindrops are category 3
-    categoryBitMask: 0b0100,
-    // raindrops collide only with category 2 (umbrella)
-    collisionBitMask: 0b0010
-  })
-  rainDrops.push(rainDrop);
+    const rainDrop = new Shape({
+        path: {
+            pathString: "M169.6 382.3c-.4.2-1 .3-1.5.5-6.9 2.6-15.8 5.3-23 6.5-14.9 2.5-30.1 2.5-45 0-35-5.9-66.8-28.7-84-59.8C-6.2 289-3.4 245.1 12.6 203c14.7-38.6 71.7-126.1 95.5-176.5 2.3-4.9 8.7-25.2 13.2-26.2 9.6-2.1 10.2 9.6 15.8 21.2C143 33.8 149.3 46 155.6 58c28.2 53 86.1 133.9 92.5 189.5 6.6 57.4-24.1 113.4-78.5 134.8z",
+            height: 10
+        },
+        fillColor: WebColors.Blue,
+        lineWidth: 0,
+        // for now, position raindrops off the visible scene
+        position: {
+            x: -100,
+            y: -100
+        },
+    });
+    sceneOne.addChild(rainDrop)
+    rainDrop.physicsBody = new PhysicsBody({
+        circleOfRadius: 5,
+        friction: 0,
+        resting: true,
+        // raindrops are category 3
+        categoryBitMask: 0b0100,
+        // raindrops collide only with category 2 (umbrella)
+        collisionBitMask: 0b0010
+    })
+    rainDrops.push(rainDrop);
 }
  
 const button = new Button({
-  text: "Rain",
-  position: { x: 100, y: 45 },
-  size: { width: 70, height: 50 },
-  isUserInteractionEnabled: true,
+    text: "Rain",
+    position: { x: 100, y: 45 },
+    size: { width: 70, height: 50 },
+    isUserInteractionEnabled: true,
 });
 sceneOne.addChild(button);
 button.onTapDown(() => {
-  button.run(Action.sequence([
-    Action.custom({
-      callback: () => {
-        rainDrops.forEach(r => {
-          r.position = {
-            x: RandomDraws.SingleFromRange(15, 185),
-            y: RandomDraws.SingleFromRange(80, 110)
-          },
-            // raindrops may be falling and rotating from
-            // a prior run. Reset them.
-            r.zRotation = 0;
-          r.physicsBody.velocity = { dx: 0, dy: 0 }
-          r.physicsBody.resting = true;
-        })
-      }
-    }),
-    Action.wait({ duration: 250 }),
-    Action.custom({
-      callback: () => {
-        rainDrops.forEach(r => {
-          r.physicsBody.resting = false;
-        })
-      }
-    })
-  ]))
+    button.run(Action.sequence([
+        Action.custom({
+          callback: () => {
+              rainDrops.forEach(r => {
+                  r.position = {
+                      x: RandomDraws.SingleFromRange(15, 185),
+                      y: RandomDraws.SingleFromRange(80, 110)
+                  },
+                  // raindrops may be falling and rotating from
+                  // a prior run. Reset them.
+                  r.zRotation = 0;
+                  r.physicsBody.velocity = { dx: 0, dy: 0 }
+                  r.physicsBody.resting = true;
+              })
+          }
+        }),
+      Action.wait({ duration: 250 }),
+      Action.custom({
+          callback: () => {
+              rainDrops.forEach(r => {
+                  r.physicsBody.resting = false;
+              })
+          }
+      })
+    ]))
 });
 `
 

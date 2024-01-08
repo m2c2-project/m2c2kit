@@ -22,76 +22,76 @@ const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
  
 const edge = new Shape({
-  rect: { width: 150, height: 350 },
-  fillColor: WebColors.Transparent,
-  strokeColor: WebColors.Black,
-  lineWidth: 1,
-  position: { x: 100, y: 200 },
+    rect: { width: 150, height: 350 },
+    fillColor: WebColors.Transparent,
+    strokeColor: WebColors.Black,
+    lineWidth: 1,
+    position: { x: 100, y: 200 },
 });
 edge.physicsBody = new PhysicsBody({
-  edgeLoop: { width: 150, height: 350, thickness: 1000 },
-  restitution: .5,
+    edgeLoop: { width: 150, height: 350, thickness: 1000 },
+    restitution: .5,
 });
 sceneOne.addChild(edge);
  
 const pinkBall = new Shape({
-  circleOfRadius: 20,
-  fillColor: WebColors.LightPink,
-  position: { x: 100, y: 355 },
-  isUserInteractionEnabled: true
+    circleOfRadius: 20,
+    fillColor: WebColors.LightPink,
+    position: { x: 100, y: 355 },
+    isUserInteractionEnabled: true
 });
 pinkBall.physicsBody = new PhysicsBody({
-  circleOfRadius: 20,
+    circleOfRadius: 20,
 });
 sceneOne.addChild(pinkBall);
 const hiLabel = new Label({
-  text: "Hi"
+    text: "Hi"
 });
 pinkBall.addChild(hiLabel);
  
 const aimBall = new Shape({
-  circleOfRadius: 20,
-  fillColor: WebColors.Transparent,
-  strokeColor: WebColors.Transparent,
-  position: { x: 100, y: 355 },
-  isUserInteractionEnabled: true,
-  draggable: true
+    circleOfRadius: 20,
+    fillColor: WebColors.Transparent,
+    strokeColor: WebColors.Transparent,
+    position: { x: 100, y: 355 },
+    isUserInteractionEnabled: true,
+    draggable: true
 });
 sceneOne.addChild(aimBall);
  
 pinkBall.onPointerDown(() => {
-  // The position is a Point, which is a reference type. The next line will
-  // "de-link" the aimBall's position from the pinkBall's position. Otherwise,
-  // the pinkBall's physics will interfere with the aimBall's dragging.
-  aimBall.position = { x: pinkBall.position.x, y: pinkBall.position.y };
+    // The position is a Point, which is a reference type. The next line will
+    // "de-link" the aimBall's position from the pinkBall's position. Otherwise,
+    // the pinkBall's physics will interfere with the aimBall's dragging.
+    aimBall.position = { x: pinkBall.position.x, y: pinkBall.position.y };
 });
  
 aimBall.onDragStart(() => {
-  aimBall.position.x = pinkBall.position.x;
-  aimBall.position.y = pinkBall.position.y;
-  pinkBall.fillColor = WebColors.Transparent;
-  hiLabel.text = "";
-  pinkBall.strokeColor = WebColors.Black;
-  pinkBall.lineWidth = 1;
-  aimBall.fillColor = WebColors.LightPink;
+    aimBall.position.x = pinkBall.position.x;
+    aimBall.position.y = pinkBall.position.y;
+    pinkBall.fillColor = WebColors.Transparent;
+    hiLabel.text = "";
+    pinkBall.strokeColor = WebColors.Black;
+    pinkBall.lineWidth = 1;
+    aimBall.fillColor = WebColors.LightPink;
 });
  
 aimBall.onDragEnd((e) => {
-  aimBall.fillColor = WebColors.Transparent;
-  pinkBall.fillColor = WebColors.LightPink;
-  pinkBall.strokeColor = WebColors.Transparent;
-  hiLabel.text = "Hi!";
-  const xSign = aimBall.position.x < pinkBall.position.x ? 1 : -1;
-  const ySign = aimBall.position.y < pinkBall.position.y ? 1 : -1;
-  const force = {
-    dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 10), 1.1)),
-    dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 10), 1.1))
-  }
-  pinkBall.physicsBody.applyForce(force);
-  console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
-  // The position is a Point, which is a reference type. The next line will link
-  // the aimBall's position to the pinkBall's position while the pinkBall is moving.
-  aimBall.position = pinkBall.position;
+    aimBall.fillColor = WebColors.Transparent;
+    pinkBall.fillColor = WebColors.LightPink;
+    pinkBall.strokeColor = WebColors.Transparent;
+    hiLabel.text = "Hi!";
+    const xSign = aimBall.position.x < pinkBall.position.x ? 1 : -1;
+    const ySign = aimBall.position.y < pinkBall.position.y ? 1 : -1;
+    const force = {
+        dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 800), 1.1)),
+        dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 800), 1.1))
+    }
+    pinkBall.physicsBody.applyForce(force);
+    console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
+    // The position is a Point, which is a reference type. The next line will link
+    // the aimBall's position to the pinkBall's position while the pinkBall is moving.
+    aimBall.position = pinkBall.position;
 })
 `
 
@@ -104,76 +104,76 @@ const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
  
 const edge = new Shape({
-  rect: { width: 150, height: 350 },
-  fillColor: WebColors.Transparent,
-  strokeColor: WebColors.Black,
-  lineWidth: 1,
-  position: { x: 100, y: 200 },
+    rect: { width: 150, height: 350 },
+    fillColor: WebColors.Transparent,
+    strokeColor: WebColors.Black,
+    lineWidth: 1,
+    position: { x: 100, y: 200 },
 });
 edge.physicsBody = new PhysicsBody({
-  edgeLoop: { width: 150, height: 350 },
-  restitution: .5,
+    edgeLoop: { width: 150, height: 350 },
+    restitution: .5,
 });
 sceneOne.addChild(edge);
  
 const pinkBall = new Shape({
-  circleOfRadius: 20,
-  fillColor: WebColors.LightPink,
-  position: { x: 100, y: 355 },
-  isUserInteractionEnabled: true
+    circleOfRadius: 20,
+    fillColor: WebColors.LightPink,
+    position: { x: 100, y: 355 },
+    isUserInteractionEnabled: true
 });
 pinkBall.physicsBody = new PhysicsBody({
-  circleOfRadius: 20,
+    circleOfRadius: 20,
 });
 sceneOne.addChild(pinkBall);
 const hiLabel = new Label({
-  text: "Hi"
+    text: "Hi"
 });
 pinkBall.addChild(hiLabel);
  
 const aimBall = new Shape({
-  circleOfRadius: 20,
-  fillColor: WebColors.Transparent,
-  strokeColor: WebColors.Transparent,
-  position: { x: 100, y: 355 },
-  isUserInteractionEnabled: true,
-  draggable: true
+    circleOfRadius: 20,
+    fillColor: WebColors.Transparent,
+    strokeColor: WebColors.Transparent,
+    position: { x: 100, y: 355 },
+    isUserInteractionEnabled: true,
+    draggable: true
 });
 sceneOne.addChild(aimBall);
  
 pinkBall.onPointerDown(() => {
-  // The position is a Point, which is a reference type. The next line will
-  // "de-link" the aimBall's position from the pinkBall's position. Otherwise,
-  // the pinkBall's physics will interfere with the aimBall's dragging.
-  aimBall.position = { x: pinkBall.position.x, y: pinkBall.position.y };
+    // The position is a Point, which is a reference type. The next line will
+    // "de-link" the aimBall's position from the pinkBall's position. Otherwise,
+    // the pinkBall's physics will interfere with the aimBall's dragging.
+    aimBall.position = { x: pinkBall.position.x, y: pinkBall.position.y };
 });
  
 aimBall.onDragStart(() => {
-  aimBall.position.x = pinkBall.position.x;
-  aimBall.position.y = pinkBall.position.y;
-  pinkBall.fillColor = WebColors.Transparent;
-  hiLabel.text = "";
-  pinkBall.strokeColor = WebColors.Black;
-  pinkBall.lineWidth = 1;
-  aimBall.fillColor = WebColors.LightPink;
+    aimBall.position.x = pinkBall.position.x;
+    aimBall.position.y = pinkBall.position.y;
+    pinkBall.fillColor = WebColors.Transparent;
+    hiLabel.text = "";
+    pinkBall.strokeColor = WebColors.Black;
+    pinkBall.lineWidth = 1;
+    aimBall.fillColor = WebColors.LightPink;
 });
  
 aimBall.onDragEnd((e) => {
-  aimBall.fillColor = WebColors.Transparent;
-  pinkBall.fillColor = WebColors.LightPink;
-  pinkBall.strokeColor = WebColors.Transparent;
-  hiLabel.text = "Hi!";
-  const xSign = aimBall.position.x < pinkBall.position.x ? 1 : -1;
-  const ySign = aimBall.position.y < pinkBall.position.y ? 1 : -1;
-  const force = {
-    dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 10), 1.1)),
-    dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 10), 1.1))
-  }
-  pinkBall.physicsBody.applyForce(force);
-  console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
-  // The position is a Point, which is a reference type. The next line will link
-  // the aimBall's position to the pinkBall's position while the pinkBall is moving.
-  aimBall.position = pinkBall.position;
+    aimBall.fillColor = WebColors.Transparent;
+    pinkBall.fillColor = WebColors.LightPink;
+    pinkBall.strokeColor = WebColors.Transparent;
+    hiLabel.text = "Hi!";
+    const xSign = aimBall.position.x < pinkBall.position.x ? 1 : -1;
+    const ySign = aimBall.position.y < pinkBall.position.y ? 1 : -1;
+    const force = {
+        dx: xSign * (Math.pow(Math.abs((pinkBall.position.x - aimBall.position.x) / 800), 1.1)),
+        dy: ySign * (Math.pow(Math.abs((pinkBall.position.y - aimBall.position.y) / 800), 1.1))
+    }
+    pinkBall.physicsBody.applyForce(force);
+    console.log("Applied force: dx = " + force.dx + ", dy = " + force.dy)
+    // The position is a Point, which is a reference type. The next line will link
+    // the aimBall's position to the pinkBall's position while the pinkBall is moving.
+    aimBall.position = pinkBall.position;
 })
 `}
 ];

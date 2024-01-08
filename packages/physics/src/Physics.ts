@@ -17,6 +17,12 @@ interface PhysicsBodiesDictionary {
   [entityUuid: string]: Matter.Body;
 }
 
+interface ApplyForceQueueItem {
+  body: Matter.Body;
+  position: Matter.Vector;
+  force: Matter.Vector;
+}
+
 export interface PhysicsEventListener {
   type: string;
   callback: (event: PhysicsEvent) => void;
@@ -33,6 +39,8 @@ export interface PhysicsEvent extends EventBase {
   bodyA: PhysicsBody;
   bodyB: PhysicsBody;
 }
+
+const DELTA_TIME_60_FPS = 16.66666667;
 
 /**
  * Physics functionality plugin
@@ -51,6 +59,8 @@ export class Physics implements Plugin {
   private framesSimulatedCount = 0;
   private cumulativeFrameSimulationTime = 0;
   private eventListeners = new Array<PhysicsEventListener>();
+  private applyForceQueue = new Array<ApplyForceQueueItem>();
+  private accumulatedDeltaTime = 0;
 
   /**
    * Creates an instance of the physics engine.
@@ -86,17 +96,64 @@ export class Physics implements Plugin {
   }
 
   afterUpdate(game: Game, deltaTime: number): void {
-    const entities = game.entities;
-    this.initializePhysicsBodies(entities);
+    this.initializePhysicsBodies(game.entities);
+
+    /**
+     * To ensure the physics simulation shows the same behavior across
+     * various frame rates, we need to run the simulation at a fixed
+     * time step. We use a fixed time step of 16.66666667 milliseconds, which
+     * corresponds to 60 frames per second. If the frame rate is lower than
+     * 60 fps, we run the simulation multiple times to catch up. If the frame
+     * rate is higher than 60 fps, we skip some simulation steps.
+     *
+     * When the frame rate is not exactly 60 fps, we keep track of the
+     * accumulated delta time and run the simulation when the accumulated
+     * delta time is greater than or equal to 16.66666667 milliseconds.
+     *
+     * See https://gafferongames.com/post/fix_your_timestep/
+     */
+    this.accumulatedDeltaTime = this.accumulatedDeltaTime + deltaTime;
+    if (this.accumulatedDeltaTime < DELTA_TIME_60_FPS) {
+      return;
+    }
 
     const engineUpdateStart = performance.now();
-    Engine.update(this.engine, deltaTime);
+    const engineTicksToRun = Math.floor(
+      this.accumulatedDeltaTime / DELTA_TIME_60_FPS,
+    );
+
+    for (let i = 0; i < engineTicksToRun; i++) {
+      while (this.applyForceQueue.length > 0) {
+        const item = this.applyForceQueue.shift();
+        if (item === undefined) {
+          throw new Error("apply force queue item is undefined");
+        }
+        Matter.Body.applyForce(
+          item.body,
+          item.position,
+          Matter.Vector.create(item.force.x, item.force.y),
+        );
+      }
+      Engine.update(this.engine, DELTA_TIME_60_FPS);
+      this.accumulatedDeltaTime = this.accumulatedDeltaTime - DELTA_TIME_60_FPS;
+    }
+    this.applyForceQueue = [];
+
     this.cumulativeFrameSimulationTime =
       this.cumulativeFrameSimulationTime +
       (performance.now() - engineUpdateStart);
     this.framesSimulatedCount++;
     this.logAverageFrameUpdateDuration();
-    this.updateEntitiesFromPhysicsBodies(entities);
+    this.updateEntitiesFromPhysicsBodies(game.entities);
+  }
+
+  /**
+   * Adds an applyForce() call to the queue.
+   *
+   * @param item - {@link ApplyForceQueueItem}
+   */
+  scheduleApplyForce(item: ApplyForceQueueItem): void {
+    this.applyForceQueue.push(item);
   }
 
   private addEventListener(

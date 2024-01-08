@@ -4,6 +4,137 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.16] - 2024-01-07
+
+### Added
+
+- Plugin system.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.13] - 2024-01-07
+
+### Fixed
+
+- `DrawPad` no longer draws incomplete lines when pointer is moved quickly.
+- `Button` text changes after button is created are respected.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.3] - 2024-01-07
+
+### Fixed
+
+- `EdgeLoop` rectangles overlap to avoid tunneling.
+- Rotation and scale in physics engine are linked to `zRotation` and `scale` of m2c2kit `Entity`.
+
+### Added
+
+- Bodies can rotate.
+- Bodies have additional properties for mass, density, speed, angular velocity.
+- Bodies have `applyForce()` method.
+- `Physics` class has `onContactBegin()` and `onContactEnd()` methods to attach handlers for contact events.
+
+### Changed
+
+- Updated dependencies.
+- Physics engine uses fixed time step to ensure consistent simulation across different frame rates.
+- `Physics` class is not a singleton.
+- Physics engine uses plugin system and must be added to the game with the asynchronous `registerPlugin()` method.
+
+## `@m2c2kit/cli` [0.3.13] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.12] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.9] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.12] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.11] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.11] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.6] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.13] - 2024-01-07
+
+### Added
+
+- `lure_position_on_card` parameter to control lure symbol positioning on card.
+
+### Changed
+
+- Updated dependencies.
+- By default, lure symbol will appear randomly on top or bottom card position, if a lure trial.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.13] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.13] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.13] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.10] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.12] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.11] - 2024-01-07
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.15] - 2023-12-12
 
 ### Fixed

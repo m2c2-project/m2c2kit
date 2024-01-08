@@ -66,7 +66,7 @@ for (let i = 0; i < NUMBER_OF_BALLS; i++) {
     });
     ball.onTapDown(() => {
         ball.physicsBody.applyForce({
-            dx: (Math.random() - .5) / 4, dy: -.125
+            dx: (Math.random() - .5) / 100, dy: -.004
         });
     });
     sceneOne.addChild(ball);

@@ -63,14 +63,14 @@ const button = new Button( {
 });
 sceneOne.addChild(button);
 button.onTapDown( () => {
-  if (button.text === "Go") {    
-    button.text = "Reset";
-    pinkBall.physicsBody.resting = false;
-  } else {
-    button.text = "Go";
-    pinkBall.position = { x: 100, y: 130};
-    pinkBall.physicsBody.resting = true;
-  }
+    if (button.text === "Go") {    
+        button.text = "Reset";
+        pinkBall.physicsBody.resting = false;
+    } else {
+        button.text = "Go";
+        pinkBall.position = { x: 100, y: 130};
+        pinkBall.physicsBody.resting = true;
+    }
 });
 `
 

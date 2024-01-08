@@ -117,17 +117,18 @@ export class PhysicsBody implements PhysicsBodyOptions {
       atPosition = this.entity.position;
     }
     /**
-     * Matter.js docs note that "If all or part of the force duration is
-     * some fraction of a timestep, first multiply the force by
-     * duration / timestep." Thus, we adjust the force by how many frames
-     * per second we're running at.
+     * We cannot call `Matter.Body.applyForce()` here because it will
+     * immediately apply the force to the body, without regard to the
+     * frames per second that the physics engine is running. Instead, we
+     * schedule the force to be applied by the physics engine at the
+     * appropriate time, as determined in the `afterUpdate()` plugin
+     * entrypoint.
      */
-    const fps = 1000 / Globals.deltaTime;
-    Matter.Body.applyForce(
-      this.body,
-      Matter.Vector.create(atPosition.x, atPosition.y),
-      Matter.Vector.create(force.dx / fps, force.dy / fps),
-    );
+    this.physics.scheduleApplyForce({
+      body: this.body,
+      position: Matter.Vector.create(atPosition.x, atPosition.y),
+      force: Matter.Vector.create(force.dx, force.dy),
+    });
   }
 
   private createCircleBody(options: PhysicsBodyOptions) {
