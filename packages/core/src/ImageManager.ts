@@ -3,34 +3,58 @@ import { CanvasKit, Image } from "canvaskit-wasm";
 import { LoadedImage } from "./LoadedImage";
 import { RenderedDataUrlImage } from "./RenderedDataUrlImage";
 import { BrowserImage } from "./BrowserImage";
-import { GameImages } from "./GameImages";
-import { Session } from "./Session";
-import { ActivityType } from "./ActivityType";
 import { Game } from "./Game";
 
-class RenderedImages {
-  [gameUuid: string]: {
-    [name: string]: RenderedDataUrlImage;
-  };
-}
-
-class LoadedImages {
-  [gameUuid: string]: {
-    [name: string]: LoadedImage;
-  };
-}
-
+/**
+ * Fetches, loads, and provides images to the game.
+ *
+ * @remarks FOR INTERNAL USE ONLY
+ */
 export class ImageManager {
-  canvasKit?: CanvasKit;
-  private renderedImages = new RenderedImages();
-  loadedImages = new LoadedImages();
+  loadedImages: LoadedImages = {};
+  private canvasKit: CanvasKit;
+  private renderedImages: RenderedImages = {};
   private _scratchCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;
-  private session: Session;
+  private game: Game;
 
-  constructor(session: Session) {
-    this.session = session;
+  constructor(game: Game) {
+    this.game = game;
+    this.canvasKit = game.canvasKit;
+  }
+
+  /**
+   * Fetches image assets and makes them available for use.
+   *
+   * @param images - array of BrowserImage objects (name, url, size)
+   */
+  async initializeImages(
+    images: Array<BrowserImage> | undefined,
+  ): Promise<void> {
+    await this.renderImages(images ?? []);
+    this.loadRenderedImages();
+    this.removeScratchCanvas();
+  }
+
+  /**
+   * Converts the browser-rendered images to CanvasKit Images and makes them
+   * available to the game.
+   *
+   * @remarks Typically, a programmer won't call this because
+   * initializeImages() will do this.
+   */
+  private loadRenderedImages(): void {
+    const imageNames = Object.keys(this.renderedImages);
+    imageNames.forEach((imageName) => {
+      const loadedImage = this.convertRenderedDataUrlImageToCanvasKitImage(
+        this.renderedImages[imageName],
+      );
+      if (!this.loadedImages) {
+        this.loadedImages = {};
+      }
+      this.addLoadedImage(loadedImage);
+    });
   }
 
   /**
@@ -39,97 +63,69 @@ export class ImageManager {
    * @remarks Typically, this won't be called directly because a programmer
    * will use a higher-level abstraction (m2c2kit Sprite).
    *
-   * @param gameUuid - The game that the image resource is part of
    * @param imageName - The name given to the rendered image
    * @returns A CanvasKit Image
    */
-  getLoadedImage(gameUuid: string, imageName: string): LoadedImage {
-    return this.loadedImages[gameUuid][imageName];
+  getLoadedImage(imageName: string): LoadedImage {
+    return this.loadedImages[imageName];
   }
 
   /**
-   * Adds a CanvasKit Image to the images available to a given game.
+   * Adds a CanvasKit Image to the images available to the game.
    *
    * @remarks Typically, a programmer won't call this because images will be
-   * automatically rendered and loaded in the Activity async init.
+   * automatically rendered and loaded in initializeImages().
    * The only time this function is called in-game is when our internal
    * methods add screenshot images needed for transitions.
    *
    * @param loadedImage - An image that has been converted to a CanvasKit Image
-   * @param gameUuid - The game that the Image is part of
    */
-  addLoadedImage(loadedImage: LoadedImage, gameUuid: string): void {
+  addLoadedImage(loadedImage: LoadedImage): void {
     /**
-     *  If no images were rendered and loaded during Activity init
+     *  If no images were rendered and loaded during initializeImages(),
      *  (or if we're running Jest tests and we skip all that), then
-     *  then this.loadedImages[gameUuid] is undefined. Make an empty
+     *  then this.loadedImages is undefined. Make an empty
      *  object so it can hold images.
      */
-    if (!this.loadedImages[gameUuid]) {
-      this.loadedImages[gameUuid] = {};
+    if (!this.loadedImages) {
+      this.loadedImages = {};
     }
-    this.loadedImages[gameUuid][loadedImage.name] = loadedImage;
+    this.loadedImages[loadedImage.name] = loadedImage;
   }
 
   /**
    * Renders game images from their original format (png, jpg, svg) to
    * CanvasKit Image.
    *
-   * @remarks Typically, a programmer won't call this because the Session
-   * object will manage this. Rendering is an async activity, and thus
+   * @remarks Typically, a programmer won't call this because
+   * initializeImages() will do this. Rendering is an async activity, and thus
    * this method returns a promise. Rendering of all images is done in
    * parallel.
    *
-   * @param allGamesImages - An array of GameImages data structures that
-   * specify the image's desired size, it's name, and where the image to be
-   * rendered is located (e.g., embedded svgString or url)
+   * @param images - array of BrowserImage
    * @returns A promise that completes when all game images have rendered
    */
-  renderImages(allGamesImages: Array<GameImages>): Promise<void[]> {
+  private renderImages(images: Array<BrowserImage>): Promise<void[]> {
     const renderImagesPromises = new Array<Promise<void>>();
-    allGamesImages.forEach((gameImages) => {
-      if (gameImages.images) {
-        const findDuplicates = (arr: string[]) =>
-          arr.filter((item, index) => arr.indexOf(item) != index);
-        const duplicateImageNames = findDuplicates(
-          gameImages.images.map((i) => i.imageName)
-        );
-        if (duplicateImageNames.length > 0) {
-          throw new Error(
-            "image names must be unique. these image names are duplicated within a game: " +
-              duplicateImageNames.join(", ")
-          );
-        }
-        gameImages.images.map((browserImage) => {
-          renderImagesPromises.push(
-            this.renderBrowserImage(gameImages.uuid, browserImage)
-          );
-        });
-      }
-    });
-    return Promise.all(renderImagesPromises);
-  }
 
-  /**
-   * Adds all rendered CanvasKit Images to the images available to m2c2kit.
-   *
-   * @remarks Typically, a programmer won't call this because the Session
-   * object will manage this.
-   */
-  loadAllGamesRenderedImages(): void {
-    const gameUuids = Object.keys(this.renderedImages);
-    gameUuids.forEach((gameUuid) => {
-      const imageNames = Object.keys(this.renderedImages[gameUuid]);
-      imageNames.forEach((imageName) => {
-        const loadedImage = this.convertRenderedDataUrlImageToCanvasKitImage(
-          this.renderedImages[gameUuid][imageName]
+    if (images) {
+      const findDuplicates = (arr: string[]) =>
+        arr.filter((item, index) => arr.indexOf(item) != index);
+      const duplicateImageNames = findDuplicates(
+        images.map((i) => i.imageName),
+      );
+      if (duplicateImageNames.length > 0) {
+        throw new Error(
+          `image names must be unique. these image names are duplicated within a game ${this.game.id}: ` +
+            duplicateImageNames.join(", "),
         );
-        if (!this.loadedImages[gameUuid]) {
-          this.loadedImages[gameUuid] = {};
-        }
-        this.addLoadedImage(loadedImage, gameUuid);
+      }
+      images.map((browserImage) => {
+        renderImagesPromises.push(this.renderBrowserImage(browserImage));
       });
-    });
+    }
+
+    return Promise.all(renderImagesPromises);
   }
 
   /**
@@ -142,14 +138,10 @@ export class ImageManager {
    * Additional complexity comes from the potentially multiple async steps and
    * the multiple errors that can happen throughout.
    *
-   * @param gameUuid
    * @param browserImage
    * @returns A promise of type void
    */
-  private renderBrowserImage(
-    gameUuid: string,
-    browserImage: BrowserImage
-  ): Promise<void> {
+  private renderBrowserImage(browserImage: BrowserImage): Promise<void> {
     const image = document.createElement("img");
 
     const renderLoadedImage = () => {
@@ -168,14 +160,14 @@ export class ImageManager {
         browserImage.imageName,
         dataUrl,
         browserImage.width,
-        browserImage.height
+        browserImage.height,
       );
       image.remove();
 
-      if (!this.renderedImages[gameUuid]) {
-        this.renderedImages[gameUuid] = {};
+      if (!this.renderedImages) {
+        this.renderedImages = {};
       }
-      this.renderedImages[gameUuid][browserImage.imageName] = renderedImage;
+      this.renderedImages[browserImage.imageName] = renderedImage;
     };
 
     const onError = () => {
@@ -186,18 +178,18 @@ export class ImageManager {
         additional = ` image source was url ${browserImage.url}`;
       }
       console.warn(
-        `unable to render image named ${browserImage.imageName}.${additional}`
+        `unable to render image named ${browserImage.imageName}.${additional}`,
       );
       const renderedImage = new RenderedDataUrlImage(
         browserImage.imageName,
         "",
         0,
-        0
+        0,
       );
-      if (!this.renderedImages[gameUuid]) {
-        this.renderedImages[gameUuid] = {};
+      if (!this.renderedImages) {
+        this.renderedImages = {};
       }
-      this.renderedImages[gameUuid][browserImage.imageName] = renderedImage;
+      this.renderedImages[browserImage.imageName] = renderedImage;
     };
 
     return new Promise((resolve) => {
@@ -247,15 +239,15 @@ export class ImageManager {
             imageSource = image.src;
           }
           console.warn(
-            `svg image named ${browserImage.imageName} loaded from ${imageSource} has naturalHeight 0 and/or naturalWidth 0. This is probably because the svg is missing height and width attributes. This will cause the svg not to render on Firefox, due to issue described at https://bugzilla.mozilla.org/show_bug.cgi?id=700533. m2c2kit will attempt to infer the height and width from the svg viewBox, but it is strongly recommended that all svg images have height and width attributes.`
+            `svg image named ${browserImage.imageName} loaded from ${imageSource} has naturalHeight 0 and/or naturalWidth 0. This is probably because the svg is missing height and width attributes. This will cause the svg not to render on Firefox, due to issue described at https://bugzilla.mozilla.org/show_bug.cgi?id=700533. m2c2kit will attempt to infer the height and width from the svg viewBox, but it is strongly recommended that all svg images have height and width attributes.`,
           );
 
           const reloadImageUsingViewBoxWidthHeight = (
-            svgElement: HTMLElement
+            svgElement: HTMLElement,
           ): void => {
             const viewBoxError = (): void => {
               console.warn(
-                `svg image named ${browserImage.imageName} has missing or invalid viewBox; unable to render.`
+                `svg image named ${browserImage.imageName} has missing or invalid viewBox; unable to render.`,
               );
               renderLoadedImage();
               resolve();
@@ -289,27 +281,19 @@ export class ImageManager {
           if (browserImage.svgString) {
             const svgElement = new DOMParser().parseFromString(
               browserImage.svgString,
-              "text/xml"
+              "text/xml",
             ).documentElement;
             reloadImageUsingViewBoxWidthHeight(svgElement);
           } else if (browserImage.url) {
-            const game = this.session.options.activities
-              .filter((a) => a.type === ActivityType.Game)
-              .filter((g) => g.uuid === gameUuid)
-              .map((g) => g as Game)
-              .find(Boolean);
-            if (!game) {
-              throw new Error("game undefined");
-            }
-            const browserImageUrl = game.prependAssetsGameIdUrl(
-              browserImage.url
+            const browserImageUrl = this.game.prependAssetsGameIdUrl(
+              browserImage.url,
             );
             fetch(browserImageUrl)
               .then((res) => res.text())
               .then((body) => {
                 const svgElement = new DOMParser().parseFromString(
                   body,
-                  "text/xml"
+                  "text/xml",
                 ).documentElement;
                 reloadImageUsingViewBoxWidthHeight(svgElement);
               });
@@ -317,7 +301,7 @@ export class ImageManager {
             // we should never get here, because either browserImage.svgString
             // or browserImage.url should be defined
             console.warn(
-              `unable to render svg image named ${browserImage.imageName}.`
+              `unable to render svg image named ${browserImage.imageName}.`,
             );
             renderLoadedImage();
             resolve();
@@ -326,7 +310,7 @@ export class ImageManager {
           if (image.naturalHeight === 0 || image.naturalWidth === 0) {
             // not an svg, but still 0 natural height or natural width
             console.warn(
-              `image named ${browserImage.imageName} has naturalHeight 0 and/or naturalWidth 0. This may cause inaccurate rendering. Please check the image.`
+              `image named ${browserImage.imageName} has naturalHeight 0 and/or naturalWidth 0. This may cause inaccurate rendering. Please check the image.`,
             );
           }
           renderLoadedImage();
@@ -341,7 +325,7 @@ export class ImageManager {
 
       if (browserImage.svgString && browserImage.url) {
         throw new Error(
-          `provide svgString or url. both were provided for image named ${browserImage.imageName}`
+          `provide svgString or url. both were provided for image named ${browserImage.imageName}`,
         );
       }
       if (browserImage.svgString) {
@@ -356,16 +340,9 @@ export class ImageManager {
          * So, now we fetch the image ourselves and set the image src
          * to the data url.
          */
-
-        const game = this.session.options.activities
-          .filter((a) => a.type === ActivityType.Game)
-          .filter((g) => g.uuid === gameUuid)
-          .map((g) => g as Game)
-          .find(Boolean);
-        if (!game) {
-          throw new Error("game undefined");
-        }
-        const browserImageUrl = game.prependAssetsGameIdUrl(browserImage.url);
+        const browserImageUrl = this.game.prependAssetsGameIdUrl(
+          browserImage.url,
+        );
         fetch(browserImageUrl)
           .then((response) => response.arrayBuffer())
           .then((data) => {
@@ -375,7 +352,7 @@ export class ImageManager {
           });
       } else {
         throw new Error(
-          `no svgString or url provided for image named ${browserImage.imageName}`
+          `no svgString or url provided for image named ${browserImage.imageName}`,
         );
       }
     });
@@ -406,7 +383,7 @@ export class ImageManager {
   }
 
   private convertRenderedDataUrlImageToCanvasKitImage(
-    loadedDataUrlImage: RenderedDataUrlImage
+    loadedDataUrlImage: RenderedDataUrlImage,
   ): LoadedImage {
     if (!this.canvasKit) {
       throw new Error("canvasKit undefined");
@@ -414,26 +391,26 @@ export class ImageManager {
     let img: Image | null = null;
     try {
       img = this.canvasKit.MakeImageFromEncoded(
-        this.dataURLtoArrayBuffer(loadedDataUrlImage.dataUrlImage)
+        this.dataURLtoArrayBuffer(loadedDataUrlImage.dataUrlImage),
       );
     } catch {
       throw new Error(
-        `could not create image with name "${loadedDataUrlImage.name}."`
+        `could not create image with name "${loadedDataUrlImage.name}."`,
       );
     }
     if (img === null) {
       throw new Error(
-        `could not create image with name "${loadedDataUrlImage.name}."`
+        `could not create image with name "${loadedDataUrlImage.name}."`,
       );
     }
     const loadedImage = new LoadedImage(
       loadedDataUrlImage.name,
       img,
       loadedDataUrlImage.width,
-      loadedDataUrlImage.height
+      loadedDataUrlImage.height,
     );
     console.log(
-      `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`
+      `image loaded. name: ${loadedDataUrlImage.name}, w: ${loadedDataUrlImage.width}, h: ${loadedDataUrlImage.height}`,
     );
     return loadedImage;
   }
@@ -446,7 +423,10 @@ export class ImageManager {
   private get scratchCanvas(): HTMLCanvasElement {
     if (!this._scratchCanvas) {
       this._scratchCanvas = document.createElement("canvas");
-      this._scratchCanvas.id = "m2c2kitscratchcanvas";
+      // use a random number in the id to avoid collisions
+      this._scratchCanvas.id = `m2c2kit-scratch-canvas-${
+        this.game.id
+      }-${Math.floor(Math.random() * 1000000)}`;
       this._scratchCanvas.hidden = true;
       document.body.appendChild(this._scratchCanvas);
 
@@ -471,8 +451,24 @@ export class ImageManager {
     return u8arr.buffer;
   }
 
-  removeScratchCanvas(): void {
+  private removeScratchCanvas(): void {
     this.ctx = undefined;
     this._scratchCanvas?.remove();
   }
+}
+
+/**
+ * A key-value object that holds information about images that have been
+ * rendered by the browser and converted to data URLs.
+ */
+interface RenderedImages {
+  [name: string]: RenderedDataUrlImage;
+}
+
+/**
+ * a key-value object that holds information about images that have been
+ * converted from data URLs and loaded and ready to use as CanvasKit Images.
+ */
+interface LoadedImages {
+  [name: string]: LoadedImage;
 }

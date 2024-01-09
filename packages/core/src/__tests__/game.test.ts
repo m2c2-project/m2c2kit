@@ -12,6 +12,7 @@ import {
   Label,
   GameParameters,
   FontManager,
+  ImageManager,
 } from "..";
 
 TestHelpers.createM2c2KitMock();
@@ -114,6 +115,24 @@ describe("FontManager", () => {
 
   it("creates a FontManager", () => {
     expect(g1.fontManager).toBeInstanceOf(FontManager);
+  });
+});
+
+describe("ImageManager", () => {
+  beforeEach(async () => {
+    g1 = new Game1();
+
+    const options: SessionOptions = {
+      activities: [g1],
+      canvasKitWasmUrl: "canvaskit.wasm",
+    };
+    session = new Session(options);
+    TestHelpers.setupDomAndGlobals();
+    await session.initialize();
+  });
+
+  it("creates an ImageManager", () => {
+    expect(g1.imageManager).toBeInstanceOf(ImageManager);
   });
 });
 

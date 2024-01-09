@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TestHelpers } from "./TestHelpers";
-import {
-  Session,
-  SessionOptions,
-  FontManager,
-  ImageManager,
-  Game,
-  GameOptions,
-  Scene,
-} from "..";
+import { Session, SessionOptions, Game, GameOptions, Scene } from "..";
 
 TestHelpers.createM2c2KitMock();
 
@@ -81,16 +73,6 @@ beforeEach(async () => {
   TestHelpers.setupDomAndGlobals();
 });
 
-describe("Session", () => {
-  beforeEach(async () => {
-    await session.initialize();
-  });
-
-  it("creates an ImageManager", () => {
-    expect(session.imageManager).toBeInstanceOf(ImageManager);
-  });
-});
-
 describe("Session init", () => {
   it("executes", () => {
     return session
@@ -103,7 +85,7 @@ describe("Session init", () => {
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
     // expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
-    expect(session.imageManager.canvasKit).toHaveProperty("MakeCanvasSurface");
+    // expect(session.imageManager.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
   });

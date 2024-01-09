@@ -5,7 +5,6 @@ import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { SpriteOptions } from "./SpriteOptions";
 import { LoadedImage } from "./LoadedImage";
-import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
@@ -37,14 +36,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   }
 
   override initialize(): void {
-    const activity = (this.parentSceneAsEntity as unknown as Scene).game
-      .session;
-    if (!activity) {
-      throw new Error("activity is undefined");
-    }
-    const imageManager = activity.imageManager;
-    const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
-    this.loadedImage = imageManager.getLoadedImage(gameUuid, this._imageName);
+    this.loadedImage = this.game.imageManager.getLoadedImage(this._imageName);
     if (!this.loadedImage) {
       throw new Error(
         `could not create sprite. the image named ${this._imageName} has not been loaded`,

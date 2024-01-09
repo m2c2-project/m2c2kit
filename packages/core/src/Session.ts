@@ -1,10 +1,8 @@
 import { EventBase, EventType } from "./EventBase";
 import { EventListenerBase } from "./EventListenerBase";
 import { Activity } from "./Activity";
-import { ImageManager } from "./ImageManager";
 import CanvasKitInit, { CanvasKit } from "canvaskit-wasm";
 import { Game } from "./Game";
-import { GameImages } from "./GameImages";
 import { Timer } from "./Timer";
 import { SessionOptions } from "./SessionOptions";
 import { Uuid } from "./Uuid";
@@ -19,7 +17,6 @@ import { Constants } from "./Constants";
 
 export class Session {
   options: SessionOptions;
-  imageManager: ImageManager;
   currentActivity?: Activity;
   uuid: string;
   dataStores?: IDataStore[];
@@ -44,7 +41,6 @@ export class Session {
         );
       }
     }
-    this.imageManager = new ImageManager(this);
     this.options.activities.forEach((activity) => (activity.session = this));
     if (this.options.sessionUuid) {
       this.uuid = this.options.sessionUuid;
@@ -267,13 +263,8 @@ export class Session {
       );
     }
 
-    const [canvasKit] = await this.getAsynchronousAssets();
-    this.options.activities
-      .filter((activity) => activity.type == ActivityType.Game)
-      .forEach((activity) => {
-        const game = activity as unknown as Game;
-        game.canvasKit = canvasKit;
-      });
+    const canvasKit = await this.loadCanvasKit(this.options.canvasKitWasmUrl);
+    this.assignCanvasKit(canvasKit);
 
     await Promise.all(
       this.options.activities.map((activity) => {
@@ -296,9 +287,6 @@ export class Session {
         return activity.initialize();
       }),
     );
-
-    this.loadAssets(canvasKit);
-    this.imageManager.removeScratchCanvas();
 
     console.log(
       `⚪ Session.sessionInitialize() took ${Timer.elapsed(
@@ -459,11 +447,16 @@ export class Session {
      * instance of the activity is created, the object has a different uuid.
      * We must update the uuid in the dictionaries (if it exists).
      */
-    if (this.imageManager.loadedImages[currentActivityOldObject.uuid]) {
-      this.imageManager.loadedImages[this.currentActivity.uuid] =
-        this.imageManager.loadedImages[currentActivityOldObject.uuid];
-      delete this.imageManager.loadedImages[currentActivityOldObject.uuid];
-    }
+    // if (this.imageManager.loadedImages[currentActivityOldObject.uuid]) {
+    //   this.imageManager.loadedImages[this.currentActivity.uuid] =
+    //     this.imageManager.loadedImages[currentActivityOldObject.uuid];
+    //   delete this.imageManager.loadedImages[currentActivityOldObject.uuid];
+    // }
+    // if (this.fontManager.gameTypefaces[currentActivityOldObject.uuid]) {
+    //   this.fontManager.gameTypefaces[this.currentActivity.uuid] =
+    //     this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
+    //   delete this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
+    // }
 
     await this.currentActivity.initialize();
     await this.currentActivity.start();
@@ -571,21 +564,6 @@ export class Session {
     return this.sessionDictionary.has(key);
   }
 
-  /**
-   * Gets asynchronous assets, including initialization of canvaskit wasm,
-   * fetching of fonts from specified urls, and rendering and fetching
-   * of images
-   * @returns
-   */
-  private async getAsynchronousAssets(): Promise<[CanvasKit, void[]]> {
-    const canvasKitPromise = this.loadCanvasKit(this.options.canvasKitWasmUrl);
-    const renderImagesPromise = this.imageManager.renderImages(
-      this.getImagesConfigurationFromGames(),
-    );
-
-    return await Promise.all([canvasKitPromise, renderImagesPromise]);
-  }
-
   // call CanvasKitInit through loadCanvasKit so we can mock
   // loadCanvasKit using jest
   private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
@@ -594,29 +572,13 @@ export class Session {
     return CanvasKitInit({ locateFile: (_file) => fullUrl });
   }
 
-  private loadAssets(canvasKit: CanvasKit) {
-    this.assignCanvasKit(canvasKit);
-    this.imageManager.loadAllGamesRenderedImages();
-  }
-
   private assignCanvasKit(canvasKit: CanvasKit) {
     this.canvasKit = canvasKit;
-    this.imageManager.canvasKit = this.canvasKit;
-
     this.options.activities
       .filter((activity) => activity.type == ActivityType.Game)
       .forEach((activity) => {
         const game = activity as unknown as Game;
         game.canvasKit = canvasKit;
-      });
-  }
-
-  private getImagesConfigurationFromGames(): GameImages[] {
-    return this.options.activities
-      .filter((activity) => activity.type == ActivityType.Game)
-      .map((activity) => {
-        const game = activity as unknown as Game;
-        return { uuid: game.uuid, images: game.options.images ?? [] };
       });
   }
 

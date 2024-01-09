@@ -59,6 +59,7 @@ import { ActivityResultsEvent } from "./ActivityResultsEvent";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Plugin } from "./Plugin";
 import { FontManager } from "./FontManager";
+import { ImageManager } from "./ImageManager";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -94,6 +95,7 @@ export class Game implements Activity {
   additionalParameters?: unknown;
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
   private _fontManager?: FontManager;
+  private _imageManager?: ImageManager;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -133,8 +135,10 @@ export class Game implements Activity {
 
   async initialize() {
     this.fontManager = new FontManager(this);
-    await this.fontManager.fetchFonts(this.options.fonts ?? []);
-    this.fontManager.loadFonts();
+    await this.fontManager.initializeFonts(this.options.fonts);
+
+    this.imageManager = new ImageManager(this);
+    await this.imageManager.initializeImages(this.options.images);
 
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
@@ -159,6 +163,17 @@ export class Game implements Activity {
 
   set fontManager(fontManager: FontManager) {
     this._fontManager = fontManager;
+  }
+
+  get imageManager(): ImageManager {
+    if (!this._imageManager) {
+      throw new Error("imageManager is undefined");
+    }
+    return this._imageManager;
+  }
+
+  set imageManager(imageManager: ImageManager) {
+    this._imageManager = imageManager;
   }
 
   /**
@@ -954,7 +969,7 @@ export class Game implements Activity {
     const warmedUpImageNames = this.entities
       .filter((entity) => entity.type === EntityType.Sprite)
       .map((entity) => (entity as Sprite).imageName);
-    const loadedImages = this.session.imageManager.loadedImages[this.uuid];
+    const loadedImages = this.imageManager.loadedImages;
     // loadedImages may be undefined/null if the game does not have images
     if (loadedImages) {
       const imageNames = Object.keys(loadedImages).filter(
@@ -1899,7 +1914,7 @@ export class Game implements Activity {
       this.canvasCssWidth,
       this.canvasCssHeight,
     );
-    this.session.imageManager.addLoadedImage(loadedImage, this.uuid);
+    this.imageManager.addLoadedImage(loadedImage);
 
     // if this._rootScale is not 1, that means we scaled down everything
     // because the display is too small, or we stretched to a larger

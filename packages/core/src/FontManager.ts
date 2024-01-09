@@ -6,14 +6,14 @@ import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 
 /**
- * Class for fetching, loading, and providing fonts to games.
+ * Fetches, loads, and provides fonts to the game.
  *
  * @remarks FOR INTERNAL USE ONLY
  */
 export class FontManager {
-  private canvasKit: CanvasKit;
-  fontMgr?: FontMgr;
   readonly gameTypefaces: GameTypefaces = {};
+  fontMgr?: FontMgr;
+  private canvasKit: CanvasKit;
   private fontData: Array<FontData> = new Array<FontData>();
   private game: Game;
 
@@ -23,7 +23,17 @@ export class FontManager {
   }
 
   /**
-   * Frees up resources allocated by the FontManager
+   * Fetches font assets and makes them available for use.
+   *
+   * @param fonts - array of FontAsset objects (name and url)
+   */
+  async initializeFonts(fonts: Array<FontAsset> | undefined): Promise<void> {
+    await this.fetchFonts(fonts ?? []);
+    this.loadFonts();
+  }
+
+  /**
+   * Frees up resources allocated by the FontManager.
    *
    * @remarks This will be done automatically by the m2c2kit library; the
    * end-user must not call this. FOR INTERNAL USE ONLY.
@@ -36,9 +46,9 @@ export class FontManager {
   }
 
   /**
-   * Gets a typeface that was previously loaded.
+   * Gets a typeface that has been loaded.
    *
-   * @param fontName
+   * @param fontName - name as defined in the game's font assets
    * @returns the requested Typeface
    */
   getTypeface(fontName: string): Typeface {
@@ -48,21 +58,22 @@ export class FontManager {
   /**
    * Gets names of fonts loaded.
    *
-   * @returns array of font names
+   * @returns array of font names loaded from the game's font assets and
+   * converted into canvaskit Typefaces. The names are the names as defined
+   * in the game's font assets.
    */
   getFontNames(): Array<string> {
     return Object.keys(this.gameTypefaces);
   }
 
   /**
-   * Fetches all fonts.
+   * Fetches all game fonts.
    *
    * @remarks Uses browser fetch to get font data from the font assets' URLs.
    *
    * @param fontAssets - array of FontAsset objects (names and font urls)
-   * @returns Promise<void[]>
    */
-  fetchFonts(fontAssets: FontAsset[]) {
+  private fetchFonts(fontAssets: FontAsset[]) {
     /**
      * note: be careful to handle the case where a game has no fonts
      */
@@ -108,9 +119,8 @@ export class FontManager {
    * converted into Array Buffers using FontManager.fetchFonts(), and
    * makes them available to canvaskit by creating Typefaces.
    */
-  loadFonts() {
-    // note: be careful to handle the case where no games in the session
-    // have fonts to load
+  private loadFonts() {
+    // note: be careful to handle the case where there are no fonts to load
     if (this.fontData.length === 0) {
       return;
     }
