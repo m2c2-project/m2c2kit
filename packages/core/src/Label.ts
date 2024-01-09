@@ -136,7 +136,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     if (!session) {
       throw new Error("session is undefined");
     }
-    const fontManager = session.fontManager;
+    const fontManager = this.game.fontManager;
     if (fontManager.fontMgr === undefined) {
       throw new Error("no fonts loaded");
     }
@@ -147,29 +147,21 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     const fontFamilies = new Array<string>();
     if (this.fontNames) {
       this.fontNames.forEach((fn) => {
-        if (fontManager.gameTypefaces[this.game.uuid][fn] === undefined) {
+        if (fontManager.gameTypefaces[fn] === undefined) {
           throw new Error(`font ${fn} not found.`);
         }
-        fontFamilies.push(
-          fontManager.gameTypefaces[this.game.uuid][fn].fontFamily,
-        );
+        fontFamilies.push(fontManager.gameTypefaces[fn].fontFamily);
       });
     } else if (this.fontName) {
-      if (
-        fontManager.gameTypefaces[this.game.uuid][this.fontName] === undefined
-      ) {
+      if (fontManager.gameTypefaces[this.fontName] === undefined) {
         throw new Error(`font ${this.fontName} not found.`);
       }
-      fontFamilies.push(
-        fontManager.gameTypefaces[this.game.uuid][this.fontName].fontFamily,
-      );
+      fontFamilies.push(fontManager.gameTypefaces[this.fontName].fontFamily);
     } else {
       // if no fontName provided, use default fontName, which is the
       // first in the list of fontAssets for this game.
 
-      const typefaces = Object.values(
-        fontManager.gameTypefaces[this.game.uuid],
-      );
+      const typefaces = Object.values(fontManager.gameTypefaces);
       const defaultTypeface = typefaces
         .filter((f) => f.isDefault)
         .find(Boolean);

@@ -130,15 +130,14 @@ export class TextLine
     if (!session) {
       throw new Error("session is undefined");
     }
-    const fontManager = session.fontManager;
+    const fontManager = this.game.fontManager;
 
-    const gameUuid = (this.parentSceneAsEntity as unknown as Scene).game.uuid;
     if (this.fontName) {
-      this.typeface = fontManager.getTypeface(gameUuid, this.fontName);
+      this.typeface = fontManager.getTypeface(this.fontName);
     } else {
-      const fontNames = fontManager.getFontNames(gameUuid);
+      const fontNames = fontManager.getFontNames();
       if (fontNames.length > 0) {
-        this.typeface = fontManager.getTypeface(gameUuid, fontNames[0]);
+        this.typeface = fontManager.getTypeface(fontNames[0]);
       }
     }
     if (this.font) {

@@ -58,6 +58,7 @@ import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Plugin } from "./Plugin";
+import { FontManager } from "./FontManager";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -92,6 +93,7 @@ export class Game implements Activity {
   private plugins: Array<Plugin> = [];
   additionalParameters?: unknown;
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
+  private _fontManager?: FontManager;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -130,6 +132,10 @@ export class Game implements Activity {
   }
 
   async initialize() {
+    this.fontManager = new FontManager(this);
+    await this.fontManager.fetchFonts(this.options.fonts ?? []);
+    this.fontManager.loadFonts();
+
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
       this.i18n = new I18n(options);
@@ -142,6 +148,17 @@ export class Game implements Activity {
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.onData(this.session.options.activityCallbacks.onActivityResults);
     }
+  }
+
+  get fontManager(): FontManager {
+    if (!this._fontManager) {
+      throw new Error("fontManager is undefined");
+    }
+    return this._fontManager;
+  }
+
+  set fontManager(fontManager: FontManager) {
+    this._fontManager = fontManager;
   }
 
   /**
@@ -887,10 +904,10 @@ export class Game implements Activity {
     canvas.drawCircle(centerX, centerY, 32, strokeColorPaintNotAntialiased);
     canvas.drawCircle(centerX, centerY, 32, strokeColorPaintAntialiased);
 
-    const fontManager = this.session.fontManager;
-    const fontNames = this.session.fontManager.getFontNames(this.uuid);
+    const fontManager = this.fontManager;
+    const fontNames = this.fontManager.getFontNames();
     if (fontNames.length > 0) {
-      const typeface = fontManager.getTypeface(this.uuid, fontNames[0]);
+      const typeface = fontManager.getTypeface(fontNames[0]);
       const font = new this.canvasKit.Font(typeface, 16 * Globals.canvasScale);
       canvas.drawText(
         "abc",
@@ -974,13 +991,14 @@ export class Game implements Activity {
   /**
    * Frees up resources that were allocated to run the game.
    *
-   * @remarks This will be done automatically by the m2c2kit library;
-   * the end-user must not call this.
+   * @remarks This will be done automatically by the m2c2kit library; the
+   * end-user must not call this. FOR INTERNAL USE ONLY.
    */
   dispose(): void {
     this.entities
       .filter((e) => e.isDrawable)
       .forEach((e) => (e as unknown as IDrawable).dispose());
+    this.fontManager.dispose();
   }
 
   private initData(): void {

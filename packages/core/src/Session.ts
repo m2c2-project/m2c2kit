@@ -1,9 +1,7 @@
-import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { EventBase, EventType } from "./EventBase";
 import { EventListenerBase } from "./EventListenerBase";
 import { Activity } from "./Activity";
 import { ImageManager } from "./ImageManager";
-import { FontManager } from "./FontManager";
 import CanvasKitInit, { CanvasKit } from "canvaskit-wasm";
 import { Game } from "./Game";
 import { GameImages } from "./GameImages";
@@ -21,7 +19,6 @@ import { Constants } from "./Constants";
 
 export class Session {
   options: SessionOptions;
-  fontManager: FontManager;
   imageManager: ImageManager;
   currentActivity?: Activity;
   uuid: string;
@@ -43,11 +40,10 @@ export class Session {
     for (const activity of this.options.activities) {
       if (this.options.activities.filter((a) => a === activity).length > 1) {
         throw new Error(
-          `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`
+          `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`,
         );
       }
     }
-    this.fontManager = new FontManager(this);
     this.imageManager = new ImageManager(this);
     this.options.activities.forEach((activity) => (activity.session = this));
     if (this.options.sessionUuid) {
@@ -65,12 +61,12 @@ export class Session {
    */
   onInitialize(
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.SessionInitialize,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
@@ -82,12 +78,12 @@ export class Session {
    */
   onStart(
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.SessionStart,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
@@ -99,12 +95,12 @@ export class Session {
    */
   onEnd(
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.SessionEnd,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
@@ -116,19 +112,19 @@ export class Session {
    */
   onActivityData(
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     this.addEventListener(
       EventType.ActivityData,
       callback as (ev: EventBase) => void,
-      options
+      options,
     );
   }
 
   private addEventListener(
     type: EventType,
     callback: (ev: EventBase) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
     const eventListener: EventListenerBase = {
       type: type,
@@ -138,7 +134,7 @@ export class Session {
 
     if (options?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
-        (listener) => !(listener.type === eventListener.type)
+        (listener) => !(listener.type === eventListener.type),
       );
     }
     this.eventListeners.push(eventListener);
@@ -226,7 +222,7 @@ export class Session {
    */
   async init(): Promise<void> {
     console.warn(
-      `The init() method of Session is deprecated. Use initialize() instead.`
+      `The init() method of Session is deprecated. Use initialize() instead.`,
     );
     return this.initialize();
   }
@@ -267,9 +263,17 @@ export class Session {
     this.dataStores = this.options.dataStores;
     if (this.dataStores?.length === 0) {
       throw new Error(
-        "Session.initialize(): dataStores must be undefined or a non-zero array of datastores."
+        "Session.initialize(): dataStores must be undefined or a non-zero array of datastores.",
       );
     }
+
+    const [canvasKit] = await this.getAsynchronousAssets();
+    this.options.activities
+      .filter((activity) => activity.type == ActivityType.Game)
+      .forEach((activity) => {
+        const game = activity as unknown as Game;
+        game.canvasKit = canvasKit;
+      });
 
     await Promise.all(
       this.options.activities.map((activity) => {
@@ -285,22 +289,21 @@ export class Session {
 
         if (this.activityUsesDeprecatedInit(activity)) {
           console.warn(
-            `game ${activity.id}: Activity.init() is deprecated. In the assessment class that extends Game, use Activity.initialize() instead:\n  async initialize() {\n    await super.initialize();\n    ...\n  }\n`
+            `game ${activity.id}: Activity.init() is deprecated. In the assessment class that extends Game, use Activity.initialize() instead:\n  async initialize() {\n    await super.initialize();\n    ...\n  }\n`,
           );
           return activity.init();
         }
         return activity.initialize();
-      })
+      }),
     );
 
-    const [canvasKit] = await this.getAsynchronousAssets();
     this.loadAssets(canvasKit);
     this.imageManager.removeScratchCanvas();
 
     console.log(
       `⚪ Session.sessionInitialize() took ${Timer.elapsed(
-        "sessionInitialize"
-      ).toFixed(0)} ms`
+        "sessionInitialize",
+      ).toFixed(0)} ms`,
     );
     Timer.remove("sessionInitialize");
     this.initialized = true;
@@ -323,8 +326,8 @@ export class Session {
       await new Promise((resolve) =>
         setTimeout(
           resolve,
-          Constants.SESSION_INITIALIZATION_POLLING_INTERVAL_MS
-        )
+          Constants.SESSION_INITIALIZATION_POLLING_INTERVAL_MS,
+        ),
       );
     }
   }
@@ -376,11 +379,7 @@ export class Session {
    * the end-user must not call this.
    */
   private dispose(): void {
-    /**
-     * All CanvasKit objects are disposed by the games that used them,
-     * except for FontMgr, which is session-wide and shared by games.
-     */
-    CanvasKitHelpers.Dispose([this.fontManager.fontMgr]);
+    // TODO: Are there are any other resources that need to be disposed at the session level?
   }
 
   /**
@@ -394,7 +393,7 @@ export class Session {
       .find(Boolean);
     if (!nextActivity) {
       throw new Error(
-        `Error in goToActivity(): Session does not contain an activity with id ${options.id}.`
+        `Error in goToActivity(): Session does not contain an activity with id ${options.id}.`,
       );
     }
     if (this.currentActivity) {
@@ -420,12 +419,12 @@ export class Session {
     const activityFactoryFunction =
       currentActivityOldObject.constructor.bind.apply(
         currentActivityOldObject.constructor,
-        [null]
+        [null],
       );
     this.currentActivity = new activityFactoryFunction() as Activity;
 
     const indexOfCurrentActivity = this.options.activities.indexOf(
-      currentActivityOldObject
+      currentActivityOldObject,
     );
     this.options.activities[indexOfCurrentActivity] = this.currentActivity;
     DomHelpers.configureDomForActivity(this.currentActivity);
@@ -450,7 +449,7 @@ export class Session {
     }
     if (currentActivityOldObject.additionalParameters) {
       this.currentActivity.setParameters(
-        currentActivityOldObject.additionalParameters
+        currentActivityOldObject.additionalParameters,
       );
     }
 
@@ -464,11 +463,6 @@ export class Session {
       this.imageManager.loadedImages[this.currentActivity.uuid] =
         this.imageManager.loadedImages[currentActivityOldObject.uuid];
       delete this.imageManager.loadedImages[currentActivityOldObject.uuid];
-    }
-    if (this.fontManager.gameTypefaces[currentActivityOldObject.uuid]) {
-      this.fontManager.gameTypefaces[this.currentActivity.uuid] =
-        this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
-      delete this.fontManager.gameTypefaces[currentActivityOldObject.uuid];
     }
 
     await this.currentActivity.initialize();
@@ -516,7 +510,7 @@ export class Session {
       return undefined;
     }
     const currentActivityIndex = this.options.activities.indexOf(
-      this.currentActivity
+      this.currentActivity,
     );
     return this.options.activities[currentActivityIndex + 1];
   }
@@ -583,23 +577,13 @@ export class Session {
    * of images
    * @returns
    */
-  private async getAsynchronousAssets(): Promise<[CanvasKit, void[], void[]]> {
+  private async getAsynchronousAssets(): Promise<[CanvasKit, void[]]> {
     const canvasKitPromise = this.loadCanvasKit(this.options.canvasKitWasmUrl);
-    const fetchFontsPromise = this.fontManager.fetchFonts(
-      this.options.activities
-        // see note above why we must check type property and not instance type
-        .filter((activity) => activity.type === ActivityType.Game)
-        .map((activity) => activity as Game)
-    );
     const renderImagesPromise = this.imageManager.renderImages(
-      this.getImagesConfigurationFromGames()
+      this.getImagesConfigurationFromGames(),
     );
 
-    return await Promise.all([
-      canvasKitPromise,
-      fetchFontsPromise,
-      renderImagesPromise,
-    ]);
+    return await Promise.all([canvasKitPromise, renderImagesPromise]);
   }
 
   // call CanvasKitInit through loadCanvasKit so we can mock
@@ -612,13 +596,11 @@ export class Session {
 
   private loadAssets(canvasKit: CanvasKit) {
     this.assignCanvasKit(canvasKit);
-    this.fontManager.loadAllGamesFontData();
     this.imageManager.loadAllGamesRenderedImages();
   }
 
   private assignCanvasKit(canvasKit: CanvasKit) {
     this.canvasKit = canvasKit;
-    this.fontManager.canvasKit = this.canvasKit;
     this.imageManager.canvasKit = this.canvasKit;
 
     this.options.activities

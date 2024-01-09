@@ -11,6 +11,7 @@ import {
   TrialSchema,
   Label,
   GameParameters,
+  FontManager,
 } from "..";
 
 TestHelpers.createM2c2KitMock();
@@ -95,6 +96,24 @@ describe("GameOptions", () => {
   it("throws error if id is not provided", () => {
     const t = () => new Game3();
     expect(t).toThrow();
+  });
+});
+
+describe("FontManager", () => {
+  beforeEach(async () => {
+    g1 = new Game1();
+
+    const options: SessionOptions = {
+      activities: [g1],
+      canvasKitWasmUrl: "canvaskit.wasm",
+    };
+    session = new Session(options);
+    TestHelpers.setupDomAndGlobals();
+    await session.initialize();
+  });
+
+  it("creates a FontManager", () => {
+    expect(g1.fontManager).toBeInstanceOf(FontManager);
   });
 });
 

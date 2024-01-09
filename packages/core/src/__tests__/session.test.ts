@@ -86,9 +86,6 @@ describe("Session", () => {
     await session.initialize();
   });
 
-  it("creates a FontManager", () => {
-    expect(session.fontManager).toBeInstanceOf(FontManager);
-  });
   it("creates an ImageManager", () => {
     expect(session.imageManager).toBeInstanceOf(ImageManager);
   });
@@ -105,7 +102,7 @@ describe("Session init", () => {
     await session.initialize();
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
-    expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
+    // expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(session.imageManager.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
