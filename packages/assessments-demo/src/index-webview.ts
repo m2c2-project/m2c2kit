@@ -16,7 +16,6 @@ const activities = [a1, a2, a3, a4, a5];
 
 const session = new Session({
   activities: activities,
-  canvasKitWasmUrl: "canvaskit.wasm",
 });
 
 Embedding.initialize(session, { host: "MobileWebView" });

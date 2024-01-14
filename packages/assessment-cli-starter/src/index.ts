@@ -10,6 +10,7 @@ import {
   TrialSchema,
   Timer,
   RgbaColor,
+  Constants,
 } from "@m2c2kit/core";
 import { Button, Instructions } from "@m2c2kit/addons";
 
@@ -84,6 +85,8 @@ class CliStarter extends Game {
       name: "cli starter assessment",
       id: "cli-starter",
       version: "__PACKAGE_JSON_VERSION__",
+      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
       longDescription: `In psychology, the Stroop effect is the delay in \
@@ -216,11 +219,11 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     for (let i = 0; i < game.getParameter<number>("number_of_trials"); i++) {
       const presentedTextIndex = RandomDraws.SingleFromRange(
         0,
-        stroopColors.length - 1
+        stroopColors.length - 1,
       );
       const presentedColorIndex = RandomDraws.SingleFromRange(
         0,
-        stroopColors.length - 1
+        stroopColors.length - 1,
       );
 
       const selection_options_text = new Array<string>();
@@ -231,21 +234,21 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
         correctOptionIndex = 0;
         selection_options_text.push(stroopColors[presentedColorIndex].name);
         const remainingColors = stroopColors.filter(
-          (c) => c.name !== stroopColors[presentedColorIndex].name
+          (c) => c.name !== stroopColors[presentedColorIndex].name,
         );
         const secondOptionIndex = RandomDraws.SingleFromRange(
           0,
-          remainingColors.length - 1
+          remainingColors.length - 1,
         );
         selection_options_text.push(remainingColors[secondOptionIndex].name);
       } else {
         correctOptionIndex = 1;
         const remainingColors = stroopColors.filter(
-          (c) => c.name !== stroopColors[presentedColorIndex].name
+          (c) => c.name !== stroopColors[presentedColorIndex].name,
         );
         const secondOptionIndex = RandomDraws.SingleFromRange(
           0,
-          remainingColors.length - 1
+          remainingColors.length - 1,
         );
         selection_options_text.push(remainingColors[secondOptionIndex].name);
         selection_options_text.push(stroopColors[presentedColorIndex].name);
@@ -328,7 +331,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
               game.presentScene(presentationScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -402,15 +405,15 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
         Timer.remove("responseTime");
         game.addTrialData(
           "presented_word_text",
-          trialConfiguration.presented_text
+          trialConfiguration.presented_text,
         );
         game.addTrialData(
           "presented_word_color",
-          trialConfiguration.presented_color.name
+          trialConfiguration.presented_color.name,
         );
         game.addTrialData(
           "selected_text",
-          trialConfiguration.selection_options_text[selectionIndex]
+          trialConfiguration.selection_options_text[selectionIndex],
         );
         const correct =
           trialConfiguration.correct_option_index === selectionIndex;

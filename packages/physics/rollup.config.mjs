@@ -1,27 +1,12 @@
 import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
-import copy from "rollup-plugin-copy";
-import dts from "rollup-plugin-dts";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import replace from "@rollup/plugin-replace";
-import { readFileSync } from "fs";
-import child_process from "child_process";
+import copy from "rollup-plugin-copy";
+import dts from "rollup-plugin-dts";
+import { insertVersionString, writeMetadataJson } from "@m2c2kit/build-helpers";
 
-const pkg = JSON.parse(
-  readFileSync(new URL("./package.json", import.meta.url), "utf8")
-);
-
-const shortCommitHash = child_process
-  .execSync("git rev-parse HEAD")
-  .toString()
-  .trim()
-  .slice(0, 8);
-
-// I could not get @rollup/plugin-typescript to work with the
-// emitDeclarationOnly option. Thus, as part of the build script in
-// package.json, before rollup is run, tsc is run to generate the
-// declaration files used by rollup-plugin-dts.
+writeMetadataJson();
 
 export default [
   {
@@ -30,36 +15,24 @@ export default [
     output: [
       { file: "./build/index.js", format: "es", sourcemap: true },
       {
-        file: "./build-nobundler/m2c2kit.physics.esm.js",
+        file: "./build/index.min.js",
         format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.js",
-        },
-        sourcemap: false,
-      },
-      {
-        file: "./build-nobundler/m2c2kit.physics.esm.min.js",
-        format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
-        },
         sourcemap: false,
         plugins: [minify()],
       },
     ],
-    plugins: [
-      replace({
-        __PACKAGE_JSON_VERSION__: `${pkg.version} (${shortCommitHash})`,
-        preventAssignment: true,
-      }),
-      nodeResolve(),
-      commonjs(),
-      esbuild(),
-    ],
+    plugins: [insertVersionString(), nodeResolve(), commonjs(), esbuild()],
   },
+  /**
+   * Bundle all declaration files in build and place the declaration bundles
+   * in dist; copy output files from build to dist.
+   *
+   * I could not get @rollup/plugin-typescript to work with the
+   * emitDeclarationOnly option. Thus, as part of the build script in
+   * package.json, before rollup is run, tsc is run to generate the
+   * declaration files used by rollup-plugin-dts.
+   */
   {
-    // bundle all declaration files and place the declaration
-    // bundle in dist
     input: "./build/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
@@ -74,14 +47,13 @@ export default [
             dest: "dist",
           },
           {
-            src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.physics.esm.d.ts",
+            src: "build/index.min.js",
+            dest: "dist",
           },
           {
             src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.physics.esm.min.d.ts",
+            dest: "dist/",
+            rename: () => "index.min.d.ts",
           },
         ],
       }),

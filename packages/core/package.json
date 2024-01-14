@@ -11,10 +11,10 @@
     }
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts",
+    "dist",
     "assets/**",
-    "index.html"
+    "index.html",
+    "metadata.json"
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
@@ -33,6 +33,7 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
+    "@m2c2kit/build-helpers": "^0.3.12",
     "@rollup/plugin-commonjs": "25.0.7",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",
@@ -54,6 +55,7 @@
     "rollup-plugin-esbuild": "6.1.0",
     "rollup-plugin-polyfill-node": "0.13.0",
     "ts-jest": "29.1.1",
+    "ts-jest-mock-import-meta": "1.1.0",
     "ts-node": "10.9.2",
     "typescript": "5.3.3"
   },

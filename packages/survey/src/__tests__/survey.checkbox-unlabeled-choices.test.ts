@@ -62,7 +62,6 @@ describe("checkbox behavior, multiresponse", () => {
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     await session.initialize();
@@ -88,7 +87,7 @@ describe("checkbox behavior, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -97,7 +96,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: null },
           { name: "who_4", value: null },
           { name: "who_Nobody", value: null },
-        ])
+        ]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -106,7 +105,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: null },
           { name: "who_4", value: null },
           { name: "who_Nobody", value: null },
-        ])
+        ]),
       );
     }
   });
@@ -147,7 +146,7 @@ describe("checkbox behavior, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -156,7 +155,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: 0 },
           { name: "who_4", value: 0 },
           { name: "who_Nobody", value: 0 },
-        ])
+        ]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -165,7 +164,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: 0 },
           { name: "who_4", value: 0 },
           { name: "who_Nobody", value: 0 },
-        ])
+        ]),
       );
     }
   });
@@ -185,10 +184,10 @@ describe("checkbox behavior, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "who_3", value: 1 }])
+        expect.arrayContaining([{ name: "who_3", value: 1 }]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -197,7 +196,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: 1 },
           { name: "who_4", value: 0 },
           { name: "who_Nobody", value: 0 },
-        ])
+        ]),
       );
     }
   });
@@ -217,7 +216,7 @@ describe("checkbox behavior, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -226,7 +225,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: null },
           { name: "who_4", value: null },
           { name: "who_Nobody", value: null },
-        ])
+        ]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -235,7 +234,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: null },
           { name: "who_4", value: null },
           { name: "who_Nobody", value: null },
-        ])
+        ]),
       );
     }
   });
@@ -259,14 +258,14 @@ describe("checkbox behavior, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
           { name: "who_2", value: 0 },
           { name: "who_3", value: 0 },
           { name: "who_Nobody", value: 1 },
-        ])
+        ]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -275,7 +274,7 @@ describe("checkbox behavior, multiresponse", () => {
           { name: "who_3", value: 0 },
           { name: "who_4", value: 0 },
           { name: "who_Nobody", value: 1 },
-        ])
+        ]),
       );
     }
   });

@@ -1,11 +1,12 @@
 import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import copy from "rollup-plugin-copy";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import {
   hashM2c2kitAssets,
   makeM2c2kitServiceWorker,
+  copyAssets,
+  restoreImportMeta,
 } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
@@ -28,46 +29,23 @@ export default (commandLineArgs) => {
       ],
       plugins: [
         nodeResolve(),
-        esbuild(),
-        copy({
-          targets: [
-            {
-              src: "../core/assets/",
-              dest: outputFolder,
-            },
-            {
-              src: "../core/index.html",
-              dest: outputFolder,
-            },
-            {
-              src: "../assessment-cli-starter/assets/*",
-              dest: `${outputFolder}/assets/cli-starter`,
-            },
-            {
-              src: "../assessment-color-dots/assets/*",
-              dest: `${outputFolder}/assets/color-dots`,
-            },
-            {
-              src: "../assessment-grid-memory/assets/*",
-              dest: `${outputFolder}/assets/grid-memory`,
-            },
-            {
-              src: "../assessment-symbol-search/assets/*",
-              dest: `${outputFolder}/assets/symbol-search`,
-            },
-            {
-              src: "../assessment-color-shapes/assets/*",
-              dest: `${outputFolder}/assets/color-shapes`,
-            },
-            {
-              src: "../db/data.html",
-              dest: `${outputFolder}`,
-            },
-            {
-              src: "../db/dist/data.js",
-              dest: `${outputFolder}`,
-            },
+        esbuild({
+          logOverride: {
+            "empty-import-meta": "silent",
+          },
+        }),
+        restoreImportMeta(),
+        copyAssets({
+          packageName: [
+            "@m2c2kit/assessment-color-dots",
+            "@m2c2kit/assessment-grid-memory",
+            "@m2c2kit/assessment-color-shapes",
+            "@m2c2kit/assessment-symbol-search",
+            "@m2c2kit/assessment-cli-starter",
+            "@m2c2kit/core",
+            "@m2c2kit/db",
           ],
+          outputFolder,
         }),
         commandLineArgs.configProd &&
           !commandLineArgs.configNoHash &&

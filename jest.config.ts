@@ -37,6 +37,30 @@ const jestConfig: JestConfigWithTsJest = {
             useESM: true,
             testLocationInResults: false,
             tsconfig: "tsconfig.json",
+            /**
+             * @m2c2kit/core uses import.meta, and this is not supported
+             * easily in jest. To avoid errors, we use the
+             * ts-jest-mock-import-meta package, which will transform usage
+             * of import.meta to a predefined mocked value. TS1343 is the
+             * warning that is generated when import.meta is used in an
+             * unsupported environment, and we suppress that.
+             *
+             * We do the same for @m2c2kit/survey and @m2c2kit/physics,
+             * because they import @m2c2kit/core.
+             */
+            diagnostics: {
+              ignoreCodes: [1343],
+            },
+            astTransformers: {
+              before: [
+                {
+                  path: "ts-jest-mock-import-meta",
+                  options: {
+                    metaObjectReplacement: { url: "https://www.url.com" },
+                  },
+                },
+              ],
+            },
           },
         ],
       },
@@ -57,6 +81,19 @@ const jestConfig: JestConfigWithTsJest = {
             useESM: true,
             testLocationInResults: false,
             tsconfig: "tsconfig.json",
+            diagnostics: {
+              ignoreCodes: [1343],
+            },
+            astTransformers: {
+              before: [
+                {
+                  path: "ts-jest-mock-import-meta",
+                  options: {
+                    metaObjectReplacement: { url: "https://www.url.com" },
+                  },
+                },
+              ],
+            },
           },
         ],
       },
@@ -80,6 +117,19 @@ const jestConfig: JestConfigWithTsJest = {
             useESM: true,
             testLocationInResults: false,
             tsconfig: "tsconfig.json",
+            diagnostics: {
+              ignoreCodes: [1343],
+            },
+            astTransformers: {
+              before: [
+                {
+                  path: "ts-jest-mock-import-meta",
+                  options: {
+                    metaObjectReplacement: { url: "https://www.url.com" },
+                  },
+                },
+              ],
+            },
           },
         ],
       },

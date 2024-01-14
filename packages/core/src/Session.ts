@@ -1,8 +1,6 @@
 import { EventBase, EventType } from "./EventBase";
 import { EventListenerBase } from "./EventListenerBase";
 import { Activity } from "./Activity";
-import CanvasKitInit, { CanvasKit } from "canvaskit-wasm";
-import { Game } from "./Game";
 import { Timer } from "./Timer";
 import { SessionOptions } from "./SessionOptions";
 import { Uuid } from "./Uuid";
@@ -22,7 +20,6 @@ export class Session {
   dataStores?: IDataStore[];
   private eventListeners = new Array<EventListenerBase>();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
-  private canvasKit?: CanvasKit;
   private initialized = false;
   private version = "__PACKAGE_JSON_VERSION__";
 
@@ -263,9 +260,6 @@ export class Session {
       );
     }
 
-    const canvasKit = await this.loadCanvasKit(this.options.canvasKitWasmUrl);
-    this.assignCanvasKit(canvasKit);
-
     await Promise.all(
       this.options.activities.map((activity) => {
         // IDataStore implementation is provided by another library and must
@@ -432,9 +426,9 @@ export class Session {
      * Game class in another bundle. Instead, we must check the type property
      * of the activity.
      */
-    if (this.currentActivity.type === ActivityType.Game && this.canvasKit) {
-      (this.currentActivity as Game).canvasKit = this.canvasKit;
-    }
+    // if (this.currentActivity.type === ActivityType.Game && this.canvasKit) {
+    //   (this.currentActivity as Game).canvasKit = this.canvasKit;
+    // }
     if (currentActivityOldObject.additionalParameters) {
       this.currentActivity.setParameters(
         currentActivityOldObject.additionalParameters,
@@ -562,40 +556,6 @@ export class Session {
    */
   dictionaryItemExists(key: string) {
     return this.sessionDictionary.has(key);
-  }
-
-  // call CanvasKitInit through loadCanvasKit so we can mock
-  // loadCanvasKit using jest
-  private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
-    const fullUrl = this.prependAssetsUrl(canvasKitWasmUrl);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return CanvasKitInit({ locateFile: (_file) => fullUrl });
-  }
-
-  private assignCanvasKit(canvasKit: CanvasKit) {
-    this.canvasKit = canvasKit;
-    this.options.activities
-      .filter((activity) => activity.type == ActivityType.Game)
-      .forEach((activity) => {
-        const game = activity as unknown as Game;
-        game.canvasKit = canvasKit;
-      });
-  }
-
-  prependAssetsUrl(url: string): string {
-    function hasUrlScheme(str: string): boolean {
-      return /^[a-z]+:\/\//i.test(str);
-    }
-
-    if (hasUrlScheme(url)) {
-      return url;
-    }
-    if (!this.options.assetsUrl) {
-      return `assets/${url}`;
-    }
-    return (
-      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
-    );
   }
 }
 

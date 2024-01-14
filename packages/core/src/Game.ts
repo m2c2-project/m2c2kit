@@ -1,7 +1,14 @@
 import "./Globals";
 import { Activity } from "./Activity";
 import { ActivityType } from "./ActivityType";
-import { CanvasKit, Canvas, Surface, Font, Image, Paint } from "canvaskit-wasm";
+import CanvasKitInit, {
+  CanvasKit,
+  Canvas,
+  Surface,
+  Font,
+  Image,
+  Paint,
+} from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { EventBase } from "./EventBase";
 import { TapEvent } from "./TapEvent";
@@ -60,6 +67,7 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Plugin } from "./Plugin";
 import { FontManager } from "./FontManager";
 import { ImageManager } from "./ImageManager";
+import { ModuleMetadata } from "./ModuleMetadata";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -78,6 +86,7 @@ export class Game implements Activity {
   uuid = Uuid.generate();
   name: string;
   id: string;
+  moduleMetadata: ModuleMetadata;
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
@@ -96,6 +105,7 @@ export class Game implements Activity {
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
+  private isImportedModule = false;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -120,6 +130,22 @@ export class Game implements Activity {
     if (!this.options.trialSchema) {
       this.options.trialSchema = {};
     }
+    if (options.moduleMetadata) {
+      this.moduleMetadata = options.moduleMetadata;
+    } else {
+      this.moduleMetadata = Constants.EMPTY_MODULE_METADATA;
+    }
+  }
+
+  private getImportedModuleBaseUrl(packageName: string, moduleUrl: string) {
+    const regex = new RegExp(`^.*${packageName}[^\\/]*`);
+    const matches = moduleUrl.match(regex);
+    if (!matches || matches.length === 0) {
+      throw new Error(
+        "Could not calculate assessment package base URL on CDN.",
+      );
+    }
+    return matches[0];
   }
 
   private addLocalizationParametersToGameParameters(): void {
@@ -133,7 +159,90 @@ export class Game implements Activity {
     return this.initialize();
   }
 
+  // call CanvasKitInit through loadCanvasKit so we can mock
+  // loadCanvasKit using jest
+  private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
+    const fullUrl = this.calculateCanvasKitWasmUrl(canvasKitWasmUrl);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return CanvasKitInit({ locateFile: (_file) => fullUrl });
+  }
+
+  private calculateCanvasKitWasmUrl(url: string): string {
+    function hasUrlScheme(str: string): boolean {
+      return /^[a-z]+:\/\//i.test(str);
+    }
+
+    if (hasUrlScheme(url)) {
+      return url;
+    }
+    if (!this.options.assetsUrl) {
+      return `assets/${this.options.id}/${url}`;
+    }
+    return (
+      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
+    );
+  }
+
   async initialize() {
+    let moduleUrl: string | undefined;
+    if (this.moduleMetadata.name) {
+      /**
+       * Is the game code an imported module? (the alternative is that the
+       * game code has been bundled). If the game code is an imported module,
+       * update the assetsUrl to point to the location of the imported module
+       * assets URL.
+       */
+      try {
+        /**
+         * moduleUrl is the URL to the module entrypoint JavaScript, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/core@0.3.11/dist/index.js
+         * moduleBaseUrl omits the entrypoint, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/core@0.3.11
+         */
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        moduleUrl = await import.meta.resolve(this.moduleMetadata.name);
+        const moduleBaseUrl = this.getImportedModuleBaseUrl(
+          this.moduleMetadata.name,
+          moduleUrl,
+        );
+        this.options.assetsUrl = moduleBaseUrl + "/assets";
+        this.isImportedModule = true;
+      } catch {
+        /**
+         * If the game code is not an imported module, an exception will
+         * occur with import.meta.resolve(). This is ok. In this case,
+         * this.options.assetsUrl will not be assigned, and the default
+         * asset location will be used.
+         */
+      }
+    }
+
+    let canvasKitWasmUrl: string = this.options.canvasKitWasmUrl;
+    try {
+      /**
+       * Is the @m2c2kit/core code an imported module? Even if the game code
+       * is not an imported module, @m2c2kit/core may be imported (e.g., the
+       * user is programming a new assessment, is not using a bundler, and
+       * imports @m2c2kit/core from a module URL).
+       */
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const coreModuleUrl = await import.meta.resolve("@m2c2kit/core");
+      canvasKitWasmUrl =
+        this.getImportedModuleBaseUrl("@m2c2kit/core", coreModuleUrl) +
+        "/assets/canvaskit.wasm";
+    } catch {
+      /**
+       * If the game code is an imported module, @m2c2kit/core must also
+       * be imported. Otherwise, this is a fatal error.
+       */
+      if (this.isImportedModule) {
+        throw new Error(
+          `the package ${this.moduleMetadata.name} has been imported from a module URL (${moduleUrl}), but the @m2c2kit/core package module URL could not be determined.`,
+        );
+      }
+    }
+    this.canvasKit = await this.loadCanvasKit(canvasKitWasmUrl);
+
     this.fontManager = new FontManager(this);
     await this.fontManager.initializeFonts(this.options.fonts);
 

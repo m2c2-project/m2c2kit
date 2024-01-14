@@ -4,6 +4,7 @@ import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
 import { Translations } from "./Translations";
 import { FontAsset } from "./FontAsset";
+import { ModuleMetadata } from "./ModuleMetadata";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
@@ -55,4 +56,8 @@ export interface GameOptions {
   logWebGl?: boolean;
   /** URL of game assets folder, if not the default location of "assets/id of game from GameOptions" */
   assetsUrl?: string;
+  /** Url of the canvaskit.wasm binary. Always set to the default value of "canvaskit.wasm" */
+  canvasKitWasmUrl: "canvaskit.wasm";
+  /** Game's module name, version, and dependencies. */
+  moduleMetadata?: ModuleMetadata;
 }

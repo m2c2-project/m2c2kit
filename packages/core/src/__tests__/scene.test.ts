@@ -1,5 +1,4 @@
 import { TestHelpers } from "./TestHelpers";
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   Session,
   SessionOptions,
@@ -25,6 +24,7 @@ class Game1 extends Game {
       name: "game1",
       id: "game1",
       version: "0.1",
+      canvasKitWasmUrl: "canvaskit.wasm",
       showFps: true,
       width: 400,
       height: 800,
@@ -61,7 +61,6 @@ beforeEach(async () => {
 
   const options: SessionOptions = {
     activities: [g1],
-    canvasKitWasmUrl: "canvaskit.wasm",
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();

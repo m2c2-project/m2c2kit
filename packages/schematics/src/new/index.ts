@@ -12,9 +12,6 @@ import {
   Source,
   applyTemplates,
 } from "@angular-devkit/schematics";
-import findup = require("findup-sync");
-import fs = require("fs");
-import path = require("path");
 import { NpmInstallOptions } from "../install";
 import { lastValueFrom } from "rxjs";
 import { Constants } from "../constants";
@@ -106,60 +103,6 @@ export function m2New(options: m2NewOptions): Rule {
     const mergeWithSourceTemplates = mergeWith(sourceParameterizedTemplates);
     rules.push(mergeWithSourceTemplates);
 
-    /**
-     * Third, copy required assets from the @m2c2kit/core package
-     */
-    rules.push((tree: Tree) => {
-      const findUps: FindUps[] = [
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/canvaskit.wasm",
-          dest: path.join(directory, "src/assets/canvaskit.wasm"),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/css/m2c2kit.css",
-          dest: path.join(directory, "src/assets/css/m2c2kit.css"),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/css/defaultV2.css",
-          dest: path.join(directory, "src/assets/css/defaultV2.css"),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/css/nouislider.css",
-          dest: path.join(directory, "src/assets/css/nouislider.css"),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/css/select2.css",
-          dest: path.join(directory, "src/assets/css/select2.css"),
-          cwd: directory,
-        },
-        {
-          findUp:
-            "node_modules/@m2c2kit/core/assets/css/bootstrap-datepicker.standalone.css",
-          dest: path.join(
-            directory,
-            "src/assets/css/bootstrap-datepicker.standalone.css",
-          ),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/assets/css/bootstrap-slider.css",
-          dest: path.join(directory, "src/assets/css/bootstrap-slider.css"),
-          cwd: directory,
-        },
-        {
-          findUp: "node_modules/@m2c2kit/core/index.html",
-          dest: path.join(directory, "src/index.html"),
-          cwd: directory,
-        },
-      ];
-      copyFindUps(findUps, tree);
-      return tree;
-    });
-
     process.on("exit", (exitCode) => {
       if (exitCode === 0) {
         console.log("");
@@ -180,22 +123,4 @@ export function m2New(options: m2NewOptions): Rule {
 
     return chain(rules);
   };
-}
-
-interface FindUps {
-  findUp: string;
-  dest: string;
-  cwd: string;
-}
-
-function copyFindUps(findUps: FindUps[], tree: Tree): void {
-  findUps.forEach((fu) => {
-    const filePath = findup(fu.findUp, { cwd: fu.cwd });
-    if (!filePath) {
-      throw new SchematicsException(`Could not find ${fu.findUp}`);
-    }
-    // console.log("found " + filePath);
-    const buf = fs.readFileSync(filePath);
-    tree.create(path.join(fu.dest), buf);
-  });
 }

@@ -21,7 +21,6 @@ const db = new LocalDatabase();
 
 const session = new Session({
   activities: activities,
-  canvasKitWasmUrl: "canvaskit.wasm",
   dataStores: [db],
 });
 
@@ -59,11 +58,11 @@ session.onActivityData((ev) => {
   console.log("  data: " + JSON.stringify(ev.data));
   console.log("  data schema: " + JSON.stringify(ev.dataSchema));
   console.log(
-    "  activity parameters: " + JSON.stringify(ev.activityConfiguration)
+    "  activity parameters: " + JSON.stringify(ev.activityConfiguration),
   );
   console.log(
     "  activity parameters schema: " +
-      JSON.stringify(ev.activityConfigurationSchema)
+      JSON.stringify(ev.activityConfigurationSchema),
   );
 
   db.saveActivityResults(ev).catch((err) => {

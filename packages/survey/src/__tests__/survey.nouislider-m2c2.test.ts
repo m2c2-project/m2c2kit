@@ -56,7 +56,6 @@ describe("nouislider-m2c2 behavior", () => {
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     await session.initialize();
@@ -81,13 +80,13 @@ describe("nouislider-m2c2 behavior", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "mood", value: null }])
+        expect.arrayContaining([{ name: "mood", value: null }]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "mood", value: null }])
+        expect.arrayContaining([{ name: "mood", value: null }]),
       );
     }
   });
@@ -128,13 +127,13 @@ describe("nouislider-m2c2 behavior", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "mood", value: 77 }])
+        expect.arrayContaining([{ name: "mood", value: 77 }]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "mood", value: 77 }])
+        expect.arrayContaining([{ name: "mood", value: 77 }]),
       );
     }
   });

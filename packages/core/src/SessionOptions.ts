@@ -10,8 +10,6 @@ export interface SessionOptions {
   activityCallbacks?: ActivityCallbacks;
   /** Callbacks executed when session events occur */
   sessionCallbacks?: SessionCallbacks;
-  /** Url of the canvaskit.wasm binary. Always set to the default value of "canvaskit.wasm" */
-  canvasKitWasmUrl: "canvaskit.wasm";
   /** Use a specified session UUID, rather than create a new one */
   sessionUuid?: string;
   /** URL of session assets folder (which contains wasm binary), if not the default location of "assets" */

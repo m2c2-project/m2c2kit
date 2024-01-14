@@ -18,6 +18,7 @@ import {
   Equals,
   Sprite,
   Point,
+  Constants,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -271,6 +272,8 @@ class ColorDots extends Game {
       name: "Color Dots",
       id: "color-dots",
       version: "__PACKAGE_JSON_VERSION__",
+      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Color Dots is cued-recall, item-location memory \
 binding task, where after viewing 3 dots for a brief period of time, \
@@ -443,7 +446,7 @@ appeared.",
       // timestamp
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
     });
     game.addScenes(instructionsScenes);
@@ -469,7 +472,7 @@ appeared.",
     const numberOfDots = game.getParameter<number>("number_of_dots");
     const dotColors =
       game.getParameter<Array<{ colorName: string; rgbaColor: RgbaColor }>>(
-        "dot_colors"
+        "dot_colors",
       );
     const dotDiameter = game.getParameter<number>("dot_diameter");
     const numberOfColors = dotColors.length;
@@ -477,11 +480,11 @@ appeared.",
     function positionTooCloseToOtherDots(
       x: number,
       y: number,
-      dots: Array<Dot>
+      dots: Array<Dot>,
     ) {
       for (let i = 0; i < dots.length; i++) {
         const dist = Math.sqrt(
-          Math.pow(x - dots[i].x, 2) + Math.pow(y - dots[i].y, 2)
+          Math.pow(x - dots[i].x, 2) + Math.pow(y - dots[i].y, 2),
         );
         if (dist < dotDiameter * 3 + 0.25 * dotDiameter) {
           return true;
@@ -503,17 +506,17 @@ appeared.",
           // +4, -4 to have some small margin between dot and square
           x = RandomDraws.SingleFromRange(
             0 + dotDiameter / 2 + 4,
-            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4
+            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4,
           );
           y = RandomDraws.SingleFromRange(
             0 + dotDiameter / 2 + 4,
-            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4
+            SQUARE_SIDE_LENGTH - dotDiameter / 2 - 4,
           );
         } while (positionTooCloseToOtherDots(x, y, dots));
 
         const colorIndex = RandomDraws.SingleFromRange(
           0,
-          availableColors.length - 1
+          availableColors.length - 1,
         );
         const dotColor = availableColors.splice(colorIndex, 1)[0];
         const dot = {
@@ -527,7 +530,7 @@ appeared.",
 
       const colorSelectionDotIndex = RandomDraws.SingleFromRange(
         0,
-        dots.length - 1
+        dots.length - 1,
       );
 
       trialConfigurations.push({
@@ -577,18 +580,18 @@ appeared.",
               game.presentScene(dotPresentationScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
     fixationScene.onAppear(() => {
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
       game.addTrialData(
         "trial_begin_iso8601_timestamp",
-        new Date().toISOString()
+        new Date().toISOString(),
       );
     });
 
@@ -647,7 +650,7 @@ appeared.",
               game.presentScene(colorSelectionScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -719,7 +722,7 @@ appeared.",
                 throw new Error("no selected color");
               }
               const colorSelectedName = dotColors.filter((d) =>
-                Equals.rgbaColor(d.rgbaColor, selectedRgba)
+                Equals.rgbaColor(d.rgbaColor, selectedRgba),
               )[0].colorName;
               colorSelected = {
                 color_name: colorSelectedName,
@@ -733,12 +736,12 @@ appeared.",
                 ];
               game.addTrialData(
                 "color_selected_correct",
-                Equals.rgbaColor(colorTargetDot.rgbaColor, selectedRgba)
+                Equals.rgbaColor(colorTargetDot.rgbaColor, selectedRgba),
               );
               game.presentScene(locationSelectionScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -934,12 +937,12 @@ appeared.",
       do {
         locationSelectionDotIndex = RandomDraws.SingleFromRange(
           0,
-          numberOfDots - 1
+          numberOfDots - 1,
         );
         if (
           Equals.rgbaColor(
             trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
-            selectedRgba
+            selectedRgba,
           )
         ) {
           locationSelectionDotIndex = -1;
@@ -984,11 +987,11 @@ appeared.",
       game.addTrialData("presented_dots", presentedDots);
       game.addTrialData(
         "color_target_dot_index",
-        trialConfiguration.colorSelectionDotIndex
+        trialConfiguration.colorSelectionDotIndex,
       );
       game.addTrialData(
         "location_target_dot_index",
-        trialConfiguration.locationSelectionDotIndex
+        trialConfiguration.locationSelectionDotIndex,
       );
 
       if (!selectedRgba) {
@@ -1046,18 +1049,18 @@ appeared.",
       game.addTrialData("location_selection_response_time_ms", locationRt);
       game.addTrialData(
         "trial_end_iso8601_timestamp",
-        new Date().toISOString()
+        new Date().toISOString(),
       );
       locationSelectionScene.removeChild(locationSelectionDot);
 
       const location_selected = calculatePositionWithinSquare(
-        locationSelectionDot.position
+        locationSelectionDot.position,
       );
       game.addTrialData("location_selected", location_selected);
       game.addTrialData("square_side_length", SQUARE_SIDE_LENGTH);
       const delta = Math.sqrt(
         Math.pow(location_selected.x - location_target.x, 2) +
-          Math.pow(location_selected.y - location_target.y, 2)
+          Math.pow(location_selected.y - location_target.y, 2),
       );
       game.addTrialData("location_selected_delta", delta);
       game.addTrialData("quit_button_pressed", false);
@@ -1073,7 +1076,7 @@ appeared.",
               direction: TransitionDirection.Left,
               duration: 500,
               easing: Easings.sinusoidalInOut,
-            })
+            }),
           );
         } else {
           game.end();

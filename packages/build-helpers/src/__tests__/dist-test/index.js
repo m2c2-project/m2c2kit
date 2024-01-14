@@ -7896,6 +7896,7 @@ class Testapp extends Game {
         const options = {
             name: "testapp",
             id: "testapp",
+            canvasKitWasmUrl: "canvaskit.wasm",
             version: "1.0.0",
             shortDescription: "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
             longDescription: `In psychology, the Stroop effect is the delay in \
@@ -8218,7 +8219,6 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
 const activity = new Testapp();
 const session = new Session({
     activities: [activity],
-    canvasKitWasmUrl: "canvaskit.wasm",
     sessionCallbacks: {
         /**
          * onSessionLifecycle() will be called on events such

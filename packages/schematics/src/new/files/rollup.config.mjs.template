@@ -3,7 +3,12 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import copy from "rollup-plugin-copy";
-import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
+import {
+  copyAssets,
+  hashM2c2kitAssets,
+  restoreImportMeta,  
+  makeM2c2kitServiceWorker,
+} from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
@@ -30,29 +35,18 @@ export default (commandLineArgs) => {
         typescript({
           sourceMap: isDebug && true,
         }),
-        copy({
-          targets: [
-            {
-              src: ["./src/assets/*", "!src/assets/fonts", "!src/assets/images"],
-              dest: outputFolder + "/assets",
-            },
-            {
-              src: ["src/assets/fonts/*"],
-              dest: outputFolder + "/assets/<%= dasherize(appName) %>/fonts",
-            },
-            {
-              src: ["src/assets/images/*"],
-              dest: outputFolder + "/assets/<%= dasherize(appName) %>/images",
-            },
-            {
-              src: "./src/index.html",
-              dest: outputFolder,
-            },
-          ],
-        }),
+        restoreImportMeta(),
+        copyAssets({ packageName: [
+          "<%= dasherize(appName) %>",
+          "@m2c2kit/core",
+        ], outputFolder }),        
         isProduction &&
           !commandLineArgs.configNoHash &&
           hashM2c2kitAssets(outputFolder),
+        commandLineArgs.configProd &&
+        !commandLineArgs.configNoHash &&
+        commandLineArgs.configServiceWorker &&
+        makeM2c2kitServiceWorker(outputFolder, ["data.html", "data.js"]),          
         isDebug &&
           serve({
             /**

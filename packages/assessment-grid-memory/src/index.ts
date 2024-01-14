@@ -15,6 +15,7 @@ import {
   Timer,
   Easings,
   Sprite,
+  Constants,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -279,6 +280,8 @@ class GridMemory extends Game {
       name: "Grid Memory",
       id: "grid-memory",
       version: "__PACKAGE_JSON_VERSION__",
+      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Grid Memory is a visuospatial working memory task, \
 with delayed free recall. After a brief exposure, and a short distraction \
@@ -448,7 +451,7 @@ phase, participants report the location of dots on a grid.",
       // in case user quits before starting trial, record the timestamp
       game.addTrialData(
         "activity_begin_iso8601_timestamp",
-        this.beginIso8601Timestamp
+        this.beginIso8601Timestamp,
       );
     });
 
@@ -487,11 +490,11 @@ phase, participants report the location of dots on a grid.",
             callback: () => {
               game.addTrialData(
                 "activity_begin_iso8601_timestamp",
-                this.beginIso8601Timestamp
+                this.beginIso8601Timestamp,
               );
               game.addTrialData(
                 "trial_begin_iso8601_timestamp",
-                new Date().toISOString()
+                new Date().toISOString(),
               );
             },
           }),
@@ -503,7 +506,7 @@ phase, participants report the location of dots on a grid.",
               game.presentScene(dotPresentationScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -549,7 +552,7 @@ phase, participants report the location of dots on a grid.",
               presentedCells = RandomDraws.FromGridWithoutReplacement(
                 NUMBER_OF_DOTS,
                 5,
-                5
+                5,
               );
               for (let i = 0; i < NUMBER_OF_DOTS; i++) {
                 const circle = new Shape({
@@ -561,7 +564,7 @@ phase, participants report the location of dots on a grid.",
                 presentationGrid.addAtCell(
                   circle,
                   presentedCells[i].row,
-                  presentedCells[i].column
+                  presentedCells[i].column,
                 );
               }
             },
@@ -575,11 +578,11 @@ phase, participants report the location of dots on a grid.",
               rememberDotsMessage.hidden = true;
               game.presentScene(
                 interferenceScene,
-                forward_into_interference_scene_transition
+                forward_into_interference_scene_transition,
               );
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -628,12 +631,12 @@ phase, participants report the location of dots on a grid.",
               Timer.remove("interferenceResponseTime");
               game.presentScene(
                 dotRecallScene,
-                back_from_interference_scene_transition
+                back_from_interference_scene_transition,
               );
             },
           }),
         ]),
-        "advanceAfterInterference"
+        "advanceAfterInterference",
       );
 
       // On repeated showings of the grid, we will slide it into view
@@ -645,12 +648,12 @@ phase, participants report the location of dots on a grid.",
         // randomly choose six cells to have F in them from the grid that
         // is of size 8 rows and 5 columns
         const number_of_interference_targets = game.getParameter<number>(
-          "number_of_interference_targets"
+          "number_of_interference_targets",
         );
         const FCells = RandomDraws.FromGridWithoutReplacement(
           number_of_interference_targets,
           8,
-          5
+          5,
         );
         for (let i = 0; i < 8; i++) {
           for (let j = 0; j < 5; j++) {
@@ -694,7 +697,7 @@ phase, participants report the location of dots on a grid.",
                   Action.sequence([
                     Action.scale({ scale: 1.25, duration: 125 }),
                     Action.scale({ scale: 1, duration: 125 }),
-                  ])
+                  ]),
                 );
                 // square has been tapped
                 (<squareUserData>square.userData).tapStatus = 1;
@@ -722,7 +725,7 @@ phase, participants report the location of dots on a grid.",
                 if (Timer.exists("interferenceResponseTime")) {
                   userInterferenceActions.push({
                     elapsed_duration_ms: Timer.elapsed(
-                      "interferenceResponseTime"
+                      "interferenceResponseTime",
                     ),
                     action_type: "on-target",
                     cell: {
@@ -737,7 +740,7 @@ phase, participants report the location of dots on a grid.",
                 if (Timer.exists("interferenceResponseTime")) {
                   userInterferenceActions.push({
                     elapsed_duration_ms: Timer.elapsed(
-                      "interferenceResponseTime"
+                      "interferenceResponseTime",
                     ),
                     action_type: "off-target",
                     cell: {
@@ -759,7 +762,7 @@ phase, participants report the location of dots on a grid.",
         if (slideGridIntoScene) {
           interferenceGrid.position = { x: 200, y: 1040 };
           interferenceGrid.run(
-            Action.move({ point: { x: 200, y: 400 }, duration: 500 })
+            Action.move({ point: { x: 200, y: 400 }, duration: 500 }),
           );
         }
       }
@@ -857,7 +860,7 @@ phase, participants report the location of dots on a grid.",
               tappedCellCount--;
               // remove this "untapped" cell from the recorded data of tapped cells
               selectedCells = selectedCells.filter(
-                (cell) => !(cell.row === i && cell.column === j)
+                (cell) => !(cell.row === i && cell.column === j),
               );
               userDotActions.push({
                 elapsed_duration_ms: Timer.elapsed("responseTime"),
@@ -921,7 +924,7 @@ phase, participants report the location of dots on a grid.",
                 youMustSelectAllMessage.hidden = true;
               },
             }),
-          ])
+          ]),
         );
       } else {
         Timer.stop("responseTime");
@@ -929,7 +932,7 @@ phase, participants report the location of dots on a grid.",
 
         game.addTrialData(
           "trial_end_iso8601_timestamp",
-          new Date().toISOString()
+          new Date().toISOString(),
         );
         game.addTrialData("response_time_duration_ms", doneButtonElapsedMs);
         game.addTrialData("presented_cells", presentedCells);
@@ -943,10 +946,10 @@ phase, participants report the location of dots on a grid.",
         const numberOfCorrectDots = selectedCells
           .map((selectedCell) =>
             presentedCells.some((presentedCell) =>
-              cellsEqual(presentedCell, selectedCell)
+              cellsEqual(presentedCell, selectedCell),
             )
               ? 1
-              : 0
+              : 0,
           )
           .reduce((a: number, b) => a + b, 0);
         game.addTrialData("number_of_correct_dots", numberOfCorrectDots);

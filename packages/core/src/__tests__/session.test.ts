@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TestHelpers } from "./TestHelpers";
 import { Session, SessionOptions, Game, GameOptions, Scene } from "..";
 
@@ -9,6 +8,7 @@ class Game1 extends Game {
     const gameOptions: GameOptions = {
       name: "game1",
       id: "game1",
+      canvasKitWasmUrl: "canvaskit.wasm",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -35,6 +35,7 @@ class Game2 extends Game {
     const gameOptions: GameOptions = {
       name: "game2",
       id: "game2",
+      canvasKitWasmUrl: "canvaskit.wasm",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -66,7 +67,6 @@ beforeEach(async () => {
 
   const options: SessionOptions = {
     activities: [g1, g2],
-    canvasKitWasmUrl: "canvaskit.wasm",
     autoStartAfterInit: false,
   };
   session = new Session(options);
@@ -84,8 +84,6 @@ describe("Session init", () => {
     await session.initialize();
     // CanvasKit is an interface, so we can't expect an instance of CanvasKit
     // Instead, expect a property we mocked above
-    // expect(session.fontManager.canvasKit).toHaveProperty("MakeCanvasSurface");
-    // expect(session.imageManager.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g1.canvasKit).toHaveProperty("MakeCanvasSurface");
     expect(g2.canvasKit).toHaveProperty("MakeCanvasSurface");
   });

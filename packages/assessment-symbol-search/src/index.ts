@@ -15,6 +15,7 @@ import {
   Timer,
   Sprite,
   Easings,
+  Constants,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -230,6 +231,8 @@ positions.",
       name: "Symbol Search",
       id: "symbol-search",
       version: "__PACKAGE_JSON_VERSION__",
+      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Symbol Search is a speeded continuous performance test of \
 conjunctive feature search in which respondents identify matching symbol \

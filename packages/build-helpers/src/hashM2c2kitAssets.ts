@@ -10,6 +10,7 @@ import * as acorn from "acorn";
 import * as walk from "acorn-walk";
 import * as estree from "estree";
 import { generate } from "astring";
+import { Plugin } from "rollup";
 
 /** We use MD5 for hashing, but keep only the first 16 characters. */
 const HASH_CHARACTER_LENGTH = 16;
@@ -54,13 +55,18 @@ interface FileRename {
  * @param cwd - current working directory; used only for testing.
  * @returns
  */
-export function hashM2c2kitAssets(rootDir: string, cwd = "") {
+export function hashM2c2kitAssets(rootDir: string, cwd = ""): Plugin {
   const indexHtmlFile = path.join(cwd, rootDir, "index.html");
   const indexJsFile = path.join(cwd, rootDir, "index.js");
 
   return {
     name: "hash-m2c2kit-assets",
-    closeBundle: {
+    writeBundle: {
+      /**
+       * Sequential is true because we will must call the copy assets
+       * plugin before this hash plugin in the writeBundle phase and respect
+       * the order.
+       */
       sequential: true,
       async handler() {
         const fileRenames = new Array<FileRename>();
@@ -68,18 +74,21 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
         let indexjs: string;
         try {
           indexjs = await readFile(indexJsFile, "utf-8");
-        } catch {
+        } catch (e) {
           throw new Error(
-            "could not hash m2c2 assets because there was an error reading index.js. This is a fatal problem because index.js is required."
+            `could not hash m2c2 assets because there was an error reading index.js. This is a fatal error because index.js is required. Error: ${e}`,
           );
         }
 
         let ast: acorn.Node;
         try {
-          ast = acorn.parse(indexjs, { ecmaVersion: 2020 });
-        } catch {
+          ast = acorn.parse(indexjs, {
+            ecmaVersion: 2020,
+            sourceType: "module",
+          });
+        } catch (e) {
           throw new Error(
-            "could not hash m2c2 assets because there was an error parsing index.js. This is a fatal problem because index.js is not valid JavaScript."
+            `could not hash m2c2 assets because there was an error parsing index.js. This is a fatal error because index.js must be parsed for asset hashing. Error: ${e}`,
           );
         }
 
@@ -102,36 +111,53 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                   const literal = node as unknown as estree.Literal;
                   const originalUrlValue = literal.value as string;
 
+                  const objectExpression = ancestors.slice(
+                    -3,
+                  )[0] as unknown as estree.ObjectExpression;
+                  const properties =
+                    objectExpression.properties as unknown as Array<estree.Property>;
+                  const gameIdProperty = properties
+                    .filter((p) => (p.key as estree.Identifier)?.name === "id")
+                    .find(Boolean);
+                  if (!gameIdProperty) {
+                    throw new Error(
+                      `could not parse game id property from index.js`,
+                    );
+                  }
+
+                  const gameId = (gameIdProperty.value as estree.Literal)
+                    .value as string;
+
                   try {
                     const hashedUrlValue = addHashToUrl(
                       originalUrlValue,
                       /**
                        * by our convention, the wasm file will be served from
-                       * the assets directory, so the location is
-                       * `assets/${canvasKitWasmUrl}` not `${canvasKitWasmUrl}`
+                       * the assets/<gameId> directory, so the location is
+                       * `assets/<gameId>/${canvasKitWasmUrl}` not `${canvasKitWasmUrl}`
                        */
-                      `${rootDir}/assets`,
-                      cwd
+                      `${rootDir}/assets/${gameId}`,
+                      cwd,
                     );
 
                     literal.value = (literal.value as string).replace(
                       originalUrlValue,
-                      hashedUrlValue
+                      hashedUrlValue,
                     );
                     literal.raw = (literal.raw as string).replace(
                       originalUrlValue,
-                      hashedUrlValue
+                      hashedUrlValue,
                     );
 
                     addFileToFilesToBeRenamed(
-                      `${rootDir}/assets`,
+                      `${rootDir}/assets/${gameId}`,
                       originalUrlValue,
                       hashedUrlValue,
-                      fileRenames
+                      fileRenames,
                     );
                   } catch {
                     console.log(
-                      `warning: could not hash canvaskit.wasm resource because it was not found at ${originalUrlValue}`
+                      `warning: could not hash canvaskit.wasm resource because it was not found at ${originalUrlValue}`,
                     );
                   }
                 }
@@ -166,7 +192,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                     const urlFontAssetProperties = ["fontName", "url"];
 
                     const propCount = identifiers.filter(
-                      (i) => urlFontAssetProperties.indexOf(i) !== -1
+                      (i) => urlFontAssetProperties.indexOf(i) !== -1,
                     ).length;
                     if (propCount === 2) {
                       // the object expression has the 2 properties
@@ -185,7 +211,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                             const originalUrlValue = literal.value as string;
 
                             const optionsDeclarator = ancestors.slice(
-                              -7
+                              -7,
                             )[0] as unknown as estree.VariableDeclarator;
                             const objExpression =
                               optionsDeclarator.init as unknown as estree.ObjectExpression;
@@ -197,7 +223,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                                 (
                                   (p as estree.Property)
                                     .key as estree.Identifier
-                                ).name == "id"
+                                ).name == "id",
                             )[0] as unknown as estree.Property;
                             const gameId = (
                               gameIdProperty.value as estree.Literal
@@ -207,22 +233,22 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                               const hashedUrlValue = addHashToUrl(
                                 originalUrlValue,
                                 path.join(rootDir, "assets", gameId),
-                                cwd
+                                cwd,
                               );
 
                               literal.value = (literal.value as string).replace(
                                 originalUrlValue,
-                                hashedUrlValue
+                                hashedUrlValue,
                               );
                               literal.raw = (literal.raw as string).replace(
                                 originalUrlValue,
-                                hashedUrlValue
+                                hashedUrlValue,
                               );
                               addFileToFilesToBeRenamed(
                                 path.join(rootDir, "assets", gameId),
                                 originalUrlValue,
                                 hashedUrlValue,
-                                fileRenames
+                                fileRenames,
                               );
                             } catch {
                               `warning: could not hash a font resource because it was not found at ${originalUrlValue} `;
@@ -269,7 +295,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                     ];
 
                     const propCount = identifiers.filter(
-                      (i) => urlBrowserImageProperties.indexOf(i) !== -1
+                      (i) => urlBrowserImageProperties.indexOf(i) !== -1,
                     ).length;
                     if (propCount === 4) {
                       // the object expression has the 4 properties
@@ -288,7 +314,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                             const originalUrlValue = literal.value as string;
 
                             const optionsDeclarator = ancestors.slice(
-                              -7
+                              -7,
                             )[0] as unknown as estree.VariableDeclarator;
                             const objExpression =
                               optionsDeclarator.init as unknown as estree.ObjectExpression;
@@ -300,7 +326,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                                 (
                                   (p as estree.Property)
                                     .key as estree.Identifier
-                                ).name == "id"
+                                ).name == "id",
                             )[0] as unknown as estree.Property;
                             const gameId = (
                               gameIdProperty.value as estree.Literal
@@ -310,22 +336,22 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                               const hashedUrlValue = addHashToUrl(
                                 originalUrlValue,
                                 path.join(rootDir, "assets", gameId),
-                                cwd
+                                cwd,
                               );
 
                               literal.value = (literal.value as string).replace(
                                 originalUrlValue,
-                                hashedUrlValue
+                                hashedUrlValue,
                               );
                               literal.raw = (literal.raw as string).replace(
                                 originalUrlValue,
-                                hashedUrlValue
+                                hashedUrlValue,
                               );
                               addFileToFilesToBeRenamed(
                                 path.join(rootDir, "assets", gameId),
                                 originalUrlValue,
                                 hashedUrlValue,
-                                fileRenames
+                                fileRenames,
                               );
                             } catch {
                               `warning: could not hash an image resource because it was not found at ${originalUrlValue} `;
@@ -365,17 +391,17 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                 link.attribs["href"] = addHashToUrl(
                   link.attribs["href"],
                   rootDir,
-                  cwd
+                  cwd,
                 );
                 addFileToFilesToBeRenamed(
                   rootDir,
                   originalUrl,
                   link.attribs["href"],
-                  fileRenames
+                  fileRenames,
                 );
               } catch {
                 console.log(
-                  `warning: could not hash css resource because it was not found at ${link.attribs["href"]}`
+                  `warning: could not hash css resource because it was not found at ${link.attribs["href"]}`,
                 );
               }
             }
@@ -397,11 +423,11 @@ export function hashM2c2kitAssets(rootDir: string, cwd = "") {
                   rootDir,
                   "index.js",
                   hashedFilename,
-                  fileRenames
+                  fileRenames,
                 );
               } catch {
                 console.log(
-                  `warning: could not hash index.js because it was not found at ${indexJsFile}`
+                  `warning: could not hash index.js because it was not found at ${indexJsFile}`,
                 );
               }
             }
@@ -442,7 +468,7 @@ const addHashToUrl = (url: string, rootDir: string, cwd = "") => {
 async function writeHashManifest(
   rootDir: string,
   fileRenames: FileRename[],
-  cwd = ""
+  cwd = "",
 ) {
   const manifestFilename = path.join(cwd, rootDir, "hash-manifest.json");
   const manifest: { [originalName: string]: string } = {};
@@ -465,7 +491,7 @@ function addFileToFilesToBeRenamed(
   rootDir: string,
   originalUrlValue: string,
   hashedUrlValue: string,
-  fileRenames: FileRename[]
+  fileRenames: FileRename[],
 ) {
   const filename = path.join(rootDir, originalUrlValue);
   const hashedFilename = path.join(rootDir, hashedUrlValue);

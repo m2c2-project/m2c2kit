@@ -60,7 +60,6 @@ describe("radiogroup behavior", () => {
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     await session.initialize();
@@ -85,13 +84,13 @@ describe("radiogroup behavior", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "where", value: null }])
+        expect.arrayContaining([{ name: "where", value: null }]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "where", value: null }])
+        expect.arrayContaining([{ name: "where", value: null }]),
       );
     }
   });
@@ -132,13 +131,13 @@ describe("radiogroup behavior", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "where", value: 2 }])
+        expect.arrayContaining([{ name: "where", value: 2 }]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
-        expect.arrayContaining([{ name: "where", value: 2 }])
+        expect.arrayContaining([{ name: "where", value: 2 }]),
       );
     }
   });

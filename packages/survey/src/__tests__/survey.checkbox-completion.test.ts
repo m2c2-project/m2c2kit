@@ -57,7 +57,6 @@ describe.skip("checkbox behavior on survey completion, multiresponse", () => {
     s1 = new Survey(surveyJson);
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     await session.initialize();
@@ -83,7 +82,7 @@ describe.skip("checkbox behavior on survey completion, multiresponse", () => {
     expect(s1["responseIndex"]).toBe(responseIndex + 1);
     function onActivityResultsCallback(
       newData: ActivityKeyValueData,
-      data: ActivityKeyValueData
+      data: ActivityKeyValueData,
     ) {
       expect(newData.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -92,7 +91,7 @@ describe.skip("checkbox behavior on survey completion, multiresponse", () => {
           { name: "who_otherfamily", value: null },
           { name: "who_otherpeople", value: null },
           { name: "who_nobody", value: null },
-        ])
+        ]),
       );
       expect(data.variables as Array<SurveyVariable>).toEqual(
         expect.arrayContaining([
@@ -101,7 +100,7 @@ describe.skip("checkbox behavior on survey completion, multiresponse", () => {
           { name: "who_otherfamily", value: null },
           { name: "who_otherpeople", value: null },
           { name: "who_nobody", value: null },
-        ])
+        ]),
       );
     }
   });

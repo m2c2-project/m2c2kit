@@ -163,6 +163,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           url: "images/assessmentExample.png",
         },
       ],
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(options);
@@ -484,7 +485,6 @@ const activity = new <%= classify(appName) %>();
 const activities = [activity];
 const session = new Session({
   activities: activities,
-  canvasKitWasmUrl: "canvaskit.wasm",
 });
 
 /**

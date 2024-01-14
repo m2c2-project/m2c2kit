@@ -26,6 +26,7 @@ describe("physics gravity", () => {
           showFps: true,
           width: 400,
           height: 800,
+          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -58,7 +59,6 @@ describe("physics gravity", () => {
     const g1 = new Game1();
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };
@@ -113,6 +113,7 @@ describe("physics no gravity", () => {
           showFps: true,
           width: 400,
           height: 800,
+          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -146,7 +147,6 @@ describe("physics no gravity", () => {
     const g1 = new Game1();
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };
@@ -189,6 +189,7 @@ describe("physics collision", () => {
           showFps: true,
           width: 400,
           height: 800,
+          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -247,7 +248,6 @@ describe("physics collision", () => {
     const g1 = new Game1();
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };
@@ -296,6 +296,7 @@ describe("physics gravity changed", () => {
           showFps: true,
           width: 400,
           height: 800,
+          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -329,7 +330,6 @@ describe("physics gravity changed", () => {
     const g1 = new Game1();
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };
@@ -391,6 +391,7 @@ describe("allows rotation", () => {
           showFps: true,
           width: 400,
           height: 800,
+          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -436,7 +437,6 @@ describe("allows rotation", () => {
     const g1 = new Game1();
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };

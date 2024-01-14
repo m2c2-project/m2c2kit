@@ -4,7 +4,7 @@
   "version": "0.8.10",
   "scripts": {
     "serve": "rollup -c --watch --configServe",
-    "build": "npm run clean && rollup -c --configProd",
+    "build": "npm run clean && tsc && rollup -c --configProd",
     "build-webview": "npm run clean-webview && rollup -c rollup.config.webview.mjs --configProd --configNoHash",
     "build-sw": "npm run clean && rollup -c --configProd --configServiceWorker",
     "clean": "rimraf build dist .rollup.cache",
@@ -29,13 +29,13 @@
     "@m2c2kit/assessment-color-shapes": "^0.8.4",
     "@m2c2kit/assessment-grid-memory": "^0.8.4",
     "@m2c2kit/assessment-symbol-search": "^0.8.4",
-    "@m2c2kit/core": "^0.3.6",
+    "@m2c2kit/core": "^0.3.16",
     "@m2c2kit/db": "^0.3.3",
     "@m2c2kit/embedding": "^1.0.2",
     "@m2c2kit/survey": "^0.3.3"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "^0.3.5",
+    "@m2c2kit/build-helpers": "^0.3.12",
     "@rollup/plugin-node-resolve": "15.2.3",
     "rimraf": "5.0.5",
     "rollup": "4.9.4",

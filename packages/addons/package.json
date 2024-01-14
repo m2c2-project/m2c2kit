@@ -4,14 +4,15 @@
   "description": "Additions to m2c2kit core functionality, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js"
     }
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts"
+    "dist",
+    "metadata.json"
   ],
   "scripts": {
     "build": "npm run clean && tsc --build && rollup -c",
@@ -33,6 +34,7 @@
     "@m2c2kit/core": "^0.3.14"
   },
   "devDependencies": {
+    "@m2c2kit/build-helpers": "^0.3.12",
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",
     "rollup": "4.9.4",

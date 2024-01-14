@@ -31,7 +31,6 @@ describe("survey start", () => {
 
     const options: SessionOptions = {
       activities: [s1],
-      canvasKitWasmUrl: "canvaskit.wasm",
       autoStartAfterInit: false,
     };
     session = new Session(options);

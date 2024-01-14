@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TestHelpers } from "./TestHelpers";
 import {
   Session,
@@ -26,6 +25,7 @@ class Game1 extends Game {
       showFps: true,
       width: 400,
       height: 800,
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);
@@ -60,6 +60,7 @@ class Game2 extends Game {
       width: 400,
       height: 800,
       stretch: true,
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);
@@ -84,10 +85,11 @@ let g2: Game2;
 describe("GameOptions", () => {
   class Game3 extends Game {
     constructor() {
-      // @ts-ignore
+      // @ts-expect-error purposely missing id
       const gameOptions: GameOptions = {
         name: "game2",
         version: "0.1",
+        canvasKitWasmUrl: "canvaskit.wasm",
       };
 
       super(gameOptions);
@@ -106,7 +108,6 @@ describe("FontManager", () => {
 
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -124,7 +125,6 @@ describe("ImageManager", () => {
 
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -159,6 +159,7 @@ describe("parameters", () => {
         width: 400,
         height: 800,
         parameters: defaultParameters,
+        canvasKitWasmUrl: "canvaskit.wasm",
       };
 
       super(gameOptions);
@@ -171,7 +172,6 @@ describe("parameters", () => {
 
     const options: SessionOptions = {
       activities: [g4],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set parameters before starting
       autoStartAfterInit: false,
     };
@@ -226,7 +226,6 @@ describe("scene add/remove", () => {
 
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -292,7 +291,6 @@ describe("presentScene", () => {
 
     const options: SessionOptions = {
       activities: [g1],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -320,7 +318,6 @@ describe("actions", () => {
 
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "canvaskit.wasm",
       // don't autostart; we need to set frame counters and actions before starting
       autoStartAfterInit: false,
     };
@@ -510,7 +507,6 @@ describe("Game start", () => {
 
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -566,7 +562,6 @@ describe("free entities", () => {
     g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
     const options: SessionOptions = {
       activities: [g1, g2],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -653,6 +648,7 @@ class Game3 extends Game {
       version: "0.1",
       width: 400,
       height: 800,
+      canvasKitWasmUrl: "canvaskit.wasm",
       trialSchema: trialSchema,
     };
 
@@ -678,7 +674,6 @@ describe("addTrialData", () => {
     g3 = new Game3();
     const options: SessionOptions = {
       activities: [g3],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -762,6 +757,7 @@ describe("time stepping", () => {
         showFps: true,
         width: 400,
         height: 800,
+        canvasKitWasmUrl: "canvaskit.wasm",
         timeStepping: true,
       };
 
@@ -793,7 +789,6 @@ describe("time stepping", () => {
 
     const options: SessionOptions = {
       activities: [g5],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();
@@ -806,7 +801,7 @@ describe("time stepping", () => {
   });
 
   it("removes time stepping controls", () => {
-    // @ts-ignore
+    // @ts-expect-error calling private method for testing
     g5.removeTimeSteppingControlsFromDom();
     expect(document.getElementById("m2c2kit-time-stepping-div")).toBeNull();
   });
@@ -817,7 +812,6 @@ describe("custom trial schema", () => {
     g3 = new Game3();
     const options: SessionOptions = {
       activities: [g3],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
     session = new Session(options);
     TestHelpers.setupDomAndGlobals();

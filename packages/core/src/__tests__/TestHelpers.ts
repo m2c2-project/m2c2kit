@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Session } from "..";
+import { Game } from "..";
 import { jest } from "@jest/globals";
+import { CanvasKit } from "canvaskit-wasm";
 
 export class TestHelpers {
   static setupDomAndGlobals(): void {
@@ -79,8 +79,8 @@ export class TestHelpers {
       return undefined;
     };
 
-    // @ts-ignore
-    Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+    // @ts-expect-error modifying private method for testing
+    Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
       Promise.resolve({
         PaintStyle: {
           Fill: undefined,
@@ -161,6 +161,6 @@ export class TestHelpers {
           Right: undefined,
         },
       }),
-    );
+    ) as (canvasKitWasmUrl: string) => Promise<CanvasKit>;
   }
 }

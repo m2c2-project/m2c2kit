@@ -26,6 +26,7 @@ class Game1 extends Game {
       name: "game1",
       id: "game1",
       version: "0.1",
+      canvasKitWasmUrl: "canvaskit.wasm",
       showFps: true,
       width: 400,
       height: 800,
@@ -60,7 +61,6 @@ beforeEach(() => {
 
   const options: SessionOptions = {
     activities: [g1],
-    canvasKitWasmUrl: "canvaskit.wasm",
     autoStartAfterInit: false,
   };
   session = new Session(options);
@@ -121,7 +121,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.end();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -140,7 +140,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.end();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -157,7 +157,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.end();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -177,7 +177,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.end();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -198,7 +198,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.end();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -217,7 +217,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.trialComplete();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
@@ -234,7 +234,7 @@ describe("Session event handlers", () => {
         callback: () => {
           g1.trialComplete();
         },
-      })
+      }),
     );
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;

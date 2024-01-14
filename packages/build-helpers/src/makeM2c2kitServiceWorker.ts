@@ -1,12 +1,12 @@
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import { InputOptions } from "rollup";
+import { InputOptions, Plugin } from "rollup";
 
 export function makeM2c2kitServiceWorker(
   rootDir: string,
-  additionalFiles?: Array<string>
-) {
+  additionalFiles?: Array<string>,
+): Plugin {
   let inputFile = "";
 
   return {
@@ -20,7 +20,7 @@ export function makeM2c2kitServiceWorker(
             inputFile = path.resolve(options.input[0]);
           } else {
             throw new Error(
-              "Could not determine input file when trying to add service worker code."
+              "Could not determine input file when trying to add service worker code.",
             );
           }
         }
@@ -32,7 +32,7 @@ export function makeM2c2kitServiceWorker(
           if (code.includes("//# sourceMappingURL")) {
             code = code.replace(
               "//# sourceMappingURL",
-              serviceWorkerRegistrationCode + "\n//# sourceMappingURL"
+              serviceWorkerRegistrationCode + "\n//# sourceMappingURL",
             );
           }
         }
@@ -45,7 +45,7 @@ export function makeM2c2kitServiceWorker(
         // this is the path of our @m2c2kit/build-helpers package
         // our sw.js template is stored under the "assets" folder here
         const packageHomeFolderPath = path.dirname(
-          fileURLToPath(import.meta.url)
+          fileURLToPath(import.meta.url),
         );
 
         let swContents = (
@@ -66,7 +66,7 @@ export function makeM2c2kitServiceWorker(
 
         swContents = swContents.replace(
           '"_-_ADDITIONAL_RESOURCES_TO_CACHE_-_"',
-          replacementString
+          replacementString,
         );
 
         const swDestinationFilename = path.join(rootDir, "sw.js");

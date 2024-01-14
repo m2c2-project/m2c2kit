@@ -15,6 +15,7 @@ import {
   Easings,
   RgbaColor,
   Sprite,
+  Constants,
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
@@ -266,6 +267,8 @@ class ColorShapes extends Game {
       name: "Color Shapes",
       id: "color-shapes",
       version: "__PACKAGE_JSON_VERSION__",
+      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Color Shapes is a visual array change detection \
 task, measuring intra-item feature binding, where participants determine \

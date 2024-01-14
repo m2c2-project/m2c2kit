@@ -13,6 +13,7 @@ class Game1 extends Game {
       showFps: true,
       width: 400,
       height: 800,
+      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);
@@ -52,7 +53,6 @@ beforeEach(async () => {
   g1 = new Game1();
   const options: SessionOptions = {
     activities: [g1],
-    canvasKitWasmUrl: "canvaskit.wasm",
   };
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();

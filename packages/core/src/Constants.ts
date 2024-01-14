@@ -1,5 +1,6 @@
 import { WebColors } from "./WebColors";
 import { RgbaColor } from "./RgbaColor";
+import { ModuleMetadata } from "./ModuleMetadata";
 
 /**
  * Reasonable defaults to use if values are not specified.
@@ -33,4 +34,10 @@ export class Constants {
   public static readonly OUTGOING_SCENE_SPRITE_NAME = "__outgoingSceneSprite";
   public static readonly OUTGOING_SCENE_IMAGE_NAME = "__outgoingSceneSnapshot";
   public static readonly SESSION_INITIALIZATION_POLLING_INTERVAL_MS = 50;
+  /** Empty placeholder that will be populated during the build process. */
+  public static readonly EMPTY_MODULE_METADATA: ModuleMetadata = {
+    name: "",
+    version: "",
+    dependencies: {},
+  };
 }
