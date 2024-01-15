@@ -10,7 +10,7 @@ import ExampleAssessment from '@site/src/components/ExampleAssessment';
 Grid Memory is a visuospatial working memory task, with delayed free recall. After a brief exposure, and a short distraction phase, participants report the location of dots on a grid. (Construct: visual working memory)
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/example-template.html';
-export const code = `import { GridMemory } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.assessment-grid-memory.esm.min.js";
+export const code = `import { GridMemory } from "@m2c2kit/assessment-grid-memory";
 const activity = new GridMemory();
 activity.setParameters({show_quit_button: false});`;
 

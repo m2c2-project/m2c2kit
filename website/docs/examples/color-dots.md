@@ -10,7 +10,7 @@ import ExampleAssessment from '@site/src/components/ExampleAssessment';
 Color Dots is cued-recall, item-location memory binding task, where after viewing 3 dots for a brief period of time, participants report: (1) the color at a cued location; (2) the location of a cued color. (Construct: Visual Working Memory, Associative Memory)
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/example-template.html';
-export const code = `import { ColorDots } from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.assessment-color-dots.esm.min.js";
+export const code = `import { ColorDots } from "@m2c2kit/assessment-color-dots";
 const activity = new ColorDots();
 activity.setParameters({show_quit_button: false});`;
 

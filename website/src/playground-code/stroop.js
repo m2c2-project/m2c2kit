@@ -82,6 +82,7 @@ class Stroop extends Game {
     const options = {
       name: "Stroop Documentation Example",
       id: "docs",
+      canvasKitWasmUrl: "canvaskit.wasm",
       width: 400,
       height: 800,
       fonts: [
@@ -115,13 +116,13 @@ class Stroop extends Game {
     ];
     const numberOfTrials = game.getParameter("number_of_trials");
     const numberOfCongruentTrials = game.getParameter(
-      "number_of_congruent_trials"
+      "number_of_congruent_trials",
     );
     const trialConfigurations = [];
     const congruentIndexes = RandomDraws.FromRangeWithoutReplacement(
       numberOfCongruentTrials,
       0,
-      numberOfTrials - 1
+      numberOfTrials - 1,
     );
 
     for (let i = 0; i < numberOfTrials; i++) {
@@ -138,7 +139,7 @@ class Stroop extends Game {
         const colorOptions = wordColors.filter((wc) => wc.text != text);
         const colorIndex = RandomDraws.SingleFromRange(
           0,
-          colorOptions.length - 1
+          colorOptions.length - 1,
         );
         textColor = colorOptions[colorIndex].color;
         colorAsString = colorOptions[colorIndex].text;
@@ -244,7 +245,7 @@ class Stroop extends Game {
           }),
           Action.wait({
             duration: game.getParameter(
-              "post_fixation_cross_blank_duration_ms"
+              "post_fixation_cross_blank_duration_ms",
             ),
           }),
           Action.custom({
@@ -261,7 +262,7 @@ class Stroop extends Game {
               Timer.start("rt");
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -273,7 +274,7 @@ class Stroop extends Game {
       Timer.remove("rt");
       game.addTrialData(
         "congruent_stimulus",
-        trialConfigurations[game.trialIndex].congruent
+        trialConfigurations[game.trialIndex].congruent,
       );
       if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
         game.addTrialData("response_correct", true);
@@ -296,7 +297,7 @@ class Stroop extends Game {
             direction: TransitionDirection.Left,
             duration: 500,
             easing: Easings.quadraticInOut,
-          })
+          }),
         );
       } else {
         game.presentScene(presentationScene);
@@ -347,7 +348,7 @@ class Stroop extends Game {
           "Percent correct: " + percentCorrect.toFixed(2);
 
         const congruentTrials = game.data.trials.filter(
-          (trial) => trial.congruent_stimulus
+          (trial) => trial.congruent_stimulus,
         );
         let congruentRtSum = 0;
         for (let i = 0; i < congruentTrials.length; i++) {
@@ -358,7 +359,7 @@ class Stroop extends Game {
           "Mean congruent rt: " + meanCongruentRt.toFixed(2);
 
         const incongruentTrials = game.data.trials.filter(
-          (trial) => !trial.congruent_stimulus
+          (trial) => !trial.congruent_stimulus,
         );
         let incongruentRtSum = 0;
         for (let i = 0; i < incongruentTrials.length; i++) {
@@ -375,7 +376,6 @@ class Stroop extends Game {
 
 const activity = new Stroop();
 const session = new Session({
-  canvasKitWasmUrl: "canvaskit.wasm",
   activities: [activity],
 });
 

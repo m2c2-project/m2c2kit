@@ -183,100 +183,92 @@ const config: Config = {
       {
         folders: [
           {
-            source: "../packages/core/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/core/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/core/dist",
             extensions: [".js", ".ts"],
           },
           {
-            source: "../packages/addons/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/addons/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/addons/dist",
             extensions: [".js", ".ts"],
           },
           {
-            source: "../packages/physics/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/physics/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/physics/dist",
             extensions: [".js", ".ts"],
           },
           {
-            source: "../packages/survey/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/survey/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/survey/dist",
             extensions: [".js", ".ts"],
           },
           {
-            source: "../packages/db/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/db/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/db/dist",
             extensions: [".js", ".ts"],
           },
           {
             source: "../packages/core/assets",
-            destination: "static/m2c2kit/assets",
-          },
-          {
-            source: "../packages/core/dist",
-            destination: "static/m2c2kit/declarations/m2c2kit/core",
-            extensions: [".d.ts"],
-          },
-          {
-            source: "../packages/addons/dist",
-            destination: "static/m2c2kit/declarations/m2c2kit/addons",
-            extensions: [".d.ts"],
-          },
-          {
-            source: "../packages/physics/dist",
-            destination: "static/m2c2kit/declarations/m2c2kit/physics",
-            extensions: [".d.ts"],
-          },
-          {
-            source: "../packages/survey/dist",
-            destination: "static/m2c2kit/declarations/m2c2kit/survey",
-            extensions: [".d.ts"],
-          },
-          {
-            source: "../packages/db/dist",
-            destination: "static/m2c2kit/declarations/m2c2kit/db",
-            extensions: [".d.ts"],
+            destination: "static/m2c2kit/modules/@m2c2kit/core/assets",
           },
           {
             source: "../node_modules/canvaskit-wasm/types",
-            destination: "static/m2c2kit/declarations/canvaskit-wasm",
+            destination: "static/m2c2kit/modules/canvaskit-wasm/dist",
             extensions: [".d.ts"],
           },
           {
             source: "../node_modules/@webgpu/types/dist",
-            destination: "static/m2c2kit/declarations/webgpu",
+            destination: "static/m2c2kit/modules/webgpu/dist",
             extensions: [".d.ts"],
           },
+          /**
+           * If the user has an older browser, it may not support import maps.
+           * The following is a polyfill for import maps.
+           */
           {
-            source: "../packages/assessment-symbol-search/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../node_modules/es-module-shims/dist",
+            destination: "static/m2c2kit/modules/es-module-shims/dist",
+            extensions: [".js"],
+          },
+          {
+            source: "../packages/assessment-symbol-search/dist",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-symbol-search/dist",
           },
           {
             source: "../packages/assessment-symbol-search/assets",
-            destination: "static/m2c2kit/assets/symbol-search",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-symbol-search/assets",
           },
           {
-            source: "../packages/assessment-color-dots/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/assessment-color-dots/dist",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-color-dots/dist",
           },
           {
             source: "../packages/assessment-color-dots/assets",
-            destination: "static/m2c2kit/assets/color-dots",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-color-dots/assets",
           },
           {
-            source: "../packages/assessment-color-shapes/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/assessment-color-shapes/dist",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-color-shapes/dist",
           },
           {
             source: "../packages/assessment-color-shapes/assets",
-            destination: "static/m2c2kit/assets/color-shapes",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-color-shapes/assets",
           },
           {
-            source: "../packages/assessment-grid-memory/build-nobundler",
-            destination: "static/m2c2kit/lib",
+            source: "../packages/assessment-grid-memory/dist",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-grid-memory/dist",
           },
           {
             source: "../packages/assessment-grid-memory/assets",
-            destination: "static/m2c2kit/assets/grid-memory",
+            destination:
+              "static/m2c2kit/modules/@m2c2kit/assessment-grid-memory/assets",
           },
         ],
       },

@@ -59,6 +59,7 @@ export const code = `class DocsDemo extends Game {
         const options = {
             name: "Documentation Example",
             id: "docs",
+            canvasKitWasmUrl: "canvaskit.wasm",
             width: 400, height: 800,
             fonts: [{
 	            fontName: "roboto",

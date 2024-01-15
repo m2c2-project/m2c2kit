@@ -53,6 +53,7 @@ In the tutorial, we've been using a screen size of 200 width x 400 height. This 
 const options = {
   name: "Documentation Example",
   id: "docs",
+  canvasKitWasmUrl: "canvaskit.wasm",
   width: 400, height: 800,
   fonts: [{
 	  fontName: "roboto",

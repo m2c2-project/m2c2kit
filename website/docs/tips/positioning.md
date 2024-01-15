@@ -26,6 +26,7 @@ export const code = `class DocsDemo extends Game {
         const options = {
             name: "Documentation Example",
             id: "docs",
+            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             images: [{
                 imageName: "circleX",

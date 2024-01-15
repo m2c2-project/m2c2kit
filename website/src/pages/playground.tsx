@@ -80,25 +80,9 @@ export default function Home(): JSX.Element {
 
   const runCode = (c?) => {
     const replacement = c === undefined ? code : c;
-    let fullCode = template.replace(
+    const fullCode = template.replace(
       /\/\/ _-_BEGIN_CODE_REPLACEMENT_BLOCK_-_([\s\S]*?)\/\/ _-_END_CODE_REPLACEMENT_BLOCK_-_/,
-      replacement
-    );
-    fullCode = fullCode.replace(
-      'from "@m2c2kit/core";',
-      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.core.esm.js";'
-    );
-    fullCode = fullCode.replace(
-      'from "@m2c2kit/addons";',
-      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.addons.esm.js";'
-    );
-    fullCode = fullCode.replace(
-      'from "@m2c2kit/db";',
-      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.db.esm.js";'
-    );
-    fullCode = fullCode.replace(
-      'from "@m2c2kit/physics";',
-      'from "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/lib/m2c2kit.physics.esm.js";'
+      replacement,
     );
     setSrcdoc(fullCode);
     /**

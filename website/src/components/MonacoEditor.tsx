@@ -16,20 +16,24 @@ export default function MonacoEditor(props) {
 
     const m2c2Modules = [
       {
-        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/core/index.d.ts",
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/core/dist/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/core/index.d.ts",
       },
       {
-        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/addons/index.d.ts",
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/addons/dist/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/addons/index.d.ts",
       },
       {
-        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/db/index.d.ts",
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/db/dist/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/db/index.d.ts",
       },
       {
-        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/declarations/m2c2kit/physics/index.d.ts",
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/physics/dist/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/physics/index.d.ts",
+      },
+      {
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/survey/dist/index.d.ts",
+        monacoUri: "file:///node_modules/@m2c2kit/survey/index.d.ts",
       },
     ];
 

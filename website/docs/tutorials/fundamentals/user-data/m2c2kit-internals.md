@@ -55,12 +55,13 @@ const demoSchema = {
 }
 ```
 
-- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs`, its `name` is `Documentation Example`, we define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
+- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs`, the URL of the wasm binary is `canvaskit.wasm` (always set it to this value), its `name` is `Documentation Example`, we define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
 
 ```js
 const options = {
     name: "Documentation Example",
     id: "docs",
+    canvasKitWasmUrl: "canvaskit.wasm",
     width: 200, height: 400,
     fonts: [{
 	    fontName: "roboto",
@@ -103,6 +104,7 @@ export const code = `class DocsDemo extends Game {
         const options = {
             name: "Documentation Example",
             id: "docs",
+            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",
