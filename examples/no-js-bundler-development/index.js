@@ -5,10 +5,10 @@ import {
   Scene,
   WebColors,
   Session,
-} from "./lib/m2c2kit.core.esm.js";
-import { Survey } from "./lib/m2c2kit.survey.esm.js";
-import { Button } from "./lib/m2c2kit.addons.esm.js";
-import { SymbolSearch } from "./lib/m2c2kit.assessment-symbol-search.esm.min.js";
+} from "@m2c2kit/core";
+import { Survey } from "@m2c2kit/survey";
+import { Button } from "@m2c2kit/addons";
+import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";
 
 /**
  * Example of how to use the SymbolSearch assessment.
@@ -30,6 +30,7 @@ class NoBundler extends Game {
       name: "No JavaScript Bundler Development Example",
       version: "0.0.1",
       id: "no-bundler-example",
+      canvasKitWasmUrl: "canvaskit.wasm",
       showFps: false,
       width: 400,
       height: 800,
@@ -80,7 +81,7 @@ class NoBundler extends Game {
               pushMeButton.isUserInteractionEnabled = true;
             },
           }),
-        ])
+        ]),
       );
     });
 
@@ -168,7 +169,6 @@ const activities = [symbolSearch, noBundlerAssessment, survey];
 
 const session = new Session({
   activities: activities,
-  canvasKitWasmUrl: "canvaskit.wasm",
 });
 
 /**
@@ -205,11 +205,11 @@ session.onActivityData((ev) => {
   console.log("  data: " + JSON.stringify(ev.data));
   console.log("  data schema: " + JSON.stringify(ev.dataSchema));
   console.log(
-    "  activity parameters: " + JSON.stringify(ev.activityConfiguration)
+    "  activity parameters: " + JSON.stringify(ev.activityConfiguration),
   );
   console.log(
     "  activity parameters schema: " +
-      JSON.stringify(ev.activityConfigurationSchema)
+      JSON.stringify(ev.activityConfigurationSchema),
   );
 });
 

@@ -19,6 +19,11 @@ import {
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
+/**
+ * Grid Memory is a visuospatial working memory task, with delayed free
+ * recall. After a brief exposure, and a short distraction phase,
+ * participants report the location of dots on a grid.
+ */
 class GridMemory extends Game {
   constructor() {
     /**

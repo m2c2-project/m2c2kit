@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo coverage",
+    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo coverage && del-cli assets/canvaskit-*.wasm",
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/core"
   },
   "license": "MIT",
@@ -43,6 +43,7 @@
     "canvas": "2.11.2",
     "canvaskit-wasm": "0.38.2",
     "cross-env": "7.0.3",
+    "del-cli": "5.1.0",
     "env-cmd": "10.1.0",
     "findup-sync": "5.0.0",
     "jest": "29.7.0",

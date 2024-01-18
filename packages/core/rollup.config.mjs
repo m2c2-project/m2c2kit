@@ -6,13 +6,21 @@ import commonjs from "@rollup/plugin-commonjs";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
 import findup from "findup-sync";
+import replace from "@rollup/plugin-replace";
 import {
   insertVersionString,
   restoreImportMeta,
   writeMetadataJson,
+  resolveAsync,
 } from "@m2c2kit/build-helpers";
 
 writeMetadataJson();
+
+const canvasKitWasmVersion = (await resolveAsync("canvaskit-wasm")).package
+  .version;
+if (!canvasKitWasmVersion) {
+  throw new Error("canvaskit-wasm package not found");
+}
 
 export default [
   {
@@ -28,6 +36,10 @@ export default [
     ],
     plugins: [
       insertVersionString(),
+      replace({
+        __CANVASKITWASM_VERSION__: canvasKitWasmVersion,
+        preventAssignment: true,
+      }),
       nodeResolve(),
       commonjs(),
       // nodePolyfills is needed because canvaskit-wasm references path and fs
@@ -74,6 +86,7 @@ export default [
               "node_modules/canvaskit-wasm/bin/canvaskit.wasm",
             ).replace(/\\/g, "/"),
             dest: "assets",
+            rename: () => `canvaskit-${canvasKitWasmVersion}.wasm`,
           },
         ],
       }),

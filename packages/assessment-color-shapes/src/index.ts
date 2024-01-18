@@ -19,6 +19,11 @@ import {
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
+/**
+ * Color Shapes is a visual array change detection task, measuring intra-item
+ * feature binding, where participants determine if shapes change color across
+ * two sequential presentations of shape stimuli.
+ */
 class ColorShapes extends Game {
   constructor() {
     /**

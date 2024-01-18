@@ -5,3 +5,4 @@ export * from "./copyAssets";
 export * from "./addModuleMetadata";
 export * from "./insertVersionString";
 export * from "./writeMetadataJson";
+export * from "./resolveAsync";

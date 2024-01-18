@@ -87,6 +87,7 @@ export class Game implements Activity {
   name: string;
   id: string;
   moduleMetadata: ModuleMetadata;
+  readonly canvasKitWasmVersion = "__CANVASKITWASM_VERSION__";
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
@@ -216,7 +217,7 @@ export class Game implements Activity {
       }
     }
 
-    let canvasKitWasmUrl: string = this.options.canvasKitWasmUrl;
+    let canvasKitWasmUrl = `canvaskit-${this.canvasKitWasmVersion}.wasm`;
     try {
       /**
        * Is the @m2c2kit/core code an imported module? Even if the game code
@@ -229,7 +230,7 @@ export class Game implements Activity {
       const coreModuleUrl = await import.meta.resolve("@m2c2kit/core");
       canvasKitWasmUrl =
         this.getImportedModuleBaseUrl("@m2c2kit/core", coreModuleUrl) +
-        "/assets/canvaskit.wasm";
+        `/assets/canvaskit-${this.canvasKitWasmVersion}.wasm`;
     } catch {
       /**
        * If the game code is an imported module, @m2c2kit/core must also
@@ -241,7 +242,13 @@ export class Game implements Activity {
         );
       }
     }
-    this.canvasKit = await this.loadCanvasKit(canvasKitWasmUrl);
+    try {
+      this.canvasKit = await this.loadCanvasKit(canvasKitWasmUrl);
+    } catch (err) {
+      throw new Error(
+        `game ${this.id} could not load canvaskit WASM file from ${canvasKitWasmUrl}`,
+      );
+    }
 
     this.fontManager = new FontManager(this);
     await this.fontManager.initializeFonts(this.options.fonts);

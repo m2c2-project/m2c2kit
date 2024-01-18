@@ -6,7 +6,7 @@
 build/
 build-nobundler/
 
-packages/core/assets/canvaskit.wasm
+packages/core/assets/canvaskit*.wasm
 
 # built assets for android-simple-webview
 packages/assessments-demo/dist-webview/

@@ -19,8 +19,12 @@ import {
 } from "@m2c2kit/core";
 import { Button, Grid, Instructions } from "@m2c2kit/addons";
 
+/**
+ * Symbol Search is a speeded continuous performance test of conjunctive
+ * feature search in which respondents identify matching symbol pairs as
+ * quickly and as accurately as they can.
+ */
 class SymbolSearch extends Game {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor() {
     /**
      * These are configurable game parameters and their defaults.

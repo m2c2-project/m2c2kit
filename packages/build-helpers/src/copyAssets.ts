@@ -77,7 +77,7 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
           }
 
           if (packageName === "@m2c2kit/core") {
-            await copyCoreAssetsExceptWasm(resolvedPackage);
+            await copyCoreAssetsExceptWasmIndexHtml(resolvedPackage);
             continue;
           }
 
@@ -125,13 +125,15 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
       path.join(
         resolvedCorePackage.packageJsonDirectory,
         "assets",
-        "canvaskit.wasm*",
+        "canvaskit-*.wasm",
       ),
       path.join(options.outputFolder, "assets", assessmentId),
     );
   }
 
-  async function copyCoreAssetsExceptWasm(resolvedPackage: resolvedPackage) {
+  async function copyCoreAssetsExceptWasmIndexHtml(
+    resolvedPackage: resolvedPackage,
+  ) {
     await cpy(
       [
         path.join(resolvedPackage.packageJsonDirectory, "assets", "**", "*"),
@@ -145,7 +147,7 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
           path.join(
             resolvedPackage.packageJsonDirectory,
             "assets",
-            "canvaskit.wasm",
+            "canvaskit-*.wasm",
           ),
       ],
       path.join(options.outputFolder, "assets"),
