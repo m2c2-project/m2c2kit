@@ -300,10 +300,12 @@ export class Game implements Activity {
         }
         return {
           ...browserImage,
-          url: this.manifestUrl(
-            browserImage.url ?? browserImage.svgString ?? "",
-            this.manifest,
-          ),
+          url: browserImage.url
+            ? this.manifestUrl(browserImage.url, this.manifest)
+            : undefined,
+          svgString: browserImage.svgString
+            ? this.manifestUrl(browserImage.svgString, this.manifest)
+            : undefined,
         };
       }),
     );
