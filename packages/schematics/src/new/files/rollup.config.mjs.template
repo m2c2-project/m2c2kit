@@ -2,11 +2,9 @@ import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-import copy from "rollup-plugin-copy";
 import {
   copyAssets,
   hashM2c2kitAssets,
-  restoreImportMeta,  
   makeM2c2kitServiceWorker,
 } from "@m2c2kit/build-helpers";
 
@@ -35,8 +33,7 @@ export default (commandLineArgs) => {
         typescript({
           sourceMap: isDebug && true,
         }),
-        restoreImportMeta(),
-        copyAssets({ packageName: [
+        copyAssets({ package: [
           "<%= dasherize(appName) %>",
           "@m2c2kit/core",
         ], outputFolder }),        

@@ -50,7 +50,6 @@
   "dependencies": {
     "acorn": "8.11.3",
     "acorn-walk": "8.3.2",
-    "astring": "1.8.6",
     "css-select": "5.1.0",
     "dom-serializer": "2.0.0",
     "domhandler": "5.0.3",

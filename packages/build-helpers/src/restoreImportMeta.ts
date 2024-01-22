@@ -7,6 +7,7 @@ import MagicString from "magic-string";
  * @remarks esbuild removes usage of `import.meta` (by substituting an empty
  * object named `import_meta`) if it is not supported in the target environment.
  * However, we will polyfill it in the browser, so we need to restore it.
+ * If not using esbuild, this plugin is not needed.
  *
  * @param pattern - the string to replace. Defaults to `import_meta = {};`
  * @param replacement - the string to replace with. Defaults to `import_meta = import.meta;`

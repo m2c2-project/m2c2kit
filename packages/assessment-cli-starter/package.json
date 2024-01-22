@@ -4,7 +4,7 @@
   "description": "A simple Stroop assessment created when the CLI creates a new app",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo"
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",

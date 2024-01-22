@@ -4,7 +4,7 @@
   "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo"
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",

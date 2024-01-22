@@ -12,7 +12,7 @@ describe("hashM2c2kitAssets rollup plugin", () => {
     );
   });
 
-  it("creates hash-manifest.json", async () => {
+  it("creates manifest.json", async () => {
     const rollupPlugin = hashM2c2kitAssets(
       "dist",
       "packages/build-helpers/src/__tests__",
@@ -20,36 +20,36 @@ describe("hashM2c2kitAssets rollup plugin", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (rollupPlugin.writeBundle as any).handler();
 
-    const hashManifestExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/hash-manifest.json",
+    const manifestExists = fs.existsSync(
+      "packages/build-helpers/src/__tests__/dist/manifest.json",
     );
-    expect(hashManifestExists).toBe(true);
+    expect(manifestExists).toBe(true);
   });
 
   it("creates correct hash for index.js", async () => {
     const hashFileExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/index.1ce7e0140321f1e0.js",
+      "packages/build-helpers/src/__tests__/dist/index.c9df28c0a2b6735b.js",
     );
     expect(hashFileExists).toBe(true);
   });
 
   it("creates correct hash for canvaskit.wasm", async () => {
     const hashFileExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/assets/testapp/canvaskit.ec1ea31c11baeadb.wasm",
+      "packages/build-helpers/src/__tests__/dist/assets/scratch/canvaskit-0.38.2.1b00aa4762039fc0.wasm",
     );
     expect(hashFileExists).toBe(true);
   });
 
   it("creates correct hash for png", async () => {
     const hashFileExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/assets/testapp/images/assessmentExample.3f7ed709655bd148.png",
+      "packages/build-helpers/src/__tests__/dist/assets/scratch/images/assessmentExample.3f7ed709655bd148.png",
     );
     expect(hashFileExists).toBe(true);
   });
 
   it("creates correct hash for font", async () => {
     const hashFileExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/assets/testapp/fonts/roboto/Roboto-Regular.f36638c2135b71e5.ttf",
+      "packages/build-helpers/src/__tests__/dist/assets/scratch/fonts/roboto/Roboto-Regular.f36638c2135b71e5.ttf",
     );
     expect(hashFileExists).toBe(true);
   });
@@ -66,7 +66,7 @@ describe("hashM2c2kitAssets rollup plugin", () => {
       "packages/build-helpers/src/__tests__/dist/index.html",
       { encoding: "utf-8" },
     );
-    expect(contents.includes("index.1ce7e0140321f1e0.js")).toBe(true);
+    expect(contents.includes("index.c9df28c0a2b6735b.js")).toBe(true);
   });
 
   it("index.html references correct hash for m2c2kit.css", async () => {
@@ -75,31 +75,5 @@ describe("hashM2c2kitAssets rollup plugin", () => {
       { encoding: "utf-8" },
     );
     expect(contents.includes("m2c2kit.42697434248ea1d8.css")).toBe(true);
-  });
-
-  it("index.js references correct hash for canvaskit.wasm", async () => {
-    const contents = fs.readFileSync(
-      "packages/build-helpers/src/__tests__/dist/index.1ce7e0140321f1e0.js",
-      { encoding: "utf-8" },
-    );
-    expect(contents.includes("canvaskit.ec1ea31c11baeadb.wasm")).toBe(true);
-  });
-
-  it("index.js references correct hash for png", async () => {
-    const contents = fs.readFileSync(
-      "packages/build-helpers/src/__tests__/dist/index.1ce7e0140321f1e0.js",
-      { encoding: "utf-8" },
-    );
-    expect(contents.includes("assessmentExample.3f7ed709655bd148.png")).toBe(
-      true,
-    );
-  });
-
-  it("index.js references correct hash for font", async () => {
-    const contents = fs.readFileSync(
-      "packages/build-helpers/src/__tests__/dist/index.1ce7e0140321f1e0.js",
-      { encoding: "utf-8" },
-    );
-    expect(contents.includes("Roboto-Regular.f36638c2135b71e5.ttf")).toBe(true);
   });
 });

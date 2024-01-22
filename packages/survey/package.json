@@ -33,7 +33,7 @@
   "dependencies": {
     "@m2c2kit/core": "^0.3.6",
     "bootstrap-datepicker": "1.9.0",
-    "bootstrap-slider": "11.0.2",
+    "bootstrap-slider": "10.6.2",
     "nouislider": "15.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",

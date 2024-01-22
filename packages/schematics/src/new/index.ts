@@ -12,6 +12,9 @@ import {
   Source,
   applyTemplates,
 } from "@angular-devkit/schematics";
+import findup = require("findup-sync");
+import fs = require("fs");
+import path = require("path");
 import { NpmInstallOptions } from "../install";
 import { lastValueFrom } from "rxjs";
 import { Constants } from "../constants";
@@ -44,7 +47,7 @@ export function m2New(options: m2NewOptions): Rule {
   "name": "${strings.dasherize(options.name)}",
   "version": "1.0.0",
   "scripts": {
-    "serve": "rollup -c rollup.config.mjs --watch --configServe",
+    "serve": "npm run clean && rollup -c rollup.config.mjs --watch --configServe",
     "build": "npm run clean && rollup -c rollup.config.mjs --configProd",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
@@ -59,7 +62,6 @@ export function m2New(options: m2NewOptions): Rule {
     "@rollup/plugin-typescript": "11.1.6",
     "rimraf": "5.0.5",
     "rollup": "4.9.5",
-    "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "3.0.0",
     "tslib": "2.6.2",
@@ -76,8 +78,14 @@ export function m2New(options: m2NewOptions): Rule {
      */
     await lastValueFrom(
       workflow.execute({
-        // collection: "@m2c2kit/schematics",
-        // collection: "c:\\github\\m2c2kit\\packages\\schematics",
+        /**
+         * collection is workflow.context.collection because it is passed
+         * in by the cli app, which has it hard-coded to "@m2c2kit/schematics".
+         * When testing/exploring, we could hard-code it here to:
+         *   collection: "@m2c2kit/schematics"
+         * or even a file location, such as:
+         *   collection: "c:/github/m2c2kit/packages/schematics"
+         */
         collection: workflow.context.collection,
         schematic: "npm-install",
         options: npmInstallOptions,
@@ -103,6 +111,27 @@ export function m2New(options: m2NewOptions): Rule {
     const mergeWithSourceTemplates = mergeWith(sourceParameterizedTemplates);
     rules.push(mergeWithSourceTemplates);
 
+    /**
+     * Third, copy index.html from @m2c2kit/core package.
+     * Other core assets, such as wasm and CSS files, will be copied during the
+     * build process by rollup. We copy index.html here, rather than in the
+     * build process, because we don't want it overwritten every time we
+     * build (the user may have made changes to it). wasm and CSS, however,
+     * should be copied every time we build in case they have changed due to
+     * a package update of @m2c2kit/core.
+     */
+    rules.push((tree: Tree) => {
+      const findUps: FindUps[] = [
+        {
+          findUp: "node_modules/@m2c2kit/core/assets/index.html",
+          dest: path.join(directory, "src/index.html"),
+          cwd: directory,
+        },
+      ];
+      copyFindUps(findUps, tree);
+      return tree;
+    });
+
     process.on("exit", (exitCode) => {
       if (exitCode === 0) {
         console.log("");
@@ -123,4 +152,21 @@ export function m2New(options: m2NewOptions): Rule {
 
     return chain(rules);
   };
+}
+
+interface FindUps {
+  findUp: string;
+  dest: string;
+  cwd: string;
+}
+
+function copyFindUps(findUps: FindUps[], tree: Tree) {
+  findUps.forEach((fu) => {
+    const filePath = findup(fu.findUp, { cwd: fu.cwd });
+    if (!filePath) {
+      throw new SchematicsException(`Could not find ${fu.findUp}`);
+    }
+    const buf = fs.readFileSync(filePath);
+    tree.create(path.join(fu.dest), buf);
+  });
 }

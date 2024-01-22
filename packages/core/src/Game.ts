@@ -69,6 +69,9 @@ import { FontManager } from "./FontManager";
 import { ImageManager } from "./ImageManager";
 import { ModuleMetadata } from "./ModuleMetadata";
 
+/** Key value pairs of file URLs and hashed file URLs */
+type Manifest = { [originalUrl: string]: string };
+
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
 }
@@ -107,6 +110,7 @@ export class Game implements Activity {
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
   private isImportedModule = false;
+  private manifest?: Manifest;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -184,6 +188,25 @@ export class Game implements Activity {
     );
   }
 
+  /**
+   * Returns the URL to the asset as it appears in the manifest.json file.
+   *
+   * @remarks This is used to return the hashed URL to the asset.
+   *
+   * @param url - the URL to the asset
+   * @param manifest - the manifest.json object, or undefined if there is no manifest.json file
+   * @returns the URL to the asset from the manifest.json file
+   */
+  private manifestUrl(url: string, manifest?: Manifest): string {
+    if (manifest && manifest[`assets/${this.id}/${url}`]) {
+      return manifest[`assets/${this.id}/${url}`].replace(
+        `assets/${this.id}/`,
+        "",
+      );
+    }
+    return url;
+  }
+
   async initialize() {
     let moduleUrl: string | undefined;
     if (this.moduleMetadata.name) {
@@ -242,19 +265,48 @@ export class Game implements Activity {
         );
       }
     }
+
+    // Load manifest.json file used for hashed asset URLs, if present
+    await this.loadManifest();
+
     try {
-      this.canvasKit = await this.loadCanvasKit(canvasKitWasmUrl);
+      this.canvasKit = await this.loadCanvasKit(
+        this.manifestUrl(canvasKitWasmUrl, this.manifest),
+      );
     } catch (err) {
       throw new Error(
-        `game ${this.id} could not load canvaskit WASM file from ${canvasKitWasmUrl}`,
+        `game ${this.id} could not load canvaskit wasm file from ${this.manifestUrl(canvasKitWasmUrl, this.manifest)}`,
       );
     }
 
     this.fontManager = new FontManager(this);
-    await this.fontManager.initializeFonts(this.options.fonts);
+    await this.fontManager.initializeFonts(
+      this.options.fonts?.map((fontAsset) => {
+        return {
+          ...fontAsset,
+          url: this.manifestUrl(fontAsset.url, this.manifest),
+        };
+      }),
+    );
 
     this.imageManager = new ImageManager(this);
-    await this.imageManager.initializeImages(this.options.images);
+    await this.imageManager.initializeImages(
+      this.options.images?.map((browserImage) => {
+        if (
+          browserImage.svgString === undefined &&
+          browserImage.url === undefined
+        ) {
+          throw new Error("image must have either svgString or url");
+        }
+        return {
+          ...browserImage,
+          url: this.manifestUrl(
+            browserImage.url ?? browserImage.svgString ?? "",
+            this.manifest,
+          ),
+        };
+      }),
+    );
 
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
@@ -267,6 +319,40 @@ export class Game implements Activity {
     }
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.onData(this.session.options.activityCallbacks.onActivityResults);
+    }
+  }
+
+  private async loadManifest() {
+    let manifestResponse: Response | undefined = undefined;
+    try {
+      manifestResponse = await fetch("manifest.json");
+      /**
+       * fetch does not throw exceptions on server status errors, such as
+       * 404. Must check response.ok
+       */
+      if (!manifestResponse.ok) {
+        console.log(
+          `Error ${manifestResponse.status} on GET manifest.json can be safely ignored if not using hashed asset URLs.`,
+        );
+      }
+    } catch {
+      // Network error. This is still OK. manifest.json is not required.
+      console.log(
+        "Error on GET manifest.json can be safely ignored if not using hashed asset URLs.",
+      );
+    }
+
+    try {
+      if (manifestResponse) {
+        this.manifest = await manifestResponse.json();
+      }
+    } catch {
+      /**
+       * OK if manifest.json is not valid JSON. Some servers may return an
+       * error page instead of an error code if the manifest.json file does
+       * not exist. In this case, the received manifest.json file will not be
+       * valid JSON and an exception will be thrown. This is OK.
+       */
     }
   }
 

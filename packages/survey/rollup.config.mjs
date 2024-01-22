@@ -125,12 +125,14 @@ export default [
                 /\\/g,
                 "/",
               ),
-              findUp(
-                "node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.css",
-              ).replace(/\\/g, "/"),
-              findUp(
-                "node_modules/surveyjs-widgets/node_modules/nouislider/distribute/nouislider.min.css",
-              ).replace(/\\/g, "/"),
+              findUp("node_modules/nouislider/dist/nouislider.css").replace(
+                /\\/g,
+                "/",
+              ),
+              findUp("node_modules/nouislider/dist/nouislider.min.css").replace(
+                /\\/g,
+                "/",
+              ),
               findUp("node_modules/select2/dist/css/select2.css").replace(
                 /\\/g,
                 "/",
@@ -141,9 +143,6 @@ export default [
               ),
               findUp(
                 "node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css",
-              ).replace(/\\/g, "/"),
-              findUp(
-                "node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css.map",
               ).replace(/\\/g, "/"),
               findUp(
                 "node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.min.css",

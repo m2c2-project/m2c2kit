@@ -33,6 +33,7 @@ Follow the folder structure in this example:
 │  │  ├─ core/
 │  │  ├─ addons/
 │  │  ├─ .../
+...
 ```
 
 Whatever id you gave to your assessment, use that name for the folder under `assets`.

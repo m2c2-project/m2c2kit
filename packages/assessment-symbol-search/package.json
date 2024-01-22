@@ -4,7 +4,7 @@
   "description": "A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo"
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",

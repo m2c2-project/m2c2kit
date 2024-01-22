@@ -3,7 +3,7 @@
   "description": "A demo of several m2c2kit assessments",
   "version": "0.8.10",
   "scripts": {
-    "serve": "rollup -c --watch --configServe",
+    "serve": "npm run clean && tsc && rollup -c --watch --configServe",
     "build": "npm run clean && tsc && rollup -c --configProd",
     "build-webview": "npm run clean-webview && rollup -c rollup.config.webview.mjs --configProd --configNoHash",
     "build-sw": "npm run clean && rollup -c --configProd --configServiceWorker",

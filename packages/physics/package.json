@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc --build && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/physics"
   },
   "dependencies": {
