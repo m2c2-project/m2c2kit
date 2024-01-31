@@ -8,8 +8,8 @@
     "schema-util": "./build/index.js"
   },
   "devDependencies": {
-    "@types/node": "20.11.5",
-    "esbuild": "0.19.11"
+    "@types/node": "20.11.13",
+    "esbuild": "0.20.0"
   },
   "scripts": {
     "build": "node esbuild.mjs",
