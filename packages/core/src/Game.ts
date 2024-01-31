@@ -21,7 +21,7 @@ import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
 import { Shape } from "./Shape";
 import { Action } from "./Action";
-import { LoadedImage } from "./LoadedImage";
+import { M2Image, M2ImageStatus } from "./M2Image";
 import { Scene } from "./Scene";
 import {
   SceneTransition,
@@ -1173,16 +1173,21 @@ export class Game implements Activity {
     const warmedUpImageNames = this.entities
       .filter((entity) => entity.type === EntityType.Sprite)
       .map((entity) => (entity as Sprite).imageName);
-    const loadedImages = this.imageManager.loadedImages;
-    // loadedImages may be undefined/null if the game does not have images
-    if (loadedImages) {
-      const imageNames = Object.keys(loadedImages).filter(
+    const images = this.imageManager.images;
+    // images may be undefined/null if the game does not have images
+    if (images) {
+      const imageNames = Object.keys(images).filter(
         (name) => name !== "__outgoingSceneSnapshot",
       );
       imageNames.forEach((imageName) => {
         if (!warmedUpImageNames.includes(imageName)) {
-          const image = loadedImages[imageName].image;
-          canvas.drawImage(image, 0, 0);
+          if (images[imageName].status === M2ImageStatus.Ready) {
+            const image = images[imageName].canvaskitImage;
+            if (!image) {
+              throw new Error(`image ${imageName} is undefined`);
+            }
+            canvas.drawImage(image, 0, 0);
+          }
         }
       });
     }
@@ -1725,8 +1730,6 @@ export class Game implements Activity {
 
       if (canvases.length === 0) {
         throw new Error("no html canvas tag was found in the html");
-      } else if (canvases.length > 1) {
-        console.warn("warning: more than one html canvas was found.");
       }
       const m2c2kitCanvas = canvases.filter(
         (c) => c.id === "m2c2kit-canvas",
@@ -2112,13 +2115,14 @@ export class Game implements Activity {
     outgoingScene.size.height = this.canvasCssHeight;
 
     this.addScene(outgoingScene);
-    const loadedImage = new LoadedImage(
-      Constants.OUTGOING_SCENE_IMAGE_NAME,
-      outgoingSceneImage,
-      this.canvasCssWidth,
-      this.canvasCssHeight,
-    );
-    this.imageManager.addLoadedImage(loadedImage);
+    const image: M2Image = {
+      imageName: Constants.OUTGOING_SCENE_IMAGE_NAME,
+      canvaskitImage: outgoingSceneImage,
+      width: this.canvasCssWidth,
+      height: this.canvasCssHeight,
+      status: M2ImageStatus.Ready,
+    };
+    this.imageManager.addImage(image);
 
     // if this._rootScale is not 1, that means we scaled down everything
     // because the display is too small, or we stretched to a larger

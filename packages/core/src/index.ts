@@ -43,7 +43,7 @@ export * from "./LabelHorizontalAlignmentMode";
 export * from "./LabelOptions";
 export * from "./Layout";
 export * from "./LayoutConstraint";
-export * from "./LoadedImage";
+export * from "./M2Image";
 export * from "./MoveActionOptions";
 export * from "./MutablePath";
 export * from "./M2DragEvent";

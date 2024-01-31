@@ -15,4 +15,8 @@ export interface BrowserImage {
   svgString?: string;
   /** URL of image asset (svg, png, jpg) to render and load */
   url?: string;
+  /** If true, the image will not be fully loaded until it is needed. Default
+   * is false. Lazy loading is useful for localized images or large "banks"
+   * of images. These should be lazy loaded because they may not be needed. */
+  lazy?: boolean;
 }

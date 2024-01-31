@@ -4,7 +4,7 @@ import { IDrawable } from "./IDrawable";
 import { Entity, handleInterfaceOptions } from "./Entity";
 import { EntityType } from "./EntityType";
 import { SpriteOptions } from "./SpriteOptions";
-import { LoadedImage } from "./LoadedImage";
+import { M2Image, M2ImageStatus } from "./M2Image";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
@@ -17,7 +17,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   // Sprite options
   private _imageName = ""; // public getter/setter is below
 
-  private loadedImage?: LoadedImage;
+  private m2Image?: M2Image;
   private _paint?: Paint;
 
   /**
@@ -36,14 +36,14 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   }
 
   override initialize(): void {
-    this.loadedImage = this.game.imageManager.getLoadedImage(this._imageName);
-    if (!this.loadedImage) {
+    this.m2Image = this.game.imageManager.getImage(this._imageName);
+    if (!this.m2Image) {
       throw new Error(
         `could not create sprite. the image named ${this._imageName} has not been loaded`,
       );
     }
-    this.size.width = this.loadedImage.width;
-    this.size.height = this.loadedImage.height;
+    this.size.width = this.m2Image.width;
+    this.size.height = this.m2Image.height;
     if (!this._paint) {
       this.paint = new this.canvasKit.Paint();
     }
@@ -52,7 +52,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
   dispose(): void {
     // use paint backing field since it may be undefined
-    CanvasKitHelpers.Dispose([this.loadedImage?.image, this._paint]);
+    CanvasKitHelpers.Dispose([this.m2Image?.canvaskitImage, this._paint]);
   }
 
   set imageName(imageName: string) {
@@ -111,7 +111,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
 
   draw(canvas: Canvas): void {
     if (!this.hidden) {
-      if (this.loadedImage) {
+      if (this.m2Image) {
         canvas.save();
         const drawScale = Globals.canvasScale / this.absoluteScale;
         canvas.scale(1 / drawScale, 1 / drawScale);
@@ -130,7 +130,24 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
           this.paint.setAlphaf(this.absoluteAlpha);
         }
 
-        canvas.drawImage(this.loadedImage.image, x, y, this.paint);
+        if (
+          this.m2Image.status === M2ImageStatus.Ready &&
+          this.m2Image.canvaskitImage
+        ) {
+          canvas.drawImage(this.m2Image.canvaskitImage, x, y, this.paint);
+        } else {
+          if (this.m2Image.status === M2ImageStatus.Deferred) {
+            console.log(
+              `begin loading lazy image ${this.m2Image.imageName} for Sprite entity ${this.toString()}`,
+            );
+            this.game.imageManager.renderDeferredImage(this._imageName);
+          }
+          if (this.m2Image.status === M2ImageStatus.Error) {
+            throw new Error(
+              `error status on image ${this.m2Image.imageName} for Sprite entity ${this.toString()}`,
+            );
+          }
+        }
         canvas.restore();
       }
 
@@ -139,13 +156,20 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   }
 
   warmup(canvas: Canvas): void {
-    this.initialize();
-    if (!this.loadedImage) {
-      throw new Error(
-        `warmup Sprite entity ${this.toString()}: image not loaded.`,
-      );
+    if (this.m2Image?.status !== M2ImageStatus.Deferred) {
+      this.initialize();
+      if (!this.m2Image) {
+        throw new Error(
+          `in Sprite.warmup(): Sprite entity ${this.toString()}: image not loaded.`,
+        );
+      }
+      if (!this.m2Image.canvaskitImage) {
+        throw new Error(
+          `in Sprite.warmup(): Sprite entity ${this.toString()} image ${this.m2Image.imageName} is undefined.`,
+        );
+      }
+      canvas.drawImage(this.m2Image.canvaskitImage, 0, 0);
     }
-    canvas.drawImage(this.loadedImage.image, 0, 0);
     this.children.forEach((child) => {
       if (child.isDrawable) {
         (child as unknown as IDrawable).warmup(canvas);
