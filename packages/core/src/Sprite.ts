@@ -140,7 +140,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
             console.log(
               `begin loading lazy image ${this.m2Image.imageName} for Sprite entity ${this.toString()}`,
             );
-            this.game.imageManager.renderDeferredImage(this._imageName);
+            this.game.imageManager.prepareDeferredImage(this.m2Image);
           }
           if (this.m2Image.status === M2ImageStatus.Error) {
             throw new Error(

@@ -827,7 +827,13 @@ export abstract class Entity implements EntityOptions {
       // note: the below initialize() function will be called on the DERIVED CLASS's initialize(),
       // never this base abstract Entity
       this.initialize();
-      this.needsInitialization = false;
+      /**
+       * Previously, we set this.needsInitialization to false here. However,
+       * we now let each entity's initialize() method to determine when it is
+       * initialized. This is because some entities are using assets that
+       * have deferred loading, and only the entity knows when it has finished
+       * initialization.
+       */
     }
 
     this.absoluteAlphaChange =

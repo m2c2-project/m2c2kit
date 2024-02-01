@@ -7,6 +7,7 @@ import {
   Image,
   Typeface,
   FontMgr,
+  TypefaceFontProvider,
   CanvasKit,
   PaintStyle,
   Path,
@@ -32,10 +33,11 @@ export class CanvasKitHelpers {
           | Paragraph
           | Image
           | Typeface
+          | TypefaceFontProvider
           | FontMgr
           | Path
         >
-    >
+    >,
   ): void {
     objects.filter((o) => !o?.isDeleted()).forEach((o) => o?.delete());
   }
@@ -44,7 +46,7 @@ export class CanvasKitHelpers {
     canvasKit: CanvasKit,
     color: RgbaColor,
     style: PaintStyle,
-    isAntialiased: boolean
+    isAntialiased: boolean,
   ): Paint {
     const paint = new canvasKit.Paint();
     paint.setColor(canvasKit.Color(color[0], color[1], color[2], color[3]));

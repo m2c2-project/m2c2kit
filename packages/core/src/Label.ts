@@ -18,6 +18,8 @@ import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
 import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { M2Font, M2FontStatus } from "./M2Font";
+import { FontManager } from "./FontManager";
 
 export class Label extends Entity implements IDrawable, IText, LabelOptions {
   readonly type = EntityType.Label;
@@ -70,6 +72,28 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
 
   override initialize(): void {
+    const fontManager = this.game.fontManager;
+    if (this.fontName && this.fontNames) {
+      throw new Error("cannot specify both fontName and fontNames");
+    }
+
+    const requiredFonts = this.getRequiredLabelFonts(fontManager);
+    requiredFonts.forEach((font) => {
+      if (font.status === M2FontStatus.Deferred) {
+        /**
+         * prepareDeferredFont() is async, but we do not await it here. We
+         * do not want to block the label's initialization while we wait for
+         * fonts to be ready. Instead, we will check if the label still needs
+         * initialization before we draw the label.
+         */
+        fontManager.prepareDeferredFont(font);
+        return;
+      }
+    });
+    if (!requiredFonts.every((font) => font.status === M2FontStatus.Ready)) {
+      return;
+    }
+
     let ckTextAlign: EmbindEnumEntity = this.canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
       case LabelHorizontalAlignmentMode.Center:
@@ -132,45 +156,6 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       this._translatedText = "";
     }
 
-    const session = (this.parentSceneAsEntity as Scene).game.session;
-    if (!session) {
-      throw new Error("session is undefined");
-    }
-    const fontManager = this.game.fontManager;
-    if (fontManager.fontMgr === undefined) {
-      throw new Error("no fonts loaded");
-    }
-
-    if (this.fontName && this.fontNames) {
-      throw new Error("cannot specify both fontName and fontNames");
-    }
-    const fontFamilies = new Array<string>();
-    if (this.fontNames) {
-      this.fontNames.forEach((fn) => {
-        if (fontManager.gameTypefaces[fn] === undefined) {
-          throw new Error(`font ${fn} not found.`);
-        }
-        fontFamilies.push(fontManager.gameTypefaces[fn].fontFamily);
-      });
-    } else if (this.fontName) {
-      if (fontManager.gameTypefaces[this.fontName] === undefined) {
-        throw new Error(`font ${this.fontName} not found.`);
-      }
-      fontFamilies.push(fontManager.gameTypefaces[this.fontName].fontFamily);
-    } else {
-      // if no fontName provided, use default fontName, which is the
-      // first in the list of fontAssets for this game.
-
-      const typefaces = Object.values(fontManager.gameTypefaces);
-      const defaultTypeface = typefaces
-        .filter((f) => f.isDefault)
-        .find(Boolean);
-      if (!defaultTypeface) {
-        throw new Error("no default font");
-      }
-      fontFamilies.push(defaultTypeface.fontFamily);
-    }
-
     /**
      * Previously, we set color, backgroundColor, fontFamilies, and fontSize
      * in the textStyle property of the ParagraphStyle. However, to support
@@ -191,9 +176,9 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     if (this.builder) {
       this.builder.delete();
     }
-    this.builder = this.canvasKit.ParagraphBuilder.Make(
+    this.builder = this.canvasKit.ParagraphBuilder.MakeFromFontProvider(
       this.paraStyle,
-      fontManager.fontMgr,
+      fontManager.provider,
     );
 
     if (!this._backgroundPaint) {
@@ -220,7 +205,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
      */
     this.builder.pushPaintStyle(
       {
-        fontFamilies: fontFamilies,
+        fontFamilies: requiredFonts.map((font) => font.fontName),
         fontSize: this.fontSize * Globals.canvasScale,
         // set default values for below properties as well.
         fontStyle: {
@@ -286,6 +271,30 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
 
     this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
     this.needsInitialization = false;
+  }
+
+  /**
+   * Determines the M2Font objects that need to be ready in order to draw
+   * the Label.
+   *
+   * @remarks It needs a FontManager because it may need to look up the
+   * default font.
+   *
+   * @param fontManager - {@link FontManager}
+   * @returns an array of M2Font objects that are required for the Label
+   */
+  private getRequiredLabelFonts(fontManager: FontManager) {
+    let requiredFonts: Array<M2Font>;
+    if (this.fontName === undefined && this.fontNames === undefined) {
+      requiredFonts = [fontManager.getDefaultFont()];
+    } else if (this.fontName !== undefined) {
+      requiredFonts = [fontManager.fonts[this.fontName]];
+    } else if (this.fontNames !== undefined && this.fontNames.length > 0) {
+      requiredFonts = this.fontNames.map((font) => fontManager.fonts[font]);
+    } else {
+      throw new Error("cannot determine required fonts");
+    }
+    return requiredFonts;
   }
 
   dispose(): void {
@@ -439,7 +448,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
 
   draw(canvas: Canvas): void {
-    if (this.parent && this.text !== "") {
+    if (this.parent && this.text !== "" && !this.needsInitialization) {
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
@@ -467,18 +476,26 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
 
   warmup(canvas: Canvas): void {
     /**
+     * If this label uses a deferred font, then we cannot warm it up.
+     */
+    const requiredFonts = this.getRequiredLabelFonts(this.game.fontManager);
+    if (requiredFonts.some((font) => font.status === M2FontStatus.Deferred)) {
+      return;
+    }
+    /**
      * If this label is part of a relative layout, then we cannot
      * warm it up because a label uses word wrapping, and that
      * would not yet have been calculated
      */
-    if (Object.keys(this.layout).length === 0) {
-      this.initialize();
-      if (!this.paragraph) {
-        throw new Error(
-          `warmup Label entity ${this.toString()}: paragraph is undefined`,
-        );
-      }
-      canvas.drawParagraph(this.paragraph, 0, 0);
+    if (Object.keys(this.layout).length !== 0) {
+      return;
     }
+    this.initialize();
+    if (!this.paragraph) {
+      throw new Error(
+        `warmup Label entity ${this.toString()}: paragraph is undefined`,
+      );
+    }
+    canvas.drawParagraph(this.paragraph, 0, 0);
   }
 }

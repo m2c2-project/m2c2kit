@@ -6,4 +6,9 @@ export interface FontAsset {
   fontName: string;
   /** URL of font (TrueType font) to load */
   url: string;
+  /** If true, the font will not be fully loaded until it is needed. Default
+   * is false. Lazy loading is useful for fonts involved in localization.
+   * These should be lazy loaded because they may not be needed.
+   */
+  lazy?: boolean;
 }

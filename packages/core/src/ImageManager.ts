@@ -39,37 +39,6 @@ export class ImageManager {
   }
 
   /**
-   * Returns a m2c2kit image ({@link M2Image}) that has been loaded by the ImageManager.
-   *
-   * @internal For m2c2kit library use only
-   *
-   * @remarks Typically, a user won't call this because they use a higher-level
-   * abstraction (m2c2kit Sprite).
-   *
-   * @param imageName - The name given to the previously rendered image
-   * @returns A m2c2kit image
-   */
-  getImage(imageName: string): M2Image {
-    return this.images[imageName];
-  }
-
-  /**
-   * Adds a m2c2kit image ({@link M2Image}) to the images ready for the game.
-   *
-   * @internal For m2c2kit library use only
-   *
-   * @remarks Typically, a programmer won't call this because images will be
-   * automatically rendered and loaded in initializeImages().
-   * One reason this function is called in-game is when the game takes
-   * a screenshot and adds it as an outgoing image for transitions.
-   *
-   * @param image - A m2c2kit image
-   */
-  addImage(image: M2Image): void {
-    this.images[image.imageName] = image;
-  }
-
-  /**
    * Loads an array of images and makes them ready for the game.
    *
    * @remarks Using the browser's image rendering, this method converts the
@@ -127,12 +96,12 @@ export class ImageManager {
    *
    * @internal For m2c2kit library use only
    *
-   * @param imageName - name of the image to render and make ready
+   * @param image - name of the image to render and make ready
    * @returns A promise that completes when the image is ready
    */
-  renderDeferredImage(imageName: string): Promise<void> {
-    this.images[imageName].status = M2ImageStatus.Loading;
-    return this.renderM2Image(this.images[imageName]);
+  prepareDeferredImage(image: M2Image): Promise<void> {
+    image.status = M2ImageStatus.Loading;
+    return this.renderM2Image(image);
   }
 
   /**
@@ -294,6 +263,37 @@ export class ImageManager {
       subtype = "svg+xml";
     }
     return subtype;
+  }
+
+  /**
+   * Returns a m2c2kit image ({@link M2Image}) that has been loaded by the ImageManager.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks Typically, a user won't call this because they use a higher-level
+   * abstraction (m2c2kit Sprite).
+   *
+   * @param imageName - The name given to the previously rendered image
+   * @returns A m2c2kit image
+   */
+  getImage(imageName: string): M2Image {
+    return this.images[imageName];
+  }
+
+  /**
+   * Adds a m2c2kit image ({@link M2Image}) to the images ready for the game.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks Typically, a programmer won't call this because images will be
+   * automatically rendered and loaded in initializeImages().
+   * One reason this function is called in-game is when the game takes
+   * a screenshot and adds it as an outgoing image for transitions.
+   *
+   * @param image - A m2c2kit image
+   */
+  addImage(image: M2Image): void {
+    this.images[image.imageName] = image;
   }
 
   /**

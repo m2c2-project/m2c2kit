@@ -10,6 +10,8 @@ import { TextLineOptions } from "./TextLineOptions";
 import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { M2FontStatus } from "./M2Font";
+import { FontManager } from "./FontManager";
 
 export class TextLine
   extends Entity
@@ -96,6 +98,16 @@ export class TextLine
   }
 
   override initialize(): void {
+    const fontManager = this.game.fontManager;
+    const requiredFont = this.getRequiredTextLineFont(fontManager);
+    if (requiredFont.status === M2FontStatus.Deferred) {
+      fontManager.prepareDeferredFont(requiredFont);
+      return;
+    }
+    if (requiredFont.status === M2FontStatus.Loading) {
+      return;
+    }
+
     if (this.paint) {
       this.paint.delete();
     }
@@ -126,12 +138,6 @@ export class TextLine
       this.paint.setAntiAlias(true);
     }
 
-    const session = (this.parentSceneAsEntity as unknown as Scene).game.session;
-    if (!session) {
-      throw new Error("session is undefined");
-    }
-    const fontManager = this.game.fontManager;
-
     if (this.fontName) {
       this.typeface = fontManager.getTypeface(this.fontName);
     } else {
@@ -148,6 +154,23 @@ export class TextLine
       this.fontSize * Globals.canvasScale,
     );
     this.needsInitialization = false;
+  }
+
+  /**
+   * Determines the M2Font object that needs to be ready in order to draw
+   * the TextLine.
+   *
+   * @remarks It needs a FontManager because it may need to look up the
+   * default font.
+   *
+   * @param fontManager - {@link FontManager}
+   * @returns a M2Font object that is required for the TextLine
+   */
+  private getRequiredTextLineFont(fontManager: FontManager) {
+    if (this.fontName === undefined) {
+      return fontManager.getDefaultFont();
+    }
+    return fontManager.getFont(this.fontName);
   }
 
   dispose(): void {
@@ -185,7 +208,7 @@ export class TextLine
   }
 
   draw(canvas: Canvas): void {
-    if (this.parent && this.text) {
+    if (this.parent && this.text && !this.needsInitialization) {
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
@@ -246,6 +269,13 @@ export class TextLine
   }
 
   warmup(canvas: Canvas): void {
+    /**
+     * If this TextLine uses a deferred font, then we cannot warm it up.
+     */
+    const requiredFont = this.getRequiredTextLineFont(this.game.fontManager);
+    if (requiredFont.status === M2FontStatus.Deferred) {
+      return;
+    }
     this.initialize();
     if (this.paint === undefined || this.font === undefined) {
       throw new Error(

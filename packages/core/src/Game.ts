@@ -68,6 +68,7 @@ import { Plugin } from "./Plugin";
 import { FontManager } from "./FontManager";
 import { ImageManager } from "./ImageManager";
 import { ModuleMetadata } from "./ModuleMetadata";
+import { M2FontStatus } from "./M2Font";
 
 /** Key value pairs of file URLs and hashed file URLs */
 type Manifest = { [originalUrl: string]: string };
@@ -1125,7 +1126,10 @@ export class Game implements Activity {
 
     const fontManager = this.fontManager;
     const fontNames = this.fontManager.getFontNames();
-    if (fontNames.length > 0) {
+    if (
+      fontNames.length > 0 &&
+      fontManager.fonts[fontNames[0]].status === M2FontStatus.Ready
+    ) {
       const typeface = fontManager.getTypeface(fontNames[0]);
       const font = new this.canvasKit.Font(typeface, 16 * Globals.canvasScale);
       canvas.drawText(

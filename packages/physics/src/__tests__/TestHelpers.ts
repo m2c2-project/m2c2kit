@@ -160,6 +160,10 @@ export class TestHelpers {
           Left: undefined,
           Right: undefined,
         },
+        TypefaceFontProvider: {
+          Make: () => undefined,
+          registerFont: () => undefined,
+        },
       }),
     ) as (canvasKitWasmUrl: string) => Promise<CanvasKit>;
   }
