@@ -1,5 +1,4 @@
 import {
-  EmbindObject,
   Font,
   Paint,
   ParagraphBuilder,
@@ -26,17 +25,15 @@ export class CanvasKitHelpers {
     objects: Array<
       | undefined
       | null
-      | EmbindObject<
-          | Font
-          | Paint
-          | ParagraphBuilder
-          | Paragraph
-          | Image
-          | Typeface
-          | TypefaceFontProvider
-          | FontMgr
-          | Path
-        >
+      | Font
+      | Paint
+      | ParagraphBuilder
+      | Paragraph
+      | Image
+      | Typeface
+      | TypefaceFontProvider
+      | FontMgr
+      | Path
     >,
   ): void {
     objects.filter((o) => !o?.isDeleted()).forEach((o) => o?.delete());

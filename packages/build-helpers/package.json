@@ -22,7 +22,7 @@
     "@types/findup-sync": "4.0.4",
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
-    "magic-string": "0.30.5",
+    "magic-string": "0.30.6",
     "pkg-dir": "8.0.0",
     "rimraf": "5.0.5",
     "rollup": "4.9.6",
