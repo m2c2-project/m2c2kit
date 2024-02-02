@@ -109,6 +109,7 @@ export class Game implements Activity {
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
   private isImportedModule = false;
+  private manifestJsonUrl = "__NO_M2C2KIT_MANIFEST_JSON_URL__";
   manifest?: Manifest;
 
   /**
@@ -283,6 +284,9 @@ export class Game implements Activity {
   }
 
   private async loadManifest() {
+    if (this.manifestJsonUrl !== "manifest.json") {
+      return;
+    }
     let manifestResponse: Response | undefined = undefined;
     try {
       manifestResponse = await fetch("manifest.json");
@@ -291,15 +295,13 @@ export class Game implements Activity {
        * 404. Must check response.ok
        */
       if (!manifestResponse.ok) {
-        console.log(
-          `Error ${manifestResponse.status} on GET manifest.json can be safely ignored if not using hashed asset URLs.`,
+        throw new Error(
+          `Error ${manifestResponse.status} on GET manifest.json.`,
         );
       }
     } catch {
       // Network error. This is still OK. manifest.json is not required.
-      console.log(
-        "Error on GET manifest.json can be safely ignored if not using hashed asset URLs.",
-      );
+      console.log("Network error on GET manifest.json.");
     }
 
     try {
@@ -307,12 +309,7 @@ export class Game implements Activity {
         this.manifest = await manifestResponse.json();
       }
     } catch {
-      /**
-       * OK if manifest.json is not valid JSON. Some servers may return an
-       * error page instead of an error code if the manifest.json file does
-       * not exist. In this case, the received manifest.json file will not be
-       * valid JSON and an exception will be thrown. This is OK.
-       */
+      throw new Error("Error parsing manifest.json.");
     }
   }
 

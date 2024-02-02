@@ -8,6 +8,7 @@ import { selectAll } from "css-select";
 import { render } from "dom-serializer";
 import { Element } from "domhandler";
 import { Plugin } from "rollup";
+import MagicString from "magic-string";
 
 /** We use MD5 for hashing, but keep only the first 16 characters. */
 const HASH_CHARACTER_LENGTH = 16;
@@ -34,7 +35,12 @@ interface FileRename {
  * index.js (index.js is the main entry point bundle file we have created
  * and is referenced in index.html).
  *
- * This is done by:
+ * In the renderChunk plugin hook, this is done by:
+ * 1) Replacing the string __NO_M2C2KIT_MANIFEST_JSON_URL__ with manifest.json
+ * in the bundled index.js file. This is done so that the game knows it must
+ * look up hashed filenames.
+ *
+ * In the writeBundle plugin hook, this is done by:
  * 1) Creating an MD5 hash of the file contents of each file and adding the
  * hash of the first 16 digits to the filename.
  *
@@ -55,6 +61,23 @@ export function hashM2c2kitAssets(rootDir: string, cwd = ""): Plugin {
 
   return {
     name: "hash-m2c2kit-assets",
+    renderChunk: {
+      handler(code: string) {
+        /**
+         * Rollup will complain #warning-sourcemap-is-likely-to-be-incorrect
+         * unless we use magic-string to also return a map.
+         */
+        const magicString = new MagicString(code);
+        magicString.replace(
+          new RegExp("__NO_M2C2KIT_MANIFEST_JSON_URL__", "g"),
+          "manifest.json",
+        );
+        return {
+          code: magicString.toString(),
+          map: magicString.generateMap({ hires: true }),
+        };
+      },
+    },
     writeBundle: {
       /**
        * Sequential is true because we will must call the copy assets
