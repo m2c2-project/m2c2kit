@@ -3,7 +3,7 @@ import { CanvasKit, Typeface, TypefaceFontProvider } from "canvaskit-wasm";
 import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
-
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 /**
  * Fetches, loads, and provides fonts to the game.
  *
@@ -31,8 +31,8 @@ export class FontManager {
    *
    * @param fonts - array of FontAsset objects (name and url)
    */
-  async initializeFonts(fonts: Array<FontAsset> | undefined): Promise<void> {
-    await this.loadFonts(fonts ?? []);
+  initializeFonts(fonts: Array<FontAsset> | undefined): Promise<void> {
+    return this.loadFonts(fonts ?? []);
   }
 
   /**
@@ -51,7 +51,7 @@ export class FontManager {
         typeface: undefined,
         data: undefined,
         default: i === 0,
-        url: font.url,
+        url: M2c2KitHelpers.getAssetUrlFromManifest(this.game, font.url),
         status: font.lazy ? M2FontStatus.Deferred : M2FontStatus.Loading,
       };
       this.fonts[font.fontName] = m2Font;

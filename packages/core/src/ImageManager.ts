@@ -4,6 +4,7 @@ import { M2Image, M2ImageStatus } from "./M2Image";
 import { BrowserImage } from "./BrowserImage";
 import { Game } from "./Game";
 import { Sprite } from "./Sprite";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 /**
  * Fetches, loads, and provides images to the game.
  */
@@ -31,10 +32,10 @@ export class ImageManager {
    * @param browserImages - array of BrowserImage objects
    * @returns A promise that completes when all images have loaded
    */
-  async initializeImages(
+  initializeImages(
     browserImages: Array<BrowserImage> | undefined,
   ): Promise<void> {
-    await this.loadImages(browserImages ?? []);
+    return this.loadImages(browserImages ?? []);
     //this.removeScratchCanvas();
   }
 
@@ -58,7 +59,9 @@ export class ImageManager {
     const renderImagesPromises = browserImages.map((browserImage) => {
       const m2Image: M2Image = {
         imageName: browserImage.imageName,
-        url: browserImage.url,
+        url: browserImage.url
+          ? M2c2KitHelpers.getAssetUrlFromManifest(this.game, browserImage.url)
+          : undefined,
         svgString: browserImage.svgString,
         canvaskitImage: undefined,
         width: browserImage.width,

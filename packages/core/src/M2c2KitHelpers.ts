@@ -6,6 +6,7 @@ import { Shape } from "./Shape";
 import { ShapeType } from "./ShapeType";
 import { Point } from "./Point";
 import { BoundingBox } from "./BoundingBox";
+import { Game } from "./Game";
 
 interface RotationTransform {
   /** Counterclockwise radians of the rotation */
@@ -15,6 +16,26 @@ interface RotationTransform {
 }
 
 export class M2c2KitHelpers {
+  /**
+   * Returns the URL to the asset as it appears in the game's manifest.json file.
+   *
+   * @remarks This is used to return the hashed URL to the asset.
+   *
+   * @param game - game object
+   * @param url - the URL to the asset
+   * @returns the URL to the asset from the manifest.json file
+   */
+  static getAssetUrlFromManifest(game: Game, url: string): string {
+    const manifest = game.manifest;
+    if (manifest && manifest[`assets/${game.id}/${url}`]) {
+      return manifest[`assets/${game.id}/${url}`].replace(
+        `assets/${game.id}/`,
+        "",
+      );
+    }
+    return url;
+  }
+
   /**
    * Calculates the four points of the bounding box of the entity, taking
    * into account the entity's rotation (as well as the rotation of its

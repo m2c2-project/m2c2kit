@@ -69,9 +69,7 @@ import { FontManager } from "./FontManager";
 import { ImageManager } from "./ImageManager";
 import { ModuleMetadata } from "./ModuleMetadata";
 import { M2FontStatus } from "./M2Font";
-
-/** Key value pairs of file URLs and hashed file URLs */
-type Manifest = { [originalUrl: string]: string };
+import { Manifest } from "./Manifest";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -111,7 +109,7 @@ export class Game implements Activity {
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
   private isImportedModule = false;
-  private manifest?: Manifest;
+  manifest?: Manifest;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -189,25 +187,6 @@ export class Game implements Activity {
     );
   }
 
-  /**
-   * Returns the URL to the asset as it appears in the manifest.json file.
-   *
-   * @remarks This is used to return the hashed URL to the asset.
-   *
-   * @param url - the URL to the asset
-   * @param manifest - the manifest.json object, or undefined if there is no manifest.json file
-   * @returns the URL to the asset from the manifest.json file
-   */
-  private manifestUrl(url: string, manifest?: Manifest): string {
-    if (manifest && manifest[`assets/${this.id}/${url}`]) {
-      return manifest[`assets/${this.id}/${url}`].replace(
-        `assets/${this.id}/`,
-        "",
-      );
-    }
-    return url;
-  }
-
   async initialize() {
     let moduleUrl: string | undefined;
     if (this.moduleMetadata.name) {
@@ -269,47 +248,17 @@ export class Game implements Activity {
 
     // Load manifest.json file used for hashed asset URLs, if present
     await this.loadManifest();
-
+    const manifestCanvasKitWasmUrl = M2c2KitHelpers.getAssetUrlFromManifest(
+      this,
+      canvasKitWasmUrl,
+    );
     try {
-      this.canvasKit = await this.loadCanvasKit(
-        this.manifestUrl(canvasKitWasmUrl, this.manifest),
-      );
+      this.canvasKit = await this.loadCanvasKit(manifestCanvasKitWasmUrl);
     } catch (err) {
       throw new Error(
-        `game ${this.id} could not load canvaskit wasm file from ${this.manifestUrl(canvasKitWasmUrl, this.manifest)}`,
+        `game ${this.id} could not load canvaskit wasm file from ${manifestCanvasKitWasmUrl}`,
       );
     }
-
-    this.fontManager = new FontManager(this);
-    await this.fontManager.initializeFonts(
-      this.options.fonts?.map((fontAsset) => {
-        return {
-          ...fontAsset,
-          url: this.manifestUrl(fontAsset.url, this.manifest),
-        };
-      }),
-    );
-
-    this.imageManager = new ImageManager(this);
-    await this.imageManager.initializeImages(
-      this.options.images?.map((browserImage) => {
-        if (
-          browserImage.svgString === undefined &&
-          browserImage.url === undefined
-        ) {
-          throw new Error("image must have either svgString or url");
-        }
-        return {
-          ...browserImage,
-          url: browserImage.url
-            ? this.manifestUrl(browserImage.url, this.manifest)
-            : undefined,
-          svgString: browserImage.svgString
-            ? this.manifestUrl(browserImage.svgString, this.manifest)
-            : undefined,
-        };
-      }),
-    );
 
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
@@ -323,6 +272,14 @@ export class Game implements Activity {
     if (this.session.options.activityCallbacks?.onActivityResults) {
       this.onData(this.session.options.activityCallbacks.onActivityResults);
     }
+
+    this.fontManager = new FontManager(this);
+    this.imageManager = new ImageManager(this);
+
+    return Promise.all([
+      this.fontManager.initializeFonts(this.options.fonts),
+      this.imageManager.initializeImages(this.options.images),
+    ]) as unknown as Promise<void>;
   }
 
   private async loadManifest() {

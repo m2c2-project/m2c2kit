@@ -156,7 +156,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   }
 
   warmup(canvas: Canvas): void {
-    if (this.m2Image?.status !== M2ImageStatus.Deferred) {
+    if (this.m2Image?.status === M2ImageStatus.Ready) {
       this.initialize();
       if (!this.m2Image) {
         throw new Error(
