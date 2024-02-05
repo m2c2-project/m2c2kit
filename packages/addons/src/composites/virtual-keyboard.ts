@@ -13,6 +13,7 @@ import {
   IDrawable,
   EntityEventListener,
   ShapeOptions,
+  CallbackOptions,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -597,61 +598,47 @@ export class VirtualKeyboard extends Composite {
    * Executes a callback when the user presses down on a key.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options
    */
   onKeyDown(
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
-    replaceExistingCallback = true,
+    options?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener = {
+    const eventListener: EntityEventListener<VirtualKeyboardEvent> = {
       type: EventType.CompositeCustom,
       compositeType: "VirtualKeyboardKeyDown",
       entityUuid: this.uuid,
       callback: <(ev: EntityEvent) => void>callback,
     };
 
-    this.addVirtualKeyboardEventListener(
-      replaceExistingCallback,
-      eventListener,
-    );
+    this.addVirtualKeyboardEventListener(eventListener, options);
   }
 
   /**
    * Executes a callback when the user releases a key.
    *
    * @param callback - function to execute
-   * @param replaceExistingCallback  - should the provided callback replace
-   * any existing callbacks of the same event type on this entity? Usually
-   * there should be only one callback defined, instead of chaining multiple
-   * ones. It is strongly recommended not to change this, unless you have a
-   * special use case. Default is true.
+   * @param options
    */
   onKeyUp(
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
-    replaceExistingCallback = true,
+    options?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener = {
+    const eventListener: EntityEventListener<VirtualKeyboardEvent> = {
       type: EventType.CompositeCustom,
       compositeType: "VirtualKeyboardKeyUp",
       entityUuid: this.uuid,
       callback: <(ev: EntityEvent) => void>callback,
     };
 
-    this.addVirtualKeyboardEventListener(
-      replaceExistingCallback,
-      eventListener,
-    );
+    this.addVirtualKeyboardEventListener(eventListener, options);
   }
 
   private addVirtualKeyboardEventListener(
-    replaceExistingCallback: boolean,
-    eventListener: EntityEventListener,
+    eventListener: EntityEventListener<VirtualKeyboardEvent>,
+    options?: CallbackOptions,
   ) {
-    if (replaceExistingCallback) {
+    if (options?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
@@ -661,7 +648,7 @@ export class VirtualKeyboard extends Composite {
           ),
       );
     }
-    this.eventListeners.push(eventListener);
+    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
   }
 
   update(): void {

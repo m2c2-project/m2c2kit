@@ -1,8 +1,7 @@
-import { EventType } from "./EventBase";
-import { ActivityEvent } from "./ActivityEvent";
+import { M2EventListener } from "./M2EventListener";
 
-export interface ActivityEventListener {
-  type: EventType;
+export interface ActivityEventListener<ActivityEvent>
+  extends M2EventListener<ActivityEvent> {
+  /** UUID of the activity that the event listener is listening for. */
   activityUuid: string;
-  callback: (event: ActivityEvent) => void;
 }

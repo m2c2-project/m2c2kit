@@ -1,19 +1,21 @@
-import { M2EventListener } from "./M2EventListener";
-import { Activity } from "./Activity";
-import { Timer } from "./Timer";
+import {
+  Activity,
+  ActivityEvent,
+  ActivityType,
+  ActivityLifecycleEvent,
+  ActivityResultsEvent,
+  CallbackOptions,
+  DomHelpers,
+  IDataStore,
+  Timer,
+  Uuid,
+  EventType,
+  Constants,
+  M2EventListener,
+} from "@m2c2kit/core";
 import { SessionOptions } from "./SessionOptions";
-import { Uuid } from "./Uuid";
-import { ActivityType } from "./ActivityType";
-import { DomHelpers } from "./DomHelpers";
-import { IDataStore } from "./IDataStore";
-import { CallbackOptions } from "./CallbackOptions";
-import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
-import { ActivityResultsEvent } from "./ActivityResultsEvent";
-import { Constants } from "./Constants";
-import { SessionEvent } from "./SessionEvent";
-import { ActivityEvent } from "./ActivityEvent";
-import { EventType } from "./M2Event";
+import { SessionEvent, SessionEventType } from "./SessionEvent";
 
 export class Session {
   options: SessionOptions;
@@ -42,7 +44,7 @@ export class Session {
         );
       }
     }
-    this.options.activities.forEach((activity) => (activity.session = this));
+    //this.options.activities.forEach((activity) => (activity.session = this));
     if (this.options.sessionUuid) {
       this.uuid = this.options.sessionUuid;
     } else {
@@ -60,7 +62,11 @@ export class Session {
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.SessionInitialize, callback, options);
+    this.addEventListener(
+      SessionEventType.SessionInitialize,
+      callback,
+      options,
+    );
   }
 
   /**
@@ -73,7 +79,7 @@ export class Session {
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.SessionStart, callback, options);
+    this.addEventListener(SessionEventType.SessionStart, callback, options);
   }
 
   /**
@@ -86,7 +92,7 @@ export class Session {
     callback: (sessionLifecycleEvent: SessionLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.SessionEnd, callback, options);
+    this.addEventListener(SessionEventType.SessionEnd, callback, options);
   }
 
   /**
@@ -237,9 +243,9 @@ export class Session {
   async initialize(): Promise<void> {
     console.log(`⚪ @m2c2kit/core version ${this.version}`);
     Timer.start("sessionInitialize");
-    const sessionInitializeEvent: SessionLifecycleEvent = {
+    const sessionInitializeEvent: SessionEvent = {
       target: this,
-      type: EventType.SessionInitialize,
+      type: SessionEventType.SessionInitialize,
     };
     this.raiseEventOnListeners(sessionInitializeEvent);
     DomHelpers.addLoadingElements();
@@ -315,7 +321,7 @@ export class Session {
     console.log("🟢 started session");
     const sessionStartEvent: SessionLifecycleEvent = {
       target: this,
-      type: EventType.SessionStart,
+      type: SessionEventType.SessionStart,
     };
     this.raiseEventOnListeners(sessionStartEvent);
     this.currentActivity = this.options.activities.find(Boolean);
@@ -338,7 +344,7 @@ export class Session {
     this.stop();
     const sessionEndEvent: SessionLifecycleEvent = {
       target: this,
-      type: EventType.SessionEnd,
+      type: SessionEventType.SessionEnd,
     };
     this.raiseEventOnListeners(sessionEndEvent);
   }
@@ -410,7 +416,7 @@ export class Session {
      * method. Also, if the old instance had new parameters set via
      * Game.SetParameters(), we must apply them.
      */
-    this.currentActivity.session = this;
+    //this.currentActivity.session = this;
     this.currentActivity.dataStores = this.dataStores;
     /**
      * IMPORTANT: Originally, we checked if the current activity was a game

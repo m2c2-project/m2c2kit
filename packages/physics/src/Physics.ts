@@ -4,7 +4,7 @@ import {
   Game,
   Entity,
   Point,
-  EventBase,
+  PluginEvent,
   CallbackOptions,
   Plugin,
 } from "@m2c2kit/core";
@@ -35,7 +35,7 @@ export const PhysicsEventType = {
 export type PhysicsEventType =
   (typeof PhysicsEventType)[keyof typeof PhysicsEventType];
 
-export interface PhysicsEvent extends EventBase {
+export interface PhysicsEvent extends PluginEvent {
   bodyA: PhysicsBody;
   bodyB: PhysicsBody;
 }

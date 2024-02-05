@@ -7,9 +7,10 @@ import {
   Scene,
   Action,
   TrialSchema,
-  EventBase,
   EventType,
+  ActivityEvent,
 } from "..";
+import { SessionEvent } from "../SessionEvent";
 
 TestHelpers.createM2c2KitMock();
 
@@ -51,8 +52,8 @@ class Game1 extends Game {
 let session: Session;
 let g1: Game1;
 
-let genericEvent: EventBase;
-const genericHandler: (ev: EventBase) => void = (ev) => {
+let genericEvent: SessionEvent | ActivityEvent;
+const genericHandler: (ev: SessionEvent | ActivityEvent) => void = (ev) => {
   genericEvent = ev;
 };
 

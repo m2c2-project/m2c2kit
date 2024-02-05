@@ -10,7 +10,6 @@ import CanvasKitInit, {
   Paint,
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
-import { EventBase } from "./EventBase";
 import { TapEvent } from "./TapEvent";
 import { M2PointerEvent } from "./M2PointerEvent";
 import { EntityEvent } from "./EntityEvent";
@@ -34,7 +33,7 @@ import { GameOptions } from "./GameOptions";
 import { Session } from "./Session";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
-import { EventType } from "./EventBase";
+import { EventType } from "./M2Event";
 import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
@@ -93,7 +92,7 @@ export class Game implements Activity {
   options: GameOptions;
   beginTimestamp = NaN;
   beginIso8601Timestamp = "";
-  private eventListeners = new Array<ActivityEventListener>();
+  private eventListeners = new Array<ActivityEventListener<ActivityEvent>>();
   private gameMetrics: Array<GameMetric> = new Array<GameMetric>();
   private fpsMetricReportThreshold: number;
   private maximumRecordedActivityMetrics: number;
@@ -2572,15 +2571,15 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const m2Event: EventBase = {
+    const entityEvent: EntityEvent = {
       target: scene,
       type: EventType.PointerDown,
       handled: false,
     };
-    this.processDomPointerDown(scene, m2Event, domPointerEvent);
+    this.processDomPointerDown(scene, entityEvent, domPointerEvent);
     this.processDomPointerDown(
       this.freeEntitiesScene,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
@@ -2591,13 +2590,17 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const m2Event: EventBase = {
+    const entityEvent: EntityEvent = {
       target: scene,
       type: EventType.PointerUp,
       handled: false,
     };
-    this.processDomPointerUp(scene, m2Event, domPointerEvent);
-    this.processDomPointerUp(this.freeEntitiesScene, m2Event, domPointerEvent);
+    this.processDomPointerUp(scene, entityEvent, domPointerEvent);
+    this.processDomPointerUp(
+      this.freeEntitiesScene,
+      entityEvent,
+      domPointerEvent,
+    );
   }
 
   private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
@@ -2606,15 +2609,15 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const m2Event: EventBase = {
+    const entityEvent: EntityEvent = {
       target: scene,
       type: EventType.PointerMove,
       handled: false,
     };
-    this.processDomPointerMove(scene, m2Event, domPointerEvent);
+    this.processDomPointerMove(scene, entityEvent, domPointerEvent);
     this.processDomPointerMove(
       this.freeEntitiesScene,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
@@ -2629,15 +2632,15 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const m2Event: EventBase = {
+    const entityEvent: EntityEvent = {
       target: scene,
       type: EventType.PointerLeave,
       handled: false,
     };
-    this.processDomPointerLeave(scene, m2Event, domPointerEvent);
+    this.processDomPointerLeave(scene, entityEvent, domPointerEvent);
     this.processDomPointerLeave(
       this.freeEntitiesScene,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
@@ -2646,15 +2649,15 @@ export class Game implements Activity {
    * Determines if/how m2c2kit entities respond to the DOM PointerDown event
    *
    * @param entity - entity that might be affected by the DOM PointerDown event
-   * @param m2Event
+   * @param entityEvent
    * @param domPointerEvent
    */
   private processDomPointerDown(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (m2Event.handled) {
+    if (entityEvent.handled) {
       return;
     }
 
@@ -2673,8 +2676,8 @@ export class Game implements Activity {
         x: domPointerEvent.offsetX,
         y: domPointerEvent.offsetY,
       };
-      this.raiseM2PointerDownEvent(entity, m2Event, domPointerEvent);
-      this.raiseTapDownEvent(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerDownEvent(entity, entityEvent, domPointerEvent);
+      this.raiseTapDownEvent(entity, entityEvent, domPointerEvent);
     }
     if (entity.children) {
       entity.children
@@ -2690,17 +2693,17 @@ export class Game implements Activity {
             (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerDown(entity, m2Event, domPointerEvent),
+          this.processDomPointerDown(entity, entityEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerUp(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (m2Event.handled) {
+    if (entityEvent.handled) {
       return;
     }
 
@@ -2708,8 +2711,8 @@ export class Game implements Activity {
       entity.dragging = false;
       entity.pressed = false;
       entity.pressedAndWithinHitArea = false;
-      this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
-      m2Event.handled = true;
+      this.raiseM2DragEndEvent(entity, entityEvent, domPointerEvent);
+      entityEvent.handled = true;
       return;
     }
 
@@ -2724,9 +2727,9 @@ export class Game implements Activity {
        */
       entity.pressed = false;
       entity.pressedAndWithinHitArea = false;
-      this.raiseTapUpEvent(entity, m2Event, domPointerEvent);
-      this.raiseTapUpAny(entity, m2Event, domPointerEvent);
-      this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
+      this.raiseTapUpEvent(entity, entityEvent, domPointerEvent);
+      this.raiseTapUpAny(entity, entityEvent, domPointerEvent);
+      this.raiseM2PointerUpEvent(entity, entityEvent, domPointerEvent);
     } else if (
       entity.isUserInteractionEnabled &&
       entity.pressed &&
@@ -2738,7 +2741,7 @@ export class Game implements Activity {
        */
       entity.pressed = false;
       entity.pressedAndWithinHitArea = false;
-      this.raiseTapUpAny(entity, m2Event, domPointerEvent);
+      this.raiseTapUpAny(entity, entityEvent, domPointerEvent);
     } else if (
       entity.isUserInteractionEnabled &&
       this.IsCanvasPointWithinEntityBounds(
@@ -2752,7 +2755,7 @@ export class Game implements Activity {
        */
       entity.pressed = false;
       entity.pressedAndWithinHitArea = false;
-      this.raiseM2PointerUpEvent(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerUpEvent(entity, entityEvent, domPointerEvent);
     }
 
     if (entity.children) {
@@ -2769,17 +2772,17 @@ export class Game implements Activity {
             (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerUp(entity, m2Event, domPointerEvent),
+          this.processDomPointerUp(entity, entityEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerMove(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (m2Event.handled) {
+    if (entityEvent.handled) {
       return;
     }
 
@@ -2802,11 +2805,11 @@ export class Game implements Activity {
         x: domPointerEvent.offsetX,
         y: domPointerEvent.offsetY,
       };
-      m2Event.handled = true;
+      entityEvent.handled = true;
       if (firstMoveOfDrag) {
-        this.raiseM2DragStartEvent(entity, m2Event, domPointerEvent);
+        this.raiseM2DragStartEvent(entity, entityEvent, domPointerEvent);
       } else {
-        this.raiseM2DragEvent(entity, m2Event, domPointerEvent);
+        this.raiseM2DragEvent(entity, entityEvent, domPointerEvent);
       }
       return;
     }
@@ -2822,7 +2825,7 @@ export class Game implements Activity {
       )
     ) {
       entity.pressedAndWithinHitArea = false;
-      this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
+      this.raiseTapLeaveEvent(entity, entityEvent, domPointerEvent);
     }
     if (
       entity.isUserInteractionEnabled &&
@@ -2832,7 +2835,7 @@ export class Game implements Activity {
         domPointerEvent.offsetY,
       )
     ) {
-      this.raiseM2PointerMoveEvent(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerMoveEvent(entity, entityEvent, domPointerEvent);
       entity.withinHitArea = true;
     }
     if (
@@ -2845,7 +2848,7 @@ export class Game implements Activity {
       )
     ) {
       entity.withinHitArea = false;
-      this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerLeaveEvent(entity, entityEvent, domPointerEvent);
     }
 
     if (entity.children) {
@@ -2862,17 +2865,17 @@ export class Game implements Activity {
             (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerMove(entity, m2Event, domPointerEvent),
+          this.processDomPointerMove(entity, entityEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerLeave(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (m2Event.handled) {
+    if (entityEvent.handled) {
       return;
     }
 
@@ -2884,7 +2887,7 @@ export class Game implements Activity {
      * dragged when the pointer is moved back into the canvas.
      */
     if (entity.dragging) {
-      const m2Event: EventBase = {
+      const m2Event: EntityEvent = {
         target: entity,
         type: EventType.DragEnd,
         handled: false,
@@ -2909,7 +2912,7 @@ export class Game implements Activity {
       )
     ) {
       entity.pressedAndWithinHitArea = false;
-      this.raiseTapLeaveEvent(entity, m2Event, domPointerEvent);
+      this.raiseTapLeaveEvent(entity, entityEvent, domPointerEvent);
     }
 
     if (
@@ -2922,7 +2925,7 @@ export class Game implements Activity {
       )
     ) {
       entity.withinHitArea = false;
-      this.raiseM2PointerLeaveEvent(entity, m2Event, domPointerEvent);
+      this.raiseM2PointerLeaveEvent(entity, entityEvent, domPointerEvent);
     }
 
     if (entity.children) {
@@ -2939,161 +2942,161 @@ export class Game implements Activity {
             (a as unknown as IDrawable).zPosition,
         )
         .forEach((entity) =>
-          this.processDomPointerLeave(entity, m2Event, domPointerEvent),
+          this.processDomPointerLeave(entity, entityEvent, domPointerEvent),
         );
     }
   }
 
   private raiseM2PointerDownEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.PointerDown;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.PointerDown;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapDownEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.TapDown;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.TapDown;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapLeaveEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.TapLeave;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.TapLeave;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2PointerUpEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.PointerUp;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.PointerUp;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapUpEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.TapUp;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.TapUp;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapUpAny(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.TapUpAny;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.TapUpAny;
     this.raiseEventOnListeningEntities<TapEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2PointerMoveEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.PointerMove;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.PointerMove;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2PointerLeaveEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.PointerLeave;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.PointerLeave;
     this.raiseEventOnListeningEntities<M2PointerEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragStartEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.DragStart;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.DragStart;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.Drag;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.Drag;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragEndEvent(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    m2Event.target = entity;
-    m2Event.type = EventType.DragEnd;
+    entityEvent.target = entity;
+    entityEvent.type = EventType.DragEnd;
     this.raiseEventOnListeningEntities<M2DragEvent>(
       entity,
-      m2Event,
+      entityEvent,
       domPointerEvent,
     );
   }
@@ -3198,19 +3201,15 @@ export class Game implements Activity {
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.ActivityData,
-      callback as (ev: EventBase) => void,
-      options,
-    );
+    this.addEventListener(EventType.ActivityData, callback, options);
   }
 
-  private addEventListener(
+  private addEventListener<T extends ActivityEvent>(
     type: EventType,
-    callback: (ev: ActivityEvent) => void,
+    callback: (ev: T) => void,
     options?: CallbackOptions,
   ): void {
-    const eventListener: ActivityEventListener = {
+    const eventListener: ActivityEventListener<T> = {
       type: type,
       activityUuid: this.uuid,
       callback: callback,
@@ -3225,7 +3224,9 @@ export class Game implements Activity {
           ),
       );
     }
-    this.eventListeners.push(eventListener);
+    this.eventListeners.push(
+      eventListener as ActivityEventListener<ActivityEvent>,
+    );
   }
 
   private raiseActivityEventOnListeners(
@@ -3248,57 +3249,57 @@ export class Game implements Activity {
 
   private raiseEventOnListeningEntities<T extends EntityEvent>(
     entity: Entity,
-    m2Event: EventBase,
+    entityEvent: EntityEvent,
     domEvent: Event,
   ): void {
     entity.eventListeners
-      .filter((listener) => listener.type === m2Event.type)
+      .filter((listener) => listener.type === entityEvent.type)
       .forEach((listener) => {
         if (listener.entityUuid === entity.uuid) {
-          (m2Event as T).target = entity;
+          (entityEvent as T).target = entity;
 
-          switch (m2Event.type) {
+          switch (entityEvent.type) {
             case EventType.PointerDown:
             case EventType.PointerMove:
             case EventType.PointerUp:
             case EventType.PointerLeave:
-              (m2Event as M2PointerEvent).point =
+              (entityEvent as M2PointerEvent).point =
                 this.calculatePointWithinEntityFromDomPointerEvent(
                   entity,
                   domEvent as PointerEvent,
                 );
-              (m2Event as M2PointerEvent).buttons = (
+              (entityEvent as M2PointerEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
-              listener.callback(m2Event as T);
+              listener.callback(entityEvent as T);
               break;
             case EventType.TapDown:
             case EventType.TapUp:
             case EventType.TapUpAny:
             case EventType.TapLeave:
-              (m2Event as TapEvent).point =
+              (entityEvent as TapEvent).point =
                 this.calculatePointWithinEntityFromDomPointerEvent(
                   entity,
                   domEvent as PointerEvent,
                 );
 
-              (m2Event as TapEvent).buttons = (
+              (entityEvent as TapEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
 
-              listener.callback(m2Event as T);
+              listener.callback(entityEvent as T);
               break;
             case EventType.DragStart:
             case EventType.Drag:
             case EventType.DragEnd:
-              (m2Event as M2DragEvent).position = {
+              (entityEvent as M2DragEvent).position = {
                 x: entity.position.x,
                 y: entity.position.y,
               };
-              (m2Event as M2DragEvent).buttons = (
+              (entityEvent as M2DragEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
-              listener.callback(m2Event as T);
+              listener.callback(entityEvent as T);
               break;
           }
         }

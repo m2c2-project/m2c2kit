@@ -1,4 +1,4 @@
-import { EventBase, EventType, Session } from "@m2c2kit/core";
+import { EventType, Session, ActivityEvent, SessionEvent } from "@m2c2kit/core";
 import { EmbeddingOptions } from "./EmbeddingOptions";
 
 /**
@@ -34,7 +34,7 @@ declare global {
     webkit: {
       messageHandlers: {
         iOSM2c2: {
-          postMessage: (event: EventBase) => void;
+          postMessage: (event: SessionEvent | ActivityEvent) => void;
         };
       };
     };
@@ -81,13 +81,13 @@ export class Embedding {
        * note: we do not need to set up Session.onData() events, because they
        * will be sent by the individual Activity.onData() events, below.
        */
-      session.onInitialize((ev) => {
+      session.onInitialize((ev: SessionEvent) => {
         Embedding.sendEventToWebView(ev);
       });
-      session.onStart((ev) => {
+      session.onStart((ev: SessionEvent) => {
         Embedding.sendEventToWebView(ev);
       });
-      session.onEnd((ev) => {
+      session.onEnd((ev: SessionEvent) => {
         Embedding.sendEventToWebView(ev);
       });
 
@@ -125,7 +125,7 @@ export class Embedding {
    *
    * @param event - the m2c2kit event to send to the Android app.
    */
-  public static sendEventToAndroid(event: EventBase): void {
+  public static sendEventToAndroid(event: SessionEvent | ActivityEvent): void {
     switch (event.type) {
       case EventType.SessionStart:
       case EventType.SessionEnd:
@@ -168,7 +168,7 @@ export class Embedding {
    *
    * @param event - the m2c2kit event to send to the iOS app.
    */
-  public static sendEventToIOS(event: EventBase): void {
+  public static sendEventToIOS(event: SessionEvent | ActivityEvent): void {
     window.webkit.messageHandlers.iOSM2c2.postMessage(event);
   }
 
@@ -188,7 +188,7 @@ export class Embedding {
    *
    * @param event - the m2c2kit event to send to the native app.
    */
-  public static sendEventToWebView(event: EventBase): void {
+  public static sendEventToWebView(event: SessionEvent | ActivityEvent): void {
     this.removeCircularReferencesFromEvent(event);
     if (Embedding.contextIsAndroidWebView()) {
       Embedding.sendEventToAndroid(event);
@@ -241,7 +241,9 @@ export class Embedding {
    *
    * @param event
    */
-  private static removeCircularReferencesFromEvent(event: EventBase): void {
+  private static removeCircularReferencesFromEvent(
+    event: SessionEvent | ActivityEvent,
+  ): void {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     event.target = { type: event.target.type, name: event.target.name };

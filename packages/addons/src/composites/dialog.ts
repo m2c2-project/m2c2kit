@@ -11,6 +11,7 @@ import {
   IDrawable,
   EntityEventListener,
   EventType,
+  CallbackOptions,
 } from "@m2c2kit/core";
 import "../Globals";
 import { Button } from "./button";
@@ -40,11 +41,10 @@ export enum DialogResult {
 
 export interface DialogEvent extends EntityEvent {
   dialogResult: DialogResult;
-  //onActivityLifecycleChange?: (event: ActivityLifecycleEvent) => void;
 }
 
 export class Dialog extends Composite {
-  compositeType = "dialog";
+  compositeType = "Dialog";
 
   private _backgroundColor = WebColors.White;
 
@@ -84,9 +84,6 @@ export class Dialog extends Composite {
       this.negativeButtonText = options.negativeButtonText;
     }
 
-    // if (options.text) {
-    //   this.text = options.text;
-    // }
     if (options.size) {
       this.size = options.size;
     }
@@ -110,38 +107,25 @@ export class Dialog extends Composite {
 
   onDialogResult(
     callback: (dialogResultEvent: DialogEvent) => void,
-    replaceExistingCallback = true
+    options?: CallbackOptions,
   ): void {
-    // By default, we'll replace the existing callback if there is one
-    // Why? If the same setup code is called more than once for a scene that repeats, it could
-    // add the same callback again. Usually, this is not the intent.
-
-    // cast <(ev: EntityEvent) => void> is needed because callback parameter
-    // in this onTapDown method has argument of type TapEvent, but
-    // in the EntityEventListener type, the callback property expects a
-    // callback with argument of type EntityEvent
-    const eventListener: EntityEventListener = {
+    const eventListener: EntityEventListener<DialogEvent> = {
       type: EventType.CompositeCustom,
+      compositeType: "DialogResult",
       entityUuid: this.uuid,
-      callback: <(ev: EntityEvent) => void>callback,
+      callback: callback,
     };
 
-    if (replaceExistingCallback) {
+    if (options?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
             listener.entityUuid === eventListener.entityUuid &&
             listener.type === eventListener.type
-          )
+          ),
       );
     }
-    this.eventListeners.push(eventListener);
-    // if (replaceExistingCallback) {
-    //   this.eventListeners = this.eventListeners.filter(
-    //     (listener) => listener.entityName !== eventListener.entityName
-    //   );
-    // }
-    // this.eventListeners.push(eventListener);
+    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
   }
 
   override initialize(): void {

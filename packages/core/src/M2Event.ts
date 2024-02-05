@@ -1,19 +1,16 @@
-import { Activity } from "./Activity";
-import { Entity } from "./Entity";
-import { Session } from "./Session";
-import { Plugin } from "./Plugin";
-
 /**
  * Base interface for all m2c2kit events.
  *
  * @remarks I would have named it Event, but that would collide with
  * the existing DOM Event
  */
-export interface EventBase {
+export interface M2Event<T> {
   /** Type of event. */
+  // It is a union type of EventType and string, so that we can define custom
+  // event types in Composites and Plugins
   type: EventType | string;
   /** The object on which the event occurred. */
-  target: Entity | Session | Activity | Plugin;
+  target: T;
   /** Has the event been taken care of by the listener and not be dispatched to other targets? */
   handled?: boolean;
 }

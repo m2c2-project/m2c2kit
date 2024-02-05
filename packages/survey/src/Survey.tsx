@@ -3,13 +3,13 @@ import {
   Uuid,
   Activity,
   ActivityKeyValueData,
+  ActivityEventListener,
   ActivityType,
   EventType,
   Timer,
-  EventListenerBase,
   ActivityLifecycleEvent,
   CallbackOptions,
-  EventBase,
+  ActivityEvent,
   ActivityResultsEvent,
 } from "@m2c2kit/core";
 import React from "react";
@@ -60,7 +60,7 @@ export class Survey implements Activity {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     show: () => {},
   };
-  private eventListeners = new Array<EventListenerBase>();
+  private eventListeners = new Array<ActivityEventListener<ActivityEvent>>();
 
   constructor(surveyJson?: unknown) {
     if (surveyJson) {
@@ -171,13 +171,9 @@ export class Survey implements Activity {
    */
   onStart(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.ActivityStart,
-      callback as (ev: EventBase) => void,
-      options
-    );
+    this.addEventListener(EventType.ActivityStart, callback, options);
   }
 
   /**
@@ -188,13 +184,9 @@ export class Survey implements Activity {
    */
   onCancel(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.ActivityCancel,
-      callback as (ev: EventBase) => void,
-      options
-    );
+    this.addEventListener(EventType.ActivityCancel, callback, options);
   }
 
   /**
@@ -205,13 +197,9 @@ export class Survey implements Activity {
    */
   onEnd(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.ActivityEnd,
-      callback as (ev: EventBase) => void,
-      options
-    );
+    this.addEventListener(EventType.ActivityEnd, callback, options);
   }
 
   /**
@@ -222,35 +210,34 @@ export class Survey implements Activity {
    */
   onData(
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.ActivityData,
-      callback as (ev: EventBase) => void,
-      options
-    );
+    this.addEventListener(EventType.ActivityData, callback, options);
   }
 
-  private addEventListener(
+  private addEventListener<T extends ActivityEvent>(
     type: EventType,
-    callback: (ev: EventBase) => void,
-    options?: CallbackOptions
+    callback: (ev: T) => void,
+    options?: CallbackOptions,
   ): void {
-    const eventListener: EventListenerBase = {
+    const eventListener: ActivityEventListener<T> = {
       type: type,
+      activityUuid: this.uuid,
       callback: callback,
       key: options?.key,
     };
 
     if (options?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
-        (listener) => !(listener.type === eventListener.type)
+        (listener) => !(listener.type === eventListener.type),
       );
     }
-    this.eventListeners.push(eventListener);
+    this.eventListeners.push(
+      eventListener as ActivityEventListener<ActivityEvent>,
+    );
   }
 
-  private raiseEventOnListeners(event: EventBase, extra?: unknown): void {
+  private raiseEventOnListeners(event: ActivityEvent, extra?: unknown): void {
     if (extra) {
       event = {
         ...event,
@@ -291,7 +278,7 @@ export class Survey implements Activity {
   private logConfigurationWarnings() {
     if (this.name === "unnamed survey") {
       console.warn(
-        `Survey json has no name property. Using "unnamed survey" as the name. It is highly recommended to set name property in survey json.`
+        `Survey json has no name property. Using "unnamed survey" as the name. It is highly recommended to set name property in survey json.`,
       );
     }
   }
@@ -306,7 +293,7 @@ export class Survey implements Activity {
     const surveyDiv = document.getElementById("m2c2kit-survey-div");
     if (!surveyDiv) {
       throw new Error(
-        "renderSurveyJs(): m2c2kit-survey-div not found in DOM. cannot start survey."
+        "renderSurveyJs(): m2c2kit-survey-div not found in DOM. cannot start survey.",
       );
     }
     Modal.setAppElement("#m2c2kit-survey-div");
@@ -385,9 +372,7 @@ export class Survey implements Activity {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {this.confirmationSkipModal.paragraphs?.map((line) => (
-            <p>{line}</p>
-          ))}
+          {this.confirmationSkipModal.paragraphs?.map((line) => <p>{line}</p>)}
           <div
             style={{
               display: "flex",
@@ -441,27 +426,27 @@ export class Survey implements Activity {
         if (
           this.shouldShowSkipConfirmation(
             options.oldCurrentPage,
-            options.newCurrentPage
+            options.newCurrentPage,
           )
         ) {
           this.confirmationSkipModal.newPageIfSkipIsConfirmed =
             options.newCurrentPage;
           this.confirmationSkipModal.paragraphs = this.getConfirmationSkipText(
-            options.oldCurrentPage.name
+            options.oldCurrentPage.name,
           );
           this.confirmationSkipModal.show();
           options.allowChanging = false;
           return;
         }
         this.updateSurveyData(sender);
-      }
+      },
     );
 
     this.survey.onValueChanged.add(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (sender: SurveyReact.Model, _options: ValueChangedOptions) => {
         this.updateSurveyData(sender);
-      }
+      },
     );
 
     this.survey.onCompleting.add(
@@ -481,7 +466,7 @@ export class Survey implements Activity {
           }
         }
         this.updateSurveyData(sender);
-      }
+      },
     );
 
     this.survey.onComplete.add(() => {
@@ -506,12 +491,12 @@ export class Survey implements Activity {
 
   private updateSurveyData(sender: SurveyReact.SurveyModel) {
     const previousM2c2SurveyData: SurveyVariables = JSON.parse(
-      JSON.stringify(this.m2c2SurveyData)
+      JSON.stringify(this.m2c2SurveyData),
     );
     const currentM2c2SurveyData = this.makeM2c2SurveyData(sender);
     const changedM2c2SurveyData = this.calculateChangedM2c2SurveyData(
       previousM2c2SurveyData,
-      currentM2c2SurveyData
+      currentM2c2SurveyData,
     );
 
     if (changedM2c2SurveyData.length > 0) {
@@ -525,7 +510,7 @@ export class Survey implements Activity {
 
   private calculateChangedM2c2SurveyData(
     previous: SurveyVariables,
-    current: SurveyVariables
+    current: SurveyVariables,
   ) {
     const changed: SurveyVariables = new Array<SurveyVariable>();
 
@@ -543,13 +528,13 @@ export class Survey implements Activity {
 
   private makeM2c2SurveyData(survey: SurveyReact.SurveyModel): SurveyVariables {
     const m2c2SurveyData: SurveyVariables = JSON.parse(
-      JSON.stringify(this.m2c2SurveyData)
+      JSON.stringify(this.m2c2SurveyData),
     );
     const surveyJsData = JSON.parse(JSON.stringify(survey.data)) as {
       [elementName: string]: any;
     };
     const pageSkippedElementNames = this.getSkippedElementNamesOnPage(
-      survey.currentPage as SurveyReact.PageModel
+      survey.currentPage as SurveyReact.PageModel,
     );
     pageSkippedElementNames.forEach((elementName) => {
       surveyJsData[elementName] = null;
@@ -596,7 +581,7 @@ export class Survey implements Activity {
   }
 
   private getSkippedElementNamesOnPage(
-    page: SurveyReact.PageModel
+    page: SurveyReact.PageModel,
   ): Array<string> {
     /**
      * Every element will generate "data" if they are
@@ -612,11 +597,7 @@ export class Survey implements Activity {
     elements
       .map((e) => e as unknown as ISurveyElement & IQuestion)
       .forEach((e) => {
-        if (
-          typeof e.name === "string" &&
-          typeof e.value !== undefined &&
-          !e.name.startsWith("__")
-        ) {
+        if (typeof e.name === "string" && !e.name.startsWith("__")) {
           if (e.value === undefined) {
             skippedElementNames.push(e.name);
           }
@@ -631,11 +612,11 @@ export class Survey implements Activity {
   }
 
   private makeDummiesFromMultipleResponse(
-    elementName: string
+    elementName: string,
   ): SurveyVariables {
     if (!this.IsSurveyJsVariableMultipleResponse(elementName)) {
       throw new Error(
-        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} is not a multiple response variable.`
+        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} is not a multiple response variable.`,
       );
     }
 
@@ -645,7 +626,7 @@ export class Survey implements Activity {
 
     if (this.getSurveyJsElementByName(elementName).getType() === "checkbox") {
       const checkbox = this.getSurveyJsElementByName(
-        elementName
+        elementName,
       ) as SurveyReact.QuestionCheckboxModel;
       choices = checkbox.choices as Array<any>;
       if (checkbox.hasNone) {
@@ -665,7 +646,7 @@ export class Survey implements Activity {
       selectedValues = checkbox.value;
     } else {
       throw new Error(
-        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} has unexpected structure.`
+        `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} has unexpected structure.`,
       );
     }
 
@@ -676,14 +657,14 @@ export class Survey implements Activity {
     return this.assignSelectedValuesToChoices(
       elementName,
       selectedValues,
-      choices
+      choices,
     );
   }
 
   private assignSelectedValuesToChoices(
     elementName: string,
     selectedValues: Array<any>,
-    choices: Array<any>
+    choices: Array<any>,
   ): SurveyVariables {
     const dummyVariables: SurveyVariables = new Array<SurveyVariable>();
     for (const choice of choices) {
@@ -702,7 +683,7 @@ export class Survey implements Activity {
 
   private makeAllDummiesNull(
     elementName: string,
-    choices: Array<any>
+    choices: Array<any>,
   ): SurveyVariables {
     const dummyVariables: SurveyVariables = new Array<SurveyVariable>();
     for (const choice of choices) {
@@ -732,11 +713,11 @@ export class Survey implements Activity {
       this.survey.pages as SurveyReact.PageModel[]
     ).flatMap((p) => p.elements as SurveyReact.IElement[]);
     const surveyJsElement = surveyJsElements.find(
-      (e) => e.name === elementName
+      (e) => e.name === elementName,
     );
     if (!surveyJsElement) {
       throw new Error(
-        `getSurveyJsElementByName(): surveyJs element ${elementName} not found.`
+        `getSurveyJsElementByName(): surveyJs element ${elementName} not found.`,
       );
     }
     return surveyJsElement;
@@ -747,7 +728,7 @@ export class Survey implements Activity {
       (this._surveyJson as any)?.pages as Array<any>
     )?.flatMap((p) => p.elements as Array<any>);
     const surveyJsElementUntyped = surveyJsElementsUntyped?.find(
-      (e) => e.name === elementName
+      (e) => e.name === elementName,
     );
     if (typeof surveyJsElementUntyped?.noneName === "string") {
       return surveyJsElementUntyped.noneName;
@@ -766,7 +747,7 @@ export class Survey implements Activity {
 
   callOnActivityResultsCallback(
     newData: ActivityKeyValueData,
-    data: ActivityKeyValueData
+    data: ActivityKeyValueData,
   ) {
     const resultsEvent: ActivityResultsEvent = {
       type: EventType.ActivityData,
@@ -784,7 +765,7 @@ export class Survey implements Activity {
 
   private shouldShowSkipConfirmation(
     currentPage: SurveyReact.PageModel,
-    nextPage?: SurveyReact.PageModel
+    nextPage?: SurveyReact.PageModel,
   ): boolean {
     return (
       this.confirmSkipping &&
@@ -795,7 +776,7 @@ export class Survey implements Activity {
 
   private nextPageIsAfterCurrentPage(
     currentPage: SurveyReact.PageModel,
-    nextPage?: SurveyReact.PageModel
+    nextPage?: SurveyReact.PageModel,
   ): boolean {
     // nextPage is undefined if this was the last page
     if (nextPage === undefined) {
@@ -811,11 +792,7 @@ export class Survey implements Activity {
     elements
       .map((e) => e as unknown as ISurveyElement & IQuestion)
       .forEach((e) => {
-        if (
-          typeof e.name === "string" &&
-          typeof e.value !== undefined &&
-          !e.name.startsWith("__")
-        ) {
+        if (typeof e.name === "string" && !e.name.startsWith("__")) {
           if (e.value === undefined) {
             hasSkippedElements = true;
           }

@@ -1,4 +1,4 @@
-import { EventBase, EventType } from "@m2c2kit/core";
+import { M2Event, EventType, SessionEvent, ActivityEvent } from "@m2c2kit/core";
 
 /**
  * When running within an Android WebView, the below defines how the session
@@ -16,7 +16,7 @@ declare namespace Android {
   function onSessionLifecycle(sessionLifecycleEventAsString: string): void;
   /**
    * If the Android native app will control the session execution and be
-   * able to set custom game paraemters (which is probably what you want),
+   * able to set custom game parameters (which is probably what you want),
    * be sure that sessionManualStart() in the native code returns true
    * */
   function sessionManualStart(): boolean;
@@ -49,7 +49,9 @@ export class SageResearch {
    *
    * @param event - the m2c2kit event to send to the Android app.
    */
-  public static sendEventToAndroid(event: EventBase): void {
+  public static sendEventToAndroid(
+    event: M2Event<SessionEvent | ActivityEvent>,
+  ): void {
     this.removeCircularReferencesFromEvent(event);
     switch (event.type) {
       case EventType.SessionStart:
@@ -93,7 +95,9 @@ export class SageResearch {
    *
    * @param event - the m2c2kit event to send to the iOS app.
    */
-  public static sendEventToIOS(event: EventBase): void {
+  public static sendEventToIOS(
+    event: M2Event<SessionEvent | ActivityEvent>,
+  ): void {
     this.removeCircularReferencesFromEvent(event);
     window.webkit.messageHandlers.iOS.postMessage(event);
   }
@@ -115,7 +119,9 @@ export class SageResearch {
    *
    * @param event - the m2c2kit event to send to the native app.
    */
-  public static sendEventToWebView(event: EventBase): void {
+  public static sendEventToWebView(
+    event: M2Event<SessionEvent | ActivityEvent>,
+  ): void {
     if (SageResearch.contextIsAndroidWebView()) {
       SageResearch.sendEventToAndroid(event);
     } else if (SageResearch.contextIsIOSWebView()) {
@@ -165,7 +171,9 @@ export class SageResearch {
    *
    * @param event
    */
-  private static removeCircularReferencesFromEvent(event: EventBase): void {
+  private static removeCircularReferencesFromEvent(
+    event: M2Event<SessionEvent | ActivityEvent>,
+  ): void {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     event.target = { type: event.target.type, name: event.target.name };

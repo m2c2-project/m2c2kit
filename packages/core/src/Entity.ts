@@ -19,7 +19,7 @@ import { EntityOptions } from "./EntityOptions";
 import { EntityType } from "./EntityType";
 import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
-import { EventType } from "./EventBase";
+import { EventType } from "./M2Event";
 import { Game } from "./Game";
 import { ActionType } from "./ActionType";
 import { M2DragEvent } from "./M2DragEvent";
@@ -92,7 +92,7 @@ export abstract class Entity implements EntityOptions {
   actions = new Array<Action>();
   queuedAction?: Action;
   originalActions = new Array<Action>();
-  eventListeners = new Array<EntityEventListener>();
+  eventListeners = new Array<EntityEventListener<EntityEvent>>();
   readonly uuid = Uuid.generate();
   needsInitialization = true;
   // library users might put anything in userData property
@@ -456,14 +456,7 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    // cast <(ev: EntityEvent) => void> is needed because callback parameter
-    // in this onTapDown method has argument of type TapEvent, but
-    // addEventListener() expects a more general EntityEvent type
-    this.addEventListener(
-      EventType.TapDown,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.TapDown, callback, options);
   }
 
   /**
@@ -481,11 +474,7 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.TapUp,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.TapUp, callback, options);
   }
 
   /**
@@ -504,11 +493,7 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.TapUpAny,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.TapUpAny, callback, options);
   }
 
   /**
@@ -526,11 +511,7 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.TapLeave,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.TapLeave, callback, options);
   }
 
   /**
@@ -546,11 +527,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.PointerDown,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.PointerDown, callback, options);
   }
 
   /**
@@ -568,11 +545,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.PointerUp,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.PointerUp, callback, options);
   }
 
   /**
@@ -586,11 +559,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.PointerMove,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.PointerMove, callback, options);
   }
 
   /**
@@ -604,11 +573,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.PointerLeave,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.PointerLeave, callback, options);
   }
 
   /**
@@ -621,11 +586,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.DragStart,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.DragStart, callback, options);
   }
 
   /**
@@ -638,11 +599,7 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.Drag,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.Drag, callback, options);
   }
 
   /**
@@ -655,19 +612,15 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(
-      EventType.DragEnd,
-      <(ev: EntityEvent) => void>callback,
-      options,
-    );
+    this.addEventListener(EventType.DragEnd, callback, options);
   }
 
-  addEventListener(
+  addEventListener<T extends EntityEvent>(
     type: EventType | string,
-    callback: (ev: EntityEvent) => void,
+    callback: (ev: T) => void,
     callbackOptions?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener = {
+    const eventListener: EntityEventListener<T> = {
       type: type,
       entityUuid: this.uuid,
       callback: callback,
@@ -682,14 +635,7 @@ export abstract class Entity implements EntityOptions {
           ),
       );
     }
-
-    if (this.eventListeners.some((listener) => listener.type == type)) {
-      console.warn(
-        `game {${this.game.id}}: listener for event ${type} has already been added to this entity {${this}}. This is usually not intended.`,
-      );
-    }
-
-    this.eventListeners.push(eventListener);
+    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
   }
 
   private parseLayoutConstraints(
