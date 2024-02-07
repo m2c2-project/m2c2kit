@@ -5,22 +5,23 @@
     "paths": {
       "@m2c2kit/core": ["modules/@m2c2kit/core/dist/index"],
       "@m2c2kit/addons": ["modules/@m2c2kit/addons/dist/index"],
+      "@m2c2kit/session": ["modules/@m2c2kit/session/dist/index"],
       "@m2c2kit/physics": ["modules/@m2c2kit/physics/dist/index"],
       "@m2c2kit/survey": ["modules/@m2c2kit/survey/dist/index"],
       "@m2c2kit/embedding": ["modules/@m2c2kit/embedding/dist/index"],
       "@m2c2kit/db": ["modules/@m2c2kit/db/dist/index"],
       "@m2c2kit/assessment-color-dots": [
-        "modules/@m2c2kit/assessment-color-dots/dist/index"
+        "modules/@m2c2kit/assessment-color-dots/dist/index",
       ],
       "@m2c2kit/assessment-color-shapes": [
-        "modules/@m2c2kit/assessment-color-shapes/dist/index"
+        "modules/@m2c2kit/assessment-color-shapes/dist/index",
       ],
       "@m2c2kit/assessment-grid-memory": [
-        "modules/@m2c2kit/assessment-grid-memory/dist/index"
+        "modules/@m2c2kit/assessment-grid-memory/dist/index",
       ],
       "@m2c2kit/assessment-symbol-search": [
-        "modules/@m2c2kit/assessment-symbol-search/dist/index"
-      ]
-    }
-  }
+        "modules/@m2c2kit/assessment-symbol-search/dist/index",
+      ],
+    },
+  },
 }

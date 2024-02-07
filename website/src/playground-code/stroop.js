@@ -2,8 +2,8 @@
 //
 // Tips:
 // - This code is editable. Try:
-//     On line 37, change the default number_of_congruent_trials from 4 to 2.
-//     On line 106, change the red color from WebColors.Red to WebColors.DarkRed
+//     On line 36, change the default number_of_congruent_trials from 4 to 2.
+//     On line 113, change the red color from WebColors.Red to WebColors.DarkRed
 // - Open your browser developer console to see diagnostics and data.
 // - This website's interactive tutorials show how to create your own assessments.
 // - Changes made here are saved, automatically, to your local browser storage.
@@ -15,13 +15,13 @@ import {
   Label,
   RandomDraws,
   Scene,
-  Session,
   Timer,
   Transition,
   TransitionDirection,
   WebColors,
 } from "@m2c2kit/core";
 import { Button, Instructions } from "@m2c2kit/addons";
+import { Session } from "@m2c2kit/session";
 
 class Stroop extends Game {
   constructor() {

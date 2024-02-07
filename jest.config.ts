@@ -6,6 +6,7 @@ const jestConfig: JestConfigWithTsJest = {
   collectCoverage: true,
   collectCoverageFrom: [
     "packages/core/src/**/*.{js,jsx,ts,tsx}",
+    "packages/session/src/**/*.{js,jsx,ts,tsx}",
     "packages/survey/src/**/*.{js,jsx,ts,tsx}",
     "packages/physics/src/**/*.{js,jsx,ts,tsx}",
     /**
@@ -45,8 +46,8 @@ const jestConfig: JestConfigWithTsJest = {
              * warning that is generated when import.meta is used in an
              * unsupported environment, and we suppress that.
              *
-             * We do the same for @m2c2kit/survey and @m2c2kit/physics,
-             * because they import @m2c2kit/core.
+             * We do the same for @m2c2kit/session, @m2c2kit/survey,
+             * and @m2c2kit/physics because they import @m2c2kit/core.
              */
             diagnostics: {
               ignoreCodes: [1343],
@@ -65,6 +66,42 @@ const jestConfig: JestConfigWithTsJest = {
         ],
       },
       testEnvironment: "jsdom",
+    },
+    {
+      displayName: { name: "@m2c2kit/session", color: "yellow" },
+      roots: ["<rootDir>/packages/session"],
+      moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
+      testMatch: [
+        "<rootDir>/packages/session/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
+      ],
+      testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
+      transform: {
+        "^.+\\.tsx?$": [
+          "ts-jest",
+          {
+            useESM: true,
+            testLocationInResults: false,
+            tsconfig: "tsconfig.json",
+            diagnostics: {
+              ignoreCodes: [1343],
+            },
+            astTransformers: {
+              before: [
+                {
+                  path: "ts-jest-mock-import-meta",
+                  options: {
+                    metaObjectReplacement: { url: "https://www.url.com" },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      testEnvironment: "jsdom",
+      moduleNameMapper: {
+        "@m2c2kit/(.*)$": "<rootDir>/packages/$1/src",
+      },
     },
     {
       displayName: { name: "@m2c2kit/survey", color: "cyan" },

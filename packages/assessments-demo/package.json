@@ -32,6 +32,7 @@
     "@m2c2kit/core": "^0.3.16",
     "@m2c2kit/db": "^0.3.3",
     "@m2c2kit/embedding": "^1.0.2",
+    "@m2c2kit/session": "^0.3.0",
     "@m2c2kit/survey": "^0.3.3"
   },
   "devDependencies": {

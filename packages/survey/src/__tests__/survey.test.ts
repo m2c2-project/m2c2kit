@@ -1,4 +1,4 @@
-import { Session, SessionOptions } from "@m2c2kit/core";
+import { Session, SessionOptions } from "@m2c2kit/session";
 import { Survey } from "..";
 import { TestHelpers } from "./TestHelpers";
 

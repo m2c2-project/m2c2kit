@@ -1,7 +1,7 @@
 {
   // add have a reference to core, otherwise intelliense
   // in vs code won't work
-  "references": [{ "path": "../core" }],
+  "references": [{ "path": "../core" }, { "path": "../session" }],
   "compilerOptions": {
     "composite": true,
     "target": "es6",
@@ -17,8 +17,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": ["./src/**/*.ts", "./src/**/*.js"],
-  "exclude": ["**/__tests__", "**/*.test.ts"]
+  "exclude": ["**/__tests__", "**/*.test.ts"],
 }

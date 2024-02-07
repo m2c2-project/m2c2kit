@@ -95,6 +95,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 ---
 
 - [`@m2c2kit/core`](packages/core) - The m2c2kit core functionality.
+- [`@m2c2kit/session`](packages/session) - The session runner for m2c2kit activities.
 - [`@m2c2kit/addons`](packages/addons) - Convenience elements, such as buttons, grids, dialog boxes, a virtual keyboard, and instructions, constructed out of the core primitives.
 - [`@m2c2kit/survey`](packages/survey) - Survey functionality that can be added to m2c2kit apps, using the MIT-licensed [survey-js](https://www.npmjs.com/package/surveyjs) library.
 - [`@m2c2kit/cli`](packages/cli) - Command line interface for scaffolding new m2c2kit apps.
@@ -116,7 +117,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 
 ---
 
-Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core), [`@m2c2kit/survey`](packages/survey), and [`@m2c2kit/build-helpers`](packages/build-helpers) packages. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
+Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core), [`@m2c2kit/session`](packages/session), [`@m2c2kit/physics`](packages/physics), [`@m2c2kit/survey`](packages/survey), and [`@m2c2kit/build-helpers`](packages/build-helpers) packages. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
 
 To run the tests, execute the following from the repository root:
 

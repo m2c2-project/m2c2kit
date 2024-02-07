@@ -14,8 +14,11 @@
     "dist/index.js",
     "dist/index.d.ts"
   ],
+  "dependencies": {
+    "@m2c2kit/core": "^0.3.16",
+    "@m2c2kit/session": "^0.3.0"
+  },
   "devDependencies": {
-    "@m2c2kit/core": "^0.3.8",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",

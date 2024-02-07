@@ -1,7 +1,5 @@
 import { TestHelpers } from "./TestHelpers";
 import {
-  Session,
-  SessionOptions,
   Game,
   GameOptions,
   Scene,
@@ -9,8 +7,9 @@ import {
   TrialSchema,
   EventType,
   ActivityEvent,
-} from "..";
-import { SessionEvent } from "../SessionEvent";
+} from "@m2c2kit/core";
+import { Session, SessionOptions } from "..";
+import { SessionEvent, SessionEventType } from "../SessionEvent";
 
 TestHelpers.createM2c2KitMock();
 
@@ -79,7 +78,7 @@ describe("Session event handlers", () => {
   it("session.onInitialize callback is provided correct event type", async () => {
     session.onInitialize(genericHandler);
     await session.initialize();
-    expect(genericEvent.type).toBe(EventType.SessionInitialize);
+    expect(genericEvent.type).toBe(SessionEventType.SessionInitialize);
   });
 
   it("calls session.onStart callback when session starts", async () => {
@@ -110,7 +109,7 @@ describe("Session event handlers", () => {
     session.onStart(genericHandler);
     await session.initialize();
     await session.start();
-    expect(genericEvent.type).toBe(EventType.SessionStart);
+    expect(genericEvent.type).toBe(SessionEventType.SessionStart);
   });
 
   it("calls session.onEnd callback when session ends", async () => {
@@ -164,7 +163,7 @@ describe("Session event handlers", () => {
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 5;
     await session.start();
-    expect(genericEvent.type).toBe(EventType.SessionEnd);
+    expect(genericEvent.type).toBe(SessionEventType.SessionEnd);
   });
 
   it("calls multiple session.onEnd callbacks when session ends", async () => {

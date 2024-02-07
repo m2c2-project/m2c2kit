@@ -1,5 +1,6 @@
 export * from "./Action";
 export * from "./Activity";
+export * from "./ActivityCallbacks";
 export * from "./ActivityLifecycleEvent";
 export * from "./ActivityKeyValueData";
 export * from "./ActivityEvent";
@@ -62,10 +63,6 @@ export * from "./RgbaColor";
 export * from "./ScaleActionOptions";
 export * from "./Scene";
 export * from "./SceneOptions";
-export * from "./Session";
-export * from "./SessionEvent";
-export * from "./SessionOptions";
-export * from "./SessionLifecycleEvent";
 export * from "./Shape";
 export * from "./ShapeOptions";
 export * from "./ShapeType";
@@ -88,3 +85,5 @@ export * from "./Uuid";
 export * from "./WaitActionOptions";
 export * from "./WebColors";
 export * from "./WebGlInfo";
+
+console.log("⚪ @m2c2kit/core version __PACKAGE_JSON_VERSION__");

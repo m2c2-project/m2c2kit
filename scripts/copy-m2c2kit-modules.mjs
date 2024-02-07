@@ -8,6 +8,7 @@ import cpy from "cpy";
 
 const packages = [
   "core",
+  "session",
   "addons",
   "physics",
   "survey",

@@ -1,5 +1,4 @@
 import {
-  Session,
   Uuid,
   Activity,
   ActivityKeyValueData,
@@ -44,7 +43,7 @@ type SurveyVariables = Array<SurveyVariable>;
  */
 export class Survey implements Activity {
   readonly type = ActivityType.Survey;
-  private _session?: Session;
+  sessionUuid = "";
   name = "unnamed survey";
   id = "survey";
   uuid = Uuid.generate();
@@ -72,16 +71,7 @@ export class Survey implements Activity {
     return this.initialize();
   }
 
-  async initialize() {
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.onStart(this.session.options.activityCallbacks.onActivityLifecycle);
-      this.onCancel(this.session.options.activityCallbacks.onActivityLifecycle);
-      this.onEnd(this.session.options.activityCallbacks.onActivityLifecycle);
-    }
-    if (this.session.options.activityCallbacks?.onActivityResults) {
-      this.onData(this.session.options.activityCallbacks.onActivityResults);
-    }
-  }
+  async initialize() {}
 
   /**
    * Sets the JSON survey definition, if it was not already set in
@@ -739,7 +729,7 @@ export class Survey implements Activity {
   private makeAutomaticSurveyDataProperties(): AutomaticSurveyDataProperties {
     return {
       document_uuid: Uuid.generate(),
-      session_uuid: this.session.uuid,
+      session_uuid: this.sessionUuid,
       activity_uuid: this.uuid,
       activity_id: this.id,
     };
@@ -805,23 +795,6 @@ export class Survey implements Activity {
         }
       });
     return hasSkippedElements;
-  }
-
-  /**
-   * Returns the session that contains this survey.
-   */
-  get session(): Session {
-    if (!this._session) {
-      throw new Error("session is undefined");
-    }
-    return this._session;
-  }
-
-  /**
-   * Sets the session that contains this survey.
-   */
-  set session(session: Session) {
-    this._session = session;
   }
 
   private get survey(): SurveyReact.Model {

@@ -32,6 +32,7 @@ const verbose = process.argv.includes("--verbose");
 const packageNamesToPublish = [
   "@m2c2kit/core",
   "@m2c2kit/addons",
+  "@m2c2kit/session",
   "@m2c2kit/physics",
   "@m2c2kit/embedding",
   "@m2c2kit/db",
@@ -98,7 +99,7 @@ function countNewPackages(packageDictionary) {
     if (
       Semver.gt(
         packageDictionary[packageName].localVersion,
-        packageDictionary[packageName].registryVersion
+        packageDictionary[packageName].registryVersion,
       )
     ) {
       return count + 1;
@@ -114,8 +115,8 @@ async function publishPackagesIfNewer(packageDictionary) {
     .filter((packageName) =>
       Semver.gt(
         packageDictionary[packageName].localVersion,
-        packageDictionary[packageName].registryVersion
-      )
+        packageDictionary[packageName].registryVersion,
+      ),
     )
     .map(async (packageName) => {
       return new Promise((resolve) => {
@@ -135,7 +136,7 @@ async function publishPackagesIfNewer(packageDictionary) {
                 error: false,
               });
             }
-          }
+          },
         );
       });
     });
@@ -144,7 +145,7 @@ async function publishPackagesIfNewer(packageDictionary) {
 
 if (verbose) {
   console.log(
-    `Comparing local repository package versions to registry ${REGISTRY_URL}:`
+    `Comparing local repository package versions to registry ${REGISTRY_URL}:`,
   );
 }
 
@@ -160,7 +161,7 @@ if (verbose) {
       registryVersion = `registry ${packageDictionary[packageName].registryVersion}`;
     }
     console.log(
-      `  ${packageName}: local ${packageDictionary[packageName].localVersion}, ${registryVersion}`
+      `  ${packageName}: local ${packageDictionary[packageName].localVersion}, ${registryVersion}`,
     );
   });
 }
@@ -169,41 +170,41 @@ if (countNewPackages(packageDictionary) === 0) {
   console.log("No updated packages to publish.");
   // GitHub Actions syntax to set an environment variable for subsequent steps in this job
   child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV'
+    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV',
   );
   // GitHub Actions syntax to set an environment variable for subsequent jobs
   child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"'
+    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"',
   );
   process.exit(0);
 } else {
   console.log(
     `Publishing ${countNewPackages(
-      packageDictionary
-    )} updated packages to registry ${REGISTRY_URL}...`
+      packageDictionary,
+    )} updated packages to registry ${REGISTRY_URL}...`,
   );
 }
 
 const results = await publishPackagesIfNewer(packageDictionary);
 results.forEach((result) => {
   console.log(
-    chalk[result.error ? "red" : "reset"]("  " + result.message.trim())
+    chalk[result.error ? "red" : "reset"]("  " + result.message.trim()),
   );
 });
 const error = results.some((result) => result.error);
 if (error) {
   child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV'
+    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV',
   );
   child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"'
+    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"',
   );
 } else {
   child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=true" >> $GITHUB_ENV'
+    'echo "PUBLISHED_UPDATED_PACKAGES=true" >> $GITHUB_ENV',
   );
   child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::true"'
+    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::true"',
   );
 }
 process.exit(error ? 1 : 0);

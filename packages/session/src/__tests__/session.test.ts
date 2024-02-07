@@ -1,6 +1,6 @@
 import { TestHelpers } from "./TestHelpers";
-import { Session, SessionOptions, Game, GameOptions, Scene } from "..";
-
+import { Game, GameOptions, Scene } from "@m2c2kit/core";
+import { Session, SessionOptions } from "@m2c2kit/session";
 TestHelpers.createM2c2KitMock();
 
 class Game1 extends Game {
@@ -74,10 +74,9 @@ beforeEach(async () => {
 });
 
 describe("Session init", () => {
-  it("executes", () => {
-    return session
-      .initialize()
-      .then((result) => expect(result).toBe(undefined));
+  it("executes", async () => {
+    const voidResult = await session.initialize();
+    return expect(voidResult).toBe(void 0);
   });
 
   it("assigns canvaskit", async () => {

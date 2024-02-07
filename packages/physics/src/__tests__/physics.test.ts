@@ -1,19 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TestHelpers } from "./TestHelpers";
-import {
-  Session,
-  SessionOptions,
-  Game,
-  GameOptions,
-  Scene,
-  Shape,
-} from "@m2c2kit/core";
+import { Game, GameOptions, Scene, Shape } from "@m2c2kit/core";
 import { Physics } from "../Physics";
 import { PhysicsBody } from "../PhysicsBody";
 
 TestHelpers.createM2c2KitMock();
 
-let session: Session;
+let g1: Game;
 
 describe("physics gravity", () => {
   beforeEach(async () => {
@@ -56,15 +49,9 @@ describe("physics gravity", () => {
       }
     }
 
-    const g1 = new Game1();
-    const options: SessionOptions = {
-      activities: [g1],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
+    g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("logs physics stats to console", async () => {
@@ -72,7 +59,7 @@ describe("physics gravity", () => {
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
     console.log = jest.fn();
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -87,18 +74,16 @@ describe("physics gravity", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = (session.options.activities[0] as Game).entities
-      .filter((e) => e.name === "myRect1")
-      .find(Boolean);
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
     expect(rect1.position.y).toBeGreaterThan(800);
-    (session.options.activities[0] as Game).stop();
+    g1.stop();
   });
 });
 
@@ -144,28 +129,20 @@ describe("physics no gravity", () => {
       }
     }
 
-    const g1 = new Game1();
-    const options: SessionOptions = {
-      activities: [g1],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
+    g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("shape with PhysicsBody and no gravity does not change position", async () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = (session.options.activities[0] as Game).entities
-      .filter((e) => e.name === "myRect1")
-      .find(Boolean);
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -245,22 +222,16 @@ describe("physics collision", () => {
       }
     }
 
-    const g1 = new Game1();
-    const options: SessionOptions = {
-      activities: [g1],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
+    g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("shape with PhysicsBody collides with edge loop", async () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -272,7 +243,7 @@ describe("physics collision", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -327,15 +298,9 @@ describe("physics gravity changed", () => {
       }
     }
 
-    const g1 = new Game1();
-    const options: SessionOptions = {
-      activities: [g1],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
+    g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("shape with PhysicsBody and no gravity set after initialization does not change position", async () => {
@@ -343,13 +308,11 @@ describe("physics gravity changed", () => {
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
     physics.gravity = { dx: 0, dy: 0 };
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = (session.options.activities[0] as Game).entities
-      .filter((e) => e.name === "myRect1")
-      .find(Boolean);
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -362,13 +325,11 @@ describe("physics gravity changed", () => {
     TestHelpers.maxRequestedFrames = 126;
     physics.gravity.dy = 0;
     physics.gravity.dx = 0;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = (session.options.activities[0] as Game).entities
-      .filter((e) => e.name === "myRect1")
-      .find(Boolean);
+    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -434,26 +395,20 @@ describe("allows rotation", () => {
       }
     }
 
-    const g1 = new Game1();
-    const options: SessionOptions = {
-      activities: [g1],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
+    g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("does not rotate when constructed with allowsRotation: false", async () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 126;
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const circle1 = (session.options.activities[0] as Game).entities
+    const circle1 = g1.entities
       .filter((e) => e.name === "myCircle1")
       .find(Boolean);
     if (!circle1) {

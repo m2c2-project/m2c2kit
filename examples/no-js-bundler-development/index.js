@@ -1,11 +1,5 @@
-import {
-  Action,
-  ActivityType,
-  Game,
-  Scene,
-  WebColors,
-  Session,
-} from "@m2c2kit/core";
+import { Action, ActivityType, Game, Scene, WebColors } from "@m2c2kit/core";
+import { Session } from "@m2c2kit/session";
 import { Survey } from "@m2c2kit/survey";
 import { Button } from "@m2c2kit/addons";
 import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";

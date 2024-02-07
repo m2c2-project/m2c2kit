@@ -31,6 +31,7 @@ Follow the folder structure in this example:
 ├─ modules/
 │  ├─ @m2c2kit/
 │  │  ├─ core/
+│  │  ├─ session/
 │  │  ├─ addons/
 │  │  ├─ .../
 ...
@@ -51,6 +52,7 @@ To load the ESM files, the `index.html` file uses [import maps](https://develope
   {
     "imports": {
       "@m2c2kit/core" : "./modules/@m2c2kit/core/dist/index.js",
+      "@m2c2kit/session": "./modules/@m2c2kit/session/dist/index.js",
       "@m2c2kit/addons": "./modules/@m2c2kit/addons/dist/index.js",
       ...
     }
@@ -81,6 +83,7 @@ When you deploy your assessment to production, you can edit the import maps in `
   {
     "imports": {
       "@m2c2kit/core" : "./modules/@m2c2kit/core/dist/index.min.js",
+      "@m2c2kit/session" : "./modules/@m2c2kit/session/dist/index.min.js",
       "@m2c2kit/addons": "./modules/@m2c2kit/addons/dist/index.min.js",
       ...
     }

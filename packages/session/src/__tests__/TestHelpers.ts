@@ -1,28 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { ActivityKeyValueData } from "@m2c2kit/core";
-import { Session } from "@m2c2kit/session";
-import * as SurveyReact from "survey-react";
-import {
-  CompletingOptions,
-  CurrentPageChangingOptions,
-  Survey,
-  ValueChangedOptions,
-} from "..";
-
-export interface surveyJsCallbacks {
-  onCurrentPageChangingCallback: (
-    sender: SurveyReact.Model,
-    options: CurrentPageChangingOptions,
-  ) => void;
-  onValueChangedCallback: (
-    sender: SurveyReact.Model,
-    options: ValueChangedOptions,
-  ) => void;
-  onCompletingCallback: (
-    sender: SurveyReact.Model,
-    options: CompletingOptions,
-  ) => void;
-}
+import { Game } from "@m2c2kit/core";
+import { jest } from "@jest/globals";
+import { CanvasKit } from "canvaskit-wasm";
 
 export class TestHelpers {
   static setupDomAndGlobals(): void {
@@ -32,20 +10,39 @@ export class TestHelpers {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body>
-        <div id="m2c2kit-survey-div"></div>
-          <div
-            class="m2c2kit-full-viewport m2c2kit-flex-container"
-            id="m2c2kit-container-div"
-          >
-          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
-        </div>
-      </body>
+      <body class="m2c2kit-background-color m2c2kit-no-margin">
+      <div id="m2c2kit-survey-div"></div>
+      <div
+        class="m2c2kit-full-viewport m2c2kit-flex-container"
+        id="m2c2kit-container-div"
+      >
+        <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+      </div>
+    </body>
     </html>`;
     document.documentElement.innerHTML = html;
 
     Object.defineProperty(window, "performance", {
       value: TestHelpers.performance,
+    });
+
+    /**
+     * Default window size when using jsdom is 1024w x 768h, but this will
+     * cause m2c2kit to resize the absolute size of entities, which
+     * complicates our tests (which are using 400w x 800h). So make the
+     * window tall enough to fit our typical 400w x 800h game.
+     */
+
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 1000,
+    });
+
+    Object.defineProperty(window, "innerHeight", {
+      writable: true,
+      configurable: true,
+      value: 1200,
     });
   }
 
@@ -56,6 +53,8 @@ export class TestHelpers {
   static performance = {
     now: () => this.perfCounter,
   };
+
+  static sleep = (ms: number) => (this.perfCounter = this.perfCounter + ms);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static createM2c2KitMock(): any {
@@ -68,6 +67,7 @@ export class TestHelpers {
       drawRRect: () => undefined,
       restore: () => undefined,
       drawText: () => undefined,
+      rotate: () => undefined,
     };
 
     const requestAnimationFrame = (callback: (canvas: object) => void) => {
@@ -79,8 +79,8 @@ export class TestHelpers {
       return undefined;
     };
 
-    // @ts-ignore
-    Session.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+    // @ts-expect-error modifying private method for testing
+    Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
       Promise.resolve({
         PaintStyle: {
           Fill: undefined,
@@ -143,6 +143,7 @@ export class TestHelpers {
             setStrokeWidth: () => undefined,
             delete: () => undefined,
             isDeleted: () => undefined,
+            setAlphaf: () => undefined,
           };
         },
         Color: function () {
@@ -154,35 +155,16 @@ export class TestHelpers {
         RRectXY: function () {
           return {};
         },
+        TextAlign: {
+          Center: undefined,
+          Left: undefined,
+          Right: undefined,
+        },
+        TypefaceFontProvider: {
+          Make: () => undefined,
+          registerFont: () => undefined,
+        },
       }),
-    );
-  }
-
-  static callOnActivityResultsCallbackSpy?: jest.SpyInstance;
-
-  static spyOnSurveyReactModel(
-    surveyModel: SurveyReact.Model,
-    onActivityResultsCallback: (
-      newData: ActivityKeyValueData,
-      data: ActivityKeyValueData,
-    ) => void,
-  ): void {
-    this.callOnActivityResultsCallbackSpy = jest.spyOn(
-      Survey.prototype,
-      "callOnActivityResultsCallback",
-    );
-    this.callOnActivityResultsCallbackSpy.mockImplementation(
-      (newData: ActivityKeyValueData, data: ActivityKeyValueData) => {
-        onActivityResultsCallback(newData, data);
-      },
-    );
-
-    jest
-      // @ts-ignore
-      .spyOn(Survey.prototype, "createSurveyReactModel")
-      // @ts-ignore
-      .mockImplementation(() => {
-        return surveyModel;
-      });
+    ) as (canvasKitWasmUrl: string) => Promise<CanvasKit>;
   }
 }

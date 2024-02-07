@@ -1,7 +1,7 @@
 {
   "name": "@m2c2kit/session",
   "version": "0.3.0",
-  "description": "The coordinator for m2c2kit sessions.",
+  "description": "The session runner for m2c2kit activities.",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "type": "module",
@@ -15,14 +15,15 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/session"
   },
   "license": "MIT",
   "author": "Scott T. Yabiku <syabiku@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/m2c2-project/m2c2kit.git",
-    "directory": "packages/core"
+    "directory": "packages/session"
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "engines": {
@@ -32,7 +33,7 @@
     "url": "https://github.com/m2c2-project/m2c2kit/issues"
   },
   "dependencies": {
-    "@m2c2kit/core": "0.3.16"
+    "@m2c2kit/core": "^0.3.16"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.12",

@@ -1,5 +1,7 @@
 {
   "references": [
+    { "path": "../core" },
+    { "path": "../session" },
     { "path": "../assessment-cli-starter" },
     { "path": "../assessment-color-dots" },
     { "path": "../assessment-color-shapes" },
@@ -7,7 +9,7 @@
     { "path": "../assessment-symbol-search" },
     { "path": "../survey" },
     { "path": "../db" },
-    { "path": "../embedding" }
+    { "path": "../embedding" },
   ],
   "compilerOptions": {
     "composite": true,
@@ -25,7 +27,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "include": ["./src/**/*.ts", "./src/**/*.js"]
+  "include": ["./src/**/*.ts", "./src/**/*.js"],
 }

@@ -1,4 +1,5 @@
-import { M2Event, EventType, SessionEvent, ActivityEvent } from "@m2c2kit/core";
+import { M2Event, EventType, ActivityEvent } from "@m2c2kit/core";
+import { SessionEvent, SessionEventType } from "@m2c2kit/session";
 
 /**
  * When running within an Android WebView, the below defines how the session
@@ -54,9 +55,9 @@ export class SageResearch {
   ): void {
     this.removeCircularReferencesFromEvent(event);
     switch (event.type) {
-      case EventType.SessionStart:
-      case EventType.SessionEnd:
-      case EventType.SessionInitialize: {
+      case SessionEventType.SessionStart:
+      case SessionEventType.SessionEnd:
+      case SessionEventType.SessionInitialize: {
         Android.onSessionLifecycle(JSON.stringify(event));
         break;
       }

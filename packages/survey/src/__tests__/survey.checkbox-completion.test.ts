@@ -1,4 +1,5 @@
-import { Session, SessionOptions, ActivityKeyValueData } from "@m2c2kit/core";
+import { ActivityKeyValueData } from "@m2c2kit/core";
+import { Session, SessionOptions } from "@m2c2kit/session";
 import { Survey, SurveyVariable } from "..";
 import { TestHelpers } from "./TestHelpers";
 import * as SurveyReact from "survey-react";

@@ -19,9 +19,6 @@ export interface M2Event<T> {
  * The different events that are dispatched by m2c2kit core.
  */
 export const EventType = {
-  SessionInitialize: "SessionInitialize",
-  SessionStart: "SessionStart",
-  SessionEnd: "SessionEnd",
   ActivityStart: "ActivityStart",
   ActivityEnd: "ActivityEnd",
   ActivityCancel: "ActivityCancel",

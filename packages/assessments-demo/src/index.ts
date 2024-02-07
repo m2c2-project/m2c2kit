@@ -1,4 +1,5 @@
-import { Session, ActivityType } from "@m2c2kit/core";
+import { ActivityType } from "@m2c2kit/core";
+import { Session } from "@m2c2kit/session";
 import { LocalDatabase } from "@m2c2kit/db";
 import { ColorShapes } from "@m2c2kit/assessment-color-shapes";
 import { ColorDots } from "@m2c2kit/assessment-color-dots";

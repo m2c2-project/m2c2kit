@@ -161,13 +161,27 @@ const config: Config = {
     [
       "docusaurus-plugin-typedoc",
       {
+        id: "api-session",
+        entryPoints: ["../packages/session/src/index.ts"],
+        tsconfig: "../packages/session/tsconfig.json",
+        out: "reference/api-session",
+        sidebar: {
+          categoryLabel: "@m2c2kit/session",
+          position: 2,
+          fullNames: true,
+        },
+      },
+    ],
+    [
+      "docusaurus-plugin-typedoc",
+      {
         id: "api-physics",
         entryPoints: ["../packages/physics/src/index.ts"],
         tsconfig: "../packages/physics/tsconfig.json",
         out: "reference/api-physics",
         sidebar: {
           categoryLabel: "@m2c2kit/physics",
-          position: 2,
+          position: 3,
           fullNames: true,
         },
       },
@@ -190,6 +204,11 @@ const config: Config = {
           {
             source: "../packages/addons/dist",
             destination: "static/m2c2kit/modules/@m2c2kit/addons/dist",
+            extensions: [".js", ".ts"],
+          },
+          {
+            source: "../packages/session/dist",
+            destination: "static/m2c2kit/modules/@m2c2kit/session/dist",
             extensions: [".js", ".ts"],
           },
           {

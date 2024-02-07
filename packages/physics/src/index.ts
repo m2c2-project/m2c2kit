@@ -19,3 +19,5 @@ declare module "@m2c2kit/core" {
     physicsBody?: PhysicsBody;
   }
 }
+
+console.log("⚪ @m2c2kit/physics version __PACKAGE_JSON_VERSION__");

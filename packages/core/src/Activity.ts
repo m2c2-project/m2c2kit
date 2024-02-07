@@ -1,7 +1,6 @@
 import { ActivityLifecycleEvent } from "./ActivityLifecycleEvent";
 import { ActivityType } from "./ActivityType";
 import { IDataStore } from "./IDataStore";
-import { Session } from "./Session";
 import { CallbackOptions } from "./CallbackOptions";
 import { ActivityResultsEvent } from "./ActivityResultsEvent";
 
@@ -42,7 +41,7 @@ export interface Activity {
    */
   onStart(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
   /**
    * Executes a callback when the activity is canceled.
@@ -52,7 +51,7 @@ export interface Activity {
    */
   onCancel(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
   /**
    * Executes a callback when the activity ends.
@@ -62,7 +61,7 @@ export interface Activity {
    */
   onEnd(
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
   /**
    * Executes a callback when the activity generates data.
@@ -72,10 +71,10 @@ export interface Activity {
    */
   onData(
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
-    options?: CallbackOptions
+    options?: CallbackOptions,
   ): void;
-  /** The activity's parent session */
-  session: Session;
+  /** The activity's parent session unique identifier. */
+  sessionUuid: string;
   /** The activity's unique identifier. NOTE: This is newly generated each session. The uuid for an activity will vary across sessions. */
   uuid: string;
   /** Human-friendly name of this activity */

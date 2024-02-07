@@ -1,7 +1,5 @@
 import { TestHelpers } from "./TestHelpers";
 import {
-  Session,
-  SessionOptions,
   Game,
   GameOptions,
   Action,
@@ -78,7 +76,6 @@ class Game2 extends Game {
   }
 }
 
-let session: Session;
 let g1: Game1;
 let g2: Game2;
 
@@ -105,13 +102,8 @@ describe("GameOptions", () => {
 describe("FontManager", () => {
   beforeEach(async () => {
     g1 = new Game1();
-
-    const options: SessionOptions = {
-      activities: [g1],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("creates a FontManager", () => {
@@ -122,13 +114,8 @@ describe("FontManager", () => {
 describe("ImageManager", () => {
   beforeEach(async () => {
     g1 = new Game1();
-
-    const options: SessionOptions = {
-      activities: [g1],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("creates an ImageManager", () => {
@@ -169,15 +156,8 @@ describe("parameters", () => {
   let g4: Game;
   beforeEach(async () => {
     g4 = new Game4();
-
-    const options: SessionOptions = {
-      activities: [g4],
-      // don't autostart; we need to set parameters before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g4.initialize();
   });
 
   it("setParameters sets a game parameter", () => {
@@ -223,13 +203,7 @@ describe("parameters", () => {
 describe("scene add/remove", () => {
   beforeEach(async () => {
     g1 = new Game1();
-
-    const options: SessionOptions = {
-      activities: [g1],
-    };
-    session = new Session(options);
-    TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("addScene adds a scene", () => {
@@ -288,13 +262,7 @@ describe("scene add/remove", () => {
 describe("presentScene", () => {
   beforeEach(async () => {
     g1 = new Game1();
-
-    const options: SessionOptions = {
-      activities: [g1],
-    };
-    session = new Session(options);
-    TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("presentScene throws error if non-added scene is presented by name", () => {
@@ -315,15 +283,8 @@ describe("actions", () => {
   beforeEach(async () => {
     g1 = new Game1();
     g2 = new Game2();
-
-    const options: SessionOptions = {
-      activities: [g1, g2],
-      // don't autostart; we need to set frame counters and actions before starting
-      autoStartAfterInit: false,
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("shape completes move from 200, 200 to 50, 50", async () => {
@@ -335,7 +296,7 @@ describe("actions", () => {
       throw new Error("rect1 undefined");
     }
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -363,7 +324,7 @@ describe("actions", () => {
     }
 
     rect1.run(Action.move({ point: { x: 50, y: 50 }, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -381,7 +342,7 @@ describe("actions", () => {
     }
     rect1.scale = 0.8;
     rect1.run(Action.scale({ scale: 0.5, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -407,7 +368,7 @@ describe("actions", () => {
     rect1.addChild(newRect);
 
     newRect.run(Action.scale({ scale: 0.5, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -428,7 +389,7 @@ describe("actions", () => {
     }
     rect1.alpha = 0.5;
     rect1.run(Action.fadeAlpha({ alpha: 0.1, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -454,7 +415,7 @@ describe("actions", () => {
     rect1.addChild(newRect);
 
     newRect.run(Action.fadeAlpha({ alpha: 0.1, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -475,7 +436,7 @@ describe("actions", () => {
     }
     rect1.zRotation = Math.PI / 2;
     rect1.run(Action.rotate({ toAngle: 0, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -492,7 +453,7 @@ describe("actions", () => {
     }
     rect1.zRotation = Math.PI / 2;
     rect1.run(Action.rotate({ byAngle: Math.PI / 2, duration: 1000 }));
-    await session.start();
+    await g1.start();
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
@@ -504,52 +465,50 @@ describe("Game start", () => {
   beforeEach(async () => {
     g1 = new Game1();
     g2 = new Game2();
-
-    const options: SessionOptions = {
-      activities: [g1, g2],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
+    await g2.initialize();
   });
 
   it("throws error if entryScene as object has not been added to game", async () => {
     g1.entryScene = new Scene();
-    await expect(session.start()).rejects.toThrow();
+    await expect(g1.start()).rejects.toThrow();
   });
 
   it("throws error if entryScene as name has not been added to game", async () => {
     g1.entryScene = "not added scene";
-    await expect(session.start()).rejects.toThrow();
+    await expect(g1.start()).rejects.toThrow();
   });
 
   it("scales down on smaller screen that is half the size", async () => {
     global.window.innerWidth = 200;
     global.window.innerHeight = 400;
-    await session.start();
+    await g1.start();
     expect(Globals.rootScale).toBe(0.5);
   });
 
   it("scales down on smaller screen with different aspect ratio", async () => {
     global.window.innerWidth = 400;
     global.window.innerHeight = 200;
-    await session.start();
+    await g1.start();
     expect(Globals.rootScale).toBe(0.25);
   });
 
   it("scales up on larger screen that is double the size when stretch is true", async () => {
     global.window.innerWidth = 800;
     global.window.innerHeight = 1600;
-    await session.start();
-    await session.goToNextActivity();
+    await g1.start();
+    g1.stop();
+    await g2.start();
     expect(Globals.rootScale).toBe(2);
   });
 
   it("scales up on larger screen with different aspect ratio when stretch is true", async () => {
     global.window.innerWidth = 1200;
     global.window.innerHeight = 1200;
-    await session.start();
-    await session.goToNextActivity();
+    await g1.start();
+    g1.stop();
+    await g2.start();
     expect(Globals.rootScale).toBe(1.5);
   });
 });
@@ -560,12 +519,8 @@ describe("free entities", () => {
     g2 = new Game2();
 
     g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
-    const options: SessionOptions = {
-      activities: [g1, g2],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
+    await g1.initialize();
   });
 
   it("removes all free entities", () => {
@@ -672,13 +627,9 @@ let g3: Game3;
 describe("addTrialData", () => {
   beforeEach(async () => {
     g3 = new Game3();
-    const options: SessionOptions = {
-      activities: [g3],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
-    await session.start();
+    await g3.initialize();
+    await g3.start();
   });
 
   it("adds boolean data", () => {
@@ -786,14 +737,9 @@ describe("time stepping", () => {
   let g5: Game5;
   beforeEach(async () => {
     g5 = new Game5();
-
-    const options: SessionOptions = {
-      activities: [g5],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
-    await session.initialize();
-    await session.start();
+    await g5.initialize();
+    await g5.start();
   });
 
   it("adds time stepping controls", () => {
@@ -810,10 +756,6 @@ describe("time stepping", () => {
 describe("custom trial schema", () => {
   beforeEach(async () => {
     g3 = new Game3();
-    const options: SessionOptions = {
-      activities: [g3],
-    };
-    session = new Session(options);
     TestHelpers.setupDomAndGlobals();
   });
 
@@ -828,8 +770,8 @@ describe("custom trial schema", () => {
         description: "Age of dog",
       },
     });
-    await session.initialize();
-    await session.start();
+    await g3.initialize();
+    await g3.start();
     if (!g3.options.trialSchema) {
       throw new Error("trialSchema is null");
     }
@@ -848,8 +790,8 @@ describe("custom trial schema", () => {
         description: "Age of dog",
       },
     });
-    await session.initialize();
-    await session.start();
+    await g3.initialize();
+    await g3.start();
     g3.addTrialData("dog_name", "Fido");
     expect(g3.data.trials[0].dog_name).toBe("Fido");
     g3.addTrialData("dog_age", 13);
@@ -868,8 +810,8 @@ describe("custom trial schema", () => {
       },
     });
 
-    await session.initialize();
-    await session.start();
+    await g3.initialize();
+    await g3.start();
     g3.addStaticTrialData("dog_name", "Fido");
     g3.addStaticTrialData("dog_age", 13);
     g3.trialComplete();

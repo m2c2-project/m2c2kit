@@ -14,7 +14,8 @@
     "dist/index.d.ts"
   ],
   "dependencies": {
-    "@m2c2kit/core": "^0.3.6"
+    "@m2c2kit/core": "^0.3.6",
+    "@m2c2kit/session": "^0.3.0"
   },
   "scripts": {
     "build": "npm run clean && rollup -c",

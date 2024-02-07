@@ -3,23 +3,14 @@ import { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
-import {
-  insertVersionString,
-  writeMetadataJson,
-  resolveAsync,
-} from "@m2c2kit/build-helpers";
+import { insertVersionString, writeMetadataJson } from "@m2c2kit/build-helpers";
 
 writeMetadataJson();
-
-const canvasKitWasmVersion = (await resolveAsync("canvaskit-wasm")).package
-  .version;
-if (!canvasKitWasmVersion) {
-  throw new Error("canvaskit-wasm package not found");
-}
 
 export default [
   {
     input: ["./src/index.ts"],
+    external: ["@m2c2kit/core"],
     output: [
       { file: "./build/index.js", format: "es", sourcemap: true },
       {

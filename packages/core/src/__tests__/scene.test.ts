@@ -1,18 +1,8 @@
 import { TestHelpers } from "./TestHelpers";
-import {
-  Session,
-  SessionOptions,
-  Game,
-  GameOptions,
-  Scene,
-  Label,
-  Shape,
-  WebColors,
-} from "..";
+import { Game, GameOptions, Scene, Label, Shape, WebColors } from "..";
 
 TestHelpers.createM2c2KitMock();
 
-let session: Session;
 let g1: Game1;
 let scene1: Scene;
 let label1: Label;
@@ -58,13 +48,8 @@ class Game1 extends Game {
 
 beforeEach(async () => {
   g1 = new Game1();
-
-  const options: SessionOptions = {
-    activities: [g1],
-  };
-  session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.initialize();
+  await g1.initialize();
 
   rect1 = g1.entities
     .filter((e) => e.name === "myRect1")
@@ -95,35 +80,35 @@ describe("test duplicate method", () => {
   });
 
   it("scene2's game is scene1's game", () => {
-    return session.initialize().then(() => {
+    return g1.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.game).toEqual(scene1.game);
     });
   });
 
   it("scene2's background color to equal scene1's background", () => {
-    return session.initialize().then(() => {
+    return g1.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.backgroundColor).toEqual(scene1.backgroundColor);
     });
   });
 
   it("scene2's name is not equal to scene1's name when no new name is given", () => {
-    return session.initialize().then(() => {
+    return g1.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.name).not.toEqual(scene1.name);
     });
   });
 
   it("scene2's name is equal to the new name provided", () => {
-    return session.initialize().then(() => {
+    return g1.initialize().then(() => {
       const scene2 = scene1.duplicate("my new scene2");
       expect(scene2.name).toEqual("my new scene2");
     });
   });
 
   it("scene2's children is duplicated deep copy of scene1's children", () => {
-    return session.initialize().then(() => {
+    return g1.initialize().then(() => {
       const scene2 = scene1.duplicate();
       expect(scene2.children[0]).toBeInstanceOf(Label);
       expect(scene2.children[0]).not.toEqual(label1);

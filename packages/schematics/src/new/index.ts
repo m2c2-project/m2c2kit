@@ -54,7 +54,8 @@ export function m2New(options: m2NewOptions): Rule {
   "private": true,
   "dependencies": {
     "@m2c2kit/addons": "0.3.13",
-    "@m2c2kit/core": "0.3.16"
+    "@m2c2kit/core": "0.3.16",
+    "@m2c2kit/session": "0.3.0"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.12",

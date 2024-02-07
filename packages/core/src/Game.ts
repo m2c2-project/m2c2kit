@@ -30,7 +30,6 @@ import {
   TransitionDirection,
 } from "./Transition";
 import { GameOptions } from "./GameOptions";
-import { Session } from "./Session";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
 import { EventType } from "./M2Event";
@@ -83,7 +82,7 @@ interface WarmupFunctionQueue {
 export class Game implements Activity {
   readonly type = ActivityType.Game;
   _canvasKit?: CanvasKit;
-  _session?: Session;
+  sessionUuid = "";
   uuid = Uuid.generate();
   name: string;
   id: string;
@@ -263,14 +262,6 @@ export class Game implements Activity {
     if (this.isLocalizationRequested()) {
       const options = this.getLocalizationOptionsFromGameParameters();
       this.i18n = new I18n(options);
-    }
-    if (this.session.options.activityCallbacks?.onActivityLifecycle) {
-      this.onStart(this.session.options.activityCallbacks.onActivityLifecycle);
-      this.onCancel(this.session.options.activityCallbacks.onActivityLifecycle);
-      this.onEnd(this.session.options.activityCallbacks.onActivityLifecycle);
-    }
-    if (this.session.options.activityCallbacks?.onActivityResults) {
-      this.onData(this.session.options.activityCallbacks.onActivityResults);
     }
 
     this.fontManager = new FontManager(this);
@@ -547,17 +538,6 @@ export class Game implements Activity {
 
   set canvasKit(canvasKit: CanvasKit) {
     this._canvasKit = canvasKit;
-  }
-
-  get session(): Session {
-    if (!this._session) {
-      throw new Error("session is undefined");
-    }
-    return this._session;
-  }
-
-  set session(session: Session) {
-    this._session = session;
   }
 
   /** The scene, or its name as a string, to be presented when the game is started. If this is undefined, the game will start with the first scene that has been added */
@@ -1299,7 +1279,7 @@ export class Game implements Activity {
       }
       this.data.trials.push({
         document_uuid: Uuid.generate(),
-        session_uuid: this.session.uuid,
+        session_uuid: this.sessionUuid,
         activity_uuid: this.uuid,
         activity_id: this.options.id,
         activity_version: this.options.version,
@@ -3307,10 +3287,7 @@ export class Game implements Activity {
   }
 
   private sceneCanReceiveUserInteraction(scene: Scene): boolean {
-    if (
-      scene.game === (scene.game.session?.currentActivity as unknown as Game) &&
-      scene._transitioning === false
-    ) {
+    if (scene._active && scene._transitioning === false) {
       // allow interaction only on scene that is part of the session's
       // current game
       // AND don't allow interaction when scene is transitioning. If, during scene transition,

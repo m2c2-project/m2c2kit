@@ -1,4 +1,5 @@
-import { EventType, Session, ActivityEvent, SessionEvent } from "@m2c2kit/core";
+import { EventType, ActivityEvent } from "@m2c2kit/core";
+import { Session, SessionEvent, SessionEventType } from "@m2c2kit/session";
 import { EmbeddingOptions } from "./EmbeddingOptions";
 
 /**
@@ -127,9 +128,9 @@ export class Embedding {
    */
   public static sendEventToAndroid(event: SessionEvent | ActivityEvent): void {
     switch (event.type) {
-      case EventType.SessionStart:
-      case EventType.SessionEnd:
-      case EventType.SessionInitialize: {
+      case SessionEventType.SessionStart:
+      case SessionEventType.SessionEnd:
+      case SessionEventType.SessionInitialize: {
         AndroidM2c2.onSessionLifecycle(JSON.stringify(event));
         break;
       }

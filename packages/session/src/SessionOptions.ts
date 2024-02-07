@@ -1,13 +1,12 @@
-//import { ActivityCallbacks } from "./ActivityCallbacks";
 import { SessionCallbacks } from "./SessionCallbacks";
-import { Activity } from "@m2c2kit/core";
+import { Activity, ActivityCallbacks } from "@m2c2kit/core";
 import { IDataStore } from "@m2c2kit/core";
 
 export interface SessionOptions {
   /** The activities that compose this session */
   activities: Array<Activity>;
   /** Callbacks executed when activity events occurs, such as when activity creates data or ends */
-  // activityCallbacks?: ActivityCallbacks;
+  activityCallbacks?: ActivityCallbacks;
   /** Callbacks executed when session events occur */
   sessionCallbacks?: SessionCallbacks;
   /** Use a specified session UUID, rather than create a new one */

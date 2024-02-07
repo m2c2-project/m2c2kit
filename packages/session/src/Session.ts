@@ -27,7 +27,6 @@ export class Session {
   >();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private initialized = false;
-  private version = "__PACKAGE_JSON_VERSION__";
 
   /**
    * A Session contains one or more activities. The session manages the start
@@ -37,18 +36,27 @@ export class Session {
    */
   constructor(options: SessionOptions) {
     this.options = options;
+    if (this.options.sessionUuid) {
+      this.uuid = this.options.sessionUuid;
+    } else {
+      this.uuid = Uuid.generate();
+    }
+
     for (const activity of this.options.activities) {
       if (this.options.activities.filter((a) => a === activity).length > 1) {
         throw new Error(
           `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`,
         );
       }
-    }
-    //this.options.activities.forEach((activity) => (activity.session = this));
-    if (this.options.sessionUuid) {
-      this.uuid = this.options.sessionUuid;
-    } else {
-      this.uuid = Uuid.generate();
+      activity.sessionUuid = this.uuid;
+      if (this.options.activityCallbacks?.onActivityLifecycle) {
+        activity.onStart(this.options.activityCallbacks.onActivityLifecycle);
+        activity.onCancel(this.options.activityCallbacks.onActivityLifecycle);
+        activity.onEnd(this.options.activityCallbacks.onActivityLifecycle);
+      }
+      if (this.options.activityCallbacks?.onActivityResults) {
+        activity.onData(this.options.activityCallbacks.onActivityResults);
+      }
     }
   }
 
@@ -109,7 +117,7 @@ export class Session {
   }
 
   private addEventListener<T extends SessionEvent | ActivityEvent>(
-    type: EventType,
+    type: EventType | SessionEventType,
     callback: (ev: T) => void,
     options?: CallbackOptions,
   ): void {
@@ -241,7 +249,6 @@ export class Session {
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async initialize(): Promise<void> {
-    console.log(`⚪ @m2c2kit/core version ${this.version}`);
     Timer.start("sessionInitialize");
     const sessionInitializeEvent: SessionEvent = {
       target: this,
@@ -416,7 +423,6 @@ export class Session {
      * method. Also, if the old instance had new parameters set via
      * Game.SetParameters(), we must apply them.
      */
-    //this.currentActivity.session = this;
     this.currentActivity.dataStores = this.dataStores;
     /**
      * IMPORTANT: Originally, we checked if the current activity was a game

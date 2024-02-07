@@ -81,7 +81,6 @@ export class Physics implements Plugin {
    * }
    */
   constructor(options?: PhysicsOptions) {
-    console.log("⚪ @m2c2kit/physics version __PACKAGE_JSON_VERSION__");
     this.engine = Engine.create();
     this.options = options ?? {};
     if (this.options.gravity) {

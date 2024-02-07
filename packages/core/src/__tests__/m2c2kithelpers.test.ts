@@ -1,5 +1,5 @@
 import { TestHelpers } from "./TestHelpers";
-import { Session, SessionOptions, Game, GameOptions, Scene, Shape } from "..";
+import { Game, GameOptions, Scene, Shape } from "..";
 import { M2c2KitHelpers } from "../M2c2KitHelpers";
 
 TestHelpers.createM2c2KitMock();
@@ -43,7 +43,6 @@ class Game1 extends Game {
   }
 }
 
-let session: Session;
 let g1: Game1;
 let scene1: Scene;
 let rect1: Shape;
@@ -51,12 +50,8 @@ let circle1: Shape;
 
 beforeEach(async () => {
   g1 = new Game1();
-  const options: SessionOptions = {
-    activities: [g1],
-  };
-  session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.initialize();
+  await g1.initialize();
 });
 
 /**
@@ -71,7 +66,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 20;
-    await session.start();
+    await g1.start();
 
     const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(scene1);
     expect(bb.xMin).toBe(0);
@@ -84,7 +79,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 20;
-    await session.start();
+    await g1.start();
 
     const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(rect1);
     // rect is 100x100, positioned at 140,160
@@ -98,7 +93,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 20;
-    await session.start();
+    await g1.start();
 
     const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(circle1);
     // circle radius is 30, positioned at 200, 600
@@ -112,7 +107,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 20;
-    await session.start();
+    await g1.start();
     scene1.zRotation = Math.PI / 2;
 
     const transforms = M2c2KitHelpers.calculateRotationTransforms(scene1);
@@ -122,8 +117,13 @@ describe("test M2c2KitHelpers", () => {
     expect(transforms[0].radians).toBe(Math.PI / 2);
   });
 
-  it("rotates scene's bounding box points by pi/2 radians", () => {
+  it("rotates scene's bounding box points by pi/2 radians", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 20;
+    await g1.start();
     scene1.zRotation = Math.PI / 2;
+
     const points = M2c2KitHelpers.calculateRotatedPoints(scene1);
     // upper left corner of scene
     expect(points[0].x).toBeCloseTo(-200);

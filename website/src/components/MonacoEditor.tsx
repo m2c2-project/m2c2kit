@@ -24,6 +24,10 @@ export default function MonacoEditor(props) {
         monacoUri: "file:///node_modules/@m2c2kit/addons/index.d.ts",
       },
       {
+        url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/session/dist/index.d.ts",
+        monacoUri: "file:///node_modules/@m2c2kit/session/index.d.ts",
+      },
+      {
         url: "/_-_BASE_URL_REPLACE_IN_DOCUSAURUS_BUILD_-_m2c2kit/modules/@m2c2kit/db/dist/index.d.ts",
         monacoUri: "file:///node_modules/@m2c2kit/db/index.d.ts",
       },

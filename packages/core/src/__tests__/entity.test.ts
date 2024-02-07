@@ -1,13 +1,5 @@
 import { TestHelpers } from "./TestHelpers";
-import {
-  Session,
-  SessionOptions,
-  Game,
-  GameOptions,
-  Scene,
-  Label,
-  Shape,
-} from "..";
+import { Game, GameOptions, Scene, Label, Shape } from "..";
 
 TestHelpers.createM2c2KitMock();
 
@@ -48,7 +40,6 @@ class Game1 extends Game {
   }
 }
 
-let session: Session;
 let g1: Game1;
 let scene1: Scene;
 let label1: Label;
@@ -57,12 +48,8 @@ let rect1: Shape;
 
 beforeEach(async () => {
   g1 = new Game1();
-  const options: SessionOptions = {
-    activities: [g1],
-  };
-  session = new Session(options);
   TestHelpers.setupDomAndGlobals();
-  await session.initialize();
+  await g1.initialize();
 });
 
 describe("test descendants", () => {
@@ -253,7 +240,7 @@ describe("test scale", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 20;
-    await session.start();
+    await g1.start();
     // .8 parent scale * .6 child scale = child absolute scale .48
     expect(newRect2.absoluteScale).toEqual(0.48);
   });
@@ -293,7 +280,7 @@ describe("test alpha", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 10;
-    await session.start();
+    await g1.start();
     // .2 parent alpha * .5 child alpha = child absolute alpha .1
     expect(newRect2.absoluteAlpha).toEqual(0.1);
   });
