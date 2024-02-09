@@ -3,12 +3,19 @@ import { readFile } from "fs/promises";
 import MagicString from "magic-string";
 
 /**
- * Adds metadata about the module to the assessment code.
+ * Adds module metadata to the assessment code.
  *
- * @remarks This plugin reads metadata from package.json and adds
- * it to the code. To use: in the GameOptions object, add
- * "moduleMetadata: Constants.EMPTY_MODULE_METADATA". This empty
- * data will be replaced with the actual metadata at build time.
+ * @remarks Use this plugin when creating an assessment that will be used
+ * as a module and imported into other projects. This plugin reads metadata
+ * from `package.json` and embeds it in the assessment code.
+ *
+ * This module metadata is important so that the m2c2kit library can locate
+ * assessment resources that are not bundled. The module metadata contains the
+ * assessment name, version, and m2c2kit dependencies.
+ *
+ * To use: add `moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER` to the
+ * `GameOptions` object. At build time, this plugin will replace this
+ * placeholder with the actual assessment metadata.
  */
 export function addModuleMetadata(): Plugin {
   return {
@@ -18,8 +25,11 @@ export function addModuleMetadata(): Plugin {
         const pkg = JSON.parse(await readFile("./package.json", "utf8"));
         const magicString = new MagicString(code);
         magicString.replace(
-          new RegExp("Constants.EMPTY_MODULE_METADATA", "g"),
-          `{ "name" : "${pkg.name}", "version" : "${
+          new RegExp(
+            "moduleMetadata:\\s*Constants.MODULE_METADATA_PLACEHOLDER",
+            "g",
+          ),
+          `moduleMetadata: { "name" : "${pkg.name}", "version" : "${
             pkg.version
           }", "dependencies" : ${JSON.stringify(pkg.dependencies)} }`,
         );

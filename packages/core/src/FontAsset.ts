@@ -11,4 +11,6 @@ export interface FontAsset {
    * These should be lazy loaded because they may not be needed.
    */
   lazy?: boolean;
+  /** Raw font data. @internal For m2c2kit library use only */
+  data?: ArrayBuffer;
 }

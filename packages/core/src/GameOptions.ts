@@ -46,8 +46,6 @@ export interface GameOptions {
   maximumRecordedActivityMetrics?: number;
   /** The FPS will be logged in game metrics if the FPS is lower than this value. Default is 59, as defined in Constants.FPS_METRIC_REPORT_THRESHOLD */
   fpsMetricReportThreshold?: number;
-  /** Adapt execution for unit testing? Default is false */
-  _unitTesting?: boolean;
   /** Advance through time step-by-step, for development and debugging */
   timeStepping?: boolean;
   /** Translations for localization. */
@@ -58,6 +56,6 @@ export interface GameOptions {
   assetsUrl?: string;
   /** Url of the canvaskit.wasm binary. Always set to the default value of "canvaskit.wasm" */
   canvasKitWasmUrl: "canvaskit.wasm";
-  /** Game's module name, version, and dependencies. */
+  /** Game's module name, version, and dependencies. @internal For m2c2kit library use only */
   moduleMetadata?: ModuleMetadata;
 }

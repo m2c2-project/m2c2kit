@@ -4,6 +4,7 @@ import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { GameBaseUrls } from "./GameBaseUrls";
 /**
  * Fetches, loads, and provides fonts to the game.
  *
@@ -14,9 +15,11 @@ export class FontManager {
   provider: TypefaceFontProvider;
   private canvasKit: CanvasKit;
   private game: Game;
+  private baseUrls: GameBaseUrls;
 
-  constructor(game: Game) {
+  constructor(game: Game, baseUrls: GameBaseUrls) {
     this.game = game;
+    this.baseUrls = baseUrls;
     this.canvasKit = game.canvasKit;
     this.provider = this.canvasKit.TypefaceFontProvider.Make();
   }
@@ -46,12 +49,24 @@ export class FontManager {
       return;
     }
     const prepareFontsPromises = fonts.map((font, i) => {
+      /**
+       * If the url has a scheme, then we do not alter the url. Otherwise, we
+       * prepend the game assets base URL and look for the full URL in the
+       * manifest.
+       */
+      let url = font.url;
+      if (!M2c2KitHelpers.urlHasScheme(font.url)) {
+        url = M2c2KitHelpers.getUrlFromManifest(
+          this.game,
+          `${this.baseUrls.assets}/${font.url}`,
+        );
+      }
       const m2Font: M2Font = {
         fontName: font.fontName,
         typeface: undefined,
-        data: undefined,
+        data: font.data,
         default: i === 0,
-        url: M2c2KitHelpers.getAssetUrlFromManifest(this.game, font.url),
+        url: url,
         status: font.lazy ? M2FontStatus.Deferred : M2FontStatus.Loading,
       };
       this.fonts[font.fontName] = m2Font;
@@ -64,7 +79,7 @@ export class FontManager {
   }
 
   private async prepareFont(font: M2Font) {
-    const arrayBuffer = await this.fetchFontAsArrayBuffer(font);
+    const arrayBuffer = font.data ?? (await this.fetchFontAsArrayBuffer(font));
     this.registerFont(arrayBuffer, font);
     console.log(
       `⚪ font ${font.fontName}${
@@ -79,7 +94,7 @@ export class FontManager {
    *
    * @internal For m2c2kit library use only
    *
-   * @param font - name of the font to make ready
+   * @param font - M2Font to make ready
    * @returns A promise that completes when the font is ready
    */
   async prepareDeferredFont(font: M2Font): Promise<void> {
@@ -88,11 +103,10 @@ export class FontManager {
   }
 
   private async fetchFontAsArrayBuffer(font: M2Font) {
-    const url = this.game.prependAssetsGameIdUrl(font.url);
-    const response = await fetch(url);
+    const response = await fetch(font.url);
     if (!response.ok) {
       throw new Error(
-        `cannot fetch font ${font.fontName} at url ${url}: ${response.statusText}`,
+        `cannot fetch font ${font.fontName} at url ${font.url}: ${response.statusText}`,
       );
     }
     const arrayBuffer = await response.arrayBuffer();
@@ -121,7 +135,7 @@ export class FontManager {
    * @remarks Typically, a user won't need to call this because font
    * initialization and processing is handled by the framework.
    *
-   * @param fontName
+   * @param fontName - font's name as defined in the game's font assets
    * @returns a m2c2kit font
    */
   getFont(fontName: string): M2Font {

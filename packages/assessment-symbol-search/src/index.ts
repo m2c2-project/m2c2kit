@@ -235,7 +235,7 @@ positions.",
       name: "Symbol Search",
       id: "symbol-search",
       version: "__PACKAGE_JSON_VERSION__",
-      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Symbol Search is a speeded continuous performance test of \

@@ -17,23 +17,31 @@ interface RotationTransform {
 
 export class M2c2KitHelpers {
   /**
-   * Returns the URL to the asset as it appears in the game's manifest.json file.
+   * Returns the URL as it appears in the game's manifest.json file.
    *
-   * @remarks This is used to return the hashed URL to the asset.
+   * @remarks This is used to return the hashed URL.
    *
    * @param game - game object
-   * @param url - the URL to the asset
-   * @returns the URL to the asset from the manifest.json file
+   * @param url - the URL
+   * @returns the hashed URL from the manifest, or the original URL if there is no manifest or the URL is not in the manifest.
    */
-  static getAssetUrlFromManifest(game: Game, url: string): string {
+  static getUrlFromManifest(game: Game, url: string): string {
     const manifest = game.manifest;
-    if (manifest && manifest[`assets/${game.id}/${url}`]) {
-      return manifest[`assets/${game.id}/${url}`].replace(
-        `assets/${game.id}/`,
-        "",
-      );
+    if (manifest && manifest[url]) {
+      return manifest[url];
     }
     return url;
+  }
+
+  /**
+   * Does the URL have a scheme?
+   *
+   * @param url - the URL to test
+   * @returns true if the url begins with a scheme (e.g., "http://",
+   * "https://", "file://", etc.)
+   */
+  static urlHasScheme(url: string): boolean {
+    return /^[a-z]+:\/\//i.test(url);
   }
 
   /**

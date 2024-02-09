@@ -79,7 +79,6 @@ export class TestHelpers {
       return undefined;
     };
 
-    // @ts-expect-error modifying private method for testing
     Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
       Promise.resolve({
         PaintStyle: {

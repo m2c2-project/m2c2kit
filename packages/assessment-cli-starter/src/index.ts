@@ -85,7 +85,7 @@ class CliStarter extends Game {
       name: "cli starter assessment",
       id: "cli-starter",
       version: "__PACKAGE_JSON_VERSION__",
-      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",

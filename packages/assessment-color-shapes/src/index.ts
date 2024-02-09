@@ -272,7 +272,7 @@ class ColorShapes extends Game {
       name: "Color Shapes",
       id: "color-shapes",
       version: "__PACKAGE_JSON_VERSION__",
-      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Color Shapes is a visual array change detection \

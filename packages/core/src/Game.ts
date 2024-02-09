@@ -68,6 +68,7 @@ import { ImageManager } from "./ImageManager";
 import { ModuleMetadata } from "./ModuleMetadata";
 import { M2FontStatus } from "./M2Font";
 import { Manifest } from "./Manifest";
+import { GameBaseUrls } from "./GameBaseUrls";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -106,8 +107,6 @@ export class Game implements Activity {
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
-  private isImportedModule = false;
-  private manifestJsonUrl = "__NO_M2C2KIT_MANIFEST_JSON_URL__";
   manifest?: Manifest;
 
   /**
@@ -136,7 +135,11 @@ export class Game implements Activity {
     if (options.moduleMetadata) {
       this.moduleMetadata = options.moduleMetadata;
     } else {
-      this.moduleMetadata = Constants.EMPTY_MODULE_METADATA;
+      this.moduleMetadata = {
+        name: "",
+        version: "",
+        dependencies: {},
+      };
     }
   }
 
@@ -145,7 +148,7 @@ export class Game implements Activity {
     const matches = moduleUrl.match(regex);
     if (!matches || matches.length === 0) {
       throw new Error(
-        "Could not calculate assessment package base URL on CDN.",
+        `Could not calculate imported assessment package base URL. Package name: ${packageName}, module URL: ${moduleUrl}`,
       );
     }
     return matches[0];
@@ -162,64 +165,75 @@ export class Game implements Activity {
     return this.initialize();
   }
 
-  // call CanvasKitInit through loadCanvasKit so we can mock
-  // loadCanvasKit using jest
-  private loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
-    const fullUrl = this.calculateCanvasKitWasmUrl(canvasKitWasmUrl);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return CanvasKitInit({ locateFile: (_file) => fullUrl });
+  /**
+   * Loads the canvaskit wasm binary.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks The CanvasKit object is initialized with this method, rather
+   * than calling `CanvasKitInit()` directly, so that this method can be
+   * easily mocked in tests.
+   *
+   * @param canvasKitWasmUrl - URL to the canvaskit wasm binary
+   * @returns a promise that resolves to a CanvasKit object
+   */
+  loadCanvasKit(canvasKitWasmUrl: string): Promise<CanvasKit> {
+    return CanvasKitInit({ locateFile: () => canvasKitWasmUrl });
   }
 
-  private calculateCanvasKitWasmUrl(url: string): string {
-    function hasUrlScheme(str: string): boolean {
-      return /^[a-z]+:\/\//i.test(str);
-    }
-
-    if (hasUrlScheme(url)) {
-      return url;
-    }
-    if (!this.options.assetsUrl) {
-      return `assets/${this.options.id}/${url}`;
-    }
-    return (
-      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
-    );
-  }
-
-  async initialize() {
+  /**
+   * Resolves base URL locations for game assets and CanvasKit wasm binary.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @param game - game to resolve base URLs for
+   * @returns base URLs for game assets and CanvasKit wasm binary
+   */
+  async resolveGameBaseUrls(game: Game) {
     let moduleUrl: string | undefined;
-    if (this.moduleMetadata.name) {
-      /**
-       * Is the game code an imported module? (the alternative is that the
-       * game code has been bundled). If the game code is an imported module,
-       * update the assetsUrl to point to the location of the imported module
-       * assets URL.
-       */
+    let isImportedModule = false;
+
+    /**
+     * If not an imported module, the default asset location is under the
+     * game's id, e.g., `assets/symbol-search`. Note: the game's id is the
+     * id as specified in `GameOptions`, which is often different than the
+     * name in `package.json`. For symbol search, id is `symbol-search`, but
+     * the package name is `@m2c2kit/assessment-symbol-search`.
+     */
+    let assetsBaseUrl = `assets/${game.id}`;
+    /**
+     * Is the game code an imported module? (the alternative is that the
+     * game code has been bundled). If the game code is an imported module,
+     * assetsBaseUrl must point to the location of the imported module
+     * assets URL. Note: Game code will be recognized as an imported module
+     * only if it was built with the `addModuleMetadata` plugin in the
+     * rollup configuration.
+     */
+    if (game.moduleMetadata.name) {
       try {
         /**
-         * moduleUrl is the URL to the module entrypoint JavaScript, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/core@0.3.11/dist/index.js
-         * moduleBaseUrl omits the entrypoint, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/core@0.3.11
+         * moduleUrl is the URL to the module entrypoint JavaScript, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/assessment-symbol-search@0.8.13/dist/index.js
+         * moduleBaseUrl omits the entrypoint, e.g., https://cdn.jsdelivr.net/npm/@m2c2kit/assessment-symbol-search@0.8.13
          */
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        moduleUrl = await import.meta.resolve(this.moduleMetadata.name);
-        const moduleBaseUrl = this.getImportedModuleBaseUrl(
-          this.moduleMetadata.name,
+        // @ts-expect-error Using import.meta here, even though it's not supported in our tsconfig module version. That's OK, because we'll include a browser polyfill.
+        moduleUrl = await import.meta.resolve(game.moduleMetadata.name);
+        const moduleBaseUrl = game.getImportedModuleBaseUrl(
+          game.moduleMetadata.name,
           moduleUrl,
         );
-        this.options.assetsUrl = moduleBaseUrl + "/assets";
-        this.isImportedModule = true;
+        assetsBaseUrl = moduleBaseUrl + "/assets";
+        isImportedModule = true;
       } catch {
         /**
          * If the game code is not an imported module, an exception will
          * occur with import.meta.resolve(). This is ok. In this case,
-         * this.options.assetsUrl will not be assigned, and the default
-         * asset location will be used.
+         * the default location for `assetsBaseUrl`, assigned above, will be
+         * used.
          */
       }
     }
 
-    let canvasKitWasmUrl = `canvaskit-${this.canvasKitWasmVersion}.wasm`;
+    let canvasKitWasmBaseUrl = `assets/${game.id}`;
     try {
       /**
        * Is the @m2c2kit/core code an imported module? Even if the game code
@@ -227,36 +241,54 @@ export class Game implements Activity {
        * user is programming a new assessment, is not using a bundler, and
        * imports @m2c2kit/core from a module URL).
        */
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error Using import.meta here, even though it's not supported in our tsconfig module version. That's OK, because we'll include a browser polyfill.
       const coreModuleUrl = await import.meta.resolve("@m2c2kit/core");
-      canvasKitWasmUrl =
-        this.getImportedModuleBaseUrl("@m2c2kit/core", coreModuleUrl) +
-        `/assets/canvaskit-${this.canvasKitWasmVersion}.wasm`;
+      canvasKitWasmBaseUrl =
+        game.getImportedModuleBaseUrl("@m2c2kit/core", coreModuleUrl) +
+        "/assets";
     } catch {
       /**
        * If the game code is an imported module, @m2c2kit/core must also
-       * be imported. Otherwise, this is a fatal error.
+       * be imported. Otherwise, this is a fatal error, because we cannot
+       * locate the CanvasKit wasm binary.
        */
-      if (this.isImportedModule) {
+      if (isImportedModule) {
         throw new Error(
-          `the package ${this.moduleMetadata.name} has been imported from a module URL (${moduleUrl}), but the @m2c2kit/core package module URL could not be determined.`,
+          `the package ${game.moduleMetadata.name} has been imported from a module URL (${moduleUrl}), but the @m2c2kit/core package module URL could not be determined.`,
         );
       }
     }
 
-    // Load manifest.json file used for hashed asset URLs, if present
-    await this.loadManifest();
-    const manifestCanvasKitWasmUrl = M2c2KitHelpers.getAssetUrlFromManifest(
-      this,
-      canvasKitWasmUrl,
-    );
-    try {
-      this.canvasKit = await this.loadCanvasKit(manifestCanvasKitWasmUrl);
-    } catch (err) {
-      throw new Error(
-        `game ${this.id} could not load canvaskit wasm file from ${manifestCanvasKitWasmUrl}`,
+    return {
+      assets: assetsBaseUrl,
+      canvasKitWasm: canvasKitWasmBaseUrl,
+    } as GameBaseUrls;
+  }
+
+  async initialize() {
+    const baseUrls = await this.resolveGameBaseUrls(this);
+
+    /**
+     * If the manifest is undefined, it means that the manifest has not yet
+     * been loaded. If code was built without a manifest, the manifest will
+     * be set to an empty Manifest object by loadManifest().
+     */
+    if (this.manifest === undefined) {
+      this.manifest = await this.loadManifest();
+    }
+
+    if (this._canvasKit === undefined) {
+      const manifestCanvasKitWasmUrl = M2c2KitHelpers.getUrlFromManifest(
+        this,
+        baseUrls.canvasKitWasm + `/canvaskit-${this.canvasKitWasmVersion}.wasm`,
       );
+      try {
+        this.canvasKit = await this.loadCanvasKit(manifestCanvasKitWasmUrl);
+      } catch (err) {
+        throw new Error(
+          `game ${this.id} could not load canvaskit wasm file from ${manifestCanvasKitWasmUrl}`,
+        );
+      }
     }
 
     if (this.isLocalizationRequested()) {
@@ -264,8 +296,8 @@ export class Game implements Activity {
       this.i18n = new I18n(options);
     }
 
-    this.fontManager = new FontManager(this);
-    this.imageManager = new ImageManager(this);
+    this.fontManager = new FontManager(this, baseUrls);
+    this.imageManager = new ImageManager(this, baseUrls);
 
     return Promise.all([
       this.fontManager.initializeFonts(this.options.fonts),
@@ -273,33 +305,44 @@ export class Game implements Activity {
     ]) as unknown as Promise<void>;
   }
 
-  private async loadManifest() {
-    if (this.manifestJsonUrl !== "manifest.json") {
-      return;
+  /**
+   * Returns the manifest, if manifest.json was created during the build.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks This should be called without any parameters. The
+   * `manifestJsonUrl` parameter's default value will be modified during the
+   * build step, if the build was configured to include the manifest.json
+   *
+   * @param manifestJsonUrl - Do not use this parameter. Allow the default.
+   * @returns a promise that resolves to the manifest object, or an empty object if there is no manifest
+   */
+  async loadManifest(manifestJsonUrl = "__NO_M2C2KIT_MANIFEST_JSON_URL__") {
+    if (manifestJsonUrl.includes("NO_M2C2KIT_MANIFEST_JSON_URL")) {
+      return {};
     }
-    let manifestResponse: Response | undefined = undefined;
+    let manifestResponse: Response;
     try {
-      manifestResponse = await fetch("manifest.json");
+      manifestResponse = await fetch(manifestJsonUrl);
       /**
        * fetch does not throw exceptions on server status errors, such as
        * 404. Must check response.ok
        */
       if (!manifestResponse.ok) {
         throw new Error(
-          `Error ${manifestResponse.status} on GET manifest.json.`,
+          `Error ${manifestResponse.status} on GET manifest.json from ${manifestJsonUrl}.`,
         );
       }
     } catch {
-      // Network error. This is still OK. manifest.json is not required.
-      console.log("Network error on GET manifest.json.");
+      throw new Error(
+        `Network error on GET manifest.json from ${manifestJsonUrl}.`,
+      );
     }
 
     try {
-      if (manifestResponse) {
-        this.manifest = await manifestResponse.json();
-      }
+      return (await manifestResponse.json()) as Manifest;
     } catch {
-      throw new Error("Error parsing manifest.json.");
+      throw new Error(`Error parsing manifest.json from ${manifestJsonUrl}.`);
     }
   }
 
@@ -562,7 +605,6 @@ export class Game implements Activity {
   private fpsRate = 0;
   private animationFramesRequested = 0;
   private limitFps = false;
-  private unitTesting = false;
   private gameStopRequested = false;
   private webGlRendererInfo = "";
 
@@ -807,7 +849,6 @@ export class Game implements Activity {
    */
   async start(entryScene?: Scene | string) {
     const gameInitOptions = this.options;
-    this.unitTesting = gameInitOptions._unitTesting ?? false;
 
     this.setupHtmlCanvases(
       gameInitOptions.canvasId,

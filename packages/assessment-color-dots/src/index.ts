@@ -277,7 +277,7 @@ class ColorDots extends Game {
       name: "Color Dots",
       id: "color-dots",
       version: "__PACKAGE_JSON_VERSION__",
-      moduleMetadata: Constants.EMPTY_MODULE_METADATA,
+      moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Color Dots is cued-recall, item-location memory \

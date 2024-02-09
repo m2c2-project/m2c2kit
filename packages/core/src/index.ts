@@ -27,6 +27,8 @@ export * from "./EntityEventListener";
 export * from "./EntityOptions";
 export * from "./EntityType";
 export * from "./Equals";
+export * from "./FontAsset";
+export * from "./M2c2KitHelpers";
 export * from "./M2Event";
 export * from "./M2EventListener";
 export * from "./FontData";

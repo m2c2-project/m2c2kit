@@ -5,6 +5,7 @@ import { BrowserImage } from "./BrowserImage";
 import { Game } from "./Game";
 import { Sprite } from "./Sprite";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { GameBaseUrls } from "./GameBaseUrls";
 /**
  * Fetches, loads, and provides images to the game.
  */
@@ -15,9 +16,11 @@ export class ImageManager {
   private ctx?: CanvasRenderingContext2D;
   private scale?: number;
   private game: Game;
+  private baseUrls: GameBaseUrls;
 
-  constructor(game: Game) {
+  constructor(game: Game, baseUrls: GameBaseUrls) {
     this.game = game;
+    this.baseUrls = baseUrls;
     this.canvasKit = game.canvasKit;
   }
 
@@ -57,11 +60,21 @@ export class ImageManager {
     this.checkImageNamesForDuplicates(browserImages);
 
     const renderImagesPromises = browserImages.map((browserImage) => {
+      /**
+       * url is undefined if the image is an svg string. If the url has
+       * a scheme, then we do not alter the url. Otherwise, we prepend the
+       * game assets base URL and look for the full URL in the manifest.
+       */
+      let url = browserImage.url;
+      if (browserImage.url && !M2c2KitHelpers.urlHasScheme(browserImage.url)) {
+        url = M2c2KitHelpers.getUrlFromManifest(
+          this.game,
+          `${this.baseUrls.assets}/${browserImage.url}`,
+        );
+      }
       const m2Image: M2Image = {
         imageName: browserImage.imageName,
-        url: browserImage.url
-          ? M2c2KitHelpers.getAssetUrlFromManifest(this.game, browserImage.url)
-          : undefined,
+        url: url,
         svgString: browserImage.svgString,
         canvaskitImage: undefined,
         width: browserImage.width,
@@ -99,7 +112,7 @@ export class ImageManager {
    *
    * @internal For m2c2kit library use only
    *
-   * @param image - name of the image to render and make ready
+   * @param image - M2Image to render and make ready
    * @returns A promise that completes when the image is ready
    */
   prepareDeferredImage(image: M2Image): Promise<void> {
@@ -117,11 +130,11 @@ export class ImageManager {
    * are two types of images to be rendered: 1) url to an image (e.g., jpg,
    * png, svg), and 2) svg string.
    *
-   * @param m2Image The image to render
+   * @param image - The M2Image to render
    * @returns A promise of type void that resolves when the image has been
    * rendered
    */
-  private renderM2Image(m2Image: M2Image): Promise<void> {
+  private renderM2Image(image: M2Image): Promise<void> {
     const imgElement = document.createElement("img");
     const renderAfterBrowserLoad = (
       resolve: (value: void | PromiseLike<void>) => void,
@@ -130,26 +143,26 @@ export class ImageManager {
         throw new Error("image manager not set up");
       }
 
-      this.scratchCanvas.width = m2Image.width * this.scale;
-      this.scratchCanvas.height = m2Image.height * this.scale;
+      this.scratchCanvas.width = image.width * this.scale;
+      this.scratchCanvas.height = image.height * this.scale;
       this.ctx.scale(this.scale, this.scale);
-      this.ctx.clearRect(0, 0, m2Image.width, m2Image.height);
-      this.ctx.drawImage(imgElement, 0, 0, m2Image.width, m2Image.height);
+      this.ctx.clearRect(0, 0, image.width, image.height);
+      this.ctx.drawImage(imgElement, 0, 0, image.width, image.height);
 
       // // commented code does the same as below this.scratchCanvas.toBlob(),
       // // but uses canvaskit methods, which are faster.
       // // TODO: explore which approach is better.
       // const canvaskitImage = this.canvasKit.MakeImageFromCanvasImageSource(this.scratchCanvas);
       // console.log(
-      //   `image loaded. name: ${m2Image.imageName}, w: ${m2Image.width}, h: ${m2Image.height}`,
+      //   `image loaded. name: ${image.imageName}, w: ${image.width}, h: ${image.height}`,
       // );
-      // this.images[m2Image.imageName].canvaskitImage = canvaskitImage;
-      // this.images[m2Image.imageName].status = M2ImageStatus.Ready;
+      // this.images[image.imageName].canvaskitImage = canvaskitImage;
+      // this.images[image.imageName].status = M2ImageStatus.Ready;
       // const sprites = this.game.entities.filter(
       //   (e) => e.type === "Sprite",
       // ) as Sprite[];
       // sprites.forEach((sprite) => {
-      //   if (sprite.imageName === m2Image.imageName) {
+      //   if (sprite.imageName === image.imageName) {
       //     sprite.needsInitialization = true;
       //   }
       // });
@@ -157,25 +170,27 @@ export class ImageManager {
 
       this.scratchCanvas.toBlob((blob) => {
         if (!blob) {
-          throw new Error("blob is undefined");
+          throw new Error(
+            `renderM2Image(): blob is undefined for ${image.imageName}`,
+          );
         }
         blob.arrayBuffer().then((buffer) => {
           const canvaskitImage = this.canvasKit.MakeImageFromEncoded(buffer);
           if (!canvaskitImage) {
             throw new Error(
-              `could not create image with name "${m2Image.imageName}."`,
+              `could not create image with name "${image.imageName}."`,
             );
           }
           console.log(
-            `image loaded. name: ${m2Image.imageName}, w: ${m2Image.width}, h: ${m2Image.height}`,
+            `image loaded. name: ${image.imageName}, w: ${image.width}, h: ${image.height}`,
           );
-          this.images[m2Image.imageName].canvaskitImage = canvaskitImage;
-          this.images[m2Image.imageName].status = M2ImageStatus.Ready;
+          this.images[image.imageName].canvaskitImage = canvaskitImage;
+          this.images[image.imageName].status = M2ImageStatus.Ready;
           const sprites = this.game.entities.filter(
             (e) => e.type === "Sprite",
           ) as Sprite[];
           sprites.forEach((sprite) => {
-            if (sprite.imageName === m2Image.imageName) {
+            if (sprite.imageName === image.imageName) {
               sprite.needsInitialization = true;
             }
           });
@@ -185,13 +200,13 @@ export class ImageManager {
     };
 
     return new Promise((resolve, reject) => {
-      imgElement.width = m2Image.width;
-      imgElement.height = m2Image.height;
+      imgElement.width = image.width;
+      imgElement.height = image.height;
       imgElement.crossOrigin = "Anonymous";
       imgElement.onerror = () => {
         reject(
           new Error(
-            `unable to render image named ${m2Image.imageName}. image source was ${m2Image.svgString ? "svgString" : `url: ${m2Image.url}`}`,
+            `unable to render image named ${image.imageName}. image source was ${image.svgString ? "svgString" : `url: ${image.url}`}`,
           ),
         );
       };
@@ -206,34 +221,33 @@ export class ImageManager {
         renderAfterBrowserLoad(resolve);
       };
 
-      if (!m2Image.svgString && !m2Image.url) {
+      if (!image.svgString && !image.url) {
         throw new Error(
-          `no svgString or url provided for image named ${m2Image.imageName}`,
+          `no svgString or url provided for image named ${image.imageName}`,
         );
       }
-      if (m2Image.svgString && m2Image.url) {
+      if (image.svgString && image.url) {
         throw new Error(
-          `provide svgString or url. both were provided for image named ${m2Image.imageName}`,
+          `provide svgString or url. both were provided for image named ${image.imageName}`,
         );
       }
-      if (m2Image.svgString) {
+      if (image.svgString) {
         imgElement.src =
-          "data:image/svg+xml," + encodeURIComponent(m2Image.svgString);
-      } else if (m2Image.url) {
-        const browserImageUrl = this.game.prependAssetsGameIdUrl(m2Image.url);
+          "data:image/svg+xml," + encodeURIComponent(image.svgString);
+      } else if (image.url) {
         /**
-         * Originally, below was a single line: image.src = browserImageUrl
+         * Originally, below was a single line: imgElement.src = m2Image.url
          * This worked, but this prevented us from intercepting this image
          * request and modifying the url (we do this by patching the
          * fetch function in some use cases, such as in the playground).
          * So, now we fetch the image ourselves and set the image src
          * to a constructed data url.
          */
-        fetch(browserImageUrl)
+        fetch(image.url)
           .then((response) => response.arrayBuffer())
           .then((data) => {
             this.arrayBufferToBase64Async(data).then((base64String) => {
-              const subtype = this.inferImageSubtypeFromUrl(m2Image.url);
+              const subtype = this.inferImageSubtypeFromUrl(image.url);
               imgElement.src =
                 "data:image/" + subtype + ";base64," + base64String;
             });
