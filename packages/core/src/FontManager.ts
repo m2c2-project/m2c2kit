@@ -5,6 +5,7 @@ import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { GameBaseUrls } from "./GameBaseUrls";
+
 /**
  * Fetches, loads, and provides fonts to the game.
  *
@@ -64,9 +65,14 @@ export class FontManager {
       const m2Font: M2Font = {
         fontName: font.fontName,
         typeface: undefined,
-        data: font.data,
+        /**
+         * sharedFont is undefined if the font is not shared with other games
+         * in the session. Otherwise, it has the already loaded font data and
+         * the url from which it was loaded.
+         */
+        data: font.sharedFont?.data,
         default: i === 0,
-        url: url,
+        url: font.sharedFont?.url ?? url,
         status: font.lazy ? M2FontStatus.Deferred : M2FontStatus.Loading,
       };
       this.fonts[font.fontName] = m2Font;
@@ -79,6 +85,11 @@ export class FontManager {
   }
 
   private async prepareFont(font: M2Font) {
+    /**
+     * font.data will be defined if the font is shared with other games in
+     * the session. A shared font's data was already loaded by the Session
+     * object, and thus we do not need to fetch it again.
+     */
     const arrayBuffer = font.data ?? (await this.fetchFontAsArrayBuffer(font));
     this.registerFont(arrayBuffer, font);
     console.log(

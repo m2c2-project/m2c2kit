@@ -8,10 +8,13 @@ import {
   DomHelpers,
   IDataStore,
   Timer,
+  FontAsset,
   Uuid,
   EventType,
   Constants,
   M2EventListener,
+  Game,
+  M2c2KitHelpers,
 } from "@m2c2kit/core";
 import { SessionOptions } from "./SessionOptions";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
@@ -266,6 +269,8 @@ export class Session {
       );
     }
 
+    await this.getSharedAssets(this.options.activities);
+
     await Promise.all(
       this.options.activities.map((activity) => {
         // IDataStore implementation is provided by another library and must
@@ -289,7 +294,7 @@ export class Session {
     );
 
     console.log(
-      `⚪ Session.sessionInitialize() took ${Timer.elapsed(
+      `⚪ Session.initialize() took ${Timer.elapsed(
         "sessionInitialize",
       ).toFixed(0)} ms`,
     );
@@ -298,6 +303,115 @@ export class Session {
     if (this.options.autoStartAfterInit !== false) {
       await this.start();
     }
+  }
+
+  /**
+   * Asynchronously loads fonts and wasm binaries that are common across two
+   * or more game activities and shares them with the games.
+   *
+   * @param activities - array of activities
+   */
+  private async getSharedAssets(activities: Activity[]) {
+    const games = activities.filter(
+      (activity) =>
+        activity.type === ActivityType.Game &&
+        (activity as Game).options.shareAssets !== false,
+    ) as Array<Game>;
+
+    if (games.length > 0) {
+      const manifest = await games[0].loadManifest();
+      games.forEach((game) => {
+        game.manifest = manifest;
+      });
+
+      const wasmPromises = this.initializeSharedCanvasKit(games);
+      const fontPromises = this.fetchSharedFontData(games);
+      await Promise.all([...wasmPromises, ...fontPromises]);
+    }
+  }
+
+  private initializeSharedCanvasKit(games: Game[]) {
+    const sharedWasmVersions = this.getDuplicates(
+      games.map((game) => game.canvasKitWasmVersion),
+    );
+    const wasmAssets = games.map((game) => {
+      return {
+        game: game,
+        version: game.canvasKitWasmVersion,
+        data: undefined,
+      };
+    });
+
+    const wasmPromises = sharedWasmVersions.map(async (sharedWasmVersion) => {
+      const wasmAsset = wasmAssets.filter(
+        (wasm) => wasm.version === sharedWasmVersion,
+      )[0];
+      const game = wasmAsset.game;
+      const baseUrls = await game.resolveGameBaseUrls(game);
+      const canvasKitWasmFilename = `canvaskit-${game.canvasKitWasmVersion}.wasm`;
+      const manifestCanvasKitWasmUrl = M2c2KitHelpers.getUrlFromManifest(
+        game,
+        `${baseUrls.canvasKitWasm}/${canvasKitWasmFilename}`,
+      );
+      console.log(`⚪ sharing ${canvasKitWasmFilename} within session`);
+
+      const canvasKit = await game.loadCanvasKit(manifestCanvasKitWasmUrl);
+      games.forEach((game) => {
+        if (game.canvasKitWasmVersion === sharedWasmVersion) {
+          game.canvasKit = canvasKit;
+        }
+      });
+    });
+    return wasmPromises;
+  }
+
+  private fetchSharedFontData(games: Game[]) {
+    const fontFiles = games
+      .flatMap(
+        (game) => game.options.fonts?.filter((f) => f.lazy !== true) ?? [],
+      )
+      .map((fontAsset) => this.getFilenameFromUrl(fontAsset.url));
+    const sharedFontFiles = this.getDuplicates(fontFiles);
+
+    const allGameFonts: Array<GameFontAsset> = games.flatMap((game) => {
+      return (game.options.fonts ?? []).map((fontAsset) => {
+        return {
+          game: game,
+          fontAsset: fontAsset,
+          filename: this.getFilenameFromUrl(fontAsset.url),
+          data: undefined,
+        };
+      });
+    });
+
+    const fontPromises = sharedFontFiles.map(async (sharedFontFile) => {
+      const gameFontAsset = allGameFonts.filter(
+        (gameFont) => gameFont.filename === sharedFontFile,
+      )[0];
+      const game = gameFontAsset.game;
+      const baseUrls = await game.resolveGameBaseUrls(game);
+      const fontUrl = M2c2KitHelpers.getUrlFromManifest(
+        game,
+        `${baseUrls.assets}/${gameFontAsset.fontAsset.url}`,
+      );
+      console.log(
+        `⚪ sharing ${this.getFilenameFromUrl(fontUrl)} within session`,
+      );
+
+      const response = await fetch(fontUrl);
+      const fontData = await response.arrayBuffer();
+      games
+        .flatMap((game) => game.options.fonts ?? [])
+        .forEach((fontAsset) => {
+          if (this.getFilenameFromUrl(fontAsset.url) === sharedFontFile) {
+            fontAsset.sharedFont = {
+              url: fontUrl,
+              data: fontData,
+            };
+          }
+        });
+    });
+    return fontPromises;
   }
 
   /**
@@ -562,6 +676,36 @@ export class Session {
   dictionaryItemExists(key: string) {
     return this.sessionDictionary.has(key);
   }
+
+  /**
+   * Returns the filename from a url.
+   *
+   * @param url - url to parse
+   * @returns filename
+   */
+  private getFilenameFromUrl(url: string) {
+    return url.substring(url.lastIndexOf("/") + 1);
+  }
+
+  /**
+   * Returns the duplicated strings in an array.
+   *
+   * @param s - array of strings
+   * @returns array of duplicated strings
+   */
+  private getDuplicates(s: string[]): string[] {
+    const count: { [key: string]: number } = {};
+    const duplicates: string[] = [];
+
+    for (const str of s) {
+      count[str] = (count[str] || 0) + 1;
+      if (count[str] === 2) {
+        duplicates.push(str);
+      }
+    }
+
+    return duplicates;
+  }
 }
 
 export interface GoToActivityOptions {
@@ -579,3 +723,10 @@ export type SessionDictionaryValues =
   | object
   | null
   | undefined;
+
+interface GameFontAsset {
+  game: Game;
+  fontAsset: FontAsset;
+  filename: string;
+  data: ArrayBuffer | undefined;
+}

@@ -3399,20 +3399,4 @@ export class Game implements Activity {
       M2c2KitHelpers.isPointInsideRectangle({ x, y }, points)
     );
   }
-
-  prependAssetsGameIdUrl(url: string): string {
-    function hasUrlScheme(str: string): boolean {
-      return /^[a-z]+:\/\//i.test(str);
-    }
-
-    if (hasUrlScheme(url)) {
-      return url;
-    }
-    if (!this.options.assetsUrl) {
-      return `assets/${this.id}/${url}`;
-    }
-    return (
-      this.options.assetsUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "")
-    );
-  }
 }

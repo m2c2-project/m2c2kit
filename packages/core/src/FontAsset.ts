@@ -1,3 +1,5 @@
+import { SharedFont } from "./SharedFontData";
+
 /**
  * Font asset to use in the game.
  */
@@ -11,6 +13,6 @@ export interface FontAsset {
    * These should be lazy loaded because they may not be needed.
    */
   lazy?: boolean;
-  /** Raw font data. @internal For m2c2kit library use only */
-  data?: ArrayBuffer;
+  /** Font url and raw data that has been shared with other games in the session. Undefined if this font was not shared. @internal For m2c2kit library use only */
+  sharedFont?: SharedFont;
 }

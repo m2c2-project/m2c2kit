@@ -52,8 +52,8 @@ export interface GameOptions {
   translations?: Translations;
   /** Show logs for WebGl activity? */
   logWebGl?: boolean;
-  /** URL of game assets folder, if not the default location of "assets/id of game from GameOptions" */
-  assetsUrl?: string;
+  /** Should games within a session share wasm and font assets that have identical filenames, in order to reduce bandwidth? Default is true. */
+  shareAssets?: boolean;
   /** Url of the canvaskit.wasm binary. Always set to the default value of "canvaskit.wasm" */
   canvasKitWasmUrl: "canvaskit.wasm";
   /** Game's module name, version, and dependencies. @internal For m2c2kit library use only */
