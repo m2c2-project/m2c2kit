@@ -62,7 +62,7 @@ export function m2New(options: m2NewOptions): Rule {
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-typescript": "11.1.6",
     "rimraf": "5.0.5",
-    "rollup": "4.9.6",
+    "rollup": "4.10.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-serve": "3.0.0",
     "tslib": "2.6.2",
