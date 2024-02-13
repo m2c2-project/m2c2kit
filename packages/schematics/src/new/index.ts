@@ -113,18 +113,19 @@ export function m2New(options: m2NewOptions): Rule {
     rules.push(mergeWithSourceTemplates);
 
     /**
-     * Third, copy index.html from @m2c2kit/core package.
-     * Other core assets, such as wasm and CSS files, will be copied during the
-     * build process by rollup. We copy index.html here, rather than in the
-     * build process, because we don't want it overwritten every time we
-     * build (the user may have made changes to it). wasm and CSS, however,
-     * should be copied every time we build in case they have changed due to
-     * a package update of @m2c2kit/core.
+     * Third, copy index.html from @m2c2kit/session package.
+     * Other assets, such as wasm and CSS files, will be copied during the
+     * build process by rollup and the copyAssets plugin. We copy index.html
+     * here, rather than in the build process, because we don't want it
+     * overwritten every time we build (the user may have made changes to it).
+     * Wasm and CSS, however, should be copied every time we build, in case
+     * they have changed due to a package update of @m2c2kit/session or
+     * @m2c2kit/core.
      */
     rules.push((tree: Tree) => {
       const findUps: FindUps[] = [
         {
-          findUp: "node_modules/@m2c2kit/core/assets/index.html",
+          findUp: "node_modules/@m2c2kit/session/assets/index.html",
           dest: path.join(directory, "src/index.html"),
           cwd: directory,
         },

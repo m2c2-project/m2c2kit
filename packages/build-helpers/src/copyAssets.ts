@@ -8,6 +8,8 @@ import * as estree from "estree";
 import { Plugin } from "rollup";
 import path from "node:path";
 import { packageDirectory } from "pkg-dir";
+import c from "ansi-colors";
+import { satisfies } from "semver";
 
 interface PackageAndExtras {
   /** Package name */
@@ -30,11 +32,11 @@ export interface CopyAssetsOptions {
   /**
    * Name of m2c2kit package or array of names of m2c2kit packages that need
    * assets copied, e.g., `@m2c2kit/assessment-symbol-search` or
-   * `["@m2c2kit/assessment-symbol-search", "@m2c2kit/core"]`, or a
+   * `["@m2c2kit/assessment-symbol-search", "@m2c2kit/session"]`, or a
    * PackageAndExtras object, e.g.,
-   * {name: "@m2c2kit/core", extras: [{ source: "assets/index.html*", dest: "" }]}
+   * {name: "@m2c2kit/session", extras: [{ source: "assets/index.html*", dest: "" }]}
    */
-  package: string | Array<string | PackageAndExtras>;
+  package: string | PackageAndExtras | Array<string | PackageAndExtras>;
   /**
    * Output folder, e.g. `dist` or `build`.
    */
@@ -53,26 +55,27 @@ export interface CopyAssetsOptions {
  * needed by assessments. This plugin copies those assets from their
  * respective packages to the output folder. What is copied depends on the
  * package that is specified.
- * - `@m2c2kit/core`: assets folder contents **except** wasm and `index.html`
+ * - `@m2c2kit/session`: assets folder contents **except** `index.html`
  * - `@m2c2kit/db`: `data.js` and `data.html`
  * - `@m2c2kit/survey`: assets folder contents
- *
- * All other packages are assumed to be assessments, and their assets folder
+ * - All other packages are assumed to be assessments, and their assets folder
  * **and** the wasm file from the required version of `@m2c2kit/core` are
- * copied. Note that the assessments's package name must be used, not its
+ * copied. Note that the assessment's package name must be used, not its
  * m2c2kit game `id`.
  *
  * At the end of the copy process, the `index.html` file from the `src` folder
- * is copied to the output folder.
+ * is copied to the output folder. This `index.html` file will have been created
+ * by the CLI or the user.
  *
- * If the `index.html` from `@m2c2kit/core` or `@m2c2kit/survey` is needed, it
- * can be added as an extra file to copy.
+ * If the `index.html` from `@m2c2kit/session` or `@m2c2kit/survey` is needed, it
+ * can be added as an extra file to copy, but this will be done only in special
+ * cases, such as when creating library demos within this repository.
  *
  * @example
  * ```
  * copyAssets({
  *   package: [
- *     "@m2c2kit/core",
+ *     "@m2c2kit/session",
  *     "@m2c2kit/assessment-symbol-search",
  *     {
  *       name: "@m2c2kit/survey",
@@ -86,7 +89,7 @@ export interface CopyAssetsOptions {
  * })
  * ```
  *
- * Usually, the `index.html` **should not** be copied from `@m2c2kit/core` or
+ * Usually, the `index.html` **should not** be copied from `@m2c2kit/session` or
  * `@m2c2kit/survey` on every build with the `extras` options because the
  * `index.html` file in the `src` folder should be used. Thus, the `extras`
  * option is only for special cases, such as when creating library demos within
@@ -120,6 +123,9 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
         }
 
         packages = sortSurveyPackageToEnd(packages);
+        if (options.verbose) {
+          console.log(c.blue("copyAssets plugin started."));
+        }
 
         for (const pkg of packages) {
           let packageName: string;
@@ -128,23 +134,37 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
           } else {
             packageName = pkg.name;
           }
+          if (options.verbose) {
+            console.log(`${c.bold(packageName)}:`);
+          }
+          if (packageName === "@m2c2kit/core") {
+            throw new Error(
+              "Do not include @m2c2kit/core in the copyAssets plugin. @m2c2kit/core an assessment dependency, and its assets are copied automatically.",
+            );
+          }
 
-          const resolvedPackage = await resolvePackage(
+          const resolvedPackage = await resolvePackage({
             packageName,
-            options.outputFolder,
-          );
+            outputFolder: options.outputFolder,
+          });
           if (resolvedPackage === undefined) {
             throw new Error(
-              `Could not find package ${pkg}. Has it been installed?`,
+              `  Could not find package ${packageName}. Has it been installed?`,
             );
           }
           if (options.verbose) {
-            console.log(`Found ${pkg} at ${resolvedPackage.packageJsonPath}.`);
+            console.log(
+              `  ${c.green("Found")} ${packageName} at ${resolvedPackage.packageJsonPath}.`,
+            );
           }
 
           switch (packageName) {
-            case "@m2c2kit/core":
-              await copyCoreAssetsExceptWasmIndexHtml(resolvedPackage);
+            /**
+             * session package has the css for m2c2kit.
+             * Copy the assets folder contents **except** `index.html`.
+             */
+            case "@m2c2kit/session":
+              await copySessionAssetsExceptIndexHtml(resolvedPackage);
               break;
             case "@m2c2kit/db":
               await copyDbAssets(resolvedPackage);
@@ -164,15 +184,18 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
         await cpy(path.join("src", "index.html*"), options.outputFolder);
         if (!existsSync(path.join(options.outputFolder, "index.html"))) {
           console.warn(
-            "WARNING: an index.html file was not copied to the output folder. Usually, there should be an index.html in the src folder.",
+            "WARNING: an index.html file does not exist in the output folder. Usually, there should be an index.html in the src folder.",
           );
+        }
+        if (options.verbose) {
+          console.log(c.blue("copyAssets plugin finished."));
         }
       },
     },
   };
 
   async function copyExtraFiles(
-    resolvedPackage: resolvedPackage,
+    resolvedPackage: ResolvedPackage,
     extraFiles: Array<ExtraFile>,
   ) {
     if (extraFiles.length === 0) {
@@ -206,7 +229,12 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
     );
   }
 
-  async function copyDbAssets(resolvedPackage: resolvedPackage) {
+  async function copyDbAssets(resolvedPackage: ResolvedPackage) {
+    if (options.verbose) {
+      console.log(
+        `  Copying assets from ${resolvedPackage.packageName} to ${options.outputFolder}/assets.`,
+      );
+    }
     await cpy(
       path.join(resolvedPackage.packageJsonDirectory, "dist", "data.js*"),
       options.outputFolder,
@@ -217,17 +245,19 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
     );
   }
 
-  async function copySurveyAssets(resolvedPackage: resolvedPackage) {
+  async function copySurveyAssets(resolvedPackage: ResolvedPackage) {
+    if (options.verbose) {
+      console.log(
+        `  Copying assets from ${resolvedPackage.packageName} to ${options.outputFolder}/assets.`,
+      );
+    }
     await cpy(
       path.join(resolvedPackage.packageJsonDirectory, "assets", "css"),
       path.join(options.outputFolder, "assets"),
     );
   }
 
-  async function copyPackageAssets(
-    resolvedPackage: resolvedPackage,
-    copyWasm = true,
-  ) {
+  async function copyPackageAssets(resolvedPackage: ResolvedPackage) {
     const assessmentId = await getAssessmentId(resolvedPackage.modulePath);
     if (assessmentId === undefined) {
       throw new Error(
@@ -238,13 +268,43 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
       path.join(resolvedPackage.packageJsonDirectory, "assets", "**", "*"),
       path.join(options.outputFolder, "assets", assessmentId),
     );
-    if (!copyWasm) {
-      return;
+
+    const wantedCoreVersion: string | undefined = JSON.parse(
+      await readFile(resolvedPackage.packageJsonPath, "utf-8"),
+    ).dependencies["@m2c2kit/core"];
+    if (wantedCoreVersion === undefined) {
+      throw new Error(
+        `Could not determine version of @m2c2kit/core in the dependencies of ${resolvedPackage.packageName}. Is @m2c2kit/core a dependency in the package.json file of ${resolvedPackage.packageName}?`,
+      );
     }
-    const resolvedCorePackage = await resolvePackage("@m2c2kit/core");
+
+    if (options.verbose) {
+      console.log(
+        `  Resolving dependency @m2c2kit/core version ${wantedCoreVersion}, starting in ${resolvedPackage.packageJsonDirectory}.`,
+      );
+    }
+
+    const resolvedCorePackage = await resolvePackage({
+      packageName: "@m2c2kit/core",
+      packageVersion: wantedCoreVersion,
+      basedir: resolvedPackage.packageJsonDirectory,
+    });
     if (resolvedCorePackage === undefined) {
       throw new Error(
-        `Could not find package @m2c2kit/core. Has it been installed?`,
+        `Could not find @m2c2kit/core version ${wantedCoreVersion}. Has it been installed?`,
+      );
+    }
+
+    const resolvedCoreVersion: string | undefined = JSON.parse(
+      await readFile(resolvedCorePackage.packageJsonPath, "utf-8"),
+    ).version;
+
+    if (options.verbose) {
+      console.log(
+        `  ${c.green("Found")} @m2c2kit/core version ${resolvedCoreVersion} at ${resolvedCorePackage.packageJsonDirectory}`,
+      );
+      console.log(
+        `  Copying wasm file from @m2c2kit/core version ${resolvedCoreVersion}to ${options.outputFolder}/assets/${assessmentId}.`,
       );
     }
 
@@ -258,9 +318,14 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
     );
   }
 
-  async function copyCoreAssetsExceptWasmIndexHtml(
-    resolvedPackage: resolvedPackage,
+  async function copySessionAssetsExceptIndexHtml(
+    resolvedPackage: ResolvedPackage,
   ) {
+    if (options.verbose) {
+      console.log(
+        `  Copying assets from ${resolvedPackage.packageName} to ${options.outputFolder}/assets.`,
+      );
+    }
     await cpy(
       [
         path.join(resolvedPackage.packageJsonDirectory, "assets", "**", "*"),
@@ -269,12 +334,6 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
             resolvedPackage.packageJsonDirectory,
             "assets",
             "index.html",
-          ),
-        "!" +
-          path.join(
-            resolvedPackage.packageJsonDirectory,
-            "assets",
-            "canvaskit-*.wasm",
           ),
       ],
       path.join(options.outputFolder, "assets"),
@@ -286,12 +345,12 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
  * Moves the survey package to the end of the array of packages
  * whose assets will be copied.
  *
- * @remarks Both core and survey have an index.html file that can be used as
- * a template. But the survey index.html file has additional CSS that is
- * needed for the survey. If a user mistakenly requests to copy both the core
- * and survey index.html files, by placing survey at the end of the array, the
- * survey index.html file will be copied last and overwrite the core
- * index.html
+ * @remarks Both session and survey have an index.html file in their assets
+ * that can be used as a template. But the survey index.html file has
+ * additional CSS that is needed for the survey. If a user mistakenly requests
+ * to copy both the session and survey index.html files, by placing survey at
+ * the end of the array, the survey index.html file will be copied last and
+ * overwrite the session index.html
  *
  * @param packages - array of package names or PackageAndExtras objects
  * @returns packages with survey moved to the end of the array
@@ -312,17 +371,23 @@ function sortSurveyPackageToEnd(packages: Array<string | PackageAndExtras>) {
   }
 }
 
-interface resolvedPackage {
+interface ResolvedPackage {
   packageJsonPath: string;
   packageName: string;
   packageJsonDirectory: string;
   modulePath: string;
 }
 
+interface ResolvePackageOptions {
+  packageName: string;
+  packageVersion?: string;
+  basedir?: string;
+  outputFolder?: string;
+}
+
 async function resolvePackage(
-  packageName: string,
-  outputFolder?: string,
-): Promise<resolvedPackage | undefined> {
+  options: ResolvePackageOptions,
+): Promise<ResolvedPackage | undefined> {
   let resolvedDirectory: string | undefined;
 
   /**
@@ -339,7 +404,7 @@ async function resolvePackage(
     const pkgName: string | undefined = JSON.parse(
       await readFile(path.join(resolvedDirectory, "package.json"), "utf-8"),
     ).name;
-    if (pkgName !== packageName) {
+    if (pkgName !== options.packageName) {
       resolvedDirectory = undefined;
     }
   }
@@ -349,26 +414,47 @@ async function resolvePackage(
      * m2c2 cli sets up a new project), the module is in the output folder,
      * e.g., `dist` or `build`, and it called `index.js`.
      */
-    if (outputFolder === undefined) {
+    if (options.outputFolder === undefined) {
       throw new Error(
         `outputFolder must be specified when package.json is in current working directory.`,
       );
     }
     return {
       packageJsonPath: path.join(resolvedDirectory, "package.json"),
-      packageName,
+      packageName: options.packageName,
       packageJsonDirectory: resolvedDirectory,
-      modulePath: path.join(resolvedDirectory, outputFolder, "index.js"),
+      modulePath: path.join(
+        resolvedDirectory,
+        options.outputFolder,
+        "index.js",
+      ),
     };
   }
 
   let modulePath: string;
   try {
-    modulePath = resolve.sync(packageName).replace(/\\/g, "/");
+    modulePath = resolve
+      .sync(options.packageName, {
+        basedir: options.basedir,
+        packageFilter: (pkg) => {
+          if (options.packageVersion === undefined) {
+            return pkg;
+          }
+          if (satisfies(pkg.version as string, options.packageVersion)) {
+            return pkg;
+          }
+          /**
+           * Returning an empty object will cause the currently tested package
+           * to be skipped.
+           */
+          return {};
+        },
+      })
+      .replace(/\\/g, "/");
   } catch (error) {
     return undefined;
   }
-  const regex = new RegExp(`^.*${packageName}`);
+  const regex = new RegExp(`^.*${options.packageName}`);
   const matches = modulePath.match(regex);
   if (!matches || matches.length === 0) {
     return undefined;
@@ -376,12 +462,22 @@ async function resolvePackage(
   const packageJsonDirectory = matches[0];
   return {
     packageJsonPath: path.join(packageJsonDirectory, "package.json"),
-    packageName,
+    packageName: options.packageName,
     packageJsonDirectory,
     modulePath,
   };
 }
 
+/**
+ * Parses the JavaScript file to find the assessment id.
+ *
+ * @remarks The assessment id, **not** its package name, is needed to copy the
+ * assets from the assessment package to the output folder. The folder
+ * structure in the output folder is `outputFolder/assets/<assessment id>`.
+ *
+ * @param filePath - path to the JavaScript file
+ * @returns assessment id
+ */
 async function getAssessmentId(filePath: string): Promise<string | undefined> {
   const jsFileContents = await readFile(filePath, "utf-8");
   let ast: acorn.Node;
@@ -431,6 +527,11 @@ async function getAssessmentId(filePath: string): Promise<string | undefined> {
                 (prop) => (prop.key as estree.Identifier).name,
               );
 
+              /**
+               * We will assume that the assessment id is the correct one if
+               * the object has the following properties: name, id, version,
+               * width, and height.
+               */
               const gameOptionsRequiredProperties = [
                 "name",
                 "id",

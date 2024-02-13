@@ -13,7 +13,6 @@
   "files": [
     "dist",
     "assets/**",
-    "index.html",
     "metadata.json"
   ],
   "scripts": {

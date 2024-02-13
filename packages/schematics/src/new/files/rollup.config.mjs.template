@@ -35,7 +35,7 @@ export default (commandLineArgs) => {
         }),
         copyAssets({ package: [
           "<%= dasherize(appName) %>",
-          "@m2c2kit/core",
+          "@m2c2kit/session",
         ], outputFolder }),        
         isProduction &&
           !commandLineArgs.configNoHash &&

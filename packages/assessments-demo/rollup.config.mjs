@@ -37,7 +37,7 @@ export default (commandLineArgs) => {
         restoreImportMeta(),
         copyAssets({
           package: [
-            "@m2c2kit/core",
+            "@m2c2kit/session",
             "@m2c2kit/assessment-color-dots",
             "@m2c2kit/assessment-grid-memory",
             "@m2c2kit/assessment-color-shapes",
@@ -47,11 +47,11 @@ export default (commandLineArgs) => {
             {
               name: "@m2c2kit/survey",
               /**
-               * Copy index.html from survey, rather than core, because the
+               * Copy index.html from survey, rather than session, because the
                * index.html in survey has additional links to the CSS needed
                * for surveys.
                * If we did not use survey functionality, we would copy the
-               * index.html from core instead.
+               * index.html from session instead.
                * Note: The asterisk after index.html is important because
                * otherwise the source will be interpreted as a folder rather
                * than a file.
