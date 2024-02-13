@@ -23,6 +23,8 @@ export const EventType = {
   ActivityEnd: "ActivityEnd",
   ActivityCancel: "ActivityCancel",
   ActivityData: "ActivityData",
+  GameWarmupStart: "GameWarmupStart",
+  GameWarmupEnd: "GameWarmupEnd",
   TapDown: "TapDown",
   TapUp: "TapUp",
   TapUpAny: "TapUpAny",

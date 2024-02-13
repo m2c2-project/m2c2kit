@@ -1,7 +1,6 @@
-import { Activity } from "./Activity";
-import { ActivityType } from "./ActivityType";
+import { Activity, ActivityType } from "@m2c2kit/core";
 
-export class DomHelpers {
+export class DomHelper {
   /**
    * Add elements to hide the canvas and show a spinner.
    */
@@ -40,15 +39,15 @@ export class DomHelpers {
     if (activity.type == ActivityType.Survey) {
       this.setCanvasDivVisibility(false);
       this.setSurveyDivVisibility(true);
-      DomHelpers.setSpinnerVisibility(false);
-      DomHelpers.setCanvasOverlayVisibility(false);
+      DomHelper.setBusyAnimationVisibility(false);
+      DomHelper.setCanvasOverlayVisibility(false);
     }
   }
 
   /**
    * Hide the canvas div and survey div.
    */
-  static hideAll(): void {
+  static hideM2c2Elements(): void {
     this.setCanvasDivVisibility(false);
     this.setSurveyDivVisibility(false);
   }
@@ -74,7 +73,7 @@ export class DomHelpers {
    *
    * @param visible - true if the spinner should be visible
    */
-  static setSpinnerVisibility(visible: boolean): void {
+  static setBusyAnimationVisibility(visible: boolean): void {
     const div = document.getElementById("m2c2kit-spinner-div");
     if (div) {
       if (visible) {

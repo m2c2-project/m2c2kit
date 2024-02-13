@@ -5,7 +5,6 @@ import {
   ActivityLifecycleEvent,
   ActivityResultsEvent,
   CallbackOptions,
-  DomHelpers,
   IDataStore,
   Timer,
   FontAsset,
@@ -16,6 +15,7 @@ import {
   Game,
   M2c2KitHelpers,
 } from "@m2c2kit/core";
+import { DomHelper } from "./DomHelper";
 import { SessionOptions } from "./SessionOptions";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
 import { SessionEvent, SessionEventType } from "./SessionEvent";
@@ -59,6 +59,17 @@ export class Session {
       }
       if (this.options.activityCallbacks?.onActivityResults) {
         activity.onData(this.options.activityCallbacks.onActivityResults);
+      }
+
+      if (activity.type === ActivityType.Game) {
+        const game = activity as Game;
+        game.onWarmupStart(() => {
+          DomHelper.setCanvasOverlayVisibility(true);
+        });
+        game.onWarmupEnd(() => {
+          DomHelper.setCanvasOverlayVisibility(false);
+          DomHelper.setBusyAnimationVisibility(false);
+        });
       }
     }
   }
@@ -258,9 +269,9 @@ export class Session {
       type: SessionEventType.SessionInitialize,
     };
     this.raiseEventOnListeners(sessionInitializeEvent);
-    DomHelpers.addLoadingElements();
-    DomHelpers.setSpinnerVisibility(true);
-    DomHelpers.setCanvasOverlayVisibility(true);
+    DomHelper.addLoadingElements();
+    DomHelper.setBusyAnimationVisibility(true);
+    DomHelper.setCanvasOverlayVisibility(true);
 
     this.dataStores = this.options.dataStores;
     if (this.dataStores?.length === 0) {
@@ -447,7 +458,7 @@ export class Session {
     this.raiseEventOnListeners(sessionStartEvent);
     this.currentActivity = this.options.activities.find(Boolean);
     if (this.currentActivity) {
-      DomHelpers.configureDomForActivity(this.currentActivity);
+      DomHelper.configureDomForActivity(this.currentActivity);
       await this.currentActivity.start();
     } else {
       // no activities, so immediately end the session
@@ -461,7 +472,7 @@ export class Session {
    */
   end(): void {
     console.log("🔴 ended session");
-    DomHelpers.hideAll();
+    DomHelper.hideM2c2Elements();
     this.stop();
     const sessionEndEvent: SessionLifecycleEvent = {
       target: this,
@@ -529,7 +540,7 @@ export class Session {
       currentActivityOldObject,
     );
     this.options.activities[indexOfCurrentActivity] = this.currentActivity;
-    DomHelpers.configureDomForActivity(this.currentActivity);
+    DomHelper.configureDomForActivity(this.currentActivity);
 
     /**
      * Because the current activity has been newly created, it needs properties
@@ -589,7 +600,7 @@ export class Session {
     this.currentActivity.stop();
     this.currentActivity = this.nextActivity;
 
-    DomHelpers.configureDomForActivity(this.currentActivity);
+    DomHelper.configureDomForActivity(this.currentActivity);
     await this.currentActivity.start();
   }
 

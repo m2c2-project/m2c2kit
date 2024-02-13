@@ -50,7 +50,6 @@ import { I18n } from "./I18n";
 import { Translations } from "./Translations";
 import { LocalizationOptions } from "./LocalizationOptions";
 import { WebColors } from "./WebColors";
-import { DomHelpers } from "./DomHelpers";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { IDataStore } from "./IDataStore";
 import { ShapeType } from "./ShapeType";
@@ -69,6 +68,7 @@ import { ModuleMetadata } from "./ModuleMetadata";
 import { M2FontStatus } from "./M2Font";
 import { Manifest } from "./Manifest";
 import { GameBaseUrls } from "./GameBaseUrls";
+import { GameEvent } from "./GameEvent";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -100,7 +100,7 @@ export class Game implements Activity {
   private steppingNow = 0;
   i18n?: I18n;
   private warmupFunctionQueue = new Array<WarmupFunctionQueue>();
-  private loaderElementsRemoved = false;
+  private warmupFinished = false;
   private _dataStores?: IDataStore[];
   private plugins: Array<Plugin> = [];
   additionalParameters?: unknown;
@@ -907,7 +907,12 @@ export class Game implements Activity {
       this.removeTimeSteppingControlsFromDom();
     }
 
-    DomHelpers.setCanvasOverlayVisibility(true);
+    this.warmupFinished = false;
+    const gameWarmupStartEvent: GameEvent = {
+      target: this,
+      type: EventType.GameWarmupStart,
+    };
+    this.raiseActivityEventOnListeners(gameWarmupStartEvent);
 
     this.warmupFunctionQueue.push({
       warmupFunction: this.warmupShadersWithPrimitives,
@@ -1929,10 +1934,17 @@ export class Game implements Activity {
       return;
     }
 
-    if (!this.loaderElementsRemoved) {
-      this.loaderElementsRemoved = true;
-      DomHelpers.setCanvasOverlayVisibility(false);
-      DomHelpers.setSpinnerVisibility(false);
+    if (!this.warmupFinished) {
+      /**
+       * We will reach this point only if warmupFunctionQueue is empty.
+       * Thus, set warmupFinished to true and send the GameWarmupEnd event.
+       */
+      this.warmupFinished = true;
+      const gameWarmupEndEvent: GameEvent = {
+        target: this,
+        type: EventType.GameWarmupEnd,
+      };
+      this.raiseActivityEventOnListeners(gameWarmupEndEvent);
       this.surface.requestAnimationFrame(this.loop.bind(this));
       return;
     }
@@ -3223,6 +3235,36 @@ export class Game implements Activity {
     options?: CallbackOptions,
   ): void {
     this.addEventListener(EventType.ActivityData, callback, options);
+  }
+
+  /**
+   * Executes a callback when the game begins its warmup.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onWarmupStart(
+    callback: (gameEvent: GameEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener(EventType.GameWarmupStart, callback, options);
+  }
+
+  /**
+   * Executes a callback when the game ends its warmup.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onWarmupEnd(
+    callback: (activityEvent: ActivityEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener(EventType.GameWarmupEnd, callback, options);
   }
 
   private addEventListener<T extends ActivityEvent>(
