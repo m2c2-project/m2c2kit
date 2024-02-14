@@ -66,6 +66,9 @@ const jestConfig: JestConfigWithTsJest = {
         ],
       },
       testEnvironment: "jsdom",
+      moduleNameMapper: {
+        "@m2c2kit/(.*)$": "<rootDir>/packages/$1/src",
+      },
     },
     {
       displayName: { name: "@m2c2kit/session", color: "yellow" },

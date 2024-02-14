@@ -37,49 +37,9 @@ describe("survey start", () => {
   });
 
   // https://stackoverflow.com/a/69372861 for async test that expect toThrow
-  test("throws error if m2c2kit-survey-div not found", async () => {
-    const html = `<!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-          <!-- <div id="m2c2kit-survey-div"></div> -->
-          <div
-            class="m2c2kit-full-viewport m2c2kit-flex-container"
-            id="m2c2kit-container-div"
-          >
-          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
-        </div>
-      </body>
-    </html>`;
-    document.documentElement.innerHTML = html;
-    await session.initialize();
-
-    await expect(async () => {
-      await session.start();
-    }).rejects.toThrow();
-  });
-
   test("starts the survey", async () => {
-    const html = `<!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-          <div id="m2c2kit-survey-div"></div>
-          <div
-            class="m2c2kit-full-viewport m2c2kit-flex-container"
-            id="m2c2kit-container-div"
-          >
-          <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
-        </div>
-      </body>
-    </html>`;
-    document.documentElement.innerHTML = html;
+    TestHelpers.setupDomAndGlobals();
+
     await session.initialize();
 
     await expect(async () => {

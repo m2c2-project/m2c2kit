@@ -40,4 +40,5 @@ export class Constants {
     version: "",
     dependencies: {},
   };
+  public static readonly DEFAULT_ROOT_ELEMENT_ID = "m2c2kit";
 }

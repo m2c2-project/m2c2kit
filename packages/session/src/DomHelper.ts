@@ -1,12 +1,29 @@
 import { Activity, ActivityType } from "@m2c2kit/core";
 
 export class DomHelper {
+  static createRoot(rootElement: HTMLElement): void {
+    const surveyDiv = document.createElement("div");
+    surveyDiv.setAttribute("id", "m2c2kit-survey-div");
+    rootElement.appendChild(surveyDiv);
+
+    const canvasDiv = document.createElement("div");
+    canvasDiv.setAttribute("id", "m2c2kit-canvas-div");
+    canvasDiv.className = "m2c2kit-full-viewport m2c2kit-flex-container";
+
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("id", "m2c2kit-canvas");
+    canvas.className = "m2c2kit-full-viewport";
+    canvasDiv.appendChild(canvas);
+
+    rootElement.appendChild(canvasDiv);
+  }
+
   /**
    * Add elements to hide the canvas and show a spinner.
    */
   static addLoadingElements(): void {
-    const containerDiv = document.getElementById("m2c2kit-container-div");
-    if (!containerDiv) {
+    const canvasDiv = document.getElementById("m2c2kit-canvas-div");
+    if (!canvasDiv) {
       throw new Error("Could not find container element");
     }
 
@@ -20,8 +37,8 @@ export class DomHelper {
       spinnerDiv.setAttribute("id", "m2c2kit-spinner-div");
       spinnerDiv.className = "m2c2kit-spinner m2c2kit-display-none";
 
-      containerDiv.appendChild(overlayDiv);
-      containerDiv.appendChild(spinnerDiv);
+      canvasDiv.appendChild(overlayDiv);
+      canvasDiv.appendChild(spinnerDiv);
     }
   }
 
@@ -107,7 +124,7 @@ export class DomHelper {
    * @param visible - true if the canvas div should be visible
    */
   private static setCanvasDivVisibility(visible: boolean): void {
-    const canvasDiv = document.getElementById("m2c2kit-container-div");
+    const canvasDiv = document.getElementById("m2c2kit-canvas-div");
     if (canvasDiv && visible) {
       canvasDiv.classList.remove("m2c2kit-display-none");
       canvasDiv.classList.add("m2c2kit-flex-container");

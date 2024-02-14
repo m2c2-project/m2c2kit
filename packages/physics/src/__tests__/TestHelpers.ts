@@ -1,6 +1,7 @@
 import { Game } from "@m2c2kit/core";
 import { jest } from "@jest/globals";
 import { CanvasKit } from "canvaskit-wasm";
+import { DomHelper } from "@m2c2kit/session";
 
 export class TestHelpers {
   static setupDomAndGlobals(): void {
@@ -11,16 +12,16 @@ export class TestHelpers {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body class="m2c2kit-background-color m2c2kit-no-margin">
-      <div id="m2c2kit-survey-div"></div>
-      <div
-        class="m2c2kit-full-viewport m2c2kit-flex-container"
-        id="m2c2kit-container-div"
-      >
-        <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+      <div id="m2c2kit">
       </div>
     </body>
     </html>`;
     document.documentElement.innerHTML = html;
+    const root = document.getElementById("m2c2kit");
+    if (!root) {
+      throw new Error(`root element not found`);
+    }
+    DomHelper.createRoot(root);
 
     Object.defineProperty(window, "performance", {
       value: TestHelpers.performance,

@@ -11,16 +11,16 @@ export class TestHelpers {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body class="m2c2kit-background-color m2c2kit-no-margin">
-      <div id="m2c2kit-survey-div"></div>
-      <div
-        class="m2c2kit-full-viewport m2c2kit-flex-container"
-        id="m2c2kit-container-div"
-      >
-        <canvas class="m2c2kit-full-viewport" id="m2c2kit-canvas"></canvas>
+      <div id="m2c2kit">
       </div>
     </body>
     </html>`;
     document.documentElement.innerHTML = html;
+    /**
+     * Note: TestHelpers for @m2c2kit/session does not call DomHelper.createRoot(root);
+     * because all the tests for @m2c2kit/session involve the session object, which
+     * creates the root element.
+     */
 
     Object.defineProperty(window, "performance", {
       value: TestHelpers.performance,

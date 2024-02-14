@@ -269,6 +269,15 @@ export class Session {
       type: SessionEventType.SessionInitialize,
     };
     this.raiseEventOnListeners(sessionInitializeEvent);
+    const rootId =
+      this.options.rootElementId ?? Constants.DEFAULT_ROOT_ELEMENT_ID;
+    const root = document.getElementById(rootId);
+    if (!root) {
+      throw new Error(
+        `Session.initialize(): root element with id ${rootId} not found. The index.html should have: <div id="${rootId}"></div>.`,
+      );
+    }
+    DomHelper.createRoot(root);
     DomHelper.addLoadingElements();
     DomHelper.setBusyAnimationVisibility(true);
     DomHelper.setCanvasOverlayVisibility(true);

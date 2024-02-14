@@ -21,6 +21,8 @@ export interface SessionOptions {
   autoGoToNextActivity?: boolean;
   /** After the last activity ends or is canceled, should the session automatically end? Default is true */
   autoEndAfterLastActivity?: boolean;
+  /** The id of the HTML element to use as the root element where m2c2kit activities will be rendered. Default is "m2c2kit". */
+  rootElementId?: string;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"
