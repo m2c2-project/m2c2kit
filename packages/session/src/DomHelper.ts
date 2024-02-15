@@ -1,6 +1,11 @@
 import { Activity, ActivityType } from "@m2c2kit/core";
 
 export class DomHelper {
+  /**
+   * Specifies the HTML element in which to render the m2c2kit activities.
+   *
+   * @param rootElement - the element to add the survey div and canvas div to
+   */
   static createRoot(rootElement: HTMLElement): void {
     const surveyDiv = document.createElement("div");
     surveyDiv.setAttribute("id", "m2c2kit-survey-div");
@@ -16,6 +21,17 @@ export class DomHelper {
     canvasDiv.appendChild(canvas);
 
     rootElement.appendChild(canvasDiv);
+  }
+
+  /**
+   * Adds a style sheet to the head of the document.
+   *
+   * @param css - text of the CSS
+   */
+  static addStyleSheet(css: string): void {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = css;
+    document.head.appendChild(styleSheet);
   }
 
   /**
@@ -86,9 +102,9 @@ export class DomHelper {
   }
 
   /**
-   * Shows or hides the spinner.
+   * Shows or hides the busy animation.
    *
-   * @param visible - true if the spinner should be visible
+   * @param visible - true if the busy animation should be visible
    */
   static setBusyAnimationVisibility(visible: boolean): void {
     const div = document.getElementById("m2c2kit-spinner-div");

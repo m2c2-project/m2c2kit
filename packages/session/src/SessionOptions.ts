@@ -23,6 +23,8 @@ export interface SessionOptions {
   autoEndAfterLastActivity?: boolean;
   /** The id of the HTML element to use as the root element where m2c2kit activities will be rendered. Default is "m2c2kit". */
   rootElementId?: string;
+  /** Optional style sheet (CSS) to apply to the document instead of the default m2c2kit CSS. It is recommended to use the default CSS. */
+  styleSheet?: string;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

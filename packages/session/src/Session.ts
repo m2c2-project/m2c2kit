@@ -19,6 +19,7 @@ import { DomHelper } from "./DomHelper";
 import { SessionOptions } from "./SessionOptions";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
 import { SessionEvent, SessionEventType } from "./SessionEvent";
+import { m2c2kitCss } from "./m2c2kitCss";
 
 export class Session {
   options: SessionOptions;
@@ -278,6 +279,7 @@ export class Session {
       );
     }
     DomHelper.createRoot(root);
+    DomHelper.addStyleSheet(this.options.styleSheet ?? m2c2kitCss);
     DomHelper.addLoadingElements();
     DomHelper.setBusyAnimationVisibility(true);
     DomHelper.setCanvasOverlayVisibility(true);

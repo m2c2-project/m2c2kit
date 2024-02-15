@@ -54,26 +54,11 @@ describe("hashM2c2kitAssets rollup plugin", () => {
     expect(hashFileExists).toBe(true);
   });
 
-  it("creates correct hash for css", async () => {
-    const hashFileExists = fs.existsSync(
-      "packages/build-helpers/src/__tests__/dist/assets/css/m2c2kit.42697434248ea1d8.css",
-    );
-    expect(hashFileExists).toBe(true);
-  });
-
   it("index.html references correct hash for index.js", async () => {
     const contents = fs.readFileSync(
       "packages/build-helpers/src/__tests__/dist/index.html",
       { encoding: "utf-8" },
     );
     expect(contents.includes("index.c9df28c0a2b6735b.js")).toBe(true);
-  });
-
-  it("index.html references correct hash for m2c2kit.css", async () => {
-    const contents = fs.readFileSync(
-      "packages/build-helpers/src/__tests__/dist/index.html",
-      { encoding: "utf-8" },
-    );
-    expect(contents.includes("m2c2kit.42697434248ea1d8.css")).toBe(true);
   });
 });

@@ -1,4 +1,4 @@
-.m2c2kit-background-color {
+export const m2c2kitCss = `.m2c2kit-background-color {
   background: white;
 }
 
@@ -69,4 +69,4 @@
   100% {
     transform: rotate(360deg);
   }
-}
+}`;

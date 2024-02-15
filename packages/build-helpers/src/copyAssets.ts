@@ -160,8 +160,7 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
 
           switch (packageName) {
             /**
-             * session package has the css for m2c2kit.
-             * Copy the assets folder contents **except** `index.html`.
+             * Copy the session assets folder contents **except** `index.html`.
              */
             case "@m2c2kit/session":
               await copySessionAssetsExceptIndexHtml(resolvedPackage);
