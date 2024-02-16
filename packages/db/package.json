@@ -10,10 +10,9 @@
     }
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts",
-    "dist/data.js",
-    "data.html"
+    "dist/**",
+    "assets/**",
+    "metadata.json"
   ],
   "scripts": {
     "build": "npm run clean && tsc --build && rollup -c",

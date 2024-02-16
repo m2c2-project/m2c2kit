@@ -27,6 +27,10 @@ do
     s="$(npm install -g @m2c2kit/cli 2>&1)"    
 done
 
+git config --global init.defaultBranch main
+git config --global user.email "ci@example.com"
+git config --global user.name "ci"
+
 m2 new testapp
 cd testapp
 # localhost did not work in container on windows host, but 0.0.0.0 did

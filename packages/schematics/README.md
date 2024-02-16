@@ -4,7 +4,7 @@
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@m2c2kit/schematics.svg)](https://www.npmjs.com/package/@m2c2kit/schematics)
 
-This package contains rules for generating new apps with the m2c2kit CLI.
+This package contains rules for generating new apps and assessment modules with the m2c2kit CLI.
 
 **m2c2kit** is a library for cross-platform cognitive assessments. Features:
 

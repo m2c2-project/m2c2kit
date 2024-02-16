@@ -12,6 +12,8 @@ import {
   Source,
   applyTemplates,
 } from "@angular-devkit/schematics";
+import { RepositoryInitializerTask } from "@angular-devkit/schematics/tasks";
+import { CommitOptions } from "@angular-devkit/schematics/tasks/repo-init/init-task";
 import findup = require("findup-sync");
 import fs = require("fs");
 import path = require("path");
@@ -21,6 +23,8 @@ import { Constants } from "../constants";
 
 interface m2NewOptions {
   name?: string;
+  module?: boolean;
+  skipGit?: boolean;
 }
 
 export function m2New(options: m2NewOptions): Rule {
@@ -40,35 +44,14 @@ export function m2New(options: m2NewOptions): Rule {
       throw new SchematicsException("Workflow is not available.");
     }
 
+    // package.json differs for an app and a module.
+    const packageJsonContents = options.module
+      ? generateModulePackageJson(options.name)
+      : generateAppPackageJson(options.name);
     const npmInstallOptions: NpmInstallOptions = {
       directory: directory,
       dependencies: [],
-      packageJsonContents: `{
-  "name": "${strings.dasherize(options.name)}",
-  "version": "1.0.0",
-  "scripts": {
-    "serve": "npm run clean && rollup -c rollup.config.mjs --watch --configServe",
-    "build": "npm run clean && rollup -c rollup.config.mjs --configProd",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
-  },
-  "private": true,
-  "dependencies": {
-    "@m2c2kit/addons": "0.3.13",
-    "@m2c2kit/core": "0.3.16",
-    "@m2c2kit/session": "0.3.0"
-  },
-  "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.12",
-    "@rollup/plugin-node-resolve": "15.2.3",
-    "@rollup/plugin-typescript": "11.1.6",
-    "rimraf": "5.0.5",
-    "rollup": "4.10.0",
-    "rollup-plugin-livereload": "2.0.5",
-    "rollup-plugin-serve": "3.0.0",
-    "tslib": "2.6.2",
-    "typescript": "5.3.3"
-  }
-}`,
+      packageJsonContents: packageJsonContents,
     };
 
     /**
@@ -96,10 +79,13 @@ export function m2New(options: m2NewOptions): Rule {
     const rules: Rule[] = [];
 
     /**
-     * Second, copy the files from the schematics template
+     * Second, copy the files from the schematics template. Use different
+     * files for an app and a module.
      */
     const schematicsVersion = Constants.M2C2KIT_SCHEMATICS_PACKAGE_VERSION;
-    const sourceTemplates: Source = url("./files");
+    const sourceTemplates: Source = options.module
+      ? url("./files/module")
+      : url("./files/app");
     const sourceParameterizedTemplates = apply(sourceTemplates, [
       applyTemplates({
         classify: strings.classify,
@@ -133,6 +119,16 @@ export function m2New(options: m2NewOptions): Rule {
       copyFindUps(findUps, tree);
       return tree;
     });
+
+    if (!options.skipGit) {
+      const commit: CommitOptions = {
+        message: "Initial commit",
+      };
+      rules.push((tree: Tree, context: SchematicContext) => {
+        context.addTask(new RepositoryInitializerTask(directory, commit));
+        return tree;
+      });
+    }
 
     process.on("exit", (exitCode) => {
       if (exitCode === 0) {
@@ -171,4 +167,75 @@ function copyFindUps(findUps: FindUps[], tree: Tree) {
     const buf = fs.readFileSync(filePath);
     tree.create(path.join(fu.dest), buf);
   });
+}
+
+function generateAppPackageJson(name: string) {
+  return `{
+  "name": "${strings.dasherize(name)}",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "npm run clean && rollup -c rollup.config.mjs --watch --configServe",
+    "build": "npm run clean && rollup -c rollup.config.mjs --configProd",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
+  },
+  "private": true,
+  "dependencies": {
+    "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
+    "@m2c2kit/addons": "${Constants.M2C2KIT_ADDONS_PACKAGE_VERSION}",
+    "@m2c2kit/session": "${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-typescript": "11.1.6",
+    "rimraf": "5.0.5",
+    "rollup": "4.10.0",
+    "rollup-plugin-livereload": "2.0.5",
+    "rollup-plugin-serve": "3.0.0",
+    "tslib": "2.6.2",
+    "typescript": "5.3.3"
+  }
+}`;
+}
+
+function generateModulePackageJson(name: string) {
+  return `{
+  "name": "${strings.dasherize(name)}",
+  "version": "1.0.0",
+  "private": true,  
+  "scripts": {
+    "serve": "npm run clean-runner && rollup -c rollup.config.runner.mjs --watch --configServe",
+    "build": "npm run clean && rollup -c rollup.config.mjs --configProd --configNoHash",
+    "clean": "rimraf dist",
+    "clean-runner": "rimraf runner-build"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },  
+  "files": [
+    "dist",
+    "assets/**",
+    "metadata.json"
+  ],  
+  "dependencies": {
+    "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
+    "@m2c2kit/addons": "${Constants.M2C2KIT_ADDONS_PACKAGE_VERSION}",
+    "@m2c2kit/session": "${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-typescript": "11.1.6",
+    "rimraf": "5.0.5",
+    "rollup": "4.10.0",
+    "rollup-plugin-livereload": "2.0.5",
+    "rollup-plugin-serve": "3.0.0",
+    "tslib": "2.6.2",
+    "typescript": "5.3.3"
+  }
+}`;
 }

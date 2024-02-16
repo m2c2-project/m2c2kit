@@ -4,22 +4,17 @@ import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import {
   copyAssets,
-  hashM2c2kitAssets,
-  makeM2c2kitServiceWorker,
 } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
-  const isProduction = commandLineArgs.configProd ? true : false;
+  const port = commandLineArgs.configPort || 3000;  
 
-  let outputFolder = "build";
-  if (isProduction) {
-    outputFolder = "dist";
-  }
+  let outputFolder = "runner-build";
 
   const finalConfig = [
     {
-      input: "./src/index.ts",
+      input: "./src/runner.ts",
       output: [
         {
           file: `./${outputFolder}/index.js`,
@@ -31,19 +26,12 @@ export default (commandLineArgs) => {
       plugins: [
         nodeResolve(),
         typescript({
-          sourceMap: isDebug && true,
+          tsconfig: "tsconfig.runner.json",
         }),
         copyAssets({ package: [
           "<%= dasherize(appName) %>",
           "@m2c2kit/session",
-        ], outputFolder }),        
-        isProduction &&
-          !commandLineArgs.configNoHash &&
-          hashM2c2kitAssets(outputFolder),
-        commandLineArgs.configProd &&
-        !commandLineArgs.configNoHash &&
-        commandLineArgs.configServiceWorker &&
-        makeM2c2kitServiceWorker(outputFolder, ["data.html", "data.js"]),          
+        ], outputFolder }),
         isDebug &&
           serve({
             /**
@@ -57,14 +45,14 @@ export default (commandLineArgs) => {
             contentBase: [`./${outputFolder}`],
             historyApiFallback: true,
             host: "localhost",
-            port: 3000,
+            port: port,
           }),
         isDebug &&
           /**
            * Try a shorter delay for quicker reloads, but increase it if
            * the browser reloads before the new build is fully ready.
            */
-          livereload({ watch: "build", delay: 250 }),
+          livereload({ watch: "runner-build", delay: 250 }),
       ],
     },
   ];

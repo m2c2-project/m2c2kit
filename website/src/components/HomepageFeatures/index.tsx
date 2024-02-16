@@ -24,9 +24,8 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Use on browsers, compile within native apps, or embed in products like
-        RedCap or Qualtrics. A shared assessment codebase reduces development
-        time and promotes experiment standardization across devices and
-        services.
+        Qualtrics. A shared assessment codebase reduces development time and
+        promotes experiment standardization across devices and services.
       </>
     ),
   },

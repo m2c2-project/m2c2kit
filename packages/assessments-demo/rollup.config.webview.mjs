@@ -7,6 +7,7 @@ import { hashM2c2kitAssets } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
   const isDebug = commandLineArgs.configServe ? true : false;
+  const port = commandLineArgs.configPort || 3000;
 
   let outputFolder = "build";
   if (commandLineArgs.configProd) {
@@ -70,7 +71,7 @@ export default (commandLineArgs) => {
             contentBase: [`./${outputFolder}`],
             historyApiFallback: true,
             host: "localhost",
-            port: 3000,
+            port: port,
           }),
         commandLineArgs.configServe &&
           livereload({ watch: "build", delay: 250 }),

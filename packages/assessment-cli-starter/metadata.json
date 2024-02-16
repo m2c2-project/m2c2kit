@@ -1,0 +1,8 @@
+{
+  "versions": {
+    "0.8.12": {
+      "dependencies": { "@m2c2kit/addons": "^0.3.3", "@m2c2kit/core": "^0.3.6" }
+    }
+  },
+  "version": "0.8.12"
+}

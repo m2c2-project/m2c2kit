@@ -17,7 +17,7 @@ m2c2kit is a library for cross-platform cognitive assessments. It is produced by
 Features:
 
 - **Mobile first**. Optimized for touch and mobile devices while also usable on desktops.
-- **Portable**. Use on browsers, compile within native apps using webviews, or embed in products like RedCap or Qualtrics. A shared assessment codebase reduces development time and promotes experiment standardization across devices and services.
+- **Portable**. Use on browsers, compile within native apps using webviews, or embed in products like Qualtrics. A shared assessment codebase reduces development time and promotes experiment standardization across devices and services.
 - **Rapid iteration**. Quickly develop and test new assessments with the JavaScript-based library and deploy them in studies.
 
 m2c2kit is written in Typescript and leverages Google's [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) Skia-based graphics engine to present cognitive assessments using HTML5 and JavaScript.

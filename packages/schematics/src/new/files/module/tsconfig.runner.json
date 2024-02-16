@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "outDir": "runner-build",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "sourceMap": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.js"]
+}

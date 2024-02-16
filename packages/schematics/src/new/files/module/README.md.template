@@ -1,0 +1,3 @@
+# <%= appName %>
+
+This project was generated with the m2c2kit CLI schematics version <%= schematicsVersion %>.

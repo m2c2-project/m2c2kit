@@ -2,7 +2,13 @@ import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
-import { addModuleMetadata, insertVersionString } from "@m2c2kit/build-helpers";
+import {
+  addModuleMetadata,
+  insertVersionString,
+  writeMetadataJson,
+} from "@m2c2kit/build-helpers";
+
+writeMetadataJson();
 
 export default [
   {

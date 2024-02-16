@@ -1,0 +1,20 @@
+# build artifacts
+dist
+build
+runner-build
+
+# Dependency directories
+node_modules
+
+# caches
+*.tsbuildinfo
+.rollup.cache
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# OS metadata
+**/.DS_Store
+**/thumbs.db

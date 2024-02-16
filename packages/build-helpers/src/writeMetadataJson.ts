@@ -8,11 +8,18 @@ import { readFileSync, writeFileSync } from "fs";
  * `metadata.json`. This is used to keep track of the dependencies of each
  * version (past and present).
  *
- * End users will not need this function.
+ * This is used only when creating assessments that are modules.
  */
 export function writeMetadataJson() {
   const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
-  const metadata = JSON.parse(readFileSync("./metadata.json", "utf8"));
+
+  let metadata;
+  try {
+    metadata = JSON.parse(readFileSync("./metadata.json", "utf8"));
+  } catch (e) {
+    metadata = { versions: {} };
+  }
+  metadata.version = pkg.version;
   for (const dependency in pkg["dependencies"]) {
     if (dependency.startsWith("@m2c2kit/")) {
       if (!metadata.versions[pkg.version]) {

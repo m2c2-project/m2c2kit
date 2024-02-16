@@ -12,6 +12,18 @@
         "index": 0
       },
       "x-prompt": "What name would you like to use for the new m2c2kit app?"
+    },
+    "module": {
+      "description": "Create a m2c2kit assessment module.",
+      "type": "boolean",
+      "default": false,
+      "alias": "m"
+    },
+    "skipGit": {
+      "description": "Do not initialize a git repository.",
+      "type": "boolean",
+      "default": false,
+      "alias": "g"
     }
   },
   "required": ["name"]

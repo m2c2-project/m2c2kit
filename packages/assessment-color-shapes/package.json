@@ -14,9 +14,9 @@
     }
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts",
-    "assets/**"
+    "dist/**",
+    "assets/**",
+    "metadata.json"
   ],
   "license": "MIT",
   "author": {
