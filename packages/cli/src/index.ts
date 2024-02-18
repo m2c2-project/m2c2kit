@@ -401,34 +401,21 @@ export async function main({
  * Get usage of the CLI tool.
  */
 function getUsage(): string {
+  const colors = ansiColors.create();
   return `
-m2 <command> [options, ...]
+m2c2kit CLI
 
-Commands:
-  m2 new <name>         create a new m2c2kit app.  
+${colors.blue("Commands:")}
+  m2 new [name]         Create a new m2c2kit project.  
 
-Options:
-    --debug             Debug mode. This is true by default if the collection is a relative
-                        path (in that case, turn off with --debug=false).
+    Arguments:
+      name              The name of the new project.
 
-    --allow-private     Allow private schematics to be run from the command line. Default to
-                        false.
+    Options:
+      -g, --skipGit     Skip initializing a git repository.
+      -m, --module      Create a m2c2kit assessment module (default is application).
 
-    --dry-run           Do not output anything, but instead just show what actions would be
-                        performed. Default to true if debug is also true.
-
-    --force             Force overwriting files that would otherwise be an error.
-
-    --list-schematics   List all schematics from the collection, by name. A collection name
-                        should be suffixed by a colon. Example: '@angular-devkit/schematics-cli:'.
-
-    --no-interactive    Disables interactive input prompts.
-
-    --verbose           Show more information.
-
-    --help              Show this message.
-
-Any additional option is passed to the Schematics depending on its schema.
+  m2 zip                Package a built assessment module into a zip file.
 `;
 }
 
@@ -444,11 +431,8 @@ const booleanArgs = [
   "interactive",
 ] as const;
 
-type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<
-  infer ElementType
->
-  ? ElementType
-  : never;
+type ElementType<T extends ReadonlyArray<unknown>> =
+  T extends ReadonlyArray<infer ElementType> ? ElementType : never;
 
 interface Options {
   _: string[];

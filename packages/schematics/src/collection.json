@@ -13,6 +13,10 @@
     "npm-install": {
       "description": "A schematic to install a package from npm",
       "factory": "./install/index#npmInstall"
+    },
+    "zip": {
+      "description": "A schematic to zip a m2c2kit module",
+      "factory": "./zip/index#zip"
     }
   }
 }
