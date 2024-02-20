@@ -1,4 +1,4 @@
-import typescript from "@rollup/plugin-typescript";
+import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
@@ -31,7 +31,7 @@ const port = commandLineArgs.configPort || 3000;
       ],
       plugins: [
         nodeResolve(),
-        typescript({
+        esbuild({
           sourceMap: isDebug && true,
         }),
         copyAssets({ package: [

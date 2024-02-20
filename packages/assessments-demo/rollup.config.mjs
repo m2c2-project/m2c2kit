@@ -6,7 +6,6 @@ import {
   hashM2c2kitAssets,
   makeM2c2kitServiceWorker,
   copyAssets,
-  restoreImportMeta,
 } from "@m2c2kit/build-helpers";
 
 export default (commandLineArgs) => {
@@ -30,12 +29,7 @@ export default (commandLineArgs) => {
       ],
       plugins: [
         nodeResolve(),
-        esbuild({
-          logOverride: {
-            "empty-import-meta": "silent",
-          },
-        }),
-        restoreImportMeta(),
+        esbuild(),
         copyAssets({
           package: [
             "@m2c2kit/session",

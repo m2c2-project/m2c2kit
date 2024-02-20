@@ -12,7 +12,9 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "sourceMap": false,
+    // esbuild will build the module; tsc will type check and generate the declaration files
     "declaration": true,
+    "emitDeclarationOnly": true,
   },
   "include": ["./src/**/*.ts", "./src/**/*.js"],
   "exclude": ["./src/runner.ts"]

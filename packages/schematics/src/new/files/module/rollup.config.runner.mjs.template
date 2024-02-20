@@ -1,4 +1,4 @@
-import typescript from "@rollup/plugin-typescript";
+import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
@@ -25,7 +25,7 @@ export default (commandLineArgs) => {
       ],
       plugins: [
         nodeResolve(),
-        typescript({
+        esbuild({
           tsconfig: "tsconfig.runner.json",
         }),
         copyAssets({ package: [

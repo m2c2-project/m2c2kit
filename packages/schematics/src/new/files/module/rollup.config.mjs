@@ -1,4 +1,4 @@
-import typescript from "@rollup/plugin-typescript";
+import esbuild from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import {
   addModuleMetadata,
@@ -26,7 +26,7 @@ export default () => {
         insertVersionString(),
         addModuleMetadata(),
         nodeResolve(),
-        typescript(),
+        esbuild(),
       ],
       onwarn: (warning) => {
         if (warning.code === "UNUSED_EXTERNAL_IMPORT") {

@@ -3,7 +3,7 @@
   "description": "A demo of several m2c2kit assessments",
   "version": "0.8.10",
   "scripts": {
-    "serve": "npm run clean && tsc && rollup -c --watch --configServe",
+    "serve": "concurrently \"rollup -c --watch --configServe\" \"tsc --watch\" --names rollup,typescript --prefix-colors auto,red",
     "build": "npm run clean && tsc && rollup -c --configProd",
     "build-webview": "npm run clean-webview && rollup -c rollup.config.webview.mjs --configProd --configNoHash",
     "build-sw": "npm run clean && rollup -c --configProd --configServiceWorker",
@@ -38,12 +38,15 @@
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.12",
     "@rollup/plugin-node-resolve": "15.2.3",
+    "concurrently": "8.2.2",
+    "esbuild": "0.20.1",
     "rimraf": "5.0.5",
     "rollup": "4.10.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.1.1",
     "rollup-plugin-livereload": "2.0.5",
-    "rollup-plugin-serve": "3.0.0"
+    "rollup-plugin-serve": "3.0.0",
+    "typescript": "5.3.3"
   },
   "engines": {
     "node": ">=18"

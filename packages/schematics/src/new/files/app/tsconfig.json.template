@@ -10,7 +10,9 @@
     "strict": true,
     "outDir": "build",
     "rootDir": "src",    
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // esbuild will build the app; tsc will only type check
+    "noEmit": true
   },
   "include": ["./src/**/*.ts", "./src/**/*.js"]
 }

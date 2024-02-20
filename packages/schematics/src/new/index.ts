@@ -174,8 +174,8 @@ function generateAppPackageJson(name: string) {
   "name": "${strings.dasherize(name)}",
   "version": "1.0.0",
   "scripts": {
-    "serve": "npm run clean && rollup -c rollup.config.mjs --watch --configServe",
-    "build": "npm run clean && rollup -c rollup.config.mjs --configProd",
+    "serve": "concurrently \\"rollup -c --watch --configServe\\" \\"tsc --watch\\" --names rollup,typescript --prefix-colors auto,red",
+    "build": "npm run clean && tsc && rollup -c rollup.config.mjs --configProd",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "private": true,
@@ -186,14 +186,15 @@ function generateAppPackageJson(name: string) {
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
-    "@rollup/plugin-node-resolve": "15.2.3",
-    "@rollup/plugin-typescript": "11.1.6",
-    "rimraf": "5.0.5",
-    "rollup": "4.10.0",
-    "rollup-plugin-livereload": "2.0.5",
-    "rollup-plugin-serve": "3.0.0",
-    "tslib": "2.6.2",
-    "typescript": "5.3.3"
+    "@rollup/plugin-node-resolve": "${Constants.ROLLUP_PLUGIN_NODE_RESOLVE_VERSION}",
+    "concurrently": "${Constants.CONCURRENTLY_VERSION}",
+    "esbuild": "${Constants.ESBUILD_VERSION}",
+    "rimraf": "${Constants.RIMRAF_VERSION}",
+    "rollup": "${Constants.ROLLUP_VERSION}",
+    "rollup-plugin-esbuild": "${Constants.ROLLUP_PLUGIN_ESBUILD_VERSION}",
+    "rollup-plugin-livereload": "${Constants.ROLLUP_PLUGIN_LIVERELOAD_VERSION}",
+    "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
+    "typescript": "${Constants.TYPESCRIPT_VERSION}"
   }
 }`;
 }
@@ -204,10 +205,9 @@ function generateModulePackageJson(name: string) {
   "version": "1.0.0",
   "private": true,  
   "scripts": {
-    "serve": "npm run clean-runner && rollup -c rollup.config.runner.mjs --watch --configServe",
-    "build": "npm run clean && rollup -c rollup.config.mjs --configProd --configNoHash",
-    "clean": "rimraf dist",
-    "clean-runner": "rimraf runner-build"
+    "serve": "concurrently \\"rollup -c rollup.config.runner.mjs --watch --configServe\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rollup,typescript --prefix-colors auto,red",
+    "build": "npm run clean && tsc && rollup -c --configProd --configNoHash",
+    "clean": "rimraf runner-build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -228,14 +228,15 @@ function generateModulePackageJson(name: string) {
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
-    "@rollup/plugin-node-resolve": "15.2.3",
-    "@rollup/plugin-typescript": "11.1.6",
-    "rimraf": "5.0.5",
-    "rollup": "4.10.0",
-    "rollup-plugin-livereload": "2.0.5",
-    "rollup-plugin-serve": "3.0.0",
-    "tslib": "2.6.2",
-    "typescript": "5.3.3"
+    "@rollup/plugin-node-resolve": "${Constants.ROLLUP_PLUGIN_NODE_RESOLVE_VERSION}",
+    "concurrently": "${Constants.CONCURRENTLY_VERSION}",
+    "esbuild": "${Constants.ESBUILD_VERSION}",
+    "rimraf": "${Constants.RIMRAF_VERSION}",
+    "rollup": "${Constants.ROLLUP_VERSION}",
+    "rollup-plugin-esbuild": "${Constants.ROLLUP_PLUGIN_ESBUILD_VERSION}",
+    "rollup-plugin-livereload": "${Constants.ROLLUP_PLUGIN_LIVERELOAD_VERSION}",
+    "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
+    "typescript": "${Constants.TYPESCRIPT_VERSION}"
   }
 }`;
 }

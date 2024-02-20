@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "20.11.17",
-    "esbuild": "0.20.0"
+    "esbuild": "0.20.1"
   },
   "scripts": {
     "build": "node esbuild.mjs",
