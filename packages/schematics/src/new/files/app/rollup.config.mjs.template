@@ -1,4 +1,4 @@
-import esbuild from "rollup-plugin-esbuild";
+import esbuild, { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
@@ -34,6 +34,7 @@ const port = commandLineArgs.configPort || 3000;
         esbuild({
           sourceMap: isDebug && true,
         }),
+        commandLineArgs.configMinify && minify(),        
         copyAssets({ package: [
           "<%= dasherize(appName) %>",
           "@m2c2kit/session",

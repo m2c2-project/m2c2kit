@@ -1,7 +1,7 @@
 {
+  "extends": "../../tsconfig.json",
   "references": [{ "path": "../core" }],
   "include": ["src"],
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "build",
     "rootDir": "src"

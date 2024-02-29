@@ -1,4 +1,5 @@
 import esbuild from "rollup-plugin-esbuild";
+import { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import {
   addModuleMetadata,
@@ -9,17 +10,19 @@ import {
 writeMetadataJson();
 
 export default () => {
-  const outputFolder = "dist";
-
   const finalConfig = [
     {
       input: "./src/index.ts",
       external: ["@m2c2kit/core", "@m2c2kit/addons"],
       output: [
         {
-          dir: outputFolder,
+          file: "./dist/index.js",
           format: "es",
-          sourcemap: false,
+        },
+        {
+          file: "./dist/index.min.js",
+          format: "es",
+          plugins: [minify()],
         },
       ],
       plugins: [
@@ -28,23 +31,6 @@ export default () => {
         nodeResolve(),
         esbuild(),
       ],
-      onwarn: (warning) => {
-        if (warning.code === "UNUSED_EXTERNAL_IMPORT") {
-          /**
-           * Suppress this warning. Constants.MODULE_METADATA_PLACEHOLDER
-           * is replaced during the build process, so it's not actually
-           * used in the final code.
-           */
-          if (
-            warning.message.includes("Constants") &&
-            warning.message.includes("@m2c2kit/core")
-          ) {
-            return;
-          }
-        }
-        // Log other warnings to console
-        console.warn(warning.message);
-      },
     },
   ];
   return finalConfig;

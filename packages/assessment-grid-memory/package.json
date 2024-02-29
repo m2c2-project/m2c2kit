@@ -6,16 +6,20 @@
     "build": "npm run clean && tsc && rollup -c",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
-    "dist/**",
-    "assets/**",
+    "dist",
+    "!*.d.ts.map",
+    "assets",
     "metadata.json"
   ],
   "license": "MIT",

@@ -1,23 +1,9 @@
 {
+  "extends": "../../tsconfig.json",
   "references": [{ "path": "../core" }, { "path": "../addons" }],
+  "include": ["src"],
   "compilerOptions": {
-    "composite": true,
-    "target": "es6",
-    "lib": ["es6", "dom", "dom.iterable"],
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "sourceMap": true,
-    "declarationMap": true,
-    "module": "es6",
-    "moduleResolution": "node",
-    "allowJs": true,
-    "outDir": "build",
-    "rootDir": "src",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true
-  },
-  "include": ["./src/**/*.ts", "./src/**/*.js"],
-  "exclude": ["**/__tests__", "**/*.test.ts"]
+    "outDir": "dist",
+    "rootDir": "src"
+  }
 }

@@ -175,7 +175,8 @@ function generateAppPackageJson(name: string) {
   "version": "1.0.0",
   "scripts": {
     "serve": "concurrently \\"rollup -c --watch --configServe\\" \\"tsc --watch\\" --names rollup,typescript --prefix-colors auto,red",
-    "build": "npm run clean && tsc && rollup -c rollup.config.mjs --configProd",
+    "build": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd",
+    "build:no-hash": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd --configNoHash",    
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "private": true,
@@ -209,15 +210,18 @@ function generateModulePackageJson(name: string) {
     "build": "npm run clean && tsc && rollup -c --configProd --configNoHash",
     "clean": "rimraf runner-build dist .rollup.cache tsconfig.tsbuildinfo"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",  
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"      
     }
-  },  
+  },
   "files": [
-    "dist",
+    "dist/**",
     "assets/**",
     "metadata.json"
   ],  

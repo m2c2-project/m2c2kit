@@ -30,7 +30,6 @@ export default [
       {
         file: "./build/index.min.js",
         format: "es",
-        sourcemap: false,
         plugins: [minify()],
       },
     ],
@@ -74,11 +73,6 @@ export default [
           {
             src: "build/index.min.js",
             dest: "dist",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "dist/",
-            rename: () => "index.min.d.ts",
           },
           {
             // rollup-plugin-copy doesn't like windows backslashes

@@ -1,7 +1,6 @@
 import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import copy from "rollup-plugin-copy";
 import {
   addModuleMetadata,
   insertVersionString,
@@ -32,19 +31,6 @@ export default [
       addModuleMetadata(),
       nodeResolve(),
       esbuild(),
-      copy({
-        targets: [
-          {
-            src: "build/index.d.ts",
-            dest: "dist",
-          },
-          {
-            src: "build/index.d.ts",
-            dest: "dist",
-            rename: () => "index.min.d.ts",
-          },
-        ],
-      }),
     ],
   },
 ];

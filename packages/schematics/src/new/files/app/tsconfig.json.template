@@ -1,18 +1,22 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es6", "dom", "dom.iterable"],
+    "lib": ["es6", "dom"],
     "module": "es6",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "esModuleInterop": true,
+    "downlevelIteration": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,    
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "outDir": "build",
     "rootDir": "src",    
     "skipLibCheck": true,
-    // esbuild will build the app; tsc will only type check
-    "noEmit": true
+    // esbuild will build the module; tsc will type check and generate the declaration files
+    "declaration": true,
+    "emitDeclarationOnly": true,
   },
   "include": ["./src/**/*.ts", "./src/**/*.js"]
 }

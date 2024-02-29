@@ -27,7 +27,7 @@ export function makeM2c2kitServiceWorker(
       },
     },
     transform: {
-      handler(code: string, id: any): string {
+      handler(code: string, id: string): string {
         if (id === inputFile) {
           if (code.includes("//# sourceMappingURL")) {
             code = code.replace(
