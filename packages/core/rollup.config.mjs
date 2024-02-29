@@ -10,11 +10,8 @@ import replace from "@rollup/plugin-replace";
 import {
   insertVersionString,
   restoreImportMeta,
-  writeMetadataJson,
   resolveAsync,
 } from "@m2c2kit/build-helpers";
-
-writeMetadataJson();
 
 const canvasKitWasmVersion = (await resolveAsync("canvaskit-wasm")).package
   .version;

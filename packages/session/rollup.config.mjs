@@ -3,9 +3,7 @@ import { minify } from "rollup-plugin-esbuild";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
-import { insertVersionString, writeMetadataJson } from "@m2c2kit/build-helpers";
-
-writeMetadataJson();
+import { insertVersionString } from "@m2c2kit/build-helpers";
 
 export default [
   {

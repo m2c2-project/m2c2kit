@@ -1,4 +1,0 @@
-{
-  "versions": { "0.1.3": { "dependencies": { "@m2c2kit/core": "^0.3.10" } } },
-  "version": "0.1.3"
-}

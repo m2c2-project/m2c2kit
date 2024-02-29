@@ -3,9 +3,6 @@ import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
-import { writeMetadataJson } from "@m2c2kit/build-helpers";
-
-writeMetadataJson();
 
 // I could not get @rollup/plugin-typescript to work with the
 // emitDeclarationOnly option. Thus, as part of the build script in
