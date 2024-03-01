@@ -61,16 +61,16 @@ export class Embedding {
    * @returns
    */
   public static initialize(session: Session, options: EmbeddingOptions): void {
-    const version = "__PACKAGE_JSON_VERSION__";
-    console.log(`⚪ @m2c2kit/embedding version ${version}`);
-
     /**
      * Make session also available on window in case we want to control
      * the session through another means, such as other javascript or
      * browser code, or a mobile WebView.
+     *
+     * We call it m2c2kitSession to avoid name conflicts with other
+     * javascript code that might use the name "session".
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as unknown as any).session = session;
+    (window as unknown as any).m2c2kitSession = session;
 
     if (options.host === "MobileWebView") {
       session.options.autoStartAfterInit = !(

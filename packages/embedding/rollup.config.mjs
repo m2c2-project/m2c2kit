@@ -1,26 +1,13 @@
 import esbuild from "rollup-plugin-esbuild";
 import { minify } from "rollup-plugin-esbuild";
-import nodeResolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
 import dts from "rollup-plugin-dts";
-import replace from "@rollup/plugin-replace";
-import { readFileSync } from "fs";
-import child_process from "child_process";
-
-const pkg = JSON.parse(
-  readFileSync(new URL("./package.json", import.meta.url), "utf8")
-);
-
-const shortCommitHash = child_process
-  .execSync("git rev-parse HEAD")
-  .toString()
-  .trim()
-  .slice(0, 8);
+import { insertVersionString } from "@m2c2kit/build-helpers";
 
 export default [
   {
     input: ["./src/index.ts"],
-    external: ["@m2c2kit/core"],
+    external: ["@m2c2kit/core", "@m2c2kit/session"],
     output: [
       { file: "./build/index.js", format: "es", sourcemap: true },
       {
@@ -29,18 +16,18 @@ export default [
         plugins: [minify()],
       },
     ],
-    plugins: [
-      replace({
-        __PACKAGE_JSON_VERSION__: `${pkg.version} (${shortCommitHash})`,
-        preventAssignment: true,
-      }),
-      nodeResolve(),
-      esbuild(),
-    ],
+    plugins: [insertVersionString(), esbuild()],
   },
+  /**
+   * Bundle all declaration files in build and place the declaration bundles
+   * in dist; copy output files from build to dist.
+   *
+   * I could not get @rollup/plugin-typescript to work with the
+   * emitDeclarationOnly option. Thus, as part of the build script in
+   * package.json, before rollup is run, tsc is run to generate the
+   * declaration files used by rollup-plugin-dts.
+   */
   {
-    // bundle all declaration files and place the declaration
-    // bundle in dist
     input: "./build/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
@@ -55,28 +42,8 @@ export default [
             dest: "dist",
           },
           {
-            src: "build/index.js",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.embedding.esm.js",
-            transform: (contents) =>
-              contents
-                .toString()
-                .replace("//# sourceMappingURL=index.js.map\n", ""),
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.embedding.esm.d.ts",
-          },
-          {
             src: "build/index.min.js",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.embedding.esm.min.js",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.embedding.esm.min.d.ts",
+            dest: "dist",
           },
         ],
       }),

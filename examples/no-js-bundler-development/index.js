@@ -207,5 +207,5 @@ session.onActivityData((ev) => {
   );
 });
 
-window.session = session;
+window.m2c2kitSession = session;
 session.initialize();

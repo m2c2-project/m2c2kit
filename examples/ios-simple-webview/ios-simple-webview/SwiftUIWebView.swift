@@ -83,9 +83,9 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler, ObservableObject {
                 // After initialization is complete, you can modify the default parameters before starting the session.
                 // For example, if we uncomment the below, we can change the number of trials for the first activity
                 // to be only 1. See the source code for each assessment for its configurable parameters and defaults.
-                //self.webView.evaluateJavaScript("window.session.options.activities[0].setParameters({\"number_of_trials\": 1});", completionHandler: nil)
+                //self.webView.evaluateJavaScript("window.m2c2kitSession.options.activities[0].setParameters({\"number_of_trials\": 1});", completionHandler: nil)
                 
-                self.webView.evaluateJavaScript("window.session.start();", completionHandler: nil)
+                self.webView.evaluateJavaScript("window.m2c2kitSession.start();", completionHandler: nil)
             }
             
             if (eventType == "ActivityData") {

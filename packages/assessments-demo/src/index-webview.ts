@@ -26,5 +26,5 @@ Embedding.initialize(session, { host: "MobileWebView" });
  * browser code, or a mobile WebView.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as unknown as any).session = session;
+(window as unknown as any).m2c2kitSession = session;
 session.initialize();

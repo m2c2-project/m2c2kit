@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.webkit.*
-import androidx.annotation.RequiresApi
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
 
@@ -68,8 +67,8 @@ class MainActivity : AppCompatActivity() {
                     webView.post {
                         // use setParameters to override the activity's default parameters
                         // this is how we would take the parameters from a configuration json and insert them into the activities
-                        // webView.loadUrl("javascript:window.session.options.activities[0].setParameters({ TrialNum: 2 });")
-                        webView.loadUrl("javascript:window.session.start();")
+                        // webView.loadUrl("javascript:window.m2c2kitSession.options.activities[0].setParameters({ TrialNum: 2 });")
+                        webView.loadUrl("javascript:window.m2c2kitSession.start();")
                     }
                 }
 
@@ -119,7 +118,6 @@ class MainActivity : AppCompatActivity() {
     // below code is taken from https://developer.android.com/guide/webapps/load-local-content#assetloader
     private class LocalContentWebViewClient(private val assetLoader: WebViewAssetLoader) :
         WebViewClientCompat() {
-        @RequiresApi(21)
         override fun shouldInterceptRequest(
             view: WebView,
             request: WebResourceRequest
@@ -128,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // to support API < 21
+        @Deprecated("Deprecated in Java")
         override fun shouldInterceptRequest(
             view: WebView,
             url: String
