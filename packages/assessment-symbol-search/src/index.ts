@@ -8,7 +8,6 @@ import {
   TransitionDirection,
   WebColors,
   RandomDraws,
-  LabelHorizontalAlignmentMode,
   GameParameters,
   GameOptions,
   TrialSchema,
@@ -17,7 +16,7 @@ import {
   Easings,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Button, Grid, Instructions, CountdownScene } from "@m2c2kit/addons";
 
 /**
  * Symbol Search is a speeded continuous performance test of conjunctive
@@ -513,7 +512,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     switch (game.getParameter("instruction_type")) {
       case "short": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           ...sharedInstructionsOptions,
           instructionScenes: [
             {
@@ -600,81 +599,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     // ==================================================
     // SCENE: countdownScene
 
-    const countdownScene = new Scene();
+    const countdownScene = new CountdownScene({
+      milliseconds: game.getParameter<number>("preparation_duration_ms"),
+      text: "GET READY!",
+      transitionDurationMilliseconds: game.getParameter(
+        "after_preparation_transition_duration_ms",
+      ),
+    });
     game.addScene(countdownScene);
-
-    const countdownCircle = new Shape({
-      circleOfRadius: 100,
-      position: { x: 200, y: 350 },
-      fillColor: [44, 90, 255, 1],
-    });
-
-    countdownScene.addChild(countdownCircle);
-
-    const countdownInitialNumber = Math.floor(
-      game.getParameter<number>("preparation_duration_ms") / 1000,
-    );
-
-    const countdownNumber = new Label({
-      text: countdownInitialNumber.toString(),
-      fontSize: 50,
-      preferredMaxLayoutWidth: 200,
-      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
-      fontColor: [255, 255, 255, 1],
-    });
-    countdownCircle.addChild(countdownNumber);
-
-    const getReadyLabel = new Label({
-      text: "GET READY",
-      fontSize: 50,
-      preferredMaxLayoutWidth: 300,
-      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
-      position: { x: 200, y: 500 },
-    });
-    countdownScene.addChild(getReadyLabel);
-
-    const countdownSequence = new Array<Action>();
-
-    for (let i = countdownInitialNumber - 1; i > 0; i--) {
-      countdownSequence.push(Action.wait({ duration: 1000 }));
-      countdownSequence.push(
-        Action.custom({
-          callback: () => {
-            countdownNumber.text = i.toString();
-          },
-        }),
-      );
-    }
-
-    countdownSequence.push(Action.wait({ duration: 1000 }));
-    countdownSequence.push(
-      Action.custom({
-        callback: () => {
-          countdownNumber.text = "0";
-        },
-      }),
-    );
-
-    countdownSequence.push(
-      Action.custom({
-        callback: () => {
-          game.presentScene(
-            chooseCardScene,
-            Transition.slide({
-              direction: TransitionDirection.Left,
-              duration: game.getParameter(
-                "after_preparation_transition_duration_ms",
-              ),
-              easing: Easings.sinusoidalInOut,
-            }),
-          );
-        },
-      }),
-    );
-
-    countdownScene.onAppear(() => {
-      countdownScene.run(Action.sequence(countdownSequence));
-    });
 
     // ==================================================
     // SCENE: chooseCardScene
