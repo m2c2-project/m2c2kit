@@ -23,7 +23,7 @@
       "request": "launch",
       "name": "Scratch-addons Launch Chrome against localhost",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/packages/addons/scratch/scratch-build"
+      "webRoot": "${workspaceFolder}/packages/addons/scratch-build"
     },
     {
       "type": "chrome",

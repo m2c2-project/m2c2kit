@@ -114,6 +114,11 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
           "Shape must specify only one of: path, circleOfRadius, or rect",
         );
       }
+      /**
+       * Layout system needs the circle's size to be set.
+       */
+      this.size.width = this.circleOfRadius * 2;
+      this.size.height = this.circleOfRadius * 2;
     }
     if (options.rect) {
       this.rect = options.rect;

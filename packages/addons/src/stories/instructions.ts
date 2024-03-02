@@ -111,12 +111,12 @@ export interface InstructionsOptions extends StoryOptions {
 
 export class Instructions extends Story {
   /**
-   * Create an array of scenes containing instructions on how to complete the task
+   * Creates an array of scenes containing instructions on how to complete the assessment
    *
    * @param options - {@link InstructionsOptions}
-   * @returns
+   * @returns instruction scenes
    */
-  static override Create(options: InstructionsOptions): Array<Scene> {
+  static override create(options: InstructionsOptions): Array<Scene> {
     const scenes = new Array<Scene>();
     options.instructionScenes.forEach((s, i) => {
       const nextSceneTransition =
@@ -277,7 +277,7 @@ export class Instructions extends Story {
         backButton.onTapDown(() => {
           scene.game.presentScene(
             sceneNamePrefix + "-" + (i + 1 - 1).toString().padStart(2, "0"),
-            backSceneTransition
+            backSceneTransition,
           );
         });
         scene.addChild(backButton);
@@ -300,7 +300,7 @@ export class Instructions extends Story {
         nextButton.onTapDown(() => {
           scene.game.presentScene(
             sceneNamePrefix + "-" + (i + 1 + 1).toString().padStart(2, "0"),
-            nextSceneTransition
+            nextSceneTransition,
           );
         });
       } else {
@@ -308,7 +308,7 @@ export class Instructions extends Story {
           nextButton.onTapDown(() => {
             scene.game.presentScene(
               options.postInstructionsScene ?? "",
-              nextSceneTransition
+              nextSceneTransition,
             );
           });
         } else {
@@ -320,18 +320,18 @@ export class Instructions extends Story {
                * been removed from the game.
                */
               console.warn(
-                "warning: postInstructionsScene is not defined, and next scene cannot be determined."
+                "warning: postInstructionsScene is not defined, and next scene cannot be determined.",
               );
             } else {
               const nextSceneIndex = sceneIndex + 1;
               if (nextSceneIndex < scene.game.scenes.length) {
                 scene.game.presentScene(
                   scene.game.scenes[nextSceneIndex],
-                  nextSceneTransition
+                  nextSceneTransition,
                 );
               } else {
                 console.warn(
-                  "warning: postInstructionsScene is not defined, and there is no next scene to present."
+                  "warning: postInstructionsScene is not defined, and there is no next scene to present.",
                 );
               }
             }
@@ -344,5 +344,17 @@ export class Instructions extends Story {
     });
 
     return scenes;
+  }
+
+  /**
+   * Creates an array of scenes containing instructions on how to complete the assessment
+   *
+   * @deprecated Use {@link Instructions.create} instead (lower case method name "create")
+   *
+   * @param options - {@link InstructionsOptions}
+   * @returns instruction scenes
+   */
+  static Create(options: InstructionsOptions): Array<Scene> {
+    return this.create(options);
   }
 }
