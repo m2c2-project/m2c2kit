@@ -383,7 +383,7 @@ appeared.",
 
     switch (game.getParameter("instruction_type")) {
       case "short": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           instructionScenes: [
             {
               title: "Color Dots",
@@ -403,7 +403,7 @@ appeared.",
         break;
       }
       case "long": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           instructionScenes: [
             {
               title: "Color Dots",

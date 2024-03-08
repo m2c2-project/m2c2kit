@@ -251,7 +251,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
 
     // ==============================================================
     // SCENES: instructions
-    const instructionsScenes = Instructions.Create({
+    const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
           title: "<%= appName %>",

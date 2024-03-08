@@ -532,7 +532,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         break;
       }
       case "long": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           ...sharedInstructionsOptions,
           instructionScenes: [
             {

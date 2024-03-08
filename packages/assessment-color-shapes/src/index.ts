@@ -372,7 +372,7 @@ phases.`,
 
     switch (game.getParameter("instruction_type")) {
       case "short": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           instructionScenes: [
             {
               title: "Color Shapes",
@@ -392,7 +392,7 @@ phases.`,
         break;
       }
       case "long": {
-        instructionsScenes = Instructions.Create({
+        instructionsScenes = Instructions.create({
           instructionScenes: [
             {
               title: "Color Shapes",

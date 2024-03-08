@@ -164,7 +164,7 @@ export const code = `class DocsDemo extends Game {
   
         // ========================================
         // SCENES: instructions
-        const instructionsScenes = Instructions.Create({
+        const instructionsScenes = Instructions.create({
             instructionScenes: [
                 {
                     title: "Stroop Assessment",

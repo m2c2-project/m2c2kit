@@ -156,7 +156,7 @@ class Stroop extends Game {
 
     // ========================================
     // SCENES: instructions
-    const instructionsScenes = Instructions.Create({
+    const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
           title: "Stroop Assessment",

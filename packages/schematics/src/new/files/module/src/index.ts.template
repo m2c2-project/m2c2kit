@@ -233,7 +233,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
      * ************************************************************************
      * Scenes: Instructions
      */
-    const instructionsScenes = Instructions.Create({
+    const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
           title: "feb20",
@@ -259,7 +259,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
       ],
     });
     /**
-     * Instructions.Create() returns an array of scenes, so we add them to the
+     * Instructions.create() returns an array of scenes, so we add them to the
      * game using addScenes() instead of addScene().
      */
     game.addScenes(instructionsScenes);

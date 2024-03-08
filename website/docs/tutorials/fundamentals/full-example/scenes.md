@@ -11,7 +11,7 @@ The first step in designing an assessment is deciding what scenes are needed.
 
 ## Instructions
 
-The opening scenes are the instructions. This is where you tell the participant what they need to do. We use use built-in helper method, `Instructions.Create()`, to make these two scenes.
+The opening scenes are the instructions. This is where you tell the participant what they need to do. We use use built-in helper method, `Instructions.create()`, to make these two scenes.
 
 :::note
 
@@ -20,7 +20,7 @@ For the image on the second instruction screen, I used an pre-created image, `st
 :::
 
 ```js
-const instructionsScenes = Instructions.Create({
+const instructionsScenes = Instructions.create({
     instructionScenes: [
         {
             title: "Stroop Assessment",
@@ -172,7 +172,7 @@ export const code = `class DocsDemo extends Game {
  
         // ==============================================================
         // SCENES: instructions
-        const instructionsScenes = Instructions.Create({
+        const instructionsScenes = Instructions.create({
             instructionScenes: [
                 {
                     title: "Stroop Assessment",

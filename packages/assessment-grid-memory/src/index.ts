@@ -418,7 +418,7 @@ phase, participants report the location of dots on a grid.",
 
     // ==============================================================
     // SCENES: instructions
-    const instructionsScenes = Instructions.Create({
+    const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
           title: "Grid Memory",

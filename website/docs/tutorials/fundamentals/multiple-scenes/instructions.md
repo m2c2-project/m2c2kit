@@ -9,11 +9,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 One of the most common uses of multiple scenes is to create instructions. Instructions typically have headings, text, and images, as well as navigation buttons to move to the next or previous page.
 
-Multiple instruction scenes can created with primitives (labels, buttons, images), button event handlers, and transitions, but this is tedious. m2c2kit has a helper method to make this easier: `Instructions.Create()`.
+Multiple instruction scenes can created with primitives (labels, buttons, images), button event handlers, and transitions, but this is tedious. m2c2kit has a helper method to make this easier: `Instructions.create()`.
 
 ## Customizing the instructions
 
-The `Instructions.Create()` method takes an [options object](/docs/reference/api-addons/interfaces/InstructionsOptions) with many properties for customizing the instructions. The options are applied to all instruction scenes, but these can be overridden and customized for each [individual instruction scene](/docs/reference/api-addons/interfaces/InstructionScene). The most important property on the options object is `instructionScenes`, which is an array that takes multiple objects that define the content of each instruction scene.
+The `Instructions.create()` method takes an [options object](/docs/reference/api-addons/interfaces/InstructionsOptions) with many properties for customizing the instructions. The options are applied to all instruction scenes, but these can be overridden and customized for each [individual instruction scene](/docs/reference/api-addons/interfaces/InstructionScene). The most important property on the options object is `instructionScenes`, which is an array that takes multiple objects that define the content of each instruction scene.
 
 The method returns an *array* of scenes that can be added to the game using the `Game.addScenes()` method -- **not** `Game.addScene()`.
 
@@ -22,7 +22,7 @@ This sounds complicated, but it makes more sense when you see an example.
 
 :::note
 
-Why is the example text so small? `Instructions.Create()` does not work on very small assessment screen sizes. In the hidden boilerplate code, this example uses a 400 x 800 assessment size. This is then scaled down on the page for the 200 x 400 space allocated to it.
+Why is the example text so small? `Instructions.create()` does not work on very small assessment screen sizes. In the hidden boilerplate code, this example uses a 400 x 800 assessment size. This is then scaled down on the page for the 200 x 400 space allocated to it.
 
 In addition, the example uses an image, `odd-even-screenshot`, that the hidden boilerplate code has loaded.
 
@@ -30,7 +30,7 @@ In addition, the example uses an image, `odd-even-screenshot`, that the hidden b
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-400x800.html';
 
-export const code = `const instructionsScenes = Instructions.Create({
+export const code = `const instructionsScenes = Instructions.create({
     instructionScenes: [
         {
             title: "Odd or Even (default font size)",
