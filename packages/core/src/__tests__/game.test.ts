@@ -23,7 +23,6 @@ class Game1 extends Game {
       showFps: true,
       width: 400,
       height: 800,
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);
@@ -58,7 +57,6 @@ class Game2 extends Game {
       width: 400,
       height: 800,
       stretch: true,
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);
@@ -86,7 +84,6 @@ describe("GameOptions", () => {
       const gameOptions: GameOptions = {
         name: "game2",
         version: "0.1",
-        canvasKitWasmUrl: "canvaskit.wasm",
       };
 
       super(gameOptions);
@@ -146,7 +143,6 @@ describe("parameters", () => {
         width: 400,
         height: 800,
         parameters: defaultParameters,
-        canvasKitWasmUrl: "canvaskit.wasm",
       };
 
       super(gameOptions);
@@ -603,7 +599,6 @@ class Game3 extends Game {
       version: "0.1",
       width: 400,
       height: 800,
-      canvasKitWasmUrl: "canvaskit.wasm",
       trialSchema: trialSchema,
     };
 
@@ -708,7 +703,6 @@ describe("time stepping", () => {
         showFps: true,
         width: 400,
         height: 800,
-        canvasKitWasmUrl: "canvaskit.wasm",
         timeStepping: true,
       };
 

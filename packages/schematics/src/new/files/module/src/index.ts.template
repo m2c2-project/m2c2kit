@@ -139,7 +139,6 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
           url: "images/Face-smile.png",
         },
       ],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     // Always end the constructor with a super call to the Game constructor.

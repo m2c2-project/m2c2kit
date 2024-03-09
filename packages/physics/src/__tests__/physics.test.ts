@@ -19,7 +19,6 @@ describe("physics gravity", () => {
           showFps: true,
           width: 400,
           height: 800,
-          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -98,7 +97,6 @@ describe("physics no gravity", () => {
           showFps: true,
           width: 400,
           height: 800,
-          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -166,7 +164,6 @@ describe("physics collision", () => {
           showFps: true,
           width: 400,
           height: 800,
-          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -267,7 +264,6 @@ describe("physics gravity changed", () => {
           showFps: true,
           width: 400,
           height: 800,
-          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }
@@ -352,7 +348,6 @@ describe("allows rotation", () => {
           showFps: true,
           width: 400,
           height: 800,
-          canvasKitWasmUrl: "canvaskit.wasm",
         };
         super(gameOptions);
       }

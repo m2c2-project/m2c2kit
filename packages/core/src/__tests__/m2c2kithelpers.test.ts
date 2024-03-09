@@ -13,7 +13,6 @@ class Game1 extends Game {
       showFps: true,
       width: 400,
       height: 800,
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(gameOptions);

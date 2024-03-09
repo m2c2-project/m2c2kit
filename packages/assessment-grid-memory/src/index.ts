@@ -286,7 +286,6 @@ class GridMemory extends Game {
       id: "grid-memory",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
-      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Grid Memory is a visuospatial working memory task, \
 with delayed free recall. After a brief exposure, and a short distraction \

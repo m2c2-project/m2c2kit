@@ -54,8 +54,6 @@ export interface GameOptions {
   logWebGl?: boolean;
   /** Should games within a session share wasm and font assets that have identical filenames, in order to reduce bandwidth? Default is true. */
   shareAssets?: boolean;
-  /** Url of the canvaskit.wasm binary. Always set to the default value of "canvaskit.wasm" */
-  canvasKitWasmUrl: "canvaskit.wasm";
   /** Game's module name, version, and dependencies. @internal For m2c2kit library use only */
   moduleMetadata?: ModuleMetadata;
 }

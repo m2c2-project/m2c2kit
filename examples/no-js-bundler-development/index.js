@@ -24,7 +24,6 @@ class NoBundler extends Game {
       name: "No JavaScript Bundler Development Example",
       version: "0.0.1",
       id: "no-bundler-example",
-      canvasKitWasmUrl: "canvaskit.wasm",
       showFps: false,
       width: 400,
       height: 800,

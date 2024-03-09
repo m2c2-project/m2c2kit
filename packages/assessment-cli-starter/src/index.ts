@@ -86,7 +86,6 @@ class CliStarter extends Game {
       id: "cli-starter",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
-      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",
       longDescription: `In psychology, the Stroop effect is the delay in \

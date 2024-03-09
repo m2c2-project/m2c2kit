@@ -278,7 +278,6 @@ class ColorDots extends Game {
       id: "color-dots",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
-      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Color Dots is cued-recall, item-location memory \
 binding task, where after viewing 3 dots for a brief period of time, \

@@ -14,7 +14,6 @@ class Game1 extends Game {
       name: "game1",
       id: "game1",
       version: "0.1",
-      canvasKitWasmUrl: "canvaskit.wasm",
       showFps: true,
       width: 400,
       height: 800,

@@ -51,7 +51,6 @@ export const code = `class DocsDemo extends Game {
         const options = {
             name: "Documentation Example",
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             images: [{
                 imageName: "earth",
@@ -81,7 +80,6 @@ code: `class DocsDemo extends Game {
     constructor() {
         const options = {
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             images: [{
                 imageName: "overlappingRectangles",
@@ -110,7 +108,6 @@ code: `class DocsDemo extends Game {
     constructor() {
         const options = {
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             images: [{
                 imageName: "earth",
@@ -138,7 +135,6 @@ code:`class DocsDemo extends Game {
     constructor() {
         const options = {
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 200, height: 400,
             images: [{
                 imageName: "bigEarth",

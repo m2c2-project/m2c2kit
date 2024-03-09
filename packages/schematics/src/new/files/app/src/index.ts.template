@@ -145,7 +145,6 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           url: "images/assessmentExample.png",
         },
       ],
-      canvasKitWasmUrl: "canvaskit.wasm",
     };
 
     super(options);

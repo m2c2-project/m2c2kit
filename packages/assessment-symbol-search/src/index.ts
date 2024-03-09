@@ -235,7 +235,6 @@ positions.",
       id: "symbol-search",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
-      canvasKitWasmUrl: "canvaskit.wasm",
       shortDescription:
         "Symbol Search is a speeded continuous performance test of \
 conjunctive feature search in which respondents identify matching symbol \

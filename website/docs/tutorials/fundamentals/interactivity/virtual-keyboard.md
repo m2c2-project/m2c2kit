@@ -59,7 +59,6 @@ export const code = `class DocsDemo extends Game {
     constructor() {
         const options = {
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 400, height: 800,
             fonts: [{
 	            fontName: "roboto",
@@ -110,7 +109,6 @@ code: `class DocsDemo extends Game {
     constructor() {
         const options = {
             id: "docs",
-            canvasKitWasmUrl: "canvaskit.wasm",
             width: 400, height: 800,
             fonts: [{
                 fontName: "roboto",

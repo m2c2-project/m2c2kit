@@ -3,7 +3,7 @@
 // Tips:
 // - This code is editable. Try:
 //     On line 36, change the default number_of_congruent_trials from 4 to 2.
-//     On line 113, change the red color from WebColors.Red to WebColors.DarkRed
+//     On line 112, change the red color from WebColors.Red to WebColors.DarkRed
 // - Open your browser developer console to see diagnostics and data.
 // - This website's interactive tutorials show how to create your own assessments.
 // - Changes made here are saved, automatically, to your local browser storage.
@@ -82,7 +82,6 @@ class Stroop extends Game {
     const options = {
       name: "Stroop Documentation Example",
       id: "docs",
-      canvasKitWasmUrl: "canvaskit.wasm",
       width: 400,
       height: 800,
       fonts: [
