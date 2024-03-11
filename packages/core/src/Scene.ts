@@ -9,6 +9,8 @@ import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { EntityEvent } from "./EntityEvent";
+import { CallbackOptions } from "./CallbackOptions";
 
 export class Scene extends Entity implements IDrawable, SceneOptions {
   readonly type = EntityType.Scene;
@@ -21,8 +23,6 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
 
   _active = false;
   _transitioning = false;
-  _setupCallback?: (scene: Scene) => void;
-  _appearCallback?: (scene: Scene) => void;
   private backgroundPaint?: Paint;
 
   /**
@@ -123,10 +123,14 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
    * have been displayed. In addition, if entities should vary in each
    * iteration, that should be done here.
    *
-   * @param callback
+   * @param callback - function to execute
+   * @param options - {@link CallbackOptions}
    */
-  onSetup(callback: (scene: Scene) => void): void {
-    this._setupCallback = callback;
+  onSetup(
+    callback: (entityEvent: EntityEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener("SceneSetup", callback, options);
   }
 
   /**
@@ -134,10 +138,14 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
    * Code that will be called after the scene has finished any transitions
    * and has fully appeared on the screen.
    *
-   * @param callback
+   * @param callback - function to execute
+   * @param options - {@link CallbackOptions}
    */
-  onAppear(callback: (scene: Scene) => void): void {
-    this._appearCallback = callback;
+  onAppear(
+    callback: (entityEvent: EntityEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener("SceneAppear", callback, options);
   }
 
   override update(): void {

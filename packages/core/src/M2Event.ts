@@ -38,6 +38,8 @@ export const EventType = {
   DragEnd: "DragEnd",
   CompositeCustom: "CompositeCustom",
   FrameDidSimulatePhysics: "FrameDidSimulatePhysics",
+  SceneSetup: "SceneSetup",
+  SceneAppear: "SceneAppear",
 } as const;
 
 export type EventType = (typeof EventType)[keyof typeof EventType];

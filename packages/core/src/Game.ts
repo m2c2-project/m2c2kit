@@ -2054,12 +2054,8 @@ export class Game implements Activity {
         }
         this.currentScene = incomingScene;
         this.currentScene._active = true;
-        if (incomingScene._setupCallback) {
-          incomingScene._setupCallback(incomingScene);
-        }
-        if (incomingScene._appearCallback) {
-          incomingScene._appearCallback(incomingScene);
-        }
+        this.raiseSceneEvent(incomingScene, "SceneSetup");
+        this.raiseSceneEvent(incomingScene, "SceneAppear");
         return;
       }
 
@@ -2076,9 +2072,7 @@ export class Game implements Activity {
       }
       this.currentScene = incomingScene;
       this.currentScene._active = true;
-      if (incomingScene._setupCallback) {
-        incomingScene._setupCallback(incomingScene);
-      }
+      this.raiseSceneEvent(incomingScene, "SceneSetup");
 
       // animateSceneTransition() will run the transition animation,
       // mark the outgoing scene as inactive once the animation is done,
@@ -2339,9 +2333,7 @@ export class Game implements Activity {
                 Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
-                    if (incomingScene._appearCallback) {
-                      incomingScene._appearCallback(incomingScene);
-                    }
+                    this.raiseSceneEvent(incomingScene, "SceneAppear");
                     /**
                      * For the transitions, the outgoing scene is a temporary scene
                      * that has a screenshot of the previous scene. Thus it is
@@ -2387,9 +2379,7 @@ export class Game implements Activity {
                 Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
-                    if (incomingScene._appearCallback) {
-                      incomingScene._appearCallback(incomingScene);
-                    }
+                    this.raiseSceneEvent(incomingScene, "SceneAppear");
                     this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
@@ -2430,9 +2420,7 @@ export class Game implements Activity {
                 Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
-                    if (incomingScene._appearCallback) {
-                      incomingScene._appearCallback(incomingScene);
-                    }
+                    this.raiseSceneEvent(incomingScene, "SceneAppear");
                     this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
@@ -2473,9 +2461,7 @@ export class Game implements Activity {
                 Action.custom({
                   callback: () => {
                     incomingScene._transitioning = false;
-                    if (incomingScene._appearCallback) {
-                      incomingScene._appearCallback(incomingScene);
-                    }
+                    this.raiseSceneEvent(incomingScene, "SceneAppear");
                     this.removeScene(Constants.OUTGOING_SCENE_NAME);
                   },
                   runDuringTransition: true,
@@ -3132,6 +3118,19 @@ export class Game implements Activity {
       entityEvent,
       domPointerEvent,
     );
+  }
+
+  private raiseSceneEvent(
+    scene: Scene,
+    eventType: "SceneSetup" | "SceneAppear",
+  ): void {
+    const event: EntityEvent = {
+      target: scene,
+      type: eventType,
+    };
+    scene.eventListeners
+      .filter((listener) => listener.type === eventType)
+      .forEach((listener) => listener.callback(event));
   }
 
   private calculatePointWithinEntityFromDomPointerEvent(
