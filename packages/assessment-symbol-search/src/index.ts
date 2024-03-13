@@ -471,9 +471,9 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         position: { x: 380, y: 20 },
         isUserInteractionEnabled: true,
       });
-      game.addFreeEntity(quitSprite);
+      game.addFreeNode(quitSprite);
       quitSprite.onTapDown((e) => {
-        game.removeAllFreeEntities();
+        game.removeAllFreeNodes();
         e.handled = true;
         const blankScene = new Scene();
         game.addScene(blankScene);
@@ -1004,7 +1004,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           }
         } else {
           questionLabel.hidden = false;
-          game.removeFreeEntity("questionLabelFree");
+          game.removeFreeNode("questionLabelFree");
           if (game.getParameter("show_trials_complete_scene")) {
             game.presentScene(doneScene, afterTrialSceneTransition);
           } else {
@@ -1023,7 +1023,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           new Date().toISOString(),
         );
         /** Add the question label free node, only if not added yet */
-        if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
+        if (!game.nodes.map((e) => e.name).includes("questionLabelFree")) {
           questionLabel.hidden = true;
 
           const questionLabelFree = new Label({
@@ -1032,7 +1032,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
             fontSize: 22,
             preferredMaxLayoutWidth: 240,
           });
-          game.addFreeEntity(questionLabelFree);
+          game.addFreeNode(questionLabelFree);
           questionLabelFree.position = { x: 200, y: 460 };
         }
 
@@ -1067,7 +1067,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     doneScene.addChild(okButton);
     doneScene.onSetup(() => {
       // no need to have cancel button, because we're done
-      game.removeAllFreeEntities();
+      game.removeAllFreeNodes();
     });
   }
 

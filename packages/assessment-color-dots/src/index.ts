@@ -352,9 +352,9 @@ appeared.",
         position: { x: 380, y: 20 },
         isUserInteractionEnabled: true,
       });
-      game.addFreeEntity(quitSprite);
+      game.addFreeNode(quitSprite);
       quitSprite.onTapDown((e) => {
-        game.removeAllFreeEntities();
+        game.removeAllFreeNodes();
         e.handled = true;
         const blankScene = new Scene();
         game.addScene(blankScene);
@@ -1114,7 +1114,7 @@ appeared.",
     doneScene.addChild(okButton);
     doneScene.onSetup(() => {
       // no need to have cancel button, because we're done
-      game.removeAllFreeEntities();
+      game.removeAllFreeNodes();
     });
   }
 }
