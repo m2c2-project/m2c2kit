@@ -126,7 +126,7 @@ export class CountdownScene extends Scene {
     const timerInitialNumber = Math.floor(options.milliseconds / 1000);
 
     const timerNumberLabel = new Label({
-      // Number text will be set in onAppear()
+      // Number text will be set in onSetup()
       text: "",
       fontSize: options?.timerNumbersFontSize ?? 50,
       fontName: options?.timerNumbersFontName,
@@ -200,12 +200,15 @@ export class CountdownScene extends Scene {
       }),
     );
 
-    this.onAppear(() => {
+    this.onSetup(() => {
       /**
        * Set the timer number label to the initial number. This must be done
-       * in onAppear() in case the scene is presented more than once.
+       * in onSetup() in case the scene is presented more than once.
        */
       timerNumberLabel.text = timerInitialNumber.toString();
+    });
+
+    this.onAppear(() => {
       this.run(Action.sequence(countdownSequence));
     });
   }
