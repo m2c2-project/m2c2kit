@@ -1013,32 +1013,41 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         }
       }
 
-      chooseCardScene.onAppear(() => {
-        game.addTrialData(
-          "activity_begin_iso8601_timestamp",
-          this.beginIso8601Timestamp,
-        );
-        game.addTrialData(
-          "trial_begin_iso8601_timestamp",
-          new Date().toISOString(),
-        );
-        /** Add the question label free node, only if not added yet */
-        if (!game.nodes.map((e) => e.name).includes("questionLabelFree")) {
-          questionLabel.hidden = true;
+      chooseCardScene.onAppear(
+        () => {
+          game.addTrialData(
+            "activity_begin_iso8601_timestamp",
+            this.beginIso8601Timestamp,
+          );
+          game.addTrialData(
+            "trial_begin_iso8601_timestamp",
+            new Date().toISOString(),
+          );
+          /** Add the question label free node, only if not added yet */
+          if (!game.nodes.map((e) => e.name).includes("questionLabelFree")) {
+            questionLabel.hidden = true;
 
-          const questionLabelFree = new Label({
-            name: "questionLabelFree",
-            text: "Which of these matches a pair above?",
-            fontSize: 22,
-            preferredMaxLayoutWidth: 240,
-          });
-          game.addFreeNode(questionLabelFree);
-          questionLabelFree.position = { x: 200, y: 460 };
-        }
+            const questionLabelFree = new Label({
+              name: "questionLabelFree",
+              text: "Which of these matches a pair above?",
+              fontSize: 22,
+              preferredMaxLayoutWidth: 240,
+            });
+            game.addFreeNode(questionLabelFree);
+            questionLabelFree.position = { x: 200, y: 460 };
+          }
 
-        setBottomCardsTappability(true);
-        Timer.start("rt");
-      });
+          setBottomCardsTappability(true);
+          Timer.start("rt");
+          /**
+           * The onAppear() callback references objects within the onSetup()
+           * scope, thus we must place it here. That means we create a new
+           * onAppear() callback each time onSetup() is called. Therefore, we
+           * replace the existing onAppear() callback.
+           */
+        },
+        { replaceExisting: true },
+      );
     });
 
     // ==================================================
