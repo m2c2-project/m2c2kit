@@ -7,12 +7,12 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Rotate
 
-The `Rotate` action changes the entity's `zRotation` over time.
+The `Rotate` action changes the node's `zRotation` over time.
 
 The options object for the `Rotate` action has the following properties:
 
-- `byAngle`: Relative amount to rotate the entity, in counter-clockwise radians.
-- `toAngle`: Absolute angle to which rotate the entity, in counter-clockwise radians.
+- `byAngle`: Relative amount to rotate the node, in counter-clockwise radians.
+- `toAngle`: Absolute angle to which rotate the node, in counter-clockwise radians.
 - `shortestUnitArc`: If `toAngle` is provided, should the rotation be performed in the direction that leads to the smallest rotation? Default is true.
 - `duration`: The duration of the animation in milliseconds.
 - `runDuringTransition`: A boolean indicating whether the action should run during a transition. This is an optional property. If not specified, the default is `false`.

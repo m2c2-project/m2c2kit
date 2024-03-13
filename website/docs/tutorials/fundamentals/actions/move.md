@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Move
 
-The `Move` action animates an entity's position over time.
+The `Move` action animates a node's position over time.
 
 The options object for the `Move` action has the following properties:
 
@@ -65,7 +65,7 @@ clickMeButton.onTapDown(() => {
 });`
 
 export const more = [
-{ description: <>Reload the example and try clicking "Click me" multiple times quickly. This will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the entity. You probably do not want this behavior. One way to [fix] this is to prevent the user from clicking the "Click me" button until the animation is complete: in the event handler for the button, set the <code>isUserInteractionEnabled</code> property of the button to <code>false</code>. This prevents additional clicks:
+{ description: <>Reload the example and try clicking "Click me" multiple times quickly. This will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the node. You probably do not want this behavior. One way to [fix] this is to prevent the user from clicking the "Click me" button until the animation is complete: in the event handler for the button, set the <code>isUserInteractionEnabled</code> property of the button to <code>false</code>. This prevents additional clicks:
 <pre>
   <code className="language-js">{`clickMeButton.onTapDown(() => {
     clickMeButton.isUserInteractionEnabled = false;

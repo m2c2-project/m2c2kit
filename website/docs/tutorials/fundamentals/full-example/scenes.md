@@ -98,7 +98,7 @@ const wordLabel = new Label({
 presentationScene.addChild(wordLabel);
 ```
 
-Note how we set the `hidden` property to `true` for all of these entities. This is because we do not them to be visible until we explicitly show them in the presentation scene's `onAppear` event handler:
+Note how we set the `hidden` property to `true` for all of these nodes. This is because we do not them to be visible until we explicitly show them in the presentation scene's `onAppear` event handler:
 
 ```js
 presentationScene.onAppear(() => {
@@ -142,7 +142,7 @@ endScene.addChild(incongruentRtLabel);
 
 ## Progress so far
 
-If you run the assessment, you can navigate the instructions and advance to the presentation scene. The presentation scene is not yet functional, and it shows all the entities at once. We will fix that in the next section.
+If you run the assessment, you can navigate the instructions and advance to the presentation scene. The presentation scene is not yet functional, and it shows all the nodes at once. We will fix that in the next section.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 

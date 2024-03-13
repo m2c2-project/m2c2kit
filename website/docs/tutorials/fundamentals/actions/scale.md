@@ -7,11 +7,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Scale
 
-The `Scale` action changes the entity's scale over time.
+The `Scale` action changes the node's scale over time.
 
 The options object for the `Scale` action has the following properties:
 
-- `scale`: The scale of the entity once the Action has completed. This is a ratio, so a value of 2 will double the size of the entity.
+- `scale`: The scale of the node once the Action has completed. This is a ratio, so a value of 2 will double the size of the node.
 - `duration`: The duration of the animation in milliseconds.
 - `runDuringTransition`: A boolean indicating whether the action should run during a transition. This is an optional property. If not specified, the default is `false`.
 

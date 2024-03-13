@@ -2,7 +2,7 @@ import { Point } from "./Point";
 import { EasingFunction } from "./Easings";
 
 export interface MoveActionOptions {
-  /** Destination point. The point is relative to the entity's parent coordinate system */
+  /** Destination point. The point is relative to the node's parent coordinate system */
   point: Point;
   /** Duration of move, in milliseconds */
   duration: number;

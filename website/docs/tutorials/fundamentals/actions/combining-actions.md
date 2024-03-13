@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Combining Actions
 
-Often times you need more than a single Action to occur. For example, you may want to move an entity in one direction, wait for a specific duration, then move in another direction. There are two ways to combine Actions: 
+Often times you need more than a single Action to occur. For example, you may want to move a node in one direction, wait for a specific duration, then move in another direction. There are two ways to combine Actions: 
 
 1. You can run multiple actions in order: a sequence.
 2. You can run multiple actions at the same time: a group.

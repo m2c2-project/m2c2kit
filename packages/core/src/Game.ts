@@ -12,10 +12,10 @@ import CanvasKitInit, {
 import { Constants } from "./Constants";
 import { TapEvent } from "./TapEvent";
 import { M2PointerEvent } from "./M2PointerEvent";
-import { EntityEvent } from "./EntityEvent";
+import { M2NodeEvent } from "./M2NodeEvent";
 import { IDrawable } from "./IDrawable";
-import { Entity } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { Sprite } from "./Sprite";
 import { Shape } from "./Shape";
@@ -32,7 +32,7 @@ import {
 import { GameOptions } from "./GameOptions";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
-import { EventType } from "./M2Event";
+import { M2EventType } from "./M2Event";
 import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
@@ -121,8 +121,8 @@ export class Game implements Activity {
     this.options = options;
     this.name = options.name;
     this.id = options.id;
-    this.freeEntitiesScene.game = this;
-    this.freeEntitiesScene.needsInitialization = true;
+    this.freeNodesScene.game = this;
+    this.freeNodesScene.needsInitialization = true;
     this.fpsMetricReportThreshold =
       options.fpsMetricReportThreshold ?? Constants.FPS_METRIC_REPORT_THRESHOLD;
     this.maximumRecordedActivityMetrics =
@@ -612,8 +612,8 @@ export class Game implements Activity {
   canvasCssHeight = 0;
 
   scenes = new Array<Scene>();
-  private freeEntitiesScene = new Scene({
-    name: Constants.FREE_ENTITIES_SCENE_NAME,
+  private freeNodesScene = new Scene({
+    name: Constants.FREE_NODES_SCENE_NAME,
     backgroundColor: [255, 255, 255, 0],
   });
   private incomingSceneTransitions = new Array<SceneTransition>();
@@ -621,79 +621,105 @@ export class Game implements Activity {
   private pendingScreenshot?: PendingScreenshot;
 
   /**
-   * Adds an entity as a free entity (an entity that is not part of a scene)
+   * Adds a node as a free node (a node that is not part of a scene)
    * to the game.
    *
-   * @remarks Once added to the game, a free entity will always be drawn,
+   * @remarks Once added to the game, a free node will always be drawn,
    * and it will not be part of any scene transitions. This is useful if
-   * an entity must persistently be drawn and not move with scene
-   * transitions. The appearance of the free entity must be managed
-   * by the programmer. Note: internally, the free entities are part of a
-   * special scene (named "__freeEntitiesScene"), but this scene is handled
-   * apart from regular scenes in order to achieve the free entity behavior.
+   * a node must persistently be drawn and not move with scene
+   * transitions. The appearance of the free node must be managed
+   * by the programmer. Note: internally, the free nodes are part of a
+   * special scene (named "__freeNodesScene"), but this scene is handled
+   * apart from regular scenes in order to achieve the free node behavior.
    *
-   * @param entity - entity to add as a free entity
+   * @param node - node to add as a free node
    */
-  addFreeEntity(entity: Entity): void {
-    this.freeEntitiesScene.addChild(entity);
+  addFreeNode(node: M2Node): void {
+    this.freeNodesScene.addChild(node);
   }
 
   /**
-   * Removes a free entity from the game.
-   *
-   * @remarks Throws exception if the entity to remove is not currently added
-   * to the game as a free entity
-   *
-   * @param entity - the free entity to remove or its name as a string
+   * @deprecated Use addFreeNode() instead
    */
-  removeFreeEntity(entity: Entity | string): void {
-    if (typeof entity === "string") {
+  addFreeEntity(node: M2Node): void {
+    this.addFreeNode(node);
+  }
+
+  /**
+   * Removes a free node from the game.
+   *
+   * @remarks Throws exception if the node to remove is not currently added
+   * to the game as a free node
+   *
+   * @param node - the free node to remove or its name as a string
+   */
+  removeFreeNode(node: M2Node | string): void {
+    if (typeof node === "string") {
       if (
-        !this.freeEntitiesScene.children
-          .map((child) => child.name)
-          .includes(entity)
+        !this.freeNodesScene.children.map((child) => child.name).includes(node)
       ) {
         throw new Error(
-          `cannot remove free entity named "${entity}" because it is not currently part of the game's free entities. `,
+          `cannot remove free node named "${node}" because it is not currently part of the game's free nodes. `,
         );
       }
-      this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
-        (child) => child.name !== entity,
+      this.freeNodesScene.children = this.freeNodesScene.children.filter(
+        (child) => child.name !== node,
       );
     } else {
-      if (!this.freeEntitiesScene.children.includes(entity)) {
+      if (!this.freeNodesScene.children.includes(node)) {
         throw new Error(
-          `cannot remove free entity "${entity.toString()}" because it is not currently part of the game's free entities. `,
+          `cannot remove free node "${node.toString()}" because it is not currently part of the game's free nodes. `,
         );
       }
-      this.freeEntitiesScene.children = this.freeEntitiesScene.children.filter(
-        (child) => child !== entity,
+      this.freeNodesScene.children = this.freeNodesScene.children.filter(
+        (child) => child !== node,
       );
     }
   }
 
   /**
-   * Removes all free entities from the game.
+   * @deprecated Use removeFreeNode() instead
    */
-  removeAllFreeEntities(): void {
-    while (this.freeEntitiesScene.children.length) {
-      this.freeEntitiesScene.children.pop();
+  removeFreeEntity(node: M2Node | string): void {
+    this.removeFreeNode(node);
+  }
+
+  /**
+   * Removes all free nodes from the game.
+   */
+  removeAllFreeNodes(): void {
+    while (this.freeNodesScene.children.length) {
+      this.freeNodesScene.children.pop();
     }
   }
 
   /**
-   * Returns array of free entities that have been added to the game.
-   *
-   * @returns array of free entities
+   * @deprecated Use removeAllFreeNodes() instead
    */
-  get freeEntities(): Array<Entity> {
-    return this.freeEntitiesScene.children;
+  removeAllFreeEntities(): void {
+    this.removeAllFreeNodes();
+  }
+
+  /**
+   * Returns array of free nodes that have been added to the game.
+   *
+   * @returns array of free nodes
+   */
+  get freeNodes(): Array<M2Node> {
+    return this.freeNodesScene.children;
+  }
+
+  /**
+   * @deprecated Use Game.freeEntities instead
+   */
+  get freeEntities(): Array<M2Node> {
+    return this.freeNodes;
   }
 
   /**
    * Adds a scene to the game.
    *
-   * @remarks A scene, and its children entities, cannot be presented unless it has been added to the game object.
+   * @remarks A scene, and its children nodes, cannot be presented unless it has been added to the game object.
    *
    * @param scene
    */
@@ -910,7 +936,7 @@ export class Game implements Activity {
     this.warmupFinished = false;
     const gameWarmupStartEvent: GameEvent = {
       target: this,
-      type: EventType.GameWarmupStart,
+      type: M2EventType.GameWarmupStart,
     };
     this.raiseActivityEventOnListeners(gameWarmupStartEvent);
 
@@ -929,7 +955,7 @@ export class Game implements Activity {
 
     const activityStartEvent: ActivityLifecycleEvent = {
       target: this,
-      type: EventType.ActivityStart,
+      type: M2EventType.ActivityStart,
     };
     this.raiseActivityEventOnListeners(activityStartEvent);
   }
@@ -1134,17 +1160,17 @@ export class Game implements Activity {
 
   /**
    * Warms up the Skia-based shaders underlying canvaskit by drawing
-   * m2c2kit entities.
+   * m2c2kit nodes.
    *
    * @remarks While warmupShadersWithPrimitives draws a predefined set of
    * primitives, this function initializes and draws all canvaskit objects
-   * that have been defined as m2c2kit entities. This not only is another
-   * opportunity for shader warmup, it also does the entity initialization.
+   * that have been defined as m2c2kit nodes. This not only is another
+   * opportunity for shader warmup, it also does the node initialization.
    *
    * @param canvas - the canvaskit-canvas to draw on
    */
   private warmupShadersWithScenes(canvas: Canvas): void {
-    [...this.scenes, this.freeEntitiesScene].forEach((scene) => {
+    [...this.scenes, this.freeNodesScene].forEach((scene) => {
       scene.warmup(canvas);
     });
 
@@ -1153,9 +1179,9 @@ export class Game implements Activity {
      * that are not yet added to a sprite have not been warmed up.
      * Thus, warmup these not-yet-added images.
      */
-    const warmedUpImageNames = this.entities
-      .filter((entity) => entity.type === EntityType.Sprite)
-      .map((entity) => (entity as Sprite).imageName);
+    const warmedUpImageNames = this.nodes
+      .filter((node) => node.type === M2NodeType.Sprite)
+      .map((node) => (node as Sprite).imageName);
     const images = this.imageManager.images;
     // images may be undefined/null if the game does not have images
     if (images) {
@@ -1202,7 +1228,7 @@ export class Game implements Activity {
    * end-user must not call this. FOR INTERNAL USE ONLY.
    */
   dispose(): void {
-    this.entities
+    this.nodes
       .filter((e) => e.isDrawable)
       .forEach((e) => (e as unknown as IDrawable).dispose());
     this.fontManager.dispose();
@@ -1456,7 +1482,7 @@ export class Game implements Activity {
     this.trialIndex++;
 
     const resultsEvent: ActivityResultsEvent = {
-      type: EventType.ActivityData,
+      type: M2EventType.ActivityData,
       iso8601Timestamp: new Date().toISOString(),
       target: this,
       /** newData is only the trial that recently completed */
@@ -1646,7 +1672,7 @@ export class Game implements Activity {
   end(): void {
     const activityEndEvent: ActivityLifecycleEvent = {
       target: this,
-      type: EventType.ActivityEnd,
+      type: M2EventType.ActivityEnd,
     };
     const results: ActivityResults = {
       data: this.data,
@@ -1675,7 +1701,7 @@ export class Game implements Activity {
   cancel(): void {
     const activityCancelEvent: ActivityLifecycleEvent = {
       target: this,
-      type: EventType.ActivityCancel,
+      type: M2EventType.ActivityCancel,
     };
     const results: ActivityResults = {
       data: this.data,
@@ -1942,7 +1968,7 @@ export class Game implements Activity {
       this.warmupFinished = true;
       const gameWarmupEndEvent: GameEvent = {
         target: this,
-        type: EventType.GameWarmupEnd,
+        type: M2EventType.GameWarmupEnd,
       };
       this.raiseActivityEventOnListeners(gameWarmupEndEvent);
       this.surface.requestAnimationFrame(this.loop.bind(this));
@@ -1991,11 +2017,11 @@ export class Game implements Activity {
       this.snapshots.push(this.takeCurrentSceneSnapshot());
 
       /**
-       * Free entities should not slide off the screen during transitions.
-       * Thus, draw the free entities AFTER a screen shot may have
+       * Free nodes should not slide off the screen during transitions.
+       * Thus, draw the free nodes AFTER a screen shot may have
        * taken place.
        */
-      this.freeEntitiesScene.draw(canvas);
+      this.freeNodesScene.draw(canvas);
 
       if (this.pendingScreenshot) {
         this.handlePendingScreenshot(this.pendingScreenshot);
@@ -2163,7 +2189,7 @@ export class Game implements Activity {
     this.scenes
       .filter((scene) => scene._active)
       .forEach((scene) => scene.update());
-    this.freeEntitiesScene.update();
+    this.freeNodesScene.update();
 
     this.plugins
       .filter((p) => p.afterUpdate !== undefined && p.disabled !== true)
@@ -2517,65 +2543,63 @@ export class Game implements Activity {
   }
 
   /**
-   * Creates an event listener for an entity based on the entity name
+   * Creates an event listener for a node based on the node name
    *
-   * @remarks Typically, event listeners will be created using a method specific to the event, such as onTapDown(). This alternative allows creation with entity name.
+   * @remarks Typically, event listeners will be created using a method specific to the event, such as onTapDown(). This alternative allows creation with node name.
    *
    * @param type - the type of event to listen for, e.g., "tapDown"
-   * @param entityName - the entity name for which an event will be listened
+   * @param nodeName - the node name for which an event will be listened
    * @param callback - the callback to be invoked when the event occurs
    * @param callbackOptions
    */
   createEventListener(
-    type: EventType,
-    entityName: string,
-    callback: (event: EntityEvent) => void,
+    type: M2EventType,
+    nodeName: string,
+    callback: (event: M2NodeEvent) => void,
     callbackOptions?: CallbackOptions,
   ): void {
-    const entities = this.entities.filter(
-      (entity) => entity.name === entityName,
-    );
-    if (entities.length > 1) {
+    const nodes = this.nodes.filter((node) => node.name === nodeName);
+    if (nodes.length > 1) {
       console.warn(
-        `warning: createEventListener() found more than one entity with name ${entityName}. Event listener will be attached to first entity found. All entities that receive tap events should be uniquely named`,
+        `warning: createEventListener() found more than one node with name ${nodeName}. Event listener will be attached to first node found. All nodes that receive tap events should be uniquely named`,
       );
     }
-    const entity = entities
-      .filter((entity) => entity.name === entityName)
-      .find(Boolean);
-    if (entity === undefined) {
+    const node = nodes.filter((node) => node.name === nodeName).find(Boolean);
+    if (node === undefined) {
       throw new Error(
-        `could not create event listener. entity with name ${entityName} could not be found in the game entity tree`,
+        `could not create event listener. node with name ${nodeName} could not be found in the game node tree`,
       );
     }
 
-    if (!Object.values(EventType).includes(type)) {
+    if (!Object.values(M2EventType).includes(type)) {
       throw new Error(
         `game ${this.id}: could not create event listener. event type ${type} is not known`,
       );
     }
-    entity.addEventListener(type, callback, callbackOptions);
+    node.addEventListener(type, callback, callbackOptions);
   }
 
   /**
-   * Returns array of all entities that have been added to the game object.
+   * Returns array of all nodes that have been added to the game object.
    */
-  get entities(): Array<Entity> {
-    function getChildEntitiesRecursive(
-      entity: Entity,
-      entities: Array<Entity>,
-    ): void {
-      entities.push(entity);
-      entity.children.forEach((child) =>
-        getChildEntitiesRecursive(child, entities),
-      );
+  get nodes(): Array<M2Node> {
+    function getChildNodesRecursive(node: M2Node, nodes: Array<M2Node>): void {
+      nodes.push(node);
+      node.children.forEach((child) => getChildNodesRecursive(child, nodes));
     }
 
-    const entities = new Array<Entity>();
-    [...this.scenes, this.freeEntitiesScene].forEach((scene) =>
-      getChildEntitiesRecursive(scene, entities),
+    const nodes = new Array<M2Node>();
+    [...this.scenes, this.freeNodesScene].forEach((scene) =>
+      getChildNodesRecursive(scene, nodes),
     );
-    return entities;
+    return nodes;
+  }
+
+  /**
+   * @deprecated use Game.nodes instead
+   */
+  get entities(): Array<M2Node> {
+    return this.nodes;
   }
 
   /**
@@ -2590,17 +2614,13 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const entityEvent: EntityEvent = {
+    const nodeEvent: M2NodeEvent = {
       target: scene,
-      type: EventType.PointerDown,
+      type: M2EventType.PointerDown,
       handled: false,
     };
-    this.processDomPointerDown(scene, entityEvent, domPointerEvent);
-    this.processDomPointerDown(
-      this.freeEntitiesScene,
-      entityEvent,
-      domPointerEvent,
-    );
+    this.processDomPointerDown(scene, nodeEvent, domPointerEvent);
+    this.processDomPointerDown(this.freeNodesScene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerUpHandler(domPointerEvent: PointerEvent): void {
@@ -2609,17 +2629,13 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const entityEvent: EntityEvent = {
+    const nodeEvent: M2NodeEvent = {
       target: scene,
-      type: EventType.PointerUp,
+      type: M2EventType.PointerUp,
       handled: false,
     };
-    this.processDomPointerUp(scene, entityEvent, domPointerEvent);
-    this.processDomPointerUp(
-      this.freeEntitiesScene,
-      entityEvent,
-      domPointerEvent,
-    );
+    this.processDomPointerUp(scene, nodeEvent, domPointerEvent);
+    this.processDomPointerUp(this.freeNodesScene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
@@ -2628,17 +2644,13 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const entityEvent: EntityEvent = {
+    const nodeEvent: M2NodeEvent = {
       target: scene,
-      type: EventType.PointerMove,
+      type: M2EventType.PointerMove,
       handled: false,
     };
-    this.processDomPointerMove(scene, entityEvent, domPointerEvent);
-    this.processDomPointerMove(
-      this.freeEntitiesScene,
-      entityEvent,
-      domPointerEvent,
-    );
+    this.processDomPointerMove(scene, nodeEvent, domPointerEvent);
+    this.processDomPointerMove(this.freeNodesScene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerLeaveHandler(domPointerEvent: PointerEvent): void {
@@ -2651,120 +2663,120 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
-    const entityEvent: EntityEvent = {
+    const nodeEvent: M2NodeEvent = {
       target: scene,
-      type: EventType.PointerLeave,
+      type: M2EventType.PointerLeave,
       handled: false,
     };
-    this.processDomPointerLeave(scene, entityEvent, domPointerEvent);
+    this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
     this.processDomPointerLeave(
-      this.freeEntitiesScene,
-      entityEvent,
+      this.freeNodesScene,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   /**
-   * Determines if/how m2c2kit entities respond to the DOM PointerDown event
+   * Determines if/how m2c2kit nodes respond to the DOM PointerDown event
    *
-   * @param entity - entity that might be affected by the DOM PointerDown event
-   * @param entityEvent
+   * @param node - node that might be affected by the DOM PointerDown event
+   * @param nodeEvent
    * @param domPointerEvent
    */
   private processDomPointerDown(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (entityEvent.handled) {
+    if (nodeEvent.handled) {
       return;
     }
 
     // note: offsetX and offsetY are relative to the HTML canvas element
     if (
-      entity.isUserInteractionEnabled &&
-      this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      entity.pressed = true;
-      entity.pressedAndWithinHitArea = true;
-      entity.pressedInitialPointerOffset = {
+      node.pressed = true;
+      node.pressedAndWithinHitArea = true;
+      node.pressedInitialPointerOffset = {
         x: domPointerEvent.offsetX,
         y: domPointerEvent.offsetY,
       };
-      this.raiseM2PointerDownEvent(entity, entityEvent, domPointerEvent);
-      this.raiseTapDownEvent(entity, entityEvent, domPointerEvent);
+      this.raiseM2PointerDownEvent(node, nodeEvent, domPointerEvent);
+      this.raiseTapDownEvent(node, nodeEvent, domPointerEvent);
     }
-    if (entity.children) {
-      entity.children
-        // a hidden entity (and its children) can't receive taps,
+    if (node.children) {
+      node.children
+        // a hidden node (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
-        .filter((entity) => !entity.hidden)
+        .filter((node) => !node.hidden)
         // only drawables have z-position
-        .filter((entity) => entity.isDrawable)
+        .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
             (a as unknown as IDrawable).zPosition,
         )
-        .forEach((entity) =>
-          this.processDomPointerDown(entity, entityEvent, domPointerEvent),
+        .forEach((node) =>
+          this.processDomPointerDown(node, nodeEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerUp(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (entityEvent.handled) {
+    if (nodeEvent.handled) {
       return;
     }
 
-    if (entity.dragging) {
-      entity.dragging = false;
-      entity.pressed = false;
-      entity.pressedAndWithinHitArea = false;
-      this.raiseM2DragEndEvent(entity, entityEvent, domPointerEvent);
-      entityEvent.handled = true;
+    if (node.dragging) {
+      node.dragging = false;
+      node.pressed = false;
+      node.pressedAndWithinHitArea = false;
+      this.raiseM2DragEndEvent(node, nodeEvent, domPointerEvent);
+      nodeEvent.handled = true;
       return;
     }
 
     if (
-      entity.isUserInteractionEnabled &&
-      entity.pressed &&
-      entity.pressedAndWithinHitArea
+      node.isUserInteractionEnabled &&
+      node.pressed &&
+      node.pressedAndWithinHitArea
     ) {
       /**
        * released pointer within hit area after pointer had been earlier
        * been pressed in the hit area and never left the hit area
        */
-      entity.pressed = false;
-      entity.pressedAndWithinHitArea = false;
-      this.raiseTapUpEvent(entity, entityEvent, domPointerEvent);
-      this.raiseTapUpAny(entity, entityEvent, domPointerEvent);
-      this.raiseM2PointerUpEvent(entity, entityEvent, domPointerEvent);
+      node.pressed = false;
+      node.pressedAndWithinHitArea = false;
+      this.raiseTapUpEvent(node, nodeEvent, domPointerEvent);
+      this.raiseTapUpAny(node, nodeEvent, domPointerEvent);
+      this.raiseM2PointerUpEvent(node, nodeEvent, domPointerEvent);
     } else if (
-      entity.isUserInteractionEnabled &&
-      entity.pressed &&
-      entity.pressedAndWithinHitArea == false
+      node.isUserInteractionEnabled &&
+      node.pressed &&
+      node.pressedAndWithinHitArea == false
     ) {
       /**
        * released pointer anywhere after pointer had been earlier
        * been pressed in the hit area
        */
-      entity.pressed = false;
-      entity.pressedAndWithinHitArea = false;
-      this.raiseTapUpAny(entity, entityEvent, domPointerEvent);
+      node.pressed = false;
+      node.pressedAndWithinHitArea = false;
+      this.raiseTapUpAny(node, nodeEvent, domPointerEvent);
     } else if (
-      entity.isUserInteractionEnabled &&
-      this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
@@ -2772,129 +2784,129 @@ export class Game implements Activity {
       /**
        * released pointer in the hit area
        */
-      entity.pressed = false;
-      entity.pressedAndWithinHitArea = false;
-      this.raiseM2PointerUpEvent(entity, entityEvent, domPointerEvent);
+      node.pressed = false;
+      node.pressedAndWithinHitArea = false;
+      this.raiseM2PointerUpEvent(node, nodeEvent, domPointerEvent);
     }
 
-    if (entity.children) {
-      entity.children
-        // a hidden entity (and its children) can't receive taps,
+    if (node.children) {
+      node.children
+        // a hidden node (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
-        .filter((entity) => !entity.hidden)
+        .filter((node) => !node.hidden)
         // only drawables have z-position
-        .filter((entity) => entity.isDrawable)
+        .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
             (a as unknown as IDrawable).zPosition,
         )
-        .forEach((entity) =>
-          this.processDomPointerUp(entity, entityEvent, domPointerEvent),
+        .forEach((node) =>
+          this.processDomPointerUp(node, nodeEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerMove(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (entityEvent.handled) {
+    if (nodeEvent.handled) {
       return;
     }
 
-    if (entity.isUserInteractionEnabled && entity.draggable && entity.pressed) {
+    if (node.isUserInteractionEnabled && node.draggable && node.pressed) {
       let firstMoveOfDrag = false;
       let deltaX: number;
       let deltaY: number;
-      if (entity.dragging === false) {
-        entity.dragging = true;
+      if (node.dragging === false) {
+        node.dragging = true;
         firstMoveOfDrag = true;
-        deltaX = domPointerEvent.offsetX - entity.pressedInitialPointerOffset.x;
-        deltaY = domPointerEvent.offsetY - entity.pressedInitialPointerOffset.y;
+        deltaX = domPointerEvent.offsetX - node.pressedInitialPointerOffset.x;
+        deltaY = domPointerEvent.offsetY - node.pressedInitialPointerOffset.y;
       } else {
-        deltaX = domPointerEvent.offsetX - entity.draggingLastPointerOffset.x;
-        deltaY = domPointerEvent.offsetY - entity.draggingLastPointerOffset.y;
+        deltaX = domPointerEvent.offsetX - node.draggingLastPointerOffset.x;
+        deltaY = domPointerEvent.offsetY - node.draggingLastPointerOffset.y;
       }
-      entity.position.x += deltaX;
-      entity.position.y += deltaY;
-      entity.draggingLastPointerOffset = {
+      node.position.x += deltaX;
+      node.position.y += deltaY;
+      node.draggingLastPointerOffset = {
         x: domPointerEvent.offsetX,
         y: domPointerEvent.offsetY,
       };
-      entityEvent.handled = true;
+      nodeEvent.handled = true;
       if (firstMoveOfDrag) {
-        this.raiseM2DragStartEvent(entity, entityEvent, domPointerEvent);
+        this.raiseM2DragStartEvent(node, nodeEvent, domPointerEvent);
       } else {
-        this.raiseM2DragEvent(entity, entityEvent, domPointerEvent);
+        this.raiseM2DragEvent(node, nodeEvent, domPointerEvent);
       }
       return;
     }
 
     if (
-      entity.isUserInteractionEnabled &&
-      entity.pressed &&
-      entity.pressedAndWithinHitArea &&
-      !this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      node.pressed &&
+      node.pressedAndWithinHitArea &&
+      !this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      entity.pressedAndWithinHitArea = false;
-      this.raiseTapLeaveEvent(entity, entityEvent, domPointerEvent);
+      node.pressedAndWithinHitArea = false;
+      this.raiseTapLeaveEvent(node, nodeEvent, domPointerEvent);
     }
     if (
-      entity.isUserInteractionEnabled &&
-      this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      this.raiseM2PointerMoveEvent(entity, entityEvent, domPointerEvent);
-      entity.withinHitArea = true;
+      this.raiseM2PointerMoveEvent(node, nodeEvent, domPointerEvent);
+      node.withinHitArea = true;
     }
     if (
-      entity.isUserInteractionEnabled &&
-      entity.withinHitArea &&
-      !this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      node.withinHitArea &&
+      !this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      entity.withinHitArea = false;
-      this.raiseM2PointerLeaveEvent(entity, entityEvent, domPointerEvent);
+      node.withinHitArea = false;
+      this.raiseM2PointerLeaveEvent(node, nodeEvent, domPointerEvent);
     }
 
-    if (entity.children) {
-      entity.children
-        // a hidden entity (and its children) can't receive taps,
+    if (node.children) {
+      node.children
+        // a hidden node (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
-        .filter((entity) => !entity.hidden)
+        .filter((node) => !node.hidden)
         // only drawables have z-position
-        .filter((entity) => entity.isDrawable)
+        .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
             (a as unknown as IDrawable).zPosition,
         )
-        .forEach((entity) =>
-          this.processDomPointerMove(entity, entityEvent, domPointerEvent),
+        .forEach((node) =>
+          this.processDomPointerMove(node, nodeEvent, domPointerEvent),
         );
     }
   }
 
   private processDomPointerLeave(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    if (entityEvent.handled) {
+    if (nodeEvent.handled) {
       return;
     }
 
@@ -2902,220 +2914,204 @@ export class Game implements Activity {
      * Adjust dragging behavior when the pointer leaves the canvas.
      * This is necessary because the pointerup event is not fired when the
      * pointer leaves the canvas. On desktop, this means that the user might
-     * lift the pointer outside the canvas, but the entity will still be
+     * lift the pointer outside the canvas, but the node will still be
      * dragged when the pointer is moved back into the canvas.
      */
-    if (entity.dragging) {
-      const m2Event: EntityEvent = {
-        target: entity,
-        type: EventType.DragEnd,
+    if (node.dragging) {
+      const m2Event: M2NodeEvent = {
+        target: node,
+        type: M2EventType.DragEnd,
         handled: false,
       };
 
-      entity.dragging = false;
-      entity.pressed = false;
-      entity.pressedAndWithinHitArea = false;
-      this.raiseM2DragEndEvent(entity, m2Event, domPointerEvent);
+      node.dragging = false;
+      node.pressed = false;
+      node.pressedAndWithinHitArea = false;
+      this.raiseM2DragEndEvent(node, m2Event, domPointerEvent);
       return;
     }
 
     // note: offsetX and offsetY are relative to the HTML canvas element
     if (
-      entity.isUserInteractionEnabled &&
-      entity.pressed &&
-      entity.pressedAndWithinHitArea &&
-      !this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      node.pressed &&
+      node.pressedAndWithinHitArea &&
+      !this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      entity.pressedAndWithinHitArea = false;
-      this.raiseTapLeaveEvent(entity, entityEvent, domPointerEvent);
+      node.pressedAndWithinHitArea = false;
+      this.raiseTapLeaveEvent(node, nodeEvent, domPointerEvent);
     }
 
     if (
-      entity.isUserInteractionEnabled &&
-      entity.withinHitArea &&
-      !this.IsCanvasPointWithinEntityBounds(
-        entity,
+      node.isUserInteractionEnabled &&
+      node.withinHitArea &&
+      !this.IsCanvasPointWithinNodeBounds(
+        node,
         domPointerEvent.offsetX,
         domPointerEvent.offsetY,
       )
     ) {
-      entity.withinHitArea = false;
-      this.raiseM2PointerLeaveEvent(entity, entityEvent, domPointerEvent);
+      node.withinHitArea = false;
+      this.raiseM2PointerLeaveEvent(node, nodeEvent, domPointerEvent);
     }
 
-    if (entity.children) {
-      entity.children
-        // a hidden entity (and its children) can't receive taps,
+    if (node.children) {
+      node.children
+        // a hidden node (and its children) can't receive taps,
         // even if isUserInteractionEnabled is true
-        .filter((entity) => !entity.hidden)
+        .filter((node) => !node.hidden)
         // only drawables have z-position
-        .filter((entity) => entity.isDrawable)
+        .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
         .sort(
           (a, b) =>
             (b as unknown as IDrawable).zPosition -
             (a as unknown as IDrawable).zPosition,
         )
-        .forEach((entity) =>
-          this.processDomPointerLeave(entity, entityEvent, domPointerEvent),
+        .forEach((node) =>
+          this.processDomPointerLeave(node, nodeEvent, domPointerEvent),
         );
     }
   }
 
   private raiseM2PointerDownEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.PointerDown;
-    this.raiseEventOnListeningEntities<M2PointerEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.PointerDown;
+    this.raiseEventOnListeningNodes<M2PointerEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapDownEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.TapDown;
-    this.raiseEventOnListeningEntities<TapEvent>(
-      entity,
-      entityEvent,
-      domPointerEvent,
-    );
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.TapDown;
+    this.raiseEventOnListeningNodes<TapEvent>(node, nodeEvent, domPointerEvent);
   }
 
   private raiseTapLeaveEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.TapLeave;
-    this.raiseEventOnListeningEntities<TapEvent>(
-      entity,
-      entityEvent,
-      domPointerEvent,
-    );
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.TapLeave;
+    this.raiseEventOnListeningNodes<TapEvent>(node, nodeEvent, domPointerEvent);
   }
 
   private raiseM2PointerUpEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.PointerUp;
-    this.raiseEventOnListeningEntities<M2PointerEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.PointerUp;
+    this.raiseEventOnListeningNodes<M2PointerEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseTapUpEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.TapUp;
-    this.raiseEventOnListeningEntities<TapEvent>(
-      entity,
-      entityEvent,
-      domPointerEvent,
-    );
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.TapUp;
+    this.raiseEventOnListeningNodes<TapEvent>(node, nodeEvent, domPointerEvent);
   }
 
   private raiseTapUpAny(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.TapUpAny;
-    this.raiseEventOnListeningEntities<TapEvent>(
-      entity,
-      entityEvent,
-      domPointerEvent,
-    );
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.TapUpAny;
+    this.raiseEventOnListeningNodes<TapEvent>(node, nodeEvent, domPointerEvent);
   }
 
   private raiseM2PointerMoveEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.PointerMove;
-    this.raiseEventOnListeningEntities<M2PointerEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.PointerMove;
+    this.raiseEventOnListeningNodes<M2PointerEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2PointerLeaveEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.PointerLeave;
-    this.raiseEventOnListeningEntities<M2PointerEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.PointerLeave;
+    this.raiseEventOnListeningNodes<M2PointerEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragStartEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.DragStart;
-    this.raiseEventOnListeningEntities<M2DragEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.DragStart;
+    this.raiseEventOnListeningNodes<M2DragEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.Drag;
-    this.raiseEventOnListeningEntities<M2DragEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.Drag;
+    this.raiseEventOnListeningNodes<M2DragEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
 
   private raiseM2DragEndEvent(
-    entity: Entity,
-    entityEvent: EntityEvent,
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domPointerEvent: PointerEvent,
   ): void {
-    entityEvent.target = entity;
-    entityEvent.type = EventType.DragEnd;
-    this.raiseEventOnListeningEntities<M2DragEvent>(
-      entity,
-      entityEvent,
+    nodeEvent.target = node;
+    nodeEvent.type = M2EventType.DragEnd;
+    this.raiseEventOnListeningNodes<M2DragEvent>(
+      node,
+      nodeEvent,
       domPointerEvent,
     );
   }
@@ -3124,7 +3120,7 @@ export class Game implements Activity {
     scene: Scene,
     eventType: "SceneSetup" | "SceneAppear",
   ): void {
-    const event: EntityEvent = {
+    const event: M2NodeEvent = {
       target: scene,
       type: eventType,
     };
@@ -3133,18 +3129,18 @@ export class Game implements Activity {
       .forEach((listener) => listener.callback(event));
   }
 
-  private calculatePointWithinEntityFromDomPointerEvent(
-    entity: Entity,
+  private calculatePointWithinNodeFromDomPointerEvent(
+    node: M2Node,
     domPointerEvent: PointerEvent,
   ): Point {
-    let width = entity.size.width;
-    let height = entity.size.height;
+    let width = node.size.width;
+    let height = node.size.height;
 
     if (
-      entity.type === EntityType.Shape &&
-      (entity as Shape).shapeType === ShapeType.Circle
+      node.type === M2NodeType.Shape &&
+      (node as Shape).shapeType === ShapeType.Circle
     ) {
-      const radius = (entity as Shape).circleOfRadius;
+      const radius = (node as Shape).circleOfRadius;
       if (!radius) {
         throw "circleOfRadius is undefined";
       }
@@ -3154,18 +3150,18 @@ export class Game implements Activity {
 
     let x = domPointerEvent.offsetX;
     let y = domPointerEvent.offsetY;
-    const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
+    const bb = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(node);
 
     /**
-     * If the entity or any of its ancestors have been rotated, we need to
+     * If the node or any of its ancestors have been rotated, we need to
      * adjust the point reported on the DOM to account for the rotation. We
      * do this by calculating the rotation transforms that were used to
-     * display the rotated entity and applying the reverse rotation transforms
+     * display the rotated node and applying the reverse rotation transforms
      * to the DOM point.
      */
-    if (M2c2KitHelpers.entityOrAncestorHasBeenRotated(entity)) {
+    if (M2c2KitHelpers.nodeOrAncestorHasBeenRotated(node)) {
       const transforms = M2c2KitHelpers.calculateRotationTransforms(
-        entity as Entity & IDrawable,
+        node as M2Node & IDrawable,
       );
       transforms.forEach((transform) => {
         const rotatedPoint = M2c2KitHelpers.rotatePoint(
@@ -3194,7 +3190,7 @@ export class Game implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityStart, callback, options);
+    this.addEventListener(M2EventType.ActivityStart, callback, options);
   }
 
   /**
@@ -3207,7 +3203,7 @@ export class Game implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityCancel, callback, options);
+    this.addEventListener(M2EventType.ActivityCancel, callback, options);
   }
 
   /**
@@ -3220,7 +3216,7 @@ export class Game implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityEnd, callback, options);
+    this.addEventListener(M2EventType.ActivityEnd, callback, options);
   }
 
   /**
@@ -3233,7 +3229,7 @@ export class Game implements Activity {
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityData, callback, options);
+    this.addEventListener(M2EventType.ActivityData, callback, options);
   }
 
   /**
@@ -3248,7 +3244,7 @@ export class Game implements Activity {
     callback: (gameEvent: GameEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.GameWarmupStart, callback, options);
+    this.addEventListener(M2EventType.GameWarmupStart, callback, options);
   }
 
   /**
@@ -3263,11 +3259,11 @@ export class Game implements Activity {
     callback: (activityEvent: ActivityEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.GameWarmupEnd, callback, options);
+    this.addEventListener(M2EventType.GameWarmupEnd, callback, options);
   }
 
   private addEventListener<T extends ActivityEvent>(
-    type: EventType,
+    type: M2EventType,
     callback: (ev: T) => void,
     options?: CallbackOptions,
   ): void {
@@ -3309,59 +3305,59 @@ export class Game implements Activity {
       });
   }
 
-  private raiseEventOnListeningEntities<T extends EntityEvent>(
-    entity: Entity,
-    entityEvent: EntityEvent,
+  private raiseEventOnListeningNodes<T extends M2NodeEvent>(
+    node: M2Node,
+    nodeEvent: M2NodeEvent,
     domEvent: Event,
   ): void {
-    entity.eventListeners
-      .filter((listener) => listener.type === entityEvent.type)
+    node.eventListeners
+      .filter((listener) => listener.type === nodeEvent.type)
       .forEach((listener) => {
-        if (listener.entityUuid === entity.uuid) {
-          (entityEvent as T).target = entity;
+        if (listener.nodeUuid === node.uuid) {
+          (nodeEvent as T).target = node;
 
-          switch (entityEvent.type) {
-            case EventType.PointerDown:
-            case EventType.PointerMove:
-            case EventType.PointerUp:
-            case EventType.PointerLeave:
-              (entityEvent as M2PointerEvent).point =
-                this.calculatePointWithinEntityFromDomPointerEvent(
-                  entity,
+          switch (nodeEvent.type) {
+            case M2EventType.PointerDown:
+            case M2EventType.PointerMove:
+            case M2EventType.PointerUp:
+            case M2EventType.PointerLeave:
+              (nodeEvent as M2PointerEvent).point =
+                this.calculatePointWithinNodeFromDomPointerEvent(
+                  node,
                   domEvent as PointerEvent,
                 );
-              (entityEvent as M2PointerEvent).buttons = (
+              (nodeEvent as M2PointerEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
-              listener.callback(entityEvent as T);
+              listener.callback(nodeEvent as T);
               break;
-            case EventType.TapDown:
-            case EventType.TapUp:
-            case EventType.TapUpAny:
-            case EventType.TapLeave:
-              (entityEvent as TapEvent).point =
-                this.calculatePointWithinEntityFromDomPointerEvent(
-                  entity,
+            case M2EventType.TapDown:
+            case M2EventType.TapUp:
+            case M2EventType.TapUpAny:
+            case M2EventType.TapLeave:
+              (nodeEvent as TapEvent).point =
+                this.calculatePointWithinNodeFromDomPointerEvent(
+                  node,
                   domEvent as PointerEvent,
                 );
 
-              (entityEvent as TapEvent).buttons = (
+              (nodeEvent as TapEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
 
-              listener.callback(entityEvent as T);
+              listener.callback(nodeEvent as T);
               break;
-            case EventType.DragStart:
-            case EventType.Drag:
-            case EventType.DragEnd:
-              (entityEvent as M2DragEvent).position = {
-                x: entity.position.x,
-                y: entity.position.y,
+            case M2EventType.DragStart:
+            case M2EventType.Drag:
+            case M2EventType.DragEnd:
+              (nodeEvent as M2DragEvent).position = {
+                x: node.position.x,
+                y: node.position.y,
               };
-              (entityEvent as M2DragEvent).buttons = (
+              (nodeEvent as M2DragEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
-              listener.callback(entityEvent as T);
+              listener.callback(nodeEvent as T);
               break;
           }
         }
@@ -3382,61 +3378,61 @@ export class Game implements Activity {
 
   /**
    *
-   * Checks if the given canvas point is within the entity's bounds.
+   * Checks if the given canvas point is within the node's bounds.
    *
-   * @param entity - entity to check bounds for
+   * @param node - node to check bounds for
    * @param x - x coordinate of the canvas point
    * @param y - y coordinate of the canvas point
-   * @returns true if x, y point is within the entity's bounds
+   * @returns true if x, y point is within the node's bounds
    */
-  private IsCanvasPointWithinEntityBounds(
-    entity: Entity,
+  private IsCanvasPointWithinNodeBounds(
+    node: M2Node,
     x: number,
     y: number,
   ): boolean {
-    if (!entity.isDrawable) {
-      throw "only drawable entities can receive pointer events";
+    if (!node.isDrawable) {
+      throw "only drawable nodes can receive pointer events";
     }
     if (
-      entity.type === EntityType.Shape &&
-      (entity as Shape).shapeType === ShapeType.Circle
+      node.type === M2NodeType.Shape &&
+      (node as Shape).shapeType === ShapeType.Circle
     ) {
-      const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
-      const radius = (entity as Shape).circleOfRadius;
+      const bb = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(node);
+      const radius = (node as Shape).circleOfRadius;
       if (!radius) {
         throw "circleOfRadius is undefined";
       }
       const center = {
-        x: bb.xMin + radius * entity.absoluteScale,
-        y: bb.yMin + radius * entity.absoluteScale,
+        x: bb.xMin + radius * node.absoluteScale,
+        y: bb.yMin + radius * node.absoluteScale,
       };
       const distance = Math.sqrt(
         Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2),
       );
-      return distance <= radius * entity.absoluteScale;
+      return distance <= radius * node.absoluteScale;
     }
 
-    if (entity.size.width === 0 || entity.size.height === 0) {
+    if (node.size.width === 0 || node.size.height === 0) {
       // console.warn(
-      //   `warning: entity ${entity.toString()} has isUserInteractionEnabled = true, but has no interactable area. Size is ${
-      //     entity.size.width
-      //   }, ${entity.size.height}`
+      //   `warning: node ${node.toString()} has isUserInteractionEnabled = true, but has no interactable area. Size is ${
+      //     node.size.width
+      //   }, ${node.size.height}`
       // );
       return false;
     }
 
-    if (entity.type === EntityType.TextLine && isNaN(entity.size.width)) {
+    if (node.type === M2NodeType.TextLine && isNaN(node.size.width)) {
       // console.warn(
-      //   `warning: entity ${entity.toString()} is a TextLine with width = NaN. A TextLine must have its width manually set.`
+      //   `warning: node ${node.toString()} is a TextLine with width = NaN. A TextLine must have its width manually set.`
       // );
       return false;
     }
 
     const points = M2c2KitHelpers.calculateRotatedPoints(
-      entity as unknown as IDrawable & Entity,
+      node as unknown as IDrawable & M2Node,
     );
     return (
-      entity.isUserInteractionEnabled &&
+      node.isUserInteractionEnabled &&
       M2c2KitHelpers.isPointInsideRectangle({ x, y }, points)
     );
   }

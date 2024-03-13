@@ -1004,7 +1004,7 @@ appeared.",
       priorColorSelectedDot.fillColor = selectedRgba;
 
       locationSelectionDot.onTapDown((tapEvent) => {
-        /** Prevent other entities from receiving the tap event.
+        /** Prevent other nodes from receiving the tap event.
          * Specifically, this prevents the quit button from being pressed if
          * the user taps on the dot. Note: the dot placement on the
          * square listens for PointerDown, so that will not be affected. */

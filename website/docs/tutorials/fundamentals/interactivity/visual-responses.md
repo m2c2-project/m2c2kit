@@ -11,7 +11,7 @@ A useful assessment changes its appearance in response to the user.
 
 We've demonstrated interactivity, but only with text in the console. Users don't see the console -- it's for programmers! Let's add some visual responses within the scene.
 
-How you respond to user events is limited only by the requirements of your assessment and your imagination. All the properties we've used to configure the appearance of entities can be changed in response to user events. For example, when the user taps a shape, you could:
+How you respond to user events is limited only by the requirements of your assessment and your imagination. All the properties we've used to configure the appearance of nodes can be changed in response to user events. For example, when the user taps a shape, you could:
 
 - Change the shape's color or position.
 - Scale the shape bigger or smaller.

@@ -7,11 +7,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Tap Events
 
-Do you want to execute code when the user first touches or clicks the entity? Or, do you want to execute code only after the user releases the touch or click? You can do this with the `onTapDown()` and `onTapUp()` methods.
+Do you want to execute code when the user first touches or clicks the node? Or, do you want to execute code only after the user releases the touch or click? You can do this with the `onTapDown()` and `onTapUp()` methods.
 
 :::tip
 
-`onTapUp()` occurs only when the user releases a touch or click _within_ the bounds of the entity. You may or may not want this restriction. For example, users with less dexterity might have trouble releasing a touch or click within the bounds of the entity. If you want to execute code when the user releases a touch or click anywhere, use the `onTapUpAny()` method.
+`onTapUp()` occurs only when the user releases a touch or click _within_ the bounds of the node. You may or may not want this restriction. For example, users with less dexterity might have trouble releasing a touch or click within the bounds of the node. If you want to execute code when the user releases a touch or click anywhere, use the `onTapUpAny()` method.
 
 :::
 
@@ -64,7 +64,7 @@ tapUpAnyButton.onTapUpAny(() => {
 });`;
  
 export const more = [
-{ description: <>An entity can respond to [multiple events]. See how the button responds to `TapDown`, `TapUp`, and `TapLeave`.</>,
+{ description: <>A node can respond to [multiple events]. See how the button responds to `TapDown`, `TapUp`, and `TapLeave`.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.DeepSkyBlue });
 game.addScene(sceneOne);
  

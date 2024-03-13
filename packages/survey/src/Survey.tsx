@@ -4,7 +4,7 @@ import {
   ActivityKeyValueData,
   ActivityEventListener,
   ActivityType,
-  EventType,
+  M2EventType,
   Timer,
   ActivityLifecycleEvent,
   CallbackOptions,
@@ -163,7 +163,7 @@ export class Survey implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityStart, callback, options);
+    this.addEventListener(M2EventType.ActivityStart, callback, options);
   }
 
   /**
@@ -176,7 +176,7 @@ export class Survey implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityCancel, callback, options);
+    this.addEventListener(M2EventType.ActivityCancel, callback, options);
   }
 
   /**
@@ -189,7 +189,7 @@ export class Survey implements Activity {
     callback: (activityLifecycleEvent: ActivityLifecycleEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityEnd, callback, options);
+    this.addEventListener(M2EventType.ActivityEnd, callback, options);
   }
 
   /**
@@ -202,11 +202,11 @@ export class Survey implements Activity {
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityData, callback, options);
+    this.addEventListener(M2EventType.ActivityData, callback, options);
   }
 
   private addEventListener<T extends ActivityEvent>(
-    type: EventType,
+    type: M2EventType,
     callback: (ev: T) => void,
     options?: CallbackOptions,
   ): void {
@@ -256,7 +256,7 @@ export class Survey implements Activity {
     this.renderSurveyJs();
     const activityStartEvent: ActivityLifecycleEvent = {
       target: this,
-      type: EventType.ActivityStart,
+      type: M2EventType.ActivityStart,
     };
     this.raiseEventOnListeners(activityStartEvent);
   }
@@ -462,7 +462,7 @@ export class Survey implements Activity {
     this.survey.onComplete.add(() => {
       const activityEndEvent: ActivityLifecycleEvent = {
         target: this,
-        type: EventType.ActivityEnd,
+        type: M2EventType.ActivityEnd,
       };
       this.raiseEventOnListeners(activityEndEvent);
     });
@@ -740,7 +740,7 @@ export class Survey implements Activity {
     data: ActivityKeyValueData,
   ) {
     const resultsEvent: ActivityResultsEvent = {
-      type: EventType.ActivityData,
+      type: M2EventType.ActivityData,
       iso8601Timestamp: new Date().toISOString(),
       target: this,
       newData: newData,

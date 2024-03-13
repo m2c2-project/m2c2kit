@@ -1,12 +1,12 @@
 import { Canvas } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { Point } from "./Point";
 import { CompositeOptions } from "./CompositeOptions";
 
-export abstract class Composite extends Entity implements IDrawable {
-  readonly type = EntityType.Composite;
+export abstract class Composite extends M2Node implements IDrawable {
+  readonly type = M2NodeType.Composite;
   compositeType = "<compositeType>";
   isDrawable = true;
   // Drawable options
@@ -14,7 +14,7 @@ export abstract class Composite extends Entity implements IDrawable {
   zPosition = 0;
 
   /**
-   * Base Drawable object for creating custom entities ("composites") composed of primitive entities.
+   * Base Drawable object for creating custom nodes ("composites") composed of primitive nodes.
    *
    * @param options
    */

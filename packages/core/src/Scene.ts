@@ -2,18 +2,18 @@ import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { SceneOptions } from "./SceneOptions";
 import { Game } from "./Game";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
-import { EntityEvent } from "./EntityEvent";
+import { M2NodeEvent } from "./M2NodeEvent";
 import { CallbackOptions } from "./CallbackOptions";
 
-export class Scene extends Entity implements IDrawable, SceneOptions {
-  readonly type = EntityType.Scene;
+export class Scene extends M2Node implements IDrawable, SceneOptions {
+  readonly type = M2NodeType.Scene;
   isDrawable = true;
   // Drawable options
   anchorPoint = { x: 0, y: 0 };
@@ -26,7 +26,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   private backgroundPaint?: Paint;
 
   /**
-   * Top-level entity that holds all other entities, such as sprites, rectangles, or labels, that will be displayed on the screen
+   * Top-level node that holds all other nodes, such as sprites, rectangles, or labels, that will be displayed on the screen
    *
    * @remarks The scene is the game screen or stage, and fills the entire available screen. There are usually multiple screens to contain multiple stages of the game, such as various instruction pages or phases of a game.
    *
@@ -84,18 +84,18 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Scene {
     const dest = new Scene({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       backgroundColor: this.backgroundColor,
       name: newName,
@@ -116,18 +116,18 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
   /**
    * Code that will be called every time the scene is presented.
    *
-   * @remarks Use this callback to set entities to their initial state, if
+   * @remarks Use this callback to set nodes to their initial state, if
    * that state might be changed later. For example, if a scene allows
    * players to place dots on a grid, the setup() method should ensure the
    * grid is clear of any prior dots from previous times this scene may
-   * have been displayed. In addition, if entities should vary in each
+   * have been displayed. In addition, if nodes should vary in each
    * iteration, that should be done here.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
    */
   onSetup(
-    callback: (entityEvent: EntityEvent) => void,
+    callback: (nodeEvent: M2NodeEvent) => void,
     options?: CallbackOptions,
   ): void {
     this.addEventListener("SceneSetup", callback, options);
@@ -142,7 +142,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
    * @param options - {@link CallbackOptions}
    */
   onAppear(
-    callback: (entityEvent: EntityEvent) => void,
+    callback: (nodeEvent: M2NodeEvent) => void,
     options?: CallbackOptions,
   ): void {
     this.addEventListener("SceneAppear", callback, options);
@@ -158,7 +158,7 @@ export class Scene extends Entity implements IDrawable, SceneOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
-    M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+    M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
     if (!this.backgroundPaint) {
       throw new Error(`in Scene ${this}, background paint is undefined.`);

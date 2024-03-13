@@ -23,13 +23,13 @@ The record of all the stroke interactions is stored in the `strokes` property of
 
 ## Interacting with items
 
-More common than simply having the user draw on a blank area is asking the user to draw strokes that interact with objects. For example, you might show a series of circles and ask the user to connect to them with lines. Entities that we add to the `DrawPad` for the purpose of interacting with them are called `DrawPadItems`. A `DrawPadItem` is a `Shape`, `Sprite`, or any other entity that we add to the `DrawPad`. We can then listen for events on the `DrawPadItem` and execute code when they occur.
+More common than simply having the user draw on a blank area is asking the user to draw strokes that interact with objects. For example, you might show a series of circles and ask the user to connect to them with lines. Nodes that we add to the `DrawPad` for the purpose of interacting with them are called `DrawPadItems`. A `DrawPadItem` is a `Shape`, `Sprite`, or any other node that we add to the `DrawPad`. We can then listen for events on the `DrawPadItem` and execute code when they occur.
 
-To use a `DrawPadItem`, we create the entity and add it to the `DrawPad` using the `addItem()` method. `addItem()` returns the entity as a `DrawPadItem`, which has extra properties and methods for interacting with strokes.
+To use a `DrawPadItem`, we create the node and add it to the `DrawPad` using the `addItem()` method. `addItem()` returns the node as a `DrawPadItem`, which has extra properties and methods for interacting with strokes.
 
 :::caution
 
-Once the entity has been added to the `DrawPad`, we can no longer access it directly. Instead, we **must** access it only through the `DrawPadItem` that was returned by `addItem()`.
+Once the node has been added to the `DrawPad`, we can no longer access it directly. Instead, we **must** access it only through the `DrawPadItem` that was returned by `addItem()`.
 
 :::
 

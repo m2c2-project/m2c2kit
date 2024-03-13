@@ -5,7 +5,7 @@ import {
   CompositeOptions,
   RgbaColor,
   Size,
-  Entity,
+  M2Node,
   Shape,
   IDrawable,
 } from "@m2c2kit/core";
@@ -26,7 +26,7 @@ export interface GridOptions extends CompositeOptions {
 }
 
 interface GridChild {
-  entity: Entity;
+  node: M2Node;
   row: number;
   column: number;
 }
@@ -48,11 +48,11 @@ export class Grid extends Composite {
   private _gridBackground?: Shape;
 
   /**
-   * A rectangular grid that supports placement of entities within the grid's
+   * A rectangular grid that supports placement of nodes within the grid's
    * cells.
    *
-   * @remarks This composite entity is composed of rectangles and lines. It
-   * has convenience functions for placing and clearing entities on the grid
+   * @remarks This composite node is composed of rectangles and lines. It
+   * has convenience functions for placing and clearing nodes on the grid
    * by row and column position (zero-based indexing)
    *
    * @param options - {@link GridOptions}
@@ -97,7 +97,7 @@ export class Grid extends Composite {
 
   override initialize(): void {
     // Remove all children, including gridLines because we may need to redraw them.
-    // Call the base class (Entity) removeAllChildren. (hence, the super)
+    // Call the base class (M2Node) removeAllChildren. (hence, the super)
     // (note that we override removeAllChildren in this Grid class)
     super.removeAllChildren();
     this.gridBackground = new Shape({
@@ -141,7 +141,7 @@ export class Grid extends Composite {
       this.gridChildren.forEach((gridChild) => {
         if (!this.cellWidth || !this.cellHeight || !this.gridBackground) {
           throw new Error(
-            "cellWidth, cellHeight, or gridBackground undefined or null"
+            "cellWidth, cellHeight, or gridBackground undefined or null",
           );
         }
         const x =
@@ -154,14 +154,14 @@ export class Grid extends Composite {
           gridChild.row * this.cellHeight;
         /**
          * Above x, y is the center of the grid cell. We need to add the
-         * x, y of the grid child entity in case the user wants to offset
+         * x, y of the grid child node in case the user wants to offset
          * the grid child within the cell.
          */
-        gridChild.entity.position = {
-          x: x + gridChild.entity.position.x,
-          y: y + gridChild.entity.position.y,
+        gridChild.node.position = {
+          x: x + gridChild.node.position.x,
+          y: y + gridChild.node.position.y,
         };
-        this.gridBackground.addChild(gridChild.entity);
+        this.gridBackground.addChild(gridChild.node);
       });
     }
     this.needsInitialization = false;
@@ -178,24 +178,24 @@ export class Grid extends Composite {
     this._gridBackground = gridBackground;
   }
 
-  // all entities that make up grid are added as children, so they
+  // all nodes that make up grid are added as children, so they
   // have their own dispose methods
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   override dispose(): void {}
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Grid {
     const dest = new Grid({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       rows: this.rows,
       columns: this.columns,
@@ -234,8 +234,8 @@ export class Grid extends Composite {
       });
   }
 
-  // override Entity.RemoveAllChildren() so that when RemoveAllChildren() is called on a Grid,
-  // it removes only entities added to the grid cells (what we call grid children), not the grid lines!
+  // override M2Node.RemoveAllChildren() so that when RemoveAllChildren() is called on a Grid,
+  // it removes only nodes added to the grid cells (what we call grid children), not the grid lines!
   /**
    * Removes all children from the grid, but retains grid lines.
    */
@@ -246,62 +246,62 @@ export class Grid extends Composite {
     while (this.gridChildren.length) {
       const gridChild = this.gridChildren.pop();
       if (gridChild) {
-        this.gridBackground.removeChild(gridChild.entity);
+        this.gridBackground.removeChild(gridChild.node);
       }
     }
     this.needsInitialization = true;
   }
 
   /**
-   * Adds an entity to the grid at the specified row and column position.
+   * Adds a node to the grid at the specified row and column position.
    *
-   * @param entity - entity to add to the grid
-   * @param row  - row position within grid to add entity; zero-based indexing
-   * @param column - column position within grid to add entity; zero-based indexing
+   * @param node - node to add to the grid
+   * @param row  - row position within grid to add node; zero-based indexing
+   * @param column - column position within grid to add node; zero-based indexing
    */
-  addAtCell(entity: Entity, row: number, column: number): void {
+  addAtCell(node: M2Node, row: number, column: number): void {
     if (row < 0 || row >= this.rows || column < 0 || column >= this.columns) {
       console.warn(
-        `warning: addAtCell() requested to add entity at row ${row}, column ${column}. This is outside the bounds of grid ${this.name}, which is size ${this.rows}x${this.columns}. Note that addAtCell() uses zero-based indexing. AddAtCell() will proceed, but may draw entities outside the grid`
+        `warning: addAtCell() requested to add node at row ${row}, column ${column}. This is outside the bounds of grid ${this.name}, which is size ${this.rows}x${this.columns}. Note that addAtCell() uses zero-based indexing. AddAtCell() will proceed, but may draw nodes outside the grid`,
       );
     }
-    this.gridChildren.push({ entity: entity, row: row, column: column });
+    this.gridChildren.push({ node: node, row: row, column: column });
     this.needsInitialization = true;
   }
 
   /**
-   * Removes all child entities at the specified row and column position.
+   * Removes all child nodes at the specified row and column position.
    *
    * @param row - row position within grid at which to remove children; zero-based indexing
    * @param column - column position within grid at which to remove children; zero-based indexing
    */
   removeAllAtCell(row: number, column: number): void {
     const gridChildrenToRemove = this.gridChildren.filter(
-      (gridChild) => gridChild.row === row && gridChild.column === column
+      (gridChild) => gridChild.row === row && gridChild.column === column,
     );
     if (gridChildrenToRemove.length === 0) {
       return;
     }
     this.gridBackground.removeChildren(
-      gridChildrenToRemove.map((gridChild) => gridChild.entity)
+      gridChildrenToRemove.map((gridChild) => gridChild.node),
     );
     this.gridChildren = this.gridChildren.filter(
-      (gridChild) => gridChild.row !== row && gridChild.column !== column
+      (gridChild) => gridChild.row !== row && gridChild.column !== column,
     );
     this.needsInitialization = true;
   }
 
-  // override Entity.RemoveChild() so that when RemoveChild() is called on a Grid, it removes the
-  // entity from the gridBackground rectangle AND our grid's own list of children (in gridChildren)
+  // override M2Node.RemoveChild() so that when RemoveChild() is called on a Grid, it removes the
+  // node from the gridBackground rectangle AND our grid's own list of children (in gridChildren)
   /**
-   * Removes the child entity from the grid.
+   * Removes the child node from the grid.
    *
-   * @param entity - entity to remove
+   * @param node - node to remove
    */
-  override removeChild(entity: Entity): void {
-    this.gridBackground.removeChild(entity);
+  override removeChild(node: M2Node): void {
+    this.gridBackground.removeChild(node);
     this.gridChildren = this.gridChildren.filter(
-      (gridChild) => gridChild.entity != entity
+      (gridChild) => gridChild.node != node,
     );
     this.needsInitialization = true;
   }

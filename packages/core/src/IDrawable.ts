@@ -5,7 +5,7 @@ export interface IDrawable {
   draw(canvas: Canvas): void;
   warmup(canvas: Canvas): void;
   /**
-   * Frees up resources allocated by the Drawable Entity.
+   * Frees up resources allocated by the Drawable M2Node.
    *
    * @internal For m2c2kit library use only
    *

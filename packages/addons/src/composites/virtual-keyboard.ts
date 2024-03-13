@@ -7,11 +7,11 @@ import {
   RgbaColor,
   Composite,
   CompositeOptions,
-  Entity,
-  EntityEvent,
-  EventType,
+  M2Node,
+  M2NodeEvent,
+  M2EventType,
   IDrawable,
-  EntityEventListener,
+  M2NodeEventListener,
   ShapeOptions,
   CallbackOptions,
 } from "@m2c2kit/core";
@@ -85,7 +85,7 @@ export interface VirtualKeyboardOptions extends CompositeOptions {
   showKeyDownPreview?: boolean;
 }
 
-export interface VirtualKeyboardEvent extends EntityEvent {
+export interface VirtualKeyboardEvent extends M2NodeEvent {
   /** String that is generated when key is pressed, with any modifiers (e.g., Shift) applied. */
   key: string;
   /** Code for the key, not taking into account any modifiers. */
@@ -453,12 +453,12 @@ export class VirtualKeyboard extends Composite {
             this.eventListeners
               .filter(
                 (listener) =>
-                  listener.type === EventType.CompositeCustom &&
+                  listener.type === M2EventType.CompositeCustom &&
                   listener.compositeType === "VirtualKeyboardKeyUp",
               )
               .forEach((listener) => {
                 const virtualKeyboardEvent: VirtualKeyboardEvent = {
-                  type: EventType.CompositeCustom,
+                  type: M2EventType.CompositeCustom,
                   target: this,
                   handled: false,
                   key: keyAsString,
@@ -531,12 +531,12 @@ export class VirtualKeyboard extends Composite {
             this.eventListeners
               .filter(
                 (listener) =>
-                  listener.type === EventType.CompositeCustom &&
+                  listener.type === M2EventType.CompositeCustom &&
                   listener.compositeType === "VirtualKeyboardKeyDown",
               )
               .forEach((listener) => {
                 const virtualKeyboardEvent: VirtualKeyboardEvent = {
-                  type: EventType.CompositeCustom,
+                  type: M2EventType.CompositeCustom,
                   target: this,
                   handled: false,
                   key: keyAsString,
@@ -604,11 +604,11 @@ export class VirtualKeyboard extends Composite {
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
     options?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener<VirtualKeyboardEvent> = {
-      type: EventType.CompositeCustom,
+    const eventListener: M2NodeEventListener<VirtualKeyboardEvent> = {
+      type: M2EventType.CompositeCustom,
       compositeType: "VirtualKeyboardKeyDown",
-      entityUuid: this.uuid,
-      callback: <(ev: EntityEvent) => void>callback,
+      nodeUuid: this.uuid,
+      callback: <(ev: M2NodeEvent) => void>callback,
     };
 
     this.addVirtualKeyboardEventListener(eventListener, options);
@@ -624,31 +624,31 @@ export class VirtualKeyboard extends Composite {
     callback: (virtualKeyboardEvent: VirtualKeyboardEvent) => void,
     options?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener<VirtualKeyboardEvent> = {
-      type: EventType.CompositeCustom,
+    const eventListener: M2NodeEventListener<VirtualKeyboardEvent> = {
+      type: M2EventType.CompositeCustom,
       compositeType: "VirtualKeyboardKeyUp",
-      entityUuid: this.uuid,
-      callback: <(ev: EntityEvent) => void>callback,
+      nodeUuid: this.uuid,
+      callback: <(ev: M2NodeEvent) => void>callback,
     };
 
     this.addVirtualKeyboardEventListener(eventListener, options);
   }
 
   private addVirtualKeyboardEventListener(
-    eventListener: EntityEventListener<VirtualKeyboardEvent>,
+    eventListener: M2NodeEventListener<VirtualKeyboardEvent>,
     options?: CallbackOptions,
   ) {
     if (options?.replaceExisting) {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
-            listener.entityUuid === eventListener.entityUuid &&
+            listener.nodeUuid === eventListener.nodeUuid &&
             listener.type === eventListener.type &&
             listener.compositeType === eventListener.compositeType
           ),
       );
     }
-    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
+    this.eventListeners.push(eventListener as M2NodeEventListener<M2NodeEvent>);
   }
 
   update(): void {
@@ -668,7 +668,7 @@ export class VirtualKeyboard extends Composite {
       });
   }
 
-  duplicate(newName?: string | undefined): Entity {
+  duplicate(newName?: string | undefined): M2Node {
     throw new Error("Method not implemented.");
   }
 }

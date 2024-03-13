@@ -1,15 +1,15 @@
 import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { SpriteOptions } from "./SpriteOptions";
 import { M2Image, M2ImageStatus } from "./M2Image";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
-export class Sprite extends Entity implements IDrawable, SpriteOptions {
-  readonly type = EntityType.Sprite;
+export class Sprite extends M2Node implements IDrawable, SpriteOptions {
+  readonly type = M2NodeType.Sprite;
   isDrawable = true;
   // Drawable options
   anchorPoint = { x: 0.5, y: 0.5 };
@@ -70,25 +70,25 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
   private get paint(): Paint {
     if (!this._paint) {
       throw new Error(
-        `in paint getter: Sprite entity ${this.toString()} paint is undefined.`,
+        `in paint getter: Sprite node ${this.toString()} paint is undefined.`,
       );
     }
     return this._paint;
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Sprite {
     const dest = new Sprite({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       imageName: this.imageName,
       name: newName,
@@ -115,7 +115,7 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
         canvas.save();
         const drawScale = Globals.canvasScale / this.absoluteScale;
         canvas.scale(1 / drawScale, 1 / drawScale);
-        M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+        M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
         const x =
           (this.absolutePosition.x -
@@ -138,13 +138,13 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
         } else {
           if (this.m2Image.status === M2ImageStatus.Deferred) {
             console.log(
-              `begin loading lazy image ${this.m2Image.imageName} for Sprite entity ${this.toString()}`,
+              `begin loading lazy image ${this.m2Image.imageName} for Sprite node ${this.toString()}`,
             );
             this.game.imageManager.prepareDeferredImage(this.m2Image);
           }
           if (this.m2Image.status === M2ImageStatus.Error) {
             throw new Error(
-              `error status on image ${this.m2Image.imageName} for Sprite entity ${this.toString()}`,
+              `error status on image ${this.m2Image.imageName} for Sprite node ${this.toString()}`,
             );
           }
         }
@@ -160,12 +160,12 @@ export class Sprite extends Entity implements IDrawable, SpriteOptions {
       this.initialize();
       if (!this.m2Image) {
         throw new Error(
-          `in Sprite.warmup(): Sprite entity ${this.toString()}: image not loaded.`,
+          `in Sprite.warmup(): Sprite node ${this.toString()}: image not loaded.`,
         );
       }
       if (!this.m2Image.canvaskitImage) {
         throw new Error(
-          `in Sprite.warmup(): Sprite entity ${this.toString()} image ${this.m2Image.imageName} is undefined.`,
+          `in Sprite.warmup(): Sprite node ${this.toString()} image ${this.m2Image.imageName} is undefined.`,
         );
       }
       canvas.drawImage(this.m2Image.canvaskitImage, 0, 0);

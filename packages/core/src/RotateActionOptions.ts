@@ -1,7 +1,7 @@
 export interface RotateActionOptions {
-  /** Relative amount to rotate the entity, in counter-clockwise radians */
+  /** Relative amount to rotate the node, in counter-clockwise radians */
   byAngle?: number;
-  /** Absolute angle to which rotate the entity, in counter-clockwise radians */
+  /** Absolute angle to which rotate the node, in counter-clockwise radians */
   toAngle?: number;
   /** If `toAngle` is provided, should the rotation be performed in the direction that leads to the smallest rotation? Default is true */
   shortestUnitArc?: boolean;

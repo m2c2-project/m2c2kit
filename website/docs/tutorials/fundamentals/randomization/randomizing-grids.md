@@ -7,9 +7,9 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Randomizing Grids
 
-Grids are common in assessments, and entities often need to be placed on the grid randomly.
+Grids are common in assessments, and nodes often need to be placed on the grid randomly.
 
-The method `RandomDraws.FromGridWithoutReplacement()` simplifies the process of randomly placing entities on a grid. This method takes `n`, `rows`, and `columns` arguments. It returns an array of `n` objects to represent the randomly chosen grid cells. The grid cells have `row` and `column` properties (these are 0-based). The grid cell positions are unique.
+The method `RandomDraws.FromGridWithoutReplacement()` simplifies the process of randomly placing nodes on a grid. This method takes `n`, `rows`, and `columns` arguments. It returns an array of `n` objects to represent the randomly chosen grid cells. The grid cells have `row` and `column` properties (these are 0-based). The grid cell positions are unique.
 
 This code returns an array of 2 grid cells, each with a unique row and column, from a grid with 4 rows and 4 columns:
 

@@ -7,15 +7,15 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Naming
 
-Every entity has an optional `name` property.
+Every node has an optional `name` property.
 
-Using JavaScript, each entity is created and assigned to a variable that has a name, such as `sceneOne` or `helloLabel`. Usually, you don't need to give an entity an additional name, because you can refer to it by its variable name. Internally, however, you can also assign a name to an entity using the `name` property, and this will be visible to the m2c2kit engine. This name does not have to match the variable name.
+Using JavaScript, each node is created and assigned to a variable that has a name, such as `sceneOne` or `helloLabel`. Usually, you don't need to give a node an additional name, because you can refer to it by its variable name. Internally, however, you can also assign a name to a node using the `name` property, and this will be visible to the m2c2kit engine. This name does not have to match the variable name.
 
 Below, we give names to the `Scene` and the `Button`. The names can be any string.
 
 :::note
 
-Normally, you don't need to give an entity a name. But it can be useful for debugging or other advanced scenarios.
+Normally, you don't need to give a node a name. But it can be useful for debugging or other advanced scenarios.
 
 :::
 

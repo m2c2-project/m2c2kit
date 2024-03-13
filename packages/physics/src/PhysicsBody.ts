@@ -1,16 +1,16 @@
-import { Entity, Point, Shape, WebColors } from "@m2c2kit/core";
+import { M2Node, Point, Shape, WebColors } from "@m2c2kit/core";
 import Matter from "matter-js";
 import { Physics } from "./Physics";
 import { Vector } from "./Vector";
 import { PhysicsBodyOptions } from "./PhysicsBodyOptions";
 
 /**
- * A rigid body model added to an entity to enable physics simulation.
+ * A rigid body model added to a node to enable physics simulation.
  *
  * @param options - {@link PhysicsBodyOptions}
  */
 export class PhysicsBody implements PhysicsBodyOptions {
-  _entity?: Entity;
+  _node?: M2Node;
   _body?: Matter.Body;
   options: PhysicsBodyOptions;
   needsInitialization = true;
@@ -98,8 +98,8 @@ export class PhysicsBody implements PhysicsBodyOptions {
     }
 
     Matter.Composite.add(this.physics.engine.world, this.body);
-    this.physics.bodiesDictionary[this.entity.uuid] = this.body;
-    this.body.label = this.entity.uuid;
+    this.physics.bodiesDictionary[this.node.uuid] = this.body;
+    this.body.label = this.node.uuid;
     this.needsInitialization = false;
   }
 
@@ -114,7 +114,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
   applyForce(force: Vector, at?: Point) {
     let atPosition = at;
     if (!atPosition) {
-      atPosition = this.entity.position;
+      atPosition = this.node.position;
     }
     /**
      * We cannot call `Matter.Body.applyForce()` here because it will
@@ -146,15 +146,15 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline for ${this.node.name}`,
       });
-      this.entity.addChild(circleOutline);
+      this.node.addChild(circleOutline);
       circleOutline.initialize();
     }
 
     return Matter.Bodies.circle(
-      this.entity.position.x,
-      this.entity.position.y,
+      this.node.position.x,
+      this.node.position.y,
       options.circleOfRadius,
     );
   }
@@ -175,15 +175,15 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline for ${this.node.name}`,
       });
-      this.entity.addChild(rectOutline);
+      this.node.addChild(rectOutline);
       rectOutline.initialize();
     }
 
     return Matter.Bodies.rectangle(
-      this.entity.position.x,
-      this.entity.position.y,
+      this.node.position.x,
+      this.node.position.y,
       options.rect.width,
       options.rect.height,
     );
@@ -214,9 +214,9 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline (Edge Loop A) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop A) for ${this.node.name}`,
       });
-      this.entity.addChild(rectOutlineA);
+      this.node.addChild(rectOutlineA);
       rectOutlineA.initialize();
 
       const rectOutlineB = new Shape({
@@ -233,9 +233,9 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline (Edge Loop B) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop B) for ${this.node.name}`,
       });
-      this.entity.addChild(rectOutlineB);
+      this.node.addChild(rectOutlineB);
       rectOutlineB.initialize();
 
       const rectOutlineC = new Shape({
@@ -252,9 +252,9 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline (Edge Loop C) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop C) for ${this.node.name}`,
       });
-      this.entity.addChild(rectOutlineC);
+      this.node.addChild(rectOutlineC);
       rectOutlineC.initialize();
 
       const rectOutlineD = new Shape({
@@ -271,32 +271,32 @@ export class PhysicsBody implements PhysicsBodyOptions {
           this.physics.options.showsPhysicsStrokeColor ?? WebColors.Green,
         lineWidth: this.physics.options.showsPhysicsLineWidth ?? 1,
         zPosition: Number.MAX_SAFE_INTEGER,
-        name: `__PhysicsBodyOutline (Edge Loop D) for ${this.entity.name}`,
+        name: `__PhysicsBodyOutline (Edge Loop D) for ${this.node.name}`,
       });
-      this.entity.addChild(rectOutlineD);
+      this.node.addChild(rectOutlineD);
       rectOutlineD.initialize();
     }
 
     /**
-     * Assign the entity UUID as the label for each part of the edge loop.
+     * Assign the node UUID as the label for each part of the edge loop.
      * This is because when there is a collision, Matter.js reports the
      * collision with the part, not the composite body we later create
      * from these parts. Parts A and B are top and bottom; parts C and D
      * are left and right.
      */
     const partA = Matter.Bodies.rectangle(
-      this.entity.position.x,
-      this.entity.position.y - options.edgeLoop.height / 2 - thickness / 2,
+      this.node.position.x,
+      this.node.position.y - options.edgeLoop.height / 2 - thickness / 2,
       options.edgeLoop.width + thickness * 2,
       thickness,
-      { label: this.entity.uuid },
+      { label: this.node.uuid },
     );
     const partB = Matter.Bodies.rectangle(
-      this.entity.position.x,
-      this.entity.position.y + options.edgeLoop.height / 2 + thickness / 2,
+      this.node.position.x,
+      this.node.position.y + options.edgeLoop.height / 2 + thickness / 2,
       options.edgeLoop.width + thickness * 2,
       thickness,
-      { label: this.entity.uuid },
+      { label: this.node.uuid },
     );
     /**
      * Parts C and D are the left and right parts of the edge loop. We add
@@ -305,18 +305,18 @@ export class PhysicsBody implements PhysicsBodyOptions {
      * bodies tunneling out of the edge loop at the "seams" of the parts.
      */
     const partC = Matter.Bodies.rectangle(
-      this.entity.position.x - options.edgeLoop.width / 2 - thickness / 2,
-      this.entity.position.y,
+      this.node.position.x - options.edgeLoop.width / 2 - thickness / 2,
+      this.node.position.y,
       thickness,
       options.edgeLoop.height + 2 * thickness,
-      { label: this.entity.uuid },
+      { label: this.node.uuid },
     );
     const partD = Matter.Bodies.rectangle(
-      this.entity.position.x + options.edgeLoop.width / 2 + thickness / 2,
-      this.entity.position.y,
+      this.node.position.x + options.edgeLoop.width / 2 + thickness / 2,
+      this.node.position.y,
       thickness,
       options.edgeLoop.height + 2 * thickness,
-      { label: this.entity.uuid },
+      { label: this.node.uuid },
     );
     const body = Matter.Body.create({
       parts: [partA, partB, partC, partD],
@@ -338,7 +338,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   get body() {
     if (!this._body) {
-      throw new Error("PhysicsBody.entity is undefined");
+      throw new Error("PhysicsBody.node is undefined");
     }
     return this._body;
   }
@@ -364,15 +364,15 @@ export class PhysicsBody implements PhysicsBodyOptions {
     );
   }
 
-  get entity() {
-    if (!this._entity) {
-      throw new Error("PhysicsBody.entity is undefined");
+  get node() {
+    if (!this._node) {
+      throw new Error("PhysicsBody.node is undefined");
     }
-    return this._entity;
+    return this._node;
   }
 
-  set entity(entity: Entity) {
-    this._entity = entity;
+  set node(node: M2Node) {
+    this._node = node;
   }
 
   set isDynamic(isDynamic: boolean) {

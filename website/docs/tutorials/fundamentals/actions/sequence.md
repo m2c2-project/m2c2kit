@@ -52,7 +52,7 @@ goButton.onTapDown(() => {
 });`;
 
 export const more = [
-{ description: <>Clicking "GO" multiple times quickly will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the entity. To fix this, to the `Sequence` Action, add Actions [before and after] the animations to disable and re-enable the button:
+{ description: <>Clicking "GO" multiple times quickly will interfere with the smooth animation. This is because the `run()` method will immediately replace any existing Action that is running on the node. To fix this, to the `Sequence` Action, add Actions [before and after] the animations to disable and re-enable the button:
 <ul>
 <li>A <code>Custom</code> Action sets the <code>isUserInteractionEnabled</code> property of the button to <code>false</code> before the animations begin. This prevents additional clicks.</li>
 <li>When the animations are complete, a <code>Custom</code> Action sets the <code>isUserInteractionEnabled</code> property of the button to <code>true</code> so it again responds to clicks.</li>

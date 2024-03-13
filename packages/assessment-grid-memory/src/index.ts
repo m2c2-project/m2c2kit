@@ -708,7 +708,7 @@ phase, participants report the location of dots on a grid.",
                 if (tappedFCount >= number_of_interference_targets) {
                   // don't allow more taps on this current grid
                   interferenceGrid.gridChildren.forEach((cell) => {
-                    cell.entity.isUserInteractionEnabled = false;
+                    cell.node.isUserInteractionEnabled = false;
                   });
 
                   // show a new interference grid
@@ -829,7 +829,7 @@ phase, participants report the location of dots on a grid.",
             rect: { size: { width: 59, height: 59 } },
             fillColor: WebColors.Transparent,
           });
-          // an entity's userData is a property we can use to store
+          // a node's userData is a property we can use to store
           // anything we want. Here, we use it simply to keep track
           // of whether the cell has been tapped or not.
           cell.userData = 0;

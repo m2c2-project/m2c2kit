@@ -7,11 +7,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # FadeAlpha
 
-The `FadeAlpha` action changes the entity's opacity over time.
+The `FadeAlpha` action changes the node's opacity over time.
 
 The options object for the `FadeAlpha` action has the following properties:
 
-- `alpha`: The opacity of the entity once the Action has completed.
+- `alpha`: The opacity of the node once the Action has completed.
 - `duration`: The duration of the animation in milliseconds.
 - `runDuringTransition`: A boolean indicating whether the action should run during a transition. This is an optional property. If not specified, the default is `false`.
 
@@ -58,7 +58,7 @@ clickMeButton.onTapDown(() => {
 });`
 
 export const more = [
-{ description: <>To make a [dissolve effect] between one entity and another, place them in the same position, and set one entity's alpha to 0. Then run two <code>FadeAlpha</code> actions: one that fades out the first entity and another that fades in the second entity.</>,
+{ description: <>To make a [dissolve effect] between one node and another, place them in the same position, and set one node's alpha to 0. Then run two <code>FadeAlpha</code> actions: one that fades out the first node and another that fades in the second node.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.Aquamarine });
 game.addScene(sceneOne);
  

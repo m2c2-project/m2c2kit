@@ -158,7 +158,7 @@ export class ImageManager {
       // );
       // this.images[image.imageName].canvaskitImage = canvaskitImage;
       // this.images[image.imageName].status = M2ImageStatus.Ready;
-      // const sprites = this.game.entities.filter(
+      // const sprites = this.game.nodes.filter(
       //   (e) => e.type === "Sprite",
       // ) as Sprite[];
       // sprites.forEach((sprite) => {
@@ -186,7 +186,7 @@ export class ImageManager {
           );
           this.images[image.imageName].canvaskitImage = canvaskitImage;
           this.images[image.imageName].status = M2ImageStatus.Ready;
-          const sprites = this.game.entities.filter(
+          const sprites = this.game.nodes.filter(
             (e) => e.type === "Sprite",
           ) as Sprite[];
           sprites.forEach((sprite) => {

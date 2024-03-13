@@ -2,8 +2,8 @@ import "./Globals";
 import { Canvas, Paint, Path } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { ShapeOptions } from "./ShapeOptions";
 import { M2Path } from "./M2Path";
@@ -14,15 +14,15 @@ import { ShapeType } from "./ShapeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
-export class Shape extends Entity implements IDrawable, ShapeOptions {
-  readonly type = EntityType.Shape;
+export class Shape extends M2Node implements IDrawable, ShapeOptions {
+  readonly type = M2NodeType.Shape;
   isDrawable = true;
   isShape = true;
   // Drawable options
   anchorPoint = { x: 0.5, y: 0.5 };
   zPosition = 0;
   // Shape options
-  // TODO: fix the Size issue; should be readonly (calculated value) in all entities, but Rectangle
+  // TODO: fix the Size issue; should be readonly (calculated value) in all nodes, but Rectangle
   shapeType = ShapeType.Undefined;
   circleOfRadius?: number;
   rect?: RectOptions;
@@ -160,12 +160,12 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     }
     if (options.strokeColor && !options.lineWidth) {
       console.warn(
-        `warning: for entity ${this}, strokeColor = ${options.strokeColor} but lineWidth is non-zero. In normal usage, both would be set or both would be undefined.`,
+        `warning: for node ${this}, strokeColor = ${options.strokeColor} but lineWidth is non-zero. In normal usage, both would be set or both would be undefined.`,
       );
     }
     if (options.strokeColor === undefined && options.lineWidth) {
       console.warn(
-        `warning: for entity ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`,
+        `warning: for node ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`,
       );
     }
   }
@@ -271,18 +271,18 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Shape {
     const dest = new Shape({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       shapeType: this.shapeType,
       circleOfRadius: this.circleOfRadius,
@@ -313,7 +313,7 @@ export class Shape extends Entity implements IDrawable, ShapeOptions {
     canvas.save();
     const drawScale = Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
-    M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+    M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
     /**
      * Not all paints may be used, and thus some paints may not be initialized,

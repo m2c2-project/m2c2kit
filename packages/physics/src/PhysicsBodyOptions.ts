@@ -3,11 +3,11 @@ import { Vector } from "./Vector";
 
 export interface PhysicsBodyOptions {
   /**
-   * A circular physics body of the given radius centered on the entity.
+   * A circular physics body of the given radius centered on the node.
    */
   circleOfRadius?: number;
   /**
-   * A rectangular physics body of the given size centered on the entity.
+   * A rectangular physics body of the given size centered on the node.
    */
   rect?: Size;
   /**

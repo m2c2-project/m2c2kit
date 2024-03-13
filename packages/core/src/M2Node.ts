@@ -1,7 +1,7 @@
 import "./Globals";
 import { Canvas, CanvasKit } from "canvaskit-wasm";
-import { EntityEventListener } from "./EntityEventListener";
-import { EntityEvent } from "./EntityEvent";
+import { M2NodeEventListener } from "./M2NodeEventListener";
+import { M2NodeEvent } from "./M2NodeEvent";
 import { M2PointerEvent } from "./M2PointerEvent";
 import { TapEvent } from "./TapEvent";
 import { IDrawable } from "./IDrawable";
@@ -15,11 +15,11 @@ import { TextOptions } from "./TextOptions";
 import { IText } from "./IText";
 import { Size } from "./Size";
 import { Point } from "./Point";
-import { EntityOptions } from "./EntityOptions";
-import { EntityType } from "./EntityType";
+import { M2NodeOptions } from "./M2NodeOptions";
+import { M2NodeType } from "./M2NodeType";
 import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
-import { EventType } from "./M2Event";
+import { M2EventType } from "./M2Event";
 import { Game } from "./Game";
 import { ActionType } from "./ActionType";
 import { M2DragEvent } from "./M2DragEvent";
@@ -52,27 +52,27 @@ function handleTextOptions(text: IText, options: TextOptions): void {
   }
 }
 export function handleInterfaceOptions(
-  entity: Entity,
-  options: EntityOptions,
+  node: M2Node,
+  options: M2NodeOptions,
 ): void {
-  if (entity.isDrawable) {
+  if (node.isDrawable) {
     handleDrawableOptions(
-      entity as unknown as IDrawable,
+      node as unknown as IDrawable,
       options as DrawableOptions,
     );
   }
-  if (entity.isText) {
-    handleTextOptions(entity as unknown as IText, options as TextOptions);
+  if (node.isText) {
+    handleTextOptions(node as unknown as IText, options as TextOptions);
   }
 }
-export abstract class Entity implements EntityOptions {
-  type = EntityType.Entity;
+export abstract class M2Node implements M2NodeOptions {
+  type = M2NodeType.Node;
   isDrawable = false;
   isShape = false;
   isText = false;
-  // Entity Options
+  // Node Options
   name: string;
-  _position: Point = { x: 0, y: 0 }; // position of the entity in the parent coordinate system
+  _position: Point = { x: 0, y: 0 }; // position of the node in the parent coordinate system
   _scale = 1.0;
   alpha = 1.0;
   _zRotation = 0;
@@ -82,8 +82,8 @@ export abstract class Entity implements EntityOptions {
   layout: Layout = {};
 
   _game?: Game;
-  parent?: Entity;
-  children = new Array<Entity>();
+  parent?: M2Node;
+  children = new Array<M2Node>();
   absolutePosition: Point = { x: 0, y: 0 }; // position within the root coordinate system
   size: Size = { width: 0, height: 0 };
   absoluteScale = 1.0;
@@ -92,7 +92,7 @@ export abstract class Entity implements EntityOptions {
   actions = new Array<Action>();
   queuedAction?: Action;
   originalActions = new Array<Action>();
-  eventListeners = new Array<EntityEventListener<EntityEvent>>();
+  eventListeners = new Array<M2NodeEventListener<M2NodeEvent>>();
   readonly uuid = Uuid.generate();
   needsInitialization = true;
   // library users might put anything in userData property
@@ -100,26 +100,26 @@ export abstract class Entity implements EntityOptions {
   userData: any = {};
   loopMessages = new Set<string>();
 
-  /** Is the entity in a pressed state? E.g., did the user put the pointer
-   * down on the entity and not yet release it? */
+  /** Is the node in a pressed state? E.g., did the user put the pointer
+   * down on the node and not yet release it? */
   pressed = false;
   withinHitArea = false;
-  /** Is the entity in a pressed state AND is the pointer within the entity's
-   * hit area? For example, a user may put the pointer down on the entity, but
-   * then move the pointer, while still down, beyond the entity's hit area. In
+  /** Is the node in a pressed state AND is the pointer within the node's
+   * hit area? For example, a user may put the pointer down on the node, but
+   * then move the pointer, while still down, beyond the node's hit area. In
    * this case, pressed = true, but pressedAndWithinHitArea = false. */
   pressedAndWithinHitArea = false;
-  /** When the entity initially enters the pressed state, what is the pointer
+  /** When the node initially enters the pressed state, what is the pointer
    * offset? (offset from the canvas's origin to the pointer position). We
    * save this because it will be needed if this press then led to a drag. */
   pressedInitialPointerOffset: Point = { x: NaN, y: NaN };
-  /** What was the previous pointer offset when the entity was in a dragging
+  /** What was the previous pointer offset when the node was in a dragging
    * state? */
   draggingLastPointerOffset: Point = { x: NaN, y: NaN };
-  /** Is the entity in a dragging state? */
+  /** Is the node in a dragging state? */
   dragging = false;
 
-  constructor(options: EntityOptions = {}) {
+  constructor(options: M2NodeOptions = {}) {
     if (options.name === undefined) {
       this.name = this.uuid;
     } else {
@@ -153,22 +153,22 @@ export abstract class Entity implements EntityOptions {
 
   // we will override this in each derived class. This method will never be called.
   initialize(): void {
-    throw new Error("initialize() called in abstract base class Entity.");
+    throw new Error("initialize() called in abstract base class Node.");
   }
 
   /**
-   * The game which this entity is a part of.
+   * The game which this node is a part of.
    *
-   * @remarks Throws error if entity is not part of the game object.
+   * @remarks Throws error if node is not part of the game object.
    */
   get game(): Game {
-    const findParentScene = (entity: Entity): Scene => {
-      if (!entity.parent) {
-        throw new Error(`Entity ${this} has not been added to a scene.`);
-      } else if (entity.parent.type === EntityType.Scene) {
-        return entity.parent as Scene;
+    const findParentScene = (node: M2Node): Scene => {
+      if (!node.parent) {
+        throw new Error(`Node ${this} has not been added to a scene.`);
+      } else if (node.parent.type === M2NodeType.Scene) {
+        return node.parent as Scene;
       } else {
-        return findParentScene(entity.parent);
+        return findParentScene(node.parent);
       }
     };
 
@@ -176,29 +176,29 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Determines if the entity has been added to the game object.
+   * Determines if the node has been added to the game object.
    *
-   * @returns true if entity has been added
+   * @returns true if node has been added
    */
   private isPartOfGame(): boolean {
     /**
      * getter this.game throws error if undefined; thus, to check if this.game
      * is undefined we must check the backing variable, _game.
      */
-    if (this.type === EntityType.Scene && this._game === undefined) {
+    if (this.type === M2NodeType.Scene && this._game === undefined) {
       return false;
     }
-    if (this.type === EntityType.Scene && this._game !== undefined) {
+    if (this.type === M2NodeType.Scene && this._game !== undefined) {
       return true;
     }
 
-    const findParentScene = (entity: Entity): Scene | undefined => {
-      if (!entity.parent) {
+    const findParentScene = (node: M2Node): Scene | undefined => {
+      if (!node.parent) {
         return undefined;
-      } else if (entity.parent.type === EntityType.Scene) {
-        return entity.parent as Scene;
+      } else if (node.parent.type === M2NodeType.Scene) {
+        return node.parent as Scene;
       } else {
-        return findParentScene(entity.parent);
+        return findParentScene(node.parent);
       }
     };
 
@@ -206,13 +206,13 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Overrides toString() and returns a human-friendly description of the entity.
+   * Overrides toString() and returns a human-friendly description of the node.
    *
    * @remarks Inspiration from https://stackoverflow.com/a/35361695
    */
   public toString = (): string => {
     let type = this.type.toString();
-    if (this.type == EntityType.Composite) {
+    if (this.type == M2NodeType.Composite) {
       type = (this as unknown as Composite).compositeType;
     }
 
@@ -224,24 +224,24 @@ export abstract class Entity implements EntityOptions {
   };
 
   /**
-   * Adds a child to this parent entity. Throws exception if the child's name
+   * Adds a child to this parent node. Throws exception if the child's name
    * is not unique with respect to other children of this parent, or if the
    * child has already been added to another parent.
    *
-   * @param child - The child entity to add
+   * @param child - The child node to add
    */
-  addChild(child: Entity): void {
+  addChild(child: M2Node): void {
     // Do not allow a child to be added to itself
     if (child === this) {
       throw new Error(
-        `Cannot add entity ${child.toString()} as a child to itself.`,
+        `Cannot add node ${child.toString()} as a child to itself.`,
       );
     }
 
-    // Do not allow a scene to be child of another entity.
-    if (child.type == EntityType.Scene) {
+    // Do not allow a scene to be child of another node.
+    if (child.type == M2NodeType.Scene) {
       throw new Error(
-        `Cannot add scene ${child.toString()} as a child to entity ${this.toString()}. A scene cannot be the child of an entity. A scene can only be added to a game object.`,
+        `Cannot add scene ${child.toString()} as a child to node ${this.toString()}. A scene cannot be the child of a node. A scene can only be added to a game object.`,
       );
     }
 
@@ -255,22 +255,20 @@ export abstract class Entity implements EntityOptions {
         .includes(child.name)
     ) {
       throw new Error(
-        `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. A child with name "${
+        `Cannot add child node ${child.toString()} to parent node ${this.toString()}. A child with name "${
           child.name
         }" already exists on this parent.`,
       );
     }
 
-    // Type is Entity | undefined because a scene has an undefined parent.
-    let otherParents = new Array<Entity | undefined>();
+    // Type is M2Node | undefined because a scene has an undefined parent.
+    let otherParents = new Array<M2Node | undefined>();
 
     if (this.isPartOfGame()) {
-      // entity has been added to game; can check all the other game entities.
-      otherParents = this.game.entities.filter((e) =>
-        e.children.includes(child),
-      );
+      // node has been added to game; can check all the other game nodes.
+      otherParents = this.game.nodes.filter((e) => e.children.includes(child));
     } else {
-      // entity not added to game; can check only this entity's descendants.
+      // node not added to game; can check only this node's descendants.
       const descendants = this.descendants;
       if (descendants.includes(child)) {
         otherParents = descendants
@@ -290,17 +288,17 @@ export abstract class Entity implements EntityOptions {
 
     if (firstOtherParent === this) {
       throw new Error(
-        `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on this parent. The child cannot be added again.`,
+        `Cannot add child node ${child.toString()} to parent node ${this.toString()}. This child already exists on this parent. The child cannot be added again.`,
       );
     }
 
     throw new Error(
-      `Cannot add child entity ${child.toString()} to parent entity ${this.toString()}. This child already exists on other parent entity: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`,
+      `Cannot add child node ${child.toString()} to parent node ${this.toString()}. This child already exists on other parent node: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`,
     );
   }
 
   /**
-   * Removes all children from the entity.
+   * Removes all children from the node.
    */
   removeAllChildren(): void {
     while (this.children.length) {
@@ -312,18 +310,18 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Removes the specific child from this parent entity. Throws exception if
+   * Removes the specific child from this parent node. Throws exception if
    * this parent does not contain the child.
    *
    * @param child
    */
-  removeChild(child: Entity): void {
+  removeChild(child: M2Node): void {
     if (this.children.includes(child)) {
       child.parent = undefined;
       this.children = this.children.filter((c) => c !== child);
     } else {
       throw new Error(
-        `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`,
+        `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
       );
     }
   }
@@ -332,13 +330,13 @@ export abstract class Entity implements EntityOptions {
    * Removes the children from the parent. Throws error if the parent does not
    * contain all of the children.
    *
-   * @param children - An array of children to remove from the parent entity
+   * @param children - An array of children to remove from the parent node
    */
-  removeChildren(children: Array<Entity>): void {
+  removeChildren(children: Array<M2Node>): void {
     children.forEach((child) => {
       if (!this.children.includes(child)) {
         throw new Error(
-          `cannot remove entity ${child} from parent ${this} because the entity is not currently a child of the parent`,
+          `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
         );
       }
       child.parent = undefined;
@@ -347,15 +345,15 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Searches all descendants by name and returns first matching entity.
+   * Searches all descendants by name and returns first matching node.
    *
    * @remarks Descendants are children and children of children, recursively.
    * Throws exception if no descendant with the given name is found.
    *
-   * @param name - Name of the descendant entity to return
+   * @param name - Name of the descendant node to return
    * @returns
    */
-  descendant<T extends Entity>(name: string): T {
+  descendant<T extends M2Node>(name: string): T {
     const descendant = this.descendants
       .filter((child) => child.name === name)
       .find(Boolean);
@@ -368,58 +366,51 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Returns all descendant entities.
+   * Returns all descendant nodes.
    *
    * @remarks Descendants are children and children of children, recursively.
    */
-  get descendants(): Array<Entity> {
-    function getChildEntitiesRecursive(
-      entity: Entity,
-      entities: Array<Entity>,
-    ): void {
-      entities.push(entity);
-      entity.children.forEach((child) =>
-        getChildEntitiesRecursive(child, entities),
-      );
+  get descendants(): Array<M2Node> {
+    function getChildNodesRecursive(node: M2Node, nodes: Array<M2Node>): void {
+      nodes.push(node);
+      node.children.forEach((child) => getChildNodesRecursive(child, nodes));
     }
-    const entities = new Array<Entity>();
-    this.children.forEach((child) =>
-      getChildEntitiesRecursive(child, entities),
-    );
-    return entities;
+    const nodes = new Array<M2Node>();
+    this.children.forEach((child) => getChildNodesRecursive(child, nodes));
+    return nodes;
   }
 
   /**
-   * Returns all ancestor entities, not including the entity itself.
+   * Returns all ancestor nodes, not including the node itself.
    */
-  get ancestors(): Array<Entity> {
+  get ancestors(): Array<M2Node> {
     function getAncestorsRecursive(
-      entity: Entity,
-      entities: Array<Entity>,
-    ): Array<Entity> {
-      if (entity.type == EntityType.Scene || !entity.parent) {
-        return entities;
+      node: M2Node,
+      nodes: Array<M2Node>,
+    ): Array<M2Node> {
+      if (node.type == M2NodeType.Scene || !node.parent) {
+        return nodes;
       }
-      entities.push(entity.parent);
-      return getAncestorsRecursive(entity.parent, entities);
+      nodes.push(node.parent);
+      return getAncestorsRecursive(node.parent, nodes);
     }
-    const entities = new Array<Entity>();
-    return getAncestorsRecursive(this, entities);
+    const nodes = new Array<M2Node>();
+    return getAncestorsRecursive(this, nodes);
   }
 
   /**
-   * Determines if this entity or ancestor is part of an active action that
+   * Determines if this node or ancestor is part of an active action that
    * affects it appearance.
    *
-   * @remarks This is used to determine if the entity should be rendered with
+   * @remarks This is used to determine if the node should be rendered with
    * anti-aliasing or not. Anti-aliasing on some devices causes a new shader
    * to be compiled during the action, which causes jank.
    *
    * @returns true if part of active action affecting appearance
    */
   involvedInActionAffectingAppearance(): boolean {
-    const entities = this.ancestors.concat(this);
-    const actions = entities.flatMap((entity) => entity.actions);
+    const nodes = this.ancestors.concat(this);
+    const actions = nodes.flatMap((node) => node.actions);
     return actions.some(
       (action) =>
         action.running &&
@@ -428,26 +419,26 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Determines if the entity is a transitioning Scene or a descendant of a
+   * Determines if the node is a transitioning Scene or a descendant of a
    * transitioning Scene.
    *
    * @returns true if transitioning
    */
   involvedInSceneTransition(): boolean {
     let rootScene: Scene;
-    if (this.type === EntityType.Scene) {
+    if (this.type === M2NodeType.Scene) {
       rootScene = this as unknown as Scene;
     } else {
-      rootScene = this.parentSceneAsEntity as unknown as Scene;
+      rootScene = this.parentSceneAsNode as unknown as Scene;
     }
     return rootScene._transitioning;
   }
 
   /**
-   * Executes a callback when the user presses down on the entity.
+   * Executes a callback when the user presses down on the node.
    *
    * @remarks TapDown is a pointer down (mouse click or touches begin) within
-   * the bounds of the entity.
+   * the bounds of the node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -456,16 +447,16 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.TapDown, callback, options);
+    this.addEventListener(M2EventType.TapDown, callback, options);
   }
 
   /**
    * Executes a callback when the user releases a press, that has been fully
-   * within the entity, from the entity.
+   * within the node, from the node.
    *
    * @remarks TapUp is a pointer up (mouse click release or touches end) within
-   * the bounds of the entity and the pointer, while down, has never moved
-   * beyond the bounds of the entity.
+   * the bounds of the node and the pointer, while down, has never moved
+   * beyond the bounds of the node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}ue.
@@ -474,16 +465,16 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.TapUp, callback, options);
+    this.addEventListener(M2EventType.TapUp, callback, options);
   }
 
   /**
-   * Executes a callback when the user releases a press from the entity within
-   * the bounds of the entity.
+   * Executes a callback when the user releases a press from the node within
+   * the bounds of the node.
    *
    * @remarks TapUpAny is a pointer up (mouse click release or touches end)
-   * within the bounds of the entity and the pointer, while down, is allowed to
-   * have been beyond the bounds of the entity during the press before the
+   * within the bounds of the node and the pointer, while down, is allowed to
+   * have been beyond the bounds of the node during the press before the
    * release.
    *
    * @param callback - function to execute
@@ -493,15 +484,15 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.TapUpAny, callback, options);
+    this.addEventListener(M2EventType.TapUpAny, callback, options);
   }
 
   /**
    * Executes a callback when the user moves the pointer (mouse, touches) beyond
-   * the bounds of the entity while the pointer is down.
+   * the bounds of the node while the pointer is down.
    *
    * @remarks TapLeave occurs when the pointer (mouse, touches) that has
-   * previously pressed the entity moves beyond the bounds of the entity
+   * previously pressed the node moves beyond the bounds of the node
    * before the press release.
    *
    * @param callback - function to execute
@@ -511,14 +502,14 @@ export abstract class Entity implements EntityOptions {
     callback: (tapEvent: TapEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.TapLeave, callback, options);
+    this.addEventListener(M2EventType.TapLeave, callback, options);
   }
 
   /**
-   * Executes a callback when the pointer first is down on the entity.
+   * Executes a callback when the pointer first is down on the node.
    *
    * @remarks PointerDown is a pointer down (mouse click or touches begin) within
-   * the bounds of the entity. It occurs under the same conditions as TapDown.
+   * the bounds of the node. It occurs under the same conditions as TapDown.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -527,16 +518,16 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.PointerDown, callback, options);
+    this.addEventListener(M2EventType.PointerDown, callback, options);
   }
 
   /**
-   * Executes a callback when the user releases a press from the entity within
-   * the bounds of the entity.
+   * Executes a callback when the user releases a press from the node within
+   * the bounds of the node.
    *
    * @remarks PointerUp is a pointer up (mouse click release or touches end)
-   * within the bounds of the entity. It does not require that there was a
-   * previous PointerDown on the entity.
+   * within the bounds of the node. It does not require that there was a
+   * previous PointerDown on the node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -545,12 +536,12 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.PointerUp, callback, options);
+    this.addEventListener(M2EventType.PointerUp, callback, options);
   }
 
   /**
    * Executes a callback when the user moves the pointer (mouse or touches)
-   * within the bounds of the entity.
+   * within the bounds of the node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -559,12 +550,12 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.PointerMove, callback, options);
+    this.addEventListener(M2EventType.PointerMove, callback, options);
   }
 
   /**
    * Executes a callback when the user moves the pointer (mouse or touches)
-   * outside the bounds of the entity.
+   * outside the bounds of the node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -573,11 +564,11 @@ export abstract class Entity implements EntityOptions {
     callback: (m2PointerEvent: M2PointerEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.PointerLeave, callback, options);
+    this.addEventListener(M2EventType.PointerLeave, callback, options);
   }
 
   /**
-   * Executes a callback when the user begins dragging an entity.
+   * Executes a callback when the user begins dragging a node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -586,11 +577,11 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.DragStart, callback, options);
+    this.addEventListener(M2EventType.DragStart, callback, options);
   }
 
   /**
-   * Executes a callback when the user continues dragging an entity.
+   * Executes a callback when the user continues dragging a node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -599,11 +590,11 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.Drag, callback, options);
+    this.addEventListener(M2EventType.Drag, callback, options);
   }
 
   /**
-   * Executes a callback when the user stop dragging an entity.
+   * Executes a callback when the user stop dragging a node.
    *
    * @param callback - function to execute
    * @param options - {@link CallbackOptions}
@@ -612,17 +603,17 @@ export abstract class Entity implements EntityOptions {
     callback: (m2DragEvent: M2DragEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.DragEnd, callback, options);
+    this.addEventListener(M2EventType.DragEnd, callback, options);
   }
 
-  addEventListener<T extends EntityEvent>(
-    type: EventType | string,
+  addEventListener<T extends M2NodeEvent>(
+    type: M2EventType | string,
     callback: (ev: T) => void,
     callbackOptions?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener<T> = {
+    const eventListener: M2NodeEventListener<T> = {
       type: type,
-      entityUuid: this.uuid,
+      nodeUuid: this.uuid,
       callback: callback,
     };
 
@@ -630,17 +621,17 @@ export abstract class Entity implements EntityOptions {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
-            listener.entityUuid === eventListener.entityUuid &&
+            listener.nodeUuid === eventListener.nodeUuid &&
             listener.type === eventListener.type
           ),
       );
     }
-    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
+    this.eventListeners.push(eventListener as M2NodeEventListener<M2NodeEvent>);
   }
 
   private parseLayoutConstraints(
     constraints: Constraints,
-    allGameEntities: Array<Entity>,
+    allGameNodes: Array<M2Node>,
   ): Array<LayoutConstraint> {
     const layoutConstraints = new Array<LayoutConstraint>();
 
@@ -656,27 +647,25 @@ export abstract class Entity implements EntityOptions {
     //
     constraintTypes.forEach((constraintType) => {
       if (constraints[constraintType] !== undefined) {
-        let entity: Entity | undefined;
+        let node: M2Node | undefined;
         let additionalExceptionMessage = "";
 
         if (typeof constraints[constraintType] === "object") {
-          entity = constraints[constraintType] as Entity;
+          node = constraints[constraintType] as M2Node;
         } else {
-          const entityName = constraints[constraintType] as string;
-          entity = allGameEntities
-            .filter((e) => e.name === entityName)
-            .find(Boolean);
-          additionalExceptionMessage = `. sibling entity named "${entityName}" has not been added to the game object`;
+          const nodeName = constraints[constraintType] as string;
+          node = allGameNodes.filter((e) => e.name === nodeName).find(Boolean);
+          additionalExceptionMessage = `. sibling node named "${nodeName}" has not been added to the game object`;
         }
 
-        if (entity === undefined) {
+        if (node === undefined) {
           throw new Error(
-            "could not find sibling entity for constraint" +
+            "could not find sibling node for constraint" +
               additionalExceptionMessage,
           );
         }
 
-        const layoutConstraint = new LayoutConstraint(constraintType, entity);
+        const layoutConstraint = new LayoutConstraint(constraintType, node);
         layoutConstraints.push(layoutConstraint);
       }
     });
@@ -691,9 +680,9 @@ export abstract class Entity implements EntityOptions {
     scale: number,
   ): number {
     // no matter what the constraint, we start with the alter's position
-    let y = constraint.alterEntity.absolutePosition.y;
+    let y = constraint.alterNode.absolutePosition.y;
 
-    if (constraint.alterEntityMinimum) {
+    if (constraint.alterNodeMinimum) {
       // we're constraining to the alter's minimum (top)
       // if the alter is NOT a scene, then to get the top of the alter
       // we have to subtract half of the alter's height because positions
@@ -702,17 +691,17 @@ export abstract class Entity implements EntityOptions {
       // But if the alter IS a scene, there's no need to make this
       // calculate because the scene is the root coordinate system and
       // it's top by definition is 0
-      if (!(constraint.alterEntity.type === EntityType.Scene)) {
-        y = y - constraint.alterEntity.size.height * 0.5 * scale;
+      if (!(constraint.alterNode.type === M2NodeType.Scene)) {
+        y = y - constraint.alterNode.size.height * 0.5 * scale;
       }
     } else {
-      if (!(constraint.alterEntity.type === EntityType.Scene)) {
-        y = y + constraint.alterEntity.size.height * 0.5 * scale;
+      if (!(constraint.alterNode.type === M2NodeType.Scene)) {
+        y = y + constraint.alterNode.size.height * 0.5 * scale;
       } else {
-        y = y + constraint.alterEntity.size.height * scale;
+        y = y + constraint.alterNode.size.height * scale;
       }
     }
-    if (constraint.focalEntityMinimum) {
+    if (constraint.focalNodeMinimum) {
       y = y + this.size.height * 0.5 * scale;
       y = y + marginTop * scale;
     } else {
@@ -728,20 +717,20 @@ export abstract class Entity implements EntityOptions {
     marginEnd: number,
     scale: number,
   ): number {
-    let x = constraint.alterEntity.absolutePosition.x;
+    let x = constraint.alterNode.absolutePosition.x;
 
-    if (constraint.alterEntityMinimum) {
-      if (!(constraint.alterEntity.type === EntityType.Scene)) {
-        x = x - constraint.alterEntity.size.width * 0.5 * scale;
+    if (constraint.alterNodeMinimum) {
+      if (!(constraint.alterNode.type === M2NodeType.Scene)) {
+        x = x - constraint.alterNode.size.width * 0.5 * scale;
       }
     } else {
-      if (!(constraint.alterEntity.type === EntityType.Scene)) {
-        x = x + constraint.alterEntity.size.width * 0.5 * scale;
+      if (!(constraint.alterNode.type === M2NodeType.Scene)) {
+        x = x + constraint.alterNode.size.width * 0.5 * scale;
       } else {
-        x = x + constraint.alterEntity.size.width * scale;
+        x = x + constraint.alterNode.size.width * scale;
       }
     }
-    if (constraint.focalEntityMinimum) {
+    if (constraint.focalNodeMinimum) {
       x = x + this.size.width * 0.5 * scale;
       x = x + marginStart * scale;
     } else {
@@ -752,16 +741,16 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Calculates the absolute alpha of the entity, taking into account the
-   * alpha of all ancestor parent entities.
+   * Calculates the absolute alpha of the node, taking into account the
+   * alpha of all ancestor parent nodes.
    *
    * @remarks Alpha has multiplicative inheritance from all ancestors.
    *
-   * @param alpha - Opacity of the entity
-   * @param ancestors - Array of ancestor parent entities
+   * @param alpha - Opacity of the node
+   * @param ancestors - Array of ancestor parent nodes
    * @returns
    */
-  private calculateAbsoluteAlpha(alpha: number, ancestors: Entity[]): number {
+  private calculateAbsoluteAlpha(alpha: number, ancestors: M2Node[]): number {
     const inheritedAlpha = ancestors.reduce((acc, ancestor) => {
       return acc * ancestor.alpha;
     }, 1);
@@ -771,13 +760,13 @@ export abstract class Entity implements EntityOptions {
   update(): void {
     if (this.needsInitialization) {
       // note: the below initialize() function will be called on the DERIVED CLASS's initialize(),
-      // never this base abstract Entity
+      // never this base abstract M2Node
       this.initialize();
       /**
        * Previously, we set this.needsInitialization to false here. However,
-       * we now let each entity's initialize() method to determine when it is
-       * initialized. This is because some entities are using assets that
-       * have deferred loading, and only the entity knows when it has finished
+       * we now let each node's initialize() method to determine when it is
+       * initialized. This is because some nodes are using assets that
+       * have deferred loading, and only the node knows when it has finished
        * initialization.
        */
     }
@@ -788,16 +777,16 @@ export abstract class Entity implements EntityOptions {
     this.absoluteAlpha += this.absoluteAlphaChange;
 
     if (this.parent === undefined) {
-      // if there's no parent, then this entity is a screen
+      // if there's no parent, then this node is a screen
       this.absolutePosition.x = this.position.x * this.scale;
       this.absolutePosition.y = this.position.y * this.scale;
       this.absoluteScale = this.scale;
     } else {
-      // this entity has a parent; it inherits the parent's scale
+      // this node has a parent; it inherits the parent's scale
       this.absoluteScale = this.parent.absoluteScale * this.scale;
 
       if (this.layout?.constraints === undefined) {
-        // entity sets its position directly using its position property
+        // node sets its position directly using its position property
         this.absolutePosition.x =
           this.parent.absolutePosition.x +
           this.position.x * this.parent.absoluteScale;
@@ -805,8 +794,8 @@ export abstract class Entity implements EntityOptions {
           this.parent.absolutePosition.y +
           this.position.y * this.parent.absoluteScale;
       } else {
-        // entity sets its position using layout approach, with constraints.
-        // this is much more complicated than using only the entity's
+        // node sets its position using layout approach, with constraints.
+        // this is much more complicated than using only the node's
         // position property.
         const horizontalBias = this.layout?.constraints?.horizontalBias ?? 0.5;
         const verticalBias = this.layout?.constraints?.verticalBias ?? 0.5;
@@ -817,8 +806,8 @@ export abstract class Entity implements EntityOptions {
 
         const layoutConstraints = this.parseLayoutConstraints(
           this.layout?.constraints,
-          //this.parentScene.game.entities
-          this.parentSceneAsEntity.descendants,
+          //this.parentScene.game.nodes
+          this.parentSceneAsNode.descendants,
         );
 
         const scale = this.parent.absoluteScale;
@@ -910,15 +899,15 @@ export abstract class Entity implements EntityOptions {
       );
     }
 
-    // Update the entity's children
+    // Update the node's children
     //
-    // If an entity uses positioning based only on the position property,
+    // If a node uses positioning based only on the position property,
     // it does not matter in what order the children are updated. If the
-    // entity uses layout constraints, however, one sibling's position
-    // may depend on another (e.g., the top of entity A is the bottom of
-    // entity B). The update of siblings must be properly ordered so that
+    // node uses layout constraints, however, one sibling's position
+    // may depend on another (e.g., the top of node A is the bottom of
+    // node B). The update of siblings must be properly ordered so that
     // dependencies are resolved prior to the positioning calculations (e.g.,
-    // we must update entity B before we update entity A).
+    // we must update node B before we update node A).
     //
     // We can solve this by modeling sibling constraint dependencies as a
     // Directed acyclic graph (DAG) and applying a topological sort.
@@ -929,16 +918,16 @@ export abstract class Entity implements EntityOptions {
     // positioning. We must update these last).
     //
     /**
-     * Get the uuids of all the sibling entities that this focal
-     * entity's constraints depend on. Ignore parent constraints, because
+     * Get the uuids of all the sibling nodes that this focal
+     * node's constraints depend on. Ignore parent constraints, because
      * the parent will have been updated already.
      *
-     * @param parent - The focal entity's parent
-     * @param constraints - The focal entity's constraints
-     * @returns Array<string> - the uuids of the siblings the focal entity depends on
+     * @param parent - The focal node's parent
+     * @param constraints - The focal node's constraints
+     * @returns Array<string> - the uuids of the siblings the focal node depends on
      */
     function getSiblingConstraintUuids(
-      parent: Entity,
+      parent: M2Node,
       constraints: Constraints | undefined,
     ): Array<string> {
       const uuids = new Array<string>();
@@ -948,26 +937,26 @@ export abstract class Entity implements EntityOptions {
       const constraintTypes = Object.values(ConstraintType);
       constraintTypes.forEach((constraint) => {
         if (constraints[constraint] !== undefined) {
-          let siblingConstraint: Entity | undefined;
+          let siblingConstraint: M2Node | undefined;
           let additionalExceptionMessage = "";
 
           if (typeof constraints[constraint] === "object") {
-            siblingConstraint = constraints[constraint] as Entity;
+            siblingConstraint = constraints[constraint] as M2Node;
           } else {
-            const entityName = constraints[constraint] as string;
-            let allGameEntities: Array<Entity>;
-            if (parent.type === EntityType.Scene) {
-              //allGameEntities = (parent as Scene).game.entities;
-              allGameEntities = parent.descendants;
+            const nodeName = constraints[constraint] as string;
+            let allGameNodes: Array<M2Node>;
+            if (parent.type === M2NodeType.Scene) {
+              //allGameNodes = (parent as Scene).game.nodes;
+              allGameNodes = parent.descendants;
             } else {
-              //allGameEntities = parent.parentScene.game.entities;
-              allGameEntities = parent.parentSceneAsEntity.descendants;
+              //allGameNodes = parent.parentScene.game.nodes;
+              allGameNodes = parent.parentSceneAsNode.descendants;
             }
-            siblingConstraint = allGameEntities
-              .filter((e) => e.name === entityName)
+            siblingConstraint = allGameNodes
+              .filter((e) => e.name === nodeName)
               .find(Boolean);
             if (siblingConstraint === undefined) {
-              additionalExceptionMessage = `. sibling entity named "${entityName}" has not been added to the game object`;
+              additionalExceptionMessage = `. sibling node named "${nodeName}" has not been added to the game object`;
             }
           }
 
@@ -989,8 +978,8 @@ export abstract class Entity implements EntityOptions {
       return uuids;
     }
 
-    // Model the DAG in a Map where the key is the uuid of the focal entity,
-    // and the value is an array of other entity uuids that this focal entity
+    // Model the DAG in a Map where the key is the uuid of the focal node,
+    // and the value is an array of other node uuids that this focal node
     // depends on for layout
     const adjList = new Map<string, string[]>();
     this.children.forEach((child) => {
@@ -1003,7 +992,7 @@ export abstract class Entity implements EntityOptions {
     const sortedUuids = this.findTopologicalSort(adjList);
     if (sortedUuids.length > 0) {
       const uuidsInUpdateOrder = sortedUuids.reverse();
-      const childrenInUpdateOrder = new Array<Entity>();
+      const childrenInUpdateOrder = new Array<M2Node>();
 
       uuidsInUpdateOrder.forEach((uuid) => {
         const child = this.children
@@ -1021,7 +1010,7 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Draws each child entity that is Drawable and is not hidden, by zPosition
+   * Draws each child node that is Drawable and is not hidden, by zPosition
    * order (highest zPosition on top).
    *
    * @param canvas - CanvasKit canvas
@@ -1035,11 +1024,11 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Runs an action on this entity.
+   * Runs an action on this node.
    *
-   * @remarks If the entity is part of an active scene, the action runs
-   * immediately. Otherwise, the action will run when the entity's scene
-   * becomes active. Calling run() multiple times on an entity will add
+   * @remarks If the node is part of an active scene, the action runs
+   * immediately. Otherwise, the action will run when the node's scene
+   * becomes active. Calling run() multiple times on a node will add
    * to existing actions, not replace them.
    *
    * @param action - The action to run
@@ -1055,7 +1044,7 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Remove an action from this entity. If the action is running, it will be
+   * Remove an action from this node. If the action is running, it will be
    * stopped.
    *
    * @param key - key (string identifier) of the action to remove
@@ -1065,7 +1054,7 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Remove all actions from this entity. If actions are running, they will be
+   * Remove all actions from this node. If actions are running, they will be
    * stopped.
    */
   removeAllActions(): void {
@@ -1075,26 +1064,26 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
-  abstract duplicate(newName?: string): Entity;
+  abstract duplicate(newName?: string): M2Node;
 
-  protected getEntityOptions(): EntityOptions {
-    const entityOptions = {
+  protected getNodeOptions(): M2NodeOptions {
+    const nodeOptions = {
       name: this.name,
       position: this.position,
       scale: this.scale,
       isUserInteractionEnabled: this.isUserInteractionEnabled,
       hidden: this.hidden,
     };
-    return entityOptions;
+    return nodeOptions;
   }
 
   protected getDrawableOptions(): DrawableOptions {
@@ -1125,57 +1114,55 @@ export abstract class Entity implements EntityOptions {
   }
 
   /**
-   * Gets the scene that contains this entity by searching up the ancestor tree recursively. Throws exception if entity is not part of a scene.
+   * Gets the scene that contains this node by searching up the ancestor tree recursively. Throws exception if node is not part of a scene.
    *
-   * @returns Scene that contains this entity
+   * @returns Scene that contains this node
    */
   // get parentScene(): Scene {
-  //   if (this.type === EntityType.scene) {
+  //   if (this.type === M2NodeType.scene) {
   //     throw new Error(
-  //       `Entity ${this} is a scene and cannot have a parent scene`
+  //       `Node ${this} is a scene and cannot have a parent scene`
   //     );
   //   }
-  //   if (this.parent && this.parent.type === EntityType.scene) {
+  //   if (this.parent && this.parent.type === M2NodeType.scene) {
   //     return this.parent as Scene;
   //   } else if (this.parent) {
   //     return this.parent.parentScene;
   //   }
-  //   throw new Error(`Entity ${this} has not been added to a scene`);
+  //   throw new Error(`Node ${this} has not been added to a scene`);
   // }
 
   get canvasKit(): CanvasKit {
     return this.game.canvasKit;
   }
 
-  get parentSceneAsEntity(): Entity {
-    if (this.type === EntityType.Scene) {
-      throw new Error(
-        `Entity ${this} is a scene and cannot have a parent scene`,
-      );
+  get parentSceneAsNode(): M2Node {
+    if (this.type === M2NodeType.Scene) {
+      throw new Error(`Node ${this} is a scene and cannot have a parent scene`);
     }
-    if (this.parent && this.parent.type === EntityType.Scene) {
+    if (this.parent && this.parent.type === M2NodeType.Scene) {
       return this.parent;
     } else if (this.parent) {
-      return this.parent.parentSceneAsEntity;
+      return this.parent.parentSceneAsNode;
     }
-    throw new Error(`Entity ${this} has not been added to a scene`);
+    throw new Error(`Node ${this} has not been added to a scene`);
   }
 
   get position(): Point {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const entity = this;
+    const node = this;
     return {
       get x(): number {
-        return entity._position.x;
+        return node._position.x;
       },
       set x(x: number) {
-        entity._position.x = x;
+        node._position.x = x;
       },
       get y(): number {
-        return entity._position.y;
+        return node._position.y;
       },
       set y(y: number) {
-        entity._position.y = y;
+        node._position.y = y;
       },
     };
   }

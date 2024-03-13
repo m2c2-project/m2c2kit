@@ -9,7 +9,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 ## Display the stimuli properly
 
-We use Actions to display the stimuli in the correct order with specified delays. Instead of showing all the entities at once, a `Sequence` Action runs additional Actions to achieve the following when the presentation scene appears:
+We use Actions to display the stimuli in the correct order with specified delays. Instead of showing all the nodes at once, a `Sequence` Action runs additional Actions to achieve the following when the presentation scene appears:
 
 - A delay of 1000 milliseconds.
 - Showing the fixation cross.

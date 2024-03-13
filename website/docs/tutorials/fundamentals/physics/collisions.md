@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Collisions
 
-When an entity has an attached `PhysicsBody`, the physics engine takes care of calculating its position as a result of interactions with other physics bodies and forces. Sometimes you need to know what is happening within the physics engine. For example, you might want to know when two physics bodies collide, so it can trigger something else to happen. You can do this by adding an event handler to the `Physics` instance. 
+When a node has an attached `PhysicsBody`, the physics engine takes care of calculating its position as a result of interactions with other physics bodies and forces. Sometimes you need to know what is happening within the physics engine. For example, you might want to know when two physics bodies collide, so it can trigger something else to happen. You can do this by adding an event handler to the `Physics` instance. 
 
 ## Physics events
 
@@ -16,7 +16,7 @@ There are two types of physics events:
 - `ContactBegin` occurs when two physics bodies start to collide.
 - `ContactEnd` occurs when two physics bodies stop colliding.
 
-When a physics event occurs, the `Physics` instance will emit an event with the type of the event type (`ContactBegin` or `ContactEnd`). The event object will have a `bodyA` property and a `bodyB` property, each of which is a `PhysicsBody` in the collision. Note that a `PhysicsBody` has a property called `entity` that is a reference to the entity to which the `PhysicsBody` is attached. You can use this to determine which entities are involved in the collision and trigger other behaviors.
+When a physics event occurs, the `Physics` instance will emit an event with the type of the event type (`ContactBegin` or `ContactEnd`). The event object will have a `bodyA` property and a `bodyB` property, each of which is a `PhysicsBody` in the collision. Note that a `PhysicsBody` has a property called `node` that is a reference to the node to which the `PhysicsBody` is attached. You can use this to determine which nodes are involved in the collision and trigger other behaviors.
 
 :::tip
 
@@ -32,11 +32,11 @@ The example has two balls. The first one is a random color, the second is transp
 physics.onContactBegin((e) => {
   // the rgb ball could be bodyA or bodyB, so we need to check both
   // the name property was set when the ball's Shape was created
-  if (e.bodyA.entity.name === "rgb-ball") {
-    e.bodyA.entity.fillColor = randomColor();
+  if (e.bodyA.node.name === "rgb-ball") {
+    e.bodyA.node.fillColor = randomColor();
   }
-  if (e.bodyB.entity.name === "rgb-ball") {
-    e.bodyB.entity.fillColor = randomColor();
+  if (e.bodyB.node.name === "rgb-ball") {
+    e.bodyB.node.fillColor = randomColor();
   }
 });
 ```
@@ -109,11 +109,11 @@ emptyBall.onTapDown(() => {
  
 physics.onContactBegin((e) => {
   // the rgb ball could be bodyA or bodyB, so we need to check both
-  if (e.bodyA.entity.name === "rgb-ball") {
-    e.bodyA.entity.fillColor = randomColor();
+  if (e.bodyA.node.name === "rgb-ball") {
+    e.bodyA.node.fillColor = randomColor();
   }
-  if (e.bodyB.entity.name === "rgb-ball") {
-    e.bodyB.entity.fillColor = randomColor();
+  if (e.bodyB.node.name === "rgb-ball") {
+    e.bodyB.node.fillColor = randomColor();
   }
 });
 `

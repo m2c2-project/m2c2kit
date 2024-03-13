@@ -1,5 +1,5 @@
 /**
- * Bounding box of an entity.
+ * Bounding box of a node.
  *
  * @remarks In the m2c2kit coordinate system, the origin (0, 0) is at the top
  * left corner.

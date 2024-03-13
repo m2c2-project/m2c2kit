@@ -7,11 +7,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Z Axis Position
 
-Determine how overlapping entities appear.
+Determine how overlapping nodes appear.
 
-If entities overlap on a scene, the entity that was added latest will appear on top. You can change this behavior by setting the `zPosition` property on an entity. It is called Z because if X and Y are two-dimensional axes, you can imagine the Z-axis as a third dimension coming out of the screen. The `zPosition` property is a number. The higher the number, the higher the entity's "layer" will be on the screen among overlapping entities.
+If nodes overlap on a scene, the node that was added latest will appear on top. You can change this behavior by setting the `zPosition` property on a node. It is called Z because if X and Y are two-dimensional axes, you can imagine the Z-axis as a third dimension coming out of the screen. The `zPosition` property is a number. The higher the number, the higher the node's "layer" will be on the screen among overlapping nodes.
 
-By default, all entities have a `zPosition: 0`, in which case the latest entity added will appear on top. But if you set `zPosition: 1` on an entity, it will appear on top of all the other entities with `zPosition: 0`.
+By default, all nodes have a `zPosition: 0`, in which case the latest node added will appear on top. But if you set `zPosition: 1` on a node, it will appear on top of all the other nodes with `zPosition: 0`.
 
 Below, the square is added to the scene after the circle, so the square should appear on top. But, we set the `zPosition: 1` on the circle, so it appears on top of the square.
 
@@ -50,7 +50,7 @@ const square = new Shape({
     position: { x: 100, y: 180 },
 });
 sceneOne.addChild(square);`},
-{ description: <>`zPosition` values can be [any] numbers, and their values will be compared to decide the order in which to draw the entities.</>,
+{ description: <>`zPosition` values can be [any] numbers, and their values will be compared to decide the order in which to draw the nodes.</>,
 code:`const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
 const circle = new Shape({
@@ -67,7 +67,7 @@ const topLabel = new Label({
     zPosition: -225.1124
 });
 sceneOne.addChild(topLabel);`},
-{ description: <>Overlapping entities with color opacity less than 1 results in blending. Set `zPosition` to put the [green] circle on top.</>,
+{ description: <>Overlapping nodes with color opacity less than 1 results in blending. Set `zPosition` to put the [green] circle on top.</>,
 code:`const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
 const circle1 = new Shape({

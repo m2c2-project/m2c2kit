@@ -7,15 +7,15 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Scaling
 
-Adjust an entity's `scale` to make it larger or smaller.
+Adjust a node's `scale` to make it larger or smaller.
 
-The `scale` property will adjust an entity's `width` and `height` by the same amount. Adjustments are multiplicative. For example, if you set `scale: 2`, the entity will be twice as large as its original size. A `scale: 1` would have no effect on its appearance. Children inherit scaling from their parents.
+The `scale` property will adjust a node's `width` and `height` by the same amount. Adjustments are multiplicative. For example, if you set `scale: 2`, the node will be twice as large as its original size. A `scale: 1` would have no effect on its appearance. Children inherit scaling from their parents.
 
 Below, we create a circle with `circleOfRadius: 100`, which will be a circle of diameter 200 pixels and will occupy the entire width of the scene (which is 200 pixels wide). But, because it has `scale: 0.5`, it will take up only 1/2 of the scene's width. The child `Label` within the circle will also be scaled down.
 
 :::note
 
-If you want a circle with radius 100 scale of .5, why not simply create a circle with radius 50 and no scale? [Later](../interactivity/visual-responses.md), we'll see it is useful to create an entity at one scale, but then change its scale in response to a user action.
+If you want a circle with radius 100 scale of .5, why not simply create a circle with radius 50 and no scale? [Later](../interactivity/visual-responses.md), we'll see it is useful to create a node at one scale, but then change its scale in response to a user action.
 
 :::
 

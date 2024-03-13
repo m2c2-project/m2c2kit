@@ -7,13 +7,13 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Alpha
 
-Adjust an entity's `alpha` to change its opacity.
+Adjust a node's `alpha` to change its opacity.
 
-An entity's `alpha` property determines how opaque it is. The value of `alpha` is a number between 0 and 1. A value of 0 means the entity is completely transparent and invisible. A value of 1 means the entity is completely opaque and visible. A value of .5 means the entity is half transparent and half opaque. The default value is 1.
+A node's `alpha` property determines how opaque it is. The value of `alpha` is a number between 0 and 1. A value of 0 means the node is completely transparent and invisible. A value of 1 means the node is completely opaque and visible. A value of .5 means the node is half transparent and half opaque. The default value is 1.
 
 :::note
 
-An entity's effective `alpha` is calculated with multiplicative inheritance from all ancestors (the entity's parent, and all parents of parents). For example, if you set `alpha: .5` on a `Shape`, and then add it as a child to a `Scene` with `alpha: .4`, the `Shape` will be drawn with an alpha of .2 (.5 * .4 = .2). The `Shape` inherits the alpha of its parent `Scene`, and then applies its own alpha to that value.
+A node's effective `alpha` is calculated with multiplicative inheritance from all ancestors (the node's parent, and all parents of parents). For example, if you set `alpha: .5` on a `Shape`, and then add it as a child to a `Scene` with `alpha: .4`, the `Shape` will be drawn with an alpha of .2 (.5 * .4 = .2). The `Shape` inherits the alpha of its parent `Scene`, and then applies its own alpha to that value.
 
 :::
 
@@ -57,7 +57,7 @@ sceneOne.addChild(cLabel);
 `
  
 export const more = [
-{ description: <>See how entities [inherit] their parents' alpha. The letter A has been added as a child of the circle. The circle has alpha .2, which means the letter A will be drawn with alpha .2 * .5 = .1</>,
+{ description: <>See how nodes [inherit] their parents' alpha. The letter A has been added as a child of the circle. The circle has alpha .2, which means the letter A will be drawn with alpha .2 * .5 = .1</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.LightGray });
 game.addScene(sceneOne);
  

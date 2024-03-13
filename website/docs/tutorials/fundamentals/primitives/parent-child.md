@@ -7,18 +7,18 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Parent-child Relationships
 
-Entities can contain other entities. This is called a parent-child relationship. The parent entity is the entity that contains the child entity. We've seen this already: a `Scene` has been the parent of all the other entities we've created so far. For example, we added a `Label` to a `Scene` by calling `sceneOne.addChild(helloLabel)`.
+Nodes can contain other nodes. This is called a parent-child relationship. The parent node is the node that contains the child node. We've seen this already: a `Scene` has been the parent of all the other nodes we've created so far. For example, we added a `Label` to a `Scene` by calling `sceneOne.addChild(helloLabel)`.
 
-But every entity can be the parent of another entity. For example, a `Scene` can be the parent of a `Shape`. That `Shape` can be the parent of another `Shape`. And that `Shape` can be the parent of a `Label`.
+But every node can be the parent of another node. For example, a `Scene` can be the parent of a `Shape`. That `Shape` can be the parent of another `Shape`. And that `Shape` can be the parent of a `Label`.
 
 ## Four things to know about parent-child relationships
 
-1. A `Scene` can't be the child of another entity. A `Scene` is the top of the hierarchy and can only be a parent.
+1. A `Scene` can't be the child of another node. A `Scene` is the top of the hierarchy and can only be a parent.
 2. A parent can have zero or more children, but a child can have only one parent.
 3. When positioning children within a parent `Scene`, the `{ x: 0, y: 0 }` position is the upper-left corner of the `Scene` -- we've seen this already.
-4. When positioning children within a parent of any other kind of entity, the `{ x: 0, y: 0 }` position is the _center of the parent entity_.
+4. When positioning children within a parent of any other kind of node, the `{ x: 0, y: 0 }` position is the _center of the parent node_.
 
-Why a different coordinate system for children when the parent is a `Scene` versus when the parent is any other kind of entity? Because the `Scene` represents the entire display area, it's useful to have a coordinate system that starts in the upper-left corner. But when positioning children within a parent entity, it's more useful to have a coordinate system that starts in the center of the parent entity: usually, you want to position the child in the center of the parent.
+Why a different coordinate system for children when the parent is a `Scene` versus when the parent is any other kind of node? Because the `Scene` represents the entire display area, it's useful to have a coordinate system that starts in the upper-left corner. But when positioning children within a parent node, it's more useful to have a coordinate system that starts in the center of the parent node: usually, you want to position the child in the center of the parent.
 
 :::note
 

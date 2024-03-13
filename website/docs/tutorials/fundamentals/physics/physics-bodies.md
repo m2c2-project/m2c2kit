@@ -7,18 +7,18 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Physics Bodies
 
-The physics engine will operate on an entity only if it has an attached `PhysicsBody`. A `PhysicsBody` models the physical properties of an entity within the engine. It is attached to an entity by setting the entity's `physicsBody` property to a `PhysicsBody` instance.
+The physics engine will operate on a node only if it has an attached `PhysicsBody`. A `PhysicsBody` models the physical properties of a node within the engine. It is attached to a node by setting the node's `physicsBody` property to a `PhysicsBody` instance.
 
 The m2c2kit physics engine supports the following types of physics bodies:
--  Circle: a circle centered on the entity's position.
--  Rectangle: a rectangle centered on the entity's position.
--  Edge Loop: a rectangle whose interior acts as a boundary for the physics engine. Entities with physics bodies are constrained by the edge loop.
+-  Circle: a circle centered on the node's position.
+-  Rectangle: a rectangle centered on the node's position.
+-  Edge Loop: a rectangle whose interior acts as a boundary for the physics engine. Nodes with physics bodies are constrained by the edge loop.
 
 Circle and rectangular physics bodies are dynamic, can move, and be affected by other physics bodies. An edge loop, however, is a static body that does not move or interact with other bodies.
 
 ## Attaching a Physics Body
 
-Usually you attach a physics body to an entity when you create it and adjust the size of the physics body to match the size of the entity. For example, this code creates a circle shape with radius `40`. The corresponding physics body also has a radius of `40`:
+Usually you attach a physics body to a node when you create it and adjust the size of the physics body to match the size of the node. For example, this code creates a circle shape with radius `40`. The corresponding physics body also has a radius of `40`:
 
 ```javascript
 const pinkBall = new Shape( {
@@ -33,7 +33,7 @@ pinkBall.physicsBody = new PhysicsBody({
 
 ## Resting a Physics Body
 
-If an entity has a physics body, the physics engine will automatically update the entity's position and rotation. That could be a problem, because the user might not be ready for the entity to move! In the example below, the `resting` property of the pink ball's `PhysicsBody` is set to `true`. When a physics body is resting, the physics engine will not apply forces to it.
+If a node has a physics body, the physics engine will automatically update the node's position and rotation. That could be a problem, because the user might not be ready for the node to move! In the example below, the `resting` property of the pink ball's `PhysicsBody` is set to `true`. When a physics body is resting, the physics engine will not apply forces to it.
 
 In the example, pressing the "Go" button will set the pink ball in motion: its `resting` property will be set to `false`, and the physics engine will apply the force of gravity.
 
@@ -87,7 +87,7 @@ button.onTapDown( () => {
 `
 
 export const more = [
-{ description: <>For development purposes, it can be helpful to show the [outline] of the physics body that has been attached to an entity. To do this, pass the option `showsPhysics: true` into the physics engine constructor. A green outline now appears around the pink ball (because it has a physics body), but not the blue ball.</>,
+{ description: <>For development purposes, it can be helpful to show the [outline] of the physics body that has been attached to a node. To do this, pass the option `showsPhysics: true` into the physics engine constructor. A green outline now appears around the pink ball (because it has a physics body), but not the blue ball.</>,
 code: `const physics = new Physics({ showsPhysics: true });
 await game.registerPlugin(physics);
  

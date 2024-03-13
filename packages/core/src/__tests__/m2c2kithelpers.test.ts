@@ -55,8 +55,8 @@ beforeEach(async () => {
 
 /**
  * In some of the below tests, we must start the session and simulate some
- * frame renders because some of the M2c2KitHelpers methods rely on an
- * entity's absoluteBoundingBox property, which is calculated during the
+ * frame renders because some of the M2c2KitHelpers methods rely on a
+ * node's absoluteBoundingBox property, which is calculated during the
  * render process.
  */
 
@@ -67,7 +67,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.maxRequestedFrames = 20;
     await g1.start();
 
-    const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(scene1);
+    const bb = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(scene1);
     expect(bb.xMin).toBe(0);
     expect(bb.yMin).toBe(0);
     expect(bb.xMax).toBe(400);
@@ -80,7 +80,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.maxRequestedFrames = 20;
     await g1.start();
 
-    const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(rect1);
+    const bb = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(rect1);
     // rect is 100x100, positioned at 140,160
     expect(bb.xMin).toBe(90);
     expect(bb.yMin).toBe(110);
@@ -94,7 +94,7 @@ describe("test M2c2KitHelpers", () => {
     TestHelpers.maxRequestedFrames = 20;
     await g1.start();
 
-    const bb = M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(circle1);
+    const bb = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(circle1);
     // circle radius is 30, positioned at 200, 600
     expect(bb.xMin).toBe(170);
     expect(bb.yMin).toBe(570);
@@ -174,15 +174,15 @@ describe("test M2c2KitHelpers", () => {
     expect(inside).toBe(true);
   });
 
-  it("determines if entity or ancestor has been rotated when entity has been rotated", () => {
+  it("determines if node or ancestor has been rotated when node has been rotated", () => {
     scene1.zRotation = Math.PI / 2;
-    const rotated = M2c2KitHelpers.entityOrAncestorHasBeenRotated(scene1);
+    const rotated = M2c2KitHelpers.nodeOrAncestorHasBeenRotated(scene1);
     expect(rotated).toBe(true);
   });
 
-  it("determines if entity or ancestor has been rotated when ancestor has been rotated", () => {
+  it("determines if node or ancestor has been rotated when ancestor has been rotated", () => {
     scene1.zRotation = Math.PI / 2;
-    const rotated = M2c2KitHelpers.entityOrAncestorHasBeenRotated(rect1);
+    const rotated = M2c2KitHelpers.nodeOrAncestorHasBeenRotated(rect1);
     expect(rotated).toBe(true);
   });
 });

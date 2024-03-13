@@ -6,14 +6,14 @@ export * from "./PhysicsBodyOptions";
 export * from "./Vector";
 
 declare module "@m2c2kit/core" {
-  interface Entity {
+  interface M2Node {
     /**
-     * A rigid body model added to an entity to enable physics simulation.
+     * A rigid body model added to a node to enable physics simulation.
      *
-     * @remarks Set to `undefined` to remove the physics body from the entity
-     * and the physics engine world. Note that this will not remove the entity
-     * from the scene. If the entity is visible, setting the physics body to
-     * `undefined` will "freeze" the entity at its current position and
+     * @remarks Set to `undefined` to remove the physics body from the node
+     * and the physics engine world. Note that this will not remove the node
+     * from the scene. If the node is visible, setting the physics body to
+     * `undefined` will "freeze" the node at its current position and
      * rotation.
      */
     physicsBody?: PhysicsBody;

@@ -7,9 +7,9 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Boundaries
 
-If there is no boundary, the physics engine will not constrain the entities in the scene. In the previous example, the pink ball will drop forever because there is no physics boundary.
+If there is no boundary, the physics engine will not constrain the nodes in the scene. In the previous example, the pink ball will drop forever because there is no physics boundary.
 
-To add a boundary, add an edge loop physics body to the scene. The edge loop physics body is a rectangle whose interior acts as a boundary for the physics engine. Entities with physics bodies are constrained by the edge loop.
+To add a boundary, add an edge loop physics body to the scene. The edge loop physics body is a rectangle whose interior acts as a boundary for the physics engine. Nodes with physics bodies are constrained by the edge loop.
 
 The example adds an edge loop physics body to the scene. The pink ball no longer falls off the scene!
 
@@ -17,7 +17,7 @@ import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-
 
 ## Tunneling
 
-If an entity moves too fast, it might pass through the edge loop. This is called [tunneling](https://gamedev.stackexchange.com/a/192403). To prevent tunneling, edge loops have a default thickness of `50`. If you still find that a fast-moving entity penetrates the edge loop, increase the `thickness` property of the edge loop. The thickness is applied to the outside of the edge loop, and thus it will not affect the interior boundary size.
+If a node moves too fast, it might pass through the edge loop. This is called [tunneling](https://gamedev.stackexchange.com/a/192403). To prevent tunneling, edge loops have a default thickness of `50`. If you still find that a fast-moving node penetrates the edge loop, increase the `thickness` property of the edge loop. The thickness is applied to the outside of the edge loop, and thus it will not affect the interior boundary size.
 
 export const code = `const physics = new Physics();
 await game.registerPlugin(physics);

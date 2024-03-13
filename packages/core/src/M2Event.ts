@@ -8,7 +8,7 @@ export interface M2Event<T> {
   /** Type of event. */
   // It is a union type of EventType and string, so that we can define custom
   // event types in Composites and Plugins
-  type: EventType | string;
+  type: M2EventType | string;
   /** The object on which the event occurred. */
   target: T;
   /** Has the event been taken care of by the listener and not be dispatched to other targets? */
@@ -18,7 +18,7 @@ export interface M2Event<T> {
 /**
  * The different events that are dispatched by m2c2kit core.
  */
-export const EventType = {
+export const M2EventType = {
   ActivityStart: "ActivityStart",
   ActivityEnd: "ActivityEnd",
   ActivityCancel: "ActivityCancel",
@@ -42,4 +42,4 @@ export const EventType = {
   SceneAppear: "SceneAppear",
 } as const;
 
-export type EventType = (typeof EventType)[keyof typeof EventType];
+export type M2EventType = (typeof M2EventType)[keyof typeof M2EventType];

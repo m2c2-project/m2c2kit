@@ -7,9 +7,9 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Rotation
 
-Adjust an entity's `zRotation` to rotate it about its axis.
+Adjust a node's `zRotation` to rotate it about its axis.
 
-An entity's `zRotation` property determines its rotation. The unit of measurement is [radians](https://en.wikipedia.org/wiki/Radian) instead of degrees. There are 2π radians in a circle, or 360°. A positive rotation is counterclockwise, and a negative rotation is clockwise. The rotation affects any children, if present. For example, if you rotate a `Scene`, all of its children will also be rotated.
+A node's `zRotation` property determines its rotation. The unit of measurement is [radians](https://en.wikipedia.org/wiki/Radian) instead of degrees. There are 2π radians in a circle, or 360°. A positive rotation is counterclockwise, and a negative rotation is clockwise. The rotation affects any children, if present. For example, if you rotate a `Scene`, all of its children will also be rotated.
 
 :::tip
 
@@ -33,7 +33,7 @@ sceneOne.addChild(aLabel);
 `
  
 export const more = [
-{ description: <>See how entities [inherit] their parents' rotations. The top letter A has been added as a child of the square, which has been rotated π/4 radians, or 45° counterclockwise. The letter A inherits this rotation. The bottom letter A has been added as child of another square, which also has been rotated π/4 radians. The bottom A in inherits this rotation, but this bottom A has its own rotation `-Math.PI / 4` which is also applied and "cancels out" its parent rotation.</>,
+{ description: <>See how nodes [inherit] their parents' rotations. The top letter A has been added as a child of the square, which has been rotated π/4 radians, or 45° counterclockwise. The letter A inherits this rotation. The bottom letter A has been added as child of another square, which also has been rotated π/4 radians. The bottom A in inherits this rotation, but this bottom A has its own rotation `-Math.PI / 4` which is also applied and "cancels out" its parent rotation.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
  

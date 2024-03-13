@@ -7,24 +7,24 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Why Actions?
 
-Actions are a powerful way to change the appearance of your entities and control the timing of your assessment.
+Actions are a powerful way to change the appearance of your nodes and control the timing of your assessment.
 
-We've learned how to create multiple scenes, customize the appearance of entities, allow user interaction, and respond to that interaction. After we learn how to collect data (record scientifically relevant user behavior) in a [later](../user-data/schemas.md) section, we'll have all the tools we need to create a fully functional assessment. Why do we need another concept, **Actions**?
+We've learned how to create multiple scenes, customize the appearance of nodes, allow user interaction, and respond to that interaction. After we learn how to collect data (record scientifically relevant user behavior) in a [later](../user-data/schemas.md) section, we'll have all the tools we need to create a fully functional assessment. Why do we need another concept, **Actions**?
 
-- Modern user interfaces (UI) are fluid. UI elements smoothly move around the screen or change size. We know how to do this with scene transitions, but what if you need to animate multiple entities independently within a scene?
+- Modern user interfaces (UI) are fluid. UI elements smoothly move around the screen or change size. We know how to do this with scene transitions, but what if you need to animate multiple nodes independently within a scene?
 - Assessments often require precise timing. You may need to show a stimulus for a specific amount of time, change its configuration, and show it again for another specific amount of time. How can we precisely schedule this?
 
 These are the kinds of problems that the `Action` solves.
 
 ## Actions for animation
 
-Animation is moving an entity from one position to another. Actions make it easy to animate entities. Simply create an action with `Action.move()` that describes the animation.
+Animation is moving a node from one position to another. Actions make it easy to animate nodes. Simply create an action with `Action.move()` that describes the animation.
 
 <details>
   <summary>Where is the game loop?</summary>
-  <p>Each time a device updates its screen, it draws a <a href="https://en.wikipedia.org/wiki/Film_frame">frame</a>. To make it appear that an entity is smoothly moving across the screen, you simply update its position a little bit when you draw the next frame.</p>
+  <p>Each time a device updates its screen, it draws a <a href="https://en.wikipedia.org/wiki/Film_frame">frame</a>. To make it appear that a node is smoothly moving across the screen, you simply update its position a little bit when you draw the next frame.</p>
 
-  <p>In many video game libraries, there is a concept of a <a href="https://en.wikipedia.org/wiki/Video_game_programming#Game_structure">game loop</a>, which usually executes 60 times per second because most devices update their screen 60 times per second. To move the entity, you adjust its position 60 times per second. You need to keep track of the entity's current position, the position it's moving to, and the amount of time it should take to get there. You also need to keep track of how much time has passed since the entity started moving. This is a lot of work!</p>
+  <p>In many video game libraries, there is a concept of a <a href="https://en.wikipedia.org/wiki/Video_game_programming#Game_structure">game loop</a>, which usually executes 60 times per second because most devices update their screen 60 times per second. To move the node, you adjust its position 60 times per second. You need to keep track of the node's current position, the position it's moving to, and the amount of time it should take to get there. You also need to keep track of how much time has passed since the node started moving. This is a lot of work!</p>
 
   <p>Internally, m2c2kit runs a game loop, but the library abstracts this away from the programmer through the <code>Move</code> Action.</p>
 </details>

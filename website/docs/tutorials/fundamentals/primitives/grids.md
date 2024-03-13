@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Grids
 
-A `Grid` holds other entities in rows and columns.
+A `Grid` holds other nodes in rows and columns.
 
 Grids are common in assessments. A grid is a convenient way to position things on the screen. For example, if you had a 3x3 tic-tac-toe grid, you could manually calculate the centers the cells. But it would be easier simply to specify by row and column: the pre-built `Grid` does this.
 
@@ -77,7 +77,7 @@ const number3 = new Label( { text: "3"});
 myGrid.addAtCell(number3, 1, 2);
 const number4 = new Label( { text: "4"});
 myGrid.addAtCell(number4, 2, 1);`},
-{ description: <>A `Grid` cell can hold almost any entity -- `Shape`, `Label`, `Sprite` -- even [another] `Grid`! (But you can't put a `Scene` inside a `Grid` cell.)</>,
+{ description: <>A `Grid` cell can hold almost any node -- `Shape`, `Label`, `Sprite` -- even [another] `Grid`! (But you can't put a `Scene` inside a `Grid` cell.)</>,
 code:`const sceneOne = new Scene({ backgroundColor: WebColors.WhiteSmoke });
 game.addScene(sceneOne);
 const bigGrid = new Grid({

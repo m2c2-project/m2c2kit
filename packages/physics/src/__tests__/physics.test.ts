@@ -77,7 +77,7 @@ describe("physics gravity", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -140,7 +140,7 @@ describe("physics no gravity", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -244,9 +244,9 @@ describe("physics collision", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const entityNames = game.entities.map((e) => e.name);
+    const nodeNames = game.nodes.map((e) => e.name);
     const hasOutlines =
-      entityNames.filter((n) => n.includes("__PhysicsBodyOutline")).length > 0;
+      nodeNames.filter((n) => n.includes("__PhysicsBodyOutline")).length > 0;
     expect(hasOutlines).toBe(true);
   });
 });
@@ -308,7 +308,7 @@ describe("physics gravity changed", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -325,7 +325,7 @@ describe("physics gravity changed", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -403,7 +403,7 @@ describe("allows rotation", () => {
     console.debug(
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
-    const circle1 = g1.entities
+    const circle1 = g1.nodes
       .filter((e) => e.name === "myCircle1")
       .find(Boolean);
     if (!circle1) {

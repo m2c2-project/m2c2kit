@@ -9,15 +9,15 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Events have properties that describe the event.
 
-In the event handler code for an event, you know what event has occurred. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the entity. But what if you need to know where the user tapped down?
+In the event handler code for an event, you know what event has occurred. For example, if you are handling a `TapDown` event, you know that the user has tapped down on the node. But what if you need to know where the user tapped down?
 
 The Tap and Pointer events all contain these additional properties:
 
-- `point` - the point on the entity where the event occurred.
+- `point` - the point on the node where the event occurred.
 - `buttons` - the buttons that were pressed when the event occurred.
 - `type` - the type of event that occurred, as a string, such as `TapDown` or `PointerMove`.
-- `target` - the entity on which the event occurred.[^1]
-- `handled` - a boolean value that indicates whether the event has been handled. If the event has been handled, then the event will not be passed to any other entities. This is useful for preventing the event from being handled by multiple entities.
+- `target` - the node on which the event occurred.[^1]
+- `handled` - a boolean value that indicates whether the event has been handled. If the event has been handled, then the event will not be passed to any other nodes. This is useful for preventing the event from being handled by multiple nodes.
 
 :::note
 

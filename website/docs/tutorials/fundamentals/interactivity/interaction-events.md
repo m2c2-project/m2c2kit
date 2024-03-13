@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Events
 
-One way of thinking of user interaction is that the user is sending **events** to the entities. For example, when the user clicks on a button, the button receives a `TapDown` event. The button can then respond to the event by executing code. The code passed into the `onTapDown()` method is called an [event handler](<https://en.wikipedia.org/wiki/Event_(computing)#Event_handler>) because it handles the `TapDown` event.
+One way of thinking of user interaction is that the user is sending **events** to the nodes. For example, when the user clicks on a button, the button receives a `TapDown` event. The button can then respond to the event by executing code. The code passed into the `onTapDown()` method is called an [event handler](<https://en.wikipedia.org/wiki/Event_(computing)#Event_handler>) because it handles the `TapDown` event.
 
 This event handler prints a message to the console when the button is tapped:
 
@@ -32,15 +32,15 @@ myButton.onTapDown(logTheEvent);`}
   <p>Arrows function are a useful shortcut when you don't want to define a separate function to execute some code.</p>
 </details>
 
-There are several types of events that can be sent to entities:
+There are several types of events that can be sent to nodes:
 
-- `TapDown` - occurs when the user begins a touch or click within the bounds of the entity.
-- `TapUp` - occurs when the user releases a touch or click within the bounds of the entity.
-- `TapLeave` - occurs when the user holds a touch or click on the entity, but moves outside the bounds of the entity.
-- `TapUpAny` - occurs when the user releases a touch or click within _or_ outside the bounds of the entity.
-- `PointerDown` - occurs when the user begins a touch or click within the bounds of the entity. Same as `TapDown`.
-- `PointerUp` - occurs when the user releases a touch or click within the bounds of the entity, but the touch or click _did not_ have to begin within the bounds of the entity.
-- `PointerMove` - occurs when the user moves the mouse or touch within the bounds of the entity.
+- `TapDown` - occurs when the user begins a touch or click within the bounds of the node.
+- `TapUp` - occurs when the user releases a touch or click within the bounds of the node.
+- `TapLeave` - occurs when the user holds a touch or click on the node, but moves outside the bounds of the node.
+- `TapUpAny` - occurs when the user releases a touch or click within _or_ outside the bounds of the node.
+- `PointerDown` - occurs when the user begins a touch or click within the bounds of the node. Same as `TapDown`.
+- `PointerUp` - occurs when the user releases a touch or click within the bounds of the node, but the touch or click _did not_ have to begin within the bounds of the node.
+- `PointerMove` - occurs when the user moves the mouse or touch within the bounds of the node.
 
 :::tip
 

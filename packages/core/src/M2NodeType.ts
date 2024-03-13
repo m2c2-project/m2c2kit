@@ -1,5 +1,5 @@
-export enum EntityType {
-  Entity = "Entity",
+export enum M2NodeType {
+  Node = "Node",
   Scene = "Scene",
   Sprite = "Sprite",
   Label = "Label",

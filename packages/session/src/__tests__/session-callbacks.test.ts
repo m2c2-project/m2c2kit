@@ -5,7 +5,7 @@ import {
   Scene,
   Action,
   TrialSchema,
-  EventType,
+  M2EventType,
   ActivityEvent,
 } from "@m2c2kit/core";
 import { Session, SessionOptions } from "..";
@@ -239,6 +239,6 @@ describe("Session event handlers", () => {
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 5;
     await session.start();
-    expect(genericEvent.type).toBe(EventType.ActivityData);
+    expect(genericEvent.type).toBe(M2EventType.ActivityData);
   });
 });

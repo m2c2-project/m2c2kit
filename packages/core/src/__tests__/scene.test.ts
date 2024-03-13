@@ -50,23 +50,17 @@ beforeEach(async () => {
   TestHelpers.setupDomAndGlobals();
   await g1.initialize();
 
-  rect1 = g1.entities
-    .filter((e) => e.name === "myRect1")
-    .find(Boolean) as Shape;
+  rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean) as Shape;
   if (!rect1) {
     throw new Error("myRect1 undefined");
   }
 
-  scene1 = g1.entities
-    .filter((e) => e.name === "myScene1")
-    .find(Boolean) as Scene;
+  scene1 = g1.nodes.filter((e) => e.name === "myScene1").find(Boolean) as Scene;
   if (!scene1) {
     throw new Error("myScene1 undefined");
   }
 
-  label1 = g1.entities
-    .filter((e) => e.name === "myLabel1")
-    .find(Boolean) as Label;
+  label1 = g1.nodes.filter((e) => e.name === "myLabel1").find(Boolean) as Label;
   if (!label1) {
     throw new Error("myLabel1 undefined");
   }

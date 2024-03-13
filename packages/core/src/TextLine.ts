@@ -2,8 +2,8 @@ import "./Globals";
 import { Canvas, Font, Paint, Typeface } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
@@ -14,10 +14,10 @@ import { M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
 
 export class TextLine
-  extends Entity
+  extends M2Node
   implements IDrawable, IText, TextLineOptions
 {
-  readonly type = EntityType.TextLine;
+  readonly type = M2NodeType.TextLine;
   isDrawable = true;
   isText = true;
   // Drawable options
@@ -123,7 +123,7 @@ export class TextLine
     this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
     this.paint.setAntiAlias(true);
 
-    const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+    const i18n = (this.parentSceneAsNode as Scene).game.i18n;
     if (i18n && i18n.options.missingTranslationFontColor) {
       this.missingTranslationPaint = new this.canvasKit.Paint();
       this.missingTranslationPaint.setColor(
@@ -178,18 +178,18 @@ export class TextLine
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): TextLine {
     const dest = new TextLine({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       ...this.getTextOptions(),
       width: this.size.width,
@@ -212,7 +212,7 @@ export class TextLine
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
-      M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+      M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
       const x = this.absolutePosition.x * drawScale;
       const y =
@@ -222,7 +222,7 @@ export class TextLine
 
       let textForDraw: string;
       let paintForDraw = this.paint;
-      const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+      const i18n = (this.parentSceneAsNode as Scene).game.i18n;
       if (i18n) {
         let translated = i18n.t(this.text);
         if (translated === undefined) {
@@ -253,7 +253,7 @@ export class TextLine
 
       if (paintForDraw === undefined || this.font === undefined) {
         throw new Error(
-          `in TextLine entity ${this}, Paint or Font is undefined.`,
+          `in TextLine node ${this}, Paint or Font is undefined.`,
         );
       }
 
@@ -279,7 +279,7 @@ export class TextLine
     this.initialize();
     if (this.paint === undefined || this.font === undefined) {
       throw new Error(
-        `warmup TextLine entity ${this.toString()}: Paint or Font is undefined.`,
+        `warmup TextLine node ${this.toString()}: Paint or Font is undefined.`,
       );
     }
     canvas.drawText(this.text, 0, 0, this.paint, this.font);

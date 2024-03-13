@@ -1,7 +1,7 @@
 import { Canvas } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
-import { Entity } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { Shape } from "./Shape";
 import { ShapeType } from "./ShapeType";
 import { Point } from "./Point";
@@ -45,30 +45,29 @@ export class M2c2KitHelpers {
   }
 
   /**
-   * Calculates the four points of the bounding box of the entity, taking
-   * into account the entity's rotation (as well as the rotation of its
+   * Calculates the four points of the bounding box of the node, taking
+   * into account the node's rotation (as well as the rotation of its
    * ancestors).
    *
    * @remarks This method is used to calculate the rotated bounding box of an
-   * entity when in order to determine if a point is inside the entity in
+   * node when in order to determine if a point is inside the node in
    * response to DOM pointer events. This method is NOT used to prepare the
-   * CanvasKit canvas for drawing the entity.
+   * CanvasKit canvas for drawing the node.
    *
-   * @param drawableEntity
-   * @returns array of points representing the rotated entity
+   * @param drawableNode
+   * @returns array of points representing the rotated node
    */
-  static calculateRotatedPoints(drawableEntity: IDrawable & Entity): Point[] {
-    const entities = drawableEntity.ancestors;
-    entities.reverse();
-    entities.push(drawableEntity);
+  static calculateRotatedPoints(drawableNode: IDrawable & M2Node): Point[] {
+    const nodes = drawableNode.ancestors;
+    nodes.reverse();
+    nodes.push(drawableNode);
 
     /**
-     * Create an array of 4 points for each entity, representing the
-     * vertices of the entity's rectangular bounding box.
+     * Create an array of 4 points for each node, representing the
+     * vertices of the node's rectangular bounding box.
      */
-    const entityPointsArray = entities.map((entity) => {
-      const boundingBox =
-        M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(entity);
+    const nodePointsArray = nodes.map((node) => {
+      const boundingBox = M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(node);
       return M2c2KitHelpers.boundingBoxToPoints(boundingBox);
     });
 
@@ -76,16 +75,16 @@ export class M2c2KitHelpers {
      * Start with the oldest ancestor and apply its rotation to itself
      * and all of its descendants. Then move on to the next ancestor.
      */
-    for (let i = 0; i < entityPointsArray.length; i++) {
-      if (!entityNeedsRotation(entities[i])) {
+    for (let i = 0; i < nodePointsArray.length; i++) {
+      if (!nodeNeedsRotation(nodes[i])) {
         continue;
       }
-      const entityPoints = entityPointsArray[i];
-      const radians = entities[i].zRotation;
-      const center = M2c2KitHelpers.findCentroid(entityPoints);
-      for (let j = i; j < entities.length; j++) {
-        entityPointsArray[j] = rotateRectangle(
-          entityPointsArray[j],
+      const nodePoints = nodePointsArray[i];
+      const radians = nodes[i].zRotation;
+      const center = M2c2KitHelpers.findCentroid(nodePoints);
+      for (let j = i; j < nodes.length; j++) {
+        nodePointsArray[j] = rotateRectangle(
+          nodePointsArray[j],
           radians,
           center,
         );
@@ -93,61 +92,61 @@ export class M2c2KitHelpers {
     }
 
     /**
-     * Return the points of the most last entity, which is the focal entity
-     * passed into this function. These are the points of the focal entity
+     * Return the points of the most last node, which is the focal node
+     * passed into this function. These are the points of the focal node
      * after all rotations have been applied.
      */
-    return entityPointsArray[entityPointsArray.length - 1];
+    return nodePointsArray[nodePointsArray.length - 1];
   }
 
   /**
-   * Rotates the canvas so the entity appears rotated when drawn.
+   * Rotates the canvas so the node appears rotated when drawn.
    *
-   * @remarks Entities inherit rotations from their ancestors. Each ancestor,
+   * @remarks Nodes inherit rotations from their ancestors. Each ancestor,
    * however, rotates around its own anchor point. Thus, we must rotate the
-   * canvas around the anchor point of each ancestor as well as the entity's
+   * canvas around the anchor point of each ancestor as well as the node's
    * anchor point.
    *
    * @param canvas - CanvasKit canvas to rotate
-   * @param drawableEntity - Entity to rotate the canvas for
+   * @param drawableNode - Node to rotate the canvas for
    */
-  static rotateCanvasForDrawableEntity(
+  static rotateCanvasForDrawableNode(
     canvas: Canvas,
-    drawableEntity: IDrawable & Entity,
+    drawableNode: IDrawable & M2Node,
   ) {
     const rotationTransforms =
-      M2c2KitHelpers.calculateRotationTransforms(drawableEntity);
+      M2c2KitHelpers.calculateRotationTransforms(drawableNode);
     if (rotationTransforms.length === 0) {
       return;
     }
-    const drawScale = Globals.canvasScale / drawableEntity.absoluteScale;
+    const drawScale = Globals.canvasScale / drawableNode.absoluteScale;
     applyRotationTransformsToCanvas(rotationTransforms, drawScale, canvas);
   }
 
   /**
-   * Calculates the absolute bounding box of the entity before any rotation
+   * Calculates the absolute bounding box of the node before any rotation
    * is applied.
    *
-   * @remarks The absolute bounding box is the bounding box of the entity
+   * @remarks The absolute bounding box is the bounding box of the node
    * relative to the scene's origin (0, 0).
    *
-   * @param entity
-   * @returns the bounding box of the entity
+   * @param node
+   * @returns the bounding box of the node
    */
-  static calculateEntityAbsoluteBoundingBox(entity: Entity): BoundingBox {
-    const anchorPoint = (entity as unknown as IDrawable).anchorPoint;
-    const scale = entity.absoluteScale;
+  static calculateNodeAbsoluteBoundingBox(node: M2Node): BoundingBox {
+    const anchorPoint = (node as unknown as IDrawable).anchorPoint;
+    const scale = node.absoluteScale;
     // TODO: NEEDS TO BE FIXED FOR ANCHOR POINTS OTHER THAN (.5, .5)
     // TODO: TEST THIS FURTHER
 
-    let width = entity.size.width;
-    let height = entity.size.height;
+    let width = node.size.width;
+    let height = node.size.height;
 
     if (
-      entity.type === EntityType.Shape &&
-      (entity as Shape).shapeType === ShapeType.Circle
+      node.type === M2NodeType.Shape &&
+      (node as Shape).shapeType === ShapeType.Circle
     ) {
-      const radius = (entity as Shape).circleOfRadius;
+      const radius = (node as Shape).circleOfRadius;
       if (!radius) {
         throw "circleOfRadius is undefined";
       }
@@ -155,16 +154,14 @@ export class M2c2KitHelpers {
       height = radius * 2;
     }
 
-    const xMin = entity.absolutePosition.x - width * anchorPoint.x * scale;
-    const xMax =
-      entity.absolutePosition.x + width * (1 - anchorPoint.x) * scale;
-    const yMin = entity.absolutePosition.y - height * anchorPoint.y * scale;
-    const yMax =
-      entity.absolutePosition.y + height * (1 - anchorPoint.y) * scale;
-    // const xMin = entity.absolutePosition.x - entity.size.width * anchorPoint.x * scale;
-    // const xMax = entity.absolutePosition.x + entity.size.width * anchorPoint.x * scale;
-    // const yMin = entity.absolutePosition.y - entity.size.height * anchorPoint.y * scale;
-    // const yMax = entity.absolutePosition.y + entity.size.height * anchorPoint.y * scale;
+    const xMin = node.absolutePosition.x - width * anchorPoint.x * scale;
+    const xMax = node.absolutePosition.x + width * (1 - anchorPoint.x) * scale;
+    const yMin = node.absolutePosition.y - height * anchorPoint.y * scale;
+    const yMax = node.absolutePosition.y + height * (1 - anchorPoint.y) * scale;
+    // const xMin = node.absolutePosition.x - node.size.width * anchorPoint.x * scale;
+    // const xMax = node.absolutePosition.x + node.size.width * anchorPoint.x * scale;
+    // const yMin = node.absolutePosition.y - node.size.height * anchorPoint.y * scale;
+    // const yMax = node.absolutePosition.y + node.size.height * anchorPoint.y * scale;
     return { xMin, xMax, yMin, yMax };
   }
 
@@ -270,15 +267,15 @@ export class M2c2KitHelpers {
   }
 
   /**
-   * Checks if the entity or any of its ancestors have been rotated.
+   * Checks if the node or any of its ancestors have been rotated.
    *
-   * @param entity - entity to check
-   * @returns true if the entity or any of its ancestors have been rotated
+   * @param node - node to check
+   * @returns true if the node or any of its ancestors have been rotated
    */
-  static entityOrAncestorHasBeenRotated(entity: Entity): boolean {
-    const entities = entity.ancestors;
-    entities.push(entity);
-    return entities.some((entity) => entityNeedsRotation(entity));
+  static nodeOrAncestorHasBeenRotated(node: M2Node): boolean {
+    const nodes = node.ancestors;
+    nodes.push(node);
+    return nodes.some((node) => nodeNeedsRotation(node));
   }
 
   /**
@@ -356,35 +353,35 @@ export class M2c2KitHelpers {
   }
 
   /**
-   * Calculates the rotation transforms to apply to entity, respecting any
+   * Calculates the rotation transforms to apply to node, respecting any
    * ancestor rotations.
    *
-   * @param drawableEntity - entity to calculate rotation transforms for
+   * @param drawableNode - node to calculate rotation transforms for
    * @returns array of rotation transforms to apply
    */
   static calculateRotationTransforms(
-    drawableEntity: IDrawable & Entity,
+    drawableNode: IDrawable & M2Node,
   ): RotationTransform[] {
     const rotationTransforms: RotationTransform[] = [];
-    const entities = drawableEntity.ancestors;
-    entities.reverse();
-    entities.push(drawableEntity);
+    const nodes = drawableNode.ancestors;
+    nodes.reverse();
+    nodes.push(drawableNode);
 
     /**
-     * Iterate all entities and, if needed, rotate each around
+     * Iterate all nodes and, if needed, rotate each around
      * its anchor point. Save a running list of all rotations in the
      * array rotationTransforms.
      */
-    entities.forEach((entity) => {
-      if (entityNeedsRotation(entity)) {
-        const drawable = entity as unknown as IDrawable & Entity;
+    nodes.forEach((node) => {
+      if (nodeNeedsRotation(node)) {
+        const drawable = node as unknown as IDrawable & M2Node;
         /**
          * Scenes must be handled specially because they have a different
          * coordinate system -- (0, 0) is in the upper-left -- and their
          * anchor point is (0, 0). Despite this, we rotate them around their
          * center.
          */
-        if (drawable.type === EntityType.Scene) {
+        if (drawable.type === M2NodeType.Scene) {
           const center = {
             x: drawable.absolutePosition.x + drawable.size.width * 0.5,
             y: drawable.absolutePosition.y + drawable.size.height * 0.5,
@@ -397,7 +394,7 @@ export class M2c2KitHelpers {
         }
 
         const boundingBox =
-          M2c2KitHelpers.calculateEntityAbsoluteBoundingBox(drawable);
+          M2c2KitHelpers.calculateNodeAbsoluteBoundingBox(drawable);
         const points = M2c2KitHelpers.boundingBoxToPoints(boundingBox);
         const center = M2c2KitHelpers.findCentroid(points);
         rotationTransforms.push({
@@ -432,10 +429,10 @@ function applyRotationTransformsToCanvas(
   });
 }
 
-function entityNeedsRotation(entity: Entity): boolean {
+function nodeNeedsRotation(node: M2Node): boolean {
   return (
-    M2c2KitHelpers.normalizeAngleRadians(entity.zRotation) !== 0 &&
-    entity.isDrawable
+    M2c2KitHelpers.normalizeAngleRadians(node.zRotation) !== 0 &&
+    node.isDrawable
   );
 }
 

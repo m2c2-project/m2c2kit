@@ -49,7 +49,7 @@ goButton.onTapDown(() => {
 });`;
 
 export const more = [
-{ description: <>How can we apply a group Action to [two different entities]? For example, what if we want to move and scale two different labels, "A" and "B", at the same time? In the group Action for the "A" label, move and scale it as before. Then, add an additional Action within the group: a custom Action to move and scale the "B" label:
+{ description: <>How can we apply a group Action to [two different nodes]? For example, what if we want to move and scale two different labels, "A" and "B", at the same time? In the group Action for the "A" label, move and scale it as before. Then, add an additional Action within the group: a custom Action to move and scale the "B" label:
 <pre>
   <code className="language-js">{`aLabel.run(Action.group([
     Action.move({ point: { x: 40, y: 75 }, duration: 1000 }),

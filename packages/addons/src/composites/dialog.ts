@@ -1,6 +1,6 @@
 import { Paint, Canvas } from "canvaskit-wasm";
 import {
-  EntityEvent,
+  M2NodeEvent,
   WebColors,
   Composite,
   CompositeOptions,
@@ -9,8 +9,8 @@ import {
   RgbaColor,
   Size,
   IDrawable,
-  EntityEventListener,
-  EventType,
+  M2NodeEventListener,
+  M2EventType,
   CallbackOptions,
 } from "@m2c2kit/core";
 import "../Globals";
@@ -39,7 +39,7 @@ export enum DialogResult {
   Negative = "Negative",
 }
 
-export interface DialogEvent extends EntityEvent {
+export interface DialogEvent extends M2NodeEvent {
   dialogResult: DialogResult;
 }
 
@@ -109,10 +109,10 @@ export class Dialog extends Composite {
     callback: (dialogResultEvent: DialogEvent) => void,
     options?: CallbackOptions,
   ): void {
-    const eventListener: EntityEventListener<DialogEvent> = {
-      type: EventType.CompositeCustom,
+    const eventListener: M2NodeEventListener<DialogEvent> = {
+      type: M2EventType.CompositeCustom,
       compositeType: "DialogResult",
-      entityUuid: this.uuid,
+      nodeUuid: this.uuid,
       callback: callback,
     };
 
@@ -120,12 +120,12 @@ export class Dialog extends Composite {
       this.eventListeners = this.eventListeners.filter(
         (listener) =>
           !(
-            listener.entityUuid === eventListener.entityUuid &&
+            listener.nodeUuid === eventListener.nodeUuid &&
             listener.type === eventListener.type
           ),
       );
     }
-    this.eventListeners.push(eventListener as EntityEventListener<EntityEvent>);
+    this.eventListeners.push(eventListener as M2NodeEventListener<M2NodeEvent>);
   }
 
   override initialize(): void {
@@ -147,10 +147,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: EventType.CompositeCustom,
+              type: M2EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Dismiss,
@@ -200,10 +200,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: EventType.CompositeCustom,
+              type: M2EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Negative,
@@ -225,10 +225,10 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.CompositeCustom)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: EventType.CompositeCustom,
+              type: M2EventType.CompositeCustom,
               target: this,
               handled: false,
               dialogResult: DialogResult.Positive,
@@ -260,19 +260,19 @@ export class Dialog extends Composite {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Dialog {
     throw new Error("duplicate not implemented");
     // const dest = new Dialog({
-    //   ...this.getEntityOptions(),
+    //   ...this.getNodeOptions(),
     //   ...this.getDrawableOptions(),
     //   ...this.getTextOptions(),
     //   size: this.size,

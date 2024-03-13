@@ -10,21 +10,21 @@ import CodeExample from '@site/src/components/CodeExample';
 You might come across this error:
 
 ```
-Uncaught Error: Cannot add child entity Shape (2717f16e-682f-4cb1-bbc2-4fe34d3ec2de)
-to parent entity Shape (921cf9e6-7970-4702-aa4a-3cc1cc8f8e59).
+Uncaught Error: Cannot add child node Shape (2717f16e-682f-4cb1-bbc2-4fe34d3ec2de)
+to parent node Shape (921cf9e6-7970-4702-aa4a-3cc1cc8f8e59).
 This child already exists on this parent. The child cannot be added again.
 ```
 
 or
 
 ```
-Uncaught Error: Cannot add child entity Shape (3a43596c-c9a3-4158-8ab0-110442f701d5)
-to parent entity Shape (68004c48-6ac9-43f8-8430-e28b09388fa9). This child already exists
-on other parent entity: Shape (dbbfe9ed-d44e-471e-8127-d2230d09dc8e).
+Uncaught Error: Cannot add child node Shape (3a43596c-c9a3-4158-8ab0-110442f701d5)
+to parent node Shape (68004c48-6ac9-43f8-8430-e28b09388fa9). This child already exists
+on other parent node: Shape (dbbfe9ed-d44e-471e-8127-d2230d09dc8e).
 Remove the child from the other parent first.
 ```
 
-In m2c2kit, a child entity can have only one parent entity. In other words, an entity can't "have two parents at once." If you add a child entity to a parent entity, but the child entity already has a parent, you'll get an error. Similarly, if you add a child entity to a parent entity for a second time, you'll also get an error.
+In m2c2kit, a child node can have only one parent node. In other words, a node can't "have two parents at once." If you add a child node to a parent node, but the child node already has a parent, you'll get an error. Similarly, if you add a child node to a parent node for a second time, you'll also get an error.
 
 ## Demonstration of the problem
 
@@ -121,10 +121,10 @@ taskScene.onSetup(() => {
 
 ## Solution
 
-The solution is to remove the circle from its parent before adding it to a new parent. Parent entities have three functions[^1] to remove children:
+The solution is to remove the circle from its parent before adding it to a new parent. Parent nodes have three functions[^1] to remove children:
 
-- `removeChild(child: Entity)` - remove the specified child.
-- `removeChildren(children: Entity[])` - remove the specified children.
+- `removeChild(child: M2Node)` - remove the specified child.
+- `removeChildren(children: M2Node[])` - remove the specified children.
 - `removeAllChildren()` - remove all children.
 
 In our example, the circle could either be a child of `rectangle1` or `rectangle2`. Rather than checking which rectangle the circle is a child of, we can remove all children (which will include the circle) from both rectangles. Then we can add the circle to the new rectangle:

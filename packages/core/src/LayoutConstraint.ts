@@ -1,13 +1,13 @@
-import { Entity } from "./Entity";
+import { M2Node } from "./M2Node";
 import { ConstraintType } from "./ConstraintType";
 
 /**
  * This class is used internally for processing layout constraints that
  * have been defined according to the Constraints interface.
  *
- * Imagine we have two entities, A and B. B's position is set
+ * Imagine we have two nodes, A and B. B's position is set
  * using its position property. A's position is set using the layout
- * constraint "bottomToTopOf B." A is the focal entity in this example.
+ * constraint "bottomToTopOf B." A is the focal node in this example.
  * What this means is that A's y coordinate will be computed such that
  * the bottom of A is the top of B. If A and B are squares, then A sits
  * on top of B with no gap.
@@ -15,10 +15,10 @@ import { ConstraintType } from "./ConstraintType";
 export class LayoutConstraint {
   // the constraint, e.g., bottomToTopOf
   type: ConstraintType;
-  // alter is the other entity that the focal entity is constrained to.
-  // in the example above, A is the focal entity, B is the alter
-  // thus the alter entity property is B
-  alterEntity: Entity;
+  // alter is the other node that the focal node is constrained to.
+  // in the example above, A is the focal node, B is the alter
+  // thus the alter node property is B
+  alterNode: M2Node;
 
   // the below 3 properties are calculated from the constraint type
   // (we set them to false by default to avoid undefined warnings, but
@@ -28,16 +28,16 @@ export class LayoutConstraint {
   // does the constraint affect the Y or X axis? If not, then it's
   // a horizontal constraint
   verticalConstraint = false;
-  // does the constraint apply to the focal entity's "minimum" position
+  // does the constraint apply to the focal node's "minimum" position
   // along its axis? That is, does the constraint reference the focal
-  // entity's "top" or "start"? Top and start are considered minimums because
+  // node's "top" or "start"? Top and start are considered minimums because
   // our origin (0, 0) in the upper left.
-  // If not, then the constraint applies to the focal entity's "maximum"
+  // If not, then the constraint applies to the focal node's "maximum"
   // position, e.g., its "bottom" or "end".
-  focalEntityMinimum = false;
-  // does the constraint apply to the alter entity's "minimum" position
+  focalNodeMinimum = false;
+  // does the constraint apply to the alter node's "minimum" position
   // along its axis?
-  alterEntityMinimum = false;
+  alterNodeMinimum = false;
 
   verticalTypes = [
     ConstraintType.topToTopOf,
@@ -46,55 +46,55 @@ export class LayoutConstraint {
     ConstraintType.bottomToBottomOf,
   ];
 
-  // e.g., entity A
-  focalEntityMinimumTypes = [
+  // e.g., node A
+  focalNodeMinimumTypes = [
     ConstraintType.topToTopOf,
     ConstraintType.topToBottomOf,
     ConstraintType.startToStartOf,
     ConstraintType.startToEndOf,
   ];
 
-  // e.g., entity B
-  alterEntityMinimumTypes = [
+  // e.g., node B
+  alterNodeMinimumTypes = [
     ConstraintType.topToTopOf,
     ConstraintType.bottomToTopOf,
     ConstraintType.startToStartOf,
     ConstraintType.endToStartOf,
   ];
 
-  constructor(type: ConstraintType, alterEntity: Entity) {
+  constructor(type: ConstraintType, alterNode: M2Node) {
     this.type = type;
-    this.alterEntity = alterEntity;
+    this.alterNode = alterNode;
 
     // If it's not a vertical constraint, it's a horizontal constraint
-    // similarly, if it's not a focal entity minimum constraint,
-    // it's a focal entity maximum constraint. All of these are binary,
+    // similarly, if it's not a focal node minimum constraint,
+    // it's a focal node maximum constraint. All of these are binary,
     // so we can use a series of if/else to completely assign values to
-    // verticalConstraint, focalEntityMinimum, and alterEntityMinimum
+    // verticalConstraint, focalNodeMinimum, and alterNodeMinimum
     //
     if (this.verticalTypes.includes(type)) {
       this.verticalConstraint = true;
-      if (this.focalEntityMinimumTypes.includes(type)) {
-        this.focalEntityMinimum = true;
+      if (this.focalNodeMinimumTypes.includes(type)) {
+        this.focalNodeMinimum = true;
       } else {
-        this.focalEntityMinimum = false;
+        this.focalNodeMinimum = false;
       }
-      if (this.alterEntityMinimumTypes.includes(type)) {
-        this.alterEntityMinimum = true;
+      if (this.alterNodeMinimumTypes.includes(type)) {
+        this.alterNodeMinimum = true;
       } else {
-        this.alterEntityMinimum = false;
+        this.alterNodeMinimum = false;
       }
     } else {
       this.verticalConstraint = false;
-      if (this.focalEntityMinimumTypes.includes(type)) {
-        this.focalEntityMinimum = true;
+      if (this.focalNodeMinimumTypes.includes(type)) {
+        this.focalNodeMinimum = true;
       } else {
-        this.focalEntityMinimum = false;
+        this.focalNodeMinimum = false;
       }
-      if (this.alterEntityMinimumTypes.includes(type)) {
-        this.alterEntityMinimum = true;
+      if (this.alterNodeMinimumTypes.includes(type)) {
+        this.alterNodeMinimum = true;
       } else {
-        this.alterEntityMinimum = false;
+        this.alterNodeMinimum = false;
       }
     }
   }

@@ -16,7 +16,7 @@ const jestConfig: JestConfigWithTsJest = {
      * these two files were included in the coverage report.
      */
     "!packages/physics/src/index.ts",
-    "!packages/physics/src/EntityExtended.ts",
+    "!packages/physics/src/M2NodeExtended.ts",
     "packages/build-helpers/src/**/*.{js,jsx,ts,tsx}",
     "!**/src/__tests__/**",
     "!**/*.d.ts",

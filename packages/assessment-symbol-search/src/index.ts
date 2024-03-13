@@ -1022,7 +1022,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           "trial_begin_iso8601_timestamp",
           new Date().toISOString(),
         );
-        /** Add the question label free entity, only if not added yet */
+        /** Add the question label free node, only if not added yet */
         if (!game.entities.map((e) => e.name).includes("questionLabelFree")) {
           questionLabel.hidden = true;
 

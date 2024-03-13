@@ -43,7 +43,7 @@ export class Button extends Composite implements IText {
   /**
    * A simple button of rectangle with text centered inside.
    *
-   * @remarks This composite entity is composed of a rectangle and text. To
+   * @remarks This composite node is composed of a rectangle and text. To
    * respond to user taps, the isUserInteractionEnabled property must be set
    * to true and an appropriate callback must be set to handle the tap event.
    *
@@ -131,18 +131,18 @@ export class Button extends Composite implements IText {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Button {
     const dest = new Button({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       ...this.getTextOptions(),
       size: this.size,

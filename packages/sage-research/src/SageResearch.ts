@@ -1,4 +1,4 @@
-import { M2Event, EventType, ActivityEvent } from "@m2c2kit/core";
+import { M2Event, M2EventType, ActivityEvent } from "@m2c2kit/core";
 import { SessionEvent, SessionEventType } from "@m2c2kit/session";
 
 /**
@@ -61,13 +61,13 @@ export class SageResearch {
         Android.onSessionLifecycle(JSON.stringify(event));
         break;
       }
-      case EventType.ActivityData: {
+      case M2EventType.ActivityData: {
         Android.onActivityResults(JSON.stringify(event));
         break;
       }
-      case EventType.ActivityStart:
-      case EventType.ActivityEnd:
-      case EventType.ActivityCancel: {
+      case M2EventType.ActivityStart:
+      case M2EventType.ActivityEnd:
+      case M2EventType.ActivityCancel: {
         Android.onActivityLifecycle(JSON.stringify(event));
         break;
       }
@@ -166,7 +166,7 @@ export class SageResearch {
    * Removes circular references from event object.
    *
    * @remarks event.target is the object that fired the event, which is an
-   * Activity, Session, or Entity. These objects have circular references,
+   * Activity, Session, or M2Node. These objects have circular references,
    * which will cause problems when serializing. Thus, before we pass the
    * event to Android or iOS, retain just target's type and name.
    *

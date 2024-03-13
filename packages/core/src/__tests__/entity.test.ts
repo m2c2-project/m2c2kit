@@ -140,7 +140,7 @@ describe("test addChild", () => {
     expect(t).toThrow(Error);
   });
 
-  it("throws Error when adding scene to another entity", () => {
+  it("throws Error when adding scene to another node", () => {
     const newScene = new Scene({ name: "myNewScene" });
     const t = () => {
       label1.addChild(newScene);
@@ -170,7 +170,7 @@ describe("test addChild", () => {
     expect(t).toThrow(Error);
   });
 
-  it("throws Error when adding entity as a child to itself", () => {
+  it("throws Error when adding node as a child to itself", () => {
     const t = () => {
       label1.addChild(label1);
     };
@@ -216,7 +216,7 @@ describe("test scale", () => {
     expect(newLabel.scale).toEqual(0.5);
   });
 
-  it("child of entity inherits parent entity scale", async () => {
+  it("child of node inherits parent node scale", async () => {
     /**
      * Once a session is started, labels require a font to be loaded before
      * they can be drawn. Avoid loading a font, and test alpha with shapes
@@ -256,7 +256,7 @@ describe("test alpha", () => {
     expect(newLabel.alpha).toEqual(0.5);
   });
 
-  it("child of entity inherits parent entity alpha", async () => {
+  it("child of node inherits parent node alpha", async () => {
     /**
      * Once a session is started, labels require a font to be loaded before
      * they can be drawn. Avoid loading a font, and test alpha with shapes

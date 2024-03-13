@@ -9,17 +9,17 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Drag and Drop lets users interact with objects on the screen.
 
-To make an entity support drag and drop, set both its `isUserInteractionEnabled` and `draggable` properties to `true`. The user can then drag the entity around the screen.
+To make a node support drag and drop, set both its `isUserInteractionEnabled` and `draggable` properties to `true`. The user can then drag the node around the screen.
 
 ## Drag Events
 
-The following events are fired when the user drags an entity:
+The following events are fired when the user drags a node:
 
-- `DragStart` - When the user starts dragging the entity.
-- `Drag` - When the user continues to drag the entity.
-- `DragEnd` - When the user stops dragging the entity.
+- `DragStart` - When the user starts dragging the node.
+- `Drag` - When the user continues to drag the node.
+- `DragEnd` - When the user stops dragging the node.
 
-These events also have a `position` property that is the position of the entity at the time of the event.
+These events also have a `position` property that is the position of the node at the time of the event.
 
 The below example changes the circle's color to green when the dragging starts and changes it back to purple when the dragging stops. It also logs the position of the circle when the dragging starts and stops.
 

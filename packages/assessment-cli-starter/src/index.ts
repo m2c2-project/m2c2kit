@@ -277,7 +277,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     // preparation_duration_ms milliseconds
 
     /**
-     * For entities that are persistent across trials, such as the
+     * For nodes that are persistent across trials, such as the
      * scenes themselves and labels that are always displayed, we create
      * them here.
      */
@@ -292,7 +292,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     preparationScene.addChild(getReadyMessage);
 
     /**
-     * For entities that are displayed or actions that are run only when a
+     * For nodes that are displayed or actions that are run only when a
      * scene has been presented, we do them within the scene's onAppear()
      * or onSetup() callbacks. When a scene is presented, the order of
      * execution is:

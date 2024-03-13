@@ -287,7 +287,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -314,7 +314,7 @@ describe("actions", () => {
      * halfway through the 1000 ms action. This is a total of 35 frames.
      */
     TestHelpers.maxRequestedFrames = 35;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -332,7 +332,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -349,7 +349,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -379,7 +379,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -396,7 +396,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -426,7 +426,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -443,7 +443,7 @@ describe("actions", () => {
     TestHelpers.perfCounter = 0;
     TestHelpers.requestedFrames = 0;
     TestHelpers.maxRequestedFrames = 66;
-    const rect1 = g1.entities.filter((e) => e.name === "myRect1").find(Boolean);
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
     if (!rect1) {
       throw new Error("rect1 undefined");
     }
@@ -509,57 +509,57 @@ describe("Game start", () => {
   });
 });
 
-describe("free entities", () => {
+describe("free nodes", () => {
   beforeEach(async () => {
     g1 = new Game1();
     g2 = new Game2();
 
-    g1.addFreeEntity(new Shape({ circleOfRadius: 10, name: "the-circle" }));
+    g1.addFreeNode(new Shape({ circleOfRadius: 10, name: "the-circle" }));
     TestHelpers.setupDomAndGlobals();
     await g1.initialize();
   });
 
-  it("removes all free entities", () => {
+  it("removes all free nodes", () => {
     const game = g1;
     const label = new Label({ text: "label text" });
-    game.addFreeEntity(label);
-    game.removeAllFreeEntities();
-    expect(game.freeEntities.length).toBe(0);
+    game.addFreeNode(label);
+    game.removeAllFreeNodes();
+    expect(game.freeNodes.length).toBe(0);
   });
 
-  it("adds a free entity", () => {
+  it("adds a free node", () => {
     const game = g1;
     const label = new Label({ text: "label text" });
-    game.addFreeEntity(label);
-    expect(game.freeEntities.length).toBe(2);
+    game.addFreeNode(label);
+    expect(game.freeNodes.length).toBe(2);
   });
 
-  it("adds a free entity and removes free entity by object", () => {
+  it("adds a free node and removes free node by object", () => {
     const game = g1;
     const label = new Label({ text: "label text" });
-    game.addFreeEntity(label);
-    game.removeFreeEntity(label);
-    expect(game.freeEntities.length).toBe(1);
+    game.addFreeNode(label);
+    game.removeFreeNode(label);
+    expect(game.freeNodes.length).toBe(1);
   });
 
-  it("adds a free entity and removes free entity by name", () => {
+  it("adds a free node and removes free node by name", () => {
     const game = g1;
     const label = new Label({ text: "label text", name: "the-label" });
-    game.addFreeEntity(label);
-    game.removeFreeEntity("the-label");
-    expect(game.freeEntities.length).toBe(1);
+    game.addFreeNode(label);
+    game.removeFreeNode("the-label");
+    expect(game.freeNodes.length).toBe(1);
   });
 
-  it("throws error when attempting to remove entity object that has not been added as a free entity", () => {
+  it("throws error when attempting to remove node object that has not been added as a free node", () => {
     const game = g1;
     const label = new Label({ text: "label text", name: "the-label" });
-    const t = () => game.removeFreeEntity(label);
+    const t = () => game.removeFreeNode(label);
     expect(t).toThrow();
   });
 
-  it("throws error when attempting to remove entity name that has not been added as a free entity", () => {
+  it("throws error when attempting to remove node name that has not been added as a free node", () => {
     const game = g1;
-    const t = () => game.removeFreeEntity("some-entity");
+    const t = () => game.removeFreeNode("some-node");
     expect(t).toThrow();
   });
 });

@@ -1,6 +1,6 @@
 import { ShapeType } from "./ShapeType";
 import { DrawableOptions } from "./DrawableOptions";
-import { EntityOptions } from "./EntityOptions";
+import { M2NodeOptions } from "./M2NodeOptions";
 import { RgbaColor } from "./RgbaColor";
 import { RectOptions } from "./RectOptions";
 import { M2Path } from "./M2Path";
@@ -8,7 +8,7 @@ import { Size } from "./Size";
 import { SvgStringPath } from "./SvgStringPath";
 import { M2ColorfulPath } from "./M2ColorfulPath";
 
-export interface ShapeOptions extends EntityOptions, DrawableOptions {
+export interface ShapeOptions extends M2NodeOptions, DrawableOptions {
   shapeType?: ShapeType;
   /** If provided, shape will be a circle with given radius */
   circleOfRadius?: number;

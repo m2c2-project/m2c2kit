@@ -11,11 +11,11 @@ import MDXPre from '@theme/MDXComponents/Pre';
 
 Think of Actions as behaviors that are scheduled to happen: they may happen immediately, or they may happen later.
 
-To run an action, call the entity's `run()` method, and provide the Action to run as the first argument.
+To run an action, call the node's `run()` method, and provide the Action to run as the first argument.
 
 :::tip
 
-By default, an entity's Actions run only when the scene that contains the entity has fully appeared on the screen. This is important to understand, because it means that you can schedule an action to happen before the scene appears.
+By default, a node's Actions run only when the scene that contains the node has fully appeared on the screen. This is important to understand, because it means that you can schedule an action to happen before the scene appears.
 
 :::
 

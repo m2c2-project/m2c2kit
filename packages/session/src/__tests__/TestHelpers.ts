@@ -28,7 +28,7 @@ export class TestHelpers {
 
     /**
      * Default window size when using jsdom is 1024w x 768h, but this will
-     * cause m2c2kit to resize the absolute size of entities, which
+     * cause m2c2kit to resize the absolute size of nodes, which
      * complicates our tests (which are using 400w x 800h). So make the
      * window tall enough to fit our typical 400w x 800h game.
      */

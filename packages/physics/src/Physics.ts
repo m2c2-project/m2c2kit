@@ -2,7 +2,7 @@ import { Engine } from "matter-js";
 import Matter from "matter-js";
 import {
   Game,
-  Entity,
+  M2Node,
   Point,
   PluginEvent,
   CallbackOptions,
@@ -11,10 +11,10 @@ import {
 import { Vector } from "./Vector";
 import { PhysicsOptions } from "./PhysicsOptions";
 import { PhysicsBody } from "./PhysicsBody";
-import { EntityExtended } from "./EntityExtended";
+import { M2NodeExtended } from "./M2NodeExtended";
 
 interface PhysicsBodiesDictionary {
-  [entityUuid: string]: Matter.Body;
+  [nodeUuid: string]: Matter.Body;
 }
 
 interface ApplyForceQueueItem {
@@ -66,8 +66,8 @@ export class Physics implements Plugin {
    * Creates an instance of the physics engine.
    *
    * @remarks The constructor must be called early in the game's `initialize()`
-   * method because it adds properties to the `Entity` class for physics
-   * functionality. These properties will not be available to entities before
+   * method because it adds properties to the `M2Node` class for physics
+   * functionality. These properties will not be available to nodes before
    * the physics plugin is created.
    *
    * @param options - {@link PhysicsOptions}
@@ -86,7 +86,7 @@ export class Physics implements Plugin {
     if (this.options.gravity) {
       this.gravity = this.options.gravity;
     }
-    this.modifyEntityProperties();
+    this.modifyNodeProperties();
     this.configureEventListeners();
   }
 
@@ -95,7 +95,7 @@ export class Physics implements Plugin {
   }
 
   afterUpdate(game: Game, deltaTime: number): void {
-    this.initializePhysicsBodies(game.entities);
+    this.initializePhysicsBodies(game.nodes);
 
     /**
      * To ensure the physics simulation shows the same behavior across
@@ -143,7 +143,7 @@ export class Physics implements Plugin {
       (performance.now() - engineUpdateStart);
     this.framesSimulatedCount++;
     this.logAverageFrameUpdateDuration();
-    this.updateEntitiesFromPhysicsBodies(game.entities);
+    this.updateNodesFromPhysicsBodies(game.nodes);
   }
 
   /**
@@ -261,37 +261,37 @@ export class Physics implements Plugin {
   private getPhysicsBodiesFromCollisionEvent(
     event: Matter.IEventCollision<Matter.Engine>,
   ) {
-    const entityA = this.game.entities.find(
+    const nodeA = this.game.nodes.find(
       (e) => e.uuid === event.pairs[0].bodyA.label,
-    ) as EntityExtended | undefined;
-    if (!entityA) {
-      throw new Error("bodyA entity not found");
+    ) as M2NodeExtended | undefined;
+    if (!nodeA) {
+      throw new Error("bodyA node not found");
     }
-    if (!entityA.physicsBody) {
-      throw new Error("bodyA entity does not have a physicsBody");
+    if (!nodeA.physicsBody) {
+      throw new Error("bodyA node does not have a physicsBody");
     }
-    const entityB = this.game.entities.find(
+    const nodeB = this.game.nodes.find(
       (e) => e.uuid === event.pairs[0].bodyB.label,
-    ) as EntityExtended | undefined;
-    if (!entityB) {
-      throw new Error("bodyB entity not found");
+    ) as M2NodeExtended | undefined;
+    if (!nodeB) {
+      throw new Error("bodyB node not found");
     }
-    if (!entityB.physicsBody) {
-      throw new Error("bodyB entity does not have a physicsBody");
+    if (!nodeB.physicsBody) {
+      throw new Error("bodyB node does not have a physicsBody");
     }
-    return { bodyA: entityA.physicsBody, bodyB: entityB.physicsBody };
+    return { bodyA: nodeA.physicsBody, bodyB: nodeB.physicsBody };
   }
 
-  private modifyEntityProperties() {
+  private modifyNodeProperties() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const physics = this;
-    // Add the physicsBody property to the Entity class.
-    Object.defineProperty(Entity.prototype, "physicsBody", {
-      set(this: EntityExtended, physicsBody: PhysicsBody) {
+    // Add the physicsBody property to the M2Node class.
+    Object.defineProperty(M2Node.prototype, "physicsBody", {
+      set(this: M2NodeExtended, physicsBody: PhysicsBody) {
         /**
          * if there is an existing physics body AND there is an existing
          * Matter.js body AND the engine has been created, then remove the
-         * Matter.js body from the world and the physics body from the entity.
+         * Matter.js body from the world and the physics body from the node.
          * Check if there are any outlines and remove them.
          */
         if (this._physicsBody && this._physicsBody.body && physics.engine) {
@@ -306,15 +306,15 @@ export class Physics implements Plugin {
         this._physicsBody = physicsBody;
         if (physicsBody !== undefined) {
           /**
-           * "as Entity" is not needed to build, but it was added because
+           * "as M2Node" is not needed to build, but it was added because
            * Jest fails without it. (related to module augmentation issues).
            */
-          this._physicsBody.entity = this as Entity;
+          this._physicsBody.node = this as M2Node;
         } else {
           delete physics.bodiesDictionary[this.uuid];
         }
       },
-      get(this: EntityExtended) {
+      get(this: M2NodeExtended) {
         return this._physicsBody;
       },
       /**
@@ -325,17 +325,17 @@ export class Physics implements Plugin {
     });
 
     /**
-     * When an entity has a physics body, its position is the same as the
+     * When a node has a physics body, its position is the same as the
      * physics body's position within the physics engine. Thus, if the user
-     * modifies the entity's position, we need to update the physics body's
+     * modifies the node's position, we need to update the physics body's
      * position within the physics engine.
      */
-    Object.defineProperty(Entity.prototype, "position", {
+    Object.defineProperty(M2Node.prototype, "position", {
       set(position: Point) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: EntityExtended = this;
-        entity._position = position;
-        const body = entity?.physicsBody?.body;
+        const node: M2NodeExtended = this;
+        node._position = position;
+        const body = node?.physicsBody?.body;
         if (
           body &&
           (body.position.x !== position.x || body.position.y !== position.y)
@@ -345,14 +345,14 @@ export class Physics implements Plugin {
       },
       get() {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: EntityExtended = this;
+        const node: M2NodeExtended = this;
         return {
           get x(): number {
-            return entity._position.x;
+            return node._position.x;
           },
           set x(x: number) {
-            entity._position.x = x;
-            const body = entity?.physicsBody?.body;
+            node._position.x = x;
+            const body = node?.physicsBody?.body;
             if (body && body.position.x !== x) {
               Matter.Body.setPosition(body, {
                 x,
@@ -361,11 +361,11 @@ export class Physics implements Plugin {
             }
           },
           get y(): number {
-            return entity._position.y;
+            return node._position.y;
           },
           set y(y: number) {
-            entity._position.y = y;
-            const body = entity?.physicsBody?.body;
+            node._position.y = y;
+            const body = node?.physicsBody?.body;
             if (body && body.position.y !== y) {
               Matter.Body.setPosition(body, {
                 x: body.position.x,
@@ -379,64 +379,64 @@ export class Physics implements Plugin {
     });
 
     /**
-     * When an entity has a physics body, its zRotation is the same as the
+     * When a node has a physics body, its zRotation is the same as the
      * physics body's angle within the physics engine. Thus, if the user
-     * modifies the entity's zRotation, we need to update the physics body's
+     * modifies the node's zRotation, we need to update the physics body's
      * angle within the physics engine.
      */
-    Object.defineProperty(Entity.prototype, "zRotation", {
+    Object.defineProperty(M2Node.prototype, "zRotation", {
       set(zRotation: number) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: EntityExtended = this;
-        entity._zRotation = zRotation;
-        const body = entity?.physicsBody?.body;
+        const node: M2NodeExtended = this;
+        node._zRotation = zRotation;
+        const body = node?.physicsBody?.body;
         if (body && body.angle !== zRotation) {
           Matter.Body.setAngle(body, zRotation);
         }
       },
       get() {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
-        return entity._zRotation;
+        const node: M2Node = this;
+        return node._zRotation;
       },
       configurable: true,
     });
 
     /**
-     * When an entity has a physics body, its scale is the same as the
+     * When a node has a physics body, its scale is the same as the
      * physics body's scale within the physics engine. Thus, if the user
-     * modifies the entity's scale, we need to update the physics body's
+     * modifies the node's scale, we need to update the physics body's
      * scaleX and scaleY within the physics engine.
      */
-    Object.defineProperty(Entity.prototype, "scale", {
+    Object.defineProperty(M2Node.prototype, "scale", {
       set(scale: number) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: EntityExtended = this;
-        entity._scale = scale;
-        const body = entity?.physicsBody?.body;
+        const node: M2NodeExtended = this;
+        node._scale = scale;
+        const body = node?.physicsBody?.body;
         if (body) {
           /**
            * Although Matter.js allows us to scale the body within its engine,
            * there is not a property to get the current scale. So we need to
            * keep track of the scale ourselves in _engineScale.
            */
-          if (entity._engineScale === undefined) {
-            entity._engineScale = 1;
+          if (node._engineScale === undefined) {
+            node._engineScale = 1;
           }
-          const scaleFactor = scale / entity._engineScale;
-          entity._engineScale = scale;
+          const scaleFactor = scale / node._engineScale;
+          node._engineScale = scale;
           // use same scaleFactor for scaleX and scaleY
-          const body = entity?.physicsBody?.body;
+          const body = node?.physicsBody?.body;
           if (body) {
             Matter.Body.scale(body, scaleFactor, scaleFactor);
           }
-          //Matter.Body.scale(entity._physicsBody.body, scaleFactor, scaleFactor);
+          //Matter.Body.scale(node._physicsBody.body, scaleFactor, scaleFactor);
         }
       },
       get() {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const entity: Entity = this;
-        return entity._scale;
+        const node: M2Node = this;
+        return node._scale;
       },
       configurable: true,
     });
@@ -486,23 +486,23 @@ export class Physics implements Plugin {
     this.engine.gravity.y = gravity.dy;
   }
 
-  private updateEntitiesFromPhysicsBodies(entities: Entity[]) {
-    entities.forEach((entity) => {
-      if (this.bodiesDictionary[entity.uuid]) {
-        entity.position.x = this.bodiesDictionary[entity.uuid].position.x;
-        entity.position.y = this.bodiesDictionary[entity.uuid].position.y;
-        entity.zRotation = this.bodiesDictionary[entity.uuid].angle;
+  private updateNodesFromPhysicsBodies(nodes: M2Node[]) {
+    nodes.forEach((node) => {
+      if (this.bodiesDictionary[node.uuid]) {
+        node.position.x = this.bodiesDictionary[node.uuid].position.x;
+        node.position.y = this.bodiesDictionary[node.uuid].position.y;
+        node.zRotation = this.bodiesDictionary[node.uuid].angle;
       }
     });
   }
 
-  private initializePhysicsBodies(entities: Entity[]) {
-    entities.forEach((entity) => {
+  private initializePhysicsBodies(nodes: M2Node[]) {
+    nodes.forEach((node) => {
       if (
-        (entity as EntityExtended).physicsBody !== undefined &&
-        (entity as EntityExtended).physicsBody?.needsInitialization
+        (node as M2NodeExtended).physicsBody !== undefined &&
+        (node as M2NodeExtended).physicsBody?.needsInitialization
       ) {
-        (entity as EntityExtended).physicsBody?.initialize(this);
+        (node as M2NodeExtended).physicsBody?.initialize(this);
       }
     });
   }

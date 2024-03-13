@@ -7,15 +7,15 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Hiding
 
-You can create an entity, but keep it hidden.
+You can create a node, but keep it hidden.
 
-You can set the `hidden` property on any entity. If it is `true`, the entity -- _and all its children_ -- will not display.
+You can set the `hidden` property on any node. If it is `true`, the node -- _and all its children_ -- will not display.
 
 Below, we create two labels, but you can see only one of them. The other label is hidden.
 
 :::note
 
-Why go through the trouble to create something but not show it? [Later](../interactivity/visual-responses.md), we'll see it is useful to create a hidden entity, but then "unhide it" in response to a user action.
+Why go through the trouble to create something but not show it? [Later](../interactivity/visual-responses.md), we'll see it is useful to create a hidden node, but then "unhide it" in response to a user action.
 
 :::
 

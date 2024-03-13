@@ -1,5 +1,5 @@
 export interface FadeAlphaActionOptions {
-  /** Opacity of the entity. 0 is fully transparent, 1 is fully opaque. */
+  /** Opacity of the node. 0 is fully transparent, 1 is fully opaque. */
   alpha: number;
   /** Duration of scale, in milliseconds */
   duration: number;

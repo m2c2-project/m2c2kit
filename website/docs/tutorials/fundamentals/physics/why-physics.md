@@ -7,7 +7,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Why Physics?
 
-Physics allow entities to respond to forces as if they were objects in the real world. This is useful for creating realistic animations and interactions.
+Physics allow nodes to respond to forces as if they were objects in the real world. This is useful for creating realistic animations and interactions.
 
 :::tip
 

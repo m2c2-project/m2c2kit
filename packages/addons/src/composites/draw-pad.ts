@@ -2,7 +2,7 @@ import {
   CompositeOptions,
   Size,
   RgbaColor,
-  EntityEvent,
+  M2NodeEvent,
   Point,
   CallbackOptions,
   Composite,
@@ -11,7 +11,7 @@ import {
   MutablePath,
   TapEvent,
   M2PointerEvent,
-  Entity,
+  M2Node,
   IDrawable,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
@@ -47,7 +47,7 @@ export const DrawPadEventType = {
 export type DrawPadEventType =
   (typeof DrawPadEventType)[keyof typeof DrawPadEventType];
 
-export interface DrawPadEvent extends EntityEvent {
+export interface DrawPadEvent extends M2NodeEvent {
   type: DrawPadEventType;
   position: Point;
 }
@@ -59,7 +59,7 @@ export const DrawPadItemEventType = {
 export type DrawPadItemEventType =
   (typeof DrawPadItemEventType)[keyof typeof DrawPadItemEventType];
 
-export interface DrawPadItemEvent extends EntityEvent {
+export interface DrawPadItemEvent extends M2NodeEvent {
   type: DrawPadItemEventType;
 }
 
@@ -130,7 +130,7 @@ export class DrawPad extends Composite {
   /**
    * A rectangular area on which the user can draw strokes (lines).
    *
-   * @remarks This composite entity is composed of a rectangle Shape and
+   * @remarks This composite node is composed of a rectangle Shape and
    * another Shape that is formed from a path of points.
    *
    * @param options - {@link DrawPadOptions}
@@ -138,7 +138,7 @@ export class DrawPad extends Composite {
   constructor(options: DrawPadOptions) {
     super(options);
     if (options.isUserInteractionEnabled === undefined) {
-      // unlike most entities, DrawPad is interactive by default
+      // unlike most nodes, DrawPad is interactive by default
       this.isUserInteractionEnabled = true;
     }
     if (!options.size) {
@@ -431,7 +431,7 @@ export class DrawPad extends Composite {
     }
   }
 
-  private raiseDrawPadItemEvent(item: Entity, event: DrawPadItemEvent): void {
+  private raiseDrawPadItemEvent(item: M2Node, event: DrawPadItemEvent): void {
     if (item.eventListeners.length > 0) {
       item.eventListeners
         .filter((listener) => listener.type === event.type)
@@ -474,7 +474,7 @@ export class DrawPad extends Composite {
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeStart,
-      <(ev: EntityEvent) => void>callback,
+      <(ev: M2NodeEvent) => void>callback,
       options,
     );
   }
@@ -491,7 +491,7 @@ export class DrawPad extends Composite {
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeMove,
-      <(ev: EntityEvent) => void>callback,
+      <(ev: M2NodeEvent) => void>callback,
       options,
     );
   }
@@ -508,53 +508,53 @@ export class DrawPad extends Composite {
   ): void {
     this.addEventListener(
       DrawPadEventType.StrokeEnd,
-      <(ev: EntityEvent) => void>callback,
+      <(ev: M2NodeEvent) => void>callback,
       options,
     );
   }
 
   /**
-   * Adds an entity to the DrawPad.
+   * Adds a node to the DrawPad.
    *
-   * @remarks After the entity is added to the DrawPad, its
+   * @remarks After the node is added to the DrawPad, its
    * position is adjusted to be relative to the DrawPad's coordinate
    * system, and it is made interactive. The method returns an object
-   * which is the entity as a DrawPadItem, which has additional methods,
-   * properties, and events specific to it now being on a DrawPad. The entity
+   * which is the node as a DrawPadItem, which has additional methods,
+   * properties, and events specific to it now being on a DrawPad. The node
    * now **must** be manipulated only using the DrawPadItem object. Using
-   * the original entity object will result in undefined behavior.
+   * the original node object will result in undefined behavior.
    *
-   * @param entity - the entity to add to the DrawPad
-   * @returns the entity as a DrawPadItem
+   * @param node - the node to add to the DrawPad
+   * @returns the node as a DrawPadItem
    */
-  addItem<T extends Entity>(entity: T): T & DrawPadItem {
-    Object.defineProperty(entity, "drawPadPosition", {
+  addItem<T extends M2Node>(node: T): T & DrawPadItem {
+    Object.defineProperty(node, "drawPadPosition", {
       get: function () {
-        const drawPad = entity.parent as DrawPad;
+        const drawPad = node.parent as DrawPad;
         return {
           get x() {
-            return entity.position.x + drawPad.size.width / 2;
+            return node.position.x + drawPad.size.width / 2;
           },
 
           set x(value) {
-            entity.position.x = value - drawPad.size.width / 2;
+            node.position.x = value - drawPad.size.width / 2;
           },
           get y() {
-            return entity.position.y + drawPad.size.height / 2;
+            return node.position.y + drawPad.size.height / 2;
           },
 
           set y(value) {
-            entity.position.y = value - drawPad.size.height / 2;
+            node.position.y = value - drawPad.size.height / 2;
           },
         };
       },
       set: function (value: Point) {
-        const drawPad = entity.parent as DrawPad;
-        entity.position.x = value.x - drawPad.size.width / 2;
-        entity.position.y = value.y - drawPad.size.height / 2;
+        const drawPad = node.parent as DrawPad;
+        node.position.x = value.x - drawPad.size.width / 2;
+        node.position.y = value.y - drawPad.size.height / 2;
       },
     });
-    Object.defineProperty(entity, "onStrokeEnter", {
+    Object.defineProperty(node, "onStrokeEnter", {
       value: function (
         this: T,
         callback: (ev: DrawPadItemEvent) => void,
@@ -562,12 +562,12 @@ export class DrawPad extends Composite {
       ) {
         this.addEventListener(
           DrawPadItemEventType.StrokeEnter,
-          <(ev: EntityEvent) => void>callback,
+          <(ev: M2NodeEvent) => void>callback,
           options,
         );
       },
     });
-    Object.defineProperty(entity, "onStrokeLeave", {
+    Object.defineProperty(node, "onStrokeLeave", {
       value: function (
         this: T,
         callback: (ev: DrawPadItemEvent) => void,
@@ -575,77 +575,77 @@ export class DrawPad extends Composite {
       ) {
         this.addEventListener(
           DrawPadItemEventType.StrokeLeave,
-          <(ev: EntityEvent) => void>callback,
+          <(ev: M2NodeEvent) => void>callback,
           options,
         );
       },
     });
-    Object.defineProperty(entity, "isStrokeWithinBounds", {
+    Object.defineProperty(node, "isStrokeWithinBounds", {
       value: false,
       writable: true,
     });
-    entity.onPointerDown(() => {
+    node.onPointerDown(() => {
       if (this.isDrawingPointerDown) {
-        if ((entity as unknown as DrawPadItem).isStrokeWithinBounds === false) {
-          (entity as unknown as DrawPadItem).isStrokeWithinBounds = true;
+        if ((node as unknown as DrawPadItem).isStrokeWithinBounds === false) {
+          (node as unknown as DrawPadItem).isStrokeWithinBounds = true;
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeEnter,
-            target: entity,
+            target: node,
           };
-          this.raiseDrawPadItemEvent(entity, drawPadItemEvent);
+          this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
       }
     });
-    entity.onPointerMove(() => {
+    node.onPointerMove(() => {
       if (this.isDrawingPointerDown) {
-        if ((entity as unknown as DrawPadItem).isStrokeWithinBounds === false) {
-          (entity as unknown as DrawPadItem).isStrokeWithinBounds = true;
+        if ((node as unknown as DrawPadItem).isStrokeWithinBounds === false) {
+          (node as unknown as DrawPadItem).isStrokeWithinBounds = true;
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeEnter,
-            target: entity,
+            target: node,
           };
-          this.raiseDrawPadItemEvent(entity, drawPadItemEvent);
+          this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
       }
     });
-    entity.onPointerLeave(() => {
+    node.onPointerLeave(() => {
       if (this.isDrawingPointerDown) {
-        if ((entity as unknown as DrawPadItem).isStrokeWithinBounds === true) {
-          (entity as unknown as DrawPadItem).isStrokeWithinBounds = false;
+        if ((node as unknown as DrawPadItem).isStrokeWithinBounds === true) {
+          (node as unknown as DrawPadItem).isStrokeWithinBounds = false;
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeLeave,
-            target: entity,
+            target: node,
           };
-          this.raiseDrawPadItemEvent(entity, drawPadItemEvent);
+          this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
       }
     });
-    entity.onPointerUp(() => {
-      if ((entity as unknown as DrawPadItem).isStrokeWithinBounds === true) {
-        (entity as unknown as DrawPadItem).isStrokeWithinBounds = false;
+    node.onPointerUp(() => {
+      if ((node as unknown as DrawPadItem).isStrokeWithinBounds === true) {
+        (node as unknown as DrawPadItem).isStrokeWithinBounds = false;
         const drawPadItemEvent: DrawPadItemEvent = {
           type: DrawPadItemEventType.StrokeLeave,
-          target: entity,
+          target: node,
         };
-        this.raiseDrawPadItemEvent(entity, drawPadItemEvent);
+        this.raiseDrawPadItemEvent(node, drawPadItemEvent);
       }
     });
-    this.addChild(entity);
+    this.addChild(node);
     /**
      * DrawPadItems must have zPosition -1 (below the DrawPadArea) so the
      * pointer events are properly processed. If this is not set, TapDown
      * event on the DrawPadArea will not set isStrokeWithinBounds = true,
      * and thus the StrokeEnter event on the item will not be raised.
      */
-    (entity as unknown as IDrawable).zPosition = -1;
+    (node as unknown as IDrawable).zPosition = -1;
     /**
-     * Adust the entity position so it is relative to the DrawPad coordinate
+     * Adust the node position so it is relative to the DrawPad coordinate
      * system.
      */
-    entity.position.x = entity.position.x - this.size.width / 2;
-    entity.position.y = entity.position.y - this.size.height / 2;
-    entity.isUserInteractionEnabled = true;
-    return entity as T & DrawPadItem;
+    node.position.x = node.position.x - this.size.width / 2;
+    node.position.y = node.position.y - this.size.height / 2;
+    node.isUserInteractionEnabled = true;
+    return node as T & DrawPadItem;
   }
 
   /**

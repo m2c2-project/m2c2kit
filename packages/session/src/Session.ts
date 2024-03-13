@@ -9,7 +9,7 @@ import {
   Timer,
   FontAsset,
   Uuid,
-  EventType,
+  M2EventType,
   Constants,
   M2EventListener,
   Game,
@@ -128,11 +128,11 @@ export class Session {
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
     options?: CallbackOptions,
   ): void {
-    this.addEventListener(EventType.ActivityData, callback, options);
+    this.addEventListener(M2EventType.ActivityData, callback, options);
   }
 
   private addEventListener<T extends SessionEvent | ActivityEvent>(
-    type: EventType | SessionEventType,
+    type: M2EventType | SessionEventType,
     callback: (ev: T) => void,
     options?: CallbackOptions,
   ): void {
@@ -208,17 +208,17 @@ export class Session {
   }
 
   private async sessionActivityLifecycleHandler(event: ActivityLifecycleEvent) {
-    if (event.type === EventType.ActivityStart) {
+    if (event.type === M2EventType.ActivityStart) {
       await this.sessionActivityStartHandler(event);
       return;
     }
 
-    if (event.type === EventType.ActivityCancel) {
+    if (event.type === M2EventType.ActivityCancel) {
       await this.sessionActivityCancelHandler(event);
       return;
     }
 
-    if (event.type === EventType.ActivityEnd) {
+    if (event.type === M2EventType.ActivityEnd) {
       await this.sessionActivityEndHandler(event);
       return;
     }

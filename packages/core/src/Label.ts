@@ -9,8 +9,8 @@ import {
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
-import { Entity, handleInterfaceOptions } from "./Entity";
-import { EntityType } from "./EntityType";
+import { M2Node, handleInterfaceOptions } from "./M2Node";
+import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
@@ -21,8 +21,8 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
 
-export class Label extends Entity implements IDrawable, IText, LabelOptions {
-  readonly type = EntityType.Label;
+export class Label extends M2Node implements IDrawable, IText, LabelOptions {
+  readonly type = M2NodeType.Label;
   isDrawable = true;
   isText = true;
   // Drawable options
@@ -127,7 +127,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     );
 
     let textForParagraph: string;
-    const i18n = (this.parentSceneAsEntity as Scene).game.i18n;
+    const i18n = (this.parentSceneAsNode as Scene).game.i18n;
     if (i18n) {
       let translated = i18n.t(this.text);
       if (translated === undefined) {
@@ -239,9 +239,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       // match parent
       // TODO: implement match parent on more properties
       if (this.parent === undefined) {
-        throw new Error(
-          "width is set to match parent, but entity has no parent",
-        );
+        throw new Error("width is set to match parent, but node has no parent");
       }
       const marginStart = this.layout.marginStart ?? 0;
       const marginEnd = this.layout.marginEnd ?? 0;
@@ -398,18 +396,18 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   }
 
   /**
-   * Duplicates an entity using deep copy.
+   * Duplicates a node using deep copy.
    *
-   * @remarks This is a deep recursive clone (entity and children).
-   * The uuid property of all duplicated entities will be newly created,
+   * @remarks This is a deep recursive clone (node and children).
+   * The uuid property of all duplicated nodes will be newly created,
    * because uuid must be unique.
    *
-   * @param newName - optional name of the new, duplicated entity. If not
+   * @param newName - optional name of the new, duplicated node. If not
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Label {
     const dest = new Label({
-      ...this.getEntityOptions(),
+      ...this.getNodeOptions(),
       ...this.getDrawableOptions(),
       ...this.getTextOptions(),
       horizontalAlignmentMode: this.horizontalAlignmentMode,
@@ -432,11 +430,11 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
   override update(): void {
     super.update();
     /**
-     * In most cases, when a property on an entity changes such that the
-     * entity must be initialized again, we set needsInitialization = true in
-     * the entity's setter for that property. However, in the case of alpha,
-     * the entity's absolute alpha change may be caused by a change in an
-     * ancestor alpha (not a setter on this entity). To ensure that these
+     * In most cases, when a property on a node changes such that the
+     * node must be initialized again, we set needsInitialization = true in
+     * the node's setter for that property. However, in the case of alpha,
+     * the node's absolute alpha change may be caused by a change in an
+     * ancestor alpha (not a setter on this node). To ensure that these
      * absolute alpha changes are handled on this update cycle, we must
      * check for them here and run the initialization if needed (if we only
      * set needsInitialization = true, it would not be run until the next
@@ -452,7 +450,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
       canvas.save();
       const drawScale = Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
-      M2c2KitHelpers.rotateCanvasForDrawableEntity(canvas, this);
+      M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
       const x =
         (this.absolutePosition.x -
@@ -493,7 +491,7 @@ export class Label extends Entity implements IDrawable, IText, LabelOptions {
     this.initialize();
     if (!this.paragraph) {
       throw new Error(
-        `warmup Label entity ${this.toString()}: paragraph is undefined`,
+        `warmup Label node ${this.toString()}: paragraph is undefined`,
       );
     }
     canvas.drawParagraph(this.paragraph, 0, 0);

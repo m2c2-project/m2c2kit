@@ -1,4 +1,4 @@
-import { EventType, ActivityEvent } from "@m2c2kit/core";
+import { M2EventType, ActivityEvent } from "@m2c2kit/core";
 import { Session, SessionEvent, SessionEventType } from "@m2c2kit/session";
 import { EmbeddingOptions } from "./EmbeddingOptions";
 
@@ -134,13 +134,13 @@ export class Embedding {
         AndroidM2c2.onSessionLifecycle(JSON.stringify(event));
         break;
       }
-      case EventType.ActivityData: {
+      case M2EventType.ActivityData: {
         AndroidM2c2.onActivityResults(JSON.stringify(event));
         break;
       }
-      case EventType.ActivityStart:
-      case EventType.ActivityEnd:
-      case EventType.ActivityCancel: {
+      case M2EventType.ActivityStart:
+      case M2EventType.ActivityEnd:
+      case M2EventType.ActivityCancel: {
         AndroidM2c2.onActivityLifecycle(JSON.stringify(event));
         break;
       }
@@ -236,7 +236,7 @@ export class Embedding {
    * Removes circular references from event object.
    *
    * @remarks event.target is the object that fired the event, which is an
-   * Activity, Session, or Entity. These objects have circular references,
+   * Activity, Session, or Node. These objects have circular references,
    * which will cause problems when serializing. Thus, before we pass the
    * event to Android or iOS, retain just target's type and name.
    *

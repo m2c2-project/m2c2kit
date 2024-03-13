@@ -1,4 +1,4 @@
-import { Entity } from "./Entity";
+import { M2Node } from "./M2Node";
 import { MoveActionOptions } from "./MoveActionOptions";
 import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
@@ -14,7 +14,7 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 /**
  * The Action class has static methods for creating actions to be executed by
- * an Entity.
+ * an M2Node.
  */
 export abstract class Action {
   abstract type: ActionType;
@@ -38,7 +38,7 @@ export abstract class Action {
   }
 
   /**
-   * Creates an action that will move an entity to a point on the screen.
+   * Creates an action that will move a node to a point on the screen.
    *
    * @param options - {@link MoveActionOptions}
    * @returns The move action
@@ -79,9 +79,9 @@ export abstract class Action {
   }
 
   /**
-   * Creates an action that will scale the entity's size.
+   * Creates an action that will scale the node's size.
    *
-   * @remarks Scaling is relative to any inherited scaling, which is multiplicative. For example, if the entity's parent is scaled to 2.0 and this entity's action scales to 3.0, then the entity will appear 6 times as large as original.
+   * @remarks Scaling is relative to any inherited scaling, which is multiplicative. For example, if the node's parent is scaled to 2.0 and this node's action scales to 3.0, then the node will appear 6 times as large as original.
    *
    * @param options - {@link ScaleActionOptions}
    * @returns The scale action
@@ -95,9 +95,9 @@ export abstract class Action {
   }
 
   /**
-   * Creates an action that will change the entity's alpha (opacity).
+   * Creates an action that will change the node's alpha (opacity).
    *
-   * @remarks Alpha has multiplicative inheritance. For example, if the entity's parent is alpha .5 and this entity's action fades alpha to .4, then the entity will appear with alpha .2.
+   * @remarks Alpha has multiplicative inheritance. For example, if the node's parent is alpha .5 and this node's action fades alpha to .4, then the node will appear with alpha .2.
    *
    * @param options - {@link FadeAlphaActionOptions}
    * @returns The fadeAlpha action
@@ -111,9 +111,9 @@ export abstract class Action {
   }
 
   /**
-   * Creates an action that will rotate the entity.
+   * Creates an action that will rotate the node.
    *
-   * @remarks Rotate actions are applied to their children. In addition to this entity's rotate action, all ancestors' rotate actions will also be applied.
+   * @remarks Rotate actions are applied to their children. In addition to this node's rotate action, all ancestors' rotate actions will also be applied.
    *
    * @param options - {@link RotateActionOptions}
    * @returns The rotate action
@@ -176,8 +176,8 @@ export abstract class Action {
     return group;
   }
 
-  initialize(entity: Entity, key?: string): Array<Action> {
-    // entity.runStartTime = -1;
+  initialize(node: M2Node, key?: string): Array<Action> {
+    // node.runStartTime = -1;
     this.assignParents(this, this, key);
     const actions = this.flattenActions(this);
     actions.forEach(
@@ -185,10 +185,10 @@ export abstract class Action {
     );
     this.calculateStartEndOffsets(this);
 
-    // clone actions so we can reuse them on other entities
+    // clone actions so we can reuse them on other nodes
     // we need to clone because actions have state that is updated over time
     // such as whether they are running or not, etc.
-    // if we didn't clone actions, two entities running the same action would
+    // if we didn't clone actions, two nodes running the same action would
     // share state
     const clonedActions = actions
       .filter(
@@ -294,7 +294,7 @@ export abstract class Action {
 
   static evaluateAction(
     action: Action,
-    entity: Entity,
+    node: M2Node,
     now: number,
     dt: number,
   ): void {
@@ -337,29 +337,29 @@ export abstract class Action {
       const moveAction = action as MoveAction;
 
       if (!moveAction.started) {
-        moveAction.dx = moveAction.point.x - entity.position.x;
-        moveAction.dy = moveAction.point.y - entity.position.y;
-        moveAction.startPoint.x = entity.position.x;
-        moveAction.startPoint.y = entity.position.y;
+        moveAction.dx = moveAction.point.x - node.position.x;
+        moveAction.dy = moveAction.point.y - node.position.y;
+        moveAction.startPoint.x = node.position.x;
+        moveAction.startPoint.y = node.position.y;
         moveAction.started = true;
       }
 
       if (elapsed < moveAction.duration) {
-        entity.position.x = moveAction.easing(
+        node.position.x = moveAction.easing(
           elapsed,
           moveAction.startPoint.x,
           moveAction.dx,
           moveAction.duration,
         );
-        entity.position.y = moveAction.easing(
+        node.position.y = moveAction.easing(
           elapsed,
           moveAction.startPoint.y,
           moveAction.dy,
           moveAction.duration,
         );
       } else {
-        entity.position.x = moveAction.point.x;
-        entity.position.y = moveAction.point.y;
+        node.position.x = moveAction.point.x;
+        node.position.y = moveAction.point.y;
         moveAction.running = false;
         moveAction.completed = true;
       }
@@ -369,15 +369,15 @@ export abstract class Action {
       const scaleAction = action as ScaleAction;
 
       if (!scaleAction.started) {
-        scaleAction.delta = scaleAction.scale - entity.scale;
+        scaleAction.delta = scaleAction.scale - node.scale;
         scaleAction.started = true;
       }
 
       if (elapsed < scaleAction.duration) {
-        entity.scale =
-          entity.scale + scaleAction.delta * (dt / scaleAction.duration);
+        node.scale =
+          node.scale + scaleAction.delta * (dt / scaleAction.duration);
       } else {
-        entity.scale = scaleAction.scale;
+        node.scale = scaleAction.scale;
         scaleAction.running = false;
         scaleAction.completed = true;
       }
@@ -387,16 +387,15 @@ export abstract class Action {
       const fadeAlphaAction = action as FadeAlphaAction;
 
       if (!fadeAlphaAction.started) {
-        fadeAlphaAction.delta = fadeAlphaAction.alpha - entity.alpha;
+        fadeAlphaAction.delta = fadeAlphaAction.alpha - node.alpha;
         fadeAlphaAction.started = true;
       }
 
       if (elapsed < fadeAlphaAction.duration) {
-        entity.alpha =
-          entity.alpha +
-          fadeAlphaAction.delta * (dt / fadeAlphaAction.duration);
+        node.alpha =
+          node.alpha + fadeAlphaAction.delta * (dt / fadeAlphaAction.duration);
       } else {
-        entity.alpha = fadeAlphaAction.alpha;
+        node.alpha = fadeAlphaAction.alpha;
         fadeAlphaAction.running = false;
         fadeAlphaAction.completed = true;
       }
@@ -413,11 +412,9 @@ export abstract class Action {
           rotateAction.toAngle = M2c2KitHelpers.normalizeAngleRadians(
             rotateAction.toAngle,
           );
-          entity.zRotation = M2c2KitHelpers.normalizeAngleRadians(
-            entity.zRotation,
-          );
+          node.zRotation = M2c2KitHelpers.normalizeAngleRadians(node.zRotation);
 
-          rotateAction.delta = rotateAction.toAngle - entity.zRotation;
+          rotateAction.delta = rotateAction.toAngle - node.zRotation;
           /**
            * If shortestUnitArc is true (default), we need to check if reaching
            * the final value is a clockwise or counter-clockwise rotation and
@@ -431,12 +428,12 @@ export abstract class Action {
           }
         }
         rotateAction.started = true;
-        rotateAction.finalValue = entity.zRotation + rotateAction.delta;
+        rotateAction.finalValue = node.zRotation + rotateAction.delta;
       }
 
       if (elapsed < rotateAction.duration) {
-        entity.zRotation =
-          entity.zRotation + rotateAction.delta * (dt / rotateAction.duration);
+        node.zRotation =
+          node.zRotation + rotateAction.delta * (dt / rotateAction.duration);
         /**
          * Check if action has overshot the final value. If so, set to final
          * value. Check will vary depending on whether the delta is positive
@@ -444,18 +441,18 @@ export abstract class Action {
          */
         if (
           rotateAction.delta <= 0 &&
-          entity.zRotation < rotateAction.finalValue
+          node.zRotation < rotateAction.finalValue
         ) {
-          entity.zRotation = rotateAction.finalValue;
+          node.zRotation = rotateAction.finalValue;
         }
         if (
           rotateAction.delta > 0 &&
-          entity.zRotation > rotateAction.finalValue
+          node.zRotation > rotateAction.finalValue
         ) {
-          entity.zRotation = rotateAction.finalValue;
+          node.zRotation = rotateAction.finalValue;
         }
       } else {
-        entity.zRotation = rotateAction.finalValue;
+        node.zRotation = rotateAction.finalValue;
         rotateAction.running = false;
         rotateAction.completed = true;
       }

@@ -7,11 +7,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 # Enabling Interactivity
 
-We've created entities and added them to scenes. But we haven't allowed any user responses. In this section, we'll learn how to make our entities interactive.
+We've created nodes and added them to scenes. But we haven't allowed any user responses. In this section, we'll learn how to make our nodes interactive.
 
-By default, entities are not interactive. To make an entity interactive, we need to do two things:
+By default, nodes are not interactive. To make a node interactive, we need to do two things:
 
-1. Set the entity's `isUserInteractionEnabled` property to `true`.
+1. Set the node's `isUserInteractionEnabled` property to `true`.
 2. Decide what kind of interaction or "event" to allow and how to respond to it.
 
 Below, we create a button and set its `isUserInteractionEnabled` property to `true`. To define what code is executed when the user taps down on the button, we call the `onTapDown()` method on the button and pass in the code to execute: a message to the console that says `"You pushed it!"`.
@@ -57,7 +57,7 @@ pushButton.onTapDown(() => {
     pushCount++;
     console.log("You pushed it " + pushCount + " times!");
 });`},
-{ description: <>What if you [set] `isUserInteractionEnabled: false`? The entity will not respond.</>,
+{ description: <>What if you [set] `isUserInteractionEnabled: false`? The node will not respond.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.DeepSkyBlue });
 game.addScene(sceneOne);
 const pushButton = new Button({
@@ -72,7 +72,7 @@ sceneOne.addChild(pushButton);
 pushButton.onTapDown(() => {
     console.log("You pushed it!");
 });`},
-{ description: <>The entity will not respond if you [omit] `isUserInteractionEnabled: true`.</>,
+{ description: <>The node will not respond if you [omit] `isUserInteractionEnabled: true`.</>,
 code: `const sceneOne = new Scene({ backgroundColor: WebColors.DeepSkyBlue });
 game.addScene(sceneOne);
 const pushButton = new Button({

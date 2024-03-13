@@ -1,9 +1,9 @@
 import { DrawableOptions } from "./DrawableOptions";
-import { EntityOptions } from "./EntityOptions";
+import { M2NodeOptions } from "./M2NodeOptions";
 import { TextOptions } from "./TextOptions";
 
 export interface TextLineOptions
-  extends EntityOptions,
+  extends M2NodeOptions,
     DrawableOptions,
     TextOptions {
   width?: number;

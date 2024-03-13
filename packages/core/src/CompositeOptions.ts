@@ -1,4 +1,4 @@
 import { DrawableOptions } from "./DrawableOptions";
-import { EntityOptions } from "./EntityOptions";
+import { M2NodeOptions } from "./M2NodeOptions";
 
-export interface CompositeOptions extends EntityOptions, DrawableOptions {}
+export interface CompositeOptions extends M2NodeOptions, DrawableOptions {}
