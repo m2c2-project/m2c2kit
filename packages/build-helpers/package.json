@@ -25,7 +25,7 @@
     "magic-string": "0.30.8",
     "pkg-dir": "8.0.0",
     "rimraf": "5.0.5",
-    "rollup": "4.12.1",
+    "rollup": "4.13.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.1",

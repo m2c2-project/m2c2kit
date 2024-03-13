@@ -8,7 +8,7 @@
     "schema-util": "./build/index.js"
   },
   "devDependencies": {
-    "@types/node": "20.11.25",
+    "@types/node": "20.11.27",
     "esbuild": "0.20.1"
   },
   "scripts": {
