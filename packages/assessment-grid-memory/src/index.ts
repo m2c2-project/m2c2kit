@@ -17,7 +17,7 @@ import {
   Sprite,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Button, CountdownScene, Grid, Instructions } from "@m2c2kit/addons";
 
 /**
  * Grid Memory is a visuospatial working memory task, with delayed free
@@ -40,7 +40,8 @@ class GridMemory extends Game {
       preparation_duration_ms: {
         type: "number",
         default: 500,
-        description: "How long the 'get ready' message is shown, milliseconds.",
+        description:
+          "How long the 'get ready' message before each trial is shown, milliseconds.",
       },
       blank_grid_duration_ms: {
         type: "number",
@@ -475,8 +476,19 @@ phase, participants report the location of dots on a grid.",
     }
 
     // ==============================================================
-    // SCENE: preparation. Show get ready message, then advance after XXXX
-    // milliseconds (as defined in preparation_duration_ms parameter)
+    // SCENE: countdown. Show 3 second countdown.
+    const countdownScene = new CountdownScene({
+      milliseconds: 3000,
+      // No message, because we show "Get Ready" before each trial
+      text: "",
+      zeroDwellMilliseconds: 1000,
+      transition: Transition.none(),
+    });
+    game.addScene(countdownScene);
+
+    // ==============================================================
+    // SCENE: per-trial preparation. Show get ready message, then advance after
+    // XXXX milliseconds (as defined in preparation_duration_ms parameter)
     const preparationScene = new Scene();
     game.addScene(preparationScene);
 

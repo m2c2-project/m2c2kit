@@ -17,7 +17,7 @@ import {
   Sprite,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Button, Grid, Instructions, CountdownScene } from "@m2c2kit/addons";
 
 /**
  * Color Shapes is a visual array change detection task, measuring intra-item
@@ -424,7 +424,6 @@ phases.`,
               textVerticalBias: 0.2,
               nextButtonText: "START",
               nextButtonBackgroundColor: WebColors.Green,
-              nextSceneTransition: Transition.none(),
             },
           ],
         });
@@ -443,6 +442,16 @@ phases.`,
       );
     });
     game.addScenes(instructionsScenes);
+
+    // ==============================================================
+    // SCENE: countdown. Show 3 second countdown.
+    const countdownScene = new CountdownScene({
+      milliseconds: 3000,
+      text: "GET READY!",
+      zeroDwellMilliseconds: 1000,
+      transition: Transition.none(),
+    });
+    game.addScene(countdownScene);
 
     const gridRows = game.getParameter<number>("cells_per_side");
     const gridColumns = game.getParameter<number>("cells_per_side");

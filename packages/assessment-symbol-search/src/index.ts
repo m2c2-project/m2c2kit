@@ -63,17 +63,17 @@ positions.",
         description:
           "Percentage of trials where the left pair is the correct answer. Number from 0 to 1.",
       },
-      preparation_duration_ms: {
+      countdown_duration_ms: {
         default: 3000,
         type: "number",
         description:
-          "Duration of the preparation phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
+          "Duration of the countdown phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
       },
-      after_preparation_transition_duration_ms: {
+      after_countdown_transition_duration_ms: {
         default: 500,
         type: "number",
         description:
-          "Duration, in milliseconds, of the slide in animation after the preparation phase.",
+          "Duration, in milliseconds, of the slide in animation after the countdown phase.",
       },
       number_of_trials: {
         default: 5,
@@ -599,10 +599,10 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     // SCENE: countdownScene
 
     const countdownScene = new CountdownScene({
-      milliseconds: game.getParameter<number>("preparation_duration_ms"),
+      milliseconds: game.getParameter<number>("countdown_duration_ms"),
       text: "GET READY!",
       transitionDurationMilliseconds: game.getParameter(
-        "after_preparation_transition_duration_ms",
+        "after_countdown_transition_duration_ms",
       ),
     });
     game.addScene(countdownScene);

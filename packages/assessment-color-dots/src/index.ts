@@ -20,7 +20,7 @@ import {
   Point,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions } from "@m2c2kit/addons";
+import { Button, CountdownScene, Grid, Instructions } from "@m2c2kit/addons";
 
 /**
  * Color Dots is cued-recall, item-location memory binding task, where after
@@ -395,7 +395,6 @@ appeared.",
               textVerticalBias: 0.2,
               nextButtonText: "START",
               nextButtonBackgroundColor: WebColors.Green,
-              nextSceneTransition: Transition.none(),
             },
           ],
         });
@@ -435,7 +434,6 @@ appeared.",
               textVerticalBias: 0.2,
               nextButtonText: "START",
               nextButtonBackgroundColor: WebColors.Green,
-              nextSceneTransition: Transition.none(),
             },
           ],
         });
@@ -454,6 +452,16 @@ appeared.",
       );
     });
     game.addScenes(instructionsScenes);
+
+    // ==============================================================
+    // SCENE: countdown. Show 3 second countdown.
+    const countdownScene = new CountdownScene({
+      milliseconds: 3000,
+      text: "GET READY!",
+      zeroDwellMilliseconds: 1000,
+      transition: Transition.none(),
+    });
+    game.addScene(countdownScene);
 
     interface Dot {
       x: number;
@@ -547,17 +555,10 @@ appeared.",
     }
 
     // ==============================================================
-    // SCENE: fixation. Show get ready message, then advance after XXXX
+    // SCENE: fixation. Show cross, then advance after XXXX
     // milliseconds (as defined in fixation_duration_ms parameter)
     const fixationScene = new Scene();
     game.addScene(fixationScene);
-
-    const readyLabel = new Label({
-      text: "Ready",
-      fontSize: 24,
-      position: { x: 200, y: 60 },
-    });
-    fixationScene.addChild(readyLabel);
 
     const fixationSceneSquare = new Shape({
       rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
