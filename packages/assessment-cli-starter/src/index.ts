@@ -12,7 +12,7 @@ import {
   RgbaColor,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Instructions } from "@m2c2kit/addons";
+import { Button, CountdownScene, Instructions } from "@m2c2kit/addons";
 
 class CliStarter extends Game {
   constructor() {
@@ -22,6 +22,12 @@ class CliStarter extends Game {
      * value), and a description.
      */
     const defaultParameters: GameParameters = {
+      countdown_duration_ms: {
+        default: 3000,
+        type: "number",
+        description:
+          "Duration of the countdown phase, milliseconds. Multiples of 1000 recommended.",
+      },
       preparation_duration_ms: {
         type: "number",
         default: 500,
@@ -154,8 +160,8 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
-    // ==============================================================
     /**
+     * ************************************************************************
      * Create the trial configuration of all trials.
      * It is often necessary to create the full trial configuration before
      * starting any trials. For example, in the stroop task, one could
@@ -243,8 +249,16 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       });
     }
 
-    // ==============================================================
-    // SCENES: instructions
+    /**
+     * For nodes that are persistent across trials, such as the
+     * scenes themselves and labels that are always displayed on the scenes,
+     * create them here within the initialize() scope.
+     */
+
+    /**
+     * ************************************************************************
+     * Scenes: instructions.
+     */
     const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
@@ -272,14 +286,21 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     });
     game.addScenes(instructionsScenes);
 
-    // ==============================================================
-    // SCENE: preparation. Show get ready message, then advance after
-    // preparation_duration_ms milliseconds
+    /**
+     * ************************************************************************
+     * Scene: countdown. Show countdown for countdown_duration_ms milliseconds
+     */
+    const countdownScene = new CountdownScene({
+      milliseconds: game.getParameter<number>("countdown_duration_ms"),
+      // suppress the default countdown text
+      text: "",
+    });
+    game.addScene(countdownScene);
 
     /**
-     * For nodes that are persistent across trials, such as the
-     * scenes themselves and labels that are always displayed, we create
-     * them here.
+     * ************************************************************************
+     * Scene: preparation. Show get ready message, then advance after
+     * preparation_duration_ms milliseconds
      */
     const preparationScene = new Scene();
     game.addScene(preparationScene);
@@ -316,8 +337,10 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       );
     });
 
-    // ==============================================================
-    // SCENE: Present the word and get user selection
+    /**
+     * ************************************************************************
+     * Scene: presentation. Present the word and get user selection
+     */
     const presentationScene = new Scene();
     game.addScene(presentationScene);
 
@@ -425,8 +448,10 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       }
     });
 
-    // ==============================================================
-    // SCENE: Done. Show done message, with a button to exit.
+    /**
+     * ************************************************************************
+     * Scene: done. Show done message, with a button to exit.
+     */
     const doneScene = new Scene();
     game.addScene(doneScene);
 

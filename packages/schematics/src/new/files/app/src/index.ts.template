@@ -13,7 +13,7 @@ import {
   RgbaColor,
 } from "@m2c2kit/core";
 import { Session, } from "@m2c2kit/session";
-import { Button, Instructions, } from "@m2c2kit/addons";
+import { Button, CountdownScene, Instructions } from "@m2c2kit/addons";
 
 class <%= classify(appName) %> extends Game {
   constructor() {
@@ -23,6 +23,12 @@ class <%= classify(appName) %> extends Game {
      * value), and a description.
      */
     const defaultParameters: GameParameters = {
+      countdown_duration_ms: {
+        default: 3000,
+        type: "number",
+        description:
+          "Duration of the countdown phase, milliseconds. Multiples of 1000 recommended.",
+      },
       preparation_duration_ms: {
         type: "number",
         default: 500,
@@ -54,12 +60,7 @@ class <%= classify(appName) %> extends Game {
      * session with a callback, along with this schema transformed into
      * JSON Schema.
      */
-    const trialSchema: TrialSchema = {
-      activity_uuid: {
-        type: "string",
-        format: "uuid",
-        description: "Unique identifier for all trials in this activity.",
-      },
+    const cliStarterTrialSchema: TrialSchema = {
       trial_index: {
         type: ["integer", "null"],
         description: "Index of the trial within this assessment, 0-based.",
@@ -118,7 +119,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        */
       width: 400,
       height: 800,
-      trialSchema: trialSchema,
+      trialSchema: cliStarterTrialSchema,
       parameters: defaultParameters,
       /**
        * The Roboto-Regular.ttf font is licensed under the Apache License,
@@ -126,7 +127,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
        */
       fonts: [
         {
-          fontName: "roboto",          
+          fontName: "roboto",
           url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
@@ -140,7 +141,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
           width: 255,
           /**
            * The image url must match the location of the image under the
-           * assets folder.
+           * src folder.
            */
           url: "images/assessmentExample.png",
         },
@@ -159,8 +160,8 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const game = this;
 
-    // ==============================================================
     /**
+     * ************************************************************************
      * Create the trial configuration of all trials.
      * It is often necessary to create the full trial configuration before
      * starting any trials. For example, in the stroop task, one could
@@ -205,11 +206,11 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     for (let i = 0; i < game.getParameter<number>("number_of_trials"); i++) {
       const presentedTextIndex = RandomDraws.SingleFromRange(
         0,
-        stroopColors.length - 1
+        stroopColors.length - 1,
       );
       const presentedColorIndex = RandomDraws.SingleFromRange(
         0,
-        stroopColors.length - 1
+        stroopColors.length - 1,
       );
 
       const selection_options_text = new Array<string>();
@@ -220,21 +221,21 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
         correctOptionIndex = 0;
         selection_options_text.push(stroopColors[presentedColorIndex].name);
         const remainingColors = stroopColors.filter(
-          (c) => c.name !== stroopColors[presentedColorIndex].name
+          (c) => c.name !== stroopColors[presentedColorIndex].name,
         );
         const secondOptionIndex = RandomDraws.SingleFromRange(
           0,
-          remainingColors.length - 1
+          remainingColors.length - 1,
         );
         selection_options_text.push(remainingColors[secondOptionIndex].name);
       } else {
         correctOptionIndex = 1;
         const remainingColors = stroopColors.filter(
-          (c) => c.name !== stroopColors[presentedColorIndex].name
+          (c) => c.name !== stroopColors[presentedColorIndex].name,
         );
         const secondOptionIndex = RandomDraws.SingleFromRange(
           0,
-          remainingColors.length - 1
+          remainingColors.length - 1,
         );
         selection_options_text.push(remainingColors[secondOptionIndex].name);
         selection_options_text.push(stroopColors[presentedColorIndex].name);
@@ -248,8 +249,16 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       });
     }
 
-    // ==============================================================
-    // SCENES: instructions
+    /**
+     * For nodes that are persistent across trials, such as the
+     * scenes themselves and labels that are always displayed on the scenes,
+     * create them here within the initialize() scope.
+     */
+
+    /**
+     * ************************************************************************
+     * Scenes: instructions.
+     */
     const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
@@ -277,14 +286,21 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     });
     game.addScenes(instructionsScenes);
 
-    // ==============================================================
-    // SCENE: preparation. Show get ready message, then advance after
-    // preparation_duration_ms milliseconds
+    /**
+     * ************************************************************************
+     * Scene: countdown. Show countdown for countdown_duration_ms milliseconds
+     */
+    const countdownScene = new CountdownScene({
+      milliseconds: game.getParameter<number>("countdown_duration_ms"),
+      // suppress the default countdown text
+      text: "",
+    });
+    game.addScene(countdownScene);
 
     /**
-     * For nodes that are persistent across trials, such as the
-     * scenes themselves and labels that are always displayed, we create
-     * them here.
+     * ************************************************************************
+     * Scene: preparation. Show get ready message, then advance after
+     * preparation_duration_ms milliseconds
      */
     const preparationScene = new Scene();
     game.addScene(preparationScene);
@@ -317,12 +333,14 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
               game.presentScene(presentationScene);
             },
           }),
-        ])
+        ]),
       );
     });
 
-    // ==============================================================
-    // SCENE: Present the word and get user selection
+    /**
+     * ************************************************************************
+     * Scene: presentation. Present the word and get user selection
+     */    
     const presentationScene = new Scene();
     game.addScene(presentationScene);
 
@@ -391,21 +409,20 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
         Timer.remove("responseTime");
         game.addTrialData(
           "presented_word_text",
-          trialConfiguration.presented_text
+          trialConfiguration.presented_text,
         );
         game.addTrialData(
           "presented_word_color",
-          trialConfiguration.presented_color.name
+          trialConfiguration.presented_color.name,
         );
         game.addTrialData(
           "selected_text",
-          trialConfiguration.selection_options_text[selectionIndex]
+          trialConfiguration.selection_options_text[selectionIndex],
         );
         const correct =
           trialConfiguration.correct_option_index === selectionIndex;
         game.addTrialData("selection_correct", correct);
         game.addTrialData("trial_index", game.trialIndex);
-        game.addTrialData("activity_uuid", game.uuid);
         /**
          * When the trial has completed, you must call game.trialComplete() to
          * 1) Increase the game.trialIndex counter
@@ -431,8 +448,10 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
       }
     });
 
-    // ==============================================================
-    // SCENE: Done. Show done message, with a button to exit.
+    /**
+     * ************************************************************************
+     * Scene: done. Show done message, with a button to exit.
+     */       
     const doneScene = new Scene();
     game.addScene(doneScene);
 

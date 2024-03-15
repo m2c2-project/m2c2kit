@@ -207,7 +207,7 @@ function generateModulePackageJson(name: string) {
   "m2c2kit": {
     "assessmentId": "${strings.dasherize(name)}"
   },
-  "private": true,  
+  "private": true,
   "scripts": {
     "serve": "concurrently \\"rollup -c rollup.config.runner.mjs --watch --configServe\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rollup,typescript --prefix-colors auto,red",
     "build": "npm run clean && tsc && rollup -c --configProd --configNoHash",
@@ -225,8 +225,7 @@ function generateModulePackageJson(name: string) {
   },
   "files": [
     "dist/**",
-    "assets/**",
-    "metadata.json"
+    "assets/**"
   ],  
   "dependencies": {
     "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",

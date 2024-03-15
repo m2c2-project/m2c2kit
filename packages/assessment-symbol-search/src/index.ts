@@ -67,7 +67,7 @@ positions.",
         default: 3000,
         type: "number",
         description:
-          "Duration of the countdown phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
+          "Duration of the countdown phase, milliseconds. Multiples of 1000 recommended.",
       },
       after_countdown_transition_duration_ms: {
         default: 500,

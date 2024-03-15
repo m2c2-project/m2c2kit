@@ -1,7 +1,6 @@
 # build artifacts
 dist
 build
-runner-build
 
 # Dependency directories
 node_modules

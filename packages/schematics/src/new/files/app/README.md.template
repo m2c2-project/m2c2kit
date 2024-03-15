@@ -19,3 +19,7 @@ Run `npm run build` from the command line to build the project. Build artifacts 
 The build process adds hashes to filenames to minimize browser cache issues in deployment. To build without filename hashes, run `npm run build:no-hash`.
 
 To minify the JavaScript files, add `-- --configMinify`, e.g., `npm run build -- --configMinify` or `npm run build:no-hash -- --configMinify`.
+
+## Publishing to npm
+
+The `package.json` file has the property `"private": true`, which prevents accidental publishing to npm. If the assessment is to be published to npm, remove this property.

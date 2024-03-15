@@ -1,6 +1,5 @@
 # build artifacts
 dist
-build
 runner-build
 
 # Dependency directories
