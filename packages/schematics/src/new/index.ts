@@ -204,6 +204,9 @@ function generateModulePackageJson(name: string) {
   return `{
   "name": "${strings.dasherize(name)}",
   "version": "1.0.0",
+  "m2c2kit": {
+    "assessmentId": "${strings.dasherize(name)}"
+  },
   "private": true,  
   "scripts": {
     "serve": "concurrently \\"rollup -c rollup.config.runner.mjs --watch --configServe\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rollup,typescript --prefix-colors auto,red",

@@ -11,10 +11,13 @@ import {
   WebColors,
 } from "@m2c2kit/core";
 
+const SCENE_TRANSITION_EASING = Easings.sinusoidalInOut;
+const SCENE_TRANSITION_DURATION_MS = 500;
+
 export interface CountdownSceneOptions extends SceneOptions {
   /** Duration of the countdown, in milliseconds. */
   milliseconds: number;
-  /** Duration of the slide transition to the next scene after the countdown completes. Default is 250. */
+  /** Duration of the slide transition, in milliseconds, to the next scene after the countdown completes. Default is 500. */
   transitionDurationMilliseconds?: number;
   /** A custom transition to use to present next scene after the countdown completes. */
   transition?: Transition;
@@ -192,8 +195,10 @@ export class CountdownScene extends Scene {
             options?.transition ??
               Transition.slide({
                 direction: TransitionDirection.Left,
-                duration: options?.transitionDurationMilliseconds ?? 250,
-                easing: Easings.sinusoidalInOut,
+                duration:
+                  options?.transitionDurationMilliseconds ??
+                  SCENE_TRANSITION_DURATION_MS,
+                easing: SCENE_TRANSITION_EASING,
               }),
           );
         },

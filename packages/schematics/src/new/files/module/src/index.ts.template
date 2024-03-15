@@ -10,8 +10,11 @@ import {
   TrialSchema,
   Timer,
   Constants,
+  Transition,
+  TransitionDirection,
+  Easings,  
 } from "@m2c2kit/core";
-import { Button, Instructions } from "@m2c2kit/addons";
+import { Button, CountdownScene, Instructions } from "@m2c2kit/addons";
 
 export class <%= classify(appName) %> extends Game {
   constructor() {
@@ -21,10 +24,11 @@ export class <%= classify(appName) %> extends Game {
      * value), and a description.
      */
     const defaultParameters: GameParameters = {
-      preparation_duration_ms: {
+      countdown_duration_ms: {
+        default: 3000,
         type: "number",
-        default: 500,
-        description: "How long the 'get ready' message is shown, milliseconds.",
+        description:
+          "Duration of the countdown phase ('get ready' countdown, milliseconds). Multiples of 1000 recommended.",
       },
       number_of_trials: {
         type: "integer",
@@ -73,7 +77,7 @@ export class <%= classify(appName) %> extends Game {
       },
       selection_correct: {
         type: "boolean",
-        description: "Was the participant's even/odd selection correct?",
+        description: "Was the user's even/odd selection correct?",
       },
       response_time_ms: {
         type: "number",
@@ -84,6 +88,9 @@ export class <%= classify(appName) %> extends Game {
 
     const options: GameOptions = {
       name: "<%= appName %>",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
       id: "<%= dasherize(appName) %>",
       /**
        * Leave the next line as-is, and the insertVersionString() rollup plugin
@@ -235,13 +242,13 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
     const instructionsScenes = Instructions.create({
       instructionScenes: [
         {
-          title: "feb20",
+          title: "<%= appName %>",
           text: `For this activity, indicate if the presented number is even or odd.`,
           textFontSize: 20,
           titleFontSize: 30,
         },
         {
-          title: "feb20",
+          title: "<%= appName %>",
           text: `For example, if the number is 7, the correct response is Odd.`,
           textFontSize: 20,
           titleFontSize: 30,
@@ -265,55 +272,13 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
 
     /**
      * ************************************************************************
-     * Scene: preparation. Show get ready message, then advance after
-     * preparation_duration_ms milliseconds
+     * Scene: countdown. Show countdown for countdown_duration_ms milliseconds
      */
-
-    /**
-     * For elements that are persistent across trials, such as the
-     * scenes themselves and labels that are always displayed, we create
-     * them here in the body of the initialize() method and add them to the
-     * game.
-     */
-    const preparationScene = new Scene();
-    game.addScene(preparationScene);
-
-    const getReadyMessage = new Label({
-      text: "Get Ready",
-      fontSize: 24,
-      position: { x: 200, y: 400 },
+    const countdownScene = new CountdownScene({
+      milliseconds: game.getParameter<number>("countdown_duration_ms"),
+      text: "GET READY!",
     });
-    preparationScene.addChild(getReadyMessage);
-
-    /**
-     * When a scene is presented, the order of  execution is:
-     *   OnSetup() -> transitions -> OnAppear()
-     * If there are no transitions, such as a scene sliding in, then
-     * it makes no difference if you put code in OnSetup() or OnAppear().
-     *
-     * In this case, we use onAppear() to run an action sequence that
-     * waits for a duration (showing this scene with the message
-     * "Get Ready"), then presents the next scene that shows the number.
-     */
-    preparationScene.onAppear(() => {
-      preparationScene.run(
-        Action.sequence([
-          Action.wait({
-            duration: game.getParameter("preparation_duration_ms"),
-          }),
-          //
-          /**
-           * Custom actions are used execute code, such as moving to the next
-           * scene.
-           */
-          Action.custom({
-            callback: () => {
-              game.presentScene(presentationScene);
-            },
-          }),
-        ])
-      );
-    });
+    game.addScene(countdownScene);
 
     /**
      * ************************************************************************
@@ -363,7 +328,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
      * scene, so we create the label here in the body of the initialize()
      * method and add it to the game. But, the number will vary across trials,
      * so we will assign the presented number to the label's text property
-     * within the scene's onAppear() callback. For now, we assign an empty
+     * within the scene's onSetup() callback. For now, assign an empty
      * string to the label's text property.
      */
     const presentedNumberLabel = new Label({
@@ -373,18 +338,24 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
     });
     presentationScene.addChild(presentedNumberLabel);
 
-    presentationScene.onAppear(() => {
-      Timer.start("responseTime");
+    presentationScene.onSetup(() => {
       const trialConfiguration = trialConfigurations[game.trialIndex];
-
       /**
        * The presented number will vary across trials. Thus, we assign the
-       * presented number, as specific to this trial, to the label here within
-       * the presentation scene's onAppear() callback.
+       * presented number, as specific to this trial, to the label within
+       * the presentation scene's onSetup() callback. We do this in onSetup()
+       * so that the number is assigned before the scene slides into view.
        */
       presentedNumberLabel.text =
         trialConfiguration.presented_number.toString();
+    });
 
+    presentationScene.onAppear(() => {
+      /**
+       * Start the timer in onAppear() because this is when the number
+       * is presented to the user and when the user can make a selection.
+       */
+      Timer.start("responseTime");
       /**
        * To avoid double taps after a user selection, we previously set both
        * buttons' isUserInteractionEnabled to false once they made a selection
@@ -429,7 +400,18 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
       if (game.trialIndex === numberOfTrials) {
         game.presentScene(doneScene);
       } else {
-        game.presentScene(preparationScene);
+        game.presentScene(
+          presentationScene,
+          /**
+           * Omit the next argument or replace with Transition.none() if no
+           * transition animation is wanted.
+           */
+          Transition.slide({
+            direction: TransitionDirection.Left,
+            duration: 500,
+            easing: Easings.sinusoidalInOut,
+          })
+        );
       }
     }
 
@@ -441,7 +423,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: "You have completed all the feb20 trials",
+      text: "You have completed all the <%= appName %> trials",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
@@ -449,7 +431,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
     const okButton = new Button({
       text: "OK",
       position: { x: 200, y: 600 },
-      isUserInteractionEnabled: true
+      isUserInteractionEnabled: true,
     });
     okButton.onTapDown(() => {
       // Don't allow repeat taps of ok button
