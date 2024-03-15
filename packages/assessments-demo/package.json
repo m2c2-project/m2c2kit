@@ -39,7 +39,7 @@
     "@m2c2kit/build-helpers": "^0.3.12",
     "@rollup/plugin-node-resolve": "15.2.3",
     "concurrently": "8.2.2",
-    "esbuild": "0.20.1",
+    "esbuild": "0.20.2",
     "rimraf": "5.0.5",
     "rollup": "4.13.0",
     "rollup-plugin-copy": "3.5.0",
