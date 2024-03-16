@@ -183,7 +183,7 @@ function generateAppPackageJson(name: string) {
   "dependencies": {
     "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
     "@m2c2kit/addons": "${Constants.M2C2KIT_ADDONS_PACKAGE_VERSION}",
-    "@m2c2kit/session": "${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
+    "@m2c2kit/session": "^${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
@@ -230,7 +230,7 @@ function generateModulePackageJson(name: string) {
   "dependencies": {
     "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
     "@m2c2kit/addons": "${Constants.M2C2KIT_ADDONS_PACKAGE_VERSION}",
-    "@m2c2kit/session": "${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
+    "@m2c2kit/session": "^${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
