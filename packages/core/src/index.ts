@@ -49,6 +49,7 @@ export * from "./LabelHorizontalAlignmentMode";
 export * from "./LabelOptions";
 export * from "./Layout";
 export * from "./LayoutConstraint";
+export * from "./LegacyTimer";
 export * from "./M2Image";
 export * from "./MoveActionOptions";
 export * from "./MutablePath";

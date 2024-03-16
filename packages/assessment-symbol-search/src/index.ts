@@ -1038,7 +1038,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           }
 
           setBottomCardsTappability(true);
-          Timer.start("rt");
+          Timer.startNew("rt");
           /**
            * The onAppear() callback references objects within the onSetup()
            * scope, thus we must place it here. That means we create a new

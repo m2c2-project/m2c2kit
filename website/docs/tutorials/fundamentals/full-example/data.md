@@ -47,7 +47,7 @@ Action.custom( {callback: () => {
     greenButton.isUserInteractionEnabled = true;
     blueButton.isUserInteractionEnabled = true;
     // highlight-start
-    Timer.start("rt");
+    Timer.startNew("rt");
     // highlight-end
 }})
 ```
@@ -254,7 +254,7 @@ export const code = `class DocsDemo extends Game {
                     redButton.isUserInteractionEnabled = true;
                     greenButton.isUserInteractionEnabled = true;
                     blueButton.isUserInteractionEnabled = true; 
-                    Timer.start("rt");
+                    Timer.startNew("rt");
                 }}),
             ]));
         });

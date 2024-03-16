@@ -631,7 +631,7 @@ phase, participants report the location of dots on a grid.",
       // cause a problem if that user taps a target before the timer starts
       // TODO: refactor so that the tappability of targets is turned on
       // only in onAppear
-      Timer.start("interferenceResponseTime");
+      Timer.startNew("interferenceResponseTime");
 
       touchTheFs.hidden = true;
       ShowInterferenceActivity();
@@ -818,7 +818,7 @@ phase, participants report the location of dots on a grid.",
       // cause a problem if that user taps a target before the timer starts
       // TODO: refactor so that the tappability of targets is turned on
       // only in onAppear
-      Timer.start("responseTime");
+      Timer.startNew("responseTime");
 
       recallGrid.removeAllChildren();
       recallDoneButton.hidden = true;

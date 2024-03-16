@@ -790,7 +790,7 @@ appeared.",
     });
 
     colorSelectionScene.onAppear(() => {
-      Timer.start("colorRt");
+      Timer.startNew("colorRt");
     });
 
     // ==============================================================
@@ -1036,7 +1036,7 @@ appeared.",
     });
 
     locationSelectionScene.onAppear(() => {
-      Timer.start("locationRt");
+      Timer.startNew("locationRt");
     });
 
     let locationRt = -1;

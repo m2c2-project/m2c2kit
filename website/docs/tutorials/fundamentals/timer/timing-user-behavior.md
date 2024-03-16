@@ -13,14 +13,14 @@ How long a user takes to complete a task is an important metric for researchers.
 
 In the below example, we will measure how long it takes a user to click a button. Click the "Begin" button to advance to the next scene. When the "CLICK ME!" button appears, click it as fast it as you can. A console message will show how long it took from when the button appeared until when you clicked it.
 
-The relevant `Timer` code appears in two places. First, we start a timer called `rt` (for "response time") in the `onAppear` event for the second scene:
+The relevant `Timer` code appears in two places. First, we start a new timer called `rt` (for "response time") in the `onAppear` event for the second scene:
 
 ```js
 sceneTwo.onAppear(() => {
     console.log("sceneTwo onAppear event");
     clickMeButton.hidden = false;
     clickMeButton.isUserInteractionEnabled = true;
-    Timer.start("rt");
+    Timer.startNew("rt");
 });
 ```
 
@@ -76,7 +76,7 @@ sceneTwo.onAppear(() => {
     console.log("sceneTwo onAppear event");
     clickMeButton.hidden = false;
     clickMeButton.isUserInteractionEnabled = true;
-    Timer.start("rt");
+    Timer.startNew("rt");
 });
  
 const clickMeButton = new Button({

@@ -264,7 +264,7 @@ export class Session {
    * Asynchronously initializes the m2c2kit engine and loads assets
    */
   async initialize(): Promise<void> {
-    Timer.start("sessionInitialize");
+    Timer.startNew("sessionInitialize");
     const sessionInitializeEvent: SessionEvent = {
       target: this,
       type: SessionEventType.SessionInitialize,

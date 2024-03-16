@@ -258,7 +258,7 @@ class Stroop extends Game {
               greenButton.isUserInteractionEnabled = true;
               blueButton.isUserInteractionEnabled = true;
 
-              Timer.start("rt");
+              Timer.startNew("rt");
             },
           }),
         ]),

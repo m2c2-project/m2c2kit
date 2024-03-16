@@ -356,7 +356,7 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
     presentationScene.addChild(whatColorIsFont);
 
     presentationScene.onAppear(() => {
-      Timer.start("responseTime");
+      Timer.startNew("responseTime");
       const trialConfiguration = trialConfigurations[game.trialIndex];
 
       /**

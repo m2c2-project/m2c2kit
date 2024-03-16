@@ -202,7 +202,7 @@ export const code = `class DocsDemo extends Game {
                     greenButton.isUserInteractionEnabled = true;
                     blueButton.isUserInteractionEnabled = true;
  
-                    Timer.start("rt");
+                    Timer.startNew("rt");
                 }}),
             ]));
         });

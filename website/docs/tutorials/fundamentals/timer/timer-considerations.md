@@ -22,7 +22,7 @@ sceneTwo.onSetup(() => {
     console.log("sceneTwo onSetup event");
     clickMeButton.hidden = false;
     clickMeButton.isUserInteractionEnabled = true;
-    Timer.start("rt");    
+    Timer.startNew("rt");    
 });
 ```
 
@@ -67,7 +67,7 @@ sceneTwo.onSetup(() => {
     console.log("sceneTwo onSetup event");
     clickMeButton.hidden = false;
     clickMeButton.isUserInteractionEnabled = true;
-    Timer.start("rt");    
+    Timer.startNew("rt");    
 });
  
 const clickMeButton = new Button({

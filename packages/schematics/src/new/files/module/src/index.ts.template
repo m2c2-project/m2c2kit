@@ -355,7 +355,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
        * Start the timer in onAppear() because this is when the number
        * is presented to the user and when the user can make a selection.
        */
-      Timer.start("responseTime");
+      Timer.startNew("responseTime");
       /**
        * To avoid double taps after a user selection, we previously set both
        * buttons' isUserInteractionEnabled to false once they made a selection

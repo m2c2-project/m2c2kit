@@ -808,7 +808,7 @@ phases.`,
       }
       sameButton.isUserInteractionEnabled = true;
       differentButton.isUserInteractionEnabled = true;
-      Timer.start("rt");
+      Timer.startNew("rt");
     });
 
     const sameButton = new Button({
