@@ -35,10 +35,10 @@
     "url": "https://github.com/m2c2-project/m2c2kit/issues"
   },
   "dependencies": {
-    "@m2c2kit/core": "^0.3.16"
+    "@m2c2kit/core": "^0.3.17"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.12",
+    "@m2c2kit/build-helpers": "^0.3.13",
     "@rollup/plugin-node-resolve": "15.2.3",
     "rimraf": "5.0.5",
     "rollup": "4.13.0",

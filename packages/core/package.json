@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -35,7 +35,7 @@
     "canvaskit-wasm": "0.39.1"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "^0.3.12",
+    "@m2c2kit/build-helpers": "^0.3.13",
     "@rollup/plugin-commonjs": "25.0.7",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",

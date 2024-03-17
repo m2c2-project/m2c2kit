@@ -25,7 +25,7 @@ function getFilePathsRecursive(folder) {
 
 const filePaths = getFilePathsRecursive("packages");
 const pkgJsonFilePaths = filePaths.filter(
-  (file) => file.endsWith("package.json") && !file.includes("node_modules")
+  (file) => file.endsWith("package.json") && !file.includes("node_modules"),
 );
 
 let pkgJsonFiles = pkgJsonFilePaths.map((file) => {
@@ -41,6 +41,7 @@ let pkgJsonFiles = pkgJsonFilePaths.map((file) => {
 const packageOrder = [
   "@m2c2kit/core",
   "@m2c2kit/addons",
+  "@m2c2kit/session",
   "@m2c2kit/physics",
   "@m2c2kit/cli",
   "@m2c2kit/schematics",

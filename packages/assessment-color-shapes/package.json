@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-shapes",
-  "version": "0.8.13",
+  "version": "0.8.14",
   "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
@@ -34,11 +34,11 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "^0.3.11",
-    "@m2c2kit/core": "^0.3.14"
+    "@m2c2kit/addons": "^0.3.14",
+    "@m2c2kit/core": "^0.3.17"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "^0.3.12",
+    "@m2c2kit/build-helpers": "^0.3.13",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",

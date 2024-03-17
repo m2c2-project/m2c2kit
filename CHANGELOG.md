@@ -4,6 +4,165 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.17] - 2024-03-17
+
+### Added
+
+- Images can be lazy loaded. Set `lazy` to `true` when defining a `BrowserImage` in `GameOptions`. Default is `lazy: false`.
+- Images can be loaded on demand with a call to `ImageManager.loadImages()`.
+- Fonts can be lazy loaded. Set `lazy` to `true` when defining a `FontAsset` in `GameOptions`. Default is `lazy: false`.
+- Embed module metadata in code to support importing as ES module.
+- Game code will use `manifest.json` to load hashed filenames for assets, if applicable.
+- `PluginEvent` to support plugins that raise events.
+
+### Changed
+
+- In `Timer` class, `startNew()` should be used in most places wherever `start()` was previously used to start a new timer. `LegacyTimer` class can be used if the old behavior is required.
+- `Entity` class is renamed to `M2Node`. m2c2kit has an object-oriented structure, not an entity component system (ECS). Related classes are also renamed (e.g., `EntityEvent` to `M2NodeEvent`).
+- A `Scene` will now raise events the same way other nodes do.
+- `Session` class and functionality is now in `@m2c2kit/session` package.
+- `FontManager` and `ImageManager` are now called from the `Game` class.
+- The wasm binary for canvaskit is now loaded by `Game`, which allows each game to have its own wasm binary version.
+- The wasm binary for canvaskit has its version embedded in the filename.
+- Rename `EventBase` to `M2Event`.
+- Use generics with event-related classes, methods, and interfaces.
+- `DomHelpers` class is now in `@m2c2kit/session` package.
+- `canvasKitWasmUrl` is no longer required in `GameOptions` or `SessionOptions`.
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.14] - 2024-03-17
+
+### Added
+
+- `CountdownScene` to display a countdown timer.
+
+### Changed
+
+- Updated dependencies.
+
+### Deprecated
+
+- `Instructions.Create()` is deprecated. Use `Instructions.create()` instead.
+
+## `@m2c2kit/session` [0.3.0] - 2024-03-17
+
+### Added
+
+- This is a new package to separate the `Session` class, which is the session runner, from core functionality in `@m2c2kit/core`.
+- To reduce bandwidth, the session will, by default, share common canvaskit wasm binaries, fonts, and images across games, if the filenames are identical. A game can override this behavior by setting `shareAssets: false` in `GameOptions`.
+- The `index.html` file now requires a single element with the id `m2c2kit`. This is where the session's activities will be rendered. If a different element for rendering is required, the `rootElementId` property in `SessionOptions` can be set to the id of the element.
+- The `Session` class will automatically generate CSS for that was previously in `m2c2kit.css`. If custom CSS is required, it can be added to the `styleSheet` property in `SessionOptions`.
+
+## `@m2c2kit/physics` [0.1.4] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.14] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.13] - 2024-03-17
+
+### Added
+
+- When creating a m2c2kit project with the new CLI command, the option `--module` will scaffold it to be a reusable assessment module, rather than a standalone assessment (default).
+- When creating a m2c2kit module project, the scaffolded module is a simple even-odd assessment.
+- When creating a m2c2kit module project, add the assessment id as `m2c2kit.assessmentId` in generated `package.json`.
+- When creating a m2c2kit project with the new CLI command, it will, by default, create a git repo with an initial commit unless the option `--skipGit` is added.
+- When creating a m2c2kit project with the new CLI command, `esbuild` will be used to build the project. TypeScript will be run concurrently with the build process to check for type errors.
+- `zip` CLI command to create a zip file of the module.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.10] - 2024-03-17
+
+### Changed
+
+- The assumed m2c2kit session on `window` is now the more specific `m2c2kitSession`, instead of `session`, to avoid name conflicts.
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.13] - 2024-03-17
+
+### Added
+
+- `copyAssets` rollup plugin to copy assets to appropriate output folder in during build. These include images, fonts, and wasm files, as well as CSS and optionally other files (HTML).
+
+### Changed
+
+- When building with hashed assets, a `manifest.json` file is created to map original asset names to hashed asset names (instead of parsing the JavaScript bundle and replacing asset names in the bundle).
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.12] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.12] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.7] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.14] - 2024-03-17
+
+### Changed
+
+- Use `CountdownScene` from `@m2c2kit/addons`.
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.14] - 2024-03-17
+
+### Changed
+
+- Use `CountdownScene` from `@m2c2kit/addons`.
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.14] - 2024-03-17
+
+### Changed
+
+- Use `CountdownScene` from `@m2c2kit/addons`.
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.14] - 2024-03-17
+
+### Changed
+
+- Use `CountdownScene` from `@m2c2kit/addons`.
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.11] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.13] - 2024-03-17
+
+### Changed
+
+- Use `CountdownScene` from `@m2c2kit/addons`.
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.12] - 2024-03-17
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.16] - 2024-01-07
 
 ### Added

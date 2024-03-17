@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/embedding",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Utility functions for embedding m2c2kit assessments in other delivery mechanisms, such as native apps and services",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -15,7 +15,7 @@
     "dist/index.d.ts"
   ],
   "dependencies": {
-    "@m2c2kit/core": "^0.3.16",
+    "@m2c2kit/core": "^0.3.17",
     "@m2c2kit/session": "^0.3.0"
   },
   "devDependencies": {

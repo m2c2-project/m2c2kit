@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schematics",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Rules for the m2c2kit CLI to generate new apps",
   "main": "index.js",
   "keywords": [
@@ -25,7 +25,6 @@
   "dependencies": {
     "@angular-devkit/core": "^17.3.0",
     "@angular-devkit/schematics": "^17.3.0",
-    "@m2c2kit/cli": "^0.3.7",
     "@schematics/angular": "^17.3.0",
     "archiver": "7.0.1",
     "findup-sync": "5.0.0"
