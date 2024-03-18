@@ -143,7 +143,7 @@ m2c2kit CLI. It is a starting point for creating your own assessment modules.`,
            * assets folder. The below image is public domain, derived from
            * https://commons.wikimedia.org/wiki/File:Face-smile.svg
            */
-          url: "images/Face-smile.png",
+          url: "images/face-smile.png",
         },
       ],
     };
