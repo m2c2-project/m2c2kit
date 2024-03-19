@@ -1,6 +1,9 @@
 {
   "name": "@m2c2kit/assessment-color-dots",
   "version": "0.8.14",
+  "m2c2kit": {
+    "assessmentId": "color-dots"
+  },
   "description": "A cued-recall, item-location memory binding task, where after viewing 3 dots for a brief period of time, participants report: (1) the color at a cued location; (2) the location of a cued color",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",

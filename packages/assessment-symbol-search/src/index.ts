@@ -232,6 +232,9 @@ positions.",
 
     const options: GameOptions = {
       name: "Symbol Search",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
       id: "symbol-search",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,

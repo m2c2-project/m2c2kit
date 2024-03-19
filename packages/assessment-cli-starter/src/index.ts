@@ -89,6 +89,9 @@ class CliStarter extends Game {
 
     const options: GameOptions = {
       name: "cli starter assessment",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
       id: "cli-starter",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,

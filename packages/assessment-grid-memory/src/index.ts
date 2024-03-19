@@ -284,6 +284,9 @@ class GridMemory extends Game {
     const img_default_size = 200;
     const options: GameOptions = {
       name: "Grid Memory",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
       id: "grid-memory",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,

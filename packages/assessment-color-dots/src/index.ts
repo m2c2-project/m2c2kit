@@ -275,6 +275,9 @@ class ColorDots extends Game {
 
     const options: GameOptions = {
       name: "Color Dots",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
       id: "color-dots",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,

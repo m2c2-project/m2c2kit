@@ -1,6 +1,9 @@
 {
   "name": "@m2c2kit/assessment-cli-starter",
   "version": "0.8.13",
+  "m2c2kit": {
+    "assessmentId": "cli-starter"
+  },
   "description": "A simple Stroop assessment created when the CLI creates a new app",
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
