@@ -24,10 +24,8 @@ export default (commandLineArgs) => {
         esbuild({
           tsconfig: "tsconfig.runner.json",
         }),
-        copyAssets({ package: [
-          "<%= dasherize(appName) %>",
-          "@m2c2kit/session",
-        ], outputFolder: "./runner-build" }),
+        copyAssets({ id: "<%= dasherize(appName) %>",
+          outputFolder: "./runner-build" }),
           serve({
             /**
              * Start development server and automatically open browser with

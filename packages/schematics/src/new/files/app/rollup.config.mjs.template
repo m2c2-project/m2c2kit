@@ -35,10 +35,7 @@ const port = commandLineArgs.configPort || 3000;
           sourceMap: isDebug && true,
         }),
         commandLineArgs.configMinify && minify(),        
-        copyAssets({ package: [
-          "<%= dasherize(appName) %>",
-          "@m2c2kit/session",
-        ], outputFolder }),        
+        copyAssets({ id: "<%= dasherize(appName) %>", outputFolder }),        
         isProduction &&
           !commandLineArgs.configNoHash &&
           hashM2c2kitAssets(outputFolder),

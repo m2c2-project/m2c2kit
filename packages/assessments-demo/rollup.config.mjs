@@ -32,7 +32,6 @@ export default (commandLineArgs) => {
         esbuild(),
         copyAssets({
           package: [
-            "@m2c2kit/session",
             "@m2c2kit/assessment-color-dots",
             "@m2c2kit/assessment-grid-memory",
             "@m2c2kit/assessment-color-shapes",

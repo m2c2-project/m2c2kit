@@ -11,6 +11,7 @@ import {
   chain,
   Source,
   applyTemplates,
+  template,
 } from "@angular-devkit/schematics";
 import { RepositoryInitializerTask } from "@angular-devkit/schematics/tasks";
 import { CommitOptions } from "@angular-devkit/schematics/tasks/repo-init/init-task";
@@ -92,6 +93,14 @@ export function m2New(options: m2NewOptions): Rule {
         dasherize: strings.dasherize,
         appName: options.name,
         schematicsVersion: schematicsVersion,
+      }),
+      /**
+       * For app, renames folder assets/__id__ to assets/<id of assessment
+       * For module, there is no folder under assets with name of the
+       * assessment id.
+       */
+      template({
+        id: strings.dasherize(options.name),
       }),
       move(directory),
     ]);
@@ -176,7 +185,7 @@ function generateAppPackageJson(name: string) {
   "scripts": {
     "serve": "concurrently \\"rollup -c --watch --configServe\\" \\"tsc --watch\\" --names rollup,typescript --prefix-colors auto,red",
     "build": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd",
-    "build:no-hash": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd --configNoHash",    
+    "build:no-hash": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd --configNoHash",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "private": true,
@@ -197,7 +206,8 @@ function generateAppPackageJson(name: string) {
     "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
     "typescript": "${Constants.TYPESCRIPT_VERSION}"
   }
-}`;
+}
+`;
 }
 
 function generateModulePackageJson(name: string) {
@@ -216,17 +226,17 @@ function generateModulePackageJson(name: string) {
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "type": "module",
-  "types": "./dist/index.d.ts",  
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"      
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
     "dist/**",
     "assets/**"
-  ],  
+  ],
   "dependencies": {
     "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
     "@m2c2kit/addons": "${Constants.M2C2KIT_ADDONS_PACKAGE_VERSION}",
@@ -244,5 +254,6 @@ function generateModulePackageJson(name: string) {
     "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
     "typescript": "${Constants.TYPESCRIPT_VERSION}"
   }
-}`;
+}
+`;
 }
