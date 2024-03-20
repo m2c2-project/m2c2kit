@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-dots",
-  "version": "0.8.14",
+  "version": "0.8.15",
   "m2c2kit": {
     "assessmentId": "color-dots"
   },
@@ -41,7 +41,7 @@
     "@m2c2kit/core": "^0.3.17"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "^0.3.13",
+    "@m2c2kit/build-helpers": "^0.3.14",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",

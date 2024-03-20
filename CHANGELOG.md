@@ -4,6 +4,62 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/schematics` [0.1.14] - 2024-03-20
+
+### Fixed
+
+- Filename casing typo.
+
+### Changed
+
+- Change templates to work with changed `copyAssets` rollup plugin.
+
+## `@m2c2kit/build-helpers` [0.3.14] - 2024-03-20
+
+### Fixed
+
+- Errors in `copyAssets` rollup plugin.
+
+### Changed
+
+- `CopyAssetsOptions` has `id` property to specify the id of local assessments.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.15] - 2024-03-20
+
+### Added
+
+- Added `m2c2kit.assessmentId` to `package.json`.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.15] - 2024-03-20
+
+### Added
+
+- Added `m2c2kit.assessmentId` to `package.json`.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.15] - 2024-03-20
+
+### Added
+
+- Added `m2c2kit.assessmentId` to `package.json`.
+
+## `@m2c2kit/assessment-color-dots` [0.8.15] - 2024-03-20
+
+### Added
+
+- Added `m2c2kit.assessmentId` to `package.json`.
+
+## `@m2c2kit/assessments-demo` [0.8.12] - 2024-03-20
+
+### Changed
+
+- Updated dependencies on assessment packages.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.14] - 2024-03-20
+
+### Added
+
+- Added `m2c2kit.assessmentId` to `package.json`.
+
 ## `@m2c2kit/core` [0.3.17] - 2024-03-17
 
 ### Added
