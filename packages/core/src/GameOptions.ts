@@ -5,6 +5,7 @@ import { GameParameters } from "./GameParameters";
 import { Translations } from "./Translations";
 import { FontAsset } from "./FontAsset";
 import { ModuleMetadata } from "./ModuleMetadata";
+import { SoundAsset } from "./SoundAsset";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
@@ -38,6 +39,8 @@ export interface GameOptions {
   fonts?: Array<FontAsset>;
   /** Array of BrowserImage objects to render and load */
   images?: Array<BrowserImage>;
+  /** Array of SoundAsset objects to fetch and decode */
+  sounds?: Array<SoundAsset>;
   /** Show FPS in upper left corner? Default is false */
   showFps?: boolean;
   /** Color of the html body, if the game does not fill the screen. Useful for showing scene boundaries. Default is the scene background color */

@@ -1,16 +1,19 @@
 import { M2Node } from "./M2Node";
+import { M2NodeType } from ".";
 import { MoveActionOptions } from "./MoveActionOptions";
 import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
 import { ScaleActionOptions } from "./ScaleActionOptions";
 import { FadeAlphaActionOptions } from "./FadeAlphaActionOptions";
 import { RotateActionOptions } from "./RotateActionOptions";
+import { PlayActionOptions } from "./PlayActionOptions";
 import { IActionContainer } from "./IActionContainer";
 import { ActionType } from "./ActionType";
 import { Point } from "./Point";
 import { EasingFunction } from "./Easings";
 import { Easings } from "./Easings";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { SoundPlayer } from "./SoundPlayer";
 
 /**
  * The Action class has static methods for creating actions to be executed by
@@ -76,6 +79,19 @@ export abstract class Action {
       options.callback,
       options.runDuringTransition ?? false,
     );
+  }
+
+  /**
+   * Creates an action that will play a sound.
+   *
+   * @remarks This action can only be used with a SoundPlayer node.
+   * It will throw an error if used with any other node type.
+   *
+   * @param options - {@link PlayActionOptions}
+   * @returns The play action
+   */
+  public static play(options?: PlayActionOptions): Action {
+    return new PlayAction(options?.runDuringTransition ?? false);
   }
 
   /**
@@ -244,6 +260,13 @@ export abstract class Action {
         });
         break;
       }
+      case ActionType.Play: {
+        const play = action as PlayAction;
+        cloned = Action.play({
+          runDuringTransition: play.runDuringTransition,
+        });
+        break;
+      }
       case ActionType.Scale: {
         const scale = action as ScaleAction;
         cloned = Action.scale({
@@ -323,6 +346,37 @@ export abstract class Action {
       customAction.callback();
       customAction.running = false;
       customAction.completed = true;
+    }
+
+    if (action.type === ActionType.Play) {
+      if (node.type !== M2NodeType.SoundPlayer) {
+        throw new Error("Play action can only be used with a SoundPlayer");
+      }
+      const playAction = action as PlayAction;
+      const soundPlayer = node as SoundPlayer;
+      const soundManager = soundPlayer.game.soundManager;
+
+      if (!playAction.started) {
+        const m2Sound = soundManager.getSound(soundPlayer.soundName!);
+        if (m2Sound.audioBuffer) {
+          const source = soundManager.audioContext.createBufferSource();
+          source.buffer = m2Sound.audioBuffer;
+          source.onended = () => {
+            playAction.running = false;
+            playAction.completed = true;
+            const dur =
+              performance.now() - (action.runStartTime + action.startOffset);
+            console.log("duration was ", dur);
+          };
+          source.connect(soundManager.audioContext.destination);
+          source.start();
+          playAction.started = true;
+        } else {
+          console.warn(
+            `Play action: audio buffer not ready for sound ${soundPlayer.soundName}; will try next frame`,
+          );
+        }
+      }
     }
 
     if (action.type === ActionType.Wait) {
@@ -655,6 +709,15 @@ export class CustomAction extends Action {
   constructor(callback: () => void, runDuringTransition = false) {
     super(runDuringTransition);
     this.callback = callback;
+    this.isParent = false;
+    this.duration = 0;
+  }
+}
+
+export class PlayAction extends Action {
+  type = ActionType.Play;
+  constructor(runDuringTransition = false) {
+    super(runDuringTransition);
     this.isParent = false;
     this.duration = 0;
   }

@@ -64,6 +64,7 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Plugin } from "./Plugin";
 import { FontManager } from "./FontManager";
 import { ImageManager } from "./ImageManager";
+import { SoundManager } from "./SoundManager";
 import { ModuleMetadata } from "./ModuleMetadata";
 import { M2FontStatus } from "./M2Font";
 import { Manifest } from "./Manifest";
@@ -107,6 +108,7 @@ export class Game implements Activity {
   staticTrialSchema = <{ [key: string]: JsonSchemaDataTypeScriptTypes }>{};
   private _fontManager?: FontManager;
   private _imageManager?: ImageManager;
+  private _soundManager?: SoundManager;
   manifest?: Manifest;
 
   /**
@@ -298,10 +300,12 @@ export class Game implements Activity {
 
     this.fontManager = new FontManager(this, baseUrls);
     this.imageManager = new ImageManager(this, baseUrls);
+    this.soundManager = new SoundManager(this, baseUrls);
 
     return Promise.all([
       this.fontManager.initializeFonts(this.options.fonts),
       this.imageManager.initializeImages(this.options.images),
+      this.soundManager.initializeSounds(this.options.sounds),
     ]) as unknown as Promise<void>;
   }
 
@@ -366,6 +370,17 @@ export class Game implements Activity {
 
   set imageManager(imageManager: ImageManager) {
     this._imageManager = imageManager;
+  }
+
+  get soundManager(): SoundManager {
+    if (!this._soundManager) {
+      throw new Error("soundManager is undefined");
+    }
+    return this._soundManager;
+  }
+
+  set soundManager(soundManager: SoundManager) {
+    this._soundManager = soundManager;
   }
 
   /**
@@ -1973,6 +1988,14 @@ export class Game implements Activity {
       this.raiseActivityEventOnListeners(gameWarmupEndEvent);
       this.surface.requestAnimationFrame(this.loop.bind(this));
       return;
+    }
+
+    if (
+      this.soundManager.hasSoundsToDecode() &&
+      navigator.userActivation.hasBeenActive
+    ) {
+      // we do not await this
+      this.soundManager.decodeFetchedSounds();
     }
 
     if (this.gameStopRequested) {

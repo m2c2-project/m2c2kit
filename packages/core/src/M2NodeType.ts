@@ -6,4 +6,5 @@ export enum M2NodeType {
   TextLine = "TextLine",
   Shape = "Shape",
   Composite = "Composite",
+  SoundPlayer = "SoundPlayer",
 }
