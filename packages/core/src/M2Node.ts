@@ -91,7 +91,6 @@ export abstract class M2Node implements M2NodeOptions {
   absoluteAlphaChange = 0;
   actions = new Array<Action>();
   queuedAction?: Action;
-  originalActions = new Array<Action>();
   eventListeners = new Array<M2NodeEventListener<M2NodeEvent>>();
   readonly uuid = Uuid.generate();
   needsInitialization = true;
@@ -1036,11 +1035,21 @@ export abstract class M2Node implements M2NodeOptions {
    * Only needed if the action will be referred to later
    */
   run(action: Action, key?: string): void {
-    //this.actions = action.initialize(this);
-    this.actions.push(...action.initialize(this, key));
-    this.originalActions = this.actions
-      .filter((action) => action.runDuringTransition === false)
-      .map((action) => Action.cloneAction(action, key));
+    /**
+     * Originally, this was this.actions = action.initialize(key), which
+     * would immediately replace all existing actions with the new actions.
+     * However, we want to allow multiple actions to be run on a node at
+     * the same time, so we push the new actions onto the actions array.
+     */
+    this.actions.push(...action.initialize(key));
+    /**
+     * Previously, there was a thought that we would save the original
+     * actions, in case we needed them. So far, we have not needed them.
+     * Thus, this is commented out.
+     */
+    // this.originalActions = this.actions
+    //   .filter((action) => action.runDuringTransition === false)
+    //   .map((action) => Action.cloneAction(action, key));
   }
 
   /**
@@ -1206,7 +1215,11 @@ export abstract class M2Node implements M2NodeOptions {
       edges.forEach((edge) => {
         // Increase the inDegree for each edge
         if (inDegree.has(edge)) {
-          inDegree.set(edge, inDegree.get(edge)! + 1);
+          const inDegreeCount = inDegree.get(edge);
+          if (inDegreeCount === undefined) {
+            throw new Error(`Could not find inDegree for edge ${edge}`);
+          }
+          inDegree.set(edge, inDegreeCount + 1);
         } else {
           inDegree.set(edge, 1);
         }
@@ -1226,16 +1239,20 @@ export abstract class M2Node implements M2NodeOptions {
     while (queue.length > 0) {
       const current = queue.shift();
       if (current === undefined) {
-        throw "bad";
+        throw "current vertex is undefined";
       }
       tSort.push(current);
       // Mark the current vertex as visited and decrease the inDegree for the edges of the vertex
       // Imagine we are deleting this current vertex from our graph
       if (adjList.has(current)) {
         adjList.get(current)?.forEach((edge) => {
-          if (inDegree.has(edge) && inDegree.get(edge)! > 0) {
+          const inDegreeCount = inDegree.get(edge);
+          if (inDegreeCount === undefined) {
+            throw new Error(`Could not find inDegree for edge ${edge}`);
+          }
+          if (inDegree.has(edge) && inDegreeCount > 0) {
             // Decrease the inDegree for the adjacent vertex
-            const newDegree = inDegree.get(edge)! - 1;
+            const newDegree = inDegreeCount - 1;
             inDegree.set(edge, newDegree);
 
             // if inDegree becomes zero, we found new leaf node.

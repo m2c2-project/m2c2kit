@@ -7,14 +7,14 @@ import { ScaleActionOptions } from "./ScaleActionOptions";
 import { FadeAlphaActionOptions } from "./FadeAlphaActionOptions";
 import { RotateActionOptions } from "./RotateActionOptions";
 import { PlayActionOptions } from "./PlayActionOptions";
-import { IActionContainer } from "./IActionContainer";
+import { ActionContainer } from "./ActionContainer";
 import { ActionType } from "./ActionType";
 import { Point } from "./Point";
 import { EasingFunction } from "./Easings";
 import { Easings } from "./Easings";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { SoundPlayer } from "./SoundPlayer";
-
+import { Futurable } from "./Futurable";
 /**
  * The Action class has static methods for creating actions to be executed by
  * an M2Node.
@@ -22,18 +22,17 @@ import { SoundPlayer } from "./SoundPlayer";
 export abstract class Action {
   abstract type: ActionType;
 
-  startOffset = -1;
-  endOffset = -1;
+  startOffset = new Futurable(0);
+  endOffset = new Futurable(0);
   started = false;
   running = false;
   completed = false;
+  // Start time of a running action is always known; it is not a Futurable.
   runStartTime = -1;
-  duration = 0;
+  duration: Futurable = new Futurable();
   runDuringTransition: boolean;
 
-  parent?: Action;
-  isParent = false;
-  isChild = false;
+  parent?: ActionContainer;
   key?: string;
 
   constructor(runDuringTransition = false) {
@@ -49,21 +48,22 @@ export abstract class Action {
   public static move(options: MoveActionOptions): Action {
     return new MoveAction(
       options.point,
-      options.duration,
+      new Futurable(options.duration),
       options.easing ?? Easings.linear,
       options.runDuringTransition ?? false,
     );
   }
 
   /**
-   * Creates an action that will wait a given duration before it is considered complete.
+   * Creates an action that will wait a given duration before it is considered
+   * complete.
    *
    * @param options - {@link WaitActionOptions}
    * @returns The wait action
    */
   public static wait(options: WaitActionOptions): Action {
     return new WaitAction(
-      options.duration,
+      new Futurable(options.duration),
       options.runDuringTransition ?? false,
     );
   }
@@ -97,7 +97,10 @@ export abstract class Action {
   /**
    * Creates an action that will scale the node's size.
    *
-   * @remarks Scaling is relative to any inherited scaling, which is multiplicative. For example, if the node's parent is scaled to 2.0 and this node's action scales to 3.0, then the node will appear 6 times as large as original.
+   * @remarks Scaling is relative to any inherited scaling, which is
+   * multiplicative. For example, if the node's parent is scaled to 2.0 and
+   * this node's action scales to 3.0, then the node will appear 6 times as
+   * large as original.
    *
    * @param options - {@link ScaleActionOptions}
    * @returns The scale action
@@ -105,7 +108,7 @@ export abstract class Action {
   public static scale(options: ScaleActionOptions): Action {
     return new ScaleAction(
       options.scale,
-      options.duration,
+      new Futurable(options.duration),
       options.runDuringTransition,
     );
   }
@@ -113,7 +116,9 @@ export abstract class Action {
   /**
    * Creates an action that will change the node's alpha (opacity).
    *
-   * @remarks Alpha has multiplicative inheritance. For example, if the node's parent is alpha .5 and this node's action fades alpha to .4, then the node will appear with alpha .2.
+   * @remarks Alpha has multiplicative inheritance. For example, if the node's
+   * parent is alpha .5 and this node's action fades alpha to .4, then the
+   * node will appear with alpha .2.
    *
    * @param options - {@link FadeAlphaActionOptions}
    * @returns The fadeAlpha action
@@ -121,7 +126,7 @@ export abstract class Action {
   public static fadeAlpha(options: FadeAlphaActionOptions): Action {
     return new FadeAlphaAction(
       options.alpha,
-      options.duration,
+      new Futurable(options.duration),
       options.runDuringTransition,
     );
   }
@@ -129,7 +134,8 @@ export abstract class Action {
   /**
    * Creates an action that will rotate the node.
    *
-   * @remarks Rotate actions are applied to their children. In addition to this node's rotate action, all ancestors' rotate actions will also be applied.
+   * @remarks Rotate actions are applied to their children. In addition to this
+   * node's rotate action, all ancestors' rotate actions will also be applied.
    *
    * @param options - {@link RotateActionOptions}
    * @returns The rotate action
@@ -159,7 +165,7 @@ export abstract class Action {
       options.byAngle,
       options.toAngle,
       options.shortestUnitArc,
-      options.duration,
+      new Futurable(options.duration),
       options.runDuringTransition,
     );
   }
@@ -167,7 +173,9 @@ export abstract class Action {
   /**
    * Creates an array of actions that will be run in order.
    *
-   * @remarks The next action will not begin until the current one has finished. The sequence will be considered completed when the last action has completed.
+   * @remarks The next action will not begin until the current one has
+   * finished. The sequence will be considered completed when the last action
+   * has completed.
    *
    * @param actions - One or more actions that form the sequence
    * @returns
@@ -181,7 +189,9 @@ export abstract class Action {
   /**
    * Create an array of actions that will be run simultaneously.
    *
-   * @remarks All actions within the group will begin to run at the same time. The group will be considered completed when the longest-running action has completed.
+   * @remarks All actions within the group will begin to run at the same time.
+   * The group will be considered completed when the longest-running action
+   * has completed.
    *
    * @param actions - One or more actions that form the group
    * @returns
@@ -192,36 +202,53 @@ export abstract class Action {
     return group;
   }
 
-  initialize(node: M2Node, key?: string): Array<Action> {
-    // node.runStartTime = -1;
+  /**
+   * Prepares the Action for execution.
+   *
+   * @remarks Calculates start and end times for all actions in the hierarchy
+   * and adds them to the array of actions ready for execution.
+   *
+   * @param key - optional string to identify an action
+   * @returns array of actions, excluding parent actions
+   */
+  initialize(key?: string): Array<Action> {
     this.assignParents(this, this, key);
-    const actions = this.flattenActions(this);
+    const action = Action.cloneAction(this, key);
+    const actions = action.flattenActions(this);
     actions.forEach(
       (action) => (action.duration = this.calculateDuration(action)),
     );
     this.calculateStartEndOffsets(this);
-
-    // clone actions so we can reuse them on other nodes
-    // we need to clone because actions have state that is updated over time
-    // such as whether they are running or not, etc.
-    // if we didn't clone actions, two nodes running the same action would
-    // share state
-    const clonedActions = actions
-      .filter(
-        (action) =>
-          action.type !== ActionType.Group &&
-          action.type !== ActionType.Sequence,
-      )
-      .map((action) => {
-        // to prevent circular references, set parent to defined
-        // we needed parent only when calculating durations, we no
-        // longer need it when executing the actions
-        return Action.cloneAction(action, key);
-      });
-
-    return clonedActions;
+    return this.excludeParentActions(actions);
   }
 
+  /**
+   * Returns the array of actions, excluding group and sequence actions.
+   *
+   * @remarks Parent actions, such as `group` and `sequence` are not run
+   * directly, but are used to organize other actions. Specifically, they
+   * impact the start and end time offsets of their children. After these
+   * offset have been taken into consideration with a call to
+   * `calculateStartEndOffsets()`, parent actions are no longer needed.
+   *
+   * @param actions - array of actions to filter
+   * @returns array of actions, excluding parent actions
+   */
+  private excludeParentActions(actions: Action[]): Action[] {
+    return actions.filter((action) => !this.isParent(action));
+  }
+
+  /**
+   * Clones the action, and all its children, recursively.
+   *
+   * @remarks We need to clone because actions have state that is updated over
+   * time such as whether they are running or not, etc. If we didn't clone
+   * actions, two nodes running the same action would share state.
+   *
+   * @param action - the action to clone
+   * @param key - optional string to identify an action
+   * @returns the cloned action
+   */
   static cloneAction(action: Action, key?: string): Action {
     let cloned: Action;
 
@@ -246,7 +273,7 @@ export abstract class Action {
         const move = action as MoveAction;
         cloned = Action.move({
           point: move.point,
-          duration: move.duration,
+          duration: move.duration.value,
           easing: move.easing,
           runDuringTransition: move.runDuringTransition,
         });
@@ -271,7 +298,7 @@ export abstract class Action {
         const scale = action as ScaleAction;
         cloned = Action.scale({
           scale: scale.scale,
-          duration: scale.duration,
+          duration: scale.duration.value,
           runDuringTransition: scale.runDuringTransition,
         });
         break;
@@ -280,7 +307,7 @@ export abstract class Action {
         const fadeAlpha = action as FadeAlphaAction;
         cloned = Action.fadeAlpha({
           alpha: fadeAlpha.alpha,
-          duration: fadeAlpha.duration,
+          duration: fadeAlpha.duration.value,
           runDuringTransition: fadeAlpha.runDuringTransition,
         });
         break;
@@ -291,7 +318,7 @@ export abstract class Action {
           byAngle: rotate.byAngle,
           toAngle: rotate.toAngle,
           shortestUnitArc: rotate.shortestUnitArc,
-          duration: rotate.duration,
+          duration: rotate.duration.value,
           runDuringTransition: rotate.runDuringTransition,
         });
         break;
@@ -299,7 +326,7 @@ export abstract class Action {
       case ActionType.Wait: {
         const wait = action as WaitAction;
         cloned = Action.wait({
-          duration: wait.duration,
+          duration: wait.duration.value,
           runDuringTransition: wait.runDuringTransition,
         });
         break;
@@ -315,6 +342,17 @@ export abstract class Action {
     return cloned;
   }
 
+  /**
+   * Evaluates an action, updating the node's properties as needed.
+   *
+   * @remarks This method is called every frame by the M2Node's `update()`
+   * method.
+   *
+   * @param action - the Action to be evaluated and possibly run
+   * @param node - the `M2Node` that the action will be run on
+   * @param now - the current elapsed time, from `performance.now()`
+   * @param dt - the time since the last frame (delta time)
+   */
   static evaluateAction(
     action: Action,
     node: M2Node,
@@ -322,13 +360,14 @@ export abstract class Action {
     dt: number,
   ): void {
     // action should not start yet
-    if (now < action.runStartTime + action.startOffset) {
+    if (now < action.runStartTime + action.startOffset.value) {
       return;
     }
 
     if (
-      now >= action.runStartTime + action.startOffset &&
-      now <= action.runStartTime + action.startOffset + action.duration
+      now >= action.runStartTime + action.startOffset.value &&
+      now <=
+        action.runStartTime + action.startOffset.value + action.duration.value
     ) {
       action.running = true;
     } else {
@@ -339,7 +378,7 @@ export abstract class Action {
       return;
     }
 
-    const elapsed = now - (action.runStartTime + action.startOffset);
+    const elapsed = now - (action.runStartTime + action.startOffset.value);
 
     if (action.type === ActionType.Custom) {
       const customAction = action as CustomAction;
@@ -357,16 +396,26 @@ export abstract class Action {
       const soundManager = soundPlayer.game.soundManager;
 
       if (!playAction.started) {
-        const m2Sound = soundManager.getSound(soundPlayer.soundName!);
+        const m2Sound = soundManager.getSound(soundPlayer.soundName);
         if (m2Sound.audioBuffer) {
           const source = soundManager.audioContext.createBufferSource();
           source.buffer = m2Sound.audioBuffer;
           source.onended = () => {
             playAction.running = false;
             playAction.completed = true;
-            const dur =
-              performance.now() - (action.runStartTime + action.startOffset);
-            console.log("duration was ", dur);
+            /**
+             * Now that the sound has ended, we can calculate the duration of
+             * the action.
+             */
+            const knownDuration =
+              performance.now() -
+              (action.runStartTime + action.startOffset.value);
+            /**
+             * The assign method updates this Futurable's expression to the
+             * known duration, and this will propagate to any other
+             * Futurables that depend on this one.
+             */
+            action.duration.assign(knownDuration);
           };
           source.connect(soundManager.audioContext.destination);
           source.start();
@@ -381,7 +430,10 @@ export abstract class Action {
 
     if (action.type === ActionType.Wait) {
       const waitAction = action as WaitAction;
-      if (now > action.runStartTime + action.startOffset + action.duration) {
+      if (
+        now >
+        action.runStartTime + action.startOffset.value + action.duration.value
+      ) {
         waitAction.running = false;
         waitAction.completed = true;
       }
@@ -398,18 +450,18 @@ export abstract class Action {
         moveAction.started = true;
       }
 
-      if (elapsed < moveAction.duration) {
+      if (elapsed < moveAction.duration.value) {
         node.position.x = moveAction.easing(
           elapsed,
           moveAction.startPoint.x,
           moveAction.dx,
-          moveAction.duration,
+          moveAction.duration.value,
         );
         node.position.y = moveAction.easing(
           elapsed,
           moveAction.startPoint.y,
           moveAction.dy,
-          moveAction.duration,
+          moveAction.duration.value,
         );
       } else {
         node.position.x = moveAction.point.x;
@@ -427,9 +479,9 @@ export abstract class Action {
         scaleAction.started = true;
       }
 
-      if (elapsed < scaleAction.duration) {
+      if (elapsed < scaleAction.duration.value) {
         node.scale =
-          node.scale + scaleAction.delta * (dt / scaleAction.duration);
+          node.scale + scaleAction.delta * (dt / scaleAction.duration.value);
       } else {
         node.scale = scaleAction.scale;
         scaleAction.running = false;
@@ -445,9 +497,10 @@ export abstract class Action {
         fadeAlphaAction.started = true;
       }
 
-      if (elapsed < fadeAlphaAction.duration) {
+      if (elapsed < fadeAlphaAction.duration.value) {
         node.alpha =
-          node.alpha + fadeAlphaAction.delta * (dt / fadeAlphaAction.duration);
+          node.alpha +
+          fadeAlphaAction.delta * (dt / fadeAlphaAction.duration.value);
       } else {
         node.alpha = fadeAlphaAction.alpha;
         fadeAlphaAction.running = false;
@@ -485,9 +538,10 @@ export abstract class Action {
         rotateAction.finalValue = node.zRotation + rotateAction.delta;
       }
 
-      if (elapsed < rotateAction.duration) {
+      if (elapsed < rotateAction.duration.value) {
         node.zRotation =
-          node.zRotation + rotateAction.delta * (dt / rotateAction.duration);
+          node.zRotation +
+          rotateAction.delta * (dt / rotateAction.duration.value);
         /**
          * Check if action has overshot the final value. If so, set to final
          * value. Check will vary depending on whether the delta is positive
@@ -523,7 +577,7 @@ export abstract class Action {
    * @param action
    * @returns the calculated duration
    */
-  private calculateDuration(action: Action): number {
+  private calculateDuration(action: Action): Futurable {
     if (action.type === ActionType.Group) {
       /**
        * Because group actions run in parallel, the duration of a group
@@ -533,9 +587,9 @@ export abstract class Action {
       const duration = groupAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((max, dur) => {
-          return Math.max(max, dur);
+          return Math.max(max, dur.value);
         }, 0);
-      return duration;
+      return new Futurable(duration);
     }
     if (action.type === ActionType.Sequence) {
       /**
@@ -546,9 +600,9 @@ export abstract class Action {
       const duration = sequenceAction.children
         .map((child) => this.calculateDuration(child))
         .reduce((sum, dur) => {
-          return sum + dur;
+          return sum + dur.value;
         }, 0);
-      return duration;
+      return new Futurable(duration);
     }
 
     /** If the action is not a group or sequence, its duration is simply the
@@ -563,52 +617,52 @@ export abstract class Action {
    * @remarks Uses recursion to handle arbitrary level of nesting parent
    * actions within parent actions.
    *
-   * @param action that needs assigning start and end offsets
+   * @param action - action that needs assigning start and end offsets
    */
   private calculateStartEndOffsets(action: Action): void {
-    let parentStartOffset: number;
-    if (action.parent === undefined) {
-      // this is the rootAction
-      parentStartOffset = 0;
-    } else {
-      parentStartOffset = action.parent.startOffset;
-    }
+    // if there's no parent, this action is the rootAction; start offset is 0
+    const parentStartOffset: Futurable =
+      action.parent?.startOffset ?? new Futurable(0);
 
-    if (action.parent?.type === ActionType.Group) {
-      /**
-       * If the action's parent is a group, this action's start offset
-       * is the parent's start offset.
-       */
-      action.startOffset = parentStartOffset;
-      action.endOffset = action.startOffset + action.duration;
-    } else if (action.parent?.type === ActionType.Sequence) {
-      const parent = action.parent as IActionContainer;
-      /**
-       * If the action's parent is a sequence, this action's start offset
-       * is the parent's start offset PLUS any sibling actions prior in
-       * the sequence.
-       */
-      let dur = 0;
-      for (const a of parent.children!) {
-        if (a === action) {
-          // if we've iterated to this action, then stop accumulating
-          break;
-        }
-        // dur is the accumulator of prior sibling durations in the sequence
-        dur = dur + a.duration;
+    switch (action.parent?.type) {
+      case ActionType.Group: {
+        /**
+         * If the action's parent is a group, this action's start offset
+         * is the parent's start offset.
+         */
+        action.startOffset = parentStartOffset;
+        break;
       }
-      action.startOffset = parentStartOffset + dur;
-      action.endOffset = action.startOffset + action.duration;
-    } else {
-      // the action has no parent.
-      action.startOffset = 0;
-      action.endOffset = action.startOffset + action.duration;
+      case ActionType.Sequence: {
+        /**
+         * If the action's parent is a sequence, this action's start offset
+         * is the parent's start offset PLUS any sibling actions prior in
+         * the sequence.
+         */
+        const priorSiblingsDuration = new Futurable(0);
+        for (const siblingAction of action.parent.children) {
+          if (siblingAction === action) {
+            // if we've iterated to this action, then stop accumulating
+            break;
+          }
+          /**
+           * priorSiblingsDuration is the accumulator of prior sibling durations
+           * in the sequence
+           */
+          priorSiblingsDuration.add(siblingAction.duration);
+        }
+        action.startOffset.add(parentStartOffset, priorSiblingsDuration);
+        break;
+      }
+      default: {
+        // the action has no parent.
+        action.startOffset = new Futurable(0);
+      }
     }
+    action.endOffset.add(action.startOffset, action.duration);
 
-    if (action.isParent) {
-      (action as IActionContainer).children?.forEach((child) =>
-        this.calculateStartEndOffsets(child),
-      );
+    if (this.isParent(action)) {
+      action.children.forEach((child) => this.calculateStartEndOffsets(child));
     }
   }
 
@@ -632,15 +686,14 @@ export abstract class Action {
       actions = new Array<Action>();
       actions.push(action);
     }
-    if (action.isParent) {
-      const parent = action as IActionContainer;
-      const children = parent.children!;
+    if (this.isParent(action)) {
+      const children = action.children;
       // flatten this parent's children and add to accumulator array
       actions.push(...children);
       // recurse for any children who themselves are parents
-      parent
-        .children!.filter((child) => child.isParent)
-        .forEach((child: Action) => this.flattenActions(child, actions));
+      children
+        .filter((child) => this.isParent(child))
+        .forEach((child) => this.flattenActions(child, actions));
     }
     return actions;
   }
@@ -665,41 +718,43 @@ export abstract class Action {
       action.key = key;
     }
     /**
-     *  group and sequence are IActionContainer: parent actions that
+     *  group and sequence are ActionContainer: parent actions that
      *  can hold other actions
      */
-    if (action.isParent) {
-      const parent = action as IActionContainer;
-      const children = parent.children!;
+    if (this.isParent(action)) {
+      const children = action.children;
       children.forEach((child) => {
         child.parent = action;
-        child.isChild = true;
       });
       // recurse for any children who themselves are parents
-      parent
-        .children!.filter((child) => child.isParent)
-        .forEach((child: Action) => this.assignParents(child, rootAction, key));
+      children
+        .filter((child) => this.isParent(child))
+        .forEach((child) => this.assignParents(child, rootAction, key));
     }
+  }
+
+  private isParent(action: Action): action is ActionContainer {
+    return (
+      action.type === ActionType.Group || action.type === ActionType.Sequence
+    );
   }
 }
 
-export class SequenceAction extends Action implements IActionContainer {
+export class SequenceAction extends Action implements ActionContainer {
   type = ActionType.Sequence;
   children: Array<Action>;
   constructor(actions: Array<Action>) {
     super();
     this.children = actions;
-    this.isParent = true;
   }
 }
 
-export class GroupAction extends Action implements IActionContainer {
+export class GroupAction extends Action implements ActionContainer {
   type = ActionType.Group;
   children = new Array<Action>();
   constructor(actions: Array<Action>) {
     super();
     this.children = actions;
-    this.isParent = true;
   }
 }
 
@@ -709,8 +764,7 @@ export class CustomAction extends Action {
   constructor(callback: () => void, runDuringTransition = false) {
     super(runDuringTransition);
     this.callback = callback;
-    this.isParent = false;
-    this.duration = 0;
+    this.duration = new Futurable(0);
   }
 }
 
@@ -718,17 +772,15 @@ export class PlayAction extends Action {
   type = ActionType.Play;
   constructor(runDuringTransition = false) {
     super(runDuringTransition);
-    this.isParent = false;
-    this.duration = 0;
+    this.duration = new Futurable();
   }
 }
 
 export class WaitAction extends Action {
   type = ActionType.Wait;
-  constructor(duration: number, runDuringTransition: boolean) {
+  constructor(duration: Futurable, runDuringTransition: boolean) {
     super(runDuringTransition);
     this.duration = duration;
-    this.isParent = false;
   }
 }
 
@@ -741,14 +793,13 @@ export class MoveAction extends Action {
   easing: EasingFunction;
   constructor(
     point: Point,
-    duration: number,
+    duration: Futurable,
     easing: EasingFunction,
     runDuringTransition: boolean,
   ) {
     super(runDuringTransition);
     this.duration = duration;
     this.point = point;
-    this.isParent = false;
     this.startPoint = { x: NaN, y: NaN };
     this.easing = easing;
   }
@@ -758,11 +809,10 @@ export class ScaleAction extends Action {
   type = ActionType.Scale;
   scale: number;
   delta = 0;
-  constructor(scale: number, duration: number, runDuringTransition = false) {
+  constructor(scale: number, duration: Futurable, runDuringTransition = false) {
     super(runDuringTransition);
     this.duration = duration;
     this.scale = scale;
-    this.isParent = false;
   }
 }
 
@@ -770,11 +820,10 @@ export class FadeAlphaAction extends Action {
   type = ActionType.FadeAlpha;
   alpha: number;
   delta = 0;
-  constructor(alpha: number, duration: number, runDuringTransition = false) {
+  constructor(alpha: number, duration: Futurable, runDuringTransition = false) {
     super(runDuringTransition);
     this.duration = duration;
     this.alpha = alpha;
-    this.isParent = false;
   }
 }
 
@@ -789,7 +838,7 @@ export class RotateAction extends Action {
     byAngle: number | undefined,
     toAngle: number | undefined,
     shortestUnitArc: boolean | undefined,
-    duration: number,
+    duration: Futurable,
     runDuringTransition = false,
   ) {
     super(runDuringTransition);
@@ -797,6 +846,5 @@ export class RotateAction extends Action {
     this.byAngle = byAngle;
     this.toAngle = toAngle;
     this.shortestUnitArc = shortestUnitArc;
-    this.isParent = false;
   }
 }
