@@ -1,5 +1,5 @@
 import { M2Node } from "./M2Node";
-import { M2NodeType } from ".";
+import { M2NodeType, M2SoundStatus } from ".";
 import { MoveActionOptions } from "./MoveActionOptions";
 import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
@@ -421,9 +421,18 @@ export abstract class Action {
           source.start();
           playAction.started = true;
         } else {
+          if (m2Sound.status === M2SoundStatus.Error) {
+            throw new Error(
+              `error loading sound ${m2Sound.soundName} (url ${m2Sound.url})`,
+            );
+          }
           console.warn(
-            `Play action: audio buffer not ready for sound ${soundPlayer.soundName}; will try next frame`,
+            `Play action: audio buffer not ready for sound ${soundPlayer.soundName} (url: ${m2Sound.url}); will try next frame`,
           );
+          if (m2Sound.status === M2SoundStatus.Deferred) {
+            // Do not await this; we want to continue evaluating other actions
+            soundManager.fetchDeferredSound(m2Sound);
+          }
         }
       }
     }

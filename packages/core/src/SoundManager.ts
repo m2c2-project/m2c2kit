@@ -42,17 +42,35 @@ export class SoundManager {
    * only be fetched, not decoded because the AudioContext can not yet
    * be created (it requires a user interaction).
    *
-   * @param sounds - array of SoundAsset objects
+   * @param soundAssets - array of SoundAsset objects
    */
-  initializeSounds(sounds: Array<SoundAsset> | undefined): Promise<void> {
-    return this.fetchSounds(sounds ?? []);
+  initializeSounds(soundAssets: Array<SoundAsset> | undefined): Promise<void> {
+    if (!soundAssets) {
+      return Promise.resolve();
+    }
+    return this.loadSounds(soundAssets);
   }
 
-  private async fetchSounds(sounds: Array<SoundAsset>) {
-    if (sounds.length === 0) {
-      return;
+  /**
+   * Loads an array of sound assets and makes them ready for the game.
+   *
+   * @remarks Loading a sound consists of 1) fetching the sound file and 2)
+   * decoding the sound data. The sound is then ready to be played. Step 1
+   * can be done at any time, but step 2 requires an `AudioContext`, which
+   * can only be created after a user interaction. If a play `Action` is
+   * attempted before the sound is ready (either it has not been fetched or
+   * decoded), the play `Action` will log a warning to the console and the
+   * loading process will continue in the background, and the sound will play
+   * when ready. This `loadSounds()` method **does not** have to be awaited.
+   *
+   * @param soundAssets - an array of {@link SoundAsset}
+   * @returns A promise that completes when all sounds have loaded
+   */
+  loadSounds(soundAssets: Array<SoundAsset>): Promise<void> {
+    if (soundAssets.length === 0) {
+      return Promise.resolve();
     }
-    const fetchSoundsPromises = sounds.map((sound) => {
+    soundAssets.forEach((sound) => {
       /**
        * If the url has a scheme, then we do not alter the url. Otherwise, we
        * prepend the game assets base URL and look for the full URL in the
@@ -70,15 +88,27 @@ export class SoundManager {
         data: undefined,
         audioBuffer: undefined,
         url,
-        status: sound.lazy ? M2SoundStatus.Deferred : M2SoundStatus.Fetching,
+        status: sound.lazy ? M2SoundStatus.Deferred : M2SoundStatus.WillFetch,
       };
+      if (this.sounds[sound.soundName]) {
+        console.warn(
+          `A sound named ${sound.soundName} has already been loaded. It will be replaced.`,
+        );
+      }
       this.sounds[sound.soundName] = m2Sound;
+    });
+    return this.fetchSounds();
+  }
 
-      if (m2Sound.status === M2SoundStatus.Fetching) {
+  private async fetchSounds() {
+    const fetchSoundsPromises = Object.values(this.sounds).map((m2Sound) => {
+      if (m2Sound.status === M2SoundStatus.WillFetch) {
+        m2Sound.status = M2SoundStatus.Fetching;
         return fetch(m2Sound.url).then((response) => {
           if (!response.ok) {
+            m2Sound.status = M2SoundStatus.Error;
             throw new Error(
-              `cannot fetch font ${sound.soundName} at url ${sound.url}: ${response.statusText}`,
+              `cannot fetch sound ${m2Sound.soundName} at url ${m2Sound.url}: ${response.statusText}`,
             );
           }
           return response.arrayBuffer().then((arrayBuffer) => {
@@ -95,6 +125,28 @@ export class SoundManager {
     await Promise.all(fetchSoundsPromises);
   }
 
+  /**
+   * Fetches a m2c2kit sound ({@link M2Sound}) that was previously
+   * initialized with lazy loading.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @param m2Sound - M2Sound to fetch
+   * @returns A promise that completes when sounds have been fetched
+   */
+  fetchDeferredSound(m2Sound: M2Sound): Promise<void> {
+    m2Sound.status = M2SoundStatus.WillFetch;
+    return this.fetchSounds();
+  }
+
+  /**
+   * Checks if the SoundManager has sounds needing decoding.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @returns true if there are sounds that have been fetched and are waiting
+   * to be decoded (status is `M2SoundStatus.Fetched`)
+   */
   hasSoundsToDecode() {
     return (
       Object.values(this.sounds).filter(
@@ -103,7 +155,17 @@ export class SoundManager {
     );
   }
 
-  async decodeFetchedSounds() {
+  /**
+   * Decodes all fetched sounds from bytes to an `AudioBuffer`.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks This method will be called after the `AudioContext` has been
+   * created and if there are fetched sounds waiting to be decoded.
+   *
+   * @returns A promise that completes when all fetched sounds have been decoded
+   */
+  decodeFetchedSounds() {
     const sounds = Object.values(this.sounds);
     const decodeSoundsPromises = sounds
       .filter((sound) => sound.status === M2SoundStatus.Fetched)
@@ -111,18 +173,33 @@ export class SoundManager {
     return Promise.all(decodeSoundsPromises);
   }
 
+  /**
+   * Decodes a sound from bytes to an `AudioBuffer`.
+   *
+   * @param sound - sound to decode
+   */
   private async decodeSound(sound: M2Sound) {
     if (!sound.data) {
-      throw new Error("sound data is undefined");
+      throw new Error(
+        `data is undefined for sound ${sound.soundName} (url ${sound.url})`,
+      );
     }
-    sound.status = M2SoundStatus.Decoding;
-    return this.audioContext.decodeAudioData(sound.data).then((buffer) => {
+
+    try {
+      sound.status = M2SoundStatus.Decoding;
+      const buffer = await this.audioContext.decodeAudioData(sound.data);
       sound.audioBuffer = buffer;
       sound.status = M2SoundStatus.Ready;
       console.log(
         `⚪ sound decoded. name: ${sound.soundName}, duration (seconds): ${buffer.duration}`,
       );
-    });
+    } catch {
+      // Set status to Error. An exception will also be thrown by the play action.
+      sound.status = M2SoundStatus.Error;
+      throw new Error(
+        `error decoding sound ${sound.soundName} (url: ${sound.url})`,
+      );
+    }
   }
 
   /**
@@ -146,7 +223,7 @@ export class SoundManager {
   }
 
   /**
-   * Frees up resources allocated by the FontManager.
+   * Frees up resources allocated by the SoundManager.
    *
    * @internal For m2c2kit library use only
    *
@@ -156,7 +233,10 @@ export class SoundManager {
   dispose(): void {}
 
   /**
-   * Gets names of sounds entered in the SoundManager.
+   * Gets names of sounds entered in the `SoundManager`.
+   *
+   * @remarks These are sounds that the `SoundManager` is aware of. The sounds
+   * may not be ready to play (may not have been fetched or decoded yet).
    *
    * @returns array of sound names
    */

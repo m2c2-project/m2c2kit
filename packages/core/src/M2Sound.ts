@@ -9,6 +9,8 @@ export interface M2Sound {
 export const M2SoundStatus = {
   /** Sound was set for lazy loading, and loading has not yet been requested. */
   Deferred: "Deferred",
+  /** Sound is indicated for fetching, but fetching has not begun. */
+  WillFetch: "WillFetch",
   /** Sound is being fetched. */
   Fetching: "Fetching",
   /** Sound has been fetched. */
