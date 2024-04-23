@@ -45,10 +45,10 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.5",
     "rimraf": "5.0.5",
-    "rollup": "4.13.0",
+    "rollup": "4.16.4",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.1.1",
-    "typescript": "5.4.2"
+    "typescript": "5.4.5"
   },
   "engines": {
     "node": ">=18"

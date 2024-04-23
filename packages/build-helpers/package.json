@@ -19,17 +19,17 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@types/estree": "1.0.5",
-    "@types/findup-sync": "4.0.4",
+    "@types/findup-sync": "4.0.5",
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
-    "magic-string": "0.30.8",
+    "magic-string": "0.30.10",
     "rimraf": "5.0.5",
-    "rollup": "4.13.0",
+    "rollup": "4.16.4",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-esbuild": "6.1.1",
     "semver": "7.6.0",
-    "typescript": "5.4.2"
+    "typescript": "5.4.5"
   },
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
