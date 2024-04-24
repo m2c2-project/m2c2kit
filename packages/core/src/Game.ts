@@ -2204,19 +2204,52 @@ export class Game implements Activity {
     }
   }
 
+  /**
+   * Updates active scenes and executes plugins.
+   *
+   */
   private update(): void {
-    this.plugins
-      .filter((p) => p.beforeUpdate !== undefined && p.disabled !== true)
-      .forEach((p) => p.beforeUpdate!(this, Globals.deltaTime));
+    this.executeBeforeUpdatePlugins();
+    this.updateScenes();
+    this.executeAfterUpdatePlugins();
+  }
 
+  /**
+   * Updates all active scenes and their children.
+   */
+  private updateScenes() {
     this.scenes
       .filter((scene) => scene._active)
       .forEach((scene) => scene.update());
     this.freeNodesScene.update();
+  }
 
+  /**
+   * Executes all active plugins before scenes are updated.
+   */
+  private executeBeforeUpdatePlugins() {
     this.plugins
-      .filter((p) => p.afterUpdate !== undefined && p.disabled !== true)
-      .forEach((p) => p.afterUpdate!(this, Globals.deltaTime));
+      .filter(
+        (p) => typeof p.beforeUpdate === "function" && p.disabled !== true,
+      )
+      .forEach((p) => {
+        if (p.beforeUpdate) {
+          p.beforeUpdate(this, Globals.deltaTime);
+        }
+      });
+  }
+
+  /**
+   * Executes all active plugins after scenes have been updated.
+   */
+  private executeAfterUpdatePlugins() {
+    this.plugins
+      .filter((p) => typeof p.afterUpdate === "function" && p.disabled !== true)
+      .forEach((p) => {
+        if (p.afterUpdate) {
+          p.afterUpdate(this, Globals.deltaTime);
+        }
+      });
   }
 
   private draw(canvas: Canvas): void {
