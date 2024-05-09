@@ -11,6 +11,8 @@ import {
   FontManager,
   ImageManager,
 } from "..";
+import { ActionContainer } from "../ActionContainer";
+import { RepeatingActionContainer } from "../RepeatingActionContainer";
 
 TestHelpers.createM2c2KitMock();
 
@@ -454,6 +456,305 @@ describe("actions", () => {
       `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
     );
     expect(rect1.zRotation).toBeCloseTo(Math.PI, 6);
+  });
+
+  it("action are reusable", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 70;
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    const scene1 = g1.scenes[0];
+    const rect2 = new Shape({
+      rect: { size: { width: 10, height: 10 } },
+      name: "myRect2",
+      position: { x: 300, y: 300 },
+    });
+    scene1.addChild(rect2);
+    const moveAction = Action.move({ point: { x: 50, y: 50 }, duration: 1000 });
+
+    rect1.run(moveAction);
+    rect2.run(moveAction);
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+
+    // when action is reused, it is cloned, so the actions are not the same object
+    expect(rect1.actions[0]).not.toBe(rect2.actions[0]);
+    // but the results are the same
+    expect(rect1.position).toEqual({ x: 50, y: 50 });
+    expect(rect2.position).toEqual({ x: 50, y: 50 });
+  });
+
+  it("reused actions run independently", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 30;
+    const rect1 = g1.nodes.filter((e) => e.name === "myRect1").find(Boolean);
+    if (!rect1) {
+      throw new Error("rect1 undefined");
+    }
+    const scene1 = g1.scenes[0];
+    const rect2 = new Shape({
+      rect: { size: { width: 10, height: 10 } },
+      name: "myRect2",
+      position: { x: 300, y: 300 },
+    });
+    scene1.addChild(rect2);
+    const moveAction = Action.move({ point: { x: 50, y: 50 }, duration: 1000 });
+
+    rect1.run(moveAction);
+    rect2.run(moveAction);
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+
+    /**
+     * The two rects reuse the same action, but are starting from different
+     * positions. Thus, when we don't allow the actions to run to completion
+     * (duration is 1000ms or 60 frames, but we only run for 30 frames since we
+     * set TestHelpers.maxRequestedFrames = 30), the rects should be in
+     * different positions midway through the action (although they will end up
+     * in the same position at the end of the action).
+     */
+    expect(rect1.position.x).not.toEqual(rect2.position.x);
+    expect(rect1.position.y).not.toEqual(rect2.position.y);
+  });
+
+  it("custom action calls callback", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 10;
+    const scene1 = g1.scenes[0];
+    const callbackFunction = jest.fn();
+
+    scene1.run(
+      Action.custom({
+        callback: () => {
+          callbackFunction();
+        },
+      }),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(callbackFunction).toHaveBeenCalled();
+  });
+
+  it("wait action waits", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 500;
+    const scene1 = g1.scenes[0];
+    let startTime = 0;
+    let endTime = 0;
+    scene1.run(
+      Action.sequence([
+        Action.custom({
+          callback: () => {
+            startTime = performance.now();
+          },
+        }),
+        Action.wait({ duration: 1000 }),
+        Action.custom({
+          callback: () => {
+            endTime = performance.now();
+          },
+        }),
+      ]),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      endTime - startTime,
+      1000,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+  });
+
+  it("sequence action does actions in sequence", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 500;
+    const scene1 = g1.scenes[0];
+    let startTime = 0;
+    let endTime = 0;
+    scene1.run(
+      Action.sequence([
+        Action.custom({
+          callback: () => {
+            startTime = performance.now();
+          },
+        }),
+        Action.wait({ duration: 1000 }),
+        Action.wait({ duration: 500 }),
+        Action.wait({ duration: 200 }),
+        Action.custom({
+          callback: () => {
+            endTime = performance.now();
+          },
+        }),
+      ]),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      endTime - startTime,
+      1700,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+    expect(scene1.actions[0].completed).toBe(true);
+  });
+
+  it("group action does actions in parallel", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 500;
+    const scene1 = g1.scenes[0];
+    let startTime = 0;
+    let endTime1 = 0;
+    let endTime2 = 0;
+    let overallEndTime = 0;
+    scene1.run(
+      Action.sequence([
+        Action.custom({
+          callback: () => {
+            startTime = performance.now();
+          },
+        }),
+        Action.group([
+          Action.sequence([
+            Action.wait({ duration: 500 }),
+            Action.custom({
+              callback: () => {
+                endTime1 = performance.now();
+              },
+            }),
+          ]),
+          Action.sequence([
+            Action.wait({ duration: 1200 }),
+            Action.custom({
+              callback: () => {
+                endTime2 = performance.now();
+              },
+            }),
+          ]),
+        ]),
+        Action.custom({
+          callback: () => {
+            overallEndTime = performance.now();
+          },
+        }),
+      ]),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      endTime1 - startTime,
+      500,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      endTime2 - startTime,
+      1200,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      overallEndTime - startTime,
+      1200,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+    expect(scene1.actions[0].completed).toBe(true);
+  });
+
+  it("repeat action executes wait action multiple times", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 500;
+    const scene1 = g1.scenes[0];
+    let startTime = 0;
+    let endTime = 0;
+
+    scene1.run(
+      Action.sequence([
+        Action.custom({
+          callback: () => {
+            startTime = performance.now();
+          },
+        }),
+        Action.repeat({ count: 3, action: Action.wait({ duration: 500 }) }),
+        Action.custom({
+          callback: () => {
+            endTime = performance.now();
+          },
+        }),
+      ]),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    TestHelpers.expectValueToBeWithinTolerance(
+      endTime - startTime,
+      1500,
+      Math.round(TestHelpers.FRAME_DURATION_MS),
+    );
+    expect(scene1.actions[0].completed).toBe(true);
+    expect(
+      (
+        (scene1.actions[0] as ActionContainer)
+          .children[1] as RepeatingActionContainer
+      ).completedRepetitions,
+    ).toBe(3);
+  });
+
+  it("repeat action calls custom action multiple times", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 100;
+    const scene1 = g1.scenes[0];
+    const callbackFunction = jest.fn();
+    scene1.run(
+      Action.repeat({
+        count: 5,
+        action: Action.custom({ callback: callbackFunction }),
+      }),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(callbackFunction).toHaveBeenCalledTimes(5);
+  });
+
+  it("repeat forever action does not complete", async () => {
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 1000;
+    const scene1 = g1.scenes[0];
+    scene1.run(
+      Action.repeatForever({ action: Action.wait({ duration: 500 }) }),
+    );
+    await g1.start();
+    console.debug(
+      `frames requested: ${TestHelpers.requestedFrames}, elapsed virtual milliseconds: ${TestHelpers.perfCounter}`,
+    );
+    expect(scene1.actions[0].completed).toBe(false);
+    // run for 1000 frames (16,666 ms), with a 500 ms wait each time, we'd expect at least 30 repetitions
+    expect(
+      (scene1.actions[0] as RepeatingActionContainer).completedRepetitions,
+    ).toBeGreaterThan(30);
   });
 });
 

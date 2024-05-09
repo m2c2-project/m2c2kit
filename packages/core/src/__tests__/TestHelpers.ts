@@ -50,6 +50,16 @@ export class TestHelpers {
   static perfCounter = 0;
   static requestedFrames = 0;
   static maxRequestedFrames = 0;
+  static FRAME_DURATION_MS = 16.66666666666667;
+
+  static expectValueToBeWithinTolerance(
+    value: number,
+    expected: number,
+    tolerance: number,
+  ) {
+    expect(value).toBeGreaterThanOrEqual(expected - tolerance);
+    expect(value).toBeLessThanOrEqual(expected + tolerance);
+  }
 
   static performance = {
     now: () => this.perfCounter,
@@ -72,7 +82,7 @@ export class TestHelpers {
     };
 
     const requestAnimationFrame = (callback: (canvas: object) => void) => {
-      this.perfCounter = this.perfCounter + 16.66666666666667;
+      this.perfCounter = this.perfCounter + this.FRAME_DURATION_MS;
       if (TestHelpers.requestedFrames < TestHelpers.maxRequestedFrames) {
         TestHelpers.requestedFrames++;
         callback(skiaCanvas);

@@ -9,4 +9,6 @@ export enum ActionType {
   FadeAlpha = "FadeAlpha",
   Rotate = "Rotate",
   Play = "Play",
+  Repeat = "Repeat",
+  RepeatForever = "RepeatForever",
 }

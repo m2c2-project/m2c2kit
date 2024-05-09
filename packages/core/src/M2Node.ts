@@ -859,44 +859,9 @@ export abstract class M2Node implements M2NodeOptions {
       }
     }
 
-    /**
-     * Distinguish uncompleted actions that can run during a scene transition
-     * from uncompleted "regular" ones that do not
-     */
-    const uncompletedTransitionActions = this.actions.filter(
-      (action) => action.runDuringTransition && !action.completed,
+    this.actions.forEach((action) =>
+      Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
     );
-    const uncompletedRegularActions = this.actions.filter(
-      (action) => !action.runDuringTransition && !action.completed,
-    );
-
-    // Evaluate all uncompleted actions that can run during a transition
-    if (uncompletedTransitionActions.length > 0) {
-      uncompletedTransitionActions.forEach((action) => {
-        if (action.runStartTime === -1) {
-          // if there are any and they have not started yet, set their run time to now
-          action.runStartTime = Globals.now;
-        }
-      });
-      uncompletedTransitionActions.forEach((action) =>
-        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
-      );
-    }
-
-    // If not transitioning, evaluate all regular uncompleted actions
-    if (
-      !this.involvedInSceneTransition() &&
-      uncompletedRegularActions.length > 0
-    ) {
-      uncompletedRegularActions.forEach((action) => {
-        if (action.runStartTime === -1) {
-          action.runStartTime = Globals.now;
-        }
-      });
-      uncompletedRegularActions.forEach((action) =>
-        Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
-      );
-    }
 
     // Update the node's children
     //
@@ -1041,15 +1006,7 @@ export abstract class M2Node implements M2NodeOptions {
      * However, we want to allow multiple actions to be run on a node at
      * the same time, so we push the new actions onto the actions array.
      */
-    this.actions.push(...action.initialize(key));
-    /**
-     * Previously, there was a thought that we would save the original
-     * actions, in case we needed them. So far, we have not needed them.
-     * Thus, this is commented out.
-     */
-    // this.originalActions = this.actions
-    //   .filter((action) => action.runDuringTransition === false)
-    //   .map((action) => Action.cloneAction(action, key));
+    this.actions.push(action.initialize(key));
   }
 
   /**

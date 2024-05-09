@@ -49,7 +49,7 @@ export class Futurable {
   }
 
   /**
-   * Appends a number or another Futurable to this Fururable's expression.
+   * Appends a number or another Futurable to this Futurable's expression.
    *
    * @remarks This method does a simple array push, but checks the length of
    * the expression array and warns if it gets "too long." This may indicate
