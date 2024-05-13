@@ -320,7 +320,6 @@ export abstract class Action {
           action.started = true;
         }
         if (action.running && action.completed) {
-          console.log(`parent action completed: ${action.type}`);
           action.running = false;
         }
         return;
@@ -398,9 +397,6 @@ export abstract class Action {
       const repetitionDuration = action.children[0].duration.value;
       action.cumulativeDuration =
         action.cumulativeDuration + repetitionDuration;
-      console.log(
-        `completed ${action.completedRepetitions} of ${action.count} repetitions. Cumulative duration: ${action.cumulativeDuration}`,
-      );
 
       /**
        * Having completed a repetition, repetitionDuration must now be a
@@ -427,9 +423,6 @@ export abstract class Action {
          */
         action.duration.assign(action.cumulativeDuration);
         action.running = false;
-        console.log(
-          `completed repeatAction, duration was ${action.duration.value}`,
-        );
       }
     }
   }
