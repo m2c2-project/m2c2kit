@@ -8,3 +8,4 @@ node_modules/
 assets/
 *.handlebars
 website/**/*.md
+website/**/*.mdx

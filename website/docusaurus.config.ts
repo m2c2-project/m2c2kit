@@ -129,6 +129,15 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
 
+  /**
+   * When using format `detect`, any markdown files using JSX must have
+   * extension `.mdx`.
+   * See https://github.com/typedoc2md/typedoc-plugin-markdown/issues/609#issuecomment-2099477248
+   */
+  markdown: {
+    format: "detect",
+  },
+
   plugins: [
     [
       "docusaurus-plugin-typedoc",
@@ -136,7 +145,7 @@ const config: Config = {
         id: "api-core",
         entryPoints: ["../packages/core/src/index.ts"],
         tsconfig: "../packages/core/tsconfig.json",
-        out: "reference/api-core",
+        out: "docs/reference/api-core",
         sidebar: {
           categoryLabel: "@m2c2kit/core",
           position: 0,
@@ -150,7 +159,7 @@ const config: Config = {
         id: "api-addons",
         entryPoints: ["../packages/addons/src/index.ts"],
         tsconfig: "../packages/addons/tsconfig.json",
-        out: "reference/api-addons",
+        out: "docs/reference/api-addons",
         sidebar: {
           categoryLabel: "@m2c2kit/addons",
           position: 1,
@@ -164,7 +173,7 @@ const config: Config = {
         id: "api-session",
         entryPoints: ["../packages/session/src/index.ts"],
         tsconfig: "../packages/session/tsconfig.json",
-        out: "reference/api-session",
+        out: "docs/reference/api-session",
         sidebar: {
           categoryLabel: "@m2c2kit/session",
           position: 2,
@@ -178,7 +187,7 @@ const config: Config = {
         id: "api-physics",
         entryPoints: ["../packages/physics/src/index.ts"],
         tsconfig: "../packages/physics/tsconfig.json",
-        out: "reference/api-physics",
+        out: "docs/reference/api-physics",
         sidebar: {
           categoryLabel: "@m2c2kit/physics",
           position: 3,

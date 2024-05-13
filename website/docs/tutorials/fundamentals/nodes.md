@@ -4,8 +4,6 @@ sidebar_position: 2
 hide_table_of_contents: true
 ---
 
-import CodeExample from '@site/src/components/CodeExample';
-
 # Nodes
 
 A node is the basic[^1] building block in m2c2kit. A node is a graphical object that can be displayed on the screen. Nodes can be moved, rotated, and scaled. Nodes can also be animated, and they can respond to user input.

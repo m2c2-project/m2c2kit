@@ -188,7 +188,7 @@ class Stroop extends Game {
 
     const fixationCross = new Label({
       text: "+",
-      color: WebColors.Black,
+      fontColor: WebColors.Black,
       position: { x: 200, y: 400 },
       fontSize: 64,
       hidden: true,

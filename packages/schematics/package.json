@@ -23,14 +23,14 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@angular-devkit/core": "^17.3.5",
-    "@angular-devkit/schematics": "^17.3.5",
-    "@schematics/angular": "^17.3.5",
+    "@angular-devkit/core": "^17.3.7",
+    "@angular-devkit/schematics": "^17.3.7",
+    "@schematics/angular": "^17.3.7",
     "archiver": "7.0.1",
     "findup-sync": "5.0.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^17.3.5",
+    "@angular-devkit/schematics-cli": "^17.3.7",
     "@types/archiver": "6.0.2",
     "jasmine": "^4.0.0",
     "typescript": "5.4.5"

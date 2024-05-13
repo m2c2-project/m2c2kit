@@ -1,114 +1,149 @@
 ---
-sidebar_position: 5
+sidebar_position: 4
 hide_table_of_contents: true
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
 
-# Saving Data
+# Randomization
 
-## Schema
-
-All data must be defined in the schema. We use this schema:
-
-```js
-const schema = {
-    trial_index: {
-        type: "integer",
-        description: "Index of the trial within this assessment, 0-based.",
-    },
-    congruent_stimulus: {
-        type: "boolean",
-        description: "Did the word displayed on the screen match its font color?",
-    },
-    response_time_ms: {
-        type: "number",
-        description: "Time in milliseconds between when the word appears and the user taps a response button.",
-    },
-    response_correct: {
-        type: "boolean",
-        description: "Was the user's response correct? (Did the button response match the font color).",
-    }      
-};
-```
-
-## Timing the user
-
-How long the user takes to respond is important. This response time will be the duration from when the word appears until when the user taps a response button. We start a timer in the same Action in which we make the word visible and the response buttons enabled.
+Each trial should randomize what the word is, and what word's font color is. You might think the place to do that is in the last Action that executes when the presentation scene appears:
 
 ```js
 Action.custom( {callback: () => {
     redButton.hidden = false;
     greenButton.hidden = false;
     blueButton.hidden = false;
-    wordLabel.text = trialConfigurations[game.trialIndex].word;
-    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+    // highlight-start
+    wordLabel.text = CODE TO RANDOMLY CHOOSE A WORD HERE
+    wordLabel.fontColor = CODE TO RANDOMLY CHOOSE ITS COLOR HERE
+    // highlight-end    
     redButton.isUserInteractionEnabled = true;
     greenButton.isUserInteractionEnabled = true;
     blueButton.isUserInteractionEnabled = true;
-    // highlight-start
-    Timer.startNew("rt");
-    // highlight-end
-}})
+}}),
 ```
 
-We stop the timer in the `handleResponse` event handler for the button taps, and store the elapsed time in the variable `responseTime`.
+While this would work, it would be inadequate for most assessments. Although unlikely, it's possible that the same word could be chosen in all the assessment. Or, the same color could be chosen for all the words. It's impossible to specify exactly how many congruent and incongruent trials the user will see.
+
+## Determine the trial configurations in advance
+
+In nearly all cases, you should randomize the trial configurations in advance. This ensures that you can achieve the desired variation for your assessments across the repeated trials.
+
+:::note
+
+This is probably the most complicated part of programming an assessment. It's a lot of data structures, arrays, indexes, and loops. But, it's worth it to get the randomization right.
+
+:::
+
+## Prepare the groundwork for randomization
+
+We define a data structure, `wordColors`, that is an array of objects. Each object has two properties: `text` and `color`. We'll use this data structure to randomize the word and its color.
 
 ```js
-function handleResponse(buttonColor) {
-    Timer.stop("rt");
-    const responseTime = Timer.elapsed("rt");
-    ...
+const wordColors = [
+    {text: "Red", color: WebColors.Red},
+    {text: "Green", color: WebColors.Green},
+    {text: "Blue", color: WebColors.Blue}
+];
 ```
 
-## Saving data for the trial
-
-Because the button tap is the end of all the user's behavior for this trial, at this point we have all the data on this trial. In the `handleResponse` event handler, save the trial data for each of the measurements in the schema.
+We define how many trials there will be, and how many will be congruent (later we will parameterize these). We also define an array, `trialConfigurations`, that will hold the unique combination of word and color for each trial.
 
 ```js
-function handleResponse(buttonColor) {
-    Timer.stop("rt");
-    const responseTime = Timer.elapsed("rt");
-    game.addTrialData("trial_index", game.trialIndex);
-    game.addTrialData("response_time_ms", responseTime);
-    Timer.remove("rt");
-    game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
-    if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
-        game.addTrialData("response_correct", true);
+const numberOfTrials = 3;
+const numberOfCongruentTrials = 2;
+const trialConfigurations = [];
+```
+
+The last preparation step is to randomly choose which trials will be congruent. `congruentIndexes` is an array that specifies which trials will be congruent. 
+
+```js
+const congruentIndexes = RandomDraws.FromRangeWithoutReplacement(numberOfCongruentTrials, 0, numberOfTrials - 1);
+```
+
+Because we have 3 trials total, and 2 will be congruent, `congruentIndexes` might be `[0, 2]`. This means that the first and third trials will be congruent.
+
+## Create each trial configuration
+
+To set the properties of each trial, loop through each of the trials. We'll use the `i` variable to keep track of which trial we're on.
+
+In each iteration through the loop, we put the word in the variable `text`. We test if the current trial is congruent with `if (congruentIndexes.includes(i))`. If it is, we set the `textColor` to be the same as the word. We also store the name of this color in the variable `colorAsString`. A variable `isCongruent` notes if this is a congruent trial or not. If the current trial is not congruent, we set the color to be a random color that's not the same as the word.
+
+The properties of the trial are stored in an object, `trial`, which we push into the `trialConfigurations` array.
+
+```js
+for (let i = 0; i < numberOfTrials; i++) {
+    const wordIndex = RandomDraws.SingleFromRange(0, wordColors.length - 1);
+    const text = wordColors[wordIndex].text;
+    let isCongruent;
+    let textColor;
+    let colorAsString;
+    if (congruentIndexes.includes(i)) {
+        textColor = wordColors[wordIndex].color;
+        colorAsString = wordColors[wordIndex].text;
+        isCongruent = true;
     } else {
-        game.addTrialData("response_correct", false);
+        const colorOptions = wordColors.filter(wc => wc.text != text);
+        const colorIndex = RandomDraws.SingleFromRange(0, colorOptions.length - 1);
+        textColor = colorOptions[colorIndex].color;
+        colorAsString = colorOptions[colorIndex].text;
+        isCongruent = false;
     }
-    ...
+    const trial = { word: text, color: textColor, colorString: colorAsString, congruent: isCongruent};
+    trialConfigurations.push(trial);            
+}
+```
+
+## Use the trial configuration to set the word and color
+
+The code to set the word and color is similar to what we proposed at the top of this page. The important difference is that instead of randomizing within this Action, we draw upon the trial configuration we already created. We placed all our trials' configurations in the array `trialConfigurations`. We can use the variable `game.trialIndex` to access the configuration for our current trial.
+
+```js
+Action.custom( {callback: () => {
+    redButton.hidden = false;
+    greenButton.hidden = false;
+    blueButton.hidden = false;
+    // highlight-start
+    wordLabel.text = trialConfigurations[game.trialIndex].word;
+    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+    // highlight-end
+    redButton.isUserInteractionEnabled = true;
+    greenButton.isUserInteractionEnabled = true;
+    blueButton.isUserInteractionEnabled = true;
+}}),
+```
+
+## Determine if the user has finished all the trials
+
+In the `handleResponse` function, we add code to mark the trial as complete. We also check if the user has completed all the trials. If they have, we present the end scene. Otherwise, we do another trial.
+
+```js
+game.trialComplete();
+if (game.trialIndex === numberOfTrials) {
+    game.presentScene(endScene, Transition.slide({
+        direction: TransitionDirection.Left,
+        duration: 500,
+        easing: Easings.quadraticInOut,
+    }));
+} else {
+    game.presentScene(presentationScene);
+}
 ```
 
 ## Progress so far
 
-The assessment now saves data for each trial. When the user completes the assessment, however, the end scene does not yet display the feedback results. 
+The assessment now randomizes the word and its color, and it presents a set number of congruent and incongruent trials. The assessment also ends after a specified number of trials.
+
+However, the assessment does not yet collect any user data (in the console, the data for each trial is `undefined`).
+
+
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 
 export const code = `class DocsDemo extends Game {
     constructor() {
  
-        const schema = {
-            trial_index: {
-                type: "integer",
-                description: "Index of the trial within this assessment, 0-based.",
-            },
-            congruent_stimulus: {
-                type: "boolean",
-                description: "Did the word displayed on the screen match its font color?",
-            },
-            response_time_ms: {
-                type: "number",
-                description: "Time in milliseconds between when the word appears and the user taps a response button.",
-            },
-            response_correct: {
-                type: "boolean",
-                description: "Was the user's response correct? (Did the button response match the font color).",
-            }      
-        };
-  
         const options = {
             name: "Documentation Example",
             id: "docs",
@@ -120,8 +155,7 @@ export const code = `class DocsDemo extends Game {
             images: [{
                 imageName: "stroop-screenshot",
                 height: 336, width: 384, url: "images/stroop.png"
-            }],            
-            trialSchema: schema,
+            }],
         };
         super(options);
     }
@@ -197,7 +231,7 @@ export const code = `class DocsDemo extends Game {
  
         const fixationCross = new Label({
             text: "+",
-            color: WebColors.Black,
+            fontColor: WebColors.Black,
             position: { x: 200, y: 400 },
             fontSize: 64,
             hidden: true
@@ -253,25 +287,12 @@ export const code = `class DocsDemo extends Game {
                     wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
                     redButton.isUserInteractionEnabled = true;
                     greenButton.isUserInteractionEnabled = true;
-                    blueButton.isUserInteractionEnabled = true; 
-                    Timer.startNew("rt");
+                    blueButton.isUserInteractionEnabled = true;
                 }}),
             ]));
         });
  
         function handleResponse(buttonColor) {
-            Timer.stop("rt");
-            const responseTime = Timer.elapsed("rt");
-            game.addTrialData("trial_index", game.trialIndex);
-            game.addTrialData("response_time_ms", responseTime);
-            Timer.remove("rt");
-            game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
-            if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
-                game.addTrialData("response_correct", true);
-            } else {
-                game.addTrialData("response_correct", false);
-            }
- 
             redButton.hidden = true;
             greenButton.hidden = true;
             blueButton.hidden = true;
@@ -307,6 +328,7 @@ export const code = `class DocsDemo extends Game {
         game.addScene(endScene);
         const doneLabel = new Label({
             text: "You are done!",
+            fontColor: WebColors.Black,
             position: { x: 200, y: 200 },
         });
         endScene.addChild(doneLabel);
@@ -324,7 +346,7 @@ export const code = `class DocsDemo extends Game {
             text: "Mean incongruent rt: ",
             position: { x: 200, y: 400 },
         });
-        endScene.addChild(incongruentRtLabel);                
+        endScene.addChild(incongruentRtLabel);        
     }
 }`;
 

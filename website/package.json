@@ -29,26 +29,26 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@docusaurus/core": "3.2.1",
-    "@docusaurus/preset-classic": "3.2.1",
+    "@docusaurus/core": "3.3.2",
+    "@docusaurus/preset-classic": "3.3.2",
     "@easyops-cn/docusaurus-search-local": "0.40.1",
     "@mdx-js/react": "^3.0.1",
     "@monaco-editor/react": "4.6.0",
     "clsx": "^2.1.1",
-    "es-module-shims": "1.9.0",
+    "es-module-shims": "1.10.0",
     "prism-react-renderer": "^2.3.1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.2.1",
-    "@docusaurus/tsconfig": "3.2.1",
-    "@docusaurus/types": "3.2.1",
+    "@docusaurus/module-type-aliases": "3.3.2",
+    "@docusaurus/tsconfig": "3.3.2",
+    "@docusaurus/types": "3.3.2",
     "docusaurus-json-schema-plugin": "1.12.0",
-    "docusaurus-plugin-typedoc": "0.22.0",
+    "docusaurus-plugin-typedoc": "1.0.1",
     "raw-loader": "4.0.2",
     "typedoc": "0.25.13",
-    "typedoc-plugin-markdown": "3.17.1",
+    "typedoc-plugin-markdown": "4.0.1",
     "typescript": "5.4.5"
   },
   "browserslist": {

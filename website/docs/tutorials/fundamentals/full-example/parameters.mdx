@@ -1,13 +1,99 @@
 ---
-sidebar_position: 8
+sidebar_position: 7
 hide_table_of_contents: true
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
 
-# Completed Assessment
+# Adding Parameters
 
-The assessment is now shown at full size. In addition, `number_of_trials` default is set to 8, and `number_of_congruent_trials` default is set to 4. These are more reasonable values for a real experiment.
+We first define the parameters:
+
+```js
+const defaultParameters = {
+    number_of_trials: {
+        type: "integer",
+        default: 3,
+        description: "How many trials to run.",
+    },
+    number_of_congruent_trials: {
+        type: "integer",
+        default: 2,
+        description: "How many trials will be congruent (word matches its color).",
+    },
+    fixation_cross_duration_ms: {
+        type: "number",
+        default: 1000,
+        description: "Duration, in milliseconds, of how long the fixation across will be shown.",
+    },
+    post_fixation_cross_blank_duration_ms: {
+        type: "number",
+        default: 1000,
+        description: "Duration, in milliseconds, of how long a blank screen is shown after the fixation cross is hidden but before the word and response buttons are shown.",
+    },
+    show_feedback: {
+        type: "boolean",
+        default: false,
+        description: "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
+    }
+};
+```
+
+## Using parameters
+
+We call `game.getParameter()` to retrieve the value of each parameter and use that in place of a hard-coded value.
+
+This is done in in the randomization code:
+
+```js
+const numberOfTrials = game.getParameter("number_of_trials");
+const numberOfCongruentTrials = game.getParameter("number_of_congruent_trials");
+```
+
+It is also used in the Actions that show the fixation cross and word:
+
+```js
+Action.custom( {callback: () => {
+    fixationCross.hidden = false;
+}}),
+Action.wait({duration: game.getParameter("fixation_cross_duration_ms")}),
+Action.custom( {callback: () => {
+    fixationCross.hidden = true;
+}}),
+Action.wait({duration: game.getParameter("post_fixation_cross_blank_duration_ms")}),
+```
+
+Finally, determine whether to show the results on the last scene. To do this, we now initialize the results labels' text to empty strings (`""`). Only in the end scene's `onSetup` event handler do we set the labels' text to the results, if `show_feedback` is true:
+
+```js
+endScene.onSetup( ()=> {
+    // highlight-next-line
+    if (game.getParameter("show_feedback")) {
+        const percentCorrect = game.data.trials.filter((trial) => trial.response_correct).length / numberOfTrials;
+        percentCorrectLabel.text = "Percent correct: " + percentCorrect.toFixed(2);
+
+        const congruentTrials = game.data.trials.filter((trial) => trial.congruent_stimulus);
+        let congruentRtSum = 0;
+        for (let i = 0; i < congruentTrials.length; i++) {
+            congruentRtSum = congruentRtSum + congruentTrials[i].response_time_ms;
+        }
+        const meanCongruentRt = congruentRtSum / congruentTrials.length;
+        congruentRtLabel.text = "Mean congruent rt: " + meanCongruentRt.toFixed(2);
+
+        const incongruentTrials = game.data.trials.filter((trial) => !trial.congruent_stimulus);
+        let incongruentRtSum = 0;
+        for (let i = 0; i < incongruentTrials.length; i++) {
+            incongruentRtSum = incongruentRtSum + incongruentTrials[i].response_time_ms;
+        }
+        const meanIncongruentRt = incongruentRtSum / incongruentTrials.length;
+        incongruentRtLabel.text = "Mean incongruent rt: " + meanIncongruentRt.toFixed(2);
+    }
+});
+```
+
+## Progress so far
+
+You now have a fully completed assessment with parameters. The next page will present this at full size.
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 
@@ -17,12 +103,12 @@ export const code = `class DocsDemo extends Game {
         const defaultParameters = {
             number_of_trials: {
                 type: "integer",
-                default: 8,
+                default: 3,
                 description: "How many trials to run.",
             },
             number_of_congruent_trials: {
                 type: "integer",
-                default: 4,
+                default: 2,
                 description: "How many trials will be congruent (word matches its color).",
             },
             fixation_cross_duration_ms: {
@@ -150,7 +236,7 @@ export const code = `class DocsDemo extends Game {
  
         const fixationCross = new Label({
             text: "+",
-            color: WebColors.Black,
+            fontColor: WebColors.Black,
             position: { x: 200, y: 400 },
             fontSize: 64,
             hidden: true
@@ -305,4 +391,4 @@ export const code = `class DocsDemo extends Game {
     }
 }`;
 
-<CodeExample code={code} template={template} console={"true"} iframeWidth={404} iframeHeight={804} iframeBorder={"2px solid black"}/>
+<CodeExample code={code} template={template} console={"true"}/>

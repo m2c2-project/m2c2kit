@@ -11,7 +11,7 @@ When using transitions, it is very important to consider when to begin the timer
 
 ## `OnAppear` or `OnSetup`?
 
-In the [previous example](./timing-user-behavior.md), the code to begin the timer is in the `sceneTwo.onAppear()` event handler, which happens when the second screen has fully slid into view and stopped moving. With practice, you can probably achieve a response time of less than 300 or 400 milliseconds, because you know where the "CLICK ME!" button will appear.
+In the [previous example](./timing-user-behavior.mdx), the code to begin the timer is in the `sceneTwo.onAppear()` event handler, which happens when the second screen has fully slid into view and stopped moving. With practice, you can probably achieve a response time of less than 300 or 400 milliseconds, because you know where the "CLICK ME!" button will appear.
 
 On the other hand, consider if the code to begin the timer is placed in the `sceneTwo.onSetup()` event handler:
 
@@ -26,7 +26,7 @@ sceneTwo.onSetup(() => {
 });
 ```
 
-Compare your performance here versus the [previous example](./timing-user-behavior.md).
+Compare your performance here versus the [previous example](./timing-user-behavior.mdx).
 
 With this code, it will be impossible to achieve a response time of less than 500 milliseconds. The timer begins before the second scene has finished its transition, which has duration 500 milliseconds. Even if the user clicks the "CLICK ME!" button as it is sliding into view, it will not accept interactions until the transition is complete.
 

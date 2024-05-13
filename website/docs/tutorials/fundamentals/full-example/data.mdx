@@ -1,132 +1,94 @@
 ---
-sidebar_position: 7
+sidebar_position: 5
 hide_table_of_contents: true
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
 
-# Adding Parameters
+# Saving Data
 
-We first define the parameters:
+## Schema
+
+All data must be defined in the schema. We use this schema:
 
 ```js
-const defaultParameters = {
-    number_of_trials: {
+const schema = {
+    trial_index: {
         type: "integer",
-        default: 3,
-        description: "How many trials to run.",
+        description: "Index of the trial within this assessment, 0-based.",
     },
-    number_of_congruent_trials: {
-        type: "integer",
-        default: 2,
-        description: "How many trials will be congruent (word matches its color).",
-    },
-    fixation_cross_duration_ms: {
-        type: "number",
-        default: 1000,
-        description: "Duration, in milliseconds, of how long the fixation across will be shown.",
-    },
-    post_fixation_cross_blank_duration_ms: {
-        type: "number",
-        default: 1000,
-        description: "Duration, in milliseconds, of how long a blank screen is shown after the fixation cross is hidden but before the word and response buttons are shown.",
-    },
-    show_feedback: {
+    congruent_stimulus: {
         type: "boolean",
-        default: false,
-        description: "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
-    }
+        description: "Did the word displayed on the screen match its font color?",
+    },
+    response_time_ms: {
+        type: "number",
+        description: "Time in milliseconds between when the word appears and the user taps a response button.",
+    },
+    response_correct: {
+        type: "boolean",
+        description: "Was the user's response correct? (Did the button response match the font color).",
+    }      
 };
 ```
 
-## Using parameters
+## Timing the user
 
-We call `game.getParameter()` to retrieve the value of each parameter and use that in place of a hard-coded value.
-
-This is done in in the randomization code:
-
-```js
-const numberOfTrials = game.getParameter("number_of_trials");
-const numberOfCongruentTrials = game.getParameter("number_of_congruent_trials");
-```
-
-It is also used in the Actions that show the fixation cross and word:
+How long the user takes to respond is important. This response time will be the duration from when the word appears until when the user taps a response button. We start a timer in the same Action in which we make the word visible and the response buttons enabled.
 
 ```js
 Action.custom( {callback: () => {
-    fixationCross.hidden = false;
-}}),
-Action.wait({duration: game.getParameter("fixation_cross_duration_ms")}),
-Action.custom( {callback: () => {
-    fixationCross.hidden = true;
-}}),
-Action.wait({duration: game.getParameter("post_fixation_cross_blank_duration_ms")}),
+    redButton.hidden = false;
+    greenButton.hidden = false;
+    blueButton.hidden = false;
+    wordLabel.text = trialConfigurations[game.trialIndex].word;
+    wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
+    redButton.isUserInteractionEnabled = true;
+    greenButton.isUserInteractionEnabled = true;
+    blueButton.isUserInteractionEnabled = true;
+    // highlight-start
+    Timer.startNew("rt");
+    // highlight-end
+}})
 ```
 
-Finally, determine whether to show the results on the last scene. To do this, we now initialize the results labels' text to empty strings (`""`). Only in the end scene's `onSetup` event handler do we set the labels' text to the results, if `show_feedback` is true:
+We stop the timer in the `handleResponse` event handler for the button taps, and store the elapsed time in the variable `responseTime`.
 
 ```js
-endScene.onSetup( ()=> {
-    // highlight-next-line
-    if (game.getParameter("show_feedback")) {
-        const percentCorrect = game.data.trials.filter((trial) => trial.response_correct).length / numberOfTrials;
-        percentCorrectLabel.text = "Percent correct: " + percentCorrect.toFixed(2);
+function handleResponse(buttonColor) {
+    Timer.stop("rt");
+    const responseTime = Timer.elapsed("rt");
+    ...
+```
 
-        const congruentTrials = game.data.trials.filter((trial) => trial.congruent_stimulus);
-        let congruentRtSum = 0;
-        for (let i = 0; i < congruentTrials.length; i++) {
-            congruentRtSum = congruentRtSum + congruentTrials[i].response_time_ms;
-        }
-        const meanCongruentRt = congruentRtSum / congruentTrials.length;
-        congruentRtLabel.text = "Mean congruent rt: " + meanCongruentRt.toFixed(2);
+## Saving data for the trial
 
-        const incongruentTrials = game.data.trials.filter((trial) => !trial.congruent_stimulus);
-        let incongruentRtSum = 0;
-        for (let i = 0; i < incongruentTrials.length; i++) {
-            incongruentRtSum = incongruentRtSum + incongruentTrials[i].response_time_ms;
-        }
-        const meanIncongruentRt = incongruentRtSum / incongruentTrials.length;
-        incongruentRtLabel.text = "Mean incongruent rt: " + meanIncongruentRt.toFixed(2);
+Because the button tap is the end of all the user's behavior for this trial, at this point we have all the data on this trial. In the `handleResponse` event handler, save the trial data for each of the measurements in the schema.
+
+```js
+function handleResponse(buttonColor) {
+    Timer.stop("rt");
+    const responseTime = Timer.elapsed("rt");
+    game.addTrialData("trial_index", game.trialIndex);
+    game.addTrialData("response_time_ms", responseTime);
+    Timer.remove("rt");
+    game.addTrialData("congruent_stimulus", trialConfigurations[game.trialIndex].congruent);
+    if (buttonColor === trialConfigurations[game.trialIndex].colorString) {
+        game.addTrialData("response_correct", true);
+    } else {
+        game.addTrialData("response_correct", false);
     }
-});
+    ...
 ```
 
 ## Progress so far
 
-You now have a fully completed assessment with parameters. The next page will present this at full size.
+The assessment now saves data for each trial. When the user completes the assessment, however, the end scene does not yet display the feedback results. 
 
 import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
 
 export const code = `class DocsDemo extends Game {
     constructor() {
- 
-        const defaultParameters = {
-            number_of_trials: {
-                type: "integer",
-                default: 3,
-                description: "How many trials to run.",
-            },
-            number_of_congruent_trials: {
-                type: "integer",
-                default: 2,
-                description: "How many trials will be congruent (word matches its color).",
-            },
-            fixation_cross_duration_ms: {
-                type: "number",
-                default: 1000,
-                description: "Duration, in milliseconds, of how long the fixation across will be shown.",
-            },
-            post_fixation_cross_blank_duration_ms: {
-                type: "number",
-                default: 1000,
-                description: "Duration, in milliseconds, of how long a blank screen is shown after the fixation cross is hidden but before the word and response buttons are shown.",
-            },
-            show_feedback: {
-                type: "boolean",
-                default: true,
-                description: "Should feedback, in the form of the user's performance, be shown at the end of the assessment? Default is true.",
-            }
-        };
  
         const schema = {
             trial_index: {
@@ -158,9 +120,8 @@ export const code = `class DocsDemo extends Game {
             images: [{
                 imageName: "stroop-screenshot",
                 height: 336, width: 384, url: "images/stroop.png"
-            }],
+            }],            
             trialSchema: schema,
-            parameters: defaultParameters,
         };
         super(options);
     }
@@ -174,8 +135,8 @@ export const code = `class DocsDemo extends Game {
             {text: "Green", color: WebColors.Green},
             {text: "Blue", color: WebColors.Blue}
         ];
-        const numberOfTrials = game.getParameter("number_of_trials");
-        const numberOfCongruentTrials = game.getParameter("number_of_congruent_trials");
+        const numberOfTrials = 3;
+        const numberOfCongruentTrials = 2;
         const trialConfigurations = [];
         const congruentIndexes = RandomDraws.FromRangeWithoutReplacement(numberOfCongruentTrials, 0, numberOfTrials - 1);
  
@@ -236,7 +197,7 @@ export const code = `class DocsDemo extends Game {
  
         const fixationCross = new Label({
             text: "+",
-            color: WebColors.Black,
+            fontColor: WebColors.Black,
             position: { x: 200, y: 400 },
             fontSize: 64,
             hidden: true
@@ -279,11 +240,11 @@ export const code = `class DocsDemo extends Game {
                 Action.custom( {callback: () => {
                     fixationCross.hidden = false;
                 }}),
-                Action.wait({duration: game.getParameter("fixation_cross_duration_ms")}),
+                Action.wait({duration: 1000}),
                 Action.custom( {callback: () => {
                     fixationCross.hidden = true;
                 }}),
-                Action.wait({duration: game.getParameter("post_fixation_cross_blank_duration_ms")}),
+                Action.wait({duration: 1000}),                
                 Action.custom( {callback: () => {
                     redButton.hidden = false;
                     greenButton.hidden = false;
@@ -292,8 +253,7 @@ export const code = `class DocsDemo extends Game {
                     wordLabel.fontColor = trialConfigurations[game.trialIndex].color;
                     redButton.isUserInteractionEnabled = true;
                     greenButton.isUserInteractionEnabled = true;
-                    blueButton.isUserInteractionEnabled = true;
- 
+                    blueButton.isUserInteractionEnabled = true; 
                     Timer.startNew("rt");
                 }}),
             ]));
@@ -312,7 +272,7 @@ export const code = `class DocsDemo extends Game {
                 game.addTrialData("response_correct", false);
             }
  
-             redButton.hidden = true;
+            redButton.hidden = true;
             greenButton.hidden = true;
             blueButton.hidden = true;
             wordLabel.text = "";
@@ -351,43 +311,20 @@ export const code = `class DocsDemo extends Game {
         });
         endScene.addChild(doneLabel);
         const percentCorrectLabel = new Label({
-            text: "",
+            text: "Percent correct: ",
             position: { x: 200, y: 300 },
         });
         endScene.addChild(percentCorrectLabel);
         const congruentRtLabel = new Label({
-            text: "",
+            text: "Mean congruent rt: ",
             position: { x: 200, y: 350 },
         });
         endScene.addChild(congruentRtLabel);
         const incongruentRtLabel = new Label({
-            text: "",
+            text: "Mean incongruent rt: ",
             position: { x: 200, y: 400 },
         });
-        endScene.addChild(incongruentRtLabel);
- 
-        endScene.onSetup( ()=> {
-            if (game.getParameter("show_feedback")) {
-                const percentCorrect = game.data.trials.filter((trial) => trial.response_correct).length / numberOfTrials;
-                percentCorrectLabel.text = "Percent correct: " + percentCorrect.toFixed(2);
-    
-                const congruentTrials = game.data.trials.filter((trial) => trial.congruent_stimulus);
-                let congruentRtSum = 0;
-                for (let i = 0; i < congruentTrials.length; i++) {
-                    congruentRtSum = congruentRtSum + congruentTrials[i].response_time_ms;
-                }
-                const meanCongruentRt = congruentRtSum / congruentTrials.length;
-                congruentRtLabel.text = "Mean congruent rt: " + meanCongruentRt.toFixed(2);
-    
-                const incongruentTrials = game.data.trials.filter((trial) => !trial.congruent_stimulus);
-                let incongruentRtSum = 0;
-                for (let i = 0; i < incongruentTrials.length; i++) {
-                    incongruentRtSum = incongruentRtSum + incongruentTrials[i].response_time_ms;
-                }
-                const meanIncongruentRt = incongruentRtSum / incongruentTrials.length;
-                incongruentRtLabel.text = "Mean incongruent rt: " + meanIncongruentRt.toFixed(2);
-            }
-        });
+        endScene.addChild(incongruentRtLabel);                
     }
 }`;
 

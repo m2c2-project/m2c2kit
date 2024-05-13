@@ -14,4 +14,4 @@ m2c2kit uses a subset of [JSON Schema](https://json-schema.org/) to describe:
 
 Each assessment has unique schema for its game parameters and trial data.
 
-Refer to the [section on Schemas](../tutorials/fundamentals/user-data/schemas.md) in the tutorial for how to use schemas in your assessment.
+Refer to the [section on Schemas](../tutorials/fundamentals/user-data/schemas.mdx) in the tutorial for how to use schemas in your assessment.
