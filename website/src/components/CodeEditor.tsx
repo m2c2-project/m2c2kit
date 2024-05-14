@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
-import Editor from "@monaco-editor/react";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import Editor, { Monaco } from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
+// @ts-expect-error ignore raw-loader typescript error
 import stroopExample from "!!raw-loader!@site/src/playground-code/stroop.js";
 
 /**
@@ -14,9 +14,12 @@ import stroopExample from "!!raw-loader!@site/src/playground-code/stroop.js";
 export default function CodeEditor(props) {
   const [monacoCode, setMonacoCode] = useState("");
 
-  const editorRef = useRef();
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-  function handleEditorDidMount(editor, monaco) {
+  function handleEditorDidMount(
+    editor: editor.IStandaloneCodeEditor,
+    monaco: Monaco,
+  ) {
     editorRef.current = editor;
 
     const m2c2Modules = [
@@ -61,9 +64,22 @@ export default function CodeEditor(props) {
       target: monaco.languages.typescript.ScriptTarget.ES2020,
       allowNonTsExtensions: true,
       moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-      module: monaco.languages.typescript.ModuleKind.ES2020,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
       noEmit: true,
     });
+    /**
+     * The following is how we could enable some diagnostics for the
+     * JavaScript code in the Monaco editor. We don't use it, however, because
+     * it is quite aggressive and can be annoying for new learners.
+     * Specifically, it doesn't seem to pick up on the type narrowing in some
+     * configuration objects using string literals (e.g., schema), which can
+     * lead to a lot of false positives.
+     */
+    //  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    //    noSemanticValidation: false,
+    //    noSyntaxValidation: false,
+    //  });
+    editor.getModel().updateOptions({ tabSize: 2 });
 
     const jsPlaygroundCode =
       localStorage.getItem("jsPlaygroundCode") ?? stroopExample;
