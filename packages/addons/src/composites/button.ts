@@ -11,6 +11,7 @@ import {
   RgbaColor,
   Size,
   IDrawable,
+  StringInterpolationMap,
 } from "@m2c2kit/core";
 import "../Globals";
 
@@ -23,6 +24,8 @@ export interface ButtonOptions extends CompositeOptions, TextOptions {
   backgroundColor?: RgbaColor;
   /** Color of button text. Default is WebColors.White */
   fontColor?: RgbaColor;
+  /** Names of multiple fonts to use for text. For example, if a text font and an emoji font are to be used together. Must have been previously loaded */
+  fontNames?: Array<string>;
 }
 
 export class Button extends Composite implements IText {
@@ -34,7 +37,10 @@ export class Button extends Composite implements IText {
   fontSize = 20;
   private _text = "";
   private _fontColor = WebColors.White;
-
+  private _fontName: string | undefined;
+  private _fontNames: Array<string> | undefined;
+  private _interpolation: StringInterpolationMap = {};
+  private _localize = true;
   private backgroundPaint?: Paint;
 
   // todo: add getters/setters so button can respond to changes in its options
@@ -60,6 +66,12 @@ export class Button extends Composite implements IText {
     if (options.cornerRadius !== undefined) {
       this.cornerRadius = options.cornerRadius;
     }
+    if (options.fontName) {
+      this.fontName = options.fontName;
+    }
+    if (options.fontNames) {
+      this.fontNames = options.fontNames;
+    }
     if (options.fontSize !== undefined) {
       this.fontSize = options.fontSize;
     }
@@ -68,6 +80,12 @@ export class Button extends Composite implements IText {
     }
     if (options.backgroundColor) {
       this.backgroundColor = options.backgroundColor;
+    }
+    if (options.interpolation) {
+      this.interpolation = options.interpolation;
+    }
+    if (options.localize !== undefined) {
+      this.localize = options.localize;
     }
   }
 
@@ -94,6 +112,10 @@ export class Button extends Composite implements IText {
 
     const buttonLabel = new Label({
       text: this.text,
+      localize: this.localize,
+      interpolation: this.interpolation,
+      fontName: this.fontName,
+      fontNames: this.fontNames,
       fontSize: this.fontSize,
       fontColor: this.fontColor,
     });
@@ -130,6 +152,47 @@ export class Button extends Composite implements IText {
     this.needsInitialization = true;
   }
 
+  get fontName(): string | undefined {
+    return this._fontName;
+  }
+  set fontName(fontName: string | undefined) {
+    this._fontName = fontName;
+    this.needsInitialization = true;
+  }
+
+  get fontNames(): Array<string> | undefined {
+    return this._fontNames;
+  }
+  set fontNames(fontNames: Array<string> | undefined) {
+    this._fontNames = fontNames;
+    this.needsInitialization = true;
+  }
+
+  get interpolation(): StringInterpolationMap {
+    return this._interpolation;
+  }
+  set interpolation(interpolation: StringInterpolationMap) {
+    /**
+     * If a new interpolation object is set, then we must re-initialize the
+     * label. But, we will not know if a property of the interpolation object
+     * has changed. Therefore, freeze the interpolation object to prevent it
+     * from being modified (attempting to modify it will throw an error).
+     * If a user wants to change a property of the interpolation object, they
+     * must instead create a new interpolation object and set it.
+     */
+    this._interpolation = interpolation;
+    Object.freeze(this._interpolation);
+    this.needsInitialization = true;
+  }
+
+  get localize(): boolean {
+    return this._localize;
+  }
+  set localize(localize: boolean) {
+    this._localize = localize;
+    this.needsInitialization = true;
+  }
+
   /**
    * Duplicates a node using deep copy.
    *
@@ -150,6 +213,10 @@ export class Button extends Composite implements IText {
       backgroundColor: this.backgroundColor,
       fontColor: this.fontColor,
       name: newName,
+      localize: this.localize,
+      interpolation: JSON.parse(JSON.stringify(this.interpolation)),
+      fontName: this.fontName,
+      fontNames: JSON.parse(JSON.stringify(this.fontNames)),
     });
 
     if (this.children.length > 0) {
