@@ -134,6 +134,9 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
           this.m2Image.status === M2ImageStatus.Ready &&
           this.m2Image.canvaskitImage
         ) {
+          if (this.m2Image.isFallback) {
+            this.drawFallbackImageBorder(canvas);
+          }
           canvas.drawImage(this.m2Image.canvaskitImage, x, y, this.paint);
         } else {
           if (this.m2Image.status === M2ImageStatus.Deferred) {
@@ -175,5 +178,45 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
         (child as unknown as IDrawable).warmup(canvas);
       }
     });
+  }
+
+  /**
+   * Draws a rectangle border around the image to indicate that a fallback
+   * image is being used.
+   *
+   * @remarks The size of the rectangle is the same as the image, but because
+   * the stroke width of the paint is wider than 1 pixel (see method
+   * `configureImageLocalization()` in `ImageManager.ts`), the rectangle will
+   * be larger than the image and thus be visible.
+   *
+   * @param canvas - CanvasKit canvas to draw on
+   */
+  private drawFallbackImageBorder(canvas: Canvas) {
+    const paint = this.game.imageManager.missingLocalizationImagePaint;
+    if (!paint) {
+      return;
+    }
+    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const rect = this.canvasKit.RRectXY(
+      this.canvasKit.LTRBRect(
+        (this.absolutePosition.x -
+          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.y -
+          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.x +
+          this.size.width * this.absoluteScale -
+          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          drawScale,
+        (this.absolutePosition.y +
+          this.size.height * this.absoluteScale -
+          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          drawScale,
+      ),
+      0,
+      0,
+    );
+    canvas.drawRRect(rect, paint);
   }
 }

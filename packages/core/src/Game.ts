@@ -47,7 +47,7 @@ import { GameMetric } from "./GameMetrics";
 import { Point } from "./Point";
 import { WebGlInfo } from "./WebGlInfo";
 import { I18n } from "./I18n";
-import { Translations } from "./Translations";
+import { Translation } from "./Translation";
 import { LocalizationOptions } from "./LocalizationOptions";
 import { WebColors } from "./WebColors";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
@@ -131,6 +131,23 @@ export class Game implements Activity {
       options.maximumRecordedActivityMetrics ??
       Constants.MAXIMUM_RECORDED_ACTIVITY_METRICS;
     this.addLocalizationParametersToGameParameters();
+    if (this.options.locale !== undefined) {
+      this.setParameters({ locale: this.options.locale });
+    }
+    if (this.options.fallbackLocale !== undefined) {
+      this.setParameters({ fallback_locale: this.options.fallbackLocale });
+    }
+    if (this.options.missingLocalizationColor) {
+      this.setParameters({
+        missing_localization_color: this.options.missingLocalizationColor,
+      });
+    }
+    if (this.options.translation) {
+      this.setParameters({ translation: this.options.translation });
+    }
+    if (this.options.additionalTranslation) {
+      this.setParameters({ translation: this.options.additionalTranslation });
+    }
     if (!this.options.trialSchema) {
       this.options.trialSchema = {};
     }
@@ -294,8 +311,9 @@ export class Game implements Activity {
     }
 
     if (this.isLocalizationRequested()) {
-      const options = this.getLocalizationOptionsFromGameParameters();
-      this.i18n = new I18n(options);
+      const localizationOptions =
+        this.getLocalizationOptionsFromGameParameters();
+      this.i18n = new I18n(localizationOptions);
     }
 
     this.fontManager = new FontManager(this, baseUrls);
@@ -534,18 +552,18 @@ export class Game implements Activity {
     const missingTranslationColor = this.getParameterOrFallback<
       RgbaColor,
       undefined
-    >("missing_translation_font_color", undefined);
-    const additionalTranslations = this.getParameterOrFallback<
-      Translations,
+    >("missing_localization_color", undefined);
+    const additionalTranslation = this.getParameterOrFallback<
+      Translation,
       undefined
-    >("translations", undefined);
-    const translations = this.options.translations;
+    >("translation", undefined);
+    const translation = this.options.translation;
     return <LocalizationOptions>{
       locale,
       fallbackLocale,
-      missingTranslationFontColor: missingTranslationColor,
-      additionalTranslations,
-      translations,
+      missingLocalizationColor: missingTranslationColor,
+      additionalTranslation: additionalTranslation,
+      translation: translation,
     };
   }
 
@@ -560,7 +578,23 @@ export class Game implements Activity {
         "Empty string in locale. Leave locale undefined or null to prevent localization.",
       );
     }
-    return locale !== undefined && locale !== null;
+
+    /**
+     * If the locale is not set, but the game has a translation object, we
+     * will use the base locale as the locale. This is to ensure that the
+     * game will show some text, rather than translation keys.
+     */
+    if ((locale === null || locale === undefined) && this.options.translation) {
+      this.setParameters({ locale: this.options.translation.baseLocale });
+      return true;
+    }
+    if (
+      (locale === null || locale === undefined) &&
+      this.options.translation === undefined
+    ) {
+      return false;
+    }
+    return true;
   }
 
   setParameters(additionalParameters: unknown): void {
@@ -1617,8 +1651,8 @@ export class Game implements Activity {
     const {
       locale, // eslint-disable-line @typescript-eslint/no-unused-vars
       fallback_locale, // eslint-disable-line @typescript-eslint/no-unused-vars
-      missing_translation_font_color, // eslint-disable-line @typescript-eslint/no-unused-vars
-      translations, // eslint-disable-line @typescript-eslint/no-unused-vars
+      missing_localization_color, // eslint-disable-line @typescript-eslint/no-unused-vars
+      translation, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...result
     } = gameParams;
 
@@ -1640,8 +1674,8 @@ export class Game implements Activity {
     const {
       locale, // eslint-disable-line @typescript-eslint/no-unused-vars
       fallback_locale, // eslint-disable-line @typescript-eslint/no-unused-vars
-      missing_translation_font_color, // eslint-disable-line @typescript-eslint/no-unused-vars
-      translations, // eslint-disable-line @typescript-eslint/no-unused-vars
+      missing_localization_color, // eslint-disable-line @typescript-eslint/no-unused-vars
+      translation, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...result
     } = gameParams;
 
@@ -1806,8 +1840,7 @@ export class Game implements Activity {
       throw new Error("main html canvas is undefined");
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error type error when adding property to window object
     window.logWebGl = this.options.logWebGl;
     this.interceptWebGlCalls();
 
@@ -2154,6 +2187,8 @@ export class Game implements Activity {
       width: this.canvasCssWidth,
       height: this.canvasCssHeight,
       status: M2ImageStatus.Ready,
+      localize: false,
+      isFallback: false,
     };
     this.imageManager.addImage(image);
 

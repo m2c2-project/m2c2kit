@@ -2,15 +2,15 @@ import { RgbaColor } from "./RgbaColor";
 import { BrowserImage } from "./BrowserImage";
 import { TrialSchema } from "./TrialSchema";
 import { GameParameters } from "./GameParameters";
-import { Translations } from "./Translations";
 import { FontAsset } from "./FontAsset";
 import { ModuleMetadata } from "./ModuleMetadata";
 import { SoundAsset } from "./SoundAsset";
+import { LocalizationOptions } from "./LocalizationOptions";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
  */
-export interface GameOptions {
+export interface GameOptions extends LocalizationOptions {
   /** Human-friendly name of this game */
   name: string;
   /** Short identifier of this game; unique among published games and url-friendly (no spaces, special characters, or slashes)*/
@@ -51,8 +51,6 @@ export interface GameOptions {
   fpsMetricReportThreshold?: number;
   /** Advance through time step-by-step, for development and debugging */
   timeStepping?: boolean;
-  /** Translations for localization. */
-  translations?: Translations;
   /** Show logs for WebGl activity? */
   logWebGl?: boolean;
   /** Should games within a session share wasm and font assets that have identical filenames, in order to reduce bandwidth? Default is true. */

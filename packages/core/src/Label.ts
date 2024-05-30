@@ -15,11 +15,11 @@ import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { LabelOptions } from "./LabelOptions";
 import { LabelHorizontalAlignmentMode } from "./LabelHorizontalAlignmentMode";
-import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
+import { StringInterpolationMap } from "./StringInterpolationMap";
 
 export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   readonly type = M2NodeType.Label;
@@ -34,18 +34,21 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   private _fontNames: Array<string> | undefined; // public getter/setter is below
   private _fontColor = Constants.DEFAULT_FONT_COLOR; // public getter/setter is below
   private _fontSize = Constants.DEFAULT_FONT_SIZE; // public getter/setter is below
+  private _interpolation: StringInterpolationMap = {};
 
   // Label options
   private _horizontalAlignmentMode = LabelHorizontalAlignmentMode.Center; // public getter/setter is below
   private _preferredMaxLayoutWidth: number | undefined; // public getter/setter is below
   private _backgroundColor?: RgbaColor | undefined; // public getter/setter is below
+  private _localize = true;
 
   private paragraph?: Paragraph;
   private paraStyle?: ParagraphStyle;
   private builder?: ParagraphBuilder;
   private _fontPaint?: Paint;
   private _backgroundPaint?: Paint;
-  private _translatedText = "";
+  private localizedFontName: string | undefined;
+  private localizedFontNames: Array<string> = [];
 
   /**
    * Single or multi-line text formatted and rendered on the screen.
@@ -72,28 +75,6 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   }
 
   override initialize(): void {
-    const fontManager = this.game.fontManager;
-    if (this.fontName && this.fontNames) {
-      throw new Error("cannot specify both fontName and fontNames");
-    }
-
-    const requiredFonts = this.getRequiredLabelFonts(fontManager);
-    requiredFonts.forEach((font) => {
-      if (font.status === M2FontStatus.Deferred) {
-        /**
-         * prepareDeferredFont() is async, but we do not await it here. We
-         * do not want to block the label's initialization while we wait for
-         * fonts to be ready. Instead, we will check if the label still needs
-         * initialization before we draw the label.
-         */
-        fontManager.prepareDeferredFont(font);
-        return;
-      }
-    });
-    if (!requiredFonts.every((font) => font.status === M2FontStatus.Ready)) {
-      return;
-    }
-
     let ckTextAlign: EmbindEnumEntity = this.canvasKit.TextAlign.Center;
     switch (this.horizontalAlignmentMode) {
       case LabelHorizontalAlignmentMode.Center:
@@ -127,33 +108,49 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     );
 
     let textForParagraph: string;
-    const i18n = (this.parentSceneAsNode as Scene).game.i18n;
-    if (i18n) {
-      let translated = i18n.t(this.text);
-      if (translated === undefined) {
-        const fallbackTranslated = i18n.t(this.text, true);
-        if (fallbackTranslated === undefined) {
-          translated = this.text;
-        } else {
-          translated = fallbackTranslated;
-        }
-        if (i18n.options.missingTranslationFontColor) {
-          textColor = this.canvasKit.Color(
-            i18n.options.missingTranslationFontColor[0],
-            i18n.options.missingTranslationFontColor[1],
-            i18n.options.missingTranslationFontColor[2],
-            i18n.options.missingTranslationFontColor[3],
-          );
-        }
-      }
-      this._translatedText = translated;
-      textForParagraph = this._translatedText;
-      if (this._translatedText === "") {
-        console.warn(`warning: empty translated text in label "${this.name}"`);
+    const i18n = this.game.i18n;
+    if (i18n && this.localize !== false) {
+      const textLocalization = i18n.getTextLocalization(
+        this.text,
+        this.interpolation,
+      );
+      textForParagraph = textLocalization.text;
+      this.localizedFontName = textLocalization.fontName;
+      this.localizedFontNames = textLocalization.fontNames ?? [];
+      if (
+        textLocalization.isFallbackOrMissingTranslation &&
+        i18n.missingLocalizationColor
+      ) {
+        textColor = this.canvasKit.Color(
+          i18n.missingLocalizationColor[0],
+          i18n.missingLocalizationColor[1],
+          i18n.missingLocalizationColor[2],
+          i18n.missingLocalizationColor[3],
+        );
       }
     } else {
       textForParagraph = this.text;
-      this._translatedText = "";
+    }
+
+    if (this.fontName && this.fontNames) {
+      throw new Error("cannot specify both fontName and fontNames");
+    }
+    const fontManager = this.game.fontManager;
+    const requiredFonts = this.getRequiredLabelFonts(fontManager);
+    requiredFonts.forEach((font) => {
+      if (font.status === M2FontStatus.Deferred) {
+        /**
+         * prepareDeferredFont() is async, but we do not await it here. We
+         * do not want to block the label's initialization while we wait for
+         * fonts to be ready. Instead, we will check if the label still needs
+         * initialization before we draw the label.
+         */
+        fontManager.prepareDeferredFont(font);
+        return;
+      }
+    });
+    if (!requiredFonts.every((font) => font.status === M2FontStatus.Ready)) {
+      return;
     }
 
     /**
@@ -283,6 +280,19 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
    */
   private getRequiredLabelFonts(fontManager: FontManager) {
     let requiredFonts: Array<M2Font>;
+
+    if (this.game.i18n && this.localize !== false) {
+      if (this.localizedFontName) {
+        requiredFonts = [fontManager.fonts[this.localizedFontName]];
+        return requiredFonts;
+      } else if (this.localizedFontNames.length > 0) {
+        requiredFonts = this.localizedFontNames.map(
+          (font) => fontManager.fonts[font],
+        );
+        return requiredFonts;
+      }
+    }
+
     if (this.fontName === undefined && this.fontNames === undefined) {
       requiredFonts = [fontManager.getDefaultFont()];
     } else if (this.fontName !== undefined) {
@@ -313,8 +323,21 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this.needsInitialization = true;
   }
 
-  get translatedText(): string {
-    return this._translatedText;
+  get interpolation(): StringInterpolationMap {
+    return this._interpolation;
+  }
+  set interpolation(interpolation: StringInterpolationMap) {
+    /**
+     * If a new interpolation object is set, then we must re-initialize the
+     * label. But, we will not know if a property of the interpolation object
+     * has changed. Therefore, freeze the interpolation object to prevent it
+     * from being modified (attempting to modify it will throw an error).
+     * If a user wants to change a property of the interpolation object, they
+     * must instead create a new interpolation object and set it.
+     */
+    this._interpolation = interpolation;
+    Object.freeze(this._interpolation);
+    this.needsInitialization = true;
   }
 
   get fontName(): string | undefined {
@@ -372,6 +395,14 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   }
   set backgroundColor(backgroundColor: RgbaColor | undefined) {
     this._backgroundColor = backgroundColor;
+    this.needsInitialization = true;
+  }
+
+  get localize(): boolean {
+    return this._localize;
+  }
+  set localize(localize: boolean) {
+    this._localize = localize;
     this.needsInitialization = true;
   }
 
@@ -473,6 +504,15 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   }
 
   warmup(canvas: Canvas): void {
+    const i18n = this.game.i18n;
+    if (i18n && this.localize !== false) {
+      const textLocalization = i18n.getTextLocalization(
+        this.text,
+        this.interpolation,
+      );
+      this.localizedFontName = textLocalization.fontName;
+      this.localizedFontNames = textLocalization.fontNames ?? [];
+    }
     /**
      * If this label uses a deferred font, then we cannot warm it up.
      */

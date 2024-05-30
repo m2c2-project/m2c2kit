@@ -50,6 +50,13 @@ function handleTextOptions(text: IText, options: TextOptions): void {
   if (options.fontSize !== undefined) {
     text.fontSize = options.fontSize;
   }
+  if (options.interpolation) {
+    text.interpolation = options.interpolation;
+  }
+
+  if (options.localize !== undefined) {
+    text.localize = options.localize;
+  }
 }
 export function handleInterfaceOptions(
   node: M2Node,

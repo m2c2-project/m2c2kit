@@ -16,7 +16,11 @@ export interface BrowserImage {
   /** URL of image asset (svg, png, jpg) to render and load */
   url?: string;
   /** If true, the image will not be fully loaded until it is needed. Default
-   * is false. Lazy loading is useful for localized images or large "banks"
-   * of images. These should be lazy loaded because they may not be needed. */
+   * is false. Lazy loading is useful for large "banks" of images. These should
+   * be lazy loaded because they may not be needed. */
   lazy?: boolean;
+  /** If true, try to use a localized version of the image. Localized images
+   * are loaded on demand and are not preloaded. Only an image whose asset
+   * is provided as a URL can be localized. Default is false. */
+  localize?: boolean;
 }

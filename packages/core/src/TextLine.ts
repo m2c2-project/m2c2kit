@@ -7,11 +7,12 @@ import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
 import { IText } from "./IText";
 import { TextLineOptions } from "./TextLineOptions";
-import { Scene } from "./Scene";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
-import { M2FontStatus } from "./M2Font";
+import { M2Font, M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
+import { I18n } from "./I18n";
+import { StringInterpolationMap } from "./StringInterpolationMap";
 
 export class TextLine
   extends M2Node
@@ -30,13 +31,17 @@ export class TextLine
   private _fontName: string | undefined; // public getter/setter is below
   private _fontColor = Constants.DEFAULT_FONT_COLOR; // public getter/setter is below
   private _fontSize = Constants.DEFAULT_FONT_SIZE; // public getter/setter is below
+  private _interpolation: StringInterpolationMap = {};
+  private _localize = true;
 
   private paint?: Paint;
   private font?: Font;
   private typeface: Typeface | null = null;
-
-  private _translatedText = "";
-  private missingTranslationPaint?: Paint;
+  private tryMissingTranslationPaint = false;
+  private textForDraw = "";
+  private fontForDraw?: M2Font;
+  private localizedFontName: string | undefined;
+  private localizedFontNames: Array<string> = [];
 
   /**
    * Single-line text rendered on the screen.
@@ -57,16 +62,128 @@ export class TextLine
     this.size.width = options.width ?? NaN;
   }
 
+  override initialize(): void {
+    const i18n = this.game.i18n;
+    this.tryMissingTranslationPaint = false;
+    if (i18n && this.localize !== false) {
+      const textLocalization = i18n.getTextLocalization(
+        this.text,
+        this.interpolation,
+      );
+      this.textForDraw = textLocalization.text;
+      this.localizedFontName = textLocalization.fontName;
+      this.localizedFontNames = textLocalization.fontNames ?? [];
+      if (textLocalization.isFallbackOrMissingTranslation) {
+        this.tryMissingTranslationPaint = true;
+      }
+    } else {
+      this.textForDraw = this.text;
+    }
+
+    const fontManager = this.game.fontManager;
+    this.fontForDraw = this.getRequiredTextLineFont(fontManager);
+    if (this.fontForDraw.status === M2FontStatus.Deferred) {
+      fontManager.prepareDeferredFont(this.fontForDraw);
+      return;
+    }
+    if (this.fontForDraw.status === M2FontStatus.Loading) {
+      return;
+    }
+
+    this.createFontPaint(i18n);
+    this.createFont(fontManager);
+    this.needsInitialization = false;
+  }
+
+  /**
+   * Determines the M2Font object that needs to be ready in order to draw
+   * the TextLine.
+   *
+   * @remarks It needs a FontManager because it may need to look up the
+   * default font.
+   *
+   * @param fontManager - {@link FontManager}
+   * @returns a M2Font object that is required for the TextLine
+   */
+  private getRequiredTextLineFont(fontManager: FontManager) {
+    if (this.game.i18n) {
+      if (
+        (this.localizedFontName !== undefined &&
+          this.localizedFontNames.length !== 0) ||
+        this.localizedFontNames.length > 1
+      ) {
+        throw new Error(
+          `TextLine supports only one font, but multiple fonts are specified in translation.`,
+        );
+      }
+
+      if (this.localizedFontName !== undefined) {
+        return fontManager.fonts[this.localizedFontName];
+      } else if (this.localizedFontNames.length == 1) {
+        return fontManager.fonts[this.localizedFontNames[0]];
+      }
+    }
+
+    if (this.fontName === undefined) {
+      return fontManager.getDefaultFont();
+    }
+    return fontManager.getFont(this.fontName);
+  }
+
+  private createFontPaint(i18n: I18n | undefined) {
+    if (this.paint) {
+      this.paint.delete();
+    }
+    this.paint = new this.canvasKit.Paint();
+    if (this.tryMissingTranslationPaint && this.localize !== false) {
+      if (i18n?.missingLocalizationColor) {
+        this.paint.setColor(
+          this.canvasKit.Color(
+            i18n.missingLocalizationColor[0],
+            i18n.missingLocalizationColor[1],
+            i18n.missingLocalizationColor[2],
+            i18n.missingLocalizationColor[3],
+          ),
+        );
+      }
+    } else {
+      this.paint.setColor(
+        this.canvasKit.Color(
+          this.fontColor[0],
+          this.fontColor[1],
+          this.fontColor[2],
+          this.fontColor[3],
+        ),
+      );
+    }
+    this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
+    this.paint.setAntiAlias(true);
+  }
+
+  private createFont(fontManager: FontManager) {
+    if (this.fontForDraw) {
+      this.typeface = fontManager.getTypeface(this.fontForDraw.fontName);
+    } else {
+      const fontNames = fontManager.getFontNames();
+      if (fontNames.length > 0) {
+        this.typeface = fontManager.getTypeface(fontNames[0]);
+      }
+    }
+    if (this.font) {
+      this.font.delete();
+    }
+    this.font = new this.canvasKit.Font(
+      this.typeface,
+      this.fontSize * Globals.canvasScale,
+    );
+  }
+
   get text(): string {
     return this._text;
   }
   set text(text: string) {
     this._text = text;
     this.needsInitialization = true;
-  }
-
-  get translatedText(): string {
-    return this._translatedText;
   }
 
   get fontName(): string | undefined {
@@ -93,84 +210,29 @@ export class TextLine
     this.needsInitialization = true;
   }
 
-  override update(): void {
-    super.update();
+  get interpolation(): StringInterpolationMap {
+    return this._interpolation;
+  }
+  set interpolation(interpolation: StringInterpolationMap) {
+    /**
+     * If a new interpolation object is set, then we must re-initialize the
+     * label. But, we will not know if a property of the interpolation object
+     * has changed. Therefore, freeze the interpolation object to prevent it
+     * from being modified (attempting to modify it will throw an error).
+     * If a user wants to change a property of the interpolation object, they
+     * must instead create a new interpolation object and set it.
+     */
+    this._interpolation = interpolation;
+    Object.freeze(this._interpolation);
+    this.needsInitialization = true;
   }
 
-  override initialize(): void {
-    const fontManager = this.game.fontManager;
-    const requiredFont = this.getRequiredTextLineFont(fontManager);
-    if (requiredFont.status === M2FontStatus.Deferred) {
-      fontManager.prepareDeferredFont(requiredFont);
-      return;
-    }
-    if (requiredFont.status === M2FontStatus.Loading) {
-      return;
-    }
-
-    if (this.paint) {
-      this.paint.delete();
-    }
-    this.paint = new this.canvasKit.Paint();
-    this.paint.setColor(
-      this.canvasKit.Color(
-        this.fontColor[0],
-        this.fontColor[1],
-        this.fontColor[2],
-        this.fontColor[3],
-      ),
-    );
-    this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
-    this.paint.setAntiAlias(true);
-
-    const i18n = (this.parentSceneAsNode as Scene).game.i18n;
-    if (i18n && i18n.options.missingTranslationFontColor) {
-      this.missingTranslationPaint = new this.canvasKit.Paint();
-      this.missingTranslationPaint.setColor(
-        this.canvasKit.Color(
-          i18n.options.missingTranslationFontColor[0],
-          i18n.options.missingTranslationFontColor[1],
-          i18n.options.missingTranslationFontColor[2],
-          i18n.options.missingTranslationFontColor[3],
-        ),
-      );
-      this.paint.setStyle(this.canvasKit.PaintStyle.Fill);
-      this.paint.setAntiAlias(true);
-    }
-
-    if (this.fontName) {
-      this.typeface = fontManager.getTypeface(this.fontName);
-    } else {
-      const fontNames = fontManager.getFontNames();
-      if (fontNames.length > 0) {
-        this.typeface = fontManager.getTypeface(fontNames[0]);
-      }
-    }
-    if (this.font) {
-      this.font.delete();
-    }
-    this.font = new this.canvasKit.Font(
-      this.typeface,
-      this.fontSize * Globals.canvasScale,
-    );
-    this.needsInitialization = false;
+  get localize(): boolean {
+    return this._localize;
   }
-
-  /**
-   * Determines the M2Font object that needs to be ready in order to draw
-   * the TextLine.
-   *
-   * @remarks It needs a FontManager because it may need to look up the
-   * default font.
-   *
-   * @param fontManager - {@link FontManager}
-   * @returns a M2Font object that is required for the TextLine
-   */
-  private getRequiredTextLineFont(fontManager: FontManager) {
-    if (this.fontName === undefined) {
-      return fontManager.getDefaultFont();
-    }
-    return fontManager.getFont(this.fontName);
+  set localize(localize: boolean) {
+    this._localize = localize;
+    this.needsInitialization = true;
   }
 
   dispose(): void {
@@ -207,6 +269,10 @@ export class TextLine
     return dest;
   }
 
+  override update(): void {
+    super.update();
+  }
+
   draw(canvas: Canvas): void {
     if (this.parent && this.text && !this.needsInitialization) {
       canvas.save();
@@ -220,48 +286,17 @@ export class TextLine
           this.size.height * this.anchorPoint.y * this.absoluteScale) *
         drawScale;
 
-      let textForDraw: string;
-      let paintForDraw = this.paint;
-      const i18n = (this.parentSceneAsNode as Scene).game.i18n;
-      if (i18n) {
-        let translated = i18n.t(this.text);
-        if (translated === undefined) {
-          const fallbackTranslated = i18n.t(this.text, true);
-          if (fallbackTranslated === undefined) {
-            translated = this.text;
-          } else {
-            translated = fallbackTranslated;
-          }
-          if (this.missingTranslationPaint) {
-            paintForDraw = this.missingTranslationPaint;
-          }
-        }
-        this._translatedText = translated;
-        textForDraw = this._translatedText;
-        if (this._translatedText === "") {
-          console.warn(
-            `warning: empty translated text in TextLine "${this.name}"`,
-          );
-        }
-      } else {
-        textForDraw = this.text;
-        this._translatedText = "";
-        if (this.text === "") {
-          console.warn(`warning: empty text in TextLine "${this.name}"`);
-        }
-      }
-
-      if (paintForDraw === undefined || this.font === undefined) {
+      if (this.paint === undefined || this.font === undefined) {
         throw new Error(
           `in TextLine node ${this}, Paint or Font is undefined.`,
         );
       }
 
       if (this.absoluteAlphaChange !== 0) {
-        paintForDraw.setAlphaf(this.absoluteAlpha);
+        this.paint.setAlphaf(this.absoluteAlpha);
       }
 
-      canvas.drawText(textForDraw, x, y, paintForDraw, this.font);
+      canvas.drawText(this.textForDraw, x, y, this.paint, this.font);
       canvas.restore();
     }
 
@@ -269,6 +304,15 @@ export class TextLine
   }
 
   warmup(canvas: Canvas): void {
+    const i18n = this.game.i18n;
+    if (i18n && this.localize !== false) {
+      const textLocalization = i18n.getTextLocalization(
+        this.text,
+        this.interpolation,
+      );
+      this.localizedFontName = textLocalization.fontName;
+      this.localizedFontNames = textLocalization.fontNames ?? [];
+    }
     /**
      * If this TextLine uses a deferred font, then we cannot warm it up.
      */

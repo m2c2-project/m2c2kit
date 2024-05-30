@@ -1,11 +1,13 @@
 import "./Globals";
-import { CanvasKit } from "canvaskit-wasm";
+import { CanvasKit, Paint } from "canvaskit-wasm";
 import { M2Image, M2ImageStatus } from "./M2Image";
 import { BrowserImage } from "./BrowserImage";
 import { Game } from "./Game";
 import { Sprite } from "./Sprite";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { GameBaseUrls } from "./GameBaseUrls";
+import { M2NodeType } from "./M2NodeType";
+import { CanvasKitHelpers } from "./CanvasKitHelpers";
 /**
  * Fetches, loads, and provides images to the game.
  */
@@ -17,6 +19,7 @@ export class ImageManager {
   private scale?: number;
   private game: Game;
   private baseUrls: GameBaseUrls;
+  missingLocalizationImagePaint?: Paint;
 
   constructor(game: Game, baseUrls: GameBaseUrls) {
     this.game = game;
@@ -75,6 +78,9 @@ export class ImageManager {
       const m2Image: M2Image = {
         imageName: browserImage.imageName,
         url: url,
+        originalUrl: url,
+        isFallback: false,
+        localize: browserImage.localize ?? false,
         svgString: browserImage.svgString,
         canvaskitImage: undefined,
         width: browserImage.width,
@@ -83,6 +89,11 @@ export class ImageManager {
           ? M2ImageStatus.Deferred
           : M2ImageStatus.Loading,
       };
+
+      if (m2Image.localize) {
+        this.configureImageLocalization(m2Image);
+      }
+
       this.images[browserImage.imageName] = m2Image;
       if (m2Image.status === M2ImageStatus.Loading) {
         return this.renderM2Image(m2Image);
@@ -90,6 +101,91 @@ export class ImageManager {
       return Promise.resolve();
     });
     await Promise.all(renderImagesPromises);
+  }
+
+  private configureImageLocalization(m2Image: M2Image) {
+    m2Image.fallbackLocalizationUrls = new Array<string>();
+    if (m2Image.originalUrl && this.game.i18n?.locale) {
+      // localized images are always treated as deferred images
+      m2Image.status = "Deferred";
+      if (this.game.i18n?.fallbackLocale) {
+        if (this.game.i18n?.fallbackLocale !== this.game.i18n?.baseLocale) {
+          m2Image.fallbackLocalizationUrls.push(
+            this.localizeImageUrl(
+              m2Image.originalUrl,
+              this.game.i18n.fallbackLocale,
+            ),
+          );
+        }
+      }
+
+      if (this.game.i18n?.locale === this.game.i18n?.baseLocale) {
+        m2Image.url = m2Image.originalUrl;
+      } else {
+        m2Image.url = this.localizeImageUrl(
+          m2Image.originalUrl,
+          this.game.i18n.locale,
+        );
+      }
+
+      if (m2Image.url !== m2Image.originalUrl) {
+        m2Image.fallbackLocalizationUrls.push(m2Image.originalUrl);
+      }
+
+      if (
+        this.game.i18n.missingLocalizationColor &&
+        !this.missingLocalizationImagePaint
+      ) {
+        this.missingLocalizationImagePaint = CanvasKitHelpers.makePaint(
+          this.canvasKit,
+          this.game.i18n.missingLocalizationColor,
+          this.canvasKit.PaintStyle.Stroke,
+          true,
+        );
+        this.missingLocalizationImagePaint.setStrokeWidth(4);
+      }
+    }
+  }
+
+  /**
+   * Localizes the image URL by appending the locale to the image URL,
+   * immediately before the file extension.
+   *
+   * @remarks For example, `https://url.com/file.png` in en-US locale
+   * becomes `https://url.com/file.en-US.png`. A URL without an extension
+   * will throw an error.
+   *
+   * @param url - url of the image
+   * @param locale - locale in format of xx-YY, where xx is the language code
+   * and YY is the country code
+   * @returns localized url
+   */
+  private localizeImageUrl(url: string, locale: string) {
+    const extensionIndex = url.lastIndexOf(".");
+    if (extensionIndex === -1) {
+      throw new Error("URL does not have an extension");
+    }
+    const localizedUrl =
+      url.slice(0, extensionIndex) + `.${locale}` + url.slice(extensionIndex);
+    return localizedUrl;
+  }
+
+  /**
+   * Sets an image to be re-rendered within the current locale.
+   */
+  reinitializeLocalizedImages() {
+    Object.keys(this.game.imageManager.images).forEach((imageName) => {
+      const m2Image = this.game.imageManager.images[imageName];
+      if (m2Image.localize) {
+        this.game.imageManager.configureImageLocalization(m2Image);
+      }
+    });
+    const sprites = this.game.nodes.filter(
+      (node) => node.type === M2NodeType.Sprite,
+    ) as Array<Sprite>;
+    sprites.forEach((sprite) => {
+      sprite.needsInitialization = true;
+    });
   }
 
   private checkImageNamesForDuplicates(browserImages: BrowserImage[]) {
@@ -117,7 +213,31 @@ export class ImageManager {
    */
   prepareDeferredImage(image: M2Image): Promise<void> {
     image.status = M2ImageStatus.Loading;
-    return this.renderM2Image(image);
+    image.isFallback = false;
+    return this.renderM2Image(image).catch(async () => {
+      image.isFallback = true;
+      /**
+       * If there is an error, and there are fallback localization URLs,
+       * try the next one. (localized images are always treated as
+       * deferred images). If there are no more fallbacks, throw an error.
+       */
+      while (image.fallbackLocalizationUrls?.length) {
+        image.url = image.fallbackLocalizationUrls.shift();
+        try {
+          await this.renderM2Image(image);
+        } catch (error) {
+          if (image.fallbackLocalizationUrls.length === 0) {
+            if (error instanceof Error) {
+              throw error;
+            } else {
+              throw new Error(
+                `prepareDeferredImage(): unable to render image named ${image.imageName}. image source was ${image.svgString ? "svgString" : `url: ${image.url}`}`,
+              );
+            }
+          }
+        }
+      }
+    });
   }
 
   /**
