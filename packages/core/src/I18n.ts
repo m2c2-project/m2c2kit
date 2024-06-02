@@ -27,8 +27,16 @@ export class I18n {
   fallbackLocale = "en-US";
   baseLocale = "en-US";
   missingLocalizationColor: RgbaColor | undefined;
+  game: Game;
 
-  constructor(options: LocalizationOptions) {
+  /**
+   * The I18n class localizes text and images.
+   *
+   * @param game - game instance
+   * @param options - {@link LocalizationOptions}
+   */
+  constructor(game: Game, options: LocalizationOptions) {
+    this.game = game;
     this._translation =
       this.mergeAdditionalTranslation(
         options.translation,
@@ -43,70 +51,89 @@ export class I18n {
       this.missingLocalizationColor = options.missingLocalizationColor;
     }
 
-    this.configureInitialLocale(options);
+    if (options.locale) {
+      this.locale = options.locale;
+    }
+
+    if (options.fallbackLocale) {
+      this.fallbackLocale = options.fallbackLocale;
+    }
   }
 
-  private configureInitialLocale(options: LocalizationOptions) {
-    if (options.locale?.toLowerCase() === "auto") {
+  /**
+   * Initializes the I18n instance and sets the initial locale.
+   *
+   * @remarks If the game instance has been configured to use a data store,
+   * the previously used locale and fallback locale will be retrieved from the
+   * data store if they have been previously set.
+   *
+   * @param game - The game instance
+   */
+  async initialize() {
+    await this.configureInitialLocale();
+  }
+
+  private async configureInitialLocale() {
+    if (this.game.hasDataStores()) {
+      const locale = await this.game.storeGetItem("locale");
+      const fallbackLocale = await this.game.storeGetItem("fallbackLocale");
+      if (typeof locale === "string" && typeof fallbackLocale === "string") {
+        this.locale = locale;
+        this.fallbackLocale = fallbackLocale;
+        return;
+      }
+    }
+
+    if (this.locale?.toLowerCase() === "auto") {
       const attemptedLocale = this.getEnvironmentLocale();
 
       if (attemptedLocale) {
         if (this.localeTranslationAvailable(attemptedLocale)) {
           this.locale = attemptedLocale;
-          if (
-            options.fallbackLocale &&
-            this.localeTranslationAvailable(options.fallbackLocale)
-          ) {
-            this.fallbackLocale = options.fallbackLocale;
-          } else {
+          if (!this.localeTranslationAvailable(this.fallbackLocale)) {
             this.fallbackLocale = this.baseLocale;
           }
         } else {
           if (
-            options.fallbackLocale &&
-            this.localeTranslationAvailable(options.fallbackLocale)
+            this.fallbackLocale &&
+            this.localeTranslationAvailable(this.fallbackLocale)
           ) {
             console.warn(
-              `auto locale requested, but detected locale ${attemptedLocale} does not have translation. Setting locale to fallback locale ${options.fallbackLocale}`,
+              `auto locale requested, but detected locale ${attemptedLocale} does not have translation. Setting locale to fallback locale ${this.fallbackLocale}`,
             );
-            this.locale = options.fallbackLocale;
+            this.locale = this.fallbackLocale;
             this.fallbackLocale = this.baseLocale;
           } else {
             console.warn(
-              `auto locale requested, but detected locale ${attemptedLocale} does not have translation, and fallback locale does not have translation or was not specified (fallback locale is ${options.fallbackLocale}). Setting locale to base locale ${this.baseLocale}.`,
+              `auto locale requested, but detected locale ${attemptedLocale} does not have translation, and fallback locale does not have translation or was not specified (fallback locale is ${this.fallbackLocale}). Setting locale to base locale ${this.baseLocale}.`,
             );
             this.locale = this.baseLocale;
-            this.fallbackLocale = "";
+            this.fallbackLocale = this.baseLocale;
           }
         }
       } else {
         if (
-          options.fallbackLocale &&
-          this.localeTranslationAvailable(options.fallbackLocale)
+          this.fallbackLocale &&
+          this.localeTranslationAvailable(this.fallbackLocale)
         ) {
           console.warn(
-            `auto locale requested, but environment cannot detect locale. Setting locale to fallback locale ${options.fallbackLocale}`,
+            `auto locale requested, but environment cannot detect locale. Setting locale to fallback locale ${this.fallbackLocale}`,
           );
-          this.locale = options.fallbackLocale;
+          this.locale = this.fallbackLocale;
           this.fallbackLocale = this.baseLocale;
         } else {
           console.warn(
-            `auto locale requested, but environment cannot detect locale, and fallback locale does not have translation or was not specified (fallback locale is ${options.fallbackLocale}). Setting locale to base locale ${this.baseLocale}.`,
+            `auto locale requested, but environment cannot detect locale, and fallback locale does not have translation or was not specified (fallback locale is ${this.fallbackLocale}). Setting locale to base locale ${this.baseLocale}.`,
           );
           this.locale = this.baseLocale;
-          this.fallbackLocale = "";
+          this.fallbackLocale = this.baseLocale;
         }
       }
     } else {
-      this.locale = options.locale ?? "";
-      if (options.fallbackLocale) {
-        this.fallbackLocale = options.fallbackLocale;
-      } else {
+      this.locale = this.locale ?? "";
+      if (!this.fallbackLocale) {
         this.fallbackLocale = this.baseLocale;
       }
-    }
-    if (this.locale === this.fallbackLocale) {
-      this.fallbackLocale = "";
     }
   }
 
@@ -114,14 +141,33 @@ export class I18n {
     return this.translation[locale] !== undefined || locale === this.baseLocale;
   }
 
-  switchToLocale(game: Game, locale: string) {
+  switchToLocale(locale: string) {
     this.locale = locale;
-    game.nodes
+    this.game.nodes
       .filter((node) => node.isText)
       .forEach((node) => (node.needsInitialization = true));
-    game.imageManager.reinitializeLocalizedImages();
+    this.game.imageManager.reinitializeLocalizedImages();
+
+    if (this.game && this.game.hasDataStores()) {
+      /**
+       * Do not await the storeSetItem() calls. We don't need to wait for them
+       * to complete before continuing. We'll assume they will complete
+       * successfully, and if not, these are just locale preferences, not
+       * critical data.
+       */
+      this.game.storeSetItem("locale", this.locale);
+      this.game.storeSetItem("fallbackLocale", this.fallbackLocale);
+    }
   }
 
+  /**
+   *
+   * @param key - Translation key
+   * @param interpolation - Interpolation keys and values to replace
+   * placeholders in the translated text
+   * @returns a `TextLocalizationResult` object with the localized text, font
+   * information, and whether the translation is a fallback.
+   */
   getTextLocalization(key: string, interpolation?: StringInterpolationMap) {
     let localizedText = "";
     let isFallbackOrMissingTranslation = false;

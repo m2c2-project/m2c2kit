@@ -313,7 +313,8 @@ export class Game implements Activity {
     if (this.isLocalizationRequested()) {
       const localizationOptions =
         this.getLocalizationOptionsFromGameParameters();
-      this.i18n = new I18n(localizationOptions);
+      this.i18n = new I18n(this, localizationOptions);
+      await this.i18n.initialize();
     }
 
     this.fontManager = new FontManager(this, baseUrls);
@@ -541,6 +542,10 @@ export class Game implements Activity {
 
   set dataStores(dataStores: IDataStore[]) {
     this._dataStores = dataStores;
+  }
+
+  hasDataStores(): boolean {
+    return (this._dataStores && this._dataStores.length > 0) || false;
   }
 
   private getLocalizationOptionsFromGameParameters() {
@@ -1407,6 +1412,7 @@ export class Game implements Activity {
         device_timezone:
           Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? "",
         device_timezone_offset_minutes: new Date().getTimezoneOffset(),
+        locale: this.i18n?.locale ?? null,
         ...emptyTrial,
         device_metadata: this.getDeviceMetadata(),
       });
@@ -1521,6 +1527,17 @@ export class Game implements Activity {
    * the appropriate time. It is not triggered automatically.
    */
   trialComplete(): void {
+    /**
+     * locale and device_metadata might change between or during trials,
+     * so update them to reflect their state at the end of the trial.
+     */
+    if (this.data.trials[this.trialIndex]?.["locale"]) {
+      this.data.trials[this.trialIndex]["locale"] = this.i18n?.locale ?? null;
+    }
+    if (this.data.trials[this.trialIndex]?.["device_metadata"]) {
+      this.data.trials[this.trialIndex]["device_metadata"] =
+        this.getDeviceMetadata();
+    }
     if (Object.keys(this.staticTrialSchema).length > 0) {
       this.data.trials[this.trialIndex] = {
         ...this.data.trials[this.trialIndex],
@@ -1590,6 +1607,11 @@ export class Game implements Activity {
       type: "integer",
       description:
         "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset().",
+    },
+    locale: {
+      type: ["string", "null"],
+      description:
+        "Locale of the trial. null if the activity does not support localization.",
     },
   };
 
