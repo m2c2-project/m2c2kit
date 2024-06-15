@@ -83,7 +83,7 @@ export abstract class M2Node implements M2NodeOptions {
   _scale = 1.0;
   alpha = 1.0;
   _zRotation = 0;
-  isUserInteractionEnabled = false;
+  protected _isUserInteractionEnabled = false;
   draggable = false;
   hidden = false;
   layout: Layout = {};
@@ -1158,6 +1158,13 @@ export abstract class M2Node implements M2NodeOptions {
 
   set scale(scale: number) {
     this._scale = scale;
+  }
+
+  get isUserInteractionEnabled(): boolean {
+    return this._isUserInteractionEnabled;
+  }
+  set isUserInteractionEnabled(isUserInteractionEnabled: boolean) {
+    this._isUserInteractionEnabled = isUserInteractionEnabled;
   }
 
   // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95

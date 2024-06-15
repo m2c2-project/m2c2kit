@@ -110,6 +110,7 @@ interface Key extends InternalKeyConfiguration {
 }
 
 export class VirtualKeyboard extends Composite {
+  compositeType = "VirtualKeyboard";
   private keyboardHorizontalPaddingPercent: number;
   private keyboardVerticalPaddingPercent: number;
   private keyHorizontalPaddingPercent: number;
@@ -128,6 +129,10 @@ export class VirtualKeyboard extends Composite {
 
   private shiftActivated = false;
   private shiftKeyShape: Shape | undefined;
+  private keyShapes = new Array<Shape>();
+
+  // VirtualKeyboard defaults to being user interactive.
+  override _isUserInteractionEnabled = true;
 
   /**
    * An on-screen keyboard that can be used to enter text.
@@ -341,6 +346,8 @@ export class VirtualKeyboard extends Composite {
     const keyBoxWidth =
       (this.size.width - 2 * keyboardHorizontalPadding) / this.keysPerRow;
 
+    this.keyShapes = [];
+
     for (let r = 0; r < rows.length; r++) {
       const row = rows[r];
       const rowSumKeyWidths = row.reduce(
@@ -409,9 +416,10 @@ export class VirtualKeyboard extends Composite {
           cornerRadius: 4,
           fillColor: this.keyColor,
           lineWidth: 0,
-          isUserInteractionEnabled: true,
+          isUserInteractionEnabled: this.isUserInteractionEnabled,
         });
         keyBox.addChild(keyShape);
+        this.keyShapes.push(keyShape);
 
         keyShape.onTapUp((tapEvent) => {
           let keyAsString = "";
@@ -651,6 +659,22 @@ export class VirtualKeyboard extends Composite {
     this.eventListeners.push(eventListener as M2NodeEventListener<M2NodeEvent>);
   }
 
+  /**
+   * Does the `VirtualKeyboard` respond to user events? Default is true.
+   */
+  override get isUserInteractionEnabled(): boolean {
+    return this._isUserInteractionEnabled;
+  }
+  /**
+   * Does the `VirtualKeyboard` respond to user events? Default is true.
+   */
+  override set isUserInteractionEnabled(isUserInteractionEnabled: boolean) {
+    this._isUserInteractionEnabled = isUserInteractionEnabled;
+    this.keyShapes.forEach((keyShape) => {
+      keyShape.isUserInteractionEnabled = isUserInteractionEnabled;
+    });
+  }
+
   update(): void {
     super.update();
   }
@@ -669,6 +693,6 @@ export class VirtualKeyboard extends Composite {
   }
 
   duplicate(newName?: string | undefined): M2Node {
-    throw new Error("Method not implemented.");
+    throw new Error(`Method not implemented. ${newName}`);
   }
 }
