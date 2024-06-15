@@ -93,6 +93,7 @@ class CliStarter extends Game {
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "cli-starter",
+      publishUuid: "b13490bb-cec7-4128-a241-712787e44635",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       shortDescription:

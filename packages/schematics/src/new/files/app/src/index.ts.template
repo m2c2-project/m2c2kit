@@ -91,6 +91,7 @@ class <%= classify(appName) %> extends Game {
     const options: GameOptions = {
       name: "<%= appName %>",
       id: "<%= dasherize(appName) %>",
+      publishUuid: "<%= publishUuid %>",
       version: "1.0.0",
       shortDescription:
         "A starter assessment created by the m2c2kit cli demonstrating the Stroop effect.",

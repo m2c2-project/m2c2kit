@@ -295,6 +295,8 @@ export class Session {
 
     await Promise.all(
       this.options.activities.map((activity) => {
+        activity.studyId = this.options.studyId;
+        activity.studyUuid = this.options.studyUuid;
         // IDataStore implementation is provided by another library and must
         // be set in the session before calling session.initialize()
         activity.dataStores = this.dataStores;

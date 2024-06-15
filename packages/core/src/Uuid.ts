@@ -27,8 +27,28 @@ export class Uuid {
       return ((1e7).toString() + -1e3 + -4e3 + -8e3 + -1e11).replace(
         /[018]/g,
         (c) =>
-          (Number(c) ^ (randomValue() & (15 >> (Number(c) / 4)))).toString(16)
+          (Number(c) ^ (randomValue() & (15 >> (Number(c) / 4)))).toString(16),
       );
     }
+  }
+
+  /**
+   * Tests if a string is a valid UUID.
+   *
+   * @remarks Will match UUID versions 1 through 8, plus the nil UUID.
+   *
+   * @param uuid - the string to test
+   * @returns true if the string is a valid UUID
+   */
+  static isValid(uuid: string | undefined | null): boolean {
+    if (!uuid) {
+      return false;
+    }
+    if (uuid === "00000000-0000-0000-0000-000000000000") {
+      return true;
+    }
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      uuid,
+    );
   }
 }

@@ -21,6 +21,7 @@ class Game1 extends Game {
     const gameOptions: GameOptions = {
       name: "game1",
       id: "game1",
+      publishUuid: "00000000-0000-0000-0000-000000000000",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -54,6 +55,7 @@ class Game2 extends Game {
     const gameOptions: GameOptions = {
       name: "game2",
       id: "game2",
+      publishUuid: "00000000-0000-0000-0000-000000000000",
       version: "0.1",
       showFps: true,
       width: 400,
@@ -141,6 +143,7 @@ describe("parameters", () => {
       const gameOptions: GameOptions = {
         name: "game4",
         id: "game4",
+        publishUuid: "00000000-0000-0000-0000-000000000000",
         version: "0.1",
         width: 400,
         height: 800,
@@ -897,6 +900,7 @@ class Game3 extends Game {
     const gameOptions: GameOptions = {
       name: "game3",
       id: "game3",
+      publishUuid: "00000000-0000-0000-0000-000000000000",
       version: "0.1",
       width: 400,
       height: 800,
@@ -1000,6 +1004,7 @@ describe("time stepping", () => {
       const gameOptions: GameOptions = {
         name: "game5",
         id: "game5",
+        publishUuid: "00000000-0000-0000-0000-000000000000",
         version: "0.1",
         showFps: true,
         width: 400,

@@ -88,6 +88,9 @@ export class Game implements Activity {
   uuid = Uuid.generate();
   name: string;
   id: string;
+  publishUuid = "";
+  studyId?: string;
+  studyUuid?: string;
   moduleMetadata: ModuleMetadata;
   readonly canvasKitWasmVersion = "__CANVASKITWASM_VERSION__";
   options: GameOptions;
@@ -120,9 +123,18 @@ export class Game implements Activity {
     if (!options.id || options.id.trim() === "") {
       throw new Error("id is required in GameOptions");
     }
+    if (!Uuid.isValid(options.publishUuid)) {
+      const providedPublishUuid = options.publishUuid
+        ? `Provided publishUuid was ${options.publishUuid}. `
+        : "";
+      console.warn(
+        `Missing or invalid publishUuid in GameOptions. ${providedPublishUuid}To generate a valid UUID, visit a site such as https://www.uuidgenerator.net/version4`,
+      );
+    }
     this.options = options;
     this.name = options.name;
     this.id = options.id;
+    this.publishUuid = options.publishUuid;
     this.freeNodesScene.game = this;
     this.freeNodesScene.needsInitialization = true;
     this.fpsMetricReportThreshold =
@@ -403,6 +415,31 @@ export class Game implements Activity {
   }
 
   /**
+   * Adds prefixes to a key to ensure that keys are unique across activities
+   * and studies.
+   *
+   * @remarks When a value is saved to the key-value data store, the key must
+   * be prefixed with additional information to ensure that keys are unique.
+   * The prefixes will include the activity id and publish UUID, and possibly
+   * the study id and study UUID, if they are set (this is so that keys are
+   * unique across different studies that might use the same activity).
+   *
+   * @param key - item key to add prefixes to
+   * @returns the item key with prefixes added
+   */
+  private addPrefixesToKey(key: string) {
+    let k = "";
+    if (this.studyId && this.studyUuid) {
+      k = this.studyId.concat(":", this.studyUuid, ":");
+    } else if (this.studyId || this.studyUuid) {
+      throw new Error(
+        `study_id and study_uuid must both be set or unset. Values are study_id: ${this.studyId}, study_uuid: ${this.studyUuid}`,
+      );
+    }
+    return k.concat(this.id.concat(this.id, ":", this.publishUuid, ":", key));
+  }
+
+  /**
    * Saves an item to the activity's key-value store.
    *
    * @remarks The underlying persistence provider of the key-value store must
@@ -425,9 +462,12 @@ export class Game implements Activity {
     value: string | number | boolean | object | undefined | null,
     globalStore = false,
   ): Promise<string> {
-    const k = globalStore ? key : this.id.concat(":", key);
-    const activityId = globalStore ? "" : this.id;
-    return this.dataStores[0].setItem(k, value, activityId);
+    const prefixedKey = globalStore ? key : this.addPrefixesToKey(key);
+    return this.dataStores[0].setItem(
+      prefixedKey,
+      value,
+      globalStore ? "" : this.publishUuid,
+    );
   }
 
   /**
@@ -451,8 +491,8 @@ export class Game implements Activity {
     key: string,
     globalStore = false,
   ): Promise<T> {
-    const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStores[0].getItem<T>(k);
+    const prefixedKey = globalStore ? key : this.addPrefixesToKey(key);
+    return this.dataStores[0].getItem<T>(prefixedKey);
   }
 
   /**
@@ -472,8 +512,8 @@ export class Game implements Activity {
    * by any activity. Default is false.
    */
   storeDeleteItem(key: string, globalStore = false) {
-    const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStores[0].deleteItem(k);
+    const prefixedKey = globalStore ? key : this.addPrefixesToKey(key);
+    return this.dataStores[0].deleteItem(prefixedKey);
   }
 
   /**
@@ -489,7 +529,7 @@ export class Game implements Activity {
    * });
    */
   storeClearItems() {
-    return this.dataStores[0].clearItemsByActivityId(this.id);
+    return this.dataStores[0].clearItemsByActivityPublishUuid(this.publishUuid);
   }
 
   /**
@@ -508,7 +548,9 @@ export class Game implements Activity {
    * by any activity. Default is false.
    */
   storeItemsKeys(globalStore = false) {
-    return this.dataStores[0].itemsKeysByActivityId(globalStore ? "" : this.id);
+    return this.dataStores[0].itemsKeysByActivityPublishUuid(
+      globalStore ? "" : this.publishUuid,
+    );
   }
 
   /**
@@ -529,8 +571,8 @@ export class Game implements Activity {
    * @returns true if the key exists, false otherwise
    */
   storeItemExists(key: string, globalStore = false) {
-    const k = globalStore ? key : this.id.concat(":", key);
-    return this.dataStores[0].itemExists(k);
+    const prefixedKey = globalStore ? key : this.addPrefixesToKey(key);
+    return this.dataStores[0].itemExists(prefixedKey);
   }
 
   get dataStores(): IDataStore[] {
@@ -1405,9 +1447,12 @@ export class Game implements Activity {
       }
       this.data.trials.push({
         document_uuid: Uuid.generate(),
+        study_id: this.studyId ?? null,
+        study_uuid: this.studyUuid ?? null,
         session_uuid: this.sessionUuid,
         activity_uuid: this.uuid,
         activity_id: this.options.id,
+        activity_publish_uuid: this.options.publishUuid,
         activity_version: this.options.version,
         device_timezone:
           Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? "",
@@ -1573,6 +1618,17 @@ export class Game implements Activity {
    * values in the trial data.
    */
   private readonly automaticTrialSchema: TrialSchema = {
+    study_id: {
+      type: ["string", "null"],
+      description:
+        "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity.",
+    },
+    study_uuid: {
+      type: ["string", "null"],
+      format: "uuid",
+      description:
+        "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity.",
+    },
     document_uuid: {
       type: "string",
       format: "uuid",
@@ -1582,17 +1638,23 @@ export class Game implements Activity {
       type: "string",
       format: "uuid",
       description:
-        "Unique identifier for all activities in this administration of the session.",
+        "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts.",
     },
     activity_uuid: {
       type: "string",
       format: "uuid",
       description:
-        "Unique identifier for all trials in this administration of the activity.",
+        "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts.",
     },
     activity_id: {
       type: "string",
       description: "Human-readable identifier of the activity.",
+    },
+    activity_publish_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions.",
     },
     activity_version: {
       type: "string",

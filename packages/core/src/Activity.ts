@@ -73,14 +73,20 @@ export interface Activity {
     callback: (activityResultsEvent: ActivityResultsEvent) => void,
     options?: CallbackOptions,
   ): void;
-  /** The activity's parent session unique identifier. */
+  /** The activity's parent session unique identifier. This is newly generated each session. */
   sessionUuid: string;
-  /** The activity's unique identifier. NOTE: This is newly generated each session. The uuid for an activity will vary across sessions. */
+  /** The activity's unique identifier. This is newly generated each session. The UUID for an activity will vary across sessions. */
   uuid: string;
   /** Human-friendly name of this activity */
   name: string;
   /** Short identifier of this activity */
   id: string;
+  /** Persistent unique identifier (UUID) of the activity. Required for games. Optional or empty string if a survey. */
+  publishUuid: string;
+  /** The ID of the study (protocol, experiment, or other aggregate) that contains the repeated administrations of this activity. The ID should be short, url-friendly, human-readable text (no spaces, special characters, or slashes), e.g., `nyc-aging-cohort`. */
+  studyId?: string;
+  /** Unique identifier (UUID) of the study (protocol, experiment, or other aggregate) that contains the administration of this activity. */
+  studyUuid?: string;
   /** The value of performance.now() immediately before the activity begins */
   beginTimestamp: number;
   /** The value of new Date().toISOString() immediately before the activity begins */

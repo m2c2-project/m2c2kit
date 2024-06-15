@@ -46,6 +46,9 @@ export class Survey implements Activity {
   sessionUuid = "";
   name = "unnamed survey";
   id = "survey";
+  publishUuid = "";
+  studyId?: string;
+  studyUuid?: string;
   uuid = Uuid.generate();
   private _surveyJson?: unknown;
   beginTimestamp = NaN;
@@ -729,9 +732,12 @@ export class Survey implements Activity {
   private makeAutomaticSurveyDataProperties(): AutomaticSurveyDataProperties {
     return {
       document_uuid: Uuid.generate(),
+      study_id: this.studyId ?? null,
+      study_uuid: this.studyUuid ?? null,
       session_uuid: this.sessionUuid,
       activity_uuid: this.uuid,
       activity_id: this.id,
+      activity_publish_uuid: this.publishUuid,
     };
   }
 

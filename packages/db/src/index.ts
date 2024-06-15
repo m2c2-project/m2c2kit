@@ -16,9 +16,9 @@ export class LocalDatabase extends Dexie implements IDataStore {
     this.version(1).stores({
       // keep the below in sync with the IActivityResultsTable interface
       // and the db.version(1).stores() method in data.ts
-      activityResults: "document_uuid,timestamp,activity_id",
+      activityResults: "document_uuid,timestamp,activity_publish_uuid",
       // keep the below in sync with the IKeyValueStoreTable interface
-      keyValueStore: "key,timestamp,activity_id",
+      keyValueStore: "key,timestamp,activity_publish_uuid",
     });
   }
 
@@ -26,13 +26,13 @@ export class LocalDatabase extends Dexie implements IDataStore {
     const document_uuid = ev.newData["document_uuid"];
     if (typeof document_uuid !== "string") {
       throw new Error(
-        "ActivityResultsEvents.newData is missing the document_uuid property"
+        "ActivityResultsEvents.newData is missing the document_uuid property",
       );
     }
     return this.activityResults.add({
       document_uuid: document_uuid,
       timestamp: Date.parse(ev.iso8601Timestamp),
-      activity_id: ev.target.id,
+      activity_publish_uuid: ev.target.publishUuid,
       data: ev.newData,
     });
   }
@@ -48,11 +48,11 @@ export class LocalDatabase extends Dexie implements IDataStore {
   setItem(
     key: string,
     value: string | number | boolean | object | undefined | null,
-    activityId: string
+    activityPublishUuid: string,
   ) {
     const tableValue: IKeyValueStoreTable = {
       timestamp: Date.parse(new Date().toISOString()),
-      activity_id: activityId,
+      activity_publish_uuid: activityPublishUuid,
       key: key,
       value: value,
     };
@@ -70,18 +70,18 @@ export class LocalDatabase extends Dexie implements IDataStore {
     return this.keyValueStore.delete(key);
   }
 
-  clearItemsByActivityId(activityId: string) {
+  clearItemsByActivityPublishUuid(activityPublishUuid: string) {
     return this.keyValueStore
-      .filter((kv) => kv.activity_id === activityId)
+      .filter((kv) => kv.activity_publish_uuid === activityPublishUuid)
       .toArray()
       .then((items) =>
-        this.keyValueStore.bulkDelete(items.map((item) => item.key))
+        this.keyValueStore.bulkDelete(items.map((item) => item.key)),
       );
   }
 
-  itemsKeysByActivityId(activityId: string) {
+  itemsKeysByActivityPublishUuid(activityPublishUuid: string) {
     return this.keyValueStore
-      .filter((kv) => kv.activity_id === activityId)
+      .filter((kv) => kv.activity_publish_uuid === activityPublishUuid)
       .toArray()
       .then((items) => items.map((item) => item.key));
   }

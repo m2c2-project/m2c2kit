@@ -92,6 +92,7 @@ export class <%= classify(appName) %> extends Game {
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "<%= dasherize(appName) %>",
+      publishUuid: "<%= publishUuid %>",      
       /**
        * Leave the next line as-is, and the insertVersionString() rollup plugin
        * will automatically populate this with the version property listed in

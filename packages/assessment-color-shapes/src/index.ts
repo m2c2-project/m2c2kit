@@ -274,6 +274,7 @@ class ColorShapes extends Game {
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "color-shapes",
+      publishUuid: "394cb010-2ccf-4a87-9d23-cda7fb07a960",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       shortDescription:

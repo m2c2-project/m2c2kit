@@ -5,6 +5,6 @@ export interface IActivityResultsTable {
   // Store timestamp as unix epoch milliseconds because IndexedDB will index it
   // Likely more efficient to index a number than an ISO string?
   timestamp: number;
-  activity_id: string;
+  activity_publish_uuid: string;
   data: ActivityKeyValueData;
 }

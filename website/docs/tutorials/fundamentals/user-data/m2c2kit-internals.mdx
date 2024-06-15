@@ -55,12 +55,13 @@ const demoSchema = {
 }
 ```
 
-- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs`, its `name` is `Documentation Example`, we define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
+- Within the `constructor()`, we define a variable for overall game options, called `options`. We will learn more about this later, but for now, just know that the `id` for this simple example is `docs` and its `name` is `Documentation Example`. The `publishUuid` is a universally unique identifier (UUID) so that if this assessment code is shared ("published") with others, it can be uniquely identified, even if someone else codes an assessment with the same `id` and `name`. We define the size of our game screen as 200 wide by 400 high, we will use Roboto font for our labels, and we set the schema for all of our game's trials to be what we put in the `demoSchema` variable:
 
 ```js
 const options = {
     name: "Documentation Example",
     id: "docs",
+    publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
     width: 200, height: 400,
     fonts: [{
 	    fontName: "roboto",
@@ -69,6 +70,13 @@ const options = {
     trialSchema: demoSchema
 };
 ```
+
+<details >
+  <summary>Universally unique identifiers</summary>
+  <p>A [universally unique identifier (UUID)](https://en.wikipedia.org/wiki/Universally_unique_identifier) is 128-bits of data generated with an algorithm to be unique from any other UUID. In text format, they look like `8a523876-907a-4b68-be22-cd6daa8b9566`. Whenever you create a new assessment, it must have its own unique UUID.</p>
+  <p>You can go to a website, such as [https://www.uuidgenerator.net/version4](https://www.uuidgenerator.net/version4), to generate a UUID. If you are using the m2c2kit CLI to scaffold a new assessment, the CLI will automatically generate a UUID and insert it into your code automatically!</p>
+  <p>In the tutorial, you will see the same `publishUuid` of `c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e` repeatedly used in different code examples. That is because this is tutorial code -- actual assessments must have their own UUID!</p>
+</details>
 
 - The last line of the constructor has the code `super(options)`. This is how we get all the built-in functionality of the `Game` class. Just always remember to include this at the end of your constructor.
 
@@ -103,6 +111,7 @@ export const code = `class DocsDemo extends Game {
         const options = {
             name: "Documentation Example",
             id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
             width: 200, height: 400,
             fonts: [{
 	            fontName: "roboto",

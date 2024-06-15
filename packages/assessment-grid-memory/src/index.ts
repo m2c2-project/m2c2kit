@@ -288,6 +288,7 @@ class GridMemory extends Game {
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "grid-memory",
+      publishUuid: "50ee0af4-d013-408f-a7d1-c8d5c04da920",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       shortDescription:

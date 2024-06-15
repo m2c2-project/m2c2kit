@@ -279,6 +279,7 @@ class ColorDots extends Game {
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "color-dots",
+      publishUuid: "72a1ef60-75c0-47b3-921c-aaee72cca9da",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
       shortDescription:

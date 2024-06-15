@@ -15,8 +15,15 @@ import {
   Sprite,
   Easings,
   Constants,
+  Translation,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions, CountdownScene } from "@m2c2kit/addons";
+import {
+  Button,
+  Grid,
+  Instructions,
+  CountdownScene,
+  LocalePicker,
+} from "@m2c2kit/addons";
 
 /**
  * Symbol Search is a speeded continuous performance test of conjunctive
@@ -103,17 +110,6 @@ positions.",
         description:
           "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
       },
-      trials_complete_scene_text: {
-        default: "You have completed all the symbol search trials",
-        type: "string",
-        description: "Text for scene displayed after all trials are complete.",
-      },
-      trials_complete_scene_button_text: {
-        default: "OK",
-        type: "string",
-        description:
-          "Button text for scene displayed after all trials are complete.",
-      },
       show_quit_button: {
         type: "boolean",
         default: true,
@@ -123,6 +119,12 @@ positions.",
         type: "boolean",
         default: false,
         description: "Should the FPS be shown?",
+      },
+      show_locale_picker: {
+        type: "boolean",
+        default: false,
+        description:
+          "Should the icon that allows the participant to switch the locale be shown?",
       },
     };
 
@@ -228,6 +230,93 @@ positions.",
       },
     };
 
+    const translation: Translation = {
+      configuration: {
+        baseLocale: "en-US",
+      },
+      "en-US": {
+        localeName: "English",
+        INSTRUCTIONS_TITLE: "Symbol Search",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1:
+          "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurately as you can",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "You will see sets of symbols on the top and bottom of the screen.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "When prompted, touch the set on the bottom that is exactly the same as a set above.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Please be as fast and accurate as you can.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Next",
+        BACK_BUTTON_TEXT: "Back",
+        GET_READY_COUNTDOWN_TEXT: "GET READY!",
+        WHICH_MATCHES_TEXT: "Which of these matches a pair above?",
+        OR_TEXT: "or",
+        TRIALS_COMPLETE_SCENE_TEXT: "This activity is complete.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "es-MX": {
+        localeName: "Español",
+        INSTRUCTIONS_TITLE: "Búsqueda de Símbolos",
+        // Short instructions need to be translated.
+        //SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Verás series de símbolos en la parte de arriba y abajo de la pantalla.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Cuando se le solicite, toque el grupo en la parte de abajo que es exactamente igual a un grupo de arriba.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Por favor, sea tan rápido y preciso como pueda.",
+        START_BUTTON_TEXT: "COMENZAR",
+        NEXT_BUTTON_TEXT: "Siguiente",
+        BACK_BUTTON_TEXT: "Atrás",
+        GET_READY_COUNTDOWN_TEXT: "PREPÁRESE",
+        WHICH_MATCHES_TEXT: "¿Cuál de estos coincide con un par anterior?",
+        OR_TEXT: "o",
+        TRIALS_COMPLETE_SCENE_TEXT: "Esta actividad está completa.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      "fr-FR": {
+        localeName: "Français",
+        INSTRUCTIONS_TITLE: "Recherche de Symboles",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Vous verrez des ensembles de symboles en haut et en bas de l'écran.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Lorsqu'on vous le demandera, touchez le groupe en bas qui est exactement le même qu'un groupe ci-dessus.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Soyez aussi rapide et précis que possible.",
+        START_BUTTON_TEXT: "DÉMARRER",
+        NEXT_BUTTON_TEXT: "Suivant",
+        BACK_BUTTON_TEXT: "Retour",
+        GET_READY_COUNTDOWN_TEXT: "PRÉPAREZ-VOUS",
+        WHICH_MATCHES_TEXT:
+          "Lequel de ces éléments correspond à une paire ci-dessus ?",
+        OR_TEXT: "ou",
+        TRIALS_COMPLETE_SCENE_TEXT: "Cette activité est terminée.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      "de-DE": {
+        localeName: "Deutsch",
+        INSTRUCTIONS_TITLE: "Symbol Suche",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Sie sehen Symbole oben und unten auf dem Bildschirm.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Wenn Sie dazu aufgefordert werden, berühren Sie das Set unten, das genau wie das Set oben ist.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Bitte sei so schnell und präzise wie möglich.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Weiter",
+        BACK_BUTTON_TEXT: "Zurück",
+        GET_READY_COUNTDOWN_TEXT: "BEREIT MACHEN",
+        WHICH_MATCHES_TEXT: "Welches dieser Elemente passt zu einem Paar oben?",
+        OR_TEXT: "oder",
+        TRIALS_COMPLETE_SCENE_TEXT: "Diese Aktivität ist abgeschlossen.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:enable
+    };
+
     const symbol_image_size = 160;
 
     const options: GameOptions = {
@@ -236,8 +325,10 @@ positions.",
        * This id must match the property m2c2kit.assessmentId in package.json
        */
       id: "symbol-search",
+      publishUuid: "400ad833-3037-4738-8ad8-c54e07c46896",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
+      translation: translation,
       shortDescription:
         "Symbol Search is a speeded continuous performance test of \
 conjunctive feature search in which respondents identify matching symbol \
@@ -275,12 +366,14 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           height: 340,
           width: 255,
           url: "images/gameImage.png",
+          localize: true,
         },
         {
           imageName: "gameImageOutlinedCards",
           height: 340,
           width: 255,
           url: "images/gameImageOutlinedCards.png",
+          localize: true,
         },
         {
           imageName: "stopwatchImage",
@@ -487,6 +580,12 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       });
     }
 
+    let localePicker: LocalePicker;
+    if (game.getParameter<boolean>("show_locale_picker")) {
+      localePicker = new LocalePicker();
+      game.addFreeNode(localePicker);
+    }
+
     // ==================================================
     // SCENES: instructions
 
@@ -518,15 +617,15 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           ...sharedInstructionsOptions,
           instructionScenes: [
             {
-              title: "Symbol Search",
-              text: "Goal: Touch the set on the bottom that is exactly the same as a set above, as fast and accurately as you can.",
+              title: "INSTRUCTIONS_TITLE",
+              text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
               imageName: "ssintroImage",
               imageAboveText: false,
               imageMarginTop: 12,
               textFontSize: 24,
               titleFontSize: 30,
               textVerticalBias: 0.25,
-              nextButtonText: "START",
+              nextButtonText: "START_BUTTON_TEXT",
               nextButtonBackgroundColor: WebColors.Green,
             },
           ],
@@ -538,36 +637,40 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           ...sharedInstructionsOptions,
           instructionScenes: [
             {
-              title: "Symbol Search",
-              text: "You will see sets of symbols on the top and bottom of the screen.",
+              title: "INSTRUCTIONS_TITLE",
+              text: "INSTRUCTIONS_TEXT_PAGE_1",
               imageName: "gameImage",
               imageAboveText: false,
               imageMarginTop: 12,
               textFontSize: 24,
               titleFontSize: 30,
               textVerticalBias: 0.25,
+              nextButtonText: "NEXT_BUTTON_TEXT",
             },
             {
-              title: "Symbol Search",
-              text: "When prompted, touch the set on the bottom that is exactly the same as a set above.",
+              title: "INSTRUCTIONS_TITLE",
+              text: "INSTRUCTIONS_TEXT_PAGE_2",
               imageName: "gameImageOutlinedCards",
               imageAboveText: false,
               imageMarginTop: 12,
               textFontSize: 24,
               titleFontSize: 30,
               textVerticalBias: 0.25,
+              nextButtonText: "NEXT_BUTTON_TEXT",
+              backButtonText: "BACK_BUTTON_TEXT",
             },
             {
-              title: "Symbol Search",
-              text: "Please be as fast and accurate as you can.",
+              title: "INSTRUCTIONS_TITLE",
+              text: "INSTRUCTIONS_TEXT_PAGE_3",
               imageName: "stopwatchImage",
               imageAboveText: false,
               imageMarginTop: 48,
               textFontSize: 24,
               titleFontSize: 30,
               textVerticalBias: 0.25,
-              nextButtonText: "START",
+              nextButtonText: "START_BUTTON_TEXT",
               nextButtonBackgroundColor: WebColors.Green,
+              backButtonText: "BACK_BUTTON_TEXT",
             },
           ],
         });
@@ -603,12 +706,21 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     const countdownScene = new CountdownScene({
       milliseconds: game.getParameter<number>("countdown_duration_ms"),
-      text: "GET READY!",
+      text: "GET_READY_COUNTDOWN_TEXT",
       transitionDurationMilliseconds: game.getParameter(
         "after_countdown_transition_duration_ms",
       ),
     });
     game.addScene(countdownScene);
+    countdownScene.onSetup(() => {
+      /**
+       * Check if localPicker is not null; if show_locale_picker is false,
+       * then localPicker would be null.
+       */
+      if (localePicker) {
+        localePicker.hidden = true;
+      }
+    });
 
     // ==================================================
     // SCENE: chooseCardScene
@@ -627,7 +739,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     chooseCardScene.addChild(bottomBackground);
 
     const questionLabel = new Label({
-      text: "Which of these matches a pair above?",
+      text: "WHICH_MATCHES_TEXT",
       fontSize: 22,
       preferredMaxLayoutWidth: 240,
     });
@@ -635,7 +747,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     questionLabel.position = { x: 200, y: 460 };
 
     const orLabel = new Label({
-      text: "or",
+      text: "OR_TEXT",
       fontSize: 22,
       preferredMaxLayoutWidth: 240,
     });
@@ -1032,7 +1144,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
             const questionLabelFree = new Label({
               name: "questionLabelFree",
-              text: "Which of these matches a pair above?",
+              text: "WHICH_MATCHES_TEXT",
               fontSize: 22,
               preferredMaxLayoutWidth: 240,
             });
@@ -1059,13 +1171,13 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: game.getParameter("trials_complete_scene_text"),
+      text: "TRIALS_COMPLETE_SCENE_TEXT",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
 
     const okButton = new Button({
-      text: game.getParameter("trials_complete_scene_button_text"),
+      text: "TRIALS_COMPLETE_SCENE_BUTTON_TEXT",
       position: { x: 200, y: 600 },
       backgroundColor: WebColors.Black,
     });

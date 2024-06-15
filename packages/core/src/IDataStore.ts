@@ -28,18 +28,20 @@ export interface IDataStore {
   setItem(
     key: string,
     value: string | number | boolean | object | undefined | null,
-    activityId: string
+    activityPublishUuid: string,
   ): Promise<string>;
   /** Gets the value of an item by its key. */
   getItem<T extends string | number | boolean | object | undefined | null>(
-    key: string
+    key: string,
   ): Promise<T>;
   /** Deletes an item by its key. */
   deleteItem(key: string): Promise<void>;
   /** Deletes all items. */
-  clearItemsByActivityId(activityId: string): Promise<void>;
+  clearItemsByActivityPublishUuid(activityPublishUuid: string): Promise<void>;
   /** Returns keys of all items. */
-  itemsKeysByActivityId(activityId: string): Promise<string[]>;
+  itemsKeysByActivityPublishUuid(
+    activityPublishUuid: string,
+  ): Promise<string[]>;
   /** Determines if the key exists. */
   itemExists(key: string): Promise<boolean>;
 }

@@ -13,8 +13,10 @@ import { LocalizationOptions } from "./LocalizationOptions";
 export interface GameOptions extends LocalizationOptions {
   /** Human-friendly name of this game */
   name: string;
-  /** Short identifier of this game; unique among published games and url-friendly (no spaces, special characters, or slashes)*/
+  /** Short identifier of this game; unique among published games and url-friendly (no spaces, special characters, or slashes). */
   id: string;
+  /** Persistent unique identifier (UUID) of this game; unique among published games. The m2c2kit CLI will generate this property automatically, and you should not change it. If not using the CLI, use a website like https://www.uuidgenerator.net/version4 to generate this value. */
+  publishUuid: string;
   /** Version of this game */
   version: string;
   /** Uri (repository, webpage, or other location where full information about the game can be found) */

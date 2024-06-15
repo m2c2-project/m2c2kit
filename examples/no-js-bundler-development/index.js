@@ -24,6 +24,7 @@ class NoBundler extends Game {
       name: "No JavaScript Bundler Development Example",
       version: "0.0.1",
       id: "no-bundler-example",
+      publishUuid: "7d0bfc64-3b31-4f17-b786-f94b65f7e8f2",
       showFps: false,
       width: 400,
       height: 800,

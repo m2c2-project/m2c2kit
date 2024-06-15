@@ -25,6 +25,7 @@ class Game1 extends Game {
     const gameOptions: GameOptions = {
       name: "game1",
       id: "game1",
+      publishUuid: "00000000-0000-0000-0000-000000000000",
       version: "0.1",
       showFps: true,
       width: 400,

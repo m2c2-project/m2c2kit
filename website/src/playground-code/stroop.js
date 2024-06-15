@@ -82,6 +82,7 @@ class Stroop extends Game {
     const options = {
       name: "Stroop Documentation Example",
       id: "docs",
+      publishUuid: "975028ff-ae19-4b2b-bad9-fa99bb0d9224",
       width: 400,
       height: 800,
       fonts: [

@@ -66,8 +66,6 @@ export class I18n {
    * @remarks If the game instance has been configured to use a data store,
    * the previously used locale and fallback locale will be retrieved from the
    * data store if they have been previously set.
-   *
-   * @param game - The game instance
    */
   async initialize() {
     await this.configureInitialLocale();

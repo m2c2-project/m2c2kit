@@ -15,6 +15,10 @@ export interface SessionOptions {
   assetsUrl?: string;
   /** Array of one or more optional databases that implement the IDataStore interface for persisting data. For store item operations, the first data store will be used. */
   dataStores?: IDataStore[];
+  /** The ID of the study (protocol, experiment, or other aggregate) that contains the repeated administrations of these sessions. The ID should be short, url-friendly, human-readable text (no spaces, special characters, or slashes), e.g., `nyc-aging-cohort.` */
+  studyId?: string;
+  /** The unique identifier (UUID) of the study (protocol, experiment, or other aggregate) that contains the administration of this session. */
+  studyUuid?: string;
   /** After the session initializes, should the session automatically start? Default is true */
   autoStartAfterInit?: boolean;
   /** When an activity ends or is canceled, should the session automatically go to the next activity? Default is true */
