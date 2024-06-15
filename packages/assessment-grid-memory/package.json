@@ -43,7 +43,7 @@
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.14",
     "@rollup/plugin-node-resolve": "15.2.3",
-    "@rollup/plugin-replace": "5.0.5",
+    "@rollup/plugin-replace": "5.0.7",
     "rimraf": "5.0.7",
     "rollup": "4.18.0",
     "rollup-plugin-copy": "3.5.0",

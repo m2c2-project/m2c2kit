@@ -36,9 +36,9 @@
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.13",
-    "@rollup/plugin-commonjs": "25.0.8",
+    "@rollup/plugin-commonjs": "26.0.1",
     "@rollup/plugin-node-resolve": "15.2.3",
-    "@rollup/plugin-replace": "5.0.5",
+    "@rollup/plugin-replace": "5.0.7",
     "@types/jest": "29.5.12",
     "@types/jsdom": "21.1.7",
     "@webgpu/types": "0.1.42",
