@@ -7,4 +7,5 @@ export enum M2NodeType {
   Shape = "Shape",
   Composite = "Composite",
   SoundPlayer = "SoundPlayer",
+  SoundRecorder = "SoundRecorder",
 }
