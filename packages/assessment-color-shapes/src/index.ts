@@ -379,7 +379,7 @@ phases.`,
           instructionScenes: [
             {
               title: "Color Shapes",
-              text: `Try to remember the location and color of ${numberOfShapesShown} shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before.`,
+              text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before.`,
               imageName: "instructions-1",
               imageAboveText: false,
               imageMarginTop: 32,
@@ -399,7 +399,7 @@ phases.`,
           instructionScenes: [
             {
               title: "Color Shapes",
-              text: `Try to remember the location and color of ${numberOfShapesShown} shapes, because they will soon disappear.`,
+              text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear.`,
               imageName: "instructions-1",
               imageAboveText: false,
               imageMarginTop: 32,
