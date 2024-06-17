@@ -1,5 +1,6 @@
 import { M2Node } from "./M2Node";
-import { M2NodeType, M2SoundStatus } from ".";
+import { M2NodeType } from "./M2NodeType";
+import { M2SoundStatus } from "./M2Sound";
 import { MoveActionOptions } from "./MoveActionOptions";
 import { WaitActionOptions } from "./WaitActionOptions";
 import { CustomActionOptions } from "./CustomActionOptions";
