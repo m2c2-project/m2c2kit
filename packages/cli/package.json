@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "description": "Command line interface to create new m2c2kit apps",
   "files": [
     "dist/**"

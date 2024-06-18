@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-shapes",
-  "version": "0.8.15",
+  "version": "0.8.16",
   "m2c2kit": {
     "assessmentId": "color-shapes"
   },
@@ -37,8 +37,8 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "^0.3.14",
-    "@m2c2kit/core": "^0.3.17"
+    "@m2c2kit/addons": "^0.3.15",
+    "@m2c2kit/core": "^0.3.18"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.14",

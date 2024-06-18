@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/session",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The session runner for m2c2kit activities.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -35,7 +35,7 @@
     "url": "https://github.com/m2c2-project/m2c2kit/issues"
   },
   "dependencies": {
-    "@m2c2kit/core": "^0.3.17"
+    "@m2c2kit/core": "^0.3.18"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "^0.3.13",

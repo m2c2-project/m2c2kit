@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/db",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "description": "A local database for storing m2c2kit data on the device",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -42,7 +42,7 @@
     "typescript": "5.4.5"
   },
   "dependencies": {
-    "@m2c2kit/core": "^0.3.17",
+    "@m2c2kit/core": "^0.3.18",
     "dexie": "4.0.7"
   },
   "engines": {

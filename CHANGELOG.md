@@ -4,6 +4,154 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.18] - 2024-06-18
+
+### Added
+
+- `SoundPlayer` node for playing sounds.
+- `PlayAction` to play sounds.
+- `SoundRecorder` node for recording sounds.
+- `SoundManager` class to manage sounds.
+- `Repeat` and `RepeatForever` actions.
+- `sounds` property in `GameOptions` to specify sounds.
+- `publishUuid` property in `GameOptions` is now required.
+- `locale`, `study_id`, `study_uuid`, and `activity_publish_uuid` are now part of automatic trial schema that will be automatically saved.
+- Internationalization supports different fonts.
+- Internationalization supports images.
+- Internationalization supports string interpolation.
+- Internationalization saves locale preferences, if an `IDataStore` is configured for the session.
+- When saving key-value pairs in `IDataStore`, the key is prefixed with additional study and activity information.
+
+### Changed
+
+- Internationalization configuration in the `Translation` interface has changed
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.15] - 2024-06-18
+
+### Fixed
+
+- `VirtualKeyboard` respects `isUserInteractionEnabled` property.
+- `Button` text supports internationalization.
+
+### Added
+
+- `LocalePicker` to switch locales.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.1] - 2024-06-18
+
+### Added
+
+- Optional `studyId` and `studyUuid` properties in `SessionOptions`.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.5] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.15] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.15] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.11] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.15] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.13] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.13] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.8] - 2024-06-18
+
+### Changed
+
+- Will now be published to npm.
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.16] - 2024-06-18
+
+### Added
+
+- Internationalization text and images for Spanish, French, and German.
+- `show_locale_picker` parameter, which currently defaults to `false`.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.16] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.16] - 2024-06-18
+
+### Fixed
+
+- Wording in instructions.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.16] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.13] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.15] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.13] - 2024-06-18
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/schematics` [0.1.14] - 2024-03-20
 
 ### Fixed
