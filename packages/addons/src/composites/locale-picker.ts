@@ -30,6 +30,8 @@ export interface LocalePickerOptions extends CompositeOptions {
   size?: Size;
   /** Corner radius of dialog box; can be used to make rounded corners */
   cornerRadius?: number;
+  /** Font size of locale options in dialog box. Default is 24. */
+  fontSize?: number;
   /** Font color of locale options in dialog box. Default is WebColors.Black */
   fontColor?: RgbaColor;
   /** Image to use for LocalePicker. Default is a globe SVG, 32x32. */
@@ -83,9 +85,11 @@ interface LocaleSvg {
 export class LocalePicker extends Composite {
   compositeType = "LocalePicker";
   zPosition = Number.MAX_VALUE;
+  private readonly DEFAULT_FONT_SIZE = 24;
   automaticallyChangeLocale = true;
   private _localeOptions = new Array<LocaleOption>();
   private _backgroundColor = WebColors.White;
+  private _fontSize = this.DEFAULT_FONT_SIZE;
   private _fontColor = WebColors.Black;
   private _currentLocale?: string;
   private _cornerRadius = 8;
@@ -150,6 +154,10 @@ export class LocalePicker extends Composite {
 
     if (options.overlayAlpha !== undefined) {
       this.overlayAlpha = options.overlayAlpha;
+    }
+
+    if (options.fontSize !== undefined) {
+      this.fontSize = options.fontSize;
     }
 
     if (options.fontColor) {
@@ -291,7 +299,16 @@ export class LocalePicker extends Composite {
     });
     this.addChild(overlay);
 
-    const dialogHeight = this.localeOptions.length * 50;
+    /**
+     * Because the locale options in the dialog box could be a mix of text and
+     * SVGs, we cannot use a label that automatically takes care of text
+     * placement. We must manually calculate the lineHeight based on the
+     * fontSize. With a default fontSize of 24, the lineHeight is 50. If the
+     * fontSize is changed, the lineHeight will be scaled based on the
+     * fontSize.
+     */
+    const lineHeight = (this.fontSize / this.DEFAULT_FONT_SIZE) * 50;
+    const dialogHeight = this.localeOptions.length * lineHeight;
     const dialogWidth = Globals.canvasCssWidth / 2;
 
     const sceneCenter: Point = {
@@ -326,11 +343,15 @@ export class LocalePicker extends Composite {
         }
         const text = new Label({
           text: labelText,
-          fontSize: 24,
+          fontSize: this.fontSize,
           fontColor: this.fontColor,
           position: {
             x: sceneCenter.x,
-            y: sceneCenter.y + i * 50 - dialogHeight / 2 + 25,
+            y:
+              sceneCenter.y +
+              i * lineHeight -
+              dialogHeight / 2 +
+              lineHeight / 2,
           },
           isUserInteractionEnabled: true,
           zPosition: 1,
@@ -356,7 +377,11 @@ export class LocalePicker extends Composite {
           imageName: localeOption.text,
           position: {
             x: sceneCenter.x,
-            y: sceneCenter.y + i * 50 - dialogHeight / 2 + 25,
+            y:
+              sceneCenter.y +
+              i * lineHeight -
+              dialogHeight / 2 +
+              lineHeight / 2,
           },
           isUserInteractionEnabled: true,
           zPosition: 1,
@@ -367,11 +392,15 @@ export class LocalePicker extends Composite {
         if (this.currentLocale === localeOption.locale) {
           const leftSelectionIndicator = new Label({
             text: this.LEFT_SELECTION_INDICATOR,
-            fontSize: 24,
+            fontSize: this.fontSize,
             fontColor: this.fontColor,
             position: {
               x: sceneCenter.x - localeOption.svg.width / 2,
-              y: sceneCenter.y + i * 50 - dialogHeight / 2 + 25,
+              y:
+                sceneCenter.y +
+                i * lineHeight -
+                dialogHeight / 2 +
+                lineHeight / 2,
             },
             hidden: true,
             // do not localize the left selection indicator
@@ -380,11 +409,15 @@ export class LocalePicker extends Composite {
           this.addChild(leftSelectionIndicator);
           const rightSelectionIndicator = new Label({
             text: this.RIGHT_SELECTION_INDICATOR,
-            fontSize: 24,
+            fontSize: this._fontSize,
             fontColor: this.fontColor,
             position: {
               x: sceneCenter.x + localeOption.svg.width / 2,
-              y: sceneCenter.y + i * 50 - dialogHeight / 2 + 25,
+              y:
+                sceneCenter.y +
+                i * lineHeight -
+                dialogHeight / 2 +
+                lineHeight / 2,
             },
             hidden: true,
             // do not localize the left selection indicator
@@ -445,6 +478,14 @@ export class LocalePicker extends Composite {
   }
   set backgroundColor(backgroundColor: RgbaColor) {
     this._backgroundColor = backgroundColor;
+    this.needsInitialization = true;
+  }
+
+  get fontSize(): number {
+    return this._fontSize;
+  }
+  set fontSize(fontSize: number) {
+    this._fontSize = fontSize;
     this.needsInitialization = true;
   }
 
