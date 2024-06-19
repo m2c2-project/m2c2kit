@@ -295,7 +295,16 @@ export class SoundRecorder
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        resolve(reader.result as string);
+        /**
+         * The result is a data URL with the following format:
+         * data:[<mediatype>][;base64],<data>
+         * We want to return the base64 data without the data URL prefix.
+         */
+        const base64WithoutPrefix = reader.result?.toString().split(",").pop();
+        if (base64WithoutPrefix === undefined) {
+          throw new Error("base64WithoutPrefix is undefined.");
+        }
+        resolve(base64WithoutPrefix);
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
