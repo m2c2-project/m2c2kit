@@ -1,0 +1,151 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Configuring the Translation
+
+The `Translation` object is an optional property in `GameOptions` that specifies the different locales your game supports. Here is the `Translation` object from the introductory demo:
+
+```js
+translation: {
+  "configuration": {
+    "baseLocale": "en-US"
+  },
+  "en-US": {
+    localeName: "English",
+    GREETING_LABEL: "Hello, world",
+  },
+  "es-MX": {
+    localeName: "Español",
+    GREETING_LABEL: "Hola, mundo",
+  },
+  "fr-FR": {
+    localeName: "Français",
+    GREETING_LABEL: "Bonjour, le monde",
+  },
+  "de-DE": {
+    localeName: "Deutsch",
+    GREETING_LABEL: "Hallo, Welt",
+  }
+}
+```
+
+In `configuration`, the `baseLocale` property specifies what is the default locale. This locale will be used if a translation is missing.
+
+The remaining properties of a `Translation` object are string keys for each locale. The locale must be a language and country code (a [BCP 47 tag](https://en.wikipedia.org/wiki/IETF_language_tag)).
+
+Within each locale:
+
+- `localeName` is how the locale will be displayed to the user for selection. Thus, use the word "Español" for someone who would choose Spanish, rather than the word "Spanish."
+- The remaining properties are key-value pairs that determine how text will be displayed for that locale. The keys can be named anything, but a recommended practice is to format the key in all caps. This distinguishes the translation keys from the translated text.
+
+## Using translations
+
+Specify the translation key as the `text` property in a `Label` or `TextLine`.
+
+```js
+const greetingLabel = new Label({
+  text: "GREETING_LABEL",
+  position: { x: 100, y: 200}
+});
+```
+
+The translated text, in the chosen locale, will be used.
+
+## Missing translation keys
+
+It is easy to omit a translation or mistype a translation key. For example, in `es-MX`, a typo might be `GREETIN_LABEL: "Hola, mundo"` (omitting the final `G`). When the m2c2kit i18n engine looks for a key named `GREETIN_LABEL` in the `es-MX` locale, it will not be found. When this happens, the translation key in the `baseLocale` will be used as a backup. If the translation key does not exist in the `baseLocale`, the translation key itself will be displayed as the text.
+
+During development, you may want to highlight missing translation keys to make them easier to find. Setting the `missingLocalizationColor` in `GameOptions` will change the font color to the specified color when a translation key is not found.
+
+## Preventing localization
+
+A missing translation key is not always an error. The text `Ok` is perhaps so universally understood, you may choose to use it in all locales. If your game has a `Translation` object, it will treat every `text` property as a translation key, unless you set the property `localize: false`.
+
+```js
+const okButton = new Button({
+  text: "Ok",
+  position: { x: 100, y: 300},
+  localize: false
+});
+```
+
+In the below example, the translation key for `GREETING_LABEL` in the `es-MX` locale is mistyped. As a backup, the game will look for the translation key in the `en-US` locale.
+
+Click the globe and choose "Español."
+
+- Because `missingLocalizationColor: WebColors.Red` is set, the translation key typo will stand out.
+- Because the Ok button has `localize: false`, its text will not be considered a missing translation key.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            locale: "en-US",
+            missingLocalizationColor: WebColors.Red,
+            translation: {
+                "configuration": {
+                    "baseLocale": "en-US"
+                },
+                "en-US": {
+                    localeName: "English",
+                    GREETING_LABEL: "Hello, world",
+                },
+                "es-MX": {
+                    localeName: "Español",
+                    GREETIN_LABEL: "Hola, mundo",
+                },
+                "fr-FR": {
+                    localeName: "Français",
+                    GREETING_LABEL: "Bonjour, le monde",
+                },
+                "de-DE": {
+                    localeName: "Deutsch",
+                    GREETING_LABEL: "Hallo, Welt",
+                }
+            }
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+        const greetingLabel = new Label({
+            text: "GREETING_LABEL",
+            position: { x: 100, y: 200}
+        });
+        sceneOne.addChild(greetingLabel);
+ 
+        const localePicker = new LocalePicker({
+            fontSize: 18
+        });
+        sceneOne.addChild(localePicker);
+
+        const okButton = new Button({
+            text: "Ok",
+            position: { x: 100, y: 300 },
+            localize: false
+        });
+        sceneOne.addChild(okButton);
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

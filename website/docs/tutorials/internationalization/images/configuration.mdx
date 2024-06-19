@@ -1,0 +1,107 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Configuration
+
+To use a localized image, the `url` must point to the image in its base locale. Then set the property `localize: true`
+
+```js
+images: [
+  {
+    imageName: "gameImage",
+    height: 340,
+    width: 255,
+    url: "images/gameImage.png",
+    localize: true,
+  },
+```
+
+:::info 
+
+Images configured for localization will automatically use lazy loading to avoid preparing unnecessary images.
+
+:::
+
+In the demo below, notice how both the text and the image change when a locale is selected.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            images: [
+              {
+                imageName: "gameImage",
+                height: 170,
+                width: 128,
+                url: "images/gameImage.png",
+                localize: true,
+              },
+            ],
+            locale: "en-US",
+            missingLocalizationColor: WebColors.Red,
+            translation: {
+                "configuration": {
+                    "baseLocale": "en-US"
+                },
+                "en-US": {
+                    localeName: "English",
+                    TITLE_LABEL: "This is an image from the game",
+                },
+                "es-MX": {
+                    localeName: "Español",
+                    TITLE_LABEL: "Esta es una imagen del juego",
+                },
+                "fr-FR": {
+                    localeName: "Français",
+                    TITLE_LABEL: "Ceci est une image du jeu",
+                },
+                "de-DE": {
+                    localeName: "Deutsch",
+                    TITLE_LABEL: "Dies ist ein Bild aus dem Spiel",
+                }
+            }
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+        const greetingLabel = new Label({
+            text: "TITLE_LABEL",
+            position: { x: 100, y: 100}
+        });
+        sceneOne.addChild(greetingLabel);
+ 
+        const localePicker = new LocalePicker({
+            fontSize: 18
+        });
+        sceneOne.addChild(localePicker);
+
+        const screenCap = new Sprite({
+          imageName: "gameImage",
+          position: { x: 100, y: 250}
+        });
+        sceneOne.addChild(screenCap);
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

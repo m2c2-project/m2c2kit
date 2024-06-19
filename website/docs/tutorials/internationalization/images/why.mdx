@@ -1,0 +1,41 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Why localize images?
+
+It is clear there is a need to localize text to different locales, but localizing images is also important.
+
+Instructions often have screen captures of what a user will see in a game. If a game has text, it would be disorienting for a user in a Spanish locale to see a screen capture of the game operating in an English locale.
+
+## Preparing images for localization
+
+To localize an image:
+
+- Prepare a separate version of the image for each locale. To avoid positioning differences, make the image the same size (height, width) across the locales. 
+- For the base locale, the image filename can be anything. For each additional locale, the image filename must have the locale inserted before the file extension. For example, if the base locale is English (US), the filename would be `gameImage.png`. The image to be shown in Spanish (Mexico) would have the filename `gameImage.es-MX.png`
+
+## Examples
+
+The following example of a localized image is from the Symbol Search instructions:
+
+import baseLocaleImage from "@site/static/m2c2kit/assets/docs/images/gameImage.png";
+import esMxImage from "@site/static/m2c2kit/assets/docs/images/gameImage.es-MX.png";
+import frFRImage from "@site/static/m2c2kit/assets/docs/images/gameImage.fr-FR.png";
+import deDEImage from "@site/static/m2c2kit/assets/docs/images/gameImage.de-DE.png";
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+  <div style={{ gridArea: '1 / 1 / 2 / 2', textAlign: 'left' }}>`gameImage.png`</div>
+  <div style={{ gridArea: '2 / 1 / 3 / 2' }}><img src={baseLocaleImage} style={{ width: 200 }} /></div>
+  <div style={{ gridArea: '1 / 2 / 2 / 3', textAlign: 'left' }}>`gameImage.es-MX.png`</div>
+  <div style={{ gridArea: '2 / 2 / 3 / 3' }}><img src={esMxImage} style={{ width: 200 }} /></div>
+  <div style={{ gridArea: '1 / 3 / 2 / 4', textAlign: 'left' }}>`gameImage.fr-FR.png`</div>
+  <div style={{ gridArea: '2 / 3 / 3 / 4' }}><img src={frFRImage} style={{ width: 200 }} /></div>
+  <div style={{ gridArea: '1 / 4 / 2 / 5', textAlign: 'left' }}>`gameImage.de-DE.png`</div>
+  <div style={{ gridArea: '2 / 4 / 3 / 5' }}><img src={deDEImage} style={{ width: 200 }} /></div>
+</div>
+
+

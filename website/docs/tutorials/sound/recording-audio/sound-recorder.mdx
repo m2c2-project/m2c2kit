@@ -1,0 +1,114 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Using the `SoundRecorder`
+
+Recording sounds requires two steps:
+
+1. Add the `SoundRecorder` node to the scene.
+2. Control the `SoundRecorder` node with its `start()` and `stop()` methods
+
+## Add the `SoundRecorder`
+
+Create a new `SoundRecorder` node and specify the preferred MIME type of the recorded audio. The MIME type determines the file type of the audio.
+
+A complication is that the supported audio recorder MIME types vary by browser. Desktop browsers support many more types than mobile browsers. And types vary by platform. For example, Android browsers tend to support audio recording only in [WebM](https://en.wikipedia.org/wiki/WebM), while iOS browsers support audio recording only in [MP4](https://en.wikipedia.org/wiki/MP4_file_format).
+
+A good strategy is to specify either WebM or MP4 as the preferred MIME type, and both of them as backups. If the device does not support any of the preferred or backup MIME types, whatever type the device supports will be used as a fallback.
+
+```js
+const recorder = new SoundRecorder({
+  mimeType: "audio/webm",
+  backupMimeTypes: ["audio/webm", "audio/mp4"],
+});
+sceneOne.addChild(recorder);
+```
+
+## Control the `SoundRecorder`
+
+To begin recording audio, call the `start()` method on the `SoundPlayer`:
+
+- If this is the first time the user has used this game to record audio, the browser will ask permission to record audio. If the user grants permission, the audio recording will begin. If the user declines permission, it will throw an exception. Thus, it is highly recommended to place the `start()` method in a try/catch block to handle this possibility.
+- The `start()` method is asynchronous and should be awaited to ensure the expected order of execution in the code block.
+
+To end recording audio, call the `stop()` method on the `SoundPlayer`:
+
+- The `stop()` method returns the results of the audio recording. The result is a [`SoundRecorderResults`](../../../../docs/reference/api-core/interfaces/SoundRecorderResults) object, which contains information such as the MIME type that was used, the duration, beginning and ending time stamps, and audio data as both a base64 string and a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob).
+- The `stop()` method is asynchronous and **must** be awaited.
+
+:::danger
+
+If the `stop()` method is not awaited, the results will be a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and the useable data will be lost.
+
+:::
+
+The example below will record audio when the "START" button is pressed. When "STOP" is pressed, recording will end. In the console, the results of the recording is shown. If you copy the base64 data, you can paste it into a website such as https://base64.guru/converter/decode/audio to hear the audio.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+  
+        const recorder = new SoundRecorder({
+          mimeType: "audio/webm",
+          backupMimeTypes: ["audio/webm", "audio/mp4"],
+        });
+        sceneOne.addChild(recorder);
+ 
+        const recordingButton = new Button({
+            text: "START",
+            size: { width: 100, height: 50 },
+            position: { x: 100, y: 200},
+            isUserInteractionEnabled: true
+        });
+        sceneOne.addChild(recordingButton);
+
+        recordingButton.onTapDown( async () => {
+          if (!recorder.isRecording) {
+            try {
+              await recorder.start();
+              recordingButton.text = "STOP";                            
+            } catch {
+              console.log("microphone permission blocked.")
+            }
+          } else {
+            recordingButton.text = "START";
+            const result = await recorder.stop();
+            console.log("Recording stopped.");
+            console.log("MIME type: " + result.mimeType);
+            console.log("Duration was " + result.duration + " milliseconds");
+            console.log("Audio data in base64:");
+            console.log(result.audioBase64);
+            // next you would typically add result.audioBase64 to the trial data
+            // so it is saved.
+          }          
+        })
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

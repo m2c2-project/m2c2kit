@@ -1,0 +1,163 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Using the `SoundPlayer`
+
+Playing sounds requires three steps:
+
+1. Load audio files to be played.
+2. Add the `SoundPlayer` node to the scene.
+3. Control the `SoundPlayer` node with the `Play` action.
+
+## Load audio files
+
+In the `GameOptions` object, the `sounds` property is an array of audio files that the game will use. Similar to the way font and image assets are loaded, each sound needs a `soundName` to identify the sound and a `url` from where it can be fetched.
+
+```js
+sounds: [
+  {
+    // public domain, adapted from https://commons.wikimedia.org/wiki/File:Car_Horn.wav
+    soundName: "carHorn",
+    url: "sounds/car-horn.mp3"
+  },
+]
+```
+
+## Add the `SoundPlayer`
+
+Create a new `SoundPlayer` node and specify which sound it will play. Use the same `soundName` as it appeared in the `sounds` array in `GameOptions`. Add the `SoundPlayer` to the scene.
+
+```js
+const carSound = new SoundPlayer({
+  soundName: "carHorn",
+});
+sceneOne.addChild(carSound);
+```
+
+## Control the `SoundPlayer`
+
+The `Play` action will play the sound.
+
+```js
+carSound.run(
+  Action.play()
+)
+```
+
+The example below will play a beeping car horn sound each time the "BEEP" button is pushed.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            sounds: [
+              {
+                // public domain, adapted from https://commons.wikimedia.org/wiki/File:Car_Horn.wav
+                soundName: "carHorn",
+                url: "sounds/car-horn.mp3"
+              },
+            ]
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+ 
+        const carSound = new SoundPlayer({
+          soundName: "carHorn",
+        });
+        sceneOne.addChild(carSound);
+
+        const beepButton = new Button({
+            text: "BEEP",
+            size: { width: 100, height: 50 },
+            position: { x: 100, y: 200},
+            isUserInteractionEnabled: true
+        });
+        sceneOne.addChild(beepButton);
+
+        beepButton.onTapDown( () => {
+          carSound.run(
+            Action.play()
+          )
+        })
+     }
+}`;
+
+export const more = [
+{ description: <>The `SoundPlayer` will play the sound [concurrently] in response to multiple `Play` actions. In this example, the audio file is bird sound. Press the "SING" button repeatedly, and you will hear multiple instances of the audio file played. </>,
+code: `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            sounds: [
+              {
+                // public domain, adapted from https://commons.wikimedia.org/wiki/File:Bird_singing.ogg
+                soundName: "birdSong",
+                url: "sounds/bird-singing.mp3"
+              },
+            ]
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+ 
+        const birdSound = new SoundPlayer({
+          soundName: "birdSong",
+        });
+        sceneOne.addChild(birdSound);
+
+        const birdButton = new Button({
+            text: "SING",
+            size: { width: 100, height: 50 },
+            position: { x: 100, y: 200},
+            isUserInteractionEnabled: true
+        });
+        sceneOne.addChild(birdButton);
+
+        birdButton.onTapDown( () => {
+          birdSound.run(
+            Action.play()
+          )
+        })
+     }
+}`}
+]
+
+
+<CodeExample code={code} more={more} template={template} console="true"/>

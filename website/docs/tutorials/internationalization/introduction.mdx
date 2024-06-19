@@ -1,0 +1,93 @@
+---
+id: introduction
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Introduction
+
+Internationalization is the ability to customize your application to different settings and cultures. It is sometimes abbreviated **i18n** -- because there are 18 letters between the **i** and the **n**, and i18n takes less space!
+
+
+:::info
+
+You will often encounter [internationalization](https://en.wikipedia.org/wiki/Internationalization_and_localization), [localization](https://en.wikipedia.org/wiki/Internationalization_and_localization), and [locale](https://en.wikipedia.org/wiki/Locale_(computer_software)) used together.
+
+**Internationalization** (i18n) is the software development and design processes that make it possible to adapt an application to different settings.
+
+**Localization** (l10n) is the process of adapting the application to the different setting, e.g., translation.
+
+A **locale** is a specific setting that the application will be adapted to, e.g., English (United States ).
+
+:::
+
+
+## Hello, world
+
+This example shows a simple label with the text "Hello, world." This label has been localized into four different locales: English (United States), Spanish (Mexico), French (France), and Germany (German).
+
+To change the locale, click on the globe icon.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            locale: "en-US",
+            translation: {
+                "configuration": {
+                    "baseLocale": "en-US"
+                },
+                "en-US": {
+                    localeName: "English",
+                    GREETING_LABEL: "Hello, world",
+                },
+                "es-MX": {
+                    localeName: "Español",
+                    GREETING_LABEL: "Hola, mundo",
+                },
+                "fr-FR": {
+                    localeName: "Français",
+                    GREETING_LABEL: "Bonjour, le monde",
+                },
+                "de-DE": {
+                    localeName: "Deutsch",
+                    GREETING_LABEL: "Hallo, Welt",
+                }
+            }
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+        const greetingLabel = new Label({
+            text: "GREETING_LABEL",
+            position: { x: 100, y: 200}
+        });
+        sceneOne.addChild(greetingLabel);
+ 
+        const localePicker = new LocalePicker({
+            fontSize: 18
+        });
+        sceneOne.addChild(localePicker);
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

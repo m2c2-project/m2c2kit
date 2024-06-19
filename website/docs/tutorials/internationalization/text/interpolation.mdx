@@ -1,0 +1,126 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Interpolation
+
+When localizing text, part of a sentence may be known only at runtime. For example, it may be randomized how many items the user is asked to remember. The following is very inefficient:
+
+```js
+translation: {
+  "configuration": {
+    "baseLocale": "en-US"
+  },
+  "en-US": {
+    localeName: "English",
+    REMEMBER_3_BALLS: "Remember the position of 3 balls",
+    REMEMBER_4_BALLS: "Remember the position of 4 balls",
+    REMEMBER_5_BALLS: "Remember the position of 5 balls",
+  },
+  "es-MX": {
+    localeName: "Español",
+    REMEMBER_3_BALLS: "Recuerda la posición de 3 bolas.",
+    REMEMBER_4_BALLS: "Recuerda la posición de 4 bolas.",
+    REMEMBER_5_BALLS: "Recuerda la posición de 5 bolas.",
+  },
+}
+```
+
+Inserting a variable into a placeholder within a string is called [string interpolation](https://en.wikipedia.org/wiki/String_interpolation). In the m2c2kit i18n engine, the placeholders are variable names surrounded by double curly braces. These placeholders are used in the `Translation` object and the node that will display the translated text.
+
+## Defining placeholders within the `Translation` object
+
+```js
+translation: {
+  "configuration": {
+    "baseLocale": "en-US"
+  },
+  "en-US": {
+    localeName: "English",
+    REMEMBER_BALLS: "Remember the position of {{ballCount}} balls",
+  },
+  "es-MX": {
+    localeName: "Español",
+    REMEMBER_BALLS: "Recuerda la posición de {{ballCount}} bolas.",
+  },
+}
+```
+
+## Specifying the placeholder values
+
+In the node with translated text, provide the `interpolation` property. It is key-value pairs where the key is the placeholder, and the value is the string to be inserted.
+
+```js
+const balls = (Math.floor(Math.random() * (10 - 3 + 1)) + 3).toString();
+const directionsLabel = new Label({
+  text: "REMEMBER_BALLS",
+  interpolation: {
+    ballCount: balls
+  }
+});
+```
+
+In the below example, the user is asked to remember a randomly chosen number of balls (3-10). These directions are localized into English and Spanish. Click the "Run" button repeatedly to see that this number changes.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+            ],
+            locale: "en-US",
+            missingLocalizationColor: WebColors.Red,
+            translation: {
+              "configuration": {
+                "baseLocale": "en-US"
+              },
+              "en-US": {
+                localeName: "English",
+                REMEMBER_BALLS: "Remember the position of {{ballCount}} balls",
+              },
+              "es-MX": {
+                localeName: "Español",
+                REMEMBER_BALLS: "Recuerda la posición de {{ballCount}} bolas.",
+              },
+            },
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+ 
+        const balls = (Math.floor(Math.random() * (10 - 3 + 1)) + 3).toString();
+        const greetingLabel = new Label({
+            text: "REMEMBER_BALLS",
+            interpolation: {
+              ballCount: balls
+            },
+            position: { x: 100, y: 200},
+        });
+        sceneOne.addChild(greetingLabel);
+ 
+        const localePicker = new LocalePicker({
+            fontSize: 18
+        });
+        sceneOne.addChild(localePicker);
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>

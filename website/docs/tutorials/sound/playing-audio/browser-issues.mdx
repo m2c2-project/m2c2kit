@@ -1,0 +1,20 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Browser issues
+
+Because m2c2kit runs within the browser or a webview, it must follow browser constraints. Most relevant for `SoundPlayer` is the browser's [autoplay policy](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide). In brief, the browser requires that the user interact with the page/webview before playing any audio.
+
+In the previous example, you may have noticed this warning in the console:
+
+```
+Play action: audio buffer not ready for sound carHorn (url: assets/docs/sounds/car-horn.mp3); will try next frame
+```
+
+What this means is that `SoundPlayer` tried to play audio before the browser allowed it. This happened if you pressed the "BEEP" button as the first interaction with the page/webview. The browser will not allow audio playback until the *next* update (the next frame), which will be approximately 16.7 milliseconds later.
+
+This is not, however, a significant limitation. It is rare for this situation to occur. Usually, an assessment begins with instructions or other scenes that require user interaction. Any interaction with a scene counts as a user interaction with the page/webview, and thus subsequent scenes can immediately play audio.

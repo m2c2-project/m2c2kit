@@ -1,0 +1,112 @@
+---
+sidebar_position: 3
+hide_table_of_contents: true
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+# Fonts
+
+In m2c2kit, fonts must be explicitly loaded. In `GameOptions`, the first font listed in the `fonts` array will be the default font for all text. Although modern browsers have built-in font support for nearly all locales, the fonts embedded in the browser are not accessible to JavaScript code or m2c2kit.
+
+It is typical m2c2kit practice to load the Roboto font as the default, but this font will not support all locales. For example, Roboto cannot display text in the Hindi (India) locale.
+
+:::warning
+
+Modern code editors support nearly any locale. Thus, a string such as हैलो वर्ल्ड may look fine in your code editor, but it will not render correctly in m2c2kit unless you load the needed font. Text missing a needed font may appear as tall rectangles with an X in them, similar to ☒☒☒☒☒.
+
+:::
+
+## Loading additional fonts
+
+In `GameOptions` in the `fonts` array, any number of fonts can listed. To localize text to Hindi (India), we will need the Devanagari font:
+
+```js
+fonts: [
+  {
+    fontName: "roboto",
+    url: "fonts/roboto/Roboto-Regular.ttf",
+  },
+  {
+    fontName: "devanagari",
+    url: "fonts/devanagari/NotoSansDevanagari-Regular.ttf",
+    lazy: true
+  },
+],
+```
+
+Font files can be large, and it wastes time and bandwidth to download a font for a locale that the use will not select. By setting the `lazy: true` property, this tells m2c2kit not to load the Devanagari font unless it is needed, i.e., if the user select the Hindi (India) locale.
+
+## Defining locale-specific fonts
+
+If a locale needs a font other than the default font, this can be specified in the `Translation` object by setting the `fontName` property:
+
+```js
+"hi-IN": {
+  localeName: "Hindi",
+  fontName: "devanagari",
+  GREETING_LABEL: "हैलो वर्ल्ड",
+},
+```
+
+In the example below, pay attention to the console output. Only when the Hindi locale is selected will the Devanagari font be loaded.
+
+import template from '!!raw-loader!@site/src/m2c2kit-index-html-templates/basic-template-with-constructor.html';
+
+export const code = `class DocsDemo extends Game {
+    constructor() {
+        const options = {
+            name: "Documentation Example",
+            id: "docs",
+            publishUuid: "c9ec7b5b-a6cc-4308-9b1c-73b40ae4aa9e",
+            width: 200, height: 400,
+            fonts: [
+              {
+                fontName: "roboto",
+                url: "fonts/roboto/Roboto-Regular.ttf",
+              },
+              {
+                fontName: "devanagari",
+                url: "fonts/devanagari/NotoSansDevanagari-Regular.ttf",
+                lazy: true
+              },
+            ],
+            locale: "en-US",
+            translation: {
+                "configuration": {
+                    "baseLocale": "en-US"
+                },
+                "en-US": {
+                    localeName: "English",
+                    GREETING_LABEL: "Hello, world",
+                },
+                "hi-IN": {
+                    localeName: "Hindi",
+                    fontName: "devanagari",
+                    GREETING_LABEL: "हैलो वर्ल्ड",
+                },
+            }
+        };
+        super(options);
+    }
+    async initialize() {
+        await super.initialize();
+        const game = this;
+        const sceneOne = new Scene({
+            backgroundColor: WebColors.WhiteSmoke
+        });
+        game.addScene(sceneOne);
+        const greetingLabel = new Label({
+            text: "GREETING_LABEL",
+            position: { x: 100, y: 200}
+        });
+        sceneOne.addChild(greetingLabel);
+ 
+        const localePicker = new LocalePicker({
+            fontSize: 18
+        });
+        sceneOne.addChild(localePicker);
+     }
+}`;
+
+<CodeExample code={code} template={template} console="true"/>
