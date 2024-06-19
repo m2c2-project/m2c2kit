@@ -37,6 +37,17 @@
         window.top.postMessage(msg, "*");
       };
 
+      const origWarn = window.console.warn;
+      window.console.warn = function (str) {
+        origWarn(str);
+        const msg = {
+          sender: "m2c2kitmsg",
+          consoleId: undefined, // replace with console id
+          text: str,
+        };
+        window.top.postMessage(msg, "*");
+      };
+
       window.onerror = function (message, source, lineno, colno, error) {
         const msg = {
           sender: "m2c2kitmsg",
@@ -96,6 +107,8 @@
         Shape,
         ShapeType,
         SlideTransition,
+        SoundPlayer,
+        SoundRecorder,
         Sprite,
         Story,
         TextLine,
@@ -115,6 +128,7 @@
         VirtualKeyboard,
         DrawPad,
         CountdownScene,
+        LocalePicker,
       } from "@m2c2kit/addons";
       import { Session } from "@m2c2kit/session";
       import { Physics, PhysicsBody } from "@m2c2kit/physics";
