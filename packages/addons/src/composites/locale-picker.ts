@@ -14,6 +14,8 @@ import {
   Label,
   TapEvent,
   IDrawable,
+  Timer,
+  CompositeEvent,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -68,7 +70,10 @@ export interface LocalePickerResult {
   locale?: string;
 }
 
-export interface LocalePickerEvent extends M2NodeEvent {
+export interface LocalePickerEvent extends CompositeEvent {
+  type: "Composite";
+  compositeType: "LocalePicker";
+  compositeEventType: "LocalePickerResult";
   result: LocalePickerResult;
 }
 
@@ -83,8 +88,7 @@ interface LocaleSvg {
 }
 
 export class LocalePicker extends Composite {
-  compositeType = "LocalePicker";
-  zPosition = Number.MAX_VALUE;
+  readonly compositeType = "LocalePicker";
   private readonly DEFAULT_FONT_SIZE = 24;
   automaticallyChangeLocale = true;
   private _localeOptions = new Array<LocaleOption>();
@@ -139,6 +143,8 @@ export class LocalePicker extends Composite {
    */
   constructor(options?: LocalePickerOptions) {
     super(options);
+    // set zPosition to max value so it is always on top
+    this.zPosition = Number.MAX_VALUE;
 
     if (!options) {
       return;
@@ -192,7 +198,7 @@ export class LocalePicker extends Composite {
     options?: CallbackOptions,
   ): void {
     const eventListener: M2NodeEventListener<LocalePickerEvent> = {
-      type: M2EventType.CompositeCustom,
+      type: M2EventType.Composite,
       compositeType: "LocalePickerResult",
       nodeUuid: this.uuid,
       callback: callback,
@@ -268,10 +274,10 @@ export class LocalePicker extends Composite {
 
     const overlay = new Shape({
       rect: {
-        width: Globals.canvasCssWidth,
-        height: Globals.canvasCssHeight,
-        x: Globals.canvasCssWidth / 2,
-        y: Globals.canvasCssHeight / 2,
+        width: m2c2Globals.canvasCssWidth,
+        height: m2c2Globals.canvasCssHeight,
+        x: m2c2Globals.canvasCssWidth / 2,
+        y: m2c2Globals.canvasCssHeight / 2,
       },
       fillColor: [0, 0, 0, this.overlayAlpha],
       zPosition: -1,
@@ -285,12 +291,16 @@ export class LocalePicker extends Composite {
           .filter((listener) => listener.type === "LocalePickerResult")
           .forEach((listener) => {
             const languagePickerEvent: LocalePickerEvent = {
-              type: "LocalePickerResult",
+              type: M2EventType.Composite,
+              compositeType: this.compositeType,
+              compositeEventType: "LocalePickerResult",
               target: this,
               handled: false,
               result: {
                 locale: undefined,
               },
+              timestamp: Timer.now(),
+              iso8601Timestamp: new Date().toISOString(),
             };
             listener.callback(languagePickerEvent);
           });
@@ -309,11 +319,11 @@ export class LocalePicker extends Composite {
      */
     const lineHeight = (this.fontSize / this.DEFAULT_FONT_SIZE) * 50;
     const dialogHeight = this.localeOptions.length * lineHeight;
-    const dialogWidth = Globals.canvasCssWidth / 2;
+    const dialogWidth = m2c2Globals.canvasCssWidth / 2;
 
     const sceneCenter: Point = {
-      x: Globals.canvasCssWidth / 2,
-      y: Globals.canvasCssHeight / 2,
+      x: m2c2Globals.canvasCssWidth / 2,
+      y: m2c2Globals.canvasCssHeight / 2,
     };
 
     const localeDialog = new Shape({
@@ -441,19 +451,22 @@ export class LocalePicker extends Composite {
       this.eventListeners
         .filter(
           (listener) =>
-            listener.type === M2EventType.CompositeCustom &&
+            listener.type === M2EventType.Composite &&
             listener.compositeType === "LocalePickerResult" &&
             listener.nodeUuid == this.uuid,
         )
         .forEach((listener) => {
           const languagePickerEvent: LocalePickerEvent = {
-            type: M2EventType.CompositeCustom,
-            compositeType: "LocalePickerResult",
+            type: M2EventType.Composite,
+            compositeType: this.compositeType,
+            compositeEventType: "LocalePickerResult",
             target: this,
             handled: false,
             result: {
               locale: localeOption.locale,
             },
+            timestamp: Timer.now(),
+            iso8601Timestamp: new Date().toISOString(),
           };
           listener.callback(languagePickerEvent);
         });

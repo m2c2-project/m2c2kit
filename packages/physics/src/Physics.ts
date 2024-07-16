@@ -1,5 +1,4 @@
-import { Engine } from "matter-js";
-import Matter from "matter-js";
+import Matter, { Engine } from "matter-js";
 import {
   Game,
   M2Node,
@@ -7,6 +6,7 @@ import {
   PluginEvent,
   CallbackOptions,
   Plugin,
+  M2c2KitHelpers,
 } from "@m2c2kit/core";
 import { Vector } from "./Vector";
 import { PhysicsOptions } from "./PhysicsOptions";
@@ -226,6 +226,7 @@ export class Physics implements Plugin {
             target: this,
             bodyA: bodyA,
             bodyB: bodyB,
+            ...M2c2KitHelpers.createTimestamps(),
           };
           listener.callback(physicsEvent);
         });
@@ -242,6 +243,7 @@ export class Physics implements Plugin {
             target: this,
             bodyA: bodyA,
             bodyB: bodyB,
+            ...M2c2KitHelpers.createTimestamps(),
           };
           listener.callback(physicsEvent);
         });

@@ -1,4 +1,3 @@
-import "./Globals";
 import { Canvas, CanvasKit } from "canvaskit-wasm";
 import { M2NodeEventListener } from "./M2NodeEventListener";
 import { M2NodeEvent } from "./M2NodeEvent";
@@ -19,12 +18,22 @@ import { M2NodeOptions } from "./M2NodeOptions";
 import { M2NodeType } from "./M2NodeType";
 import { Scene } from "./Scene";
 import { Uuid } from "./Uuid";
-import { M2EventType } from "./M2Event";
+import {
+  M2Event,
+  M2EventType,
+  M2NodeAddChildEvent,
+  M2NodeNewEvent,
+  M2NodeRemoveChildEvent,
+  M2NodePropertyChangeEvent,
+} from "./M2Event";
 import { Game } from "./Game";
 import { ActionType } from "./ActionType";
 import { M2DragEvent } from "./M2DragEvent";
 import { CallbackOptions } from "./CallbackOptions";
 import { Composite } from "./Composite";
+import { Timer } from "./Timer";
+import { Equal } from "./Equal";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -77,22 +86,27 @@ export abstract class M2Node implements M2NodeOptions {
   isDrawable = false;
   isShape = false;
   isText = false;
+  private _suppressEvents = false;
+  options: M2NodeOptions;
+  constructionTimeStamp: number;
+  constructionIso8601TimeStamp: string;
+  constructionSequence: number;
   // Node Options
   name: string;
   _position: Point = { x: 0, y: 0 }; // position of the node in the parent coordinate system
   _scale = 1.0;
-  alpha = 1.0;
+  _alpha = 1.0;
   _zRotation = 0;
   protected _isUserInteractionEnabled = false;
-  draggable = false;
-  hidden = false;
+  protected _draggable = false;
+  protected _hidden = false;
   layout: Layout = {};
 
   _game?: Game;
   parent?: M2Node;
   children = new Array<M2Node>();
   absolutePosition: Point = { x: 0, y: 0 }; // position within the root coordinate system
-  size: Size = { width: 0, height: 0 };
+  protected _size: Size = { width: 0, height: 0 };
   absoluteScale = 1.0;
   absoluteAlpha = 1.0;
   absoluteAlphaChange = 0;
@@ -105,6 +119,7 @@ export abstract class M2Node implements M2NodeOptions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   userData: any = {};
   loopMessages = new Set<string>();
+  nodeEvents = new Array<M2Event<M2Node>>();
 
   /** Is the node in a pressed state? E.g., did the user put the pointer
    * down on the node and not yet release it? */
@@ -126,6 +141,24 @@ export abstract class M2Node implements M2NodeOptions {
   dragging = false;
 
   constructor(options: M2NodeOptions = {}) {
+    /**
+     * suppressEvents *must* be set early in the constructor because it
+     * determines if other properties set in the constructor are saved as
+     * property change events.
+     */
+    if (options.suppressEvents !== undefined) {
+      this.suppressEvents = options.suppressEvents;
+    }
+    this.constructionTimeStamp =
+      Number.isNaN(m2c2Globals?.now) || m2c2Globals?.now === undefined
+        ? Timer.now()
+        : m2c2Globals.now;
+    this.constructionIso8601TimeStamp = new Date().toISOString();
+    this.constructionSequence = m2c2Globals.eventSequence;
+    this.options = options;
+    if (options.uuid !== undefined) {
+      this.uuid = options.uuid;
+    }
     if (options.name === undefined) {
       this.name = this.uuid;
     } else {
@@ -160,6 +193,80 @@ export abstract class M2Node implements M2NodeOptions {
   // we will override this in each derived class. This method will never be called.
   initialize(): void {
     throw new Error("initialize() called in abstract base class Node.");
+  }
+
+  protected get completeNodeOptions(): M2NodeOptions {
+    throw new Error(
+      "get completeNodeOptions() called in abstract base class Node.",
+    );
+  }
+
+  /**
+   * Save the node's construction event in the event store.
+   */
+  protected saveNodeNewEvent(): void {
+    if (this.suppressEvents) {
+      return;
+    }
+
+    const nodeNewEvent: M2NodeNewEvent = {
+      type: M2EventType.NodeNew,
+      target: this,
+      nodeType: this.type,
+      compositeType:
+        this.type === M2NodeType.Composite
+          ? (this as unknown as Composite).compositeType
+          : undefined,
+      timestamp: this.constructionTimeStamp,
+      iso8601Timestamp: this.constructionIso8601TimeStamp,
+      nodeOptions: this.completeNodeOptions,
+      sequence: this.constructionSequence,
+    };
+    this.saveEvent(nodeNewEvent);
+  }
+
+  /**
+   * Saves the node's property change event in the event store.
+   *
+   * @param property - property name
+   * @param value - property value
+   */
+  protected savePropertyChangeEvent(
+    property: string,
+    value: string | number | boolean | object | null | undefined,
+  ): void {
+    if (this.suppressEvents) {
+      return;
+    }
+    const nodePropertyChangeEvent: M2NodePropertyChangeEvent = {
+      type: M2EventType.NodePropertyChange,
+      target: this,
+      uuid: this.uuid,
+      property: property,
+      value: value,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+    };
+    this.saveEvent(nodePropertyChangeEvent);
+  }
+
+  /**
+   * Saves the node's event.
+   *
+   * @remarks If the game event store is not available, the event is saved
+   * within the node's `nodeEvents` event array. It will be added to the game
+   * event store when the node is added to the game.
+   *
+   * @param event - event to save
+   */
+  protected saveEvent(event: M2Event<M2Node>): void {
+    if (event.sequence === undefined) {
+      event.sequence = m2c2Globals.eventSequence;
+    }
+    try {
+      this.game.eventStore.addEvent(event);
+    } catch {
+      this.nodeEvents.push(event);
+    }
   }
 
   /**
@@ -237,6 +344,7 @@ export abstract class M2Node implements M2NodeOptions {
    * @param child - The child node to add
    */
   addChild(child: M2Node): void {
+    const suppressEvents = this.suppressEvents || child.suppressEvents;
     // Do not allow a child to be added to itself
     if (child === this) {
       throw new Error(
@@ -287,6 +395,18 @@ export abstract class M2Node implements M2NodeOptions {
     if (otherParents.length === 0) {
       child.parent = this;
       this.children.push(child);
+
+      const nodeAddChildEvent: M2NodeAddChildEvent = {
+        type: "NodeAddChild",
+        target: this,
+        uuid: this.uuid,
+        childUuid: child.uuid,
+        ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+      };
+      if (!suppressEvents) {
+        this.saveEvent(nodeAddChildEvent);
+      }
+      this.saveChildEvents(child);
       return;
     }
 
@@ -304,15 +424,29 @@ export abstract class M2Node implements M2NodeOptions {
   }
 
   /**
+   * Saves the child's events to the parent node.
+   *
+   * @remarks When a child is added to a parent, the parent receives all the
+   * child's events and saves them.
+   *
+   * @param child - child node to save events to parent node
+   */
+  private saveChildEvents(child: M2Node) {
+    child.nodeEvents.forEach((ev) => {
+      this.saveEvent(ev);
+    });
+    child.nodeEvents.length = 0;
+
+    for (const c of child.children) {
+      this.saveChildEvents(c);
+    }
+  }
+
+  /**
    * Removes all children from the node.
    */
   removeAllChildren(): void {
-    while (this.children.length) {
-      const child = this.children.pop();
-      if (child) {
-        child.parent = undefined;
-      }
-    }
+    this.children.forEach((child) => this.removeChild(child));
   }
 
   /**
@@ -322,6 +456,7 @@ export abstract class M2Node implements M2NodeOptions {
    * @param child
    */
   removeChild(child: M2Node): void {
+    const suppressEvents = this.suppressEvents || child.suppressEvents;
     if (this.children.includes(child)) {
       child.parent = undefined;
       this.children = this.children.filter((c) => c !== child);
@@ -329,6 +464,17 @@ export abstract class M2Node implements M2NodeOptions {
       throw new Error(
         `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
       );
+    }
+
+    const nodeRemoveChildEvent: M2NodeRemoveChildEvent = {
+      type: "NodeRemoveChild",
+      target: this,
+      uuid: this.uuid,
+      childUuid: child.uuid,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+    };
+    if (!suppressEvents) {
+      this.saveEvent(nodeRemoveChildEvent);
     }
   }
 
@@ -345,9 +491,8 @@ export abstract class M2Node implements M2NodeOptions {
           `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
         );
       }
-      child.parent = undefined;
+      this.removeChild(child);
     });
-    this.children = this.children.filter((child) => !children.includes(child));
   }
 
   /**
@@ -660,7 +805,14 @@ export abstract class M2Node implements M2NodeOptions {
           node = constraints[constraintType] as M2Node;
         } else {
           const nodeName = constraints[constraintType] as string;
-          node = allGameNodes.filter((e) => e.name === nodeName).find(Boolean);
+          node = allGameNodes
+            .filter((e) => e.name === nodeName || e.uuid === nodeName)
+            .find(Boolean);
+          if (!node) {
+            node = this.game.materializedNodes
+              .filter((e) => e.name === nodeName || e.uuid === nodeName)
+              .find(Boolean);
+          }
           additionalExceptionMessage = `. sibling node named "${nodeName}" has not been added to the game object`;
         }
 
@@ -867,7 +1019,12 @@ export abstract class M2Node implements M2NodeOptions {
     }
 
     this.actions.forEach((action) =>
-      Action.evaluateAction(action, this, Globals.now, Globals.deltaTime),
+      Action.evaluateAction(
+        action,
+        this,
+        m2c2Globals.now,
+        m2c2Globals.deltaTime,
+      ),
     );
 
     // Update the node's children
@@ -924,8 +1081,15 @@ export abstract class M2Node implements M2NodeOptions {
               allGameNodes = parent.parentSceneAsNode.descendants;
             }
             siblingConstraint = allGameNodes
-              .filter((e) => e.name === nodeName)
+              .filter((e) => e.name === nodeName || e.uuid === nodeName)
               .find(Boolean);
+
+            if (siblingConstraint === undefined) {
+              siblingConstraint = parent.game.materializedNodes
+                .filter((e) => e.name === nodeName || e.uuid === nodeName)
+                .find(Boolean);
+            }
+
             if (siblingConstraint === undefined) {
               additionalExceptionMessage = `. sibling node named "${nodeName}" has not been added to the game object`;
             }
@@ -1053,8 +1217,13 @@ export abstract class M2Node implements M2NodeOptions {
       name: this.name,
       position: this.position,
       scale: this.scale,
+      alpha: this.alpha,
+      zRotation: this.zRotation,
       isUserInteractionEnabled: this.isUserInteractionEnabled,
+      draggable: this.draggable,
       hidden: this.hidden,
+      layout: this.layout,
+      uuid: this.uuid,
     };
     return nodeOptions;
   }
@@ -1121,6 +1290,40 @@ export abstract class M2Node implements M2NodeOptions {
     throw new Error(`Node ${this} has not been added to a scene`);
   }
 
+  get size(): Size {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get height(): number {
+        return node._size.height;
+      },
+      set height(height: number) {
+        if (Equal.value(node._size.height, height)) {
+          return;
+        }
+        node._size.height = height;
+        node.savePropertyChangeEvent("size", node.size);
+      },
+      get width(): number {
+        return node._size.width;
+      },
+      set width(width: number) {
+        if (Equal.value(node._size.width, width)) {
+          return;
+        }
+        node._size.width = width;
+        node.savePropertyChangeEvent("size", node.size);
+      },
+    };
+  }
+  set size(size: Size) {
+    if (Equal.value(this._size.width, size.width)) {
+      return;
+    }
+    this._size = size;
+    this.savePropertyChangeEvent("size", this.size);
+  }
+
   get position(): Point {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const node = this;
@@ -1129,42 +1332,106 @@ export abstract class M2Node implements M2NodeOptions {
         return node._position.x;
       },
       set x(x: number) {
+        if (Equal.value(node._position.x, x)) {
+          return;
+        }
         node._position.x = x;
+        node.savePropertyChangeEvent("position", node.position);
       },
       get y(): number {
         return node._position.y;
       },
       set y(y: number) {
+        if (Equal.value(node._position.y, y)) {
+          return;
+        }
         node._position.y = y;
+        node.savePropertyChangeEvent("position", node.position);
       },
     };
   }
-
   set position(position: Point) {
+    if (Equal.value(this._position, position)) {
+      return;
+    }
     this._position = position;
+    this.savePropertyChangeEvent("position", this.position);
   }
 
   get zRotation(): number {
     return this._zRotation;
   }
-
   set zRotation(zRotation: number) {
+    if (Equal.value(this._zRotation, zRotation)) {
+      return;
+    }
     this._zRotation = zRotation;
+    this.savePropertyChangeEvent("zRotation", zRotation);
   }
 
   get scale(): number {
     return this._scale;
   }
-
   set scale(scale: number) {
+    if (Equal.value(this._scale, scale)) {
+      return;
+    }
     this._scale = scale;
+    this.savePropertyChangeEvent("scale", scale);
+  }
+
+  get alpha(): number {
+    return this._alpha;
+  }
+  set alpha(alpha: number) {
+    if (Equal.value(this._alpha, alpha)) {
+      return;
+    }
+    this._alpha = alpha;
+    this.savePropertyChangeEvent("alpha", alpha);
   }
 
   get isUserInteractionEnabled(): boolean {
     return this._isUserInteractionEnabled;
   }
   set isUserInteractionEnabled(isUserInteractionEnabled: boolean) {
+    if (Equal.value(this._isUserInteractionEnabled, isUserInteractionEnabled)) {
+      return;
+    }
     this._isUserInteractionEnabled = isUserInteractionEnabled;
+    this.savePropertyChangeEvent(
+      "isUserInteractionEnabled",
+      isUserInteractionEnabled,
+    );
+  }
+
+  get hidden(): boolean {
+    return this._hidden;
+  }
+  set hidden(hidden: boolean) {
+    if (Equal.value(this._hidden, hidden)) {
+      return;
+    }
+    this._hidden = hidden;
+    this.savePropertyChangeEvent("hidden", hidden);
+  }
+
+  get draggable(): boolean {
+    return this._draggable;
+  }
+  set draggable(draggable: boolean) {
+    if (Equal.value(this._draggable, draggable)) {
+      return;
+    }
+    this._draggable = draggable;
+    this.savePropertyChangeEvent("draggable", draggable);
+  }
+
+  get suppressEvents(): boolean {
+    return this._suppressEvents;
+  }
+  set suppressEvents(value: boolean) {
+    this._suppressEvents = value;
   }
 
   // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95

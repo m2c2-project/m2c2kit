@@ -268,6 +268,7 @@ export class Session {
     const sessionInitializeEvent: SessionEvent = {
       target: this,
       type: SessionEventType.SessionInitialize,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(sessionInitializeEvent);
     const rootId =
@@ -467,6 +468,7 @@ export class Session {
     const sessionStartEvent: SessionLifecycleEvent = {
       target: this,
       type: SessionEventType.SessionStart,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(sessionStartEvent);
     this.currentActivity = this.options.activities.find(Boolean);
@@ -490,6 +492,7 @@ export class Session {
     const sessionEndEvent: SessionLifecycleEvent = {
       target: this,
       type: SessionEventType.SessionEnd,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(sessionEndEvent);
   }

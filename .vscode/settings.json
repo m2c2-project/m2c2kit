@@ -24,5 +24,19 @@
    * arguments to the script).
    */
   "jest.jestCommandLine": "npx env-cmd -f .env.jest jest",
-  "jest.autoRun": "off"
+  "jest.runMode": "on-demand",
+  "cSpell.words": [
+    "Alphaf",
+    "CANVASKITWASM",
+    "checkmarks",
+    "drawables",
+    "Embind",
+    "evericons",
+    "interactable",
+    "LTRB",
+    "Materializer",
+    "Materializers",
+    "Unpremul",
+    "unshifted"
+  ]
 }

@@ -1,6 +1,6 @@
-import { CanvasKitHelpers } from "@m2c2kit/core";
 import { Paint, Canvas } from "canvaskit-wasm";
 import {
+  CanvasKitHelpers,
   WebColors,
   Composite,
   CompositeOptions,
@@ -12,29 +12,34 @@ import {
   Size,
   IDrawable,
   StringInterpolationMap,
+  Equal,
+  M2c2KitHelpers,
+  M2NodeConstructor,
 } from "@m2c2kit/core";
-import "../Globals";
 
 export interface ButtonOptions extends CompositeOptions, TextOptions {
-  /** Size of button */
+  /** Size of button. Default is 200 wide by 50 high. */
   size?: Size;
-  /** Corner radius of button; can be used to make rounded corners */
+  /** Corner radius of button; can be used to make rounded corners. Default is 9 */
   cornerRadius?: number;
-  /** Background color of button. Default is WebColors.RoyalBlue */
+  /** Background color of button. Default is WebColors.Black */
   backgroundColor?: RgbaColor;
   /** Color of button text. Default is WebColors.White */
   fontColor?: RgbaColor;
   /** Names of multiple fonts to use for text. For example, if a text font and an emoji font are to be used together. Must have been previously loaded */
   fontNames?: Array<string>;
+  // Already defined in TextOptions, but redefined here to change documentation
+  /** Size of button text. Default is 20. */
+  fontSize?: number;
 }
 
-export class Button extends Composite implements IText {
-  compositeType = "button";
+export class Button extends Composite implements IText, ButtonOptions {
+  compositeType = "Button";
+  isText = true;
   // Button options
   private _backgroundColor = WebColors.Black;
-  size = { width: 200, height: 50 };
-  cornerRadius = 9;
-  fontSize = 20;
+  private _cornerRadius = 9;
+  private _fontSize = 20;
   private _text = "";
   private _fontColor = WebColors.White;
   private _fontName: string | undefined;
@@ -43,8 +48,7 @@ export class Button extends Composite implements IText {
   private _localize = true;
   private backgroundPaint?: Paint;
 
-  // todo: add getters/setters so button can respond to changes in its options
-  // todo: add default "behaviors" (?) like button click animation?
+  // TODO: add default "behaviors" (?) like button click animation?
 
   /**
    * A simple button of rectangle with text centered inside.
@@ -62,6 +66,8 @@ export class Button extends Composite implements IText {
     }
     if (options.size) {
       this.size = options.size;
+    } else {
+      this.size = { width: 200, height: 50 };
     }
     if (options.cornerRadius !== undefined) {
       this.cornerRadius = options.cornerRadius;
@@ -87,6 +93,21 @@ export class Button extends Composite implements IText {
     if (options.localize !== undefined) {
       this.localize = options.localize;
     }
+
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      ...this.getTextOptions(),
+      size: this.size,
+      cornerRadius: this.cornerRadius,
+      backgroundColor: this.backgroundColor,
+      fontNames: this.fontNames,
+    };
   }
 
   override initialize(): void {
@@ -104,13 +125,16 @@ export class Button extends Composite implements IText {
     this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
 
     const buttonRectangle = new Shape({
+      name: "__" + this.name + "-buttonRectangle",
       rect: { size: this.size },
       cornerRadius: this.cornerRadius,
       fillColor: this._backgroundColor,
+      suppressEvents: true,
     });
     this.addChild(buttonRectangle);
 
     const buttonLabel = new Label({
+      name: "__" + this.name + "-buttonLabel",
       text: this.text,
       localize: this.localize,
       interpolation: this.interpolation,
@@ -118,6 +142,7 @@ export class Button extends Composite implements IText {
       fontNames: this.fontNames,
       fontSize: this.fontSize,
       fontColor: this.fontColor,
+      suppressEvents: true,
     });
     buttonRectangle.addChild(buttonLabel);
 
@@ -131,47 +156,94 @@ export class Button extends Composite implements IText {
   get text(): string {
     return this._text;
   }
-
   set text(text: string) {
+    if (Equal.value(this._text, text)) {
+      return;
+    }
     this._text = text;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("text", text);
   }
 
   get backgroundColor(): RgbaColor {
     return this._backgroundColor;
   }
   set backgroundColor(backgroundColor: RgbaColor) {
+    if (Equal.value(this._backgroundColor, backgroundColor)) {
+      return;
+    }
     this._backgroundColor = backgroundColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("backgroundColor", backgroundColor);
   }
+
   get fontColor(): RgbaColor {
     return this._fontColor;
   }
   set fontColor(fontColor: RgbaColor) {
+    if (Equal.value(this._fontColor, fontColor)) {
+      return;
+    }
     this._fontColor = fontColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontColor", fontColor);
   }
 
   get fontName(): string | undefined {
     return this._fontName;
   }
   set fontName(fontName: string | undefined) {
+    if (this._fontName === fontName) {
+      return;
+    }
     this._fontName = fontName;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontName", fontName);
   }
 
   get fontNames(): Array<string> | undefined {
     return this._fontNames;
   }
   set fontNames(fontNames: Array<string> | undefined) {
+    if (Equal.value(this._fontNames, fontNames)) {
+      return;
+    }
     this._fontNames = fontNames;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontNames", fontNames);
+  }
+
+  get cornerRadius(): number {
+    return this._cornerRadius;
+  }
+  set cornerRadius(cornerRadius: number) {
+    if (Equal.value(this._cornerRadius, cornerRadius)) {
+      return;
+    }
+    this._cornerRadius = cornerRadius;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("cornerRadius", cornerRadius);
+  }
+
+  get fontSize(): number {
+    return this._fontSize;
+  }
+  set fontSize(fontSize: number) {
+    if (Equal.value(this._fontSize, fontSize)) {
+      return;
+    }
+    this._fontSize = fontSize;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontSize", fontSize);
   }
 
   get interpolation(): StringInterpolationMap {
     return this._interpolation;
   }
   set interpolation(interpolation: StringInterpolationMap) {
+    if (Equal.value(this._interpolation, interpolation)) {
+      return;
+    }
     /**
      * If a new interpolation object is set, then we must re-initialize the
      * label. But, we will not know if a property of the interpolation object
@@ -183,14 +255,19 @@ export class Button extends Composite implements IText {
     this._interpolation = interpolation;
     Object.freeze(this._interpolation);
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("interpolation", interpolation);
   }
 
   get localize(): boolean {
     return this._localize;
   }
   set localize(localize: boolean) {
+    if (Equal.value(this._localize, localize)) {
+      return;
+    }
     this._localize = localize;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("localize", localize);
   }
 
   /**
@@ -247,3 +324,5 @@ export class Button extends Composite implements IText {
       });
   }
 }
+
+M2c2KitHelpers.registerM2NodeClass(Button as unknown as M2NodeConstructor);

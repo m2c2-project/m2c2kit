@@ -1,4 +1,3 @@
-import "./Globals";
 import { Activity } from "./Activity";
 import { ActivityType } from "./ActivityType";
 import CanvasKitInit, {
@@ -32,7 +31,13 @@ import {
 import { GameOptions } from "./GameOptions";
 import { GameData } from "./GameData";
 import { Uuid } from "./Uuid";
-import { M2EventType } from "./M2Event";
+import {
+  DomPointerDownEvent,
+  M2EventType,
+  M2NodeNewEvent,
+  ScenePresentEvent,
+  I18nDataReadyEvent,
+} from "./M2Event";
 import { PendingScreenshot } from "./PendingScreenshot";
 import { Timer } from "./Timer";
 import { GameParameters } from "./GameParameters";
@@ -70,6 +75,10 @@ import { M2FontStatus } from "./M2Font";
 import { Manifest } from "./Manifest";
 import { GameBaseUrls } from "./GameBaseUrls";
 import { GameEvent } from "./GameEvent";
+import { EventStore, EventStoreMode } from "./EventStore";
+import { M2NodeFactory } from "./M2NodeFactory";
+import { EventMaterializer } from "./EventMaterializer";
+import { Easings } from "./Easings";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -113,6 +122,11 @@ export class Game implements Activity {
   private _imageManager?: ImageManager;
   private _soundManager?: SoundManager;
   manifest?: Manifest;
+  eventStore = new EventStore();
+  private nodeFactory = new M2NodeFactory();
+  private _eventMaterializer?: EventMaterializer;
+  /** Nodes created during event replay */
+  materializedNodes = new Array<M2Node>();
 
   /**
    * The base class for all games. New games should extend this class.
@@ -135,8 +149,6 @@ export class Game implements Activity {
     this.name = options.name;
     this.id = options.id;
     this.publishUuid = options.publishUuid;
-    this.freeNodesScene.game = this;
-    this.freeNodesScene.needsInitialization = true;
     this.fpsMetricReportThreshold =
       options.fpsMetricReportThreshold ?? Constants.FPS_METRIC_REPORT_THRESHOLD;
     this.maximumRecordedActivityMetrics =
@@ -172,6 +184,26 @@ export class Game implements Activity {
         dependencies: {},
       };
     }
+  }
+
+  private createFreeNodesScene() {
+    this.freeNodesScene.game = this;
+    this.freeNodesScene.needsInitialization = true;
+
+    const freeNodeSceneOptions = {
+      name: Constants.FREE_NODES_SCENE_NAME,
+      backgroundColor: [255, 255, 255, 0],
+      uuid: this.freeNodesScene.uuid,
+    };
+    const freeNodesSceneNewEvent: M2NodeNewEvent = {
+      type: M2EventType.NodeNew,
+      target: this.freeNodesScene,
+      nodeType: M2NodeType.Scene,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+      nodeOptions: freeNodeSceneOptions,
+      sequence: m2c2Globals.eventSequence,
+    };
+    this.eventStore.addEvent(freeNodesSceneNewEvent);
   }
 
   private getImportedModuleBaseUrl(packageName: string, moduleUrl: string) {
@@ -296,7 +328,26 @@ export class Game implements Activity {
     } as GameBaseUrls;
   }
 
+  private async configureI18n(localizationOptions: LocalizationOptions) {
+    this.i18n = new I18n(this, localizationOptions);
+    if (!this.i18n) {
+      throw new Error("I18n object is undefined");
+    }
+    await this.i18n.initialize();
+    this.eventStore.addEvent({
+      type: "I18nDataReadyEvent",
+      target: this.i18n,
+      localizationOptions: localizationOptions,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+    } as I18nDataReadyEvent);
+  }
+
   async initialize() {
+    if (this.options.recordEvents === true) {
+      this.eventStore.mode = EventStoreMode.Record;
+    }
+    this.createFreeNodesScene();
+
     const baseUrls = await this.resolveGameBaseUrls(this);
 
     /**
@@ -325,13 +376,19 @@ export class Game implements Activity {
     if (this.isLocalizationRequested()) {
       const localizationOptions =
         this.getLocalizationOptionsFromGameParameters();
-      this.i18n = new I18n(this, localizationOptions);
-      await this.i18n.initialize();
+      await this.configureI18n(localizationOptions);
     }
 
     this.fontManager = new FontManager(this, baseUrls);
     this.imageManager = new ImageManager(this, baseUrls);
     this.soundManager = new SoundManager(this, baseUrls);
+
+    this.eventMaterializer = new EventMaterializer({
+      game: this,
+      nodeFactory: this.nodeFactory,
+      freeNodesScene: this.freeNodesScene,
+      configureI18n: this.configureI18n.bind(this),
+    });
 
     return Promise.all([
       this.fontManager.initializeFonts(this.options.fonts),
@@ -412,6 +469,16 @@ export class Game implements Activity {
 
   set soundManager(soundManager: SoundManager) {
     this._soundManager = soundManager;
+  }
+
+  get eventMaterializer(): EventMaterializer {
+    if (!this._eventMaterializer) {
+      throw new Error("eventMaterializer is undefined");
+    }
+    return this._eventMaterializer;
+  }
+  set eventMaterializer(eventMaterializer: EventMaterializer) {
+    this._eventMaterializer = eventMaterializer;
   }
 
   /**
@@ -691,7 +758,7 @@ export class Game implements Activity {
   private showFps?: boolean;
   private bodyBackgroundColor?: RgbaColor;
 
-  private currentScene?: Scene;
+  currentScene?: Scene;
   private priorUpdateTime?: number;
   private fpsTextFont?: Font;
   private fpsTextPaint?: Paint;
@@ -708,7 +775,7 @@ export class Game implements Activity {
   canvasCssHeight = 0;
 
   scenes = new Array<Scene>();
-  private freeNodesScene = new Scene({
+  freeNodesScene = new Scene({
     name: Constants.FREE_NODES_SCENE_NAME,
     backgroundColor: [255, 255, 255, 0],
   });
@@ -751,25 +818,17 @@ export class Game implements Activity {
    */
   removeFreeNode(node: M2Node | string): void {
     if (typeof node === "string") {
-      if (
-        !this.freeNodesScene.children.map((child) => child.name).includes(node)
-      ) {
+      const child = this.freeNodesScene.children
+        .filter((child) => child.name === node)
+        .find(Boolean);
+      if (!child) {
         throw new Error(
           `cannot remove free node named "${node}" because it is not currently part of the game's free nodes. `,
         );
       }
-      this.freeNodesScene.children = this.freeNodesScene.children.filter(
-        (child) => child.name !== node,
-      );
+      this.freeNodesScene.removeChild(child);
     } else {
-      if (!this.freeNodesScene.children.includes(node)) {
-        throw new Error(
-          `cannot remove free node "${node.toString()}" because it is not currently part of the game's free nodes. `,
-        );
-      }
-      this.freeNodesScene.children = this.freeNodesScene.children.filter(
-        (child) => child !== node,
-      );
+      this.freeNodesScene.removeChild(node);
     }
   }
 
@@ -823,6 +882,27 @@ export class Game implements Activity {
     scene.game = this;
     scene.needsInitialization = true;
     this.scenes.push(scene);
+    this.addNodeEvents(scene);
+  }
+
+  /**
+   * Adds events from a node and its children to the game's event store.
+   *
+   * @remarks This method is first called when a scene is added to the game.
+   * If the scene or any of its descendants was constructed or had its
+   * properties changed before it was added to the game, these events were
+   * stored within the node (because the game event store was not yet
+   * available). This method retrieves these events from the node and adds
+   * them to the game's event store.
+   *
+   * @param node - node that contains events to add
+   */
+  private addNodeEvents(node: M2Node): void {
+    this.eventStore.addEvents(node.nodeEvents);
+    node.nodeEvents.length = 0;
+    for (const child of node.children) {
+      this.addNodeEvents(child);
+    }
   }
 
   /**
@@ -864,10 +944,10 @@ export class Game implements Activity {
   /**
    * Specifies the scene that will be presented upon the next frame draw.
    *
-   * @param scene
+   * @param scene - the scene, its string name, or UUID
    * @param transition
    */
-  presentScene(scene: string | Scene, transition = Transition.none()): void {
+  presentScene(scene: string | Scene, transition?: Transition): void {
     // When we want to present a new scene, we can't immediately switch to the new scene
     // because we could be in the middle of updating the entire scene and its children hierarchy.
     // Thus, we have a queue called "incomingSceneTransitions" that has the next scene and its
@@ -878,6 +958,11 @@ export class Game implements Activity {
       incomingScene = this.scenes
         .filter((scene_) => scene_.name === scene)
         .find(Boolean);
+      if (incomingScene === undefined) {
+        incomingScene = this.scenes
+          .filter((scene_) => scene_.uuid === scene)
+          .find(Boolean);
+      }
       if (incomingScene === undefined) {
         throw new Error(`scene ${scene} not found`);
       }
@@ -892,13 +977,35 @@ export class Game implements Activity {
     incomingScene.initialize();
     incomingScene.needsInitialization = false;
 
-    const sceneTransition = new SceneTransition(incomingScene, transition);
+    const sceneTransition = new SceneTransition(
+      incomingScene,
+      transition ?? Transition.none(),
+    );
     this.incomingSceneTransitions.push(sceneTransition);
     if (incomingScene.game.bodyBackgroundColor !== undefined) {
       document.body.style.backgroundColor = `rgb(${incomingScene.game.bodyBackgroundColor[0]},${incomingScene.game.bodyBackgroundColor[1]},${incomingScene.game.bodyBackgroundColor[2]},${incomingScene.game.bodyBackgroundColor[3]})`;
     } else {
       document.body.style.backgroundColor = `rgb(${incomingScene.backgroundColor[0]},${incomingScene.backgroundColor[1]},${incomingScene.backgroundColor[2]},${incomingScene.backgroundColor[3]})`;
     }
+
+    let direction: TransitionDirection | undefined;
+    if (transition?.type === TransitionType.Slide) {
+      direction = (transition as SlideTransition).direction;
+    }
+
+    const scenePresentEvent: ScenePresentEvent = {
+      type: "ScenePresent",
+      target: incomingScene,
+      uuid: incomingScene.uuid,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+      transitionType: transition?.type ?? TransitionType.None,
+      duration: transition?.duration,
+      direction: direction,
+      easingType: transition?.easing
+        ? Easings.toTypeAsString(transition.easing)
+        : undefined,
+    };
+    this.eventStore.addEvent(scenePresentEvent);
     return;
   }
 
@@ -987,6 +1094,9 @@ export class Game implements Activity {
     this.setupFpsFont();
     this.setupCanvasDomEventHandlers();
 
+    this.beginTimestamp = Timer.now();
+    this.beginIso8601Timestamp = new Date().toISOString();
+
     let startingScene: Scene | undefined;
 
     if (entryScene !== undefined) {
@@ -1019,8 +1129,6 @@ export class Game implements Activity {
     if (this.surface === undefined) {
       throw new Error("CanvasKit surface is undefined");
     }
-    this.beginTimestamp = Timer.now();
-    this.beginIso8601Timestamp = new Date().toISOString();
 
     if (this.options.timeStepping) {
       this.addTimeSteppingControlsToDom();
@@ -1029,10 +1137,15 @@ export class Game implements Activity {
       this.removeTimeSteppingControlsFromDom();
     }
 
+    if (this.options.showEventStoreControls) {
+      this.addEventControlsToDom();
+    }
+
     this.warmupFinished = false;
     const gameWarmupStartEvent: GameEvent = {
       target: this,
       type: M2EventType.GameWarmupStart,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     this.raiseActivityEventOnListeners(gameWarmupStartEvent);
 
@@ -1052,8 +1165,125 @@ export class Game implements Activity {
     const activityStartEvent: ActivityLifecycleEvent = {
       target: this,
       type: M2EventType.ActivityStart,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     this.raiseActivityEventOnListeners(activityStartEvent);
+  }
+
+  playEventsHandler(mouseEvent: MouseEvent) {
+    if ((mouseEvent?.target as HTMLElement)?.id === "replay-events") {
+      this.eventStore.mode = EventStoreMode.Disabled;
+      this.scenes.forEach((scene) => {
+        this.removeScene(scene);
+      });
+      this.currentScene = undefined;
+      this.eventListeners = new Array<ActivityEventListener<ActivityEvent>>();
+      this.freeNodesScene.removeAllChildren();
+      this.materializedNodes = [];
+      this.eventStore.replay();
+      this.setReplayEventsButtonEnabled(false);
+      this.setStopReplayButtonEnabled(true);
+    }
+
+    if ((mouseEvent?.target as HTMLElement)?.id === "stop-replay") {
+      this.eventStore.clearEvents();
+      this.setReplayEventsButtonEnabled(true);
+      this.setStopReplayButtonEnabled(false);
+    }
+
+    if ((mouseEvent?.target as HTMLElement)?.id === "log-events") {
+      if (this.eventStore.mode === EventStoreMode.Replay) {
+        console.log(this.eventStore.serializedEventsBeforeReplay);
+        console.log(
+          `Total events: ${JSON.parse(this.eventStore.serializedEventsBeforeReplay).length}`,
+        );
+        return;
+      }
+      console.log(JSON.stringify(this.eventStore.getEvents()));
+      console.log(`Total events: ${this.eventStore.getEvents().length}`);
+    }
+  }
+
+  private replayEventsButtonEnabled = true;
+  private setReplayEventsButtonEnabled(enable: boolean) {
+    const replayEventsButton = document.getElementById("replay-events");
+    if (!replayEventsButton) {
+      return;
+    }
+    if (enable) {
+      replayEventsButton.removeAttribute("disabled");
+      this.replayEventsButtonEnabled = true;
+      return;
+    }
+    replayEventsButton.setAttribute("disabled", "true");
+    this.replayEventsButtonEnabled = false;
+  }
+
+  private setStopReplayButtonEnabled(enable: boolean) {
+    const stopReplayButton = document.getElementById("stop-replay");
+    if (!stopReplayButton) {
+      return;
+    }
+    if (enable) {
+      stopReplayButton.removeAttribute("disabled");
+      return;
+    }
+    stopReplayButton.setAttribute("disabled", "true");
+  }
+
+  private addEventControlsToDom() {
+    const existingDiv = document.getElementById("m2c2kit-event-controls-div");
+    if (existingDiv) {
+      existingDiv.remove();
+    }
+
+    const body = document.getElementsByTagName("body")[0];
+    if (body) {
+      const div = document.createElement("div");
+      div.id = "m2c2kit-event-controls-div";
+      div.style.position = "fixed";
+      div.style.top = "4px";
+      div.style.left = "4px";
+      body.prepend(div);
+
+      const btn = document.createElement("button");
+      btn.id = "replay-events";
+      btn.title = "replay event recording";
+      btn.innerText = "▶️";
+      btn.style.marginRight = "4px";
+      div.appendChild(btn);
+      btn.addEventListener("click", this.playEventsHandler.bind(this));
+
+      const btn2 = document.createElement("button");
+      btn2.id = "stop-replay";
+      btn2.title = "stop event replay";
+      btn2.innerText = "⏹️";
+      btn2.style.marginRight = "4px";
+      btn2.disabled = true;
+      div.appendChild(btn2);
+      btn2.addEventListener("click", this.playEventsHandler.bind(this));
+
+      const btn3 = document.createElement("button");
+      btn3.id = "log-events";
+      btn3.title = "log events to console";
+      btn3.innerText = "📄";
+      btn3.style.marginRight = "4px";
+      div.appendChild(btn3);
+      btn3.addEventListener("click", this.playEventsHandler.bind(this));
+
+      const replayThroughTextSpan = document.createElement("span");
+      replayThroughTextSpan.title =
+        "optional: replay events only through a given sequence number. Default is to replay all events.";
+      replayThroughTextSpan.innerText = "Replay through sequence: ";
+      div.appendChild(replayThroughTextSpan);
+
+      const input = document.createElement("input");
+      input.id = "sequence-number";
+      input.title =
+        "optional: replay events only through a given sequence number. Default is to replay all events.";
+      input.style.marginRight = "4px";
+      div.appendChild(input);
+    }
   }
 
   private addTimeSteppingControlsToDom() {
@@ -1161,11 +1391,11 @@ export class Game implements Activity {
   ): void {
     canvas.save();
     if (positionOffset == 0) {
-      canvas.scale(1 / Globals.canvasScale, 1 / Globals.canvasScale);
+      canvas.scale(1 / m2c2Globals.canvasScale, 1 / m2c2Globals.canvasScale);
     } else {
       canvas.scale(
-        (1 / Globals.canvasScale) * 1.13,
-        (1 / Globals.canvasScale) * 1.13,
+        (1 / m2c2Globals.canvasScale) * 1.13,
+        (1 / m2c2Globals.canvasScale) * 1.13,
       );
     }
 
@@ -1232,7 +1462,10 @@ export class Game implements Activity {
       fontManager.fonts[fontNames[0]].status === M2FontStatus.Ready
     ) {
       const typeface = fontManager.getTypeface(fontNames[0]);
-      const font = new this.canvasKit.Font(typeface, 16 * Globals.canvasScale);
+      const font = new this.canvasKit.Font(
+        typeface,
+        16 * m2c2Globals.canvasScale,
+      );
       canvas.drawText(
         "abc",
         centerX,
@@ -1594,7 +1827,7 @@ export class Game implements Activity {
 
     const resultsEvent: ActivityResultsEvent = {
       type: M2EventType.ActivityData,
-      iso8601Timestamp: new Date().toISOString(),
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
       target: this,
       /** newData is only the trial that recently completed */
       newData: this.data.trials[this.trialIndex - 1],
@@ -1806,6 +2039,7 @@ export class Game implements Activity {
     const activityEndEvent: ActivityLifecycleEvent = {
       target: this,
       type: M2EventType.ActivityEnd,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     const results: ActivityResults = {
       data: this.data,
@@ -1835,6 +2069,7 @@ export class Game implements Activity {
     const activityCancelEvent: ActivityLifecycleEvent = {
       target: this,
       type: M2EventType.ActivityCancel,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     const results: ActivityResults = {
       data: this.data,
@@ -1856,7 +2091,7 @@ export class Game implements Activity {
     height: number,
     stretch: boolean | undefined,
   ): void {
-    Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
+    m2c2Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
 
     let htmlCanvas: HTMLCanvasElement | undefined;
     if (canvasId === undefined) {
@@ -1867,7 +2102,7 @@ export class Game implements Activity {
         canvases.push(canvasCollection[i]);
       }
       canvases = canvases.filter(
-        (canvas) => canvas.id !== "m2c2kitscratchcanvas",
+        (canvas) => !canvas.id.startsWith("m2c2kit-scratch-canvas"),
       );
 
       if (canvases.length === 0) {
@@ -1901,22 +2136,23 @@ export class Game implements Activity {
       const actualAspectRatio = window.innerHeight / window.innerWidth;
 
       if (actualAspectRatio < requestedAspectRatio) {
-        Globals.rootScale = window.innerHeight / height;
+        m2c2Globals.rootScale = window.innerHeight / height;
       } else {
-        Globals.rootScale = window.innerWidth / width;
+        m2c2Globals.rootScale = window.innerWidth / width;
       }
     }
 
-    htmlCanvas.style.width = Globals.rootScale * width + "px";
-    htmlCanvas.style.height = Globals.rootScale * height + "px";
-    htmlCanvas.width = Globals.rootScale * width * Globals.canvasScale;
-    htmlCanvas.height = Globals.rootScale * height * Globals.canvasScale;
+    htmlCanvas.style.width = m2c2Globals.rootScale * width + "px";
+    htmlCanvas.style.height = m2c2Globals.rootScale * height + "px";
+    htmlCanvas.width = m2c2Globals.rootScale * width * m2c2Globals.canvasScale;
+    htmlCanvas.height =
+      m2c2Globals.rootScale * height * m2c2Globals.canvasScale;
     this.htmlCanvas = htmlCanvas;
     this.canvasCssWidth = width;
     this.canvasCssHeight = height;
 
-    Globals.canvasCssWidth = width;
-    Globals.canvasCssHeight = height;
+    m2c2Globals.canvasCssWidth = width;
+    m2c2Globals.canvasCssHeight = height;
   }
 
   private setupCanvasKitSurface(): void {
@@ -1947,7 +2183,9 @@ export class Game implements Activity {
         this.surface.reportBackendTypeIsGPU() ? "GPU" : "CPU"
       }`,
     );
-    this.surface.getCanvas().scale(Globals.canvasScale, Globals.canvasScale);
+    this.surface
+      .getCanvas()
+      .scale(m2c2Globals.canvasScale, m2c2Globals.canvasScale);
   }
 
   private interceptWebGlCalls() {
@@ -2032,7 +2270,7 @@ export class Game implements Activity {
   private setupFpsFont(): void {
     this.fpsTextFont = new this.canvasKit.Font(
       null,
-      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * Globals.canvasScale,
+      Constants.FPS_DISPLAY_TEXT_FONT_SIZE * m2c2Globals.canvasScale,
     );
     this.fpsTextPaint = new this.canvasKit.Paint();
     this.fpsTextPaint.setColor(
@@ -2101,6 +2339,7 @@ export class Game implements Activity {
       const gameWarmupEndEvent: GameEvent = {
         target: this,
         type: M2EventType.GameWarmupEnd,
+        ...M2c2KitHelpers.createFrameUpdateTimestamps(),
       };
       this.raiseActivityEventOnListeners(gameWarmupEndEvent);
       this.surface.requestAnimationFrame(this.loop.bind(this));
@@ -2129,12 +2368,26 @@ export class Game implements Activity {
     ) {
       if (
         this.currentScene === undefined &&
-        this.incomingSceneTransitions.length === 0
+        this.incomingSceneTransitions.length === 0 &&
+        this.eventStore.mode !== EventStoreMode.Replay
       ) {
         throw new Error("Can not run game without a current or incoming scene");
       }
 
       this.updateGameTime();
+
+      if (this.eventStore.mode === EventStoreMode.Replay) {
+        const events = this.eventStore.dequeueEvents(Timer.now());
+        this.eventMaterializer.materialize(events);
+        if (
+          this.eventStore.eventQueueLength === 0 &&
+          !this.replayEventsButtonEnabled
+        ) {
+          this.setReplayEventsButtonEnabled(true);
+          this.setStopReplayButtonEnabled(false);
+        }
+      }
+
       this.handleIncomingSceneTransitions(this.incomingSceneTransitions);
       this.update();
       this.draw(canvas);
@@ -2169,7 +2422,7 @@ export class Game implements Activity {
       }
     }
 
-    this.priorUpdateTime = Globals.now;
+    this.priorUpdateTime = m2c2Globals.now;
     this.surface.requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -2177,15 +2430,15 @@ export class Game implements Activity {
 
   private updateGameTime(): void {
     if (!this.options.timeStepping) {
-      Globals.now = performance.now();
+      m2c2Globals.now = performance.now();
     } else {
-      Globals.now = this.steppingNow;
+      m2c2Globals.now = this.steppingNow;
     }
 
     if (this.priorUpdateTime) {
-      Globals.deltaTime = Globals.now - this.priorUpdateTime;
+      m2c2Globals.deltaTime = m2c2Globals.now - this.priorUpdateTime;
     } else {
-      Globals.deltaTime = 0;
+      m2c2Globals.deltaTime = 0;
     }
   }
 
@@ -2286,11 +2539,11 @@ export class Game implements Activity {
       name: Constants.OUTGOING_SCENE_SPRITE_NAME,
       imageName: Constants.OUTGOING_SCENE_IMAGE_NAME,
       position: {
-        x: this.canvasCssWidth / Globals.rootScale / 2,
-        y: this.canvasCssHeight / Globals.rootScale / 2,
+        x: this.canvasCssWidth / m2c2Globals.rootScale / 2,
+        y: this.canvasCssHeight / m2c2Globals.rootScale / 2,
       },
     });
-    spr.scale = 1 / Globals.rootScale;
+    spr.scale = 1 / m2c2Globals.rootScale;
     outgoingScene.addChild(spr);
     return outgoingScene;
   }
@@ -2353,7 +2606,7 @@ export class Game implements Activity {
       )
       .forEach((p) => {
         if (p.beforeUpdate) {
-          p.beforeUpdate(this, Globals.deltaTime);
+          p.beforeUpdate(this, m2c2Globals.deltaTime);
         }
       });
   }
@@ -2366,7 +2619,7 @@ export class Game implements Activity {
       .filter((p) => typeof p.afterUpdate === "function" && p.disabled !== true)
       .forEach((p) => {
         if (p.afterUpdate) {
-          p.afterUpdate(this, Globals.deltaTime);
+          p.afterUpdate(this, m2c2Globals.deltaTime);
         }
       });
   }
@@ -2385,16 +2638,17 @@ export class Game implements Activity {
 
   private calculateFps(): void {
     if (this.lastFpsUpdate === 0) {
-      this.lastFpsUpdate = Globals.now;
-      this.nextFpsUpdate = Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+      this.lastFpsUpdate = m2c2Globals.now;
+      this.nextFpsUpdate =
+        m2c2Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
     } else {
-      if (Globals.now >= this.nextFpsUpdate) {
+      if (m2c2Globals.now >= this.nextFpsUpdate) {
         this.fpsRate =
-          this.drawnFrames / ((Globals.now - this.lastFpsUpdate) / 1000);
+          this.drawnFrames / ((m2c2Globals.now - this.lastFpsUpdate) / 1000);
         this.drawnFrames = 0;
-        this.lastFpsUpdate = Globals.now;
+        this.lastFpsUpdate = m2c2Globals.now;
         this.nextFpsUpdate =
-          Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
+          m2c2Globals.now + Constants.FPS_DISPLAY_UPDATE_INTERVAL;
         if (
           this.gameMetrics.length < this.maximumRecordedActivityMetrics &&
           this.fpsRate < this.fpsMetricReportThreshold
@@ -2425,10 +2679,10 @@ export class Game implements Activity {
     }
     let image: Image;
     if (pendingScreenshot.rect.length == 4) {
-      const sx = pendingScreenshot.rect[0] * Globals.canvasScale;
-      const sy = pendingScreenshot.rect[1] * Globals.canvasScale;
-      const sw = pendingScreenshot.rect[2] * Globals.canvasScale;
-      const sh = pendingScreenshot.rect[3] * Globals.canvasScale;
+      const sx = pendingScreenshot.rect[0] * m2c2Globals.canvasScale;
+      const sy = pendingScreenshot.rect[1] * m2c2Globals.canvasScale;
+      const sw = pendingScreenshot.rect[2] * m2c2Globals.canvasScale;
+      const sh = pendingScreenshot.rect[3] * m2c2Globals.canvasScale;
       const scaledRect = [sx, sy, sx + sw, sy + sh];
       image = this.surface.makeImageSnapshot(scaledRect);
     } else {
@@ -2702,7 +2956,7 @@ export class Game implements Activity {
 
   private drawFps(canvas: Canvas): void {
     canvas.save();
-    const drawScale = Globals.canvasScale;
+    const drawScale = m2c2Globals.canvasScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     if (!this.fpsTextFont || !this.fpsTextPaint) {
       throw new Error("fps font or paint is undefined");
@@ -2789,10 +3043,24 @@ export class Game implements Activity {
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
     }
+
+    if (!this.htmlCanvas) {
+      throw new Error("main html canvas is undefined");
+    }
+    const domPointerDownEvent: DomPointerDownEvent = {
+      type: "DomPointerDown",
+      target: this.htmlCanvas,
+      x: domPointerEvent.offsetX / m2c2Globals.rootScale,
+      y: domPointerEvent.offsetY / m2c2Globals.rootScale,
+      ...M2c2KitHelpers.createTimestamps(),
+    };
+    this.eventStore.addEvent(domPointerDownEvent);
+
     const nodeEvent: M2NodeEvent = {
       target: scene,
       type: M2EventType.PointerDown,
       handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.processDomPointerDown(scene, nodeEvent, domPointerEvent);
     this.processDomPointerDown(this.freeNodesScene, nodeEvent, domPointerEvent);
@@ -2808,6 +3076,7 @@ export class Game implements Activity {
       target: scene,
       type: M2EventType.PointerUp,
       handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.processDomPointerUp(scene, nodeEvent, domPointerEvent);
     this.processDomPointerUp(this.freeNodesScene, nodeEvent, domPointerEvent);
@@ -2823,6 +3092,7 @@ export class Game implements Activity {
       target: scene,
       type: M2EventType.PointerMove,
       handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.processDomPointerMove(scene, nodeEvent, domPointerEvent);
     this.processDomPointerMove(this.freeNodesScene, nodeEvent, domPointerEvent);
@@ -2842,6 +3112,7 @@ export class Game implements Activity {
       target: scene,
       type: M2EventType.PointerLeave,
       handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
     this.processDomPointerLeave(
@@ -3097,6 +3368,7 @@ export class Game implements Activity {
         target: node,
         type: M2EventType.DragEnd,
         handled: false,
+        ...M2c2KitHelpers.createTimestamps(),
       };
 
       node.dragging = false;
@@ -3298,6 +3570,7 @@ export class Game implements Activity {
     const event: M2NodeEvent = {
       target: scene,
       type: eventType,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     scene.eventListeners
       .filter((listener) => listener.type === eventType)
@@ -3534,6 +3807,9 @@ export class Game implements Activity {
               ).buttons;
               listener.callback(nodeEvent as T);
               break;
+          }
+          if (!node.suppressEvents) {
+            this.eventStore.addEvent(nodeEvent);
           }
         }
       });

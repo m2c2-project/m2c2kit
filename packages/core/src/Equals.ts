@@ -2,7 +2,10 @@ import { RgbaColor } from "./RgbaColor";
 
 /**
  * Utility class for comparing equality of m2c2kit objects.
+ *
+ * @deprecated Use the class `Equal` instead.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Equals {
   /**
    * Compares two RgbaColor objects and returns true if they are equal.
@@ -11,6 +14,8 @@ export class Equals {
    * return false. RgbaColor is an array of 4 numbers, and thus is a
    * reference type. We need this method to compare two RgbaColor objects
    * for value equality.
+   *
+   * @deprecated Use the methods in `Equal` instead.
    *
    * @param color1
    * @param color2

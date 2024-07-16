@@ -5,6 +5,7 @@ import { ModuleMetadata } from "./ModuleMetadata";
 /**
  * Reasonable defaults to use if values are not specified.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Constants {
   /** Size of the font showing frames per second */
   public static readonly FPS_DISPLAY_TEXT_FONT_SIZE = 12;

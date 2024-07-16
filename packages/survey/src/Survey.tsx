@@ -10,6 +10,7 @@ import {
   CallbackOptions,
   ActivityEvent,
   ActivityResultsEvent,
+  M2c2KitHelpers,
 } from "@m2c2kit/core";
 import React from "react";
 import Modal from "react-modal";
@@ -260,6 +261,7 @@ export class Survey implements Activity {
     const activityStartEvent: ActivityLifecycleEvent = {
       target: this,
       type: M2EventType.ActivityStart,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(activityStartEvent);
   }
@@ -466,6 +468,7 @@ export class Survey implements Activity {
       const activityEndEvent: ActivityLifecycleEvent = {
         target: this,
         type: M2EventType.ActivityEnd,
+        ...M2c2KitHelpers.createTimestamps(),
       };
       this.raiseEventOnListeners(activityEndEvent);
     });
@@ -747,7 +750,6 @@ export class Survey implements Activity {
   ) {
     const resultsEvent: ActivityResultsEvent = {
       type: M2EventType.ActivityData,
-      iso8601Timestamp: new Date().toISOString(),
       target: this,
       newData: newData,
       newDataSchema: {},
@@ -755,6 +757,7 @@ export class Survey implements Activity {
       dataSchema: {},
       activityConfiguration: {},
       activityConfigurationSchema: {},
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(resultsEvent);
   }

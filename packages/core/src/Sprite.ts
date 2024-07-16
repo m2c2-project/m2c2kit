@@ -1,4 +1,3 @@
-import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { IDrawable } from "./IDrawable";
 import { M2Node, handleInterfaceOptions } from "./M2Node";
@@ -7,13 +6,15 @@ import { SpriteOptions } from "./SpriteOptions";
 import { M2Image, M2ImageStatus } from "./M2Image";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { Equal } from "./Equal";
+import { Point } from "./Point";
 
 export class Sprite extends M2Node implements IDrawable, SpriteOptions {
   readonly type = M2NodeType.Sprite;
   isDrawable = true;
   // Drawable options
-  anchorPoint = { x: 0.5, y: 0.5 };
-  zPosition = 0;
+  private _anchorPoint: Point = { x: 0.5, y: 0.5 };
+  private _zPosition = 0;
   // Sprite options
   private _imageName = ""; // public getter/setter is below
 
@@ -33,6 +34,17 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     if (options.imageName !== undefined) {
       this.imageName = options.imageName;
     }
+
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      imageName: this.imageName,
+    };
   }
 
   override initialize(): void {
@@ -55,13 +67,60 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     CanvasKitHelpers.Dispose([this.m2Image?.canvaskitImage, this._paint]);
   }
 
+  get imageName(): string {
+    return this._imageName;
+  }
   set imageName(imageName: string) {
+    if (Equal.value(this._imageName, imageName)) {
+      return;
+    }
     this._imageName = imageName;
     this.needsInitialization = true;
   }
 
-  get imageName(): string {
-    return this._imageName;
+  get anchorPoint(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get x(): number {
+        return node._anchorPoint.x;
+      },
+      set x(x: number) {
+        if (Equal.value(node._anchorPoint.x, x)) {
+          return;
+        }
+        node._anchorPoint.x = x;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+      get y(): number {
+        return node._anchorPoint.y;
+      },
+      set y(y: number) {
+        if (Equal.value(node._anchorPoint.y, y)) {
+          return;
+        }
+        node._anchorPoint.y = y;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+    };
+  }
+  set anchorPoint(anchorPoint: Point) {
+    if (Equal.value(this._anchorPoint, anchorPoint)) {
+      return;
+    }
+    this._anchorPoint = anchorPoint;
+    this.savePropertyChangeEvent("anchorPoint", this.anchorPoint);
+  }
+
+  get zPosition(): number {
+    return this._zPosition;
+  }
+  set zPosition(zPosition: number) {
+    if (Equal.value(this._zPosition, zPosition)) {
+      return;
+    }
+    this._zPosition = zPosition;
+    this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
   private set paint(paint: Paint) {
@@ -113,7 +172,7 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     if (!this.hidden) {
       if (this.m2Image) {
         canvas.save();
-        const drawScale = Globals.canvasScale / this.absoluteScale;
+        const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
         canvas.scale(1 / drawScale, 1 / drawScale);
         M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
@@ -196,7 +255,7 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     if (!paint) {
       return;
     }
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     const rect = this.canvasKit.RRectXY(
       this.canvasKit.LTRBRect(
         (this.absolutePosition.x -

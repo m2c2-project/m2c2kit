@@ -784,14 +784,14 @@ describe("Game start", () => {
     global.window.innerWidth = 200;
     global.window.innerHeight = 400;
     await g1.start();
-    expect(Globals.rootScale).toBe(0.5);
+    expect(m2c2Globals.rootScale).toBe(0.5);
   });
 
   it("scales down on smaller screen with different aspect ratio", async () => {
     global.window.innerWidth = 400;
     global.window.innerHeight = 200;
     await g1.start();
-    expect(Globals.rootScale).toBe(0.25);
+    expect(m2c2Globals.rootScale).toBe(0.25);
   });
 
   it("scales up on larger screen that is double the size when stretch is true", async () => {
@@ -800,7 +800,7 @@ describe("Game start", () => {
     await g1.start();
     g1.stop();
     await g2.start();
-    expect(Globals.rootScale).toBe(2);
+    expect(m2c2Globals.rootScale).toBe(2);
   });
 
   it("scales up on larger screen with different aspect ratio when stretch is true", async () => {
@@ -809,7 +809,7 @@ describe("Game start", () => {
     await g1.start();
     g1.stop();
     await g2.start();
-    expect(Globals.rootScale).toBe(1.5);
+    expect(m2c2Globals.rootScale).toBe(1.5);
   });
 });
 

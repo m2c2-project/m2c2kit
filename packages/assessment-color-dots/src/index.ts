@@ -15,7 +15,7 @@ import {
   Timer,
   Easings,
   RgbaColor,
-  Equals,
+  Equal,
   Sprite,
   Point,
   Constants,
@@ -731,7 +731,7 @@ appeared.",
                 throw new Error("no selected color");
               }
               const colorSelectedName = dotColors.filter((d) =>
-                Equals.rgbaColor(d.rgbaColor, selectedRgba),
+                Equal.rgbaColor(d.rgbaColor, selectedRgba),
               )[0].colorName;
               colorSelected = {
                 color_name: colorSelectedName,
@@ -745,7 +745,7 @@ appeared.",
                 ];
               game.addTrialData(
                 "color_selected_correct",
-                Equals.rgbaColor(colorTargetDot.rgbaColor, selectedRgba),
+                Equal.rgbaColor(colorTargetDot.rgbaColor, selectedRgba),
               );
               game.presentScene(locationSelectionScene);
             },
@@ -773,7 +773,7 @@ appeared.",
 
       colorSelectionSceneSquare.addChild(colorSelectionDot);
 
-      colorPaletteGrid.removeAllChildren();
+      colorPaletteGrid.removeAllGridChildren();
       for (let i = 0; i < numberOfColors; i++) {
         const colorDot = new Shape({
           circleOfRadius: dotDiameter / 2,
@@ -949,7 +949,7 @@ appeared.",
           numberOfDots - 1,
         );
         if (
-          Equals.rgbaColor(
+          Equal.rgbaColor(
             trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
             selectedRgba,
           )

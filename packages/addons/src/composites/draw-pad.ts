@@ -13,6 +13,8 @@ import {
   M2PointerEvent,
   M2Node,
   IDrawable,
+  M2c2KitHelpers,
+  M2NodeConstructor,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -121,6 +123,7 @@ export class DrawPad extends Composite {
   private isDrawingPointerDown = false;
   private pointerIsDownAndPointerLeftDrawAreaWhenDown = false;
   private currentStrokesNotAllowed = false;
+  private originalOptions: DrawPadOptions;
 
   /** Array of strokes created on the DrawPad, with position and timestamps
    * of all interactions with each DrawPadStroke.
@@ -137,6 +140,7 @@ export class DrawPad extends Composite {
    */
   constructor(options: DrawPadOptions) {
     super(options);
+    this.originalOptions = JSON.parse(JSON.stringify(options));
     if (options.isUserInteractionEnabled === undefined) {
       // unlike most nodes, DrawPad is interactive by default
       this.isUserInteractionEnabled = true;
@@ -173,6 +177,16 @@ export class DrawPad extends Composite {
       this.continuousDrawingOnlyExceptionDistance =
         options.continuousDrawingOnlyExceptionDistance;
     }
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      ...this.originalOptions,
+    };
   }
 
   override initialize(): void {
@@ -199,6 +213,7 @@ export class DrawPad extends Composite {
       this.drawArea = new Shape({
         rect: { size: this.size },
         isUserInteractionEnabled: true,
+        suppressEvents: true,
       });
       this.addChild(this.drawArea);
 
@@ -259,6 +274,7 @@ export class DrawPad extends Composite {
         target: this,
         handled: false,
         position: e.point,
+        ...M2c2KitHelpers.createTimestamps(),
       };
       this.strokes.push([
         {
@@ -295,6 +311,7 @@ export class DrawPad extends Composite {
       target: this,
       handled: false,
       position: interpolatedPoint,
+      ...M2c2KitHelpers.createTimestamps(),
     };
     this.strokes[strokeCount - 1].push({
       type: DrawPadEventType.StrokeMove,
@@ -336,6 +353,7 @@ export class DrawPad extends Composite {
           this.strokes[strokeCount - 1][strokeInteractionCount - 1].position,
         target: this,
         handled: false,
+        ...M2c2KitHelpers.createTimestamps(),
       };
       this.strokes[strokeCount - 1].push({
         type: DrawPadEventType.StrokeEnd,
@@ -368,6 +386,7 @@ export class DrawPad extends Composite {
           this.strokes[strokeCount - 1][strokeInteractionCount - 1].position,
         target: this,
         handled: false,
+        ...M2c2KitHelpers.createTimestamps(),
       };
       this.strokes[strokeCount - 1].push({
         type: DrawPadEventType.StrokeEnd,
@@ -401,6 +420,7 @@ export class DrawPad extends Composite {
         target: this,
         handled: false,
         position: e.point,
+        ...M2c2KitHelpers.createTimestamps(),
       };
       const strokeCount = this.strokes.length;
       this.strokes[strokeCount - 1].push({
@@ -591,6 +611,7 @@ export class DrawPad extends Composite {
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeEnter,
             target: node,
+            ...M2c2KitHelpers.createTimestamps(),
           };
           this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
@@ -603,6 +624,7 @@ export class DrawPad extends Composite {
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeEnter,
             target: node,
+            ...M2c2KitHelpers.createTimestamps(),
           };
           this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
@@ -615,6 +637,7 @@ export class DrawPad extends Composite {
           const drawPadItemEvent: DrawPadItemEvent = {
             type: DrawPadItemEventType.StrokeLeave,
             target: node,
+            ...M2c2KitHelpers.createTimestamps(),
           };
           this.raiseDrawPadItemEvent(node, drawPadItemEvent);
         }
@@ -626,6 +649,7 @@ export class DrawPad extends Composite {
         const drawPadItemEvent: DrawPadItemEvent = {
           type: DrawPadItemEventType.StrokeLeave,
           target: node,
+          ...M2c2KitHelpers.createTimestamps(),
         };
         this.raiseDrawPadItemEvent(node, drawPadItemEvent);
       }
@@ -661,12 +685,12 @@ export class DrawPad extends Composite {
     }
     const sx =
       (drawArea.absolutePosition.x - drawArea.size.width / 2) *
-      Globals.canvasScale;
+      m2c2Globals.canvasScale;
     const sy =
       (drawArea.absolutePosition.y - drawArea.size.height / 2) *
-      Globals.canvasScale;
-    const sw = drawArea.size.width * Globals.canvasScale;
-    const sh = drawArea.size.height * Globals.canvasScale;
+      m2c2Globals.canvasScale;
+    const sw = drawArea.size.width * m2c2Globals.canvasScale;
+    const sh = drawArea.size.height * m2c2Globals.canvasScale;
     const imageInfo = {
       alphaType: this.game.canvasKit.AlphaType.Unpremul,
       colorType: this.game.canvasKit.ColorType.RGBA_8888,
@@ -859,6 +883,8 @@ export class DrawPad extends Composite {
   }
 
   override duplicate(newName?: string): DrawPad {
-    throw new Error("DrawPad.duplicate(): Method not implemented.");
+    throw new Error(`DrawPad.duplicate(): Method not implemented. ${newName}`);
   }
 }
+
+M2c2KitHelpers.registerM2NodeClass(DrawPad as unknown as M2NodeConstructor);

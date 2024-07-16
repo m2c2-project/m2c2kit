@@ -6,12 +6,13 @@ export type EasingFunction = (
   /** total change of value to be eased */
   c: number,
   /** total duration of action */
-  d: number
+  d: number,
 ) => number;
 
 /**
  * The Easings class has static methods for creating easings to be used in actions.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Easings {
   // These easing functions are adapted from work by Robert Penner
 
@@ -37,7 +38,7 @@ export class Easings {
     b: number,
     c: number,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    d: number
+    d: number,
   ) => {
     return c + b;
   };
@@ -45,7 +46,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return (c * t) / d + b;
   };
@@ -53,7 +54,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return c * t * t + b;
@@ -62,7 +63,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return -c * t * (t - 2) + b;
@@ -71,7 +72,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * t * t + b;
@@ -82,7 +83,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return c * t * t * t + b;
@@ -91,7 +92,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     t--;
@@ -101,7 +102,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * t * t * t + b;
@@ -112,7 +113,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return c * t * t * t * t + b;
@@ -121,7 +122,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     t--;
@@ -131,7 +132,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * t * t * t * t + b;
@@ -142,7 +143,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return c * t * t * t * t * t + b;
@@ -151,7 +152,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     t--;
@@ -161,7 +162,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * t * t * t * t * t + b;
@@ -172,7 +173,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
   };
@@ -180,7 +181,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return c * Math.sin((t / d) * (Math.PI / 2)) + b;
   };
@@ -188,7 +189,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
   };
@@ -196,7 +197,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return c * Math.pow(2, 10 * (t / d - 1)) + b;
   };
@@ -204,7 +205,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     return c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
   };
@@ -212,7 +213,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
@@ -223,7 +224,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     return -c * (Math.sqrt(1 - t * t) - 1) + b;
@@ -232,7 +233,7 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d;
     t--;
@@ -242,11 +243,167 @@ export class Easings {
     t: number,
     b: number,
     c: number,
-    d: number
+    d: number,
   ) => {
     t /= d / 2;
     if (t < 1) return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
     t -= 2;
     return (c / 2) * (Math.sqrt(1 - t * t) + 1) + b;
   };
+
+  static toTypeAsString(easingFunction: EasingFunction): string {
+    switch (easingFunction) {
+      case Easings.none: {
+        return "None";
+      }
+      case Easings.linear: {
+        return "Linear";
+      }
+      case Easings.quadraticIn: {
+        return "QuadraticIn";
+      }
+      case Easings.quadraticOut: {
+        return "QuadraticOut";
+      }
+      case Easings.quadraticInOut: {
+        return "QuadraticInOut";
+      }
+      case Easings.cubicIn: {
+        return "CubicIn";
+      }
+      case Easings.cubicOut: {
+        return "CubicOut";
+      }
+      case Easings.cubicInOut: {
+        return "CubicInOut";
+      }
+      case Easings.quarticIn: {
+        return "QuarticIn";
+      }
+      case Easings.quarticOut: {
+        return "QuarticOut";
+      }
+      case Easings.quarticInOut: {
+        return "QuarticInOut";
+      }
+      case Easings.quinticIn: {
+        return "QuinticIn";
+      }
+      case Easings.quinticOut: {
+        return "QuinticOut";
+      }
+      case Easings.quinticInOut: {
+        return "QuinticInOut";
+      }
+      case Easings.sinusoidalIn: {
+        return "SinusoidalIn";
+      }
+      case Easings.sinusoidalOut: {
+        return "SinusoidalOut";
+      }
+      case Easings.sinusoidalInOut: {
+        return "SinusoidalInOut";
+      }
+      case Easings.exponentialIn: {
+        return "ExponentialIn";
+      }
+      case Easings.exponentialOut: {
+        return "ExponentialOut";
+      }
+      case Easings.exponentialInOut: {
+        return "ExponentialInOut";
+      }
+      case Easings.circularIn: {
+        return "CircularIn";
+      }
+      case Easings.circularOut: {
+        return "CircularOut";
+      }
+      case Easings.circularInOut: {
+        return "CircularInOut";
+      }
+      default: {
+        throw new Error("Easings.toTypeAsString(): Unknown easing function");
+      }
+    }
+  }
+
+  static fromTypeAsString(easingType: string): EasingFunction {
+    switch (easingType) {
+      case "None": {
+        return Easings.none;
+      }
+      case "Linear": {
+        return Easings.linear;
+      }
+      case "QuadraticIn": {
+        return Easings.quadraticIn;
+      }
+      case "QuadraticOut": {
+        return Easings.quadraticOut;
+      }
+      case "QuadraticInOut": {
+        return Easings.quadraticInOut;
+      }
+      case "CubicIn": {
+        return Easings.cubicIn;
+      }
+      case "CubicOut": {
+        return Easings.cubicOut;
+      }
+      case "CubicInOut": {
+        return Easings.cubicInOut;
+      }
+      case "QuarticIn": {
+        return Easings.quarticIn;
+      }
+      case "QuarticOut": {
+        return Easings.quarticOut;
+      }
+      case "QuarticInOut": {
+        return Easings.quarticInOut;
+      }
+      case "QuinticIn": {
+        return Easings.quinticIn;
+      }
+      case "QuinticOut": {
+        return Easings.quinticOut;
+      }
+      case "QuinticInOut": {
+        return Easings.quinticInOut;
+      }
+      case "SinusoidalIn": {
+        return Easings.sinusoidalIn;
+      }
+      case "SinusoidalOut": {
+        return Easings.sinusoidalOut;
+      }
+      case "SinusoidalInOut": {
+        return Easings.sinusoidalInOut;
+      }
+      case "ExponentialIn": {
+        return Easings.exponentialIn;
+      }
+      case "ExponentialOut": {
+        return Easings.exponentialOut;
+      }
+      case "ExponentialInOut": {
+        return Easings.exponentialInOut;
+      }
+      case "CircularIn": {
+        return Easings.circularIn;
+      }
+      case "CircularOut": {
+        return Easings.circularOut;
+      }
+      case "CircularInOut": {
+        return Easings.circularInOut;
+      }
+      default: {
+        throw new Error(
+          `Easings.fromTypeAsString(): Unknown easing function type ${easingType}`,
+        );
+      }
+    }
+  }
 }

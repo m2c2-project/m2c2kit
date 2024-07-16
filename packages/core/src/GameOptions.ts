@@ -53,6 +53,10 @@ export interface GameOptions extends LocalizationOptions {
   fpsMetricReportThreshold?: number;
   /** Advance through time step-by-step, for development and debugging */
   timeStepping?: boolean;
+  /** Show controls for replaying and viewing the event store? Default is false */
+  showEventStoreControls?: boolean;
+  /** Should the game events be saved to the event store? Default is false */
+  recordEvents?: boolean;
   /** Show logs for WebGl activity? */
   logWebGl?: boolean;
   /** Should games within a session share wasm and font assets that have identical filenames, in order to reduce bandwidth? Default is true. */

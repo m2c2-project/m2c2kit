@@ -1,4 +1,3 @@
-import "./Globals";
 import {
   Canvas,
   Paragraph,
@@ -20,14 +19,16 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
 import { StringInterpolationMap } from "./StringInterpolationMap";
+import { Equal } from "./Equal";
+import { Point } from "./Point";
 
 export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   readonly type = M2NodeType.Label;
   isDrawable = true;
   isText = true;
   // Drawable options
-  anchorPoint = { x: 0.5, y: 0.5 };
-  zPosition = 0;
+  private _anchorPoint: Point = { x: 0.5, y: 0.5 };
+  private _zPosition = 0;
   // Text options
   private _text = ""; // public getter/setter is below
   private _fontName: string | undefined; // public getter/setter is below
@@ -72,6 +73,20 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     if (options.fontNames) {
       this.fontNames = options.fontNames;
     }
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      ...this.getTextOptions(),
+      horizontalAlignmentMode: this.horizontalAlignmentMode,
+      preferredMaxLayoutWidth: this.preferredMaxLayoutWidth,
+      backgroundColor: this.backgroundColor,
+      fontNames: this.fontNames,
+    };
   }
 
   override initialize(): void {
@@ -203,7 +218,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this.builder.pushPaintStyle(
       {
         fontFamilies: requiredFonts.map((font) => font.fontName),
-        fontSize: this.fontSize * Globals.canvasScale,
+        fontSize: this.fontSize * m2c2Globals.canvasScale,
         // set default values for below properties as well.
         fontStyle: {
           weight: this.canvasKit.FontWeight.Normal,
@@ -229,7 +244,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this.paragraph = this.builder.build();
     const preferredWidth =
       //this.preferredMaxLayoutWidth ?? this.parentScene.game.canvasCssWidth;
-      this.preferredMaxLayoutWidth ?? Globals.canvasCssWidth;
+      this.preferredMaxLayoutWidth ?? m2c2Globals.canvasCssWidth;
 
     let calculatedWidth = preferredWidth;
     if (preferredWidth === 0 || this.layout.width === 0) {
@@ -243,7 +258,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       calculatedWidth = this.parent.size.width - (marginStart + marginEnd);
     }
 
-    this.paragraph.layout(calculatedWidth * Globals.canvasScale);
+    this.paragraph.layout(calculatedWidth * m2c2Globals.canvasScale);
 
     /**
      * If label has a relative layout, then use the calculated width as the
@@ -261,10 +276,10 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       this.size.width = calculatedWidth;
     } else {
       this.paragraph.layout(Math.ceil(this.paragraph.getLongestLine()));
-      this.size.width = this.paragraph.getMaxWidth() / Globals.canvasScale;
+      this.size.width = this.paragraph.getMaxWidth() / m2c2Globals.canvasScale;
     }
 
-    this.size.height = this.paragraph.getHeight() / Globals.canvasScale;
+    this.size.height = this.paragraph.getHeight() / m2c2Globals.canvasScale;
     this.needsInitialization = false;
   }
 
@@ -319,14 +334,21 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     return this._text;
   }
   set text(text: string) {
+    if (Equal.value(this._text, text)) {
+      return;
+    }
     this._text = text;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("text", text);
   }
 
   get interpolation(): StringInterpolationMap {
     return this._interpolation;
   }
   set interpolation(interpolation: StringInterpolationMap) {
+    if (Equal.value(this._interpolation, interpolation)) {
+      return;
+    }
     /**
      * If a new interpolation object is set, then we must re-initialize the
      * label. But, we will not know if a property of the interpolation object
@@ -338,38 +360,55 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this._interpolation = interpolation;
     Object.freeze(this._interpolation);
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("interpolation", interpolation);
   }
 
   get fontName(): string | undefined {
     return this._fontName;
   }
   set fontName(fontName: string | undefined) {
+    if (Equal.value(this._fontName, fontName)) {
+      return;
+    }
     this._fontName = fontName;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontName", fontName);
   }
 
   get fontNames(): Array<string> | undefined {
     return this._fontNames;
   }
   set fontNames(fontNames: Array<string> | undefined) {
+    if (Equal.value(this._fontNames, fontNames)) {
+      return;
+    }
     this._fontNames = fontNames;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontNames", fontNames);
   }
 
   get fontColor(): RgbaColor {
     return this._fontColor;
   }
   set fontColor(fontColor: RgbaColor) {
+    if (Equal.value(this._fontColor, fontColor)) {
+      return;
+    }
     this._fontColor = fontColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontColor", fontColor);
   }
 
   get fontSize(): number {
     return this._fontSize;
   }
   set fontSize(fontSize: number) {
+    if (Equal.value(this._fontSize, fontSize)) {
+      return;
+    }
     this._fontSize = fontSize;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontSize", fontSize);
   }
 
   get horizontalAlignmentMode(): LabelHorizontalAlignmentMode {
@@ -378,32 +417,99 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   set horizontalAlignmentMode(
     horizontalAlignmentMode: LabelHorizontalAlignmentMode,
   ) {
+    if (Equal.value(this._horizontalAlignmentMode, horizontalAlignmentMode)) {
+      return;
+    }
     this._horizontalAlignmentMode = horizontalAlignmentMode;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent(
+      "horizontalAlignmentMode",
+      horizontalAlignmentMode,
+    );
   }
 
   get preferredMaxLayoutWidth(): number | undefined {
     return this._preferredMaxLayoutWidth;
   }
   set preferredMaxLayoutWidth(preferredMaxLayoutWidth: number | undefined) {
+    if (Equal.value(this._preferredMaxLayoutWidth, preferredMaxLayoutWidth)) {
+      return;
+    }
     this._preferredMaxLayoutWidth = preferredMaxLayoutWidth;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent(
+      "preferredMaxLayoutWidth",
+      preferredMaxLayoutWidth,
+    );
   }
 
   get backgroundColor(): RgbaColor | undefined {
     return this._backgroundColor;
   }
   set backgroundColor(backgroundColor: RgbaColor | undefined) {
+    if (Equal.value(this._backgroundColor, backgroundColor)) {
+      return;
+    }
     this._backgroundColor = backgroundColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("backgroundColor", backgroundColor);
   }
 
   get localize(): boolean {
     return this._localize;
   }
   set localize(localize: boolean) {
+    if (Equal.value(this._localize, localize)) {
+      return;
+    }
     this._localize = localize;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("localize", localize);
+  }
+
+  get anchorPoint(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get x(): number {
+        return node._anchorPoint.x;
+      },
+      set x(x: number) {
+        if (Equal.value(node._anchorPoint.x, x)) {
+          return;
+        }
+        node._anchorPoint.x = x;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+      get y(): number {
+        return node._anchorPoint.y;
+      },
+      set y(y: number) {
+        if (Equal.value(node._anchorPoint.y, y)) {
+          return;
+        }
+        node._anchorPoint.y = y;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+    };
+  }
+  set anchorPoint(anchorPoint: Point) {
+    if (Equal.value(this._anchorPoint, anchorPoint)) {
+      return;
+    }
+    this._anchorPoint = anchorPoint;
+    this.savePropertyChangeEvent("anchorPoint", this.anchorPoint);
+  }
+
+  get zPosition(): number {
+    return this._zPosition;
+  }
+  set zPosition(zPosition: number) {
+    if (Equal.value(this._zPosition, zPosition)) {
+      return;
+    }
+    this._zPosition = zPosition;
+    this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
   private get backgroundPaint(): Paint {
@@ -479,7 +585,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   draw(canvas: Canvas): void {
     if (this.parent && this.text !== "" && !this.needsInitialization) {
       canvas.save();
-      const drawScale = Globals.canvasScale / this.absoluteScale;
+      const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
       M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 

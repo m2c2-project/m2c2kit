@@ -20,4 +20,9 @@ export interface M2NodeOptions {
   hidden?: boolean;
   /** FOR INTERNAL USE ONLY */
   layout?: Layout;
+  /** Unique identifier (UUID). Will be generated automatically. @internal For m2c2kit library use only */
+  uuid?: string;
+  /** Should the node not emit events to the EventStore? Default is false.
+   * @remarks This property is for use by authors of `Composite` nodes. It is not intended for general use. */
+  suppressEvents?: boolean;
 }

@@ -1,4 +1,3 @@
-import "./Globals";
 import { Canvas, Font, Paint, Typeface } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -13,6 +12,8 @@ import { M2Font, M2FontStatus } from "./M2Font";
 import { FontManager } from "./FontManager";
 import { I18n } from "./I18n";
 import { StringInterpolationMap } from "./StringInterpolationMap";
+import { Equal } from "./Equal";
+import { Point } from "./Point";
 
 export class TextLine
   extends M2Node
@@ -22,10 +23,10 @@ export class TextLine
   isDrawable = true;
   isText = true;
   // Drawable options
-  zPosition = 0;
+  private _zPosition = 0;
   //   We don't know TextLine width in advance, so we must text align left,
   //   and so anchorPoint is (0, .5). (we do know height, which is fontSize)
-  anchorPoint = { x: 0, y: 0.5 };
+  private _anchorPoint: Point = { x: 0, y: 0.5 };
   // Text options
   private _text = ""; // public getter/setter is below
   private _fontName: string | undefined; // public getter/setter is below
@@ -60,6 +61,18 @@ export class TextLine
     // TODO: explore using ShapedText in canvas.drawText(), because
     // ShapedText will report its own bounds?
     this.size.width = options.width ?? NaN;
+
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      ...this.getTextOptions(),
+      width: this.size.width,
+    };
   }
 
   override initialize(): void {
@@ -174,7 +187,7 @@ export class TextLine
     }
     this.font = new this.canvasKit.Font(
       this.typeface,
-      this.fontSize * Globals.canvasScale,
+      this.fontSize * m2c2Globals.canvasScale,
     );
   }
 
@@ -182,38 +195,57 @@ export class TextLine
     return this._text;
   }
   set text(text: string) {
+    if (Equal.value(this._text, text)) {
+      return;
+    }
     this._text = text;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("text", text);
   }
 
   get fontName(): string | undefined {
     return this._fontName;
   }
   set fontName(fontName: string | undefined) {
+    if (Equal.value(this._fontName, fontName)) {
+      return;
+    }
     this._fontName = fontName;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontName", fontName);
   }
 
   get fontColor(): RgbaColor {
     return this._fontColor;
   }
   set fontColor(fontColor: RgbaColor) {
+    if (Equal.value(this._fontColor, fontColor)) {
+      return;
+    }
     this._fontColor = fontColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontColor", fontColor);
   }
 
   get fontSize(): number {
     return this._fontSize;
   }
   set fontSize(fontSize: number) {
+    if (Equal.value(this._fontSize, fontSize)) {
+      return;
+    }
     this._fontSize = fontSize;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fontSize", fontSize);
   }
 
   get interpolation(): StringInterpolationMap {
     return this._interpolation;
   }
   set interpolation(interpolation: StringInterpolationMap) {
+    if (Equal.value(this._interpolation, interpolation)) {
+      return;
+    }
     /**
      * If a new interpolation object is set, then we must re-initialize the
      * label. But, we will not know if a property of the interpolation object
@@ -225,14 +257,64 @@ export class TextLine
     this._interpolation = interpolation;
     Object.freeze(this._interpolation);
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("interpolation", interpolation);
   }
 
   get localize(): boolean {
     return this._localize;
   }
   set localize(localize: boolean) {
+    if (Equal.value(this._localize, localize)) {
+      return;
+    }
     this._localize = localize;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("localize", localize);
+  }
+
+  get anchorPoint(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get x(): number {
+        return node._anchorPoint.x;
+      },
+      set x(x: number) {
+        if (Equal.value(node._anchorPoint.x, x)) {
+          return;
+        }
+        node._anchorPoint.x = x;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+      get y(): number {
+        return node._anchorPoint.y;
+      },
+      set y(y: number) {
+        if (Equal.value(node._anchorPoint.y, y)) {
+          return;
+        }
+        node._anchorPoint.y = y;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+    };
+  }
+  set anchorPoint(anchorPoint: Point) {
+    if (Equal.value(this._anchorPoint, anchorPoint)) {
+      return;
+    }
+    this._anchorPoint = anchorPoint;
+    this.savePropertyChangeEvent("anchorPoint", this.anchorPoint);
+  }
+
+  get zPosition(): number {
+    return this._zPosition;
+  }
+  set zPosition(zPosition: number) {
+    if (Equal.value(this._zPosition, zPosition)) {
+      return;
+    }
+    this._zPosition = zPosition;
+    this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
   dispose(): void {
@@ -276,7 +358,7 @@ export class TextLine
   draw(canvas: Canvas): void {
     if (this.parent && this.text && !this.needsInitialization) {
       canvas.save();
-      const drawScale = Globals.canvasScale / this.absoluteScale;
+      const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
       canvas.scale(1 / drawScale, 1 / drawScale);
       M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 

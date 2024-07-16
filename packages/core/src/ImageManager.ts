@@ -1,4 +1,3 @@
-import "./Globals";
 import { CanvasKit, Paint } from "canvaskit-wasm";
 import { M2Image, M2ImageStatus } from "./M2Image";
 import { BrowserImage } from "./BrowserImage";
@@ -8,6 +7,8 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { GameBaseUrls } from "./GameBaseUrls";
 import { M2NodeType } from "./M2NodeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
+import { BrowserImageDataReadyEvent, M2EventType } from "./M2Event";
+
 /**
  * Fetches, loads, and provides images to the game.
  */
@@ -74,6 +75,9 @@ export class ImageManager {
           this.game,
           `${this.baseUrls.assets}/${browserImage.url}`,
         );
+      }
+      if (browserImage.dataUrl) {
+        url = browserImage.dataUrl;
       }
       const m2Image: M2Image = {
         imageName: browserImage.imageName,
@@ -354,6 +358,16 @@ export class ImageManager {
       if (image.svgString) {
         imgElement.src =
           "data:image/svg+xml," + encodeURIComponent(image.svgString);
+        const browserImageDataReady: BrowserImageDataReadyEvent = {
+          type: M2EventType.BrowserImageDataReady,
+          target: this,
+          imageName: image.imageName,
+          width: image.width,
+          height: image.height,
+          svgString: image.svgString,
+          ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+        };
+        this.game.eventStore.addEvent(browserImageDataReady);
       } else if (image.url) {
         /**
          * Originally, below was a single line: imgElement.src = m2Image.url
@@ -370,6 +384,16 @@ export class ImageManager {
               const subtype = this.inferImageSubtypeFromUrl(image.url);
               imgElement.src =
                 "data:image/" + subtype + ";base64," + base64String;
+              const browserImageDataReady: BrowserImageDataReadyEvent = {
+                type: M2EventType.BrowserImageDataReady,
+                target: this,
+                imageName: image.imageName,
+                width: image.width,
+                height: image.height,
+                dataUrl: imgElement.src,
+                ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+              };
+              this.game.eventStore.addEvent(browserImageDataReady);
             });
           });
       }
@@ -388,6 +412,13 @@ export class ImageManager {
   }
 
   private inferImageSubtypeFromUrl(url?: string) {
+    // handle case of it being Data URL
+    if (url?.startsWith("data:image/")) {
+      const parts = url.split(";");
+      const subtype = parts[0].split("/")[1];
+      return subtype;
+    }
+
     // default to jpeg if no extension
     let subtype = "jpeg";
     if (url?.includes(".")) {

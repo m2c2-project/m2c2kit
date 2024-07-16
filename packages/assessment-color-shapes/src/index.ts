@@ -752,7 +752,7 @@ phases.`,
           }),
           Action.custom({
             callback: () => {
-              presentationGrid.removeAllChildren();
+              presentationGrid.removeAllGridChildren();
             },
           }),
           Action.wait({
@@ -760,7 +760,7 @@ phases.`,
           }),
           Action.custom({
             callback: () => {
-              presentationGrid.removeAllChildren();
+              presentationGrid.removeAllGridChildren();
               game.presentScene(shapeResponseScene);
             },
           }),
@@ -840,7 +840,7 @@ phases.`,
     const handleSelection = (differentPressed: boolean) => {
       const rt = Timer.elapsed("rt");
       Timer.remove("rt");
-      responseGrid.removeAllChildren();
+      responseGrid.removeAllGridChildren();
 
       game.addTrialData(
         "trial_end_iso8601_timestamp",

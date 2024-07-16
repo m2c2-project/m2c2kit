@@ -12,8 +12,8 @@ import {
   M2NodeEventListener,
   M2EventType,
   CallbackOptions,
+  Timer,
 } from "@m2c2kit/core";
-import "../Globals";
 import { Button } from "./button";
 
 export interface DialogOptions extends CompositeOptions {
@@ -54,8 +54,6 @@ export class Dialog extends Composite {
   contentText = "";
   positiveButtonText = "";
   negativeButtonText = "";
-  zPosition = Number.MAX_VALUE;
-  hidden = true;
 
   private _fontColor = WebColors.White;
   private backgroundPaint?: Paint;
@@ -64,6 +62,12 @@ export class Dialog extends Composite {
   // todo: add default "behaviors" (?) like button click animation?
   constructor(options?: DialogOptions) {
     super(options);
+    // set zPosition to max value so it is always on top
+    this.zPosition = Number.MAX_VALUE;
+
+    // by default, dialog is hidden
+    this.hidden = true;
+
     if (!options) {
       return;
     }
@@ -110,7 +114,7 @@ export class Dialog extends Composite {
     options?: CallbackOptions,
   ): void {
     const eventListener: M2NodeEventListener<DialogEvent> = {
-      type: M2EventType.CompositeCustom,
+      type: M2EventType.Composite,
       compositeType: "DialogResult",
       nodeUuid: this.uuid,
       callback: callback,
@@ -133,10 +137,10 @@ export class Dialog extends Composite {
 
     const overlay = new Shape({
       rect: {
-        width: Globals.canvasCssWidth,
-        height: Globals.canvasCssHeight,
-        x: Globals.canvasCssWidth / 2,
-        y: Globals.canvasCssHeight / 2,
+        width: m2c2Globals.canvasCssWidth,
+        height: m2c2Globals.canvasCssHeight,
+        x: m2c2Globals.canvasCssWidth / 2,
+        y: m2c2Globals.canvasCssHeight / 2,
       },
       fillColor: [0, 0, 0, this.overlayAlpha],
       zPosition: -1,
@@ -147,13 +151,15 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === M2EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.Composite)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: M2EventType.CompositeCustom,
+              type: M2EventType.Composite,
               target: this,
               handled: false,
               dialogResult: DialogResult.Dismiss,
+              timestamp: Timer.now(),
+              iso8601Timestamp: new Date().toISOString(),
             };
             listener.callback(dialogEvent);
           });
@@ -165,8 +171,8 @@ export class Dialog extends Composite {
       rect: {
         width: 300,
         height: 150,
-        x: Globals.canvasCssWidth / 2,
-        y: Globals.canvasCssHeight / 2,
+        x: m2c2Globals.canvasCssWidth / 2,
+        y: m2c2Globals.canvasCssHeight / 2,
       },
       cornerRadius: this.cornerRadius,
       fillColor: this.backgroundColor,
@@ -200,13 +206,15 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === M2EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.Composite)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: M2EventType.CompositeCustom,
+              type: M2EventType.Composite,
               target: this,
               handled: false,
               dialogResult: DialogResult.Negative,
+              timestamp: Timer.now(),
+              iso8601Timestamp: new Date().toISOString(),
             };
             listener.callback(dialogEvent);
           });
@@ -225,13 +233,15 @@ export class Dialog extends Composite {
       this.hidden = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
-          .filter((listener) => listener.type === M2EventType.CompositeCustom)
+          .filter((listener) => listener.type === M2EventType.Composite)
           .forEach((listener) => {
             const dialogEvent: DialogEvent = {
-              type: M2EventType.CompositeCustom,
+              type: M2EventType.Composite,
               target: this,
               handled: false,
               dialogResult: DialogResult.Positive,
+              timestamp: Timer.now(),
+              iso8601Timestamp: new Date().toISOString(),
             };
             listener.callback(dialogEvent);
           });
@@ -259,6 +269,14 @@ export class Dialog extends Composite {
     this.needsInitialization = true;
   }
 
+  get hidden(): boolean {
+    return this._hidden;
+  }
+  set hidden(hidden: boolean) {
+    this._hidden = hidden;
+    this.needsInitialization;
+  }
+
   /**
    * Duplicates a node using deep copy.
    *
@@ -270,7 +288,7 @@ export class Dialog extends Composite {
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Dialog {
-    throw new Error("duplicate not implemented");
+    throw new Error(`duplicate not implemented. ${newName}`);
     // const dest = new Dialog({
     //   ...this.getNodeOptions(),
     //   ...this.getDrawableOptions(),

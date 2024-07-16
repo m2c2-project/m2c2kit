@@ -14,6 +14,7 @@ export interface SlideTransitionOptions {
 /**
  * The Transition class has static methods for creating animations that run as one scene transitions to another.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export abstract class Transition {
   abstract type: TransitionType;
   abstract easing: EasingFunction;
@@ -29,7 +30,7 @@ export abstract class Transition {
     return new SlideTransition(
       options.direction,
       options.duration,
-      options.easing ?? Easings.linear
+      options.easing ?? Easings.linear,
     );
   }
 
@@ -60,7 +61,7 @@ export class SlideTransition extends Transition {
   constructor(
     direction: TransitionDirection,
     duration: number,
-    easing: EasingFunction
+    easing: EasingFunction,
   ) {
     super();
     this.direction = direction;
@@ -69,17 +70,25 @@ export class SlideTransition extends Transition {
   }
 }
 
-export enum TransitionType {
-  Slide = "Slide",
-  None = "None",
-}
+export const TransitionType = {
+  Slide: "Slide",
+  None: "None",
+} as const;
+export type TransitionType =
+  (typeof TransitionType)[keyof typeof TransitionType];
 
-export enum TransitionDirection {
-  Up = "Up",
-  Down = "Down",
-  Right = "Right",
-  Left = "Left",
-}
+export const TransitionDirection = {
+  Up: "Up",
+  Down: "Down",
+  Right: "Right",
+  Left: "Left",
+} as const;
+export type TransitionDirection =
+  (typeof TransitionDirection)[keyof typeof TransitionDirection];
+
 export class SceneTransition {
-  constructor(public scene: Scene, public transition: Transition) {}
+  constructor(
+    public scene: Scene,
+    public transition: Transition,
+  ) {}
 }

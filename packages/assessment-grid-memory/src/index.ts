@@ -594,7 +594,7 @@ phase, participants report the location of dots on a grid.",
           }),
           Action.custom({
             callback: () => {
-              presentationGrid.removeAllChildren();
+              presentationGrid.removeAllGridChildren();
               rememberDotsMessage.hidden = true;
               game.presentScene(
                 interferenceScene,
@@ -662,7 +662,7 @@ phase, participants report the location of dots on a grid.",
       // On repeated showings of the grid, we will slide it into view
       // and slideGridIntoScene = true
       function ShowInterferenceActivity(slideGridIntoScene = false) {
-        interferenceGrid.removeAllChildren();
+        interferenceGrid.removeAllGridChildren();
         let tappedFCount = 0;
 
         // randomly choose six cells to have F in them from the grid that
@@ -824,7 +824,7 @@ phase, participants report the location of dots on a grid.",
       // only in onAppear
       Timer.startNew("responseTime");
 
-      recallGrid.removeAllChildren();
+      recallGrid.removeAllGridChildren();
       recallDoneButton.hidden = true;
       whereDotsMessage.hidden = true;
 

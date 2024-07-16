@@ -1,4 +1,3 @@
-import "./Globals";
 import { Canvas, Paint } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -11,13 +10,15 @@ import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { M2NodeEvent } from "./M2NodeEvent";
 import { CallbackOptions } from "./CallbackOptions";
+import { Equal } from "./Equal";
+import { Point } from "./Point";
 
 export class Scene extends M2Node implements IDrawable, SceneOptions {
   readonly type = M2NodeType.Scene;
   isDrawable = true;
   // Drawable options
-  anchorPoint = { x: 0, y: 0 };
-  zPosition = 0;
+  private _anchorPoint: Point = { x: 0, y: 0 };
+  private _zPosition = 0;
   // Scene options
   private _backgroundColor = Constants.DEFAULT_SCENE_BACKGROUND_COLOR;
 
@@ -38,10 +39,20 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     if (options.backgroundColor) {
       this.backgroundColor = options.backgroundColor;
     }
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      backgroundColor: this.backgroundColor,
+    };
   }
 
   override initialize(): void {
-    this.scale = Globals.rootScale;
+    this.scale = m2c2Globals.rootScale;
     this.size.width = this.game.canvasCssWidth;
     this.size.height = this.game.canvasCssHeight;
     if (this.backgroundPaint) {
@@ -79,8 +90,57 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     return this._backgroundColor;
   }
   set backgroundColor(backgroundColor: RgbaColor) {
+    if (Equal.value(this._backgroundColor, backgroundColor)) {
+      return;
+    }
     this._backgroundColor = backgroundColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("backgroundColor", backgroundColor);
+  }
+
+  get anchorPoint(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get x(): number {
+        return node._anchorPoint.x;
+      },
+      set x(x: number) {
+        if (Equal.value(node._anchorPoint.x, x)) {
+          return;
+        }
+        node._anchorPoint.x = x;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+      get y(): number {
+        return node._anchorPoint.y;
+      },
+      set y(y: number) {
+        if (Equal.value(node._anchorPoint.y, y)) {
+          return;
+        }
+        node._anchorPoint.y = y;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+    };
+  }
+  set anchorPoint(anchorPoint: Point) {
+    if (Equal.value(this._anchorPoint, anchorPoint)) {
+      return;
+    }
+    this._anchorPoint = anchorPoint;
+    this.savePropertyChangeEvent("anchorPoint", this.anchorPoint);
+  }
+
+  get zPosition(): number {
+    return this._zPosition;
+  }
+  set zPosition(zPosition: number) {
+    if (Equal.value(this._zPosition, zPosition)) {
+      return;
+    }
+    this._zPosition = zPosition;
+    this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
   /**
@@ -156,7 +216,7 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     // Except for its children, a scene itself only draws a background rectangle to "clear" the screen
     // Due to transition animations, this background rectangle may be beyond the viewable canvas bounds
     canvas.save();
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
@@ -170,10 +230,12 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
 
     canvas.drawRect(
       [
-        this.position.x * drawScale * Globals.rootScale,
-        this.position.y * drawScale * Globals.rootScale,
-        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
-        (this.position.y + this.size.height) * drawScale * Globals.rootScale,
+        this.position.x * drawScale * m2c2Globals.rootScale,
+        this.position.y * drawScale * m2c2Globals.rootScale,
+        (this.position.x + this.size.width) * drawScale * m2c2Globals.rootScale,
+        (this.position.y + this.size.height) *
+          drawScale *
+          m2c2Globals.rootScale,
       ],
       this.backgroundPaint,
     );
@@ -186,17 +248,19 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     this.initialize();
 
     canvas.save();
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     if (!this.backgroundPaint) {
       throw new Error(`in Scene ${this}, background paint is undefined.`);
     }
     canvas.drawRect(
       [
-        this.position.x * drawScale * Globals.rootScale,
-        this.position.y * drawScale * Globals.rootScale,
-        (this.position.x + this.size.width) * drawScale * Globals.rootScale,
-        (this.position.y + this.size.height) * drawScale * Globals.rootScale,
+        this.position.x * drawScale * m2c2Globals.rootScale,
+        this.position.y * drawScale * m2c2Globals.rootScale,
+        (this.position.x + this.size.width) * drawScale * m2c2Globals.rootScale,
+        (this.position.y + this.size.height) *
+          drawScale *
+          m2c2Globals.rootScale,
       ],
       this.backgroundPaint,
     );

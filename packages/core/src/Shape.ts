@@ -1,4 +1,3 @@
-import "./Globals";
 import { Canvas, Paint, Path } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -13,27 +12,30 @@ import { RectOptions } from "./RectOptions";
 import { ShapeType } from "./ShapeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { Equal } from "./Equal";
+import { Size } from "./Size";
+import { Point } from "./Point";
 
 export class Shape extends M2Node implements IDrawable, ShapeOptions {
   readonly type = M2NodeType.Shape;
   isDrawable = true;
   isShape = true;
   // Drawable options
-  anchorPoint = { x: 0.5, y: 0.5 };
-  zPosition = 0;
+  private _anchorPoint: Point = { x: 0.5, y: 0.5 };
+  private _zPosition = 0;
   // Shape options
   // TODO: fix the Size issue; should be readonly (calculated value) in all nodes, but Rectangle
   shapeType = ShapeType.Undefined;
-  circleOfRadius?: number;
-  rect?: RectOptions;
-  path?: M2Path | M2ColorfulPath | SvgStringPath;
+  private _circleOfRadius?: number;
+  private _rect?: RectOptions;
+  private _path?: M2Path | M2ColorfulPath | SvgStringPath;
   ckPath: Path | null = null;
   ckPathWidth?: number;
   ckPathHeight?: number;
-  cornerRadius = 0;
+  private _cornerRadius = 0;
   private _fillColor = Constants.DEFAULT_SHAPE_FILL_COLOR;
   private _strokeColor?: RgbaColor | undefined;
-  lineWidth?: number;
+  private _lineWidth?: number;
   private _isAntialiased = true;
 
   private _fillColorPaintAntialiased?: Paint;
@@ -168,6 +170,29 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         `warning: for node ${this}, lineWidth = ${options.lineWidth} but strokeColor is undefined. In normal usage, both would be set or both would be undefined.`,
       );
     }
+
+    this.saveNodeNewEvent();
+  }
+
+  override get completeNodeOptions() {
+    let size: Size | undefined = undefined;
+    if (this.shapeIsM2Path()) {
+      size = this.size;
+    }
+    return {
+      ...this.options,
+      ...this.getNodeOptions(),
+      ...this.getDrawableOptions(),
+      circleOfRadius: this.circleOfRadius,
+      rect: this.rect,
+      cornerRadius: this.cornerRadius,
+      fillColor: this.fillColor,
+      strokeColor: this.strokeColor,
+      lineWidth: this.lineWidth,
+      path: this.path,
+      size: size,
+      isAntialiased: this.isAntialiased,
+    };
   }
 
   override initialize(): void {
@@ -258,6 +283,51 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     this.needsInitialization = false;
   }
 
+  get anchorPoint(): Point {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const node = this;
+    return {
+      get x(): number {
+        return node._anchorPoint.x;
+      },
+      set x(x: number) {
+        if (Equal.value(node._anchorPoint.x, x)) {
+          return;
+        }
+        node._anchorPoint.x = x;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+      get y(): number {
+        return node._anchorPoint.y;
+      },
+      set y(y: number) {
+        if (Equal.value(node._anchorPoint.y, y)) {
+          return;
+        }
+        node._anchorPoint.y = y;
+        node.savePropertyChangeEvent("anchorPoint", node.anchorPoint);
+      },
+    };
+  }
+  set anchorPoint(anchorPoint: Point) {
+    if (Equal.value(this._anchorPoint, anchorPoint)) {
+      return;
+    }
+    this._anchorPoint = anchorPoint;
+    this.savePropertyChangeEvent("anchorPoint", this.anchorPoint);
+  }
+
+  get zPosition(): number {
+    return this._zPosition;
+  }
+  set zPosition(zPosition: number) {
+    if (Equal.value(this._zPosition, zPosition)) {
+      return;
+    }
+    this._zPosition = zPosition;
+    this.savePropertyChangeEvent("zPosition", zPosition);
+  }
+
   dispose(): void {
     CanvasKitHelpers.Dispose([
       // use backing fields, since paints may be undefined
@@ -311,7 +381,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
   draw(canvas: Canvas): void {
     canvas.save();
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
@@ -360,7 +430,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
   }
 
   private drawPathFromM2Path(canvas: Canvas) {
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     /** paths use origin with anchor point at 0,0 (upper left) */
     const pathOriginX =
       (this.absolutePosition.x -
@@ -403,7 +473,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
                 this.canvasKit.PaintStyle.Stroke,
                 true,
               );
-              paint.setStrokeWidth(lineWidth * Globals.canvasScale);
+              paint.setStrokeWidth(lineWidth * m2c2Globals.canvasScale);
               this.colorfulPathPaints.set(paintKey, paint);
             }
             if (lp < linePresentations.length - 1) {
@@ -415,10 +485,10 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
           }
 
           canvas.drawLine(
-            pathOriginX + points[i].x * Globals.canvasScale,
-            pathOriginY + points[i].y * Globals.canvasScale,
-            pathOriginX + points[i + 1].x * Globals.canvasScale,
-            pathOriginY + points[i + 1].y * Globals.canvasScale,
+            pathOriginX + points[i].x * m2c2Globals.canvasScale,
+            pathOriginY + points[i].y * m2c2Globals.canvasScale,
+            pathOriginX + points[i + 1].x * m2c2Globals.canvasScale,
+            pathOriginY + points[i + 1].y * m2c2Globals.canvasScale,
             paint,
           );
         }
@@ -433,7 +503,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     ) {
       // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
       this.strokeColorPaintAntialiased.setStrokeWidth(
-        this.lineWidth * Globals.canvasScale,
+        this.lineWidth * m2c2Globals.canvasScale,
       );
 
       const subpaths = (this.path as M2Path).subpaths;
@@ -441,10 +511,10 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         const points = subpath.flat();
         for (let i = 0; i < points.length - 1; i++) {
           canvas.drawLine(
-            pathOriginX + points[i].x * Globals.canvasScale,
-            pathOriginY + points[i].y * Globals.canvasScale,
-            pathOriginX + points[i + 1].x * Globals.canvasScale,
-            pathOriginY + points[i + 1].y * Globals.canvasScale,
+            pathOriginX + points[i].x * m2c2Globals.canvasScale,
+            pathOriginY + points[i].y * m2c2Globals.canvasScale,
+            pathOriginX + points[i + 1].x * m2c2Globals.canvasScale,
+            pathOriginY + points[i + 1].y * m2c2Globals.canvasScale,
             this.strokeColorPaintAntialiased,
           );
         }
@@ -472,9 +542,9 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
      *   - the path has moved since the last draw
      */
     if (this.pathNeedsTransform(x, y)) {
-      const drawScale = Globals.canvasScale / this.absoluteScale;
+      const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
       const pathScale =
-        drawScale * this.svgPathScaleForResizing * Globals.rootScale;
+        drawScale * this.svgPathScaleForResizing * m2c2Globals.rootScale;
       const matrix = this.calculateTransformationMatrix(pathScale, x, y);
       this.ckPath = this.ckPath.transform(matrix);
       this.saveSvgPathAbsolutePosition(x, y);
@@ -492,7 +562,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
   }
 
   private calculateSvgPathY() {
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     return (
       (this.absolutePosition.y - (this.size.height * this.absoluteScale) / 2) *
       drawScale
@@ -500,7 +570,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
   }
 
   private calculateSvgPathX() {
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     return (
       (this.absolutePosition.x - (this.size.width * this.absoluteScale) / 2) *
       drawScale
@@ -597,7 +667,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     if (!this.circleOfRadius) {
       return;
     }
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     const cx = this.absolutePosition.x * drawScale;
     const cy = this.absolutePosition.y * drawScale;
     const radius = this.circleOfRadius * this.absoluteScale * drawScale;
@@ -610,7 +680,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
   }
 
   private calculateCKRoundedRectangle() {
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     return this.canvasKit.RRectXY(
       this.canvasKit.LTRBRect(
         (this.absolutePosition.x -
@@ -663,7 +733,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     }
 
     // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     paint.setStrokeWidth(lineWidth * drawScale);
     return paint;
   }
@@ -672,7 +742,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     this.initialize();
 
     canvas.save();
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
 
     if (this.shapeType === ShapeType.Circle) {
@@ -714,7 +784,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     if (!this.lineWidth || !this.circleOfRadius) {
       return;
     }
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
     this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
@@ -732,7 +802,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     if (!this.lineWidth || !this.circleOfRadius) {
       return;
     }
-    const drawScale = Globals.canvasScale / this.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
     this.drawRectangleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
@@ -744,28 +814,100 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     );
   }
 
+  get circleOfRadius(): number | undefined {
+    return this._circleOfRadius;
+  }
+  set circleOfRadius(circleOfRadius: number | undefined) {
+    if (Equal.value(circleOfRadius, this._circleOfRadius)) {
+      return;
+    }
+    this._circleOfRadius = circleOfRadius;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("circleOfRadius", circleOfRadius);
+  }
+
+  get rect(): RectOptions | undefined {
+    return this._rect;
+  }
+  set rect(rect: RectOptions | undefined) {
+    if (Equal.value(rect, this._rect)) {
+      return;
+    }
+    this._rect = rect;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("rect", rect);
+  }
+
+  get cornerRadius(): number {
+    return this._cornerRadius;
+  }
+  set cornerRadius(cornerRadius: number | undefined) {
+    if (Equal.value(cornerRadius, this._cornerRadius)) {
+      return;
+    }
+    this._cornerRadius = cornerRadius ?? 0;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("cornerRadius", cornerRadius ?? 0);
+  }
+
+  get lineWidth(): number | undefined {
+    return this._lineWidth;
+  }
+  set lineWidth(lineWidth: number | undefined) {
+    if (Equal.value(lineWidth, this._lineWidth)) {
+      return;
+    }
+    this._lineWidth = lineWidth;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("lineWidth", lineWidth);
+  }
+
+  get path(): M2Path | M2ColorfulPath | SvgStringPath | undefined {
+    return this._path;
+  }
+  set path(path: M2Path | M2ColorfulPath | SvgStringPath | undefined) {
+    if (Equal.value(path, this._path)) {
+      return;
+    }
+    this._path = path;
+    this.needsInitialization = true;
+    this.savePropertyChangeEvent("path", path);
+  }
+
   get fillColor(): RgbaColor {
     return this._fillColor;
   }
   set fillColor(fillColor: RgbaColor) {
+    if (Equal.value(fillColor, this._fillColor)) {
+      return;
+    }
     this._fillColor = fillColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("fillColor", fillColor);
   }
 
   get strokeColor(): RgbaColor | undefined {
     return this._strokeColor;
   }
   set strokeColor(strokeColor: RgbaColor | undefined) {
+    if (Equal.value(strokeColor, this._strokeColor)) {
+      return;
+    }
     this._strokeColor = strokeColor;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("strokeColor", strokeColor);
   }
 
   get isAntialiased(): boolean {
     return this._isAntialiased;
   }
   set isAntialiased(isAntialiased: boolean) {
+    if (Equal.value(isAntialiased, this._isAntialiased)) {
+      return;
+    }
     this._isAntialiased = isAntialiased;
     this.needsInitialization = true;
+    this.savePropertyChangeEvent("isAntialiased", isAntialiased);
   }
 
   public get fillColorPaintAntialiased(): Paint {

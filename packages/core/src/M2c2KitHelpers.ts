@@ -7,6 +7,8 @@ import { ShapeType } from "./ShapeType";
 import { Point } from "./Point";
 import { BoundingBox } from "./BoundingBox";
 import { Game } from "./Game";
+import { M2NodeConstructor } from "./M2NodeConstructor";
+import { Timer } from "./Timer";
 
 interface RotationTransform {
   /** Counterclockwise radians of the rotation */
@@ -15,6 +17,7 @@ interface RotationTransform {
   center: Point;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class M2c2KitHelpers {
   /**
    * Returns the URL as it appears in the game's manifest.json file.
@@ -42,6 +45,80 @@ export class M2c2KitHelpers {
    */
   static urlHasScheme(url: string): boolean {
     return /^[a-z]+:\/\//i.test(url);
+  }
+
+  /**
+   * Registers a `M2Node` class with the global class registry.
+   *
+   * @remarks This is used to register a class so that it can be
+   * instantiated by the `M2NodeFactory`.
+   *
+   * @param nodeClass - class or classes to register.
+   */
+  static registerM2NodeClass(...nodeClass: Array<M2NodeConstructor>): void {
+    if (!m2c2Globals.m2NodeClassRegistry) {
+      m2c2Globals.m2NodeClassRegistry = {};
+    }
+
+    nodeClass.forEach((_nodeClass) => {
+      m2c2Globals.m2NodeClassRegistry = {
+        ...m2c2Globals.m2NodeClassRegistry,
+        [_nodeClass.name]: _nodeClass,
+      };
+    });
+  }
+
+  /**
+   * Creates timestamps based on when the current frame's update began.
+   *
+   * @remarks When recording events related to node creation, node
+   * parent-child relationships, and node properties, the timestamps should be
+   * based on when current frame's update began -- not the current time. While
+   * current time is most accurate for recording user interactions (use
+   * `M2c2KitHelpers.createTimestamps()` for user interactions), the frame's
+   * update is the best way to ensure that node events that occurred in the same
+   * frame are recorded with the same timestamp and thus are replayed in the
+   * correct order. For example, a node may be created, added to a scene, and
+   * have its hidden property set to true, all in the same frame. If the
+   * current timestamps were used for all these events, it could happen that
+   * the hidden property is set slightly after the node is added to the scene.
+   * When replayed, this could cause the node to be visible for a single frame
+   * if the queue of replay events pulls only the creation and addition events.
+   * By using the frame's update time, we ensure that all events related to a
+   * node are recorded with the same timestamp and are replayed in the same
+   * frame.
+   * If game has not yet begun to run (i.e., frame updates have not yet started),
+   * the timestamps will be based on the current time.
+   *
+   * @returns object with timestamps
+   */
+  static createFrameUpdateTimestamps() {
+    return {
+      timestamp:
+        Number.isNaN(m2c2Globals?.now) || m2c2Globals?.now === undefined
+          ? Timer.now()
+          : m2c2Globals.now,
+      iso8601Timestamp: !m2c2Globals.iso8601Now
+        ? new Date().toISOString()
+        : m2c2Globals.iso8601Now,
+    };
+  }
+
+  /**
+   * Creates timestamps based on the current time.
+   *
+   * @remarks Use `M2c2KitHelpers.createFrameUpdateTimestamps()` when requesting
+   * timestamps for events related to node creation, parent-child
+   * relationships, and properties.
+   * See {@link createFrameUpdateTimestamps()} for explanation.
+   *
+   * @returns object with `timestamp` and `iso8601Timestamp` properties
+   */
+  static createTimestamps() {
+    return {
+      timestamp: Timer.now(),
+      iso8601Timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -119,7 +196,7 @@ export class M2c2KitHelpers {
     if (rotationTransforms.length === 0) {
       return;
     }
-    const drawScale = Globals.canvasScale / drawableNode.absoluteScale;
+    const drawScale = m2c2Globals.canvasScale / drawableNode.absoluteScale;
     applyRotationTransformsToCanvas(rotationTransforms, drawScale, canvas);
   }
 
