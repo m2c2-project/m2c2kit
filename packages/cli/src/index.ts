@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-/* eslint-disable no-case-declarations */
 /**
  * The code in this file is adapted from a reference CLI implementation from
  * the Angular devkit repository:
- *   https://github.com/angular/angular-cli/blob/1f9278fa8cb8cdaf7775962165c042b9f382a89b/packages/angular_devkit/schematics_cli/bin/schematics.ts
+ *   https://github.com/angular/angular-cli/blob/f5c250ab48e22c5aff31d8ebd35fb9a88e380fd7/packages/angular_devkit/schematics_cli/bin/schematics.ts
  * The license for that code is as follows:
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -56,6 +55,10 @@ function parseSchematicName(str: string | null): {
   return { collection, schematic };
 }
 
+function removeLeadingSlash(value: string): string {
+  return value[0] === "/" ? value.slice(1) : value;
+}
+
 export interface MainOptions {
   args: string[];
   stdout?: ProcessOutput;
@@ -100,27 +103,25 @@ function _createPromptProvider(): schema.PromptProvider {
             continue;
           }
 
-          const choices = definition.items?.map((item) => {
-            return typeof item == "string"
-              ? {
-                  name: item,
-                  value: item,
-                }
-              : {
-                  name: item.label,
-                  value: item.value,
-                };
-          });
-
           answers[definition.id] = await (
             definition.multiselect ? prompts.checkbox : prompts.select
           )({
             message: definition.message,
             default: definition.default,
-            choices,
+            choices: definition.items.map((item) =>
+              typeof item == "string"
+                ? {
+                    name: item,
+                    value: item,
+                  }
+                : {
+                    name: item.label,
+                    value: item.value,
+                  },
+            ),
           });
           break;
-        case "input":
+        case "input": {
           let finalValue: JsonValue | undefined;
           answers[definition.id] = await prompts.input({
             message: definition.message,
@@ -166,6 +167,7 @@ function _createPromptProvider(): schema.PromptProvider {
             answers[definition.id] = finalValue;
           }
           break;
+        }
       }
     }
 
@@ -301,19 +303,14 @@ export async function main({
   workflow.reporter.subscribe((event) => {
     nothingDone = false;
     // Strip leading slash to prevent confusion.
-    const eventPath = event.path.startsWith("/")
-      ? event.path.slice(1)
-      : event.path;
+    const eventPath = removeLeadingSlash(event.path);
 
     switch (event.kind) {
       case "error":
         error = true;
-
-        const desc =
-          event.description == "alreadyExist"
-            ? "already exists"
-            : "does not exist";
-        logger.error(`ERROR! ${eventPath} ${desc}.`);
+        logger.error(
+          `ERROR! ${eventPath} ${event.description == "alreadyExist" ? "already exists" : "does not exist"}.`,
+        );
         break;
       case "update":
         loggingQueue.push(
@@ -329,11 +326,8 @@ export async function main({
         loggingQueue.push(`${colors.yellow("DELETE")} ${eventPath}`);
         break;
       case "rename":
-        const eventToPath = event.to.startsWith("/")
-          ? event.to.slice(1)
-          : event.to;
         loggingQueue.push(
-          `${colors.blue("RENAME")} ${eventPath} => ${eventToPath}`,
+          `${colors.blue("RENAME")} ${eventPath} => ${removeLeadingSlash(event.to)}`,
         );
         break;
     }
