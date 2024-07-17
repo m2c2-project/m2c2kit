@@ -30,6 +30,8 @@ export abstract class Transition {
     let easingFunction = Easings.linear;
     if (typeof options.easing === "string") {
       easingFunction = Easings.fromTypeAsString(options.easing);
+    } else if (options.easing !== undefined) {
+      easingFunction = options.easing;
     }
 
     return new SlideTransition(
