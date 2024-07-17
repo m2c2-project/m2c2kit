@@ -6,7 +6,8 @@
   },
   "description": "A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can",
   "scripts": {
-    "build": "npm run clean && tsc && rollup -c",
+    "build": "npm run clean && tsc && rollup -c && npm run extract-schemas",
+    "extract-schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" --game-class=../core/src/Game.ts > schemas.json",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "./dist/index.js",
@@ -23,6 +24,7 @@
     "dist",
     "!*.d.ts.map",
     "assets",
+    "schemas.json",
     "metadata.json"
   ],
   "license": "MIT",

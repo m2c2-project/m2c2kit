@@ -8,6 +8,10 @@ build-nobundler/
 
 packages/core/assets/canvaskit*.wasm
 
+# assessment schemas for distribution will be generated during CI/CD
+# these are considered build artifacts and should not be committed
+packages/assessment-*/schemas.json
+
 # built assets for android-simple-webview
 packages/assessments-demo/dist-webview/
 examples/android-simple-webview/app/src/main/assets

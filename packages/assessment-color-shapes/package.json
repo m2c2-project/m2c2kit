@@ -6,7 +6,8 @@
   },
   "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
   "scripts": {
-    "build": "npm run clean && tsc && rollup -c",
+    "build": "npm run clean && tsc && rollup -c && npm run extract-schemas",
+    "extract-schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" --game-class=../core/src/Game.ts > schemas.json",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
   },
   "main": "./dist/index.js",
@@ -23,6 +24,7 @@
     "dist",
     "!*.d.ts.map",
     "assets",
+    "schemas.json",
     "metadata.json"
   ],
   "license": "MIT",
