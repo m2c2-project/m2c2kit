@@ -7,8 +7,8 @@ export interface SlideTransitionOptions {
   direction: TransitionDirection;
   /** Duration, in milliseconds, of the transition */
   duration: number;
-  /** Easing function for movement; default is linear */
-  easing?: EasingFunction;
+  /** Easing function for movement or a string identifier of the easing function, e.g., `SinusoidalInOut`. Default is a linear easing function. */
+  easing?: EasingFunction | string;
 }
 
 /**
@@ -27,10 +27,15 @@ export abstract class Transition {
    * @returns
    */
   public static slide(options: SlideTransitionOptions): SlideTransition {
+    let easingFunction = Easings.linear;
+    if (typeof options.easing === "string") {
+      easingFunction = Easings.fromTypeAsString(options.easing);
+    }
+
     return new SlideTransition(
       options.direction,
       options.duration,
-      options.easing ?? Easings.linear,
+      easingFunction,
     );
   }
 
