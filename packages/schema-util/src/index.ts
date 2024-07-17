@@ -46,29 +46,46 @@ yargs(hideBin(process.argv))
         }
 
         const assessmentVersion = `${getAssessmentVersion(
-          f
+          f,
         )}, ${shortCommitHash}`;
         const assessmentName = `${getAssessmentNameFromSourceFile(
-          f
+          f,
         )} (${assessmentVersion})`;
 
-        let schema = getSchemaFromSourceFile(f, argv.schema as string);
+        let trialSchema: M2c2Schema | undefined = undefined;
+        let parametersSchema: M2c2Schema | undefined = undefined;
 
-        if (argv.schema === "TrialSchema") {
+        if (
+          argv.schema === "TrialSchema" ||
+          (argv.schema as string).toLowerCase() === "all"
+        ) {
+          trialSchema = getSchemaFromSourceFile(f, "TrialSchema");
           if (!argv["game-class"]) {
             process.stderr.write(
-              "--game-class option is required for TrialSchema"
+              "--game-class option is required for TrialSchema",
             );
             process.exit(1);
           }
           const automaticTrialSchema = getAutomaticTrialSchemaFromSourceFile(
-            argv["game-class"].toString()
+            argv["game-class"].toString(),
           );
-          schema = { ...automaticTrialSchema, ...schema };
+          trialSchema = { ...automaticTrialSchema, ...trialSchema };
+        }
+        if (
+          argv.schema === "GameParameters" ||
+          (argv.schema as string).toLowerCase() === "all"
+        ) {
+          parametersSchema = getSchemaFromSourceFile(f, "GameParameters");
         }
 
         if (outputFormat === "json") {
-          dataJson.push(schema);
+          if ((argv.schema as string).toLowerCase() === "all") {
+            process.stderr.write(
+              "--schema=all is valid only for json-schema output",
+            );
+            process.exit(1);
+          }
+          dataJson.push(trialSchema ?? parametersSchema ?? {});
           return;
         }
 
@@ -80,23 +97,58 @@ yargs(hideBin(process.argv))
             title = title.replace("__VERSION__", assessmentVersion);
           }
           let description = "";
-          if (argv.schema === "TrialSchema") {
-            description = "Trial data schema";
-          } else if (argv.schema === "GameParameters") {
-            description = "Game parameters schema";
+
+          if (
+            argv.schema === "TrialSchema" ||
+            argv.schema === "GameParameters"
+          ) {
+            if (argv.schema === "TrialSchema") {
+              description = "Trial data schema";
+            } else if (argv.schema === "GameParameters") {
+              description = "Game parameters schema";
+            }
+
+            jsonSchema = {
+              $schema: "http://json-schema.org/draft-07/schema",
+              title: title,
+              type: "object",
+              description: description,
+              properties: trialSchema ?? parametersSchema ?? {},
+            };
+            return;
           }
 
+          // all schemas in one json schema
           jsonSchema = {
             $schema: "http://json-schema.org/draft-07/schema",
             title: title,
             type: "object",
-            description: description,
-            properties: schema,
+            description: "All game schemas",
+            properties: {
+              GameParameters: {
+                type: "object",
+                description: "Game parameters schema",
+                properties: parametersSchema,
+              },
+              TrialSchema: {
+                type: "object",
+                description: "Trial data schema",
+                properties: trialSchema,
+              },
+            },
           };
           return;
         }
 
         // csv format
+        if ((argv.schema as string).toLowerCase() === "all") {
+          process.stderr.write(
+            "--schema=all is valid only for json-schema output",
+          );
+          process.exit(1);
+        }
+
+        const schema = trialSchema ?? parametersSchema ?? {};
         Object.keys(schema).forEach((k) => {
           const type = schema[k].type;
           let typeString;
@@ -150,11 +202,12 @@ yargs(hideBin(process.argv))
       }
       // csv
       process.stdout.write(stringify(data, { header: true }) + EOL);
-    }
+    },
   )
   .option("schema", {
     type: "string",
-    description: "schema type: TrialSchema or GameParameters",
+    description:
+      "schema type: TrialSchema, GameParameters, or all (all valid only for json-schema output)",
     demandOption: true,
   })
   .option("files", {
@@ -164,12 +217,13 @@ yargs(hideBin(process.argv))
   })
   .option("game-class", {
     type: "string",
-    description: "Game.ts assessment source. Required for --schema=TrialSchema",
+    description:
+      "Game.ts assessment source. Required for --schema=TrialSchema and --schema=all",
   })
   .option("format", {
     type: "string",
     default: "csv",
-    description: "output format: csv or json",
+    description: "output format: csv, json, or json-schema",
   })
   .option("title", {
     type: "string",
@@ -196,7 +250,7 @@ function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
     .find(Boolean);
   if (!automaticTrialSchemaDeclaration) {
     process.stderr.write(
-      "No automaticTrialSchema property found in Game class at " + sourceFile
+      "No automaticTrialSchema property found in Game class at " + sourceFile,
     );
     process.exit(1);
   }
@@ -209,7 +263,7 @@ function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
 
 function getSchemaFromSourceFile(
   sourceFile: string,
-  schemaName: string
+  schemaName: string,
 ): M2c2Schema {
   const project = new Project();
   const file = project.addSourceFileAtPath(sourceFile);
@@ -227,7 +281,7 @@ function getSchemaFromSourceFile(
     process.exit(1);
   }
   const declaration = ctor.getVariableDeclaration(
-    (f) => f.getTypeNode()?.getText() === schemaName
+    (f) => f.getTypeNode()?.getText() === schemaName,
   );
   if (!declaration) {
     process.stderr.write(`No declaration found in ${sourceFile}` + EOL);
@@ -257,7 +311,7 @@ function getAssessmentNameFromSourceFile(sourceFile: string): string {
     process.exit(1);
   }
   const declaration = ctor.getVariableDeclaration(
-    (f) => f.getTypeNode()?.getText() === "GameOptions"
+    (f) => f.getTypeNode()?.getText() === "GameOptions",
   );
   if (!declaration) {
     process.stderr.write(`No declaration found in ${sourceFile}` + EOL);
@@ -280,11 +334,11 @@ function getAssessmentVersion(sourceFile: string): string {
   const packageJsonPath = path.resolve(
     path.dirname(sourceFile),
     "..",
-    "package.json"
+    "package.json",
   );
   if (!fs.existsSync(packageJsonPath)) {
     process.stderr.write(
-      `Could not find assessment package.json at ${packageJsonPath}` + EOL
+      `Could not find assessment package.json at ${packageJsonPath}` + EOL,
     );
     process.exit(1);
   }
