@@ -20,7 +20,13 @@ import {
   Point,
   Constants,
 } from "@m2c2kit/core";
-import { Button, CountdownScene, Grid, Instructions } from "@m2c2kit/addons";
+import {
+  Button,
+  CountdownScene,
+  Grid,
+  Instructions,
+  InstructionsOptions,
+} from "@m2c2kit/addons";
 
 /**
  * Color Dots is cued-recall, item-location memory binding task, where after
@@ -124,6 +130,12 @@ class ColorDots extends Game {
         description: "Type of instructions to show, 'short' or 'long'.",
         type: "string",
         enum: ["short", "long"],
+      },
+      instructions: {
+        default: null,
+        type: ["object", "null"],
+        description:
+          "When non-null, an InstructionsOptions object that will completely override the built-in instructions.",
       },
       show_quit_button: {
         type: "boolean",
@@ -384,67 +396,74 @@ appeared.",
     // SCENES: instructions
     let instructionsScenes: Array<Scene>;
 
-    switch (game.getParameter("instruction_type")) {
-      case "short": {
-        instructionsScenes = Instructions.create({
-          instructionScenes: [
-            {
-              title: "Color Dots",
-              text: "For this activity, try to remember the location and color of 3 dots.",
-              imageName: "cd1",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-              nextButtonText: "START",
-              nextButtonBackgroundColor: WebColors.Green,
-            },
-          ],
-        });
-        break;
-      }
-      case "long": {
-        instructionsScenes = Instructions.create({
-          instructionScenes: [
-            {
-              title: "Color Dots",
-              text: "For this activity, try to remember the location and color of 3 dots.",
-              imageName: "cd1",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-            },
-            {
-              title: "Color Dots",
-              text: "Choose the color of the dot from the options at the bottom of the screen.",
-              imageName: "cd2",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-            },
-            {
-              title: "Color Dots",
-              text: "Next you are asked to place another dot. Touch the screen where you remember seeing the dot.",
-              imageName: "cd3",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-              nextButtonText: "START",
-              nextButtonBackgroundColor: WebColors.Green,
-            },
-          ],
-        });
-        break;
-      }
-      default: {
-        throw new Error("invalid value for instruction_type");
+    const customInstructions = game.getParameter<InstructionsOptions | null>(
+      "instructions",
+    );
+    if (customInstructions) {
+      instructionsScenes = Instructions.create(customInstructions);
+    } else {
+      switch (game.getParameter("instruction_type")) {
+        case "short": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "Color Dots",
+                text: "For this activity, try to remember the location and color of 3 dots.",
+                imageName: "cd1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START",
+                nextButtonBackgroundColor: WebColors.Green,
+              },
+            ],
+          });
+          break;
+        }
+        case "long": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "Color Dots",
+                text: "For this activity, try to remember the location and color of 3 dots.",
+                imageName: "cd1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+              },
+              {
+                title: "Color Dots",
+                text: "Choose the color of the dot from the options at the bottom of the screen.",
+                imageName: "cd2",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+              },
+              {
+                title: "Color Dots",
+                text: "Next you are asked to place another dot. Touch the screen where you remember seeing the dot.",
+                imageName: "cd3",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START",
+                nextButtonBackgroundColor: WebColors.Green,
+              },
+            ],
+          });
+          break;
+        }
+        default: {
+          throw new Error("invalid value for instruction_type");
+        }
       }
     }
     instructionsScenes[0].onAppear(() => {

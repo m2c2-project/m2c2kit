@@ -17,7 +17,13 @@ import {
   Sprite,
   Constants,
 } from "@m2c2kit/core";
-import { Button, Grid, Instructions, CountdownScene } from "@m2c2kit/addons";
+import {
+  Button,
+  Grid,
+  Instructions,
+  CountdownScene,
+  InstructionsOptions,
+} from "@m2c2kit/addons";
 
 /**
  * Color Shapes is a visual array change detection task, measuring intra-item
@@ -120,6 +126,12 @@ class ColorShapes extends Game {
         description: "Type of instructions to show, 'short' or 'long'.",
         type: "string",
         enum: ["short", "long"],
+      },
+      instructions: {
+        default: null,
+        type: ["object", "null"],
+        description:
+          "When non-null, an InstructionsOptions object that will completely override the built-in instructions.",
       },
       show_quit_button: {
         type: "boolean",
@@ -373,68 +385,75 @@ phases.`,
     // SCENES: instructions
     let instructionsScenes: Array<Scene>;
 
-    switch (game.getParameter("instruction_type")) {
-      case "short": {
-        instructionsScenes = Instructions.create({
-          instructionScenes: [
-            {
-              title: "Color Shapes",
-              text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before.`,
-              imageName: "instructions-1",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-              nextButtonText: "START",
-              nextButtonBackgroundColor: WebColors.Green,
-              nextSceneTransition: Transition.none(),
-            },
-          ],
-        });
-        break;
-      }
-      case "long": {
-        instructionsScenes = Instructions.create({
-          instructionScenes: [
-            {
-              title: "Color Shapes",
-              text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear.`,
-              imageName: "instructions-1",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-            },
-            {
-              title: "Color Shapes",
-              text: "Next you will see the same shapes reappear.",
-              imageName: "instructions-2",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-            },
-            {
-              title: "Color Shapes",
-              text: "Answer whether the shapes have the SAME or DIFFERENT colors as they had before.",
-              imageName: "instructions-3",
-              imageAboveText: false,
-              imageMarginTop: 32,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.2,
-              nextButtonText: "START",
-              nextButtonBackgroundColor: WebColors.Green,
-            },
-          ],
-        });
-        break;
-      }
-      default: {
-        throw new Error("invalid value for instruction_type");
+    const customInstructions = game.getParameter<InstructionsOptions | null>(
+      "instructions",
+    );
+    if (customInstructions) {
+      instructionsScenes = Instructions.create(customInstructions);
+    } else {
+      switch (game.getParameter("instruction_type")) {
+        case "short": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "Color Shapes",
+                text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before.`,
+                imageName: "instructions-1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START",
+                nextButtonBackgroundColor: WebColors.Green,
+                nextSceneTransition: Transition.none(),
+              },
+            ],
+          });
+          break;
+        }
+        case "long": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "Color Shapes",
+                text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear.`,
+                imageName: "instructions-1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+              },
+              {
+                title: "Color Shapes",
+                text: "Next you will see the same shapes reappear.",
+                imageName: "instructions-2",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+              },
+              {
+                title: "Color Shapes",
+                text: "Answer whether the shapes have the SAME or DIFFERENT colors as they had before.",
+                imageName: "instructions-3",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START",
+                nextButtonBackgroundColor: WebColors.Green,
+              },
+            ],
+          });
+          break;
+        }
+        default: {
+          throw new Error("invalid value for instruction_type");
+        }
       }
     }
     instructionsScenes[0].onAppear(() => {

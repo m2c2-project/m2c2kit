@@ -23,6 +23,7 @@ import {
   Instructions,
   CountdownScene,
   LocalePicker,
+  InstructionsOptions,
 } from "@m2c2kit/addons";
 
 /**
@@ -103,6 +104,12 @@ positions.",
         type: "string",
         enum: ["short", "long"],
         description: "Type of instructions to show, 'short' or 'long'.",
+      },
+      instructions: {
+        default: null,
+        type: ["object", "null"],
+        description:
+          "When non-null, an InstructionsOptions object that will completely override the built-in instructions.",
       },
       show_trials_complete_scene: {
         default: true,
@@ -296,22 +303,22 @@ positions.",
       },
       "de-DE": {
         localeName: "Deutsch",
-        INSTRUCTIONS_TITLE: "Symbol Suche",
+        INSTRUCTIONS_TITLE: "Symbol-Übereinstimmungs",
         // Short instructions need to be translated.
         // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
-        INSTRUCTIONS_TEXT_PAGE_1:
-          "Sie sehen Symbole oben und unten auf dem Bildschirm.",
+        INSTRUCTIONS_TEXT_PAGE_1: "Oben und unten sehen Sie Symbolpaare.",
         INSTRUCTIONS_TEXT_PAGE_2:
-          "Wenn Sie dazu aufgefordert werden, berühren Sie das Set unten, das genau wie das Set oben ist.",
+          "Ihre Aufgabe wird es sein, auf dasjenige untere Paar zu tippen, welches mit einem der obigen Paare exakt übereinstimmt.",
         INSTRUCTIONS_TEXT_PAGE_3:
-          "Bitte sei so schnell und präzise wie möglich.",
+          "Versuchen Sie bitte, so schnell und korrekt wie möglich zu sein.",
         START_BUTTON_TEXT: "START",
         NEXT_BUTTON_TEXT: "Weiter",
-        BACK_BUTTON_TEXT: "Zurück",
+        BACK_BUTTON_TEXT: "Vorherige",
         GET_READY_COUNTDOWN_TEXT: "BEREIT MACHEN",
-        WHICH_MATCHES_TEXT: "Welches dieser Elemente passt zu einem Paar oben?",
+        WHICH_MATCHES_TEXT:
+          "Welches dieser beiden stimmt mit einem der obigen Paare überein?",
         OR_TEXT: "oder",
-        TRIALS_COMPLETE_SCENE_TEXT: "Diese Aktivität ist abgeschlossen.",
+        TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
         TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
       },
       // cSpell:enable
@@ -334,6 +341,7 @@ positions.",
 conjunctive feature search in which respondents identify matching symbol \
 pairs as quickly and as accurately as they can.",
       longDescription:
+        // cSpell:disable
         'On each trial of the symbol search task, participants saw a row of \
 three symbol pairs at the top of the screen and were presented with two \
 symbol pairs at the bottom of the screen. Stimuli were presented until a \
@@ -348,6 +356,7 @@ indicator of perceptual speed. SOURCE: Sliwinski, Martin J., Jacqueline A. \
 Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 "Reliability and validity of ambulatory cognitive assessments." Assessment \
 25, no. 1 (2018): 14-30.',
+      // cSpell:enable
       showFps: defaultParameters.show_fps.default,
       width: 400,
       height: 800,
@@ -591,97 +600,104 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
     let instructionsScenes: Array<Scene>;
 
-    /**
-     * sharedInstructionsOptions are what is the the same for short
-     * and long instructions
-     */
-    const sharedInstructionsOptions = {
-      backgroundColor: WebColors.White,
-      nextButtonBackgroundColor: WebColors.Black,
-      backButtonBackgroundColor: WebColors.Black,
-      nextSceneTransition: Transition.slide({
-        direction: TransitionDirection.Left,
-        duration: 500,
-        easing: Easings.sinusoidalInOut,
-      }),
-      backSceneTransition: Transition.slide({
-        direction: TransitionDirection.Right,
-        duration: 500,
-        easing: Easings.sinusoidalInOut,
-      }),
-    };
+    const customInstructions = game.getParameter<InstructionsOptions | null>(
+      "instructions",
+    );
+    if (customInstructions) {
+      instructionsScenes = Instructions.create(customInstructions);
+    } else {
+      /**
+       * sharedInstructionsOptions are what is the the same for short
+       * and long instructions
+       */
+      const sharedInstructionsOptions = {
+        backgroundColor: WebColors.White,
+        nextButtonBackgroundColor: WebColors.Black,
+        backButtonBackgroundColor: WebColors.Black,
+        nextSceneTransition: Transition.slide({
+          direction: TransitionDirection.Left,
+          duration: 500,
+          easing: Easings.sinusoidalInOut,
+        }),
+        backSceneTransition: Transition.slide({
+          direction: TransitionDirection.Right,
+          duration: 500,
+          easing: Easings.sinusoidalInOut,
+        }),
+      };
 
-    switch (game.getParameter("instruction_type")) {
-      case "short": {
-        instructionsScenes = Instructions.create({
-          ...sharedInstructionsOptions,
-          instructionScenes: [
-            {
-              title: "INSTRUCTIONS_TITLE",
-              text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
-              imageName: "ssintroImage",
-              imageAboveText: false,
-              imageMarginTop: 12,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.25,
-              nextButtonText: "START_BUTTON_TEXT",
-              nextButtonBackgroundColor: WebColors.Green,
-            },
-          ],
-        });
-        break;
-      }
-      case "long": {
-        instructionsScenes = Instructions.create({
-          ...sharedInstructionsOptions,
-          instructionScenes: [
-            {
-              title: "INSTRUCTIONS_TITLE",
-              text: "INSTRUCTIONS_TEXT_PAGE_1",
-              imageName: "gameImage",
-              imageAboveText: false,
-              imageMarginTop: 12,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.25,
-              nextButtonText: "NEXT_BUTTON_TEXT",
-            },
-            {
-              title: "INSTRUCTIONS_TITLE",
-              text: "INSTRUCTIONS_TEXT_PAGE_2",
-              imageName: "gameImageOutlinedCards",
-              imageAboveText: false,
-              imageMarginTop: 12,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.25,
-              nextButtonText: "NEXT_BUTTON_TEXT",
-              backButtonText: "BACK_BUTTON_TEXT",
-            },
-            {
-              title: "INSTRUCTIONS_TITLE",
-              text: "INSTRUCTIONS_TEXT_PAGE_3",
-              imageName: "stopwatchImage",
-              imageAboveText: false,
-              imageMarginTop: 48,
-              textFontSize: 24,
-              titleFontSize: 30,
-              textVerticalBias: 0.25,
-              nextButtonText: "START_BUTTON_TEXT",
-              nextButtonBackgroundColor: WebColors.Green,
-              backButtonText: "BACK_BUTTON_TEXT",
-            },
-          ],
-        });
-        break;
-      }
-      default: {
-        throw new Error(
-          `invalid value for instruction_type: ${game.getParameter(
-            "instruction_type",
-          )}`,
-        );
+      switch (game.getParameter("instruction_type")) {
+        case "short": {
+          instructionsScenes = Instructions.create({
+            ...sharedInstructionsOptions,
+            instructionScenes: [
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
+                imageName: "ssintroImage",
+                imageAboveText: false,
+                imageMarginTop: 12,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.25,
+                nextButtonText: "START_BUTTON_TEXT",
+                nextButtonBackgroundColor: WebColors.Green,
+              },
+            ],
+          });
+          break;
+        }
+        case "long": {
+          instructionsScenes = Instructions.create({
+            ...sharedInstructionsOptions,
+            instructionScenes: [
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_1",
+                imageName: "gameImage",
+                imageAboveText: false,
+                imageMarginTop: 12,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.25,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+              },
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_2",
+                imageName: "gameImageOutlinedCards",
+                imageAboveText: false,
+                imageMarginTop: 12,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.25,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT",
+              },
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_3",
+                imageName: "stopwatchImage",
+                imageAboveText: false,
+                imageMarginTop: 48,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.25,
+                nextButtonText: "START_BUTTON_TEXT",
+                nextButtonBackgroundColor: WebColors.Green,
+                backButtonText: "BACK_BUTTON_TEXT",
+              },
+            ],
+          });
+          break;
+        }
+        default: {
+          throw new Error(
+            `invalid value for instruction_type: ${game.getParameter(
+              "instruction_type",
+            )}`,
+          );
+        }
       }
     }
     instructionsScenes[0].onAppear(() => {
@@ -692,7 +708,6 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         this.beginIso8601Timestamp,
       );
     });
-
     game.addScenes(instructionsScenes);
 
     const afterTrialSceneTransition = Transition.slide({

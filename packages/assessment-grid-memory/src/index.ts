@@ -17,7 +17,13 @@ import {
   Sprite,
   Constants,
 } from "@m2c2kit/core";
-import { Button, CountdownScene, Grid, Instructions } from "@m2c2kit/addons";
+import {
+  Button,
+  CountdownScene,
+  Grid,
+  Instructions,
+  InstructionsOptions,
+} from "@m2c2kit/addons";
 
 /**
  * Grid Memory is a visuospatial working memory task, with delayed free
@@ -97,6 +103,12 @@ class GridMemory extends Game {
         type: "string",
         default: "long",
         description: "Type of instructions to show, 'short' or 'long'.",
+      },
+      instructions: {
+        default: null,
+        type: ["object", "null"],
+        description:
+          "When non-null, an InstructionsOptions object that will completely override the built-in instructions.",
       },
       show_quit_button: {
         type: "boolean",
@@ -422,40 +434,49 @@ phase, participants report the location of dots on a grid.",
 
     // ==============================================================
     // SCENES: instructions
-    const instructionsScenes = Instructions.create({
-      instructionScenes: [
-        {
-          title: "Grid Memory",
-          text: `For this activity, try to remember the location of ${NUMBER_OF_DOTS} dots.`,
-          imageName: "grid",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-        },
-        {
-          title: "Grid Memory",
-          text: `Before placing the ${NUMBER_OF_DOTS} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.`,
-          imageName: "fs",
-          imageAboveText: false,
-          imageMarginTop: 12,
-          textFontSize: 24,
-          titleFontSize: 30,
-          textVerticalBias: 0.25,
-        },
-        {
-          title: "Grid Memory",
-          text: "Press START to begin!",
-          textFontSize: 24,
-          titleFontSize: 30,
-          textAlignmentMode: LabelHorizontalAlignmentMode.Center,
-          nextButtonText: "START",
-          nextButtonBackgroundColor: WebColors.Green,
-        },
-      ],
-    });
-    game.addScenes(instructionsScenes);
+
+    let instructionsScenes: Array<Scene>;
+
+    const customInstructions = game.getParameter<InstructionsOptions | null>(
+      "instructions",
+    );
+    if (customInstructions) {
+      instructionsScenes = Instructions.create(customInstructions);
+    } else {
+      instructionsScenes = Instructions.create({
+        instructionScenes: [
+          {
+            title: "Grid Memory",
+            text: `For this activity, try to remember the location of ${NUMBER_OF_DOTS} dots.`,
+            imageName: "grid",
+            imageAboveText: false,
+            imageMarginTop: 12,
+            textFontSize: 24,
+            titleFontSize: 30,
+            textVerticalBias: 0.25,
+          },
+          {
+            title: "Grid Memory",
+            text: `Before placing the ${NUMBER_OF_DOTS} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.`,
+            imageName: "fs",
+            imageAboveText: false,
+            imageMarginTop: 12,
+            textFontSize: 24,
+            titleFontSize: 30,
+            textVerticalBias: 0.25,
+          },
+          {
+            title: "Grid Memory",
+            text: "Press START to begin!",
+            textFontSize: 24,
+            titleFontSize: 30,
+            textAlignmentMode: LabelHorizontalAlignmentMode.Center,
+            nextButtonText: "START",
+            nextButtonBackgroundColor: WebColors.Green,
+          },
+        ],
+      });
+    }
     instructionsScenes[0].onAppear(() => {
       // in case user quits before starting trial, record the timestamp
       game.addTrialData(
@@ -463,6 +484,7 @@ phase, participants report the location of dots on a grid.",
         this.beginIso8601Timestamp,
       );
     });
+    game.addScenes(instructionsScenes);
 
     let forward_into_interference_scene_transition: Transition | undefined;
     let back_from_interference_scene_transition: Transition | undefined;
