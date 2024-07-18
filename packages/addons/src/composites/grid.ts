@@ -390,25 +390,22 @@ export class Grid extends Composite implements GridOptions {
     this.needsInitialization = true;
 
     /**
-     * When in record mode, save the gridChildren property change event.
-     * The node of the gridChild is not serializable, so we can't pass
-     * the gridChildren object directly to savePropertyChangeEvent. Instead,
-     * we pass in a SerializedGridChild object, which has the node's uuid
-     * in the node property.
+     * Save the gridChildren property change event. The gridChild node is not
+     * serializable, so we can't pass the gridChildren object directly to
+     * savePropertyChangeEvent. Instead, we pass in the SerializedGridChild
+     * objects, which have the node's uuid in the node property.
      */
-    if (this.game.eventStore.mode === EventStoreMode.Record) {
-      this.savePropertyChangeEvent(
-        "gridChildren",
-        this.gridChildren.map(
-          (gridChild) =>
-            ({
-              node: gridChild.node.uuid,
-              row: gridChild.row,
-              column: gridChild.column,
-            }) as SerializedGridChild,
-        ),
-      );
-    }
+    this.savePropertyChangeEvent(
+      "gridChildren",
+      this.gridChildren.map(
+        (gridChild) =>
+          ({
+            node: gridChild.node.uuid,
+            row: gridChild.row,
+            column: gridChild.column,
+          }) as SerializedGridChild,
+      ),
+    );
   }
 
   /**
