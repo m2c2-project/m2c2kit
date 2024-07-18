@@ -4,6 +4,157 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.19] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+- in `SlideTransitionOptions`, the `easing` parameter now also accepts a string identifier of the easing function, in addition to an easing function.
+- The global variables object is now named `m2c2Globals`, instead of `Globals`, to avoid potential naming conflicts. `M2Event` interface now has `timestamp`, `iso8601Timestamp` and `sequence` properties. The global object `m2c2Globals` has an `eventSequence` property that returns an auto-incrementing number (for internal use in event replay).
+- `Game.presentScene()` now also accepts the scene UUID (for internal use in event replay).
+
+### Added
+
+- Begin to implement event recording and replay. This involves many internal changes, but they should not affect library users. These new classes include `EventStore`, `EventMaterializer`, and `M2NodeFactory`. `M2c2KitHelpers.registerM2NodeClass()` registers nodes so they can be instantiated from events. Nodes have been modified so that they now emit events for instantiation and property changes. Other game events are also emitted, e.g., scene present, i18n configuration, and image data being ready.
+- `GameOptions` now has options for showing controls for replaying events from the event store and recording events to the event store. Default is `false` on both.
+- For better checking of equality for property change events, a new `Equal` class was created, which has methods that check for deep equality. The `Equals` class is now marked as deprecated.
+
+## `@m2c2kit/addons` [0.3.16] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+- A breaking change is that to remove a grid child or all grid children, new `Grid.removeGridChild()` and `Grid.removeAllGridChildren()` must now be used. A warning will go to the log if any of the base (`M2Node`) child methods are used on the `Grid`, since these are likely mistakes.
+- A breaking change is that a `Grid` cannot be nested in another `Grid`. This will be fixed in a future release.
+- A breaking change is that you can no longer add a grid child outside the bounds of the `Grid`, e.g., on a 2 x 2 grid, you cannot add a child at (4, 3). This was allowed in the past, but it is now an error.
+- Composites become much more complicated in order to support the event store. These will be internal changes that are not exposed to the library user, but are necessary for the event store to work correctly. Specifically, if a composite has internal state that can be changed, these changes need to be serialized into events that the composite must now emit and ingest. This has been completed for `VirtualKeyboard` and `Grid`, but other composites will need to be updated to work with event replay.
+
+### Added
+
+- a `VirtualKeyboardOnKeyLeave` event to handle when a user press down on a key, but then moves the pointer outside the key bounds.
+- For a `Composite` to support event replay, it must register itself with `M2c2KitHelpers.registerM2NodeClass()`.
+
+## `@m2c2kit/session` [0.3.2] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.6] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.16] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.16] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.12] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.16] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.14] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.14] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.9] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+### Added
+
+- For output format `json-schema`, the `schema-util` can now output all schemas (`GameParameters` and `TrialSchema`) into a single JSON Schema with option `--schema=all`
+
+## `@m2c2kit/assessment-symbol-search` [0.8.17] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+- Updated de-DE instruction images and translation.
+
+### Added
+
+- `instructions` game parameter to allow for custom instructions.
+- Build script will extract all game schemas and place them in `schemas.json`.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.17] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+### Added
+
+- `instructions` game parameter to allow for custom instructions.
+- Build script will extract all game schemas and place them in `schemas.json`.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.17] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+### Added
+
+- `instructions` game parameter to allow for custom instructions.
+- Build script will extract all game schemas and place them in `schemas.json`.
+
+## `@m2c2kit/assessment-color-dots` [0.8.17] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+### Added
+
+- `instructions` game parameter to allow for custom instructions.
+- Build script will extract all game schemas and place them in `schemas.json`.
+
+## `@m2c2kit/assessments-demo` [0.8.14] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.16] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.14] - 2024-07-18
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.18] - 2024-06-18
 
 ### Added

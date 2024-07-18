@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/build-helpers",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "Utility functions for building m2c2kit apps",
   "main": "dist/index.js",
   "module": "dist/index.js",

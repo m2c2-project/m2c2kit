@@ -1,0 +1,34 @@
+{
+  "versionGroups": [
+    {
+      "label": "@m2c2kit/session uses @m2c2kit/core 0.3.19 and later",
+      "packages": ["@m2c2kit/session"],
+      "dependencies": ["@m2c2kit/core"],
+      "pinVersion": "^0.3.19"
+    },
+    {
+      "label": "@m2c2kit/physics uses @m2c2kit/core 0.3.19 and later",
+      "packages": ["@m2c2kit/physics"],
+      "dependencies": ["@m2c2kit/core"],
+      "pinVersion": "^0.3.19"
+    },
+    {
+      "label": "@m2c2kit/db uses @m2c2kit/core 0.3.19 and later",
+      "packages": ["@m2c2kit/db"],
+      "dependencies": ["@m2c2kit/core"],
+      "pinVersion": "^0.3.19"
+    },
+    {
+      "label": "@m2c2kit/embedding uses @m2c2kit/core 0.3.19 and later",
+      "packages": ["@m2c2kit/embedding"],
+      "dependencies": ["@m2c2kit/core"],
+      "pinVersion": "^0.3.19"
+    },
+    {
+      "label": "@m2c2kit/embedding uses @m2c2kit/session 0.3.2 and later",
+      "packages": ["@m2c2kit/embedding"],
+      "dependencies": ["@m2c2kit/session"],
+      "pinVersion": "^0.3.2"
+    }
+  ]
+}
