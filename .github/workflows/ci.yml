@@ -52,12 +52,14 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Test
-        run: npm run test
+      # No need to run tests here because they will be run as part of the "Integration test" next step (see repo root Dockerfile, "RUN npm test")
+      #- name: Test
+      #  run: npm run test
       - name: Integration test
         run: npm run integration-test
         timeout-minutes: 15
       - name: Publish updated packages
+        # only packages explicitly named in scripts/publish-updated-packages.mjs will be published
         run: npm run publish-updated
         # publish-updated will set an environment variable to indicate if 1) there were updated packages, and 2) all updated packages were successfully published to the registry
       - name: Build docs
