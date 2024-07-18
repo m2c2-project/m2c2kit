@@ -150,7 +150,6 @@ export class EventMaterializer {
         `EventMaterializer: composite node of type ${event.compositeType} with uuid ${event.target} not found when handling CompositeEvent ${event.compositeEventType}`,
       );
     } else {
-      console.log(`calling handleCompositeEvent on composite node`);
       if (node.type === M2NodeType.Composite) {
         (node as Composite).handleCompositeEvent(event as CompositeEvent);
       } else {
