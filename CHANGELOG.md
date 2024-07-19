@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/addons` [0.3.17] - 2024-07-18
+
+### Fixed
+
+- `Grid` handles nesting properly again.
+
+### Added
+
+- `CountdownTimer` is a `Composite` that counts down to zero.
+
+### Changed
+
+- To align `CountdownSceneOptions` with `CountdownTimerOptions`, `timerShape.verticalBias` property in `CountdownSceneOptions` has been moved to `CountdownSceneOptions.shapeVerticalBias`. `CountdownSceneOptions.timerZeroString` is renamed to `CountdownSceneOptions.zeroString`.
+
 ## `@m2c2kit/core` [0.3.19] - 2024-07-18
 
 ### Changed
