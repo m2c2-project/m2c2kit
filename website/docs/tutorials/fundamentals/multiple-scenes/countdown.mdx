@@ -74,14 +74,15 @@ const countdownScene = new CountdownScene({
     transition: Transition.none(),
     // pause for 500 milliseconds at zero
     zeroDwellMilliseconds: 500,
-    // red rectangle, 1/4 from top
+    // red rectangle
     timerShape: {
         rectangle: {
             width: 200, height: 100
         },
-        fillColor: WebColors.Red,
-        verticalBias: .25
+        fillColor: WebColors.Red
     },
+    // 1/4 from top of scene
+    shapeVerticalBias: .25,
     // bigger margin from timer to text
     textMarginTop: 128,
     text: "No slide transition!",

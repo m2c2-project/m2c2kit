@@ -10,6 +10,7 @@ import {
   RgbaColor,
   WebColors,
 } from "@m2c2kit/core";
+import { TimerShape } from "../composites/countdown-timer";
 
 const SCENE_TRANSITION_EASING = Easings.sinusoidalInOut;
 const SCENE_TRANSITION_DURATION_MS = 500;
@@ -40,28 +41,11 @@ export interface CountdownSceneOptions extends SceneOptions {
   /** Font size for timer numbers. Default is white. */
   timerNumbersFontColor?: RgbaColor;
   /** String to show when the timer reaches zero. Default is "0". This could be changed to another value, such as "GO!" */
-  timerZeroString?: string;
+  zeroString?: string;
   /** Shape of the timer. Default is a Royal Blue circle with a radius of 100 centered vertically. */
   timerShape?: TimerShape;
-}
-
-export interface TimerShape {
-  circle?: {
-    /** Radius of the circle timer shape. */
-    radius: number;
-  };
-  rectangle?: {
-    /** Width of the rectangle timer shape. */
-    width: number;
-    /** Height of the rectangle timer shape. */
-    height: number;
-    /** Corner radius of the rectangle timer shape. Default is 0. */
-    cornerRadius?: number;
-  };
-  /** Color of the timer shape. Default is Royal Blue. */
-  fillColor?: RgbaColor;
   /** Default is to center the timer shape vertically within the scene (verticalBias = .5). Setting verticalBias less than .5 will pull the shape towards the top. Setting verticalBias greater than .5 will pull the shape towards the bottom. */
-  verticalBias?: number;
+  shapeVerticalBias?: number;
 }
 
 export class CountdownScene extends Scene {
@@ -97,7 +81,7 @@ export class CountdownScene extends Scene {
             bottomToBottomOf: this,
             startToStartOf: this,
             endToEndOf: this,
-            verticalBias: options?.timerShape?.verticalBias ?? 0.5,
+            verticalBias: options?.shapeVerticalBias ?? 0.5,
           },
         },
         fillColor: options?.timerShape?.fillColor ?? WebColors.RoyalBlue,
@@ -116,7 +100,7 @@ export class CountdownScene extends Scene {
             bottomToBottomOf: this,
             startToStartOf: this,
             endToEndOf: this,
-            verticalBias: options?.timerShape?.verticalBias ?? 0.5,
+            verticalBias: options.shapeVerticalBias ?? 0.5,
           },
         },
         fillColor: options?.timerShape?.fillColor ?? WebColors.RoyalBlue,
@@ -170,7 +154,7 @@ export class CountdownScene extends Scene {
     countdownSequence.push(
       Action.custom({
         callback: () => {
-          timerNumberLabel.text = options?.timerZeroString ?? "0";
+          timerNumberLabel.text = options?.zeroString ?? "0";
         },
       }),
     );
