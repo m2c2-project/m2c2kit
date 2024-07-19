@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/addons` [0.3.18] - 2024-07-19
+
+### Fixed
+
+- `CountdownTimer` works in event replay and correctly handles property changes.
+
+### Added
+
+- `CountdownTimer` now has a `reset()` method to reset the timer to its initial state so it can be started again.
+
 ## `@m2c2kit/addons` [0.3.17] - 2024-07-18
 
 ### Fixed

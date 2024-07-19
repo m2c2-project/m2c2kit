@@ -138,6 +138,8 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
 
   override initialize(): void {
     this.removeAllChildren();
+    this._isRunning = false;
+    this.hasStopped = false;
 
     if (
       (this.timerShape?.circle === undefined &&
@@ -147,6 +149,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       this.timerShapeNode = new Shape({
         circleOfRadius: this.timerShape.circle?.radius ?? 100,
         fillColor: this.timerShape?.fillColor ?? WebColors.RoyalBlue,
+        suppressEvents: true,
       });
       this.addChild(this.timerShapeNode);
     } else if (this.timerShape?.rectangle !== undefined) {
@@ -157,6 +160,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
         },
         cornerRadius: this.timerShape?.rectangle?.cornerRadius,
         fillColor: this.timerShape?.fillColor ?? WebColors.RoyalBlue,
+        suppressEvents: true,
       });
       this.addChild(this.timerShapeNode);
     } else {
@@ -185,6 +189,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
           verticalBias: this.textVerticalBias,
         },
       },
+      suppressEvents: true,
     });
     this.timerShapeNode.addChild(this.timerNumberLabel);
 
@@ -273,8 +278,8 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
   /**
    * Starts the countdown timer.
    *
-   * @remarks Calling start on a running timer or a stopped timer will raise
-   * an error.
+   * @remarks Calling `start()` on a timer whose state is running (already started)
+   * or stopped will raise an error.
    */
   start() {
     if (this.isRunning) {
@@ -282,8 +287,15 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
     }
     if (this.hasStopped) {
       throw new Error(
-        "CountdownTimer: It has stopped. You cannot start a stopped CountdownTimer. Instead, create a new CountdownTimer.",
+        "CountdownTimer: It has stopped. You cannot start a stopped CountdownTimer. Instead, create a new CountdownTimer or call CountdownTimer.reset() before starting.",
       );
+    }
+    /**
+     * If the user calls start() and the timer has not yet been initialized as
+     * part of the composite lifecycle, then initialize it.
+     */
+    if (this.needsInitialization) {
+      this.initialize();
     }
     this.run(
       Action.sequence(this.countdownSequence),
@@ -295,8 +307,9 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
   /**
    * Stops the countdown timer.
    *
-   * @remarks This method is idempotent. Calling stop() on a stopped timer has
-   * no effect and will not raise an error.
+   * @remarks This method is idempotent. Calling `stop()` on a stopped timer
+   * has no effect and will not raise an error. This can be called on a
+   * CountdownTimer in any state.
    */
   stop() {
     if (this.isRunning) {
@@ -304,6 +317,18 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       this._isRunning = false;
       this.hasStopped = true;
     }
+  }
+
+  /**
+   * Resets the countdown timer to its initial state so it can be started
+   * again.
+   *
+   * @remarks This method is idempotent. Calling reset() multiple times will
+   * not raise an error. This can be called on a CountdownTimer in any state.
+   */
+  reset() {
+    this.stop();
+    this.initialize();
   }
 
   /**
@@ -407,6 +432,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       return;
     }
     this._milliseconds = milliseconds;
+    this.needsInitialization = true;
     this.savePropertyChangeEvent("milliseconds", milliseconds);
   }
 
@@ -418,6 +444,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       return;
     }
     this._tickIntervalMilliseconds = tickIntervalMilliseconds;
+    this.needsInitialization = true;
     this.savePropertyChangeEvent(
       "tickIntervalMilliseconds",
       tickIntervalMilliseconds,
@@ -468,6 +495,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       return;
     }
     this._zeroString = zeroString;
+    this.needsInitialization = true;
     this.savePropertyChangeEvent("zeroString", zeroString);
   }
 
@@ -479,6 +507,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       return;
     }
     this._timerShape = shape;
+    this.needsInitialization = true;
     this.savePropertyChangeEvent("timerShape", shape);
   }
 
@@ -490,6 +519,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       return;
     }
     this._textVerticalBias = textVerticalBias;
+    this.needsInitialization = true;
     this.savePropertyChangeEvent("textVerticalBias", textVerticalBias);
   }
 
