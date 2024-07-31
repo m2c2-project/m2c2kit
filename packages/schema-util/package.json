@@ -7,6 +7,9 @@
   "bin": {
     "schema-util": "./build/index.js"
   },
+  "files": [
+    "build/**"
+  ],
   "devDependencies": {
     "@types/findup-sync": "4.0.5",
     "@types/node": "20.14.11",

@@ -11,8 +11,8 @@
     }
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts"
+    "dist/**",
+    "assets/**"
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",

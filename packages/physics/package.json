@@ -11,8 +11,7 @@
     }
   },
   "files": [
-    "dist/**",
-    "metadata.json"
+    "dist/**"
   ],
   "scripts": {
     "build": "npm run clean && tsc --build && rollup -c",
