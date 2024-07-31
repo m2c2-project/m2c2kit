@@ -221,8 +221,9 @@ function generateModulePackageJson(name: string) {
   "private": true,
   "scripts": {
     "serve": "concurrently \\"rollup -c rollup.config.runner.mjs --watch --configServe\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rollup,typescript --prefix-colors auto,red",
-    "build": "npm run clean && tsc && rollup -c --configProd --configNoHash",
-    "clean": "rimraf runner-build dist .rollup.cache tsconfig.tsbuildinfo"
+    "build": "npm run clean && tsc && rollup -c --configProd --configNoHash && npm run schemas",
+    "schemas": "schema-util list --schema=all --files=src/index.ts --format=json-schema --title=\\"${strings.dasherize(name)} version __VERSION__\\" > schemas.json",    
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -236,7 +237,8 @@ function generateModulePackageJson(name: string) {
   },
   "files": [
     "dist/**",
-    "assets/**"
+    "assets/**",
+    "schemas.json"
   ],
   "dependencies": {
     "@m2c2kit/core": "${Constants.M2C2KIT_CORE_PACKAGE_VERSION}",
@@ -245,6 +247,7 @@ function generateModulePackageJson(name: string) {
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
+    "@m2c2kit/schema-util": "${Constants.M2C2KIT_SCHEMA_UTIL_PACKAGE_VERSION}",
     "@rollup/plugin-node-resolve": "${Constants.ROLLUP_PLUGIN_NODE_RESOLVE_VERSION}",
     "concurrently": "${Constants.CONCURRENTLY_VERSION}",
     "esbuild": "${Constants.ESBUILD_VERSION}",

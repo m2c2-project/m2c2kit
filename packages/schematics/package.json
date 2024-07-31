@@ -7,6 +7,9 @@
     "schematics"
   ],
   "schematics": "./src/collection.json",
+  "files": [
+    "src/**"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json && node ./scripts/add-version-string.mjs",
     "test": "npm run build && jasmine src/**/*_spec.js"

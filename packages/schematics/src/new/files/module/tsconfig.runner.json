@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "runner-build",
+    "outDir": "build",
     "declarationMap": true,
     "sourceMap": true
   },

@@ -65,7 +65,7 @@ export function zip(): Rule {
       ...distFiles,
       pathFragmentInRoot("README.md"),
       pathFragmentInRoot("LICENSE"),
-      pathFragmentInRoot("metadata.json"),
+      pathFragmentInRoot("schemas.json"),
       packageJsonPathFragment,
     ].filter(Boolean) as string[];
 

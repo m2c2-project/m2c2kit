@@ -14,7 +14,7 @@ export default (commandLineArgs) => {
       input: "./src/runner.ts",
       output: [
         {
-          file: `./runner-build/index.js`,
+          file: `./build/index.js`,
           format: "es",
           sourcemap: true,
         },
@@ -25,7 +25,7 @@ export default (commandLineArgs) => {
           tsconfig: "tsconfig.runner.json",
         }),
         copyAssets({ id: "<%= dasherize(appName) %>",
-          outputFolder: "./runner-build" }),
+          outputFolder: "./build" }),
           serve({
             /**
              * Start development server and automatically open browser with
@@ -35,7 +35,7 @@ export default (commandLineArgs) => {
              */
             open: commandLineArgs.configOpen && true,
             verbose: true,
-            contentBase: ["./runner-build"],
+            contentBase: ["./build"],
             historyApiFallback: true,
             host: "localhost",
             port: port,
@@ -44,7 +44,7 @@ export default (commandLineArgs) => {
            * Try a shorter delay for quicker reloads, but increase it if
            * the browser reloads before the new build is fully ready.
            */
-          livereload({ watch: "runner-build", delay: 250 }),
+          livereload({ watch: "build", delay: 250 }),
       ],
     },
   ];

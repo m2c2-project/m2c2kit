@@ -1,6 +1,7 @@
 # build artifacts
 dist
 build
+schemas.json
 
 # Dependency directories
 node_modules

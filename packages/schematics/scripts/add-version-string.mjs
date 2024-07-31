@@ -39,6 +39,10 @@ const m2c2kitReplacePatterns = [
     pattern: "__M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION__",
     packageJsonPath: path.join(__dirname, "../../build-helpers/package.json"),
   },
+  {
+    pattern: "__M2C2KIT_SCHEMA_UTIL_PACKAGE_VERSION__",
+    packageJsonPath: path.join(__dirname, "../../schema-util/package.json"),
+  },
 ];
 
 m2c2kitReplacePatterns.forEach(({ pattern, packageJsonPath }) => {
