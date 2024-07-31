@@ -8,6 +8,7 @@
     "schema-util": "./build/index.js"
   },
   "devDependencies": {
+    "@types/findup-sync": "4.0.5",
     "@types/node": "20.14.11",
     "esbuild": "0.23.0"
   },
@@ -28,6 +29,7 @@
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
     "csv": "6.3.9",
+    "findup-sync": "5.0.0",
     "ts-morph": "23.0.0",
     "yargs": "17.7.2"
   },

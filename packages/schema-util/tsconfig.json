@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "node16",
+    "target": "ES2022",
+    "module": "Node16",
     "strict": true,
     "moduleResolution": "node16",
     "esModuleInterop": true,

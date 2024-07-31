@@ -10,6 +10,7 @@ import fs from "fs";
 import "process";
 import { EOL } from "os";
 import child_process from "child_process";
+import findupSync from "findup-sync";
 
 let shortCommitHash: string;
 try {
@@ -60,15 +61,14 @@ yargs(hideBin(process.argv))
           (argv.schema as string).toLowerCase() === "all"
         ) {
           trialSchema = getSchemaFromSourceFile(f, "TrialSchema");
+          let automaticTrialSchema: object;
           if (!argv["game-class"]) {
-            process.stderr.write(
-              "--game-class option is required for TrialSchema",
+            automaticTrialSchema = getAutomaticTrialSchemaFromCorePackage();
+          } else {
+            automaticTrialSchema = getAutomaticTrialSchemaFromSourceFile(
+              argv["game-class"].toString(),
             );
-            process.exit(1);
           }
-          const automaticTrialSchema = getAutomaticTrialSchemaFromSourceFile(
-            argv["game-class"].toString(),
-          );
           trialSchema = { ...automaticTrialSchema, ...trialSchema };
         }
         if (
@@ -218,7 +218,7 @@ yargs(hideBin(process.argv))
   .option("game-class", {
     type: "string",
     description:
-      "Game.ts assessment source. Required for --schema=TrialSchema and --schema=all",
+      "Game.ts assessment source. Used for --schema=TrialSchema and --schema=all. If it is not provided, the @m2c2kit/core JavaScript bundle will automatically be located and used",
   })
   .option("format", {
     type: "string",
@@ -232,6 +232,50 @@ yargs(hideBin(process.argv))
   })
   .demandCommand(1, "You need at least one command")
   .parse();
+
+function getAutomaticTrialSchemaFromCorePackage() {
+  const coreBundle = findupSync("node_modules/@m2c2kit/core/dist/index.js");
+  if (!coreBundle) {
+    process.stderr.write(
+      "Could not resolve @m2c2kit/core package. This is required if --game-class is omitted.",
+    );
+    process.exit(1);
+  }
+
+  const project = new Project();
+  const file = project.addSourceFileAtPath(coreBundle);
+  const gameClass = file
+    .getClasses()
+    .filter((c) => c.getName() === "Game")
+    .find(Boolean);
+  if (!gameClass) {
+    process.stderr.write(`No Game class found in ${coreBundle}` + EOL);
+    process.exit(1);
+  }
+
+  const binaryExpression = gameClass
+    .getDescendantsOfKind(SyntaxKind.BinaryExpression)
+    .filter((d) => d.getLeft().getText() === "this.automaticTrialSchema")
+    .find(Boolean);
+  if (!binaryExpression) {
+    process.stderr.write(
+      "No automaticTrialSchema property found in file " + coreBundle,
+    );
+    process.exit(1);
+  }
+
+  const rightExpression = binaryExpression.getRight();
+  if (rightExpression.getKind() === SyntaxKind.ObjectLiteralExpression) {
+    const schemaString = rightExpression.getText();
+    const schema = eval("(" + schemaString + ")");
+    return schema as object;
+  }
+
+  process.stderr.write(
+    `Could not get automaticTrialSchema from file ${coreBundle}` + EOL,
+  );
+  process.exit(1);
+}
 
 function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
   const project = new Project();
@@ -258,7 +302,7 @@ function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
     .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
     .getText();
   const schema = eval("(" + schemaString + ")");
-  return schema;
+  return schema as object;
 }
 
 function getSchemaFromSourceFile(
