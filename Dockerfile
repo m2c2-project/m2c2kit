@@ -25,6 +25,18 @@ ENV NODE_OPTIONS=--max_old_space_size=4096
 
 RUN npm ci
 RUN npx playwright install --with-deps chromium
+
+# Outside of a container, the next two lines are not needed. When running in
+# this container, however, we need to build the schema-util package and
+# install it in the monorepo root beforehand for schema-util to be found and
+# executed. Otherwise, we get an error "could not determine executable to run"
+# when running npm scripts that use schema-util as part of the overall
+# monorepo build. This may be related to issues when running npm commands as
+# root, see https://github.com/npm/cli/issues/3773 and
+# https://github.com/npm/rfcs/issues/546
+RUN npm run build -w @m2c2kit/schema-util
+RUN npm install -E -D @m2c2kit/schema-util
+
 RUN npm run build
 RUN npm test
 RUN chmod +x scripts/wait-for-it.sh
