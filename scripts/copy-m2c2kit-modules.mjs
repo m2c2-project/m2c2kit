@@ -36,7 +36,7 @@ await Promise.all(
           [
             `packages/${pkg}/README.md*`,
             `packages/${pkg}/LICENSE*`,
-            `packages/${pkg}/metadata.json*`,
+            `packages/${pkg}/schemas.json*`,
           ],
           `examples/no-js-bundler-development/modules/@m2c2kit/${pkg}`,
         ),

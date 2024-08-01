@@ -6,9 +6,10 @@
   },
   "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
   "scripts": {
-    "build": "npm run clean && tsc && rollup -c && npm run extract-schemas",
-    "extract-schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" --game-class=../core/src/Game.ts > schemas.json",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
+    "build": "npm run clean && tsc && rollup -c && npm run schemas",
+    "serve": "concurrently \"rollup -c rollup.config.runner.mjs --watch --configServe\" \"tsc --project tsconfig.runner.json --watch\" --names rollup,typescript --prefix-colors auto,red",
+    "schemas": "schema-util list --schema=all --files=src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" > schemas.json",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -21,11 +22,9 @@
     }
   },
   "files": [
-    "dist",
-    "!*.d.ts.map",
-    "assets",
-    "schemas.json",
-    "metadata.json"
+    "dist/**",
+    "assets/**",
+    "schemas.json"
   ],
   "license": "MIT",
   "author": {
@@ -39,11 +38,12 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.16",
+    "@m2c2kit/addons": "0.3.18",
     "@m2c2kit/core": "0.3.19"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.16",
+    "@m2c2kit/session": "0.3.2",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.7",
     "rimraf": "6.0.1",

@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "references": [{ "path": "../core" }, { "path": "../addons" }],
   "include": ["src"],
+  "exclude": ["src/runner.ts"],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"
