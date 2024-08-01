@@ -17,6 +17,9 @@ export interface GlobalVariables {
   rootScale: number;
   canvasCssWidth: number;
   canvasCssHeight: number;
+  erudaRequested?: boolean;
+  erudaInitialized?: boolean;
+  addedScriptUrls: string[];
   /**
    * A dictionary of all `M2Node` classes that have been registered.
    * This is used to instantiate `M2Node` objects from their class name.
@@ -47,6 +50,7 @@ function initializeGlobalVariables() {
       m2c2Globals.__sequence++;
       return m2c2Globals.__sequence - 1;
     },
+    addedScriptUrls: [],
   };
 }
 

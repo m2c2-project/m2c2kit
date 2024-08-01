@@ -42,4 +42,6 @@ export class Constants {
     dependencies: {},
   };
   public static readonly DEFAULT_ROOT_ELEMENT_ID = "m2c2kit";
+  public static readonly ERUDA_URL =
+    "https://cdn.jsdelivr.net/npm/eruda@3.2.1/eruda.js";
 }

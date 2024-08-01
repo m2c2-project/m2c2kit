@@ -184,6 +184,11 @@ export class Game implements Activity {
         dependencies: {},
       };
     }
+    if (options.moduleMetadata?.name && options.version) {
+      console.log(
+        `⚪ ${options.moduleMetadata.name} version ${options.version}`,
+      );
+    }
   }
 
   private createFreeNodesScene() {
@@ -342,7 +347,31 @@ export class Game implements Activity {
     } as I18nDataReadyEvent);
   }
 
+  private async waitForErudaInitialization(maxWaitDurationMs = 5000) {
+    await new Promise((resolve) => {
+      let cumulativeWaitTime = 0;
+      const intervalId = setInterval(() => {
+        if (m2c2Globals.erudaInitialized === true) {
+          clearInterval(intervalId);
+          resolve(void 0);
+        }
+        cumulativeWaitTime = cumulativeWaitTime + 100;
+        if (cumulativeWaitTime > maxWaitDurationMs) {
+          console.warn(
+            `Could not initialize eruda within ${maxWaitDurationMs} milliseconds.`,
+          );
+          clearInterval(intervalId);
+          resolve(void 0);
+        }
+      }, 100);
+    });
+  }
+
   async initialize() {
+    if (m2c2Globals.erudaRequested === true) {
+      await this.waitForErudaInitialization();
+    }
+
     if (this.options.recordEvents === true) {
       this.eventStore.mode = EventStoreMode.Record;
     }
@@ -715,6 +744,37 @@ export class Game implements Activity {
     const { parameters } = this.options;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.keys(additionalParameters as any).forEach((key) => {
+      /**
+       * The parameter "eruda" is a special case. It is for loading the eruda
+       * debugging console, and it will not be added to the game's parameters.
+       */
+      if (key === "eruda") {
+        const erudaRequested =
+          (additionalParameters as { [key: string]: boolean })[key] === true;
+        if (erudaRequested) {
+          M2c2KitHelpers.loadEruda();
+        }
+        return;
+      }
+
+      /**
+       * The parameter "scripts" is a special case. It is for loading arbitrary
+       * scripts (when debugging, testing), and it will not be added to the
+       * game's parameters. "scripts" must be an array of URL strings. If
+       * "scripts" has come from a URL query parameter, it must have been
+       * previously decoded/deserialized by decodeURIComponent() and
+       * JSON.parse().
+       */
+      if (key === "scripts") {
+        const scriptUrls = (
+          additionalParameters as { [key: string]: string[] }
+        )[key];
+        if (scriptUrls) {
+          M2c2KitHelpers.loadScriptUrls(scriptUrls);
+        }
+        return;
+      }
+
       if (!parameters || !(key in parameters)) {
         console.warn(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

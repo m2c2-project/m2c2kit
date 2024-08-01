@@ -9,6 +9,7 @@ import { BoundingBox } from "./BoundingBox";
 import { Game } from "./Game";
 import { M2NodeConstructor } from "./M2NodeConstructor";
 import { Timer } from "./Timer";
+import { Constants } from "./Constants";
 
 interface RotationTransform {
   /** Counterclockwise radians of the rotation */
@@ -45,6 +46,88 @@ export class M2c2KitHelpers {
    */
   static urlHasScheme(url: string): boolean {
     return /^[a-z]+:\/\//i.test(url);
+  }
+
+  /**
+   * Load scripts from URLs.
+   *
+   * @remarks This is for debugging purposes only. If this is unwanted, it
+   * can be disabled on the server side with an appropriate Content
+   * Security Policy (CSP) header.
+   *
+   * @param urls - URLs with scripts to load
+   */
+  static loadScriptUrls(urls: string[]) {
+    // warn if scripts is not an array of string
+    if (!Array.isArray(urls) || !urls.every((s) => typeof s === "string")) {
+      console.warn(
+        `Error parsing "scripts" parameter. "scripts" must be an array of URL strings, and it is recommended to be URI encoded.`,
+      );
+      return;
+    }
+
+    urls.forEach((url) => {
+      if (!m2c2Globals.addedScriptUrls.includes(url)) {
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        document.head.appendChild(script);
+        console.log(`⚪ added script: ${url}`);
+        m2c2Globals.addedScriptUrls.push(url);
+      }
+    });
+  }
+
+  /**
+   * Loads eruda from a CDN and initializes it.
+   *
+   * @remarks This is for debugging purposes only. If this is unwanted, it
+   * can be disabled on the server side with an appropriate Content
+   * Security Policy (CSP) header.
+   * eruda is a dev console overlay for mobile web browsers and web views.
+   * see https://github.com/liriliri/eruda
+   *
+   * @param pollingIntervalMs - milliseconds between each attempt
+   * @param maxAttempts - how many attempts to make
+   */
+  static loadEruda(pollingIntervalMs = 100, maxAttempts = 50) {
+    // Don't request eruda more than once
+    if (m2c2Globals.erudaRequested === true) {
+      return;
+    }
+    console.log(`⚪ added eruda script: ${Constants.ERUDA_URL}`);
+
+    const script = document.createElement("script");
+    script.src = Constants.ERUDA_URL;
+    script.async = true;
+    document.head.appendChild(script);
+    m2c2Globals.erudaRequested = true;
+
+    let attempts = 0;
+    const waitForEruda = () => {
+      const eruda = (
+        window as unknown as {
+          eruda:
+            | {
+                init: () => void;
+              }
+            | undefined;
+        }
+      )?.eruda;
+      if (typeof eruda !== "undefined") {
+        console.log("⚪ eruda ready");
+        eruda.init();
+        m2c2Globals.erudaInitialized = true;
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(waitForEruda, pollingIntervalMs);
+      } else {
+        console.log(
+          `eruda was requested, but could not be loaded after ${pollingIntervalMs * maxAttempts} milliseconds.`,
+        );
+      }
+    };
+    waitForEruda();
   }
 
   /**

@@ -73,6 +73,39 @@ export class Session {
         });
       }
     }
+
+    // Make session also available on window in case we want to control or inspect it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as unknown as any).m2c2kitSession = this;
+
+    this.addDebuggingTools();
+  }
+
+  /**
+   * Adds debugging tools to the session.
+   *
+   * @remarks These tools can be added by appending query parameters to the
+   * URL or by setting game parameters via the Game.SetParameters() method.
+   */
+  private addDebuggingTools() {
+    if (/eruda=true/.test(window.location.href)) {
+      M2c2KitHelpers.loadEruda();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const scriptsParam = urlParams.get("scripts");
+    if (scriptsParam) {
+      try {
+        const scripts = JSON.parse(
+          decodeURIComponent(scriptsParam),
+        ) as string[];
+        M2c2KitHelpers.loadScriptUrls(scripts);
+      } catch {
+        console.log(
+          `Error parsing "scripts" parameter. "scripts" must be an array of URL strings, and it is recommended to be URI encoded.`,
+        );
+      }
+    }
   }
 
   /**
