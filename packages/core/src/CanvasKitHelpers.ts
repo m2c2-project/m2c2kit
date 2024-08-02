@@ -13,6 +13,7 @@ import {
 } from "canvaskit-wasm";
 import { RgbaColor } from "./RgbaColor";
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class CanvasKitHelpers {
   /**
    * Frees up resources that were allocated by CanvasKit.

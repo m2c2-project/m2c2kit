@@ -6,11 +6,8 @@
 import { Session } from "@m2c2kit/session";
 import { SymbolSearch } from "./index";
 
-const s = new SymbolSearch();
-//s.setParameters({ eruda: true, scripts: ["http://localhost:4000/target.js"]})
-
 const session = new Session({
-  activities: [s],
+  activities: [new SymbolSearch()],
 });
 
 session.onActivityData((ev) => {

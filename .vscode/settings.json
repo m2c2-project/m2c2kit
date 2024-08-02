@@ -40,6 +40,8 @@
     "LTRB",
     "Materializer",
     "Materializers",
+    "stroop",
+    "tseslint",
     "Unpremul",
     "unshifted"
   ]

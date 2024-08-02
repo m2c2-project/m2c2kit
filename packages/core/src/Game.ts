@@ -777,7 +777,6 @@ export class Game implements Activity {
 
       if (!parameters || !(key in parameters)) {
         console.warn(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           `game ${
             this.options.name
           } does not have a parameter named ${key}. attempt to set parameter ${key} to value ${

@@ -274,7 +274,7 @@ export class Dialog extends Composite {
   }
   set hidden(hidden: boolean) {
     this._hidden = hidden;
-    this.needsInitialization;
+    this.needsInitialization = true;
   }
 
   /**

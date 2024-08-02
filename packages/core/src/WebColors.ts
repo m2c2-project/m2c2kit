@@ -1,5 +1,6 @@
 import { RgbaColor } from "./RgbaColor";
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class WebColors {
   public static Transparent: RgbaColor = [0, 0, 0, 0];
   public static MediumVioletRed: RgbaColor = [199, 21, 133, 1];

@@ -31,7 +31,7 @@
     "integration-test": "docker-compose down && docker-compose build --no-cache && docker-compose up --exit-code-from m2c2kit",
     "copy-modules": "rimraf examples/no-js-bundler-development/modules && node scripts/copy-m2c2kit-modules.mjs",
     "publish-updated": "node scripts/publish-updated-packages.mjs",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "type": "module",
   "keywords": [],
@@ -46,21 +46,22 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
+    "@eslint/js": "^9.8.0",
     "@types/semver": "7.5.8",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "chalk": "^5.3.0",
     "concurrently": "8.2.2",
     "cpy-cli": "4.2.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.1.0",
     "find-up": "7.0.0",
-    "husky": "9.0.11",
+    "husky": "9.1.4",
     "linkinator": "6.1.1",
-    "lint-staged": "^15.2.7",
     "prettier": "3.3.3",
     "semver": "7.6.3",
-    "syncpack": "12.4.0"
+    "syncpack": "12.4.0",
+    "typescript-eslint": "^8.0.0"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"

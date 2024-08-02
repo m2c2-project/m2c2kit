@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class WebGlInfo {
   /**
    * Returns graphics driver vendor and renderer information.
@@ -38,7 +39,7 @@ export class WebGlInfo {
    */
   public static dispose(): void {
     const rendererInfoCanvas = document.getElementById(
-      "webgl-renderer-info-canvas"
+      "webgl-renderer-info-canvas",
     );
     if (rendererInfoCanvas) {
       rendererInfoCanvas.remove();
