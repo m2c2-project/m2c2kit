@@ -23,14 +23,14 @@
     "@types/semver": "7.5.8",
     "cpy": "10.1.0",
     "findup-sync": "5.0.0",
-    "magic-string": "0.30.10",
+    "magic-string": "0.30.11",
     "rimraf": "6.0.1",
-    "rollup": "4.18.1",
+    "rollup": "4.19.2",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-esbuild": "6.1.1",
     "semver": "7.6.3",
-    "typescript": "5.5.3"
+    "typescript": "5.5.4"
   },
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
