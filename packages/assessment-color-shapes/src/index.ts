@@ -16,6 +16,7 @@ import {
   RgbaColor,
   Sprite,
   Constants,
+  Translation,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -23,6 +24,7 @@ import {
   Instructions,
   CountdownScene,
   InstructionsOptions,
+  LocalePicker,
 } from "@m2c2kit/addons";
 
 /**
@@ -110,17 +112,6 @@ class ColorShapes extends Game {
         description:
           "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
       },
-      trials_complete_scene_text: {
-        default: "You have completed all the color shapes trials",
-        description: "Text for scene displayed after all trials are complete.",
-        type: "string",
-      },
-      trials_complete_scene_button_text: {
-        default: "OK",
-        description:
-          "Button text for scene displayed after all trials are complete.",
-        type: "string",
-      },
       instruction_type: {
         default: "long",
         description: "Type of instructions to show, 'short' or 'long'.",
@@ -142,6 +133,12 @@ class ColorShapes extends Game {
         type: "boolean",
         default: false,
         description: "Should the FPS be shown?",
+      },
+      show_locale_picker: {
+        type: "boolean",
+        default: false,
+        description:
+          "Should the icon that allows the participant to switch the locale be shown?",
       },
     };
 
@@ -280,6 +277,52 @@ class ColorShapes extends Game {
       },
     };
 
+    const translation: Translation = {
+      configuration: {
+        baseLocale: "en-US",
+      },
+      "en-US": {
+        localeName: "English",
+        INSTRUCTIONS_TITLE: "Color Shapes",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1:
+          "Try to remember the color of 3 shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Try to remember the color of 3 shapes, because they will soon disappear.",
+        INSTRUCTIONS_TEXT_PAGE_2: "Next you will see the same shapes reappear.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Answer whether the shapes have the SAME or DIFFERENT colors as they had before.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Next",
+        BACK_BUTTON_TEXT: "Back",
+        GET_READY_COUNTDOWN_TEXT: "GET READY!",
+        SAME_BUTTON_TEXT: "Same",
+        DIFFERENT_BUTTON_TEXT: "Different",
+        TRIALS_COMPLETE_SCENE_TEXT: "This activity is complete.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "de-DE": {
+        localeName: "Deutsch",
+        INSTRUCTIONS_TITLE: "Farb-Formen",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1: "Oben und unten sehen Sie Symbolpaare.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Ihre Aufgabe wird es sein, auf dasjenige untere Paar zu tippen, welches mit einem der obigen Paare exakt übereinstimmt.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Versuchen Sie bitte, so schnell und korrekt wie möglich zu sein.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Weiter",
+        BACK_BUTTON_TEXT: "Vorherige",
+        GET_READY_COUNTDOWN_TEXT: "BEREIT MACHEN",
+        SAME_BUTTON_TEXT: "Gleich",
+        DIFFERENT_BUTTON_TEXT: "Unterschiedlich",
+        TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:enable
+    };
+
     const options: GameOptions = {
       name: "Color Shapes",
       /**
@@ -289,6 +332,7 @@ class ColorShapes extends Game {
       publishUuid: "394cb010-2ccf-4a87-9d23-cda7fb07a960",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
+      translation: translation,
       shortDescription:
         "Color Shapes is a visual array change detection \
 task, measuring intra-item feature binding, where participants determine \
@@ -381,6 +425,12 @@ phases.`,
       });
     }
 
+    let localePicker: LocalePicker;
+    if (game.getParameter<boolean>("show_locale_picker")) {
+      localePicker = new LocalePicker();
+      game.addFreeNode(localePicker);
+    }
+
     // ==============================================================
     // SCENES: instructions
     let instructionsScenes: Array<Scene>;
@@ -396,15 +446,15 @@ phases.`,
           instructionsScenes = Instructions.create({
             instructionScenes: [
               {
-                title: "Color Shapes",
-                text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before.`,
+                title: "INSTRUCTIONS_TITLE",
+                text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
                 imageName: "instructions-1",
                 imageAboveText: false,
                 imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
-                nextButtonText: "START",
+                nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
                 nextSceneTransition: Transition.none(),
               },
@@ -416,36 +466,41 @@ phases.`,
           instructionsScenes = Instructions.create({
             instructionScenes: [
               {
-                title: "Color Shapes",
-                text: `Try to remember the color of ${numberOfShapesShown} shapes, because they will soon disappear.`,
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_1",
                 imageName: "instructions-1",
                 imageAboveText: false,
                 imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT",
               },
               {
-                title: "Color Shapes",
-                text: "Next you will see the same shapes reappear.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_2",
                 imageName: "instructions-2",
                 imageAboveText: false,
                 imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT",
               },
               {
-                title: "Color Shapes",
-                text: "Answer whether the shapes have the SAME or DIFFERENT colors as they had before.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_3",
                 imageName: "instructions-3",
                 imageAboveText: false,
                 imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
-                nextButtonText: "START",
+                nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
+                backButtonText: "BACK_BUTTON_TEXT",
               },
             ],
           });
@@ -470,7 +525,7 @@ phases.`,
     // SCENE: countdown. Show 3 second countdown.
     const countdownScene = new CountdownScene({
       milliseconds: 3000,
-      text: "GET READY!",
+      text: "GET_READY_COUNTDOWN_TEXT",
       zeroDwellMilliseconds: 1000,
       transition: Transition.none(),
     });
@@ -698,6 +753,7 @@ phases.`,
       text: "+",
       fontSize: 32,
       fontColor: WebColors.Black,
+      localize: false,
     });
     fixationSceneSquare.addChild(plusLabel);
 
@@ -835,9 +891,9 @@ phases.`,
     });
 
     const sameButton = new Button({
-      text: "Same",
+      text: "SAME_BUTTON_TEXT",
       position: { x: 100, y: 700 },
-      size: { width: 125, height: 50 },
+      size: { width: 150, height: 50 },
     });
     shapeResponseScene.addChild(sameButton);
     sameButton.onTapDown(() => {
@@ -846,9 +902,9 @@ phases.`,
     });
 
     const differentButton = new Button({
-      text: "Different",
+      text: "DIFFERENT_BUTTON_TEXT",
       position: { x: 300, y: 700 },
-      size: { width: 125, height: 50 },
+      size: { width: 150, height: 50 },
     });
     shapeResponseScene.addChild(differentButton);
     differentButton.onTapDown(() => {
@@ -925,13 +981,13 @@ phases.`,
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: game.getParameter("trials_complete_scene_text"),
+      text: "TRIALS_COMPLETE_SCENE_TEXT",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
 
     const okButton = new Button({
-      text: game.getParameter("trials_complete_scene_button_text"),
+      text: "TRIALS_COMPLETE_SCENE_BUTTON_TEXT",
       position: { x: 200, y: 650 },
     });
     okButton.isUserInteractionEnabled = true;
