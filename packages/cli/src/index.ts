@@ -415,16 +415,20 @@ function getUsage(): string {
 m2c2kit CLI
 
 ${colors.blue("Commands:")}
-  m2 new [name]         Create a new m2c2kit project.  
+  m2 new [name]            Create a new m2c2kit project.  
 
     Arguments:
-      name              The name of the new project.
+      name                 The name of the new project.
 
     Options:
-      -g, --skipGit     Skip initializing a git repository.
-      -m, --module      Create a m2c2kit assessment module (default is application).
+      -g, --skipGit        Skip initializing a git repository.
+      -m, --module         Create a m2c2kit assessment module (default is application).
 
-  m2 zip                Package a built assessment module into a zip file.
+  m2 static-site           Create a static website containing m2c2kit assessments.  
+
+    Options:
+      --config <file.mjs>  The name of the configuration file, must end in .mjs   
+      --init               Create config.mjs file in the current directory.
 `;
 }
 

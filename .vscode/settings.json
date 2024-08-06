@@ -41,6 +41,8 @@
     "Materializer",
     "Materializers",
     "stroop",
+    "subdirs",
+    "subfiles",
     "tseslint",
     "Unpremul",
     "unshifted"

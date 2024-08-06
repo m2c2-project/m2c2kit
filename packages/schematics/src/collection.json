@@ -17,6 +17,10 @@
     "zip": {
       "description": "A schematic to zip a m2c2kit module",
       "factory": "./zip/index#zip"
+    },
+    "static-site": {
+      "description": "A schematic to create a static website containing m2c2kit assessments",
+      "factory": "./static-site/index#staticSite"
     }
   }
 }

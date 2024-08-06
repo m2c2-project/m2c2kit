@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicStaticSite",
+  "title": "StaticSite Schema",
+  "type": "object",
+  "properties": {
+    "config": {
+      "description": "The configuration file for the static site.",
+      "type": "string",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "init": {
+      "description": "Creates a new static site configuration file, config.mjs",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

@@ -3,15 +3,17 @@
   "version": "0.1.16",
   "description": "Rules for the m2c2kit CLI to generate new apps",
   "main": "index.js",
+  "types": "types/index.d.ts",
   "keywords": [
     "schematics"
   ],
   "schematics": "./src/collection.json",
   "files": [
-    "src/**"
+    "src/**",
+    "types/**"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node ./scripts/add-version-string.mjs",
+    "build": "tsc -p tsconfig.json && node ./scripts/add-version-string.mjs && npx cpy StaticSiteConfig.d.ts ../../types --cwd=src/static-site --rename=index.d.ts",
     "test": "npm run build && jasmine src/**/*_spec.js"
   },
   "license": "MIT",
@@ -30,11 +32,18 @@
     "@angular-devkit/schematics": "^18.1.3",
     "@schematics/angular": "^18.1.3",
     "archiver": "7.0.1",
-    "findup-sync": "5.0.0"
+    "findup-sync": "5.0.0",
+    "js-beautify": "1.15.1",
+    "semver": "7.6.3",
+    "tar-stream": "3.1.7"
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^18.1.3",
+    "@m2c2kit/core": "0.3.19",
+    "@m2c2kit/session": "0.3.2",
     "@types/archiver": "6.0.2",
+    "@types/js-beautify": "1.14.3",
+    "@types/tar-stream": "3.1.3",
     "jasmine": "^4.0.0",
     "typescript": "5.5.4"
   },
