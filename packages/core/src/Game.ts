@@ -790,8 +790,15 @@ export class Game implements Activity {
           key
         ];
       }
+
+      if (this.additionalParameters === undefined) {
+        this.additionalParameters = {};
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.additionalParameters as { [key: string]: any })[key] =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (additionalParameters as any)[key];
     });
-    this.additionalParameters = additionalParameters;
   }
 
   get canvasKit(): CanvasKit {
