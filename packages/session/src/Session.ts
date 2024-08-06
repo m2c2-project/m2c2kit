@@ -24,7 +24,7 @@ import { m2c2kitCss } from "./m2c2kitCss";
 export class Session {
   options: SessionOptions;
   currentActivity?: Activity;
-  uuid: string;
+  private _uuid?: string;
   dataStores?: IDataStore[];
   private eventListeners = new Array<
     M2EventListener<SessionEvent | ActivityEvent>
@@ -40,39 +40,6 @@ export class Session {
    */
   constructor(options: SessionOptions) {
     this.options = options;
-    if (this.options.sessionUuid) {
-      this.uuid = this.options.sessionUuid;
-    } else {
-      this.uuid = Uuid.generate();
-    }
-
-    for (const activity of this.options.activities) {
-      if (this.options.activities.filter((a) => a === activity).length > 1) {
-        throw new Error(
-          `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`,
-        );
-      }
-      activity.sessionUuid = this.uuid;
-      if (this.options.activityCallbacks?.onActivityLifecycle) {
-        activity.onStart(this.options.activityCallbacks.onActivityLifecycle);
-        activity.onCancel(this.options.activityCallbacks.onActivityLifecycle);
-        activity.onEnd(this.options.activityCallbacks.onActivityLifecycle);
-      }
-      if (this.options.activityCallbacks?.onActivityResults) {
-        activity.onData(this.options.activityCallbacks.onActivityResults);
-      }
-
-      if (activity.type === ActivityType.Game) {
-        const game = activity as Game;
-        game.onWarmupStart(() => {
-          DomHelper.setCanvasOverlayVisibility(true);
-        });
-        game.onWarmupEnd(() => {
-          DomHelper.setCanvasOverlayVisibility(false);
-          DomHelper.setBusyAnimationVisibility(false);
-        });
-      }
-    }
 
     // Make session also available on window in case we want to control or inspect it
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -298,6 +265,41 @@ export class Session {
    */
   async initialize(): Promise<void> {
     Timer.startNew("sessionInitialize");
+
+    if (this.options.sessionUuid) {
+      this.uuid = this.options.sessionUuid;
+    } else {
+      this.uuid = Uuid.generate();
+    }
+
+    for (const activity of this.options.activities) {
+      if (this.options.activities.filter((a) => a === activity).length > 1) {
+        throw new Error(
+          `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`,
+        );
+      }
+      activity.sessionUuid = this.uuid;
+      if (this.options.activityCallbacks?.onActivityLifecycle) {
+        activity.onStart(this.options.activityCallbacks.onActivityLifecycle);
+        activity.onCancel(this.options.activityCallbacks.onActivityLifecycle);
+        activity.onEnd(this.options.activityCallbacks.onActivityLifecycle);
+      }
+      if (this.options.activityCallbacks?.onActivityResults) {
+        activity.onData(this.options.activityCallbacks.onActivityResults);
+      }
+
+      if (activity.type === ActivityType.Game) {
+        const game = activity as Game;
+        game.onWarmupStart(() => {
+          DomHelper.setCanvasOverlayVisibility(true);
+        });
+        game.onWarmupEnd(() => {
+          DomHelper.setCanvasOverlayVisibility(false);
+          DomHelper.setBusyAnimationVisibility(false);
+        });
+      }
+    }
+
     const sessionInitializeEvent: SessionEvent = {
       target: this,
       type: SessionEventType.SessionInitialize,
@@ -765,6 +767,16 @@ export class Session {
     }
 
     return duplicates;
+  }
+
+  get uuid(): string {
+    if (!this._uuid) {
+      throw new Error("Session.uuid is undefined.");
+    }
+    return this._uuid;
+  }
+  set uuid(value: string) {
+    this._uuid = value;
   }
 }
 
