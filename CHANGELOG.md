@@ -4,6 +4,142 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.20] - 2024-08-07
+
+### Fixed
+
+- Minor bug of the `Game` property `additionalParameters` not being set correctly. This did not affect library users.
+
+### Added
+
+- Support for debugging tools to help with mobile browsers and web views.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.19] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.3] - 2024-08-07
+
+### Added
+
+- Support for debugging tools to help with mobile browsers and web views.
+
+### Changed
+
+- Some code in the `Session` constructor has been moved to the `initialize()` method. This should not affect library users.
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.7] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.17] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.17] - 2024-08-07
+
+### Added
+
+- The static-site schematic generates a static website with the specified m2c2kit assessments and configuration.
+- In new scaffolded modules, `schema-util` will be run as part of the build.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.13] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.17] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.15] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.15] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.10] - 2024-08-07
+
+### Added
+
+- More comprehensive documentation to the `README.md`
+
+### Changed
+
+- This is now published to npm registry.
+- It now can get the `automaticTrialSchema` from the core bundle.
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.18] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.18] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.18] - 2024-08-07
+
+### Added
+
+- Internationalization text for German.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.18] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.15] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.17] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.15] - 2024-08-07
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/addons` [0.3.18] - 2024-07-19
 
 ### Fixed

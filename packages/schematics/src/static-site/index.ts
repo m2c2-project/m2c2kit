@@ -209,9 +209,12 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
           }
           dependencyTree[assessment.name][version] = dependencies;
 
+          // TODO: this is a temporary fix to add @m2c2kit/session as a dependency
+          // we should scan the assessment's package.json dependencies and
+          // devDependencies for @m2c2kit/session and add the appropriate version
           if (!dependencyTree[assessment.name][version]["@mc2kit/session"]) {
             dependencyTree[assessment.name][version]["@m2c2kit/session"] =
-              "0.3.2";
+              "0.3.3";
           }
           const url = packageMetadata.versions[version].dist.tarball;
           packagesToDownload.push({
@@ -586,6 +589,7 @@ if (!assessment) {
   window.location.href = "/assessments/" + assessment + "/index.html?" + forwardedParams;
 }`;
 
+// TODO: insert the schematics package.json version into the config file
 /** created when the --init option is specified */
 const newConfig = `/**
  * To get intellisense hints for this configuration file, create an NPM project
@@ -605,7 +609,7 @@ export default {
   assessments: [
     {
       name: "@m2c2kit/assessment-symbol-search",
-      versions: ">=0.8.17",
+      versions: ">=0.8.18",
       parameters: {
         // for configurable game parameters,
         // see https://m2c2-project.github.io/m2c2kit/docs/schemas/what-is-schema/

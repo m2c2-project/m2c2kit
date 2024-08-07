@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/session",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "The session runner for m2c2kit activities.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -34,10 +34,10 @@
     "url": "https://github.com/m2c2-project/m2c2kit/issues"
   },
   "dependencies": {
-    "@m2c2kit/core": "^0.3.19"
+    "@m2c2kit/core": "^0.3.20"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.16",
+    "@m2c2kit/build-helpers": "0.3.17",
     "@rollup/plugin-node-resolve": "15.2.3",
     "rimraf": "6.0.1",
     "rollup": "4.20.0",

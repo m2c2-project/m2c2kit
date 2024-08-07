@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/sage-research",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "description": "Utility functions for embedding m2c2kit assessments in iOS and Android apps developed by Sage Bionetworks",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -14,8 +14,8 @@
     "dist/index.d.ts"
   ],
   "dependencies": {
-    "@m2c2kit/core": "0.3.19",
-    "@m2c2kit/session": "0.3.2"
+    "@m2c2kit/core": "0.3.20",
+    "@m2c2kit/session": "0.3.3"
   },
   "scripts": {
     "build": "npm run clean && rollup -c",
