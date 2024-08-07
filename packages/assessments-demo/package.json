@@ -41,7 +41,7 @@
     "concurrently": "8.2.2",
     "esbuild": "0.23.0",
     "rimraf": "6.0.1",
-    "rollup": "4.19.2",
+    "rollup": "4.20.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.1.1",
     "rollup-plugin-livereload": "2.0.5",

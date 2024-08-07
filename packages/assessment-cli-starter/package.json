@@ -47,7 +47,7 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.7",
     "rimraf": "6.0.1",
-    "rollup": "4.19.2",
+    "rollup": "4.20.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.1.1",
     "typescript": "5.5.4"

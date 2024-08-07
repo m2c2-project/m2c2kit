@@ -13,9 +13,11 @@ export default [
       parserOptions: {
         projectService: {
           allowDefaultProject: [
-            "eslint.config.mjs",
-            ".prettierrc.mjs",
+            "*.mjs",
+            ".*.mjs",
             "scripts/*.mjs",
+            "packages/*/*.mjs",
+            "packages/*/src/runner.ts",
           ],
           defaultProject: "./tsconfig.json",
         },
