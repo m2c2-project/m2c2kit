@@ -428,7 +428,7 @@ ${colors.blue("Commands:")}
 
     Options:
       --config <file.mjs>  The name of the configuration file, must end in .mjs   
-      --init               Create config.mjs file in the current directory.
+      --init               Create site-config.mjs file in the current directory.
 `;
 }
 

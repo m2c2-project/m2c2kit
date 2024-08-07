@@ -146,13 +146,13 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
     }
 
     if (options.init) {
-      tree.create("config.mjs", newConfig);
+      tree.create("site-config.mjs", newConfig);
       return;
     }
 
     if (!options.config) {
       throw new Error(
-        "No configuration file specified. Use --config option, e.g., --config=config.mjs",
+        "No configuration file specified. Use --config option, e.g., --config=site-config.mjs",
       );
     }
 
@@ -588,11 +588,18 @@ if (!assessment) {
 
 /** created when the --init option is specified */
 const newConfig = `/**
- * @typedef {import("@m2c2kit/schematics").StaticSiteConfig} StaticSiteConfig
+ * To get intellisense hints for this configuration file, create an NPM project
+ * in the same folder as this file and install the @m2c2kit/schematics package:
+ *   npm init -y
+ *   npm install -D @m2c2kit/schematics
  */
 
-/** @type {StaticSiteConfig} */
+/**
+ * @typedef {import("@m2c2kit/schematics").StaticSiteConfig} StaticSiteConfig
+ * @type {StaticSiteConfig}
+ */
 export default {
+  configVersion: "0.1.17",
   outDir: "./site",
   dockerfile: true,
   assessments: [
@@ -600,13 +607,28 @@ export default {
       name: "@m2c2kit/assessment-symbol-search",
       versions: ">=0.8.17",
       parameters: {
+        // for configurable game parameters,
+        // see https://m2c2-project.github.io/m2c2kit/docs/schemas/what-is-schema/
         number_of_trials: 2,
+        show_quit_button: false,
       },
       configure: (context, session, assessment) => {
         console.log(\`configuring assessment \${assessment.options.name} version \${assessment.options.version}\`)
         session.onActivityData((ev) => {
           console.log("  newData: " + JSON.stringify(ev.newData));
+          // place code here to post data to a server, e.g.,
+          // fetch("https://www.example.com", {
+          //   method: "POST",
+          //   headers: {
+          //     "Content-Type": "application/json",
+          //   },
+          //   body: JSON.stringify(ev.newData),
+          // });
         });
+        // place code here to redirect when session ends, e.g.,
+        // session.onEnd(() => {
+        //   window.location.href = "https://www.example.com";
+        // });
       }
     }
   ]

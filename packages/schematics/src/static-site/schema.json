@@ -13,7 +13,7 @@
       }
     },
     "init": {
-      "description": "Creates a new static site configuration file, config.mjs",
+      "description": "Creates a new static site configuration file, site-config.mjs",
       "type": "boolean",
       "default": false
     }

@@ -2,6 +2,8 @@ import { Game } from "@m2c2kit/core";
 import { Session } from "@m2c2kit/session";
 
 export interface StaticSiteConfig {
+  /** Version of this config file format. */
+  configVersion: string;
   /** Output directory for the m2c2kit static website. */
   outDir: string;
   /** Create a Dockerfile to serve the static website with NGINX? Default is false. */
