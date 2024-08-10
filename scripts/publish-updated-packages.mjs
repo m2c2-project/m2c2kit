@@ -41,6 +41,7 @@ const packageNamesToPublish = [
   "@m2c2kit/build-helpers",
   "@m2c2kit/schema-util",
   "@m2c2kit/survey",
+  "@m2c2kit/assessments-registry",
   "@m2c2kit/assessment-color-dots",
   "@m2c2kit/assessment-color-shapes",
   "@m2c2kit/assessment-grid-memory",

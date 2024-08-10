@@ -1,0 +1,26 @@
+{
+  "name": "@m2c2kit/assessments-registry",
+  "version": "0.1.0",
+  "description": "A registry of m2c2kit assessments and their locations",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "devDependencies": {},
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/assessments-registry"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit"
+}
