@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import { pathToFileURL } from "url";
 import { satisfies } from "semver";
 import * as beautify from "js-beautify";
-import { decompressTgzArchive } from "./decompressTgzArchive";
+import { decompressTgzArchive, ExtractedFile } from "./decompressTgzArchive";
 import { fetchPackage } from "./fetchPackage";
 import { getNpmPackageMetadata } from "./getNpmPackageMetadata";
 import { extractMethodBodyFromArrowFunctionString } from "./extractMethodBodyFromArrowFunctionString";
@@ -20,6 +20,7 @@ const DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
 
 interface m2StaticSiteOptions {
   config?: string;
+  dockerfile?: boolean;
   init?: boolean;
 }
 
@@ -307,6 +308,92 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
       });
     }
 
+    const decompressedTgzFiles: { [key: string]: ExtractedFile[] } = {};
+    for (const assessment of assessments.filter((p) => "tarball" in p)) {
+      const tgzBuffer = fs.readFileSync(assessment.tarball);
+      const tgzFiles = await decompressTgzArchive(tgzBuffer);
+      const packageJsonBuffer = tgzFiles.find(
+        (f) => f.filepath === "package/package.json",
+      );
+      if (!packageJsonBuffer) {
+        throw new Error(`No package.json found in ${assessment.tarball}`);
+      }
+      const packageJson = JSON.parse(packageJsonBuffer.buffer.toString());
+      console.log(`packageJson: ${JSON.stringify(packageJson)}`);
+      const name = packageJson.name as string;
+      const version = packageJson.version as string;
+
+      if (!decompressedTgzFiles[name]) {
+        decompressedTgzFiles[`${name}@${version}`] = [];
+      }
+      decompressedTgzFiles[`${name}@${version}`].push(...tgzFiles);
+
+      const dependencies = packageJson.dependencies as {
+        [key: string]: string;
+      };
+      if (!dependencyTree[name]) {
+        dependencyTree[name] = {};
+      }
+      dependencyTree[name][version] = dependencies;
+
+      // TODO: this is a temporary fix to add @m2c2kit/session as a dependency
+      // we should scan the assessment's package.json dependencies and
+      // devDependencies for @m2c2kit/session and add the appropriate version
+      if (!dependencyTree[name][version]["@mc2kit/session"]) {
+        dependencyTree[name][version]["@m2c2kit/session"] = "0.3.3";
+      }
+
+      assessmentConfigurations.push({
+        name: name,
+        version,
+        requiredPackages: {
+          [name]: version,
+          ...dependencies,
+        },
+        parameters: assessment.parameters,
+        /**
+         * Use the setup and configure functions for this specific
+         * assessment, if they exist. Otherwise, use the functions
+         * from the configuration.
+         */
+        setup: assessment.setup ?? config.setup,
+        configure: assessment.configure ?? config.configure,
+        entry: assessment.entry ?? config.entry,
+      });
+
+      for (const dependency in dependencies) {
+        const dependencyVersion = dependencies[dependency];
+
+        // if packagesToDownload already has the dependency with the same name and version
+        // we don't need to download it again
+        if (
+          packagesToDownload.find(
+            (p) => p.name === dependency && p.version === dependencyVersion,
+          )
+        ) {
+          continue;
+        }
+        const packageData = await getNpmPackageMetadata(
+          // dependencies are always retrieved from the default registry
+          DEFAULT_REGISTRY_URL,
+          dependency,
+          //assessment.tokenEnvironmentVariable,
+        );
+        const dependencyUrl =
+          packageData.versions[dependencyVersion].dist.tarball;
+        packagesToDownload.push({
+          name: dependency,
+          version: dependencyVersion,
+          url: dependencyUrl,
+          //tokenEnvironmentVariable: assessment.tokenEnvironmentVariable,
+        });
+      }
+    }
+
+    if (assessmentConfigurations.length === 0) {
+      throw new Error("No assessments found in configuration file.");
+    }
+
     const exampleAssessment = assessmentConfigurations[0];
     const exampleQueryString = `/index.html?assessment=${exampleAssessment.name}@${exampleAssessment.version}&number_of_trials=6`;
     const hostedAssessmentPaths = new Array<string>();
@@ -481,6 +568,20 @@ loadModules(["@m2c2kit/session", "${moduleName}"]).then(
     }
 
     /**
+     * Copy the files from the `TarballAssessment` to the modules directory
+     */
+    for (const [assessment, files] of Object.entries(decompressedTgzFiles)) {
+      for (const file of files) {
+        const filepath = file.filepath.replace("package/", "");
+        // assessment already has the version in the name
+        tree.create(
+          config.outDir + `/modules/${assessment}/${filepath}`,
+          file.buffer,
+        );
+      }
+    }
+
+    /**
      * Create the root index.html and index.js files. This is the entry point
      * for the static site and will redirect to the assessment specified in the
      * URL query string "assessment"
@@ -498,7 +599,7 @@ loadModules(["@m2c2kit/session", "${moduleName}"]).then(
         .replace("<%- exampleQueryString %>", `"${exampleQueryString}"`),
     );
 
-    if (config.dockerfile) {
+    if (options.dockerfile) {
       const f = tree.get("Dockerfile");
       if (f) {
         tree.delete("Dockerfile");
@@ -516,7 +617,7 @@ loadModules(["@m2c2kit/session", "${moduleName}"]).then(
           `You may now serve the site using the files in ${config.outDir}`,
         );
         console.log(
-          "If you requested a Dockerfile, the following commands build a Docker image and serve the site using NGINX on local port 8080, mapping to port 80 in the container:",
+          "If you requested a Dockerfile (--dockerfile), the following commands build a Docker image and serve the site using NGINX on local port 8080, mapping to port 80 in the container:",
         );
         console.log("  docker build -t m2c2kit-static-site .");
         console.log("  docker run -p 8080:80 m2c2kit-static-site");
@@ -605,7 +706,6 @@ const newConfig = `/**
 export default {
   configVersion: "0.1.17",
   outDir: "./site",
-  dockerfile: true,
   assessments: [
     {
       name: "@m2c2kit/assessment-symbol-search",

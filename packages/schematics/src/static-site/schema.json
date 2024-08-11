@@ -12,6 +12,11 @@
         "index": 0
       }
     },
+    "dockerfile": {
+      "description": "Creates Dockerfile when generating the static site.",
+      "type": "boolean",
+      "default": false
+    },
     "init": {
       "description": "Creates a new static site configuration file, site-config.mjs",
       "type": "boolean",

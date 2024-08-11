@@ -6,10 +6,10 @@ export interface StaticSiteConfig {
   configVersion: string;
   /** Output directory for the m2c2kit static website. */
   outDir: string;
-  /** Create a Dockerfile to serve the static website with NGINX? Default is false. */
-  dockerfile?: boolean;
   /** Assessments to be included in the static website. */
-  assessments: Array<RegistryAssessment | ExtendedAssessment>;
+  assessments: Array<
+    RegistryAssessment | ExtendedAssessment | TarballAssessment
+  >;
   /** A site-wide {@link Setup} to be applied to all assessments. It will be overridden if a setup is defined by an assessment. */
   setup?: Setup;
   /** A site-wide {@link Configure} to be applied to all assessments. It will be overridden if a configure is defined by an assessment. */
@@ -121,17 +121,7 @@ export interface PageContext {
 }
 
 export interface Assessment {
-  /**
-   * Name of the assessment. This is one of:
-   * - Name of the assessment package to download from the registry, e.g.,
-   * `@m2c2kit/assessment-symbol-search`
-   * - Name for this assessment configuration that has been extended from a
-   * registry package. For example, if extending `@m2c2kit/assessment-symbol-search`
-   * for a project called `aging`, a reasonable name might be `aging/symbol-search`.
-   * Name must follow format of `xxxxx/yyyyy`
-   */
-  name: string;
-  /** Custom parameters for the assessment, e.g., `{ number_of_trials: 4, locale: "auto"}`
+  /** Custom parameters for the assessment, e.g., `{ number_of_trials: 4, locale: "auto" }`
    * @remarks Parameters passed through the URL query string will override these parameters.
    */
   parameters?: {
@@ -150,7 +140,9 @@ export interface Assessment {
  * registry, such as npm or GitHub.
  */
 export interface RegistryAssessment extends Assessment {
-  /** Versions to download, semver format, e.g., `>=0.8.17` */
+  /** Name of the assessment package to download from the registry, e.g., `@m2c2kit/assessment-symbol-search` */
+  name: string;
+  /** Versions to download, semver format, e.g., `>=0.8.17` or `>=0.8.17 <0.9.1 || >=0.9.1` */
   versions: string;
   /** Registry URL to download from. Default is `https://registry.npmjs.org`, but it could another registry, such as `https://npm.pkg.github.com` if downloading from a GitHub registry */
   registryUrl?: string;
@@ -166,6 +158,12 @@ export interface RegistryAssessment extends Assessment {
  * registry and give it a different name and endpoint.
  */
 export interface ExtendedAssessment extends Assessment {
+  /** Name for this assessment configuration that has been extended from a
+   * registry package. For example, if extending `@m2c2kit/assessment-symbol-search`
+   * for a project called `aging`, a reasonable name might be `aging/symbol-search`.
+   * Name must follow format of `xxxxx/yyyyy`.
+   * */
+  name: string;
   extends: {
     /** Name of the registry package that this assessment will extend, e.g.,
      * `@m2c2kit/assessment-symbol-search` */
@@ -177,4 +175,19 @@ export interface ExtendedAssessment extends Assessment {
   /** Version number to be given to this extended assessment configuration,
    * e.g., `1.0.0` */
   version: string;
+}
+
+/**
+ * An `TarballAssessment` is an assessment that comes from a package archive
+ * with a `.tgz` extension, which is created by the `npm pack` command.
+ *
+ * @remarks It is *highly* recommended to use a `RegistryAssessment` or
+ * `ExtendedAssessment`. This better ensures the reproducibility of the static
+ * site. Getting assessments from a registry is a more stable and reliable
+ * process because registry packages are versioned and are for the most part
+ * immutable.
+ */
+export interface TarballAssessment extends Assessment {
+  /** Path to the `.tgz` file containing the assessment */
+  tarball: string;
 }

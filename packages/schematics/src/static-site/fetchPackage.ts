@@ -1,3 +1,11 @@
+/**
+ * Fetches a package tarball from a URL
+ *
+ * @param url - the URL to fetch the package from
+ * @param tokenEnvironmentVariable - the environment variable that holds the
+ * authorization token for the registry, if required
+ * @returns
+ */
 export async function fetchPackage(
   url: string,
   tokenEnvironmentVariable?: string,
