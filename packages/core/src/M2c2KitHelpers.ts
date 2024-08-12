@@ -99,6 +99,8 @@ export class M2c2KitHelpers {
 
     const script = document.createElement("script");
     script.src = Constants.ERUDA_URL;
+    script.integrity = Constants.ERUDA_SRI;
+    script.crossOrigin = "anonymous";
     script.async = true;
     document.head.appendChild(script);
     m2c2Globals.erudaRequested = true;
