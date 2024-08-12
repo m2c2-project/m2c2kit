@@ -487,19 +487,16 @@ ${loadModulesFunction}
 ${getAssessmentClassNameFromModuleFunction}
 ${setGameParametersFromUrlFunction}
 ${setupCode}
-loadModules(["@m2c2kit/session", "${moduleName}"]).then(
-  ([sessionModule, assessmentModule]) => {
-    const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
-    const assessment = new assessmentModule[assessmentClassName]();
-    const session = new sessionModule.Session({
-      activities: [assessment]
-    });
-    ${configureParametersCode}
-    ${configureCode}    
-    setGameParametersFromUrlParams(assessment, context.urlParams);
-    session.initialize();
-  }
-);`;
+const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "${moduleName}"]);
+const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
+const assessment = new assessmentModule[assessmentClassName]();
+const session = new sessionModule.Session({
+  activities: [assessment]
+});
+${configureParametersCode}
+${configureCode}    
+setGameParametersFromUrlParams(assessment, context.urlParams);
+session.initialize();`;
       }
 
       indexJs = beautify(indexJs, {
