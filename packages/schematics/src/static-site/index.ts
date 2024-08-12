@@ -185,6 +185,60 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
       );
     }
 
+    const importMaps: { [key: string]: string } = {};
+
+    if (config.dependencies) {
+      // currently only ESM packages are supported
+      // transitive dependencies are not resolved
+      // TODO: add support for CJS packages via rollup
+      // TODO: add support for transitive dependencies?
+      const esmDependencies = Object.entries(config.dependencies);
+      for (const [name, version] of esmDependencies) {
+        const packageData = await getNpmPackageMetadata(
+          DEFAULT_REGISTRY_URL,
+          name,
+        );
+
+        const url = packageData.versions[version].dist.tarball;
+        const buffer = await fetchPackage(url);
+        console.log(
+          `downloaded ${name}@${version} (${buffer.byteLength} bytes) from ${url}`,
+        );
+
+        const files = await decompressTgzArchive(buffer);
+        for (const file of files) {
+          const filepath = file.filepath.replace("package/", "");
+          tree.create(
+            config.outDir + `/modules/${name}@${version}/${filepath}`,
+            file.buffer,
+          );
+        }
+
+        let entry = packageData.versions[version].module;
+        if (!entry) {
+          console.log(
+            `No module entry found for ${name}@${version} in package.json`,
+          );
+          console.log(
+            "Remember that currently only ESM packages are supported.",
+          );
+          if (packageData.versions[version].main) {
+            entry = packageData.versions[version].main;
+            console.log(`Using main entry: ${entry}, but this may not work.`);
+          } else {
+            console.log(
+              `No main entry found for ${name}@${version} in package.json`,
+            );
+            entry = "dist/index.js";
+            console.log(
+              `Using default entry: ${entry}, but this may not work.`,
+            );
+          }
+        }
+        importMaps[name] = `../../../modules/${name}@${version}/${entry}`;
+      }
+    }
+
     const packagesToDownload: PackageToDownload[] = [];
     const dependencyTree: DependencyTree = {};
     const assessmentConfigurations = new Array<AssessmentConfiguration>();
@@ -327,6 +381,9 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
         decompressedTgzFiles[`${name}@${version}`] = [];
       }
       decompressedTgzFiles[`${name}@${version}`].push(...tgzFiles);
+      console.log(
+        `extracted ${name}@${version} (${tgzBuffer.byteLength} bytes) from ${assessment.tarball}`,
+      );
 
       const dependencies = packageJson.dependencies as {
         [key: string]: string;
@@ -361,6 +418,8 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
         entry: assessment.entry ?? config.entry,
       });
 
+      // currently, transitive dependencies are not resolved
+      // TODO: add support for transitive dependencies?
       for (const dependency in dependencies) {
         const dependencyVersion = dependencies[dependency];
 
@@ -514,7 +573,6 @@ session.initialize();`;
         indexJs,
       );
 
-      const importMaps: { [key: string]: string } = {};
       for (const [dep, ver] of Object.entries(
         assessmentConfiguration.requiredPackages,
       )) {

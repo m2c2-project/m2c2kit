@@ -16,8 +16,23 @@ export interface StaticSiteConfig {
   configure?: Configure;
   /** A site-wide {@link Entry} to be applied to all assessments. It will be overridden if an entry is defined by an assessment. @remarks Using this option requires a deep understanding of the internals of m2c2kit and is not recommended for most users. */
   entry?: Entry;
-  /** Load es-module-shims script to polyfill import maps? Default is true. */
+  /** Load es-module-shims script to polyfill import maps? Default is true. @remarks see https://github.com/guybedford/es-module-shims */
   esModuleShims?: boolean;
+  /** Map of ESM package name and exact version number to make available to setup, configure, and entry code. Package will be downloaded from the public NPM registry.
+   * @remarks Assessment packages must be specified in `assessments`. This `dependencies` property is for additional ESM packages that are not assessments.
+   * Currently, only ESM packages are supported. The entry point for the ESM package will be resolved in the following order:
+   * 1. the package's `module` field
+   * 2. the package's `main` field
+   * 3. `dist/index.js`
+   *
+   * Note that a missing `module` field may mean that the package is not ESM, and the package may not work as expected.
+   * @example
+   * esmDependencies: {
+   *   "@m2c2kit/embedding": "1.0.13",
+   *   "canvas-confetti": "1.9.3",
+   * }
+   */
+  dependencies?: { [key: string]: string };
 }
 
 /**

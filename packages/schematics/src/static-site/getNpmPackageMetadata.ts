@@ -7,6 +7,8 @@ interface NpmPackageMetadata {
     [version: string]: {
       name: string;
       version: string;
+      main: string;
+      module: string;
       dist: {
         tarball: string;
       };
