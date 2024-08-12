@@ -5,6 +5,9 @@ src/**/*.js.map
 src/**/*.d.ts
 types/**
 
+# es-module-shims will be copied from node_modules as part of the build
+src/static-site/files/es-module-shims
+
 # IDEs
 .idea/
 jsconfig.json

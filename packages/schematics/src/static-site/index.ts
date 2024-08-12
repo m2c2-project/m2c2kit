@@ -9,6 +9,7 @@ import { fetchPackage } from "./fetchPackage";
 import { getNpmPackageMetadata } from "./getNpmPackageMetadata";
 import { extractMethodBodyFromArrowFunctionString } from "./extractMethodBodyFromArrowFunctionString";
 import { loadEsmModule } from "./loadEsmModule";
+import { getFilesRecursive } from "./getFilesRecursive";
 import { Configure, Entry, Setup, StaticSiteConfig } from "./StaticSiteConfig";
 /**
  * @m2c2kit/core and @m2c2kit/session are included only for their type
@@ -319,7 +320,6 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
         throw new Error(`No package.json found in ${assessment.tarball}`);
       }
       const packageJson = JSON.parse(packageJsonBuffer.buffer.toString());
-      console.log(`packageJson: ${JSON.stringify(packageJson)}`);
       const name = packageJson.name as string;
       const version = packageJson.version as string;
 
@@ -528,10 +528,34 @@ loadModules(["@m2c2kit/session", "${moduleName}"]).then(
         importMaps[dep] =
           `../../../modules/${dep}@${(ver as string).replace("^", "")}/dist/index.min.js`;
       }
-      const indexHtml = assessmentIndexHtmlTemplate.replace(
+      let indexHtml = assessmentIndexHtmlTemplate.replace(
         "<%- importMaps %>",
         JSON.stringify(importMaps, null, 2),
       );
+      if (config.esModuleShims !== false) {
+        const schematicDir = __dirname.replace(/\\/g, "/");
+        const filenames = getFilesRecursive(
+          schematicDir + "/files/es-module-shims",
+        );
+        for (const filename of filenames) {
+          const buffer = fs.readFileSync(filename);
+          const treeFilename =
+            config.outDir +
+            "/modules/" +
+            filename.replace(schematicDir + "/files/", "");
+          tree.create(treeFilename, buffer);
+        }
+        /**
+         * below integrity is for es-module-shims 1.10.0. It will have to be
+         * updated when a new version is released.
+         */
+        indexHtml = indexHtml.replace(
+          "<%- esModuleShims %>",
+          '\n  <script async src="../../../modules/es-module-shims/dist/es-module-shims.js" integrity="sha384-BTO8nLHukFlPxTSib9wgQyLgd2oYLxp24Goxje82QeHp7cwyUtgx4Z32PCEb3Q09"></script>',
+        );
+      } else {
+        indexHtml = indexHtml.replace("<%- esModuleShims %>", "");
+      }
       tree.create(
         config.outDir +
           `/assessments/${assessmentConfiguration.name}@${assessmentConfiguration.version}/index.html`,
@@ -644,8 +668,7 @@ const assessmentIndexHtmlTemplate = `
   <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" /><%- esModuleShims %>
   <script type="importmap"> {
     "imports": <%- importMaps %>
     }

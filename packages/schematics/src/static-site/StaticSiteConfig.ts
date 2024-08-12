@@ -16,6 +16,8 @@ export interface StaticSiteConfig {
   configure?: Configure;
   /** A site-wide {@link Entry} to be applied to all assessments. It will be overridden if an entry is defined by an assessment. @remarks Using this option requires a deep understanding of the internals of m2c2kit and is not recommended for most users. */
   entry?: Entry;
+  /** Load es-module-shims script to polyfill import maps? Default is true. */
+  esModuleShims?: boolean;
 }
 
 /**

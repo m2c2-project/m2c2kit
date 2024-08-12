@@ -18,6 +18,7 @@ export default [
             "scripts/*.mjs",
             "packages/*/*.mjs",
             "packages/*/src/runner.ts",
+            "packages/schematics/scripts/*.mjs",
           ],
           defaultProject: "./tsconfig.json",
         },
