@@ -301,6 +301,25 @@ class ColorShapes extends Game {
         TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
       },
       // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "es-MX": {
+        localeName: "Español",
+        INSTRUCTIONS_TITLE: "Formas de Color",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Intenta recordar el color de las 3 formas, porque pronto desaparecerán.",
+        INSTRUCTIONS_TEXT_PAGE_2: "Luego verás reaparecer las mismas formas.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Responde si las formas tienen el MISMO o DIFERENTE color que antes.",
+        START_BUTTON_TEXT: "COMENZAR",
+        NEXT_BUTTON_TEXT: "Siguiente",
+        BACK_BUTTON_TEXT: "Atrás",
+        GET_READY_COUNTDOWN_TEXT: "PREPÁRESE",
+        SAME_BUTTON_TEXT: "Mismo",
+        DIFFERENT_BUTTON_TEXT: "Diferente",
+        TRIALS_COMPLETE_SCENE_TEXT: "Esta actividad está completa.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
       "de-DE": {
         localeName: "Deutsch",
         INSTRUCTIONS_TITLE: "Farb-Formen",
@@ -372,9 +391,10 @@ phases.`,
         },
         {
           imageName: "instructions-3",
-          height: 330,
-          width: 256,
+          height: 350,
+          width: 300,
           url: "images/cs-instructions-3.png",
+          localize: true,
         },
         {
           imageName: "circle-x",
