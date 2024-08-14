@@ -39,6 +39,24 @@ declare global {
         };
       };
     };
+    /**
+     * The following two message handlers are used to communicate with the
+     * MetricWire Catalyst app. These definitions must match what the Catalyst
+     * app expects, which is not part of the m2c2kit codebase and not in our
+     * control.
+     */
+    /**
+     * Used in both web view and cognitive task
+     */
+    catalystMessageHandler: {
+      postMessage: (message: string) => void;
+    };
+    /**
+     * Used only in cognitive task
+     */
+    cognitiveTaskMessageHandler: {
+      postMessage: (message: string) => void;
+    };
   }
 }
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -46,6 +64,7 @@ declare namespace IOSM2c2 {
   function sessionManualStart(): boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Embedding {
   /**
    * Configures the m2c2kit session to run embedded in a "host" such as a
@@ -60,7 +79,7 @@ export class Embedding {
    * @param options - options for embedding, such as the type of host.
    * @returns
    */
-  public static initialize(session: Session, options: EmbeddingOptions): void {
+  public static initialize(session: Session, options: EmbeddingOptions) {
     /**
      * Make session also available on window in case we want to control
      * the session through another means, such as other javascript or
@@ -72,44 +91,101 @@ export class Embedding {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as unknown as any).m2c2kitSession = session;
 
-    if (options.host === "MobileWebView") {
-      session.options.autoStartAfterInit = !(
-        Embedding.contextIsWebView() && Embedding.sessionManualStart() === true
-      );
-      this.configureWasmFetchInterceptor();
-
-      /**
-       * note: we do not need to set up Session.onData() events, because they
-       * will be sent by the individual Activity.onData() events, below.
-       */
-      session.onInitialize((ev: SessionEvent) => {
-        Embedding.sendEventToWebView(ev);
-      });
-      session.onStart((ev: SessionEvent) => {
-        Embedding.sendEventToWebView(ev);
-      });
-      session.onEnd((ev: SessionEvent) => {
-        Embedding.sendEventToWebView(ev);
-      });
-
-      session.options.activities.forEach((activity) => {
-        activity.onStart((ev) => {
-          Embedding.sendEventToWebView(ev);
-        });
-        activity.onData((ev) => {
-          Embedding.sendEventToWebView(ev);
-        });
-        activity.onCancel((ev) => {
-          Embedding.sendEventToWebView(ev);
-        });
-        activity.onEnd((ev) => {
-          Embedding.sendEventToWebView(ev);
-        });
-      });
-      return;
+    switch (options.host) {
+      case "MobileWebView": {
+        Embedding.configureForMobileWebView(session);
+        return;
+      }
+      case "CatalystWebView": {
+        Embedding.configureForCatalystWebView(session);
+        return;
+      }
+      case "CatalystCognitiveTask": {
+        Embedding.configureForCatalystCognitiveTask(session);
+        return;
+      }
+      default: {
+        throw new Error(`Unknown embedding host: ${options.host}`);
+      }
     }
+  }
 
-    throw new Error(`Unknown embedding host: ${options.host}`);
+  private static configureForMobileWebView(session: Session) {
+    session.options.autoStartAfterInit = !(
+      Embedding.contextIsWebView() && Embedding.sessionManualStart() === true
+    );
+    this.configureWasmFetchInterceptor();
+
+    /**
+     * note: we do not need to set up Session.onData() events, because they
+     * will be sent by the individual Activity.onData() events, below.
+     */
+    session.onInitialize((ev: SessionEvent) => {
+      Embedding.sendEventToWebView(ev);
+    });
+    session.onStart((ev: SessionEvent) => {
+      Embedding.sendEventToWebView(ev);
+    });
+    session.onEnd((ev: SessionEvent) => {
+      Embedding.sendEventToWebView(ev);
+    });
+
+    session.options.activities.forEach((activity) => {
+      activity.onStart((ev) => {
+        Embedding.sendEventToWebView(ev);
+      });
+      activity.onData((ev) => {
+        Embedding.sendEventToWebView(ev);
+      });
+      activity.onCancel((ev) => {
+        Embedding.sendEventToWebView(ev);
+      });
+      activity.onEnd((ev) => {
+        Embedding.sendEventToWebView(ev);
+      });
+    });
+  }
+
+  private static configureForCatalystWebView(session: Session) {
+    this.configureWasmFetchInterceptor();
+
+    session.onEnd(() => {
+      if (window.catalystMessageHandler !== undefined) {
+        // note: message differs for catalyst web view and cognitive task
+        window.catalystMessageHandler.postMessage("catalyst_next_button");
+        return;
+      }
+      console.warn(
+        "session ended, but window.catalystMessageHandler is undefined. cannot post catalyst_next_button message",
+      );
+    });
+  }
+
+  private static configureForCatalystCognitiveTask(session: Session) {
+    this.configureWasmFetchInterceptor();
+
+    session.onEnd(() => {
+      if (window.catalystMessageHandler !== undefined) {
+        // note: message differs for catalyst web view and cognitive task
+        window.catalystMessageHandler.postMessage("catalyst_finish");
+        return;
+      }
+      console.warn(
+        "session ended, but window.catalystMessageHandler is undefined. cannot post catalyst_finish message",
+      );
+    });
+
+    session.onActivityData((ev) => {
+      if (window.cognitiveTaskMessageHandler !== undefined) {
+        window.cognitiveTaskMessageHandler.postMessage(
+          JSON.stringify(ev.newData),
+        );
+        return;
+      }
+      console.warn(
+        `activity ${ev.target.name} generated data, but window.cognitiveTaskMessageHandler is undefined. cannot post new data: ${JSON.stringify(ev.newData)}`,
+      );
+    });
   }
 
   /**
