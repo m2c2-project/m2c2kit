@@ -2,7 +2,7 @@
 /**
  * The code in this file is adapted from a reference CLI implementation from
  * the Angular devkit repository:
- *   https://github.com/angular/angular-cli/blob/f5c250ab48e22c5aff31d8ebd35fb9a88e380fd7/packages/angular_devkit/schematics_cli/bin/schematics.ts
+ *   https://github.com/angular/angular-cli/blob/a7f466a5fa87c51b914441524bd0dff5b3957ced/packages/angular_devkit/schematics_cli/bin/schematics.ts
  * The license for that code is as follows:
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -13,7 +13,7 @@
 
 // symbol polyfill must go first
 import "symbol-observable";
-import type { JsonValue, logging, schema } from "@angular-devkit/core";
+import { JsonValue, logging, schema } from "@angular-devkit/core";
 import { ProcessOutput, createConsoleLogger } from "@angular-devkit/core/node";
 import { UnsuccessfulWorkflowExecution } from "@angular-devkit/schematics";
 import { NodeWorkflow } from "@angular-devkit/schematics/tools";
@@ -108,6 +108,15 @@ function _createPromptProvider(): schema.PromptProvider {
           )({
             message: definition.message,
             default: definition.default,
+            validate: (values) => {
+              if (!definition.validator) {
+                return true;
+              }
+
+              return definition.validator(
+                Object.values(values).map(({ value }) => value),
+              );
+            },
             choices: definition.items.map((item) =>
               typeof item == "string"
                 ? {
@@ -347,6 +356,8 @@ export async function main({
       error = false;
     }
   });
+
+  workflow.registry.addPostTransform(schema.transforms.addUndefinedDefaults);
 
   // Show usage of deprecated options
   workflow.registry.useXDeprecatedProvider((msg) => logger.warn(msg));
