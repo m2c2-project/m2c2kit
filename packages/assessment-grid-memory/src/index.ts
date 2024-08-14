@@ -16,6 +16,7 @@ import {
   Easings,
   Sprite,
   Constants,
+  Translation,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -23,6 +24,7 @@ import {
   Grid,
   Instructions,
   InstructionsOptions,
+  LocalePicker,
 } from "@m2c2kit/addons";
 
 /**
@@ -88,17 +90,6 @@ class GridMemory extends Game {
         description:
           "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
       },
-      trials_complete_scene_text: {
-        type: "string",
-        default: "You have completed all the grid memory trials",
-        description: "Text for scene displayed after all trials are complete.",
-      },
-      trials_complete_scene_button_text: {
-        type: "string",
-        default: "OK",
-        description:
-          "Button text for scene displayed after all trials are complete.",
-      },
       instruction_type: {
         type: "string",
         default: "long",
@@ -119,6 +110,12 @@ class GridMemory extends Game {
         type: "boolean",
         default: false,
         description: "Should the FPS be shown?",
+      },
+      show_locale_picker: {
+        type: "boolean",
+        default: false,
+        description:
+          "Should the icon that allows the participant to switch the locale be shown?",
       },
     };
 
@@ -293,6 +290,77 @@ class GridMemory extends Game {
       },
     };
 
+    const translation: Translation = {
+      configuration: {
+        baseLocale: "en-US",
+      },
+      "en-US": {
+        localeName: "English",
+        INSTRUCTIONS_TITLE: "Grid Memory",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "For this activity, try to remember the location of {{NUMBER_OF_DOTS}} dots.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Before placing the {{NUMBER_OF_DOTS}} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Press START to begin!",
+        GET_READY: "GET READY",
+        REMEMBER: "Remember the dot locations!",
+        TOUCH_INTERFERENCE: "Touch the F's!",
+        DONE_BUTTON_TEXT: "Done",
+        WHERE_WERE: "Where were the dots?",
+        MUST_SELECT: "You must select all {{NUMBER_OF_DOTS}} locations!",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Next",
+        BACK_BUTTON_TEXT: "Back",
+        TRIALS_COMPLETE_SCENE_TEXT: "This activity is complete.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "es-MX": {
+        localeName: "Español",
+        INSTRUCTIONS_TITLE: "Memoria de Puntos",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Para esta actividad, intenta recordar la ubicación de {{NUMBER_OF_DOTS}} puntos.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Antes de colocar los {{NUMBER_OF_DOTS}} puntos en su ubicación, también tendrás que tocar las Fs en la pantalla lo más rápido que puedas.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Presione COMENZAR para Empezar",
+        GET_READY: "PREPÁRESE",
+        REMEMBER: "Recuerda las ubicaciones de los puntos",
+        TOUCH_INTERFERENCE: "¡Toca las Fs!",
+        DONE_BUTTON_TEXT: "Listo",
+        WHERE_WERE: "¿Dónde estaban los puntos?",
+        MUST_SELECT:
+          "¡Debes seleccionar todas las {{NUMBER_OF_DOTS}} ubicaciones!",
+        START_BUTTON_TEXT: "COMENZAR",
+        NEXT_BUTTON_TEXT: "Siguiente",
+        BACK_BUTTON_TEXT: "Atrás",
+        TRIALS_COMPLETE_SCENE_TEXT: "Esta actividad está completa.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      "de-DE": {
+        localeName: "Deutsch",
+        INSTRUCTIONS_TITLE: "Raster-Gedächtnis",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "In dieser Aufgabe werden {{NUMBER_OF_DOTS}} rote Punkte kurz in einem Raster erscheinen. Ihre Aufgabe ist es, sich ihre Standorte zu merken!",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Als nächstes werden Sie eine Seite voll mit den Buchstaben E und F sehen, wie auf dem Beispiel unten. Ihre Aufgabe ist es, so schnell wie möglich auf alle F's zu tippen!",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Sobald das leere Raster erscheint, platzieren Sie die Punkte dort, wo Sie sie zuvor gesehen haben, indem Sie auf die entsprechenden Stellen tippen.",
+        GET_READY: "BEREIT MACHEN",
+        REMEMBER: "Merken Sie sich die Punktpositionen!",
+        TOUCH_INTERFERENCE: "Berühren die F's!",
+        DONE_BUTTON_TEXT: "Fertig",
+        WHERE_WERE: "Wo waren die Punkte?",
+        MUST_SELECT:
+          "Sie müssen alle {{NUMBER_OF_DOTS}} Punktpositionen auswählen!",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Weiter",
+        BACK_BUTTON_TEXT: "Vorherige",
+        TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:enable
+    };
+
     const img_default_size = 200;
     const options: GameOptions = {
       name: "Grid Memory",
@@ -303,6 +371,7 @@ class GridMemory extends Game {
       publishUuid: "50ee0af4-d013-408f-a7d1-c8d5c04da920",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
+      translation: translation,
       shortDescription:
         "Grid Memory is a visuospatial working memory task, \
 with delayed free recall. After a brief exposure, and a short distraction \
@@ -432,6 +501,12 @@ phase, participants report the location of dots on a grid.",
       });
     }
 
+    let localePicker: LocalePicker;
+    if (game.getParameter<boolean>("show_locale_picker")) {
+      localePicker = new LocalePicker();
+      game.addFreeNode(localePicker);
+    }
+
     // ==============================================================
     // SCENES: instructions
 
@@ -443,36 +518,46 @@ phase, participants report the location of dots on a grid.",
     if (customInstructions) {
       instructionsScenes = Instructions.create(customInstructions);
     } else {
+      if (!this.i18n) {
+        throw new Error("No i18n object found.");
+      }
       instructionsScenes = Instructions.create({
         instructionScenes: [
           {
-            title: "Grid Memory",
-            text: `For this activity, try to remember the location of ${NUMBER_OF_DOTS} dots.`,
+            title: "INSTRUCTIONS_TITLE",
+            text: "INSTRUCTIONS_TEXT_PAGE_1",
+            textInterpolation: { NUMBER_OF_DOTS: NUMBER_OF_DOTS.toString() },
             imageName: "grid",
             imageAboveText: false,
             imageMarginTop: 12,
             textFontSize: 24,
             titleFontSize: 30,
             textVerticalBias: 0.25,
+            nextButtonText: "NEXT_BUTTON_TEXT",
+            backButtonText: "BACK_BUTTON_TEXT",
           },
           {
-            title: "Grid Memory",
-            text: `Before placing the ${NUMBER_OF_DOTS} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.`,
+            title: "INSTRUCTIONS_TITLE",
+            text: "INSTRUCTIONS_TEXT_PAGE_2",
+            textInterpolation: { NUMBER_OF_DOTS: NUMBER_OF_DOTS.toString() },
             imageName: "fs",
             imageAboveText: false,
             imageMarginTop: 12,
             textFontSize: 24,
             titleFontSize: 30,
             textVerticalBias: 0.25,
+            nextButtonText: "NEXT_BUTTON_TEXT",
+            backButtonText: "BACK_BUTTON_TEXT",
           },
           {
-            title: "Grid Memory",
-            text: "Press START to begin!",
+            title: "INSTRUCTIONS_TITLE",
+            text: "INSTRUCTIONS_TEXT_PAGE_3",
             textFontSize: 24,
             titleFontSize: 30,
             textAlignmentMode: LabelHorizontalAlignmentMode.Center,
-            nextButtonText: "START",
+            nextButtonText: "START_BUTTON_TEXT",
             nextButtonBackgroundColor: WebColors.Green,
+            backButtonText: "BACK_BUTTON_TEXT",
           },
         ],
       });
@@ -519,7 +604,7 @@ phase, participants report the location of dots on a grid.",
     game.addScene(preparationScene);
 
     const getReadyMessage = new Label({
-      text: "Get Ready",
+      text: "GET_READY",
       fontSize: 24,
       position: { x: 200, y: 400 },
     });
@@ -558,7 +643,7 @@ phase, participants report the location of dots on a grid.",
     game.addScene(dotPresentationScene);
 
     const rememberDotsMessage = new Label({
-      text: "Remember the dot locations!",
+      text: "REMEMBER",
       fontSize: 24,
       position: { x: 200, y: 150 },
     });
@@ -634,7 +719,7 @@ phase, participants report the location of dots on a grid.",
     game.addScene(interferenceScene);
 
     const touchTheFs = new Label({
-      text: "Touch the F's!",
+      text: "TOUCH_INTERFERENCE",
       fontSize: 24,
       position: { x: 200, y: 100 },
     });
@@ -820,7 +905,7 @@ phase, participants report the location of dots on a grid.",
     game.addScene(dotRecallScene);
 
     const whereDotsMessage = new Label({
-      text: "Where were the dots?",
+      text: "WHERE_WERE",
       fontSize: 24,
       position: { x: 200, y: 150 },
     });
@@ -928,7 +1013,7 @@ phase, participants report the location of dots on a grid.",
     });
 
     const recallDoneButton = new Button({
-      text: "Done",
+      text: "DONE_BUTTON_TEXT",
       position: { x: 200, y: 700 },
       size: { width: 250, height: 50 },
     });
@@ -937,7 +1022,8 @@ phase, participants report the location of dots on a grid.",
     // place this warning message on the scene, but hide it
     // we'll unhide it, if needed.
     const youMustSelectAllMessage = new Label({
-      text: `You must select all ${NUMBER_OF_DOTS} locations!`,
+      text: "MUST_SELECT",
+      interpolation: { NUMBER_OF_DOTS: NUMBER_OF_DOTS.toString() },
       position: { x: 200, y: 600 },
       hidden: true,
     });
@@ -1021,13 +1107,13 @@ phase, participants report the location of dots on a grid.",
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: game.getParameter("trials_complete_scene_text"),
+      text: "TRIALS_COMPLETE_SCENE_TEXT",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
 
     const okButton = new Button({
-      text: game.getParameter("trials_complete_scene_button_text"),
+      text: "TRIALS_COMPLETE_SCENE_BUTTON_TEXT",
       position: { x: 200, y: 600 },
     });
     okButton.isUserInteractionEnabled = true;
