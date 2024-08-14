@@ -3128,8 +3128,13 @@ export class Game implements Activity {
       handled: false,
       ...M2c2KitHelpers.createTimestamps(),
     };
-    this.processDomPointerDown(scene, nodeEvent, domPointerEvent);
+    /**
+     * Free nodes are typically used as overlays and thus should have the first
+     * opportunity to process the DOM pointer event and potentially set
+     * nodeEvent.handled to true so it does not propagate to the current scene.
+     */
     this.processDomPointerDown(this.freeNodesScene, nodeEvent, domPointerEvent);
+    this.processDomPointerDown(scene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerUpHandler(domPointerEvent: PointerEvent): void {
@@ -3144,8 +3149,8 @@ export class Game implements Activity {
       handled: false,
       ...M2c2KitHelpers.createTimestamps(),
     };
-    this.processDomPointerUp(scene, nodeEvent, domPointerEvent);
     this.processDomPointerUp(this.freeNodesScene, nodeEvent, domPointerEvent);
+    this.processDomPointerUp(scene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
@@ -3160,8 +3165,8 @@ export class Game implements Activity {
       handled: false,
       ...M2c2KitHelpers.createTimestamps(),
     };
-    this.processDomPointerMove(scene, nodeEvent, domPointerEvent);
     this.processDomPointerMove(this.freeNodesScene, nodeEvent, domPointerEvent);
+    this.processDomPointerMove(scene, nodeEvent, domPointerEvent);
   }
 
   private htmlCanvasPointerLeaveHandler(domPointerEvent: PointerEvent): void {
@@ -3180,12 +3185,12 @@ export class Game implements Activity {
       handled: false,
       ...M2c2KitHelpers.createTimestamps(),
     };
-    this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
     this.processDomPointerLeave(
       this.freeNodesScene,
       nodeEvent,
       domPointerEvent,
     );
+    this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
   }
 
   /**
