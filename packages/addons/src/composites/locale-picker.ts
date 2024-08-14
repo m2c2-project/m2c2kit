@@ -267,8 +267,31 @@ export class LocalePicker extends Composite {
       });
       this.addChild(this.iconSprite);
 
-      this.iconSprite.onTapDown(() => {
+      /**
+       * The `LocalePicker` will be typically be added as a free node to the
+       * game so that it exists independently and on top of the game's scenes.
+       * Set `handled` to true for all tap and pointer events so that they do
+       * not propagate to the scene underneath. Drag and pointer leave/move
+       * events are not handled because they would not be relevant once this
+       * picker is shown.
+       * We will do this (handling of events) for other nodes in this composite
+       * that will be tapped.
+       */
+      this.iconSprite.onTapDown((e) => {
+        e.handled = true;
         this.setDialogVisibility(true);
+      });
+      this.iconSprite.onTapUp((e) => {
+        e.handled = true;
+      });
+      this.iconSprite.onTapUpAny((e) => {
+        e.handled = true;
+      });
+      this.iconSprite.onPointerUp((e) => {
+        e.handled = true;
+      });
+      this.iconSprite.onPointerDown((e) => {
+        e.handled = true;
       });
     }
 
@@ -284,7 +307,7 @@ export class LocalePicker extends Composite {
       isUserInteractionEnabled: true,
       hidden: true,
     });
-    overlay.onTapDown((e) => {
+    overlay.onTapUp((e) => {
       e.handled = true;
       if (this.eventListeners.length > 0) {
         this.eventListeners
@@ -306,6 +329,18 @@ export class LocalePicker extends Composite {
           });
       }
       this.setDialogVisibility(false);
+    });
+    overlay.onTapUpAny((e) => {
+      e.handled = true;
+    });
+    overlay.onTapDown((e) => {
+      e.handled = true;
+    });
+    overlay.onPointerUp((e) => {
+      e.handled = true;
+    });
+    overlay.onPointerDown((e) => {
+      e.handled = true;
     });
     this.addChild(overlay);
 
@@ -341,6 +376,19 @@ export class LocalePicker extends Composite {
     localeDialog.onTapDown((e) => {
       e.handled = true;
     });
+    localeDialog.onTapUp((e) => {
+      e.handled = true;
+    });
+    localeDialog.onTapUpAny((e) => {
+      e.handled = true;
+    });
+    localeDialog.onPointerUp((e) => {
+      e.handled = true;
+    });
+    localeDialog.onPointerDown((e) => {
+      e.handled = true;
+    });
+
     this.addChild(localeDialog);
 
     for (let i = 0; i < this.localeOptions.length; i++) {
@@ -369,8 +417,21 @@ export class LocalePicker extends Composite {
           // do not localize the text of each language option
           localize: false,
         });
-        text.onTapDown((e) => {
+        text.onTapUp((e) => {
+          e.handled = true;
           this.handleLocaleSelection(e, localeOption);
+        });
+        text.onTapUpAny((e) => {
+          e.handled = true;
+        });
+        text.onTapDown((e) => {
+          e.handled = true;
+        });
+        text.onPointerUp((e) => {
+          e.handled = true;
+        });
+        text.onPointerDown((e) => {
+          e.handled = true;
         });
         this.addChild(text);
       } else {
@@ -436,8 +497,21 @@ export class LocalePicker extends Composite {
           this.addChild(rightSelectionIndicator);
         }
 
-        localeSprite.onTapDown((e) => {
+        localeSprite.onTapUp((e) => {
+          e.handled = true;
           this.handleLocaleSelection(e, localeOption);
+        });
+        localeSprite.onTapUpAny((e) => {
+          e.handled = true;
+        });
+        localeSprite.onTapDown((e) => {
+          e.handled = true;
+        });
+        localeSprite.onPointerUp((e) => {
+          e.handled = true;
+        });
+        localeSprite.onPointerDown((e) => {
+          e.handled = true;
         });
       }
     }
@@ -446,7 +520,6 @@ export class LocalePicker extends Composite {
   }
 
   private handleLocaleSelection(e: TapEvent, localeOption: LocaleOption) {
-    e.handled = true;
     if (this.eventListeners.length > 0) {
       this.eventListeners
         .filter(
