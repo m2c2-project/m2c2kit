@@ -303,7 +303,7 @@ class GridMemory extends Game {
           "Before placing the {{NUMBER_OF_DOTS}} dots in their location, you will also have to tap some Fs on the screen as quickly as you can.",
         INSTRUCTIONS_TEXT_PAGE_3: "Press START to begin!",
         GET_READY: "GET READY",
-        REMEMBER: "Remember the dot locations!",
+        REMEMBER_LOCATIONS: "Remember the dot locations!",
         TOUCH_INTERFERENCE: "Touch the F's!",
         DONE_BUTTON_TEXT: "Done",
         WHERE_WERE: "Where were the dots?",
@@ -324,7 +324,7 @@ class GridMemory extends Game {
           "Antes de colocar los {{NUMBER_OF_DOTS}} puntos en su ubicación, también tendrás que tocar las Fs en la pantalla lo más rápido que puedas.",
         INSTRUCTIONS_TEXT_PAGE_3: "Presione COMENZAR para Empezar",
         GET_READY: "PREPÁRESE",
-        REMEMBER: "Recuerda las ubicaciones de los puntos",
+        REMEMBER_LOCATIONS: "Recuerda las ubicaciones de los puntos",
         TOUCH_INTERFERENCE: "¡Toca las Fs!",
         DONE_BUTTON_TEXT: "Listo",
         WHERE_WERE: "¿Dónde estaban los puntos?",
@@ -346,7 +346,7 @@ class GridMemory extends Game {
         INSTRUCTIONS_TEXT_PAGE_3:
           "Sobald das leere Raster erscheint, platzieren Sie die Punkte dort, wo Sie sie zuvor gesehen haben, indem Sie auf die entsprechenden Stellen tippen.",
         GET_READY: "BEREIT MACHEN",
-        REMEMBER: "Merken Sie sich die Punktpositionen!",
+        REMEMBER_LOCATIONS: "Merken Sie sich die Punktpositionen!",
         TOUCH_INTERFERENCE: "Berühren die F's!",
         DONE_BUTTON_TEXT: "Fertig",
         WHERE_WERE: "Wo waren die Punkte?",
@@ -643,7 +643,7 @@ phase, participants report the location of dots on a grid.",
     game.addScene(dotPresentationScene);
 
     const rememberDotsMessage = new Label({
-      text: "REMEMBER",
+      text: "REMEMBER_LOCATIONS",
       fontSize: 24,
       position: { x: 200, y: 150 },
     });
