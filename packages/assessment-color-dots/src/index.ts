@@ -4,7 +4,6 @@ import {
   Scene,
   Shape,
   Label,
-  TextLine,
   Transition,
   TransitionDirection,
   WebColors,
@@ -19,6 +18,8 @@ import {
   Sprite,
   Point,
   Constants,
+  Translation,
+  LabelHorizontalAlignmentMode,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -26,6 +27,7 @@ import {
   Grid,
   Instructions,
   InstructionsOptions,
+  LocalePicker,
 } from "@m2c2kit/addons";
 
 /**
@@ -114,17 +116,6 @@ class ColorDots extends Game {
         description:
           "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end.",
       },
-      trials_complete_scene_text: {
-        default: "You have completed all the color dots trials",
-        description: "Text for scene displayed after all trials are complete.",
-        type: "string",
-      },
-      trials_complete_scene_button_text: {
-        default: "OK",
-        description:
-          "Button text for scene displayed after all trials are complete.",
-        type: "string",
-      },
       instruction_type: {
         default: "long",
         description: "Type of instructions to show, 'short' or 'long'.",
@@ -146,6 +137,12 @@ class ColorDots extends Game {
         type: "boolean",
         default: false,
         description: "Should the FPS be shown?",
+      },
+      show_locale_picker: {
+        type: "boolean",
+        default: false,
+        description:
+          "Should the icon that allows the participant to switch the locale be shown?",
       },
     };
 
@@ -285,6 +282,58 @@ class ColorDots extends Game {
       },
     };
 
+    const translation: Translation = {
+      configuration: {
+        baseLocale: "en-US",
+      },
+      "en-US": {
+        localeName: "English",
+        INSTRUCTIONS_TITLE: "Color Dots",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1:
+          "For this activity, try to remember the location and color of 3 dots.",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "For this activity, try to remember the location and color of 3 dots.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Choose the color of the dot from the options at the bottom of the screen.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Next you are asked to place another dot. Touch the screen where you remember seeing the dot.",
+        WHAT_COLOR: "What color was this dot?",
+        WHERE_WAS: "Where was this dot?",
+        TOUCH_TO_MOVE: "Touch the screen to move the dot",
+        DONE_BUTTON_TEXT: "Done",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Next",
+        BACK_BUTTON_TEXT: "Back",
+        GET_READY_COUNTDOWN_TEXT: "GET READY!",
+        TRIALS_COMPLETE_SCENE_TEXT: "This activity is complete.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "es-MX": {
+        localeName: "Español",
+        INSTRUCTIONS_TITLE: "Puntos de Color",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1:
+          "Para esta actividad, intenta recordar la ubicación y el color de 3 puntos.",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Para esta actividad, intenta recordar la ubicación y el color de 3 puntos.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Escoja el color del punto de las opciones en la parte de abajo de la pantalla.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Luego, se te pedirá que coloques otro punto. Toca la pantalla donde recuerdas haber visto el punto.",
+        WHAT_COLOR: "¿De qué color era este punto?",
+        WHERE_WAS: "¿Dónde estaba este punto?",
+        TOUCH_TO_MOVE: "Toca la pantalla para mover el punto",
+        DONE_BUTTON_TEXT: "Listo",
+        START_BUTTON_TEXT: "COMENZAR",
+        NEXT_BUTTON_TEXT: "Siguiente",
+        BACK_BUTTON_TEXT: "Atrás",
+        GET_READY_COUNTDOWN_TEXT: "PREPÁRESE",
+        TRIALS_COMPLETE_SCENE_TEXT: "Esta actividad está completa.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
+      // cSpell:enable
+    };
+
     const options: GameOptions = {
       name: "Color Dots",
       /**
@@ -294,6 +343,7 @@ class ColorDots extends Game {
       publishUuid: "72a1ef60-75c0-47b3-921c-aaee72cca9da",
       version: "__PACKAGE_JSON_VERSION__",
       moduleMetadata: Constants.MODULE_METADATA_PLACEHOLDER,
+      translation: translation,
       shortDescription:
         "Color Dots is cued-recall, item-location memory \
 binding task, where after viewing 3 dots for a brief period of time, \
@@ -321,21 +371,23 @@ appeared.",
       images: [
         {
           imageName: "cd1",
-          height: 250,
-          width: 250,
+          height: 450,
+          width: 350,
           url: "images/cd1.png",
         },
         {
           imageName: "cd2",
-          height: 357,
-          width: 250,
+          height: 450,
+          width: 350,
           url: "images/cd2.png",
+          localize: true,
         },
         {
           imageName: "cd3",
-          height: 345,
-          width: 250,
+          height: 450,
+          width: 350,
           url: "images/cd3.png",
+          localize: true,
         },
         {
           imageName: "circle-x",
@@ -381,6 +433,12 @@ appeared.",
       });
     }
 
+    let localePicker: LocalePicker;
+    if (game.getParameter<boolean>("show_locale_picker")) {
+      localePicker = new LocalePicker();
+      game.addFreeNode(localePicker);
+    }
+
     // ==============================================================
     // These user input variables are referenced across scenes, thus
     // we must define them in this scope, rather than in the
@@ -407,15 +465,14 @@ appeared.",
           instructionsScenes = Instructions.create({
             instructionScenes: [
               {
-                title: "Color Dots",
-                text: "For this activity, try to remember the location and color of 3 dots.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
                 imageName: "cd1",
                 imageAboveText: false,
-                imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
-                nextButtonText: "START",
+                nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
               },
             ],
@@ -426,36 +483,39 @@ appeared.",
           instructionsScenes = Instructions.create({
             instructionScenes: [
               {
-                title: "Color Dots",
-                text: "For this activity, try to remember the location and color of 3 dots.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_1",
                 imageName: "cd1",
                 imageAboveText: false,
-                imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT",
               },
               {
-                title: "Color Dots",
-                text: "Choose the color of the dot from the options at the bottom of the screen.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_2",
                 imageName: "cd2",
                 imageAboveText: false,
-                imageMarginTop: 32,
                 textFontSize: 24,
                 titleFontSize: 30,
-                textVerticalBias: 0.2,
+                textVerticalBias: 0.15,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT",
               },
               {
-                title: "Color Dots",
-                text: "Next you are asked to place another dot. Touch the screen where you remember seeing the dot.",
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_3",
                 imageName: "cd3",
                 imageAboveText: false,
-                imageMarginTop: 32,
+                imageMarginTop: 8,
                 textFontSize: 24,
                 titleFontSize: 30,
-                textVerticalBias: 0.2,
-                nextButtonText: "START",
+                textVerticalBias: 0.15,
+                nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
+                backButtonText: "BACK_BUTTON_TEXT",
               },
             ],
           });
@@ -480,7 +540,7 @@ appeared.",
     // SCENE: countdown. Show 3 second countdown.
     const countdownScene = new CountdownScene({
       milliseconds: 3000,
-      text: "GET READY!",
+      text: "GET_READY_COUNTDOWN_TEXT",
       zeroDwellMilliseconds: 1000,
       transition: Transition.none(),
     });
@@ -596,6 +656,7 @@ appeared.",
       text: "+",
       fontSize: 32,
       fontColor: WebColors.Black,
+      localize: false,
     });
     fixationSceneSquare.addChild(plusLabel);
 
@@ -697,9 +758,9 @@ appeared.",
     colorSelectionScene.addChild(colorSelectionSceneSquare);
 
     const whatColorLabel = new Label({
-      text: "What color was this dot?",
+      text: "WHAT_COLOR",
       fontSize: 24,
-      position: { x: 200, y: 60 },
+      position: { x: 200, y: 75 },
     });
     colorSelectionScene.addChild(whatColorLabel);
 
@@ -727,7 +788,7 @@ appeared.",
 
     const colorSelectionDoneButton = new Button({
       position: { x: 200, y: 650 },
-      text: "Done",
+      text: "DONE_BUTTON_TEXT",
       hidden: true,
     });
     colorSelectionDoneButton.onTapDown(() => {
@@ -837,15 +898,17 @@ appeared.",
       currentInteractionIsDrag = false;
     });
 
-    const whereDotText = new TextLine({
-      text: "Where was this dot?",
+    const whereDotText = new Label({
+      text: "WHERE_WAS",
       fontSize: 24,
-      position: { x: 50, y: 60 },
+      position: { x: 165, y: 75 },
+      preferredMaxLayoutWidth: 285,
+      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Left,
     });
     locationSelectionScene.addChild(whereDotText);
 
     const touchToMoveLabel = new Label({
-      text: "Touch the screen to move the dot",
+      text: "TOUCH_TO_MOVE",
       fontSize: 24,
       position: { x: 200, y: 530 },
     });
@@ -985,7 +1048,7 @@ appeared.",
       locationSelectionDot = new Shape({
         circleOfRadius: dotDiameter / 2,
         fillColor: trialConfiguration.dots[locationSelectionDotIndex].rgbaColor,
-        position: { x: 300, y: 60 },
+        position: { x: 345, y: 75 },
         isUserInteractionEnabled: true,
         draggable: true,
       });
@@ -1066,7 +1129,7 @@ appeared.",
 
     const locationSelectionDoneButton = new Button({
       position: { x: 200, y: 650 },
-      text: "Done",
+      text: "DONE_BUTTON_TEXT",
       hidden: true,
       isUserInteractionEnabled: true,
     });
@@ -1119,13 +1182,13 @@ appeared.",
     game.addScene(doneScene);
 
     const doneSceneText = new Label({
-      text: game.getParameter("trials_complete_scene_text"),
+      text: "TRIALS_COMPLETE_SCENE_TEXT",
       position: { x: 200, y: 400 },
     });
     doneScene.addChild(doneSceneText);
 
     const okButton = new Button({
-      text: game.getParameter("trials_complete_scene_button_text"),
+      text: "TRIALS_COMPLETE_SCENE_BUTTON_TEXT",
       position: { x: 200, y: 650 },
     });
     okButton.isUserInteractionEnabled = true;
