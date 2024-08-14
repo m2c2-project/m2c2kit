@@ -12,6 +12,7 @@ import {
   LabelHorizontalAlignmentMode,
   Sprite,
   RgbaColor,
+  StringInterpolationMap,
 } from "@m2c2kit/core";
 
 const SCENE_TRANSITION_EASING = Easings.sinusoidalInOut;
@@ -20,6 +21,8 @@ const SCENE_TRANSITION_DURATION = 500;
 export interface InstructionScene {
   /** Primary instruction text */
   text?: string;
+  /** Interpolation for text */
+  textInterpolation?: StringInterpolationMap;
   /** Margin from left screen edge to primary instruction text. Default is 48 */
   textMarginStart?: number;
   /** Margin from right to primary instruction text. Default is 48 */
@@ -32,6 +35,8 @@ export interface InstructionScene {
   textFontSize?: number;
   /** A text heading to appear at the top of the scene */
   title?: string;
+  /** Interpolation for title */
+  titleInterpolation?: StringInterpolationMap;
   /** Margin from top of screen edge to title text. Default is 48 */
   titleMarginTop?: number;
   /** Font size of title text. Default is 16 */
@@ -50,8 +55,12 @@ export interface InstructionScene {
   backgroundColor?: RgbaColor;
   /** Button text for the back button. Will override what is set in InstructionsOptions */
   backButtonText?: string;
+  /** Interpolation for back button text */
+  backButtonTextInterpolation?: StringInterpolationMap;
   /** Button text for the next button. Will override what is set in InstructionsOptions */
   nextButtonText?: string;
+  /** Interpolation map for next button text */
+  nextButtonTextInterpolation?: StringInterpolationMap;
   /** Width of back button. Will override what is set in InstructionsOptions */
   backButtonWidth?: number;
   /** Width of next button. Will override what is set in InstructionsOptions */
@@ -89,8 +98,12 @@ export interface InstructionsOptions extends StoryOptions {
   backSceneTransition?: Transition;
   /** Button text for the back button. Default is "Back". Can be overridden within a single instruction scene */
   backButtonText?: string;
+  /** Interpolation map for back button text */
+  backButtonTextInterpolation?: StringInterpolationMap;
   /** Button text for the next button. Default is "Next". Can be overridden within a single instruction scene */
   nextButtonText?: string;
+  /** Interpolation map for next button text */
+  nextButtonTextInterpolation?: StringInterpolationMap;
   /** Width of back button. Default is 125. Can be overridden within a single instruction scene */
   backButtonWidth?: number;
   /** Width of next button. Default is 125. Can be overridden within a single instruction scene */
@@ -137,8 +150,12 @@ export class Instructions extends Story {
         });
       const backButtonText =
         s.backButtonText ?? options.backButtonText ?? "Back";
+      const backButtonTextInterpolation =
+        s.backButtonTextInterpolation ?? options.backButtonTextInterpolation;
       const nextButtonText =
         s.nextButtonText ?? options.nextButtonText ?? "Next";
+      const nextButtonTextInterpolation =
+        s.nextButtonTextInterpolation ?? options.nextButtonTextInterpolation;
       const backButtonWidth =
         s.backButtonWidth ?? options.backButtonWidth ?? 125;
       const nextButtonWidth =
@@ -181,6 +198,7 @@ export class Instructions extends Story {
       if (s.title !== undefined) {
         titleLabel = new Label({
           text: s.title,
+          interpolation: s.titleInterpolation,
           fontSize: titleFontSize,
           layout: {
             marginTop: titleMarginTop,
@@ -198,6 +216,7 @@ export class Instructions extends Story {
       if (s.text !== undefined) {
         textLabel = new Label({
           text: s.text,
+          interpolation: s.textInterpolation,
           preferredMaxLayoutWidth: Dimensions.MatchConstraint,
           horizontalAlignmentMode: textAlignmentMode,
           fontSize: textFontSize,
@@ -263,7 +282,9 @@ export class Instructions extends Story {
 
       if (i > 0) {
         const backButton = new Button({
+          name: "backButton",
           text: backButtonText,
+          interpolation: backButtonTextInterpolation,
           fontColor: backButtonFontColor,
           backgroundColor: backButtonBackgroundColor,
           size: { width: backButtonWidth, height: backButtonHeight },
@@ -286,6 +307,7 @@ export class Instructions extends Story {
       const nextButton = new Button({
         name: "nextButton",
         text: nextButtonText,
+        interpolation: nextButtonTextInterpolation,
         fontColor: nextButtonFontColor,
         backgroundColor: nextButtonBackgroundColor,
         size: { width: nextButtonWidth, height: nextButtonHeight },
