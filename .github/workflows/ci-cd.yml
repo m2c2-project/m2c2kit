@@ -1,12 +1,10 @@
-# Build/test/deploy packages to npm and docs to GitHub Pages
+# Build/test/publish packages to registries and docs to GitHub Pages
 name: CI/CD
 
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -14,14 +12,12 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "ci"
+  group: "publish"
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -29,10 +25,16 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=4096"
       # The base url in GitHub Pages where the docs will be deployed is typically the repo name
       DOCS_BASE_URL: m2c2kit
-      # Use GitHub secrets to get token used to authenticate with the registry
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      # URL of the registry where the packages will be published
-      REGISTRY_URL: https://registry.npmjs.org
+      # Use GitHub secrets to get token to authenticate with the public registry. Token must have publish access.
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # URL of the registry where public packages will be published. For npm, the URL is https://registry.npmjs.org
+      PUBLIC_REGISTRY_URL: https://registry.npmjs.org
+      # Use GitHub secrets to get token to authenticate with the organization npm-compatible registry. Token must have publish access.
+      ORG_NPM_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
+      # URL of the organization npm-compatible registry where packages will be published. For GitHub Packages, the URL is https://npm.pkg.github.com
+      ORG_REGISTRY_URL: https://npm.pkg.github.com
+      # Name of the organization. Must match the scope in name field of package.json for packages that will be published to the organization registry.
+      ORG_NAME: "@m2c2-project"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,9 +47,12 @@ jobs:
         with:
           node-version: 20.x
           cache: npm
-      - run: npm config set registry $REGISTRY_URL
-      # remove the scheme from the URL; needs to be in the format of //registry.npmjs.org/:_authToken=...
-      - run: 'npm config set $(echo $REGISTRY_URL | awk -v TOKEN=$NODE_AUTH_TOKEN -F[/:] ''{ print "//" $4 "/:_authToken=" TOKEN}'')'
+      # Configure .npmrc for public and organization registry
+      # To set auth token for a registry, registry needs to be in the format of //registry.npmjs.org/:_authToken=...
+      - run: npm config set registry $PUBLIC_REGISTRY_URL
+      - run: 'npm config set $(echo $PUBLIC_REGISTRY_URL | awk -v TOKEN=$NPM_TOKEN -F[/:] ''{ print "//" $4 "/:_authToken=" TOKEN}'')'
+      - run: npm config set $(echo $ORG_NAME:registry) $ORG_REGISTRY_URL
+      - run: 'npm config set $(echo $ORG_REGISTRY_URL | awk -v TOKEN=$ORG_NPM_TOKEN -F[/:] ''{ print "//" $4 "/:_authToken=" TOKEN}'')'
       - name: Install dependencies
         run: npm ci
       # See repo root Dockerfile for why this step is needed only when running in a container, like in GitHub Actions
@@ -56,27 +61,27 @@ jobs:
       - name: Build
         run: npm run build
       # No need to run tests here because they will be run as part of the "Integration test" next step (see repo root Dockerfile, "RUN npm test")
-      #- name: Test
-      #  run: npm run test
+      # - name: Test
+      #   run: npm run test
       - name: Integration test
         run: npm run integration-test
         timeout-minutes: 15
       - name: Publish updated packages
         # only packages explicitly named in scripts/publish-updated-packages.mjs will be published
         run: npm run publish-updated
-        # publish-updated will set an environment variable to indicate if 1) there were updated packages, and 2) all updated packages were successfully published to the registry
+        # publish-updated will set an environment variable PUBLIC_PACKAGES_OK to indicate if there were no errors with the public packages
       - name: Build docs
-        if: env.PUBLISHED_UPDATED_PACKAGES=='true'
+        if: env.PUBLIC_PACKAGES_OK=='true'
         run: npm run build -w website
       - name: Setup Pages
-        if: env.PUBLISHED_UPDATED_PACKAGES=='true'
+        if: env.PUBLIC_PACKAGES_OK=='true'
         uses: actions/configure-pages@v5
       - name: Upload artifact
-        if: env.PUBLISHED_UPDATED_PACKAGES=='true'
+        if: env.PUBLIC_PACKAGES_OK=='true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: website/build
       - name: Deploy to GitHub Pages
-        if: env.PUBLISHED_UPDATED_PACKAGES=='true'
+        if: env.PUBLIC_PACKAGES_OK=='true'
         id: deployment
         uses: actions/deploy-pages@v4

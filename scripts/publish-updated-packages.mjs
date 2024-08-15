@@ -1,35 +1,20 @@
+// @ts-check
+
 import * as url from "url";
 import * as fs from "fs";
 import * as path from "path";
 import process from "process";
 import child_process from "child_process";
-import chalk from "chalk";
 import Semver from "semver";
 
 /**
- * The script sets a GitHub Actions environment variable called
- * PUBLISHED_UPDATED_PACKAGES to true if 1) there were updated packages,
- * and 2) all updated packages were successfully published to the registry.
+ * These are the packages that will be published to the registries. We will
+ * manually update these as needed. If the package is to be published somewhere
+ * other than the public registry, then its `package.json` file must:
+ * 1. Have a `publishConfig` field with the registry URL.
+ * 2. Have a `name` starting with the organization scope, e.g. `@org-name/`.
  */
-
-/**
- * In the GitHub action, set the environment variable REGISTRY_URL to the
- * registry you want to publish to.
- */
-const REGISTRY_URL = process.env.REGISTRY_URL;
-
-if (!REGISTRY_URL) {
-  console.error("REGISTRY_URL environment variable not set.");
-  process.exit(1);
-}
-
-const verbose = process.argv.includes("--verbose");
-
-/**
- * These are the packages that will be published to the registry. We will
- * manually update these as needed.
- */
-const packageNamesToPublish = [
+const packagesToPublish = [
   "@m2c2kit/core",
   "@m2c2kit/addons",
   "@m2c2kit/session",
@@ -48,165 +33,292 @@ const packageNamesToPublish = [
   "@m2c2kit/assessment-symbol-search",
 ];
 
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
-const packagesPath = path.join(__dirname, "..", "packages");
 /**
- * Inspect the packages folder and returns an object with the package
- * name as the key and the package path as the value
+ * A "public package" is a package that will be published to the public
+ * registry, which is typically the npm registry.
+ *
+ * The script sets a GitHub Actions environment variable called
+ * PUBLIC_PACKAGES_OK to true if:
+ * 1. There were updated public packages and all were successfully built and
+ * published to the public registry, or
+ * 2. There were no updated public packages.
+ *
+ * Errors in building or publishing other packages will not affect the value
+ * of PUBLIC_PACKAGES_OK.
  */
-function makePackageDictionary(folder) {
-  const packageDictionary = {};
-  const packageFolders = fs
-    .readdirSync(folder)
-    .filter((file) => fs.lstatSync(path.join(folder, file)).isDirectory());
-  for (const packageFolder of packageFolders) {
-    const packagePath = path.join(folder, packageFolder);
-    const packageJsonPath = path.join(packagePath, "package.json");
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
-    packageDictionary[packageJson.name] = {
-      path: packageJsonPath,
-      localVersion: packageJson.version,
-    };
-  }
-  return packageDictionary;
-}
 
-const packageDictionary = makePackageDictionary(packagesPath);
+/**
+ * In the GitHub action, set the environment variable PUBLIC_REGISTRY_URL to the
+ * public registry. This is typically the npm registry, and it is the default
+ * value if PUBLIC_REGISTRY_URL is not set.
+ */
+const PUBLIC_REGISTRY_URL =
+  process.env.PUBLIC_REGISTRY_URL ?? "https://registry.npmjs.org";
+/**
+ * In the GitHub action, set the environment variable ORG_NPM_TOKEN to the
+ * secret that is the token to publish to the organization's registry.
+ */
+const ORG_NPM_TOKEN = process.env.ORG_NPM_TOKEN;
+const verbose = process.argv.includes("--verbose");
 
-// remove packages that are not in the array of packageNamesToPublish
-for (const packageName of Object.keys(packageDictionary)) {
-  if (!packageNamesToPublish.includes(packageName)) {
-    delete packageDictionary[packageName];
-  }
-}
+/**
+ * The GitHub Action (.yml file in .github/workflows) would be similar to:
+ *
+ * ```yaml
+ * env:
+ *   PUBLIC_REGISTRY_URL: https://registry.npmjs.org
+ *   ORG_NPM_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
+ *   <other environment variables needed by the action>
+ * ```
+ *
+ * The `ORG_NPM_TOKEN` is a GitHub secret that you create in the GitHub
+ * repository settings. The value of this secret is the token that has access
+ * to your organization's registries. This is typically a GitHub Personal
+ * Access Token (PAT) with the `read:packages` and `write:packages` scopes.
+ */
 
-// check the registry using an api call to get the version of each package in packageDictionary
-async function getPackageVersions(packageDictionary) {
-  const packageNames = Object.keys(packageDictionary);
+/**
+ * Returns paths to `package.json` files in directories immediately below
+ * specified directory.
+ *
+ * @param {string} dir - directory containing directories of npm projects
+ * @returns filepaths to `package.json` files
+ */
+function getPackageJsonPaths(dir) {
+  /** @type {Array<string>} */
+  const results = [];
 
-  const getVersionPromises = packageNames.map(async (packageName) => {
-    const response = await fetch(`${REGISTRY_URL}/${packageName}/latest`);
-    return response.json().then((data) => {
-      packageDictionary[packageName].registryVersion = data.version ?? "0.0.0";
-    });
+  const subfolders = fs.readdirSync(dir).filter((subfolder) => {
+    const fullPath = path.join(dir, subfolder);
+    return fs.statSync(fullPath).isDirectory();
   });
 
-  await Promise.all(getVersionPromises);
-  return packageDictionary;
-}
-
-function countNewPackages(packageDictionary) {
-  const packageNames = Object.keys(packageDictionary);
-  return packageNames.reduce((count, packageName) => {
-    if (
-      Semver.gt(
-        packageDictionary[packageName].localVersion,
-        packageDictionary[packageName].registryVersion,
-      )
-    ) {
-      return count + 1;
-    } else {
-      return count;
+  subfolders.forEach((subfolder) => {
+    const packageJsonPath = path.join(dir, subfolder, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      results.push(packageJsonPath);
     }
-  }, 0);
+  });
+
+  return results;
 }
 
-async function publishPackagesIfNewer(packageDictionary) {
-  const packageNames = Object.keys(packageDictionary);
-  const publishPromises = packageNames
-    .filter((packageName) =>
-      Semver.gt(
-        packageDictionary[packageName].localVersion,
-        packageDictionary[packageName].registryVersion,
-      ),
-    )
-    .map(async (packageName) => {
-      return new Promise((resolve) => {
-        child_process.exec(
-          `npm publish -w ${packageName} --registry ${REGISTRY_URL} --access public`,
-          (error) => {
-            if (error) {
-              resolve({
-                packageName: packageName,
-                message: `${packageName}@${packageDictionary[packageName].localVersion} failed: ${error}`,
-                error: true,
-              });
-            } else {
-              resolve({
-                packageName: packageName,
-                message: `${packageName}@${packageDictionary[packageName].localVersion} OK.`,
-                error: false,
-              });
-            }
-          },
-        );
-      });
+/**
+ * Fetches the latest version number of a package from a registry.
+ *
+ * @remarks A token will be needed if the registry does not allow anonymous
+ * public access.
+ *
+ * @param {string} packageName - name of the package
+ * @param {string} registryUrl - URL of the registry
+ * @param {string | undefined} token - token to access the registry
+ * @returns {Promise<string>} latest version number
+ */
+async function getRegistryLatestVersion(
+  packageName,
+  registryUrl,
+  token = undefined,
+) {
+  const auth = token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : undefined;
+
+  const response = await fetch(`${registryUrl}/${packageName}`, {
+    headers: auth,
+  });
+  if (response.status === 404) {
+    console.log(
+      `${packageName} not found at ${registryUrl}/${packageName}. assuming it is a new package.`,
+    );
+    return "0.0.0";
+  }
+  if (response.status >= 400) {
+    console.error(
+      `failed to fetch ${registryUrl}/${packageName}, error: ${response.status}.`,
+    );
+    if (response.status === 401 || response.status === 403) {
+      console.error(
+        `check your token, GitHub Action environment variables, or repository secrets.`,
+      );
+    }
+    process.exit(1);
+  }
+  return response.json().then((data) => data["dist-tags"].latest ?? "0.0.0");
+}
+
+/**
+ * @typedef PublishPackageResult
+ * @type {object}
+ * @property {string} message - message about the result of the publish
+ * @property {boolean} error - was there an error?
+ */
+
+/**
+ * Publishes a package to a registry.
+ *
+ * @param {string | undefined} [workspace] - workspace of the package
+ * @returns {Promise<PublishPackageResult>} result of the publish
+ */
+async function publishPackage(workspace = undefined) {
+  let workspaceOption = "";
+  if (workspace) {
+    workspaceOption = ` --workspace ${workspace}`;
+  }
+
+  return new Promise((resolve) => {
+    child_process.exec(`npm publish ${workspaceOption}`, (error) => {
+      if (error) {
+        resolve({
+          message: error.message,
+          error: true,
+        });
+      } else {
+        resolve({
+          message: "OK",
+          error: false,
+        });
+      }
     });
-  return Promise.all(publishPromises);
+  });
 }
 
-if (verbose) {
+/**
+ * Summarizes the results of publishing packages to the console.
+ *
+ * @param {number} publicPublishCount
+ * @param {number} publicPublishErrors
+ * @param {number} orgPublishCount
+ * @param {number} orgPublishErrors
+ */
+function logResultsToConsole(
+  publicPublishCount,
+  publicPublishErrors,
+  orgPublishCount,
+  orgPublishErrors,
+) {
+  console.log();
   console.log(
-    `Comparing local repository package versions to registry ${REGISTRY_URL}:`,
+    `published ${publicPublishCount} public ${publicPublishCount == 1 ? "package" : "packages"}.`,
   );
+  console.log(
+    `published ${orgPublishCount} organization ${orgPublishCount == 1 ? "package" : "packages"}.`,
+  );
+  if (publicPublishErrors > 0) {
+    console.error(
+      `FAILED to publish ${publicPublishErrors} public ${publicPublishErrors == 1 ? "package" : "packages"}.`,
+    );
+  }
+  if (orgPublishErrors > 0) {
+    console.error(
+      `FAILED to publish ${orgPublishErrors} organization ${orgPublishErrors == 1 ? "package" : "packages"}.`,
+    );
+  }
 }
 
-await getPackageVersions(packageDictionary);
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+/**
+ * It is assumed that this is a monorepo: multiple packages are in directories
+ * under a `packages` directory, and this script is executed from a directory
+ * parallel to the `packages` directory.
+ */
+const packagesPath = path.join(__dirname, "..", "packages");
+const packageJsonPaths = getPackageJsonPaths(packagesPath).filter((p) => {
+  const packageJson = JSON.parse(fs.readFileSync(p).toString());
+  return packagesToPublish.includes(packageJson.name);
+});
 
-if (verbose) {
-  const packageNames = Object.keys(packageDictionary);
-  packageNames.forEach((packageName) => {
-    let registryVersion;
-    if (packageDictionary[packageName].registryVersion === "0.0.0") {
-      registryVersion = chalk.cyanBright("not published yet");
-    } else {
-      registryVersion = `registry ${packageDictionary[packageName].registryVersion}`;
+let publicPublishErrors = 0;
+let publicPublishCount = 0;
+let orgPublishErrors = 0;
+let orgPublishCount = 0;
+
+for (const packageJsonPath of packageJsonPaths) {
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
+  const packageName = packageJson.name;
+  if (typeof packageName !== "string") {
+    console.error(`package.json name is not a string in ${packageJsonPath}`);
+    process.exit(1);
+  }
+  const repoVersion = packageJson.version;
+  if (typeof repoVersion !== "string") {
+    console.error(`package.json version is not a string in ${packageJsonPath}`);
+    process.exit(1);
+  }
+
+  /**
+   * If the package.json file does not have a publishConfig.registry field, the
+   * package will be published to the public registry.
+   */
+  const registryUrl =
+    packageJson.publishConfig?.registry ?? PUBLIC_REGISTRY_URL;
+  const isPublicPackage = registryUrl === PUBLIC_REGISTRY_URL;
+  let token = isPublicPackage ? undefined : ORG_NPM_TOKEN;
+  const registryVersion = await getRegistryLatestVersion(
+    packageName,
+    registryUrl,
+    token,
+  );
+
+  if (Semver.gt(repoVersion, registryVersion)) {
+    if (verbose) {
+      console.log(
+        `repository package ${packageName} version ${repoVersion} is newer than registry version ${registryVersion}`,
+      );
+    }
+    /**
+     * We assume that the package is in a workspace (this is a monorepo), and
+     * the workspace name is the same as the package name.
+     */
+    const result = await publishPackage(packageName);
+    if (result.error) {
+      console.error(
+        `ERROR. failed to publish ${packageName} to ${registryUrl}. error: ${result.message}`,
+      );
+      if (isPublicPackage) {
+        publicPublishErrors++;
+      } else {
+        orgPublishErrors++;
+      }
+      continue;
     }
     console.log(
-      `  ${packageName}: local ${packageDictionary[packageName].localVersion}, ${registryVersion}`,
+      `OK. published ${packageName} version ${repoVersion} to ${registryUrl}`,
     );
-  });
+    if (isPublicPackage) {
+      publicPublishCount++;
+    } else {
+      orgPublishCount++;
+    }
+  } else {
+    if (verbose) {
+      console.log(
+        `repository package ${packageName} version ${repoVersion} is not newer than registry version ${registryVersion}. skipping publish.`,
+      );
+    }
+  }
 }
 
-if (countNewPackages(packageDictionary) === 0) {
-  console.log("No updated packages to publish.");
+logResultsToConsole(
+  publicPublishCount,
+  publicPublishErrors,
+  orgPublishCount,
+  orgPublishErrors,
+);
+
+if (publicPublishErrors > 0) {
   // GitHub Actions syntax to set an environment variable for subsequent steps in this job
-  child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV',
-  );
+  child_process.execSync('echo "PUBLIC_PACKAGES_OK=false" >> $GITHUB_ENV');
   // GitHub Actions syntax to set an environment variable for subsequent jobs
-  child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"',
-  );
-  process.exit(0);
-} else {
-  console.log(
-    `Publishing ${countNewPackages(
-      packageDictionary,
-    )} updated packages to registry ${REGISTRY_URL}...`,
-  );
+  child_process.execSync('echo "::set-env name=PUBLIC_PACKAGES_OK::false"');
+  process.exit(1);
 }
 
-const results = await publishPackagesIfNewer(packageDictionary);
-results.forEach((result) => {
-  console.log(
-    chalk[result.error ? "red" : "reset"]("  " + result.message.trim()),
-  );
-});
-const error = results.some((result) => result.error);
-if (error) {
-  child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=false" >> $GITHUB_ENV',
-  );
-  child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::false"',
-  );
-} else {
-  child_process.execSync(
-    'echo "PUBLISHED_UPDATED_PACKAGES=true" >> $GITHUB_ENV',
-  );
-  child_process.execSync(
-    'echo "::set-env name=PUBLISHED_UPDATED_PACKAGES::true"',
-  );
+if (orgPublishErrors > 0) {
+  process.exit(1);
 }
-process.exit(error ? 1 : 0);
+
+child_process.execSync('echo "PUBLIC_PACKAGES_OK=true" >> $GITHUB_ENV');
+child_process.execSync('echo "::set-env name=PUBLIC_PACKAGES_OK::true"');
+process.exit(0);
