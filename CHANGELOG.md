@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/assessments-registry` [0.1.1] - 2024-08-16
+
+### Changed
+
+- Updated build script and added types (jsdoc-style) to built files.
+
 ## `@m2c2kit/core` [0.3.21] - 2024-08-16
 
 ### Changed

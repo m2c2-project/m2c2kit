@@ -158,29 +158,37 @@ async function getRegistryLatestVersion(
 /**
  * Publishes a package to a registry.
  *
+ * @param {"public" | "restricted"} access - access level of the package
  * @param {string | undefined} [workspace] - workspace of the package
  * @returns {Promise<PublishPackageResult>} result of the publish
  */
-async function publishPackage(workspace = undefined) {
+async function publishPackage(access, workspace = undefined) {
   let workspaceOption = "";
   if (workspace) {
     workspaceOption = ` --workspace ${workspace}`;
   }
+  let accessOption = "";
+  if (access) {
+    accessOption = ` --access ${access}`;
+  }
 
   return new Promise((resolve) => {
-    child_process.exec(`npm publish ${workspaceOption}`, (error) => {
-      if (error) {
-        resolve({
-          message: error.message,
-          error: true,
-        });
-      } else {
-        resolve({
-          message: "OK",
-          error: false,
-        });
-      }
-    });
+    child_process.exec(
+      `npm publish ${workspaceOption}${accessOption}`,
+      (error) => {
+        if (error) {
+          resolve({
+            message: error.message,
+            error: true,
+          });
+        } else {
+          resolve({
+            message: "OK",
+            error: false,
+          });
+        }
+      },
+    );
   });
 }
 
@@ -267,11 +275,13 @@ for (const packageJsonPath of packageJsonPaths) {
         `repository package ${packageName} version ${repoVersion} is newer than registry version ${registryVersion}`,
       );
     }
+
+    const access = isPublicPackage ? "public" : "restricted";
     /**
      * We assume that the package is in a workspace (this is a monorepo), and
      * the workspace name is the same as the package name.
      */
-    const result = await publishPackage(packageName);
+    const result = await publishPackage(access, packageName);
     if (result.error) {
       console.error(
         `ERROR. failed to publish ${packageName} to ${registryUrl}. error: ${result.message}`,
