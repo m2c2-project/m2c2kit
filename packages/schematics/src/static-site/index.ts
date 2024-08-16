@@ -456,7 +456,7 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
     const exampleAssessment = assessmentConfigurations[0];
     const exampleQueryString = `/index.html?assessment=${exampleAssessment.name}@${exampleAssessment.version}&number_of_trials=6`;
     const hostedAssessmentPaths = new Array<string>();
-
+    let esModuleShimsAdded = false;
     /**
      * assessmentConfigurations now has all the information needed to create
      * the index.js and index.html files for each specific assessment.
@@ -587,7 +587,8 @@ session.initialize();`;
         "<%- importMaps %>",
         JSON.stringify(importMaps, null, 2),
       );
-      if (config.esModuleShims !== false) {
+      if (config.esModuleShims !== false && !esModuleShimsAdded) {
+        esModuleShimsAdded = true;
         const schematicDir = __dirname.replace(/\\/g, "/");
         const filenames = getFilesRecursive(
           schematicDir + "/files/es-module-shims",
@@ -775,6 +776,11 @@ const newConfig = `/**
  * in the same folder as this file and install the @m2c2kit/schematics package:
  *   npm init -y
  *   npm install -D @m2c2kit/schematics
+ *
+ * To use the latest version of both packages, run the following commands in
+ * the same folder as this file:
+ *   npm install -g @m2c2kit/cli@latest
+ *   npm install @m2c2kit/schematics@latest
  */
 
 /**
@@ -782,37 +788,48 @@ const newConfig = `/**
  * @type {StaticSiteConfig}
  */
 export default {
-  configVersion: "0.1.17",
+  configVersion: "0.1.19",
   outDir: "./site",
   assessments: [
     {
       name: "@m2c2kit/assessment-symbol-search",
-      versions: ">=0.8.18",
+      versions: ">=0.8.19",
+      // by setting the parameters property, the game's parameters can be
+      // changed from the defaults built into the game. for game parameters,
+      // see https://m2c2-project.github.io/m2c2kit/docs/schemas/what-is-schema/
+      // note that if game parameters are passed in through URL parameters,
+      // they will override these.
       parameters: {
-        // for configurable game parameters,
-        // see https://m2c2-project.github.io/m2c2kit/docs/schemas/what-is-schema/
+        number_of_trials: 4,
+        show_quit_button: false,
+      },
+    },
+    {
+      name: "@m2c2kit/assessment-grid-memory",
+      versions: ">=0.8.19",
+      parameters: {
         number_of_trials: 2,
         show_quit_button: false,
       },
-      configure: (context, session, assessment) => {
-        console.log(\`configuring assessment \${assessment.options.name} version \${assessment.options.version}\`)
-        session.onActivityData((ev) => {
-          console.log("  newData: " + JSON.stringify(ev.newData));
-          // place code here to post data to a server, e.g.,
-          // fetch("https://www.example.com", {
-          //   method: "POST",
-          //   headers: {
-          //     "Content-Type": "application/json",
-          //   },
-          //   body: JSON.stringify(ev.newData),
-          // });
-        });
-        // place code here to redirect when session ends, e.g.,
-        // session.onEnd(() => {
-        //   window.location.href = "https://www.example.com";
-        // });
-      }
-    }
-  ]
+    }    
+  ],
+  configure: (context, session, assessment) => {
+    console.log(\`configuring assessment \${assessment.options.name} version \${assessment.options.version}\`)
+    session.onActivityData((ev) => {
+      console.log("  newData: " + JSON.stringify(ev.newData));
+      // place code here to post data to a server, e.g.,
+      // fetch("https://www.example.com", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(ev.newData),
+      // });
+    });
+    // place code here to redirect when session ends, e.g.,
+    // session.onEnd(() => {
+    //   window.location.href = "https://www.example.com";
+    // });
+  }  
 };
 `;

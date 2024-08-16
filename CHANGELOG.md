@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/schematics` [0.1.19] - 2024-08-16
+
+### Fixed
+
+- A bug copying `es-module-shims` happened when more than one assessment was included.
+
 ## `@m2c2kit/assessments-registry` [0.1.1] - 2024-08-16
 
 ### Changed

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schematics",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Rules for the m2c2kit CLI to generate new apps",
   "main": "index.js",
   "types": "types/index.d.ts",
