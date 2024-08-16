@@ -12,14 +12,7 @@ export default [
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: [
-            "*.mjs",
-            ".*.mjs",
-            "scripts/*.mjs",
-            "packages/*/*.mjs",
-            "packages/*/src/runner.ts",
-            "packages/schematics/scripts/*.mjs",
-          ],
+          allowDefaultProject: ["*.mjs", ".*.mjs"],
           defaultProject: "./tsconfig.json",
         },
         tsconfigRootDir: import.meta.dirname,
@@ -39,6 +32,13 @@ export default [
       "examples/no-js-bundler-development/lib/",
       "packages/build-helpers/src/__tests__/dist-test",
       "website/static/m2c2kit/modules",
+      // ignore these to avoid typescript-eslint warnings about too many
+      // out of project default files
+      "scripts/*.mjs",
+      "packages/*/*.mjs",
+      "packages/*/src/runner.ts",
+      "packages/*/src/__tests__/*.ts",
+      "packages/schematics/scripts/*.mjs",
     ],
   },
 ];

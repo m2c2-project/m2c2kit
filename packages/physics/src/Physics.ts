@@ -40,7 +40,8 @@ export interface PhysicsEvent extends PluginEvent {
   bodyB: PhysicsBody;
 }
 
-const DELTA_TIME_60_FPS = 16.66666667;
+// eslint-disable-next-line no-loss-of-precision
+const DELTA_TIME_60_FPS = 16.666666666666667;
 
 /**
  * Physics functionality plugin

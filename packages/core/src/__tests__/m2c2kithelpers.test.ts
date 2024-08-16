@@ -187,3 +187,306 @@ describe("test M2c2KitHelpers", () => {
     expect(rotated).toBe(true);
   });
 });
+
+describe("convertValueToType", () => {
+  it("converts string to string", () => {
+    const value = M2c2KitHelpers.convertValueToType("hello", "string");
+    expect(value).toBe("hello");
+  });
+
+  it("converts number to string", () => {
+    const value = M2c2KitHelpers.convertValueToType(10, "string");
+    expect(value).toBe(10);
+  });
+
+  it("converts boolean to string", () => {
+    const value = M2c2KitHelpers.convertValueToType(true, "string");
+    expect(value).toBe("true");
+  });
+
+  it("converts null to string", () => {
+    const value = M2c2KitHelpers.convertValueToType(null, "string");
+    expect(value).toBe("null");
+  });
+
+  it("converts array to string", () => {
+    const value = M2c2KitHelpers.convertValueToType([10, 20, 30], "string");
+    expect(value).toBe("[10,20,30]");
+  });
+
+  it("converts object to string", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      { a: 100, b: 200 },
+      "string",
+    );
+    expect(value).toBe('{"a":100,"b":200}');
+  });
+
+  it("converts number to number", () => {
+    const value = M2c2KitHelpers.convertValueToType(10, "number");
+    expect(value).toBe(10);
+  });
+
+  it("converts string number to number", () => {
+    const value = M2c2KitHelpers.convertValueToType("10", "number");
+    expect(value).toBe(10);
+  });
+
+  it("throws error converting non-numeric string to number", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "number");
+    }).toThrow();
+  });
+
+  it("throws error converting boolean to number", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(true, "number");
+    }).toThrow();
+  });
+
+  it("throws error converting null to number", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(null, "number");
+    }).toThrow();
+  });
+
+  it("throws error converting array to number", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType([10, 20, 30], "number");
+    }).toThrow();
+  });
+
+  it("throws error converting object to number", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType({ a: 100, b: 200 }, "number");
+    }).toThrow();
+  });
+
+  it("converts number to integer", () => {
+    const value = M2c2KitHelpers.convertValueToType(10, "integer");
+    expect(value).toBe(10);
+  });
+
+  it("converts string integer to integer", () => {
+    const value = M2c2KitHelpers.convertValueToType("10", "integer");
+    expect(value).toBe(10);
+  });
+
+  it("throws error converting non-numeric string to integer", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "integer");
+    }).toThrow();
+  });
+
+  it("throws error converting boolean to integer", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(true, "integer");
+    }).toThrow();
+  });
+
+  it("throws error converting null to integer", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(null, "integer");
+    }).toThrow();
+  });
+
+  it("throws error converting array to integer", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType([10, 20, 30], "integer");
+    }).toThrow();
+  });
+
+  it("throws error converting object to integer", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType({ a: 100, b: 200 }, "integer");
+    }).toThrow();
+  });
+
+  it("converts boolean to boolean", () => {
+    const value = M2c2KitHelpers.convertValueToType(true, "boolean");
+    expect(value).toBe(true);
+  });
+
+  it("converts string boolean to boolean", () => {
+    const value = M2c2KitHelpers.convertValueToType("true", "boolean");
+    expect(value).toBe(true);
+  });
+
+  it("throws error converting non-boolean string to boolean", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "boolean");
+    }).toThrow();
+  });
+
+  it("throws error converting number to boolean", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(10, "boolean");
+    }).toThrow();
+  });
+
+  it("throws error converting null to boolean", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(null, "boolean");
+    }).toThrow();
+  });
+
+  it("throws error converting array to boolean", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType([10, 20, 30], "boolean");
+    }).toThrow();
+  });
+
+  it("throws error converting object to boolean", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType({ a: 100, b: 200 }, "boolean");
+    }).toThrow();
+  });
+
+  it("converts null to null", () => {
+    const value = M2c2KitHelpers.convertValueToType(null, "null");
+    expect(value).toBe(null);
+  });
+
+  it("converts string null to null", () => {
+    const value = M2c2KitHelpers.convertValueToType("null", "null");
+    expect(value).toBe(null);
+  });
+
+  it("throws error converting non-null string to null", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "null");
+    }).toThrow();
+  });
+
+  it("throws error converting number to null", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(10, "null");
+    }).toThrow();
+  });
+
+  it("throws error converting boolean to null", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(true, "null");
+    }).toThrow();
+  });
+
+  it("throws error converting array to null", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType([10, 20, 30], "null");
+    }).toThrow();
+  });
+
+  it("throws error converting object to null", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType({ a: 100, b: 200 }, "null");
+    }).toThrow();
+  });
+
+  it("converts array to array", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      [10, 20, 30, { a: true }],
+      "array",
+    );
+    expect(value).toStrictEqual([10, 20, 30, { a: true }]);
+  });
+
+  it("converts string array to array", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      '[10, 20, 30, { "a": true }]',
+      "array",
+    );
+    expect(value).toStrictEqual([10, 20, 30, { a: true }]);
+  });
+
+  it("converts uri-encoded string array to array", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      "%5B10%2C%2020%2C%2030%2C%20%7B%20%22a%22%3A%20true%20%7D%5D",
+      "array",
+    );
+    expect(value).toStrictEqual([10, 20, 30, { a: true }]);
+  });
+
+  it("throws error converting non-array string to array", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "array");
+    }).toThrow();
+  });
+
+  it("throws error converting number to array", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(10, "array");
+    }).toThrow();
+  });
+
+  it("throws error converting boolean to array", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(true, "array");
+    }).toThrow();
+  });
+
+  it("throws error converting null to array", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(null, "array");
+    }).toThrow();
+  });
+
+  it("throws error converting object to array", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType({ a: 100, b: 200 }, "array");
+    }).toThrow();
+  });
+
+  it("converts object to object", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      { a: 100, b: 200 },
+      "object",
+    );
+    expect(value).toStrictEqual({ a: 100, b: 200 });
+  });
+
+  it("converts string object to object", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      '{ "a": 100, "b": 200, "c": [1, -1] }',
+      "object",
+    );
+    expect(value).toStrictEqual({ a: 100, b: 200, c: [1, -1] });
+  });
+
+  it("converts uri-encoded string object to object", () => {
+    const value = M2c2KitHelpers.convertValueToType(
+      "%7B%20%22a%22%3A%20100%2C%20%22b%22%3A%20200%2C%20%22c%22%3A%20%5B1%2C%20-1%5D%20%7D",
+      "object",
+    );
+    expect(value).toStrictEqual({ a: 100, b: 200, c: [1, -1] });
+  });
+
+  it("throws error converting non-object string to object", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType("hello", "object");
+    }).toThrow();
+  });
+
+  it("throws error converting number to object", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(10, "object");
+    }).toThrow();
+  });
+
+  it("throws error converting boolean to object", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(true, "object");
+    }).toThrow();
+  });
+
+  it("throws error converting null to object", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType(null, "object");
+    }).toThrow();
+  });
+
+  it("throws error converting array to object", () => {
+    expect(() => {
+      M2c2KitHelpers.convertValueToType([10, 20, 30], "object");
+    }).toThrow();
+  });
+});

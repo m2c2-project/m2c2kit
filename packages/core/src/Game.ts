@@ -786,9 +786,26 @@ export class Game implements Activity {
         );
       } else if (this.options.parameters && this.options.parameters[key]) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.options.parameters[key].default = (additionalParameters as any)[
-          key
-        ];
+        const providedValue = (additionalParameters as any)[key];
+        let value;
+        if (
+          this.options.parameters[key].type !== undefined &&
+          providedValue !== undefined
+        ) {
+          try {
+            value = M2c2KitHelpers.convertValueToType(
+              providedValue,
+              this.options.parameters[key].type,
+            );
+          } catch (e: unknown) {
+            throw new Error(
+              "Error setting parameter " + key + ": " + (e as Error).message,
+            );
+          }
+        } else {
+          value = providedValue;
+        }
+        this.options.parameters[key].default = value;
       }
 
       if (this.additionalParameters === undefined) {

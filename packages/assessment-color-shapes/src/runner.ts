@@ -6,8 +6,18 @@
 import { Session } from "@m2c2kit/session";
 import { ColorShapes } from "./index";
 
+const activity = new ColorShapes();
+
+// Set game parameters from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const gameParameters: { [key: string]: string } = {};
+urlParams.forEach((value, key) => {
+  gameParameters[key] = value;
+});
+activity.setParameters(gameParameters);
+
 const session = new Session({
-  activities: [new ColorShapes()],
+  activities: [activity],
 });
 
 session.onActivityData((ev) => {

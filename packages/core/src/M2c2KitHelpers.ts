@@ -10,6 +10,7 @@ import { Game } from "./Game";
 import { M2NodeConstructor } from "./M2NodeConstructor";
 import { Timer } from "./Timer";
 import { Constants } from "./Constants";
+import { JsonSchemaDataType } from "./JsonSchema";
 
 interface RotationTransform {
   /** Counterclockwise radians of the rotation */
@@ -46,6 +47,293 @@ export class M2c2KitHelpers {
    */
   static urlHasScheme(url: string): boolean {
     return /^[a-z]+:\/\//i.test(url);
+  }
+
+  /**
+   * Converts a value to a JSON schema type or one of types.
+   *
+   * @remarks The value can be of the target type, or a string that can be
+   * parsed into the target type. For example, a string `"3"` can be converted
+   * to a number, and a string `'{ "color" : "red" }'` can be converted to an
+   * object. If the target type if an object or array, the value can be a
+   * string parsable into the target type: this string can be the string
+   * representation of the object or array, or the URI encoded string.
+   * Throws an error if the value cannot be converted to the type or one of the
+   * types. Converting an object, null, or array to a string is often not the
+   * desired behavior, so a warning is logged if this occurs.
+   *
+   * @param value - the value to convert
+   * @param type - A JSON Schema type or types to convert the value to, e.g.,
+   * "string" or ["string", "null"]
+   * @returns the converted value
+   */
+  static convertValueToType(
+    value: string | number | boolean | Array<unknown> | object | null,
+    type: JsonSchemaDataType | JsonSchemaDataType[] | undefined,
+  ) {
+    function canBeString(value: unknown): boolean {
+      if (typeof value === "string") {
+        return true;
+      }
+      if (typeof value === "object") {
+        return true;
+      }
+      if (!Number.isNaN(parseFloat(value as string))) {
+        return true;
+      }
+      if (typeof value === "boolean") {
+        return true;
+      }
+      return false;
+    }
+
+    function asString(value: unknown) {
+      if (typeof value === "string") {
+        return value;
+      }
+      if (typeof value === "object") {
+        console.warn(
+          `convertValueToType() converted an object to a string. This may not be the desired behavior. The object was: ${JSON.stringify(value)}`,
+        );
+        return JSON.stringify(value);
+      }
+      if (!Number.isNaN(parseFloat(value as string))) {
+        return value;
+      }
+      if (typeof value === "boolean") {
+        return value.toString();
+      }
+      throw new Error(`Error parsing "${value}" as a string.`);
+    }
+
+    function canBeNumber(value: unknown) {
+      if (typeof value === "number") {
+        return true;
+      }
+      if (typeof value !== "string") {
+        return false;
+      }
+      const n = parseFloat(value);
+      if (Number.isNaN(n)) {
+        return false;
+      }
+      return true;
+    }
+
+    function asNumber(value: unknown) {
+      if (typeof value === "number") {
+        return value;
+      }
+      if (typeof value !== "string") {
+        throw new Error(`Error parsing "${value}" as a number.`);
+      }
+      const n = parseFloat(value);
+      if (Number.isNaN(n)) {
+        throw new Error(`Error parsing "${value}" as a number.`);
+      }
+      return n;
+    }
+
+    function canBeInteger(value: unknown) {
+      if (typeof value === "number") {
+        return true;
+      }
+      if (typeof value !== "string") {
+        return false;
+      }
+      const n = parseInt(value);
+      if (Number.isNaN(n)) {
+        return false;
+      }
+      return true;
+    }
+
+    function asInteger(value: unknown) {
+      if (typeof value === "number") {
+        return value;
+      }
+      if (typeof value !== "string") {
+        throw new Error(`Error parsing "${value}" as an integer.`);
+      }
+      const n = parseInt(value);
+      if (Number.isNaN(n)) {
+        throw new Error(`Error parsing "${value}" as an integer.`);
+      }
+      return n;
+    }
+
+    function canBeBoolean(value: unknown): boolean {
+      if (typeof value === "boolean") {
+        return true;
+      }
+      if (value !== "true" && value !== "false") {
+        return false;
+      }
+      return true;
+    }
+
+    function asBoolean(value: unknown) {
+      if (typeof value === "boolean") {
+        return value;
+      }
+      if (value !== "true" && value !== "false") {
+        throw new Error(`Error parsing "${value}" as a boolean.`);
+      }
+      return value === "true";
+    }
+
+    function canBeArray(value: unknown): boolean {
+      if (Array.isArray(value)) {
+        return true;
+      }
+      if (typeof value !== "string") {
+        return false;
+      }
+      try {
+        const a = JSON.parse(value);
+        if (Array.isArray(a)) {
+          return true;
+        }
+      } catch {
+        const a = JSON.parse(decodeURIComponent(value));
+        if (Array.isArray(a)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function asArray(value: unknown) {
+      if (Array.isArray(value)) {
+        return value;
+      }
+      if (typeof value !== "string") {
+        throw new Error(`Error parsing "${value}" as an array.`);
+      }
+      try {
+        const a = JSON.parse(value);
+        if (Array.isArray(a)) {
+          return a;
+        }
+      } catch {
+        const a = JSON.parse(decodeURIComponent(value));
+        if (Array.isArray(a)) {
+          return a;
+        }
+      }
+      throw new Error(`Error parsing "${value}" as an array.`);
+    }
+
+    function canBeObject(value: unknown): boolean {
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value !== null
+      ) {
+        return true;
+      }
+      if (typeof value !== "string") {
+        return false;
+      }
+      try {
+        const o = JSON.parse(value);
+        if (typeof o === "object" && !Array.isArray(o) && o !== null) {
+          return true;
+        }
+      } catch {
+        const o = JSON.parse(decodeURIComponent(value));
+        if (typeof o === "object" && !Array.isArray(o) && o !== null) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function asObject(value: unknown) {
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value !== null
+      ) {
+        return value;
+      }
+      if (typeof value !== "string") {
+        throw new Error(`Error parsing "${value}" as an object.`);
+      }
+      try {
+        const o = JSON.parse(value);
+        if (typeof o === "object" && !Array.isArray(o) && o !== null) {
+          return o;
+        }
+      } catch {
+        const o = JSON.parse(decodeURIComponent(value));
+        if (typeof o === "object" && !Array.isArray(o) && o !== null) {
+          return o;
+        }
+      }
+      throw new Error(`Error parsing "${value}" as an object.`);
+    }
+
+    function canBeNull(value: unknown): boolean {
+      if (value === null || value === "null") {
+        return true;
+      }
+      return false;
+    }
+
+    function asNull(value: unknown) {
+      if (value !== "null" && value !== null) {
+        throw new Error(`Error parsing "${value}" as null.`);
+      }
+      return null;
+    }
+
+    interface TypeCheckers {
+      [key: string]: (value: unknown) => boolean;
+    }
+
+    interface TypeConverters {
+      [key: string]: (value: unknown) => unknown;
+    }
+
+    const typeCheckers: TypeCheckers = {
+      string: canBeString,
+      number: canBeNumber,
+      integer: canBeInteger,
+      boolean: canBeBoolean,
+      array: canBeArray,
+      object: canBeObject,
+      null: canBeNull,
+    };
+
+    const typeConverters: TypeConverters = {
+      string: asString,
+      number: asNumber,
+      integer: asInteger,
+      boolean: asBoolean,
+      array: asArray,
+      object: asObject,
+      null: asNull,
+    };
+
+    if (type === undefined) {
+      throw new Error(`Error with "${value}" as a target type.`);
+    }
+
+    if (!Array.isArray(type)) {
+      if (typeCheckers[type](value)) {
+        return typeConverters[type](value);
+      }
+      throw new Error(`Error parsing "${value}" as a ${type}.`);
+    }
+
+    for (const t of type) {
+      if (typeCheckers[t](value)) {
+        return typeConverters[t](value);
+      }
+    }
+
+    throw new Error(`Error parsing "${value}" as one of ${type}.`);
   }
 
   /**

@@ -4,6 +4,94 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.21] - 2024-08-16
+
+### Changed
+
+- The free nodes scene will handle DOM pointer events before the current scene.
+- `Game.setParameters()` will try to convert a value to the target type, and it throws an error if the conversion fails. For object and array targets, the string value can be the stringified JSON representation of the object or array or a uri-encoded string of the JSON representation.
+
+## `@m2c2kit/addons` [0.3.20] - 2024-08-16
+
+### Fixed
+
+- When active, `LocalePicker` handles pointer events and does not allow them to pass through to the current scene.
+
+### Added
+
+- `InstructionsOptions` now have `textInterpolation`, `titleInterpolation`, `nextButtonTextInterpolation`, and `backButtonTextInterpolation` to aid i18n.
+
+## `@m2c2kit/physics` [0.1.8] - 2024-08-16
+
+### Changed
+
+- Version of 0.20.0 of matter-js now warns if delta is > `16.666666666666668`. We now set the delta to `16.666666666666667` (it was `16.66666667`).
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.18] - 2024-08-16
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.18] - 2024-08-16
+
+### Added
+
+- Option for `TarballAssessment` in static site configuration.
+- Option to include `es-module-shims` in static site configuration. Default is `true`.
+- Option for `dependencies` in static site configuration to download additional dependencies. Only ESM dependencies are supported.
+
+### Changed
+
+- Updated dependencies.
+- Creating a Dockerfile for the static site is now cli option `--dockerfile`.
+
+## `@m2c2kit/embedding` [1.0.14] - 2024-08-16
+
+### Added
+
+- Experimental support for `CatalystWebView` and `CatalystCognitiveTask` hosts
+
+## `@m2c2kit/schema-util` [0.1.11] - 2024-08-16
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.0] - 2024-08-16
+
+### Added
+
+- This is a new package to provide a registry of assessments.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.19] - 2024-08-16
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.19] - 2024-08-16
+
+### Added
+
+- Spanish and German translations.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.19] - 2024-08-16
+
+### Added
+
+- Spanish and German translations.
+
+## `@m2c2kit/assessment-color-dots` [0.8.19] - 2024-08-16
+
+### Added
+
+- Spanish translation.
+
 ## `@m2c2kit/core` [0.3.20] - 2024-08-07
 
 ### Fixed

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "description": "Additions to m2c2kit core functionality, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/core": "0.3.20"
+    "@m2c2kit/core": "0.3.21"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.17",

@@ -5,7 +5,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-function getFilePathsRecursive(folder) {
+function getFilePathsRecursive(folder, maxDepth, currentDepth = 0) {
   let files = [];
   const contents = fs.readdirSync(folder);
   for (const item of contents) {
@@ -16,14 +16,20 @@ function getFilePathsRecursive(folder) {
       // If it is a file, push it to the array
       files.push(itemPath);
     } else if (stats.isDirectory()) {
-      // If it is a directory, recursively call the function on it and concatenate the result to the array
-      files = files.concat(getFilePathsRecursive(itemPath));
+      // If it is a directory, and we have not yet reached maxDepth,
+      // recursively call the function on it and concatenate the result to
+      // the array
+      if (currentDepth < maxDepth) {
+        files = files.concat(
+          getFilePathsRecursive(itemPath, maxDepth, currentDepth + 1),
+        );
+      }
     }
   }
   return files;
 }
 
-const filePaths = getFilePathsRecursive("packages");
+const filePaths = getFilePathsRecursive("packages", 1);
 const pkgJsonFilePaths = filePaths.filter(
   (file) => file.endsWith("package.json") && !file.includes("node_modules"),
 );
@@ -50,6 +56,7 @@ const packageOrder = [
   "@m2c2kit/db",
   "@m2c2kit/survey",
   "@m2c2kit/schema-util",
+  "@m2c2kit/assessments-registry",
   "@m2c2kit/assessment-symbol-search",
   "@m2c2kit/assessment-grid-memory",
   "@m2c2kit/assessment-color-shapes",

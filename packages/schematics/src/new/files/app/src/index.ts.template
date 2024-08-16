@@ -483,6 +483,15 @@ articles in literature. Source: https://en.wikipedia.org/wiki/Stroop_effect`,
 }
 
 const activity = new <%= classify(appName) %>();
+
+// Set game parameters from URL parameters. Delete if this is not wanted.
+const urlParams = new URLSearchParams(window.location.search);
+const gameParameters: { [key: string]: string } = {};
+urlParams.forEach((value, key) => {
+  gameParameters[key] = value;
+});
+activity.setParameters(gameParameters);
+
 const activities = [activity];
 const session = new Session({
   activities: activities,
