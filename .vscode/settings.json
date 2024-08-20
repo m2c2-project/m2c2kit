@@ -46,6 +46,7 @@
     "subfiles",
     "tseslint",
     "Unpremul",
-    "unshifted"
+    "unshifted",
+    "Vercel"
   ]
 }

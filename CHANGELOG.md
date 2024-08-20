@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/cli` [0.3.20] - 2024-08-20
+
+### Changed
+
+- Updated dependencies.
+- Removed "Nothing to be done" message if file system is not changed.
+
+## `@m2c2kit/schematics` [0.1.20] - 2024-08-20
+
+### Added
+
+- `static-site` schematic `--list` option to display current m2c2kit assessments on NPM.
+
+### Changed
+
+- In generated `site-config.mjs`, default for `outDir` is now `./dist`.
+
 ## `@m2c2kit/cli` [0.3.19] - 2024-08-16
 
 ### Changed
