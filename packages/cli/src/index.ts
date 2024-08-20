@@ -393,7 +393,7 @@ export async function main({
       .toPromise();
 
     if (nothingDone) {
-      logger.info("Nothing to be done.");
+      // logger.info("Nothing to be done.");
     } else if (dryRun) {
       logger.info(
         `Dry run enabled${

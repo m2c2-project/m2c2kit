@@ -16,6 +16,7 @@ import { Configure, Entry, Setup, StaticSiteConfig } from "./StaticSiteConfig";
  * definitions. Thus, these are devDependencies in the package.json file.
  */
 import { Game } from "@m2c2kit/core";
+import { AssessmentsRegistry } from "./AssessmentsRegistry";
 
 const DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
 
@@ -23,6 +24,7 @@ interface m2StaticSiteOptions {
   config?: string;
   dockerfile?: boolean;
   init?: boolean;
+  list?: boolean;
 }
 
 interface AssessmentConfiguration {
@@ -140,6 +142,37 @@ function deleteDirectory(tree: Tree, dirPath: string) {
 export function staticSite(options: m2StaticSiteOptions): Rule {
   return async (tree: Tree) => {
     const cwd = process.cwd().replace(/\\/g, "/");
+
+    if (options.list) {
+      const name = "@m2c2kit/assessments-registry";
+      const packageData = await getNpmPackageMetadata(
+        DEFAULT_REGISTRY_URL,
+        name,
+      );
+      const version = packageData["dist-tags"].latest;
+
+      const url = packageData.versions[version].dist.tarball;
+      const buffer = await fetchPackage(url);
+      const file = (await decompressTgzArchive(buffer))
+        .filter((f) => f.filepath.endsWith("assessments-registry.json"))
+        .find(Boolean);
+      if (!file) {
+        throw new Error("No assessments-registry.json found in the package.");
+      }
+      const registry = JSON.parse(
+        file.buffer.toString(),
+      ) as AssessmentsRegistry;
+      for (const assessment of registry.assessments) {
+        console.log(`${assessment.name}:`);
+        console.log(`  description: ${assessment.description}`);
+        console.log(
+          `  latest version: ${assessment.latest} (${assessment.latestTime})`,
+        );
+        console.log(`  versions: ${assessment.versions.join(", ")}`);
+        console.log();
+      }
+      return;
+    }
 
     if (options.init && options.config) {
       throw new Error(
@@ -788,8 +821,8 @@ const newConfig = `/**
  * @type {StaticSiteConfig}
  */
 export default {
-  configVersion: "0.1.19",
-  outDir: "./site",
+  configVersion: "0.1.20",
+  outDir: "./dist",
   assessments: [
     {
       name: "@m2c2kit/assessment-symbol-search",
