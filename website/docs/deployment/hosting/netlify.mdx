@@ -1,0 +1,46 @@
+---
+sidebar_position: 4
+hide_table_of_contents: true
+---
+
+# Netlify
+
+[Netlify](https://www.netlify.com) is a platform for deploying web apps and static web sites. Their free tier plan is convenient for testing.
+
+The Netlify CLI can easily deploy a static website.
+
+## Installing the Netlify CLI
+
+It is convenient if the CLI is installed globally:
+
+```
+npm install -g netlify-cli
+```
+
+## Deploying the static website
+
+If not there already, change to the directory with the m2c2kit static site, e.g.:
+
+```
+cd dist
+```
+
+Login:
+
+```
+netlify login
+```
+
+Begin the deployment (you will be asked to authenticate):
+
+```
+netlify deploy --prod
+```
+
+If successful, the CLI will give you a URL where the static site is hosted.
+
+:::tip
+
+If you visit the site and it is blank, remember that you must [specify the assessment](./site-usage#specifying-the-assessment)!
+
+:::

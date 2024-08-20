@@ -1,0 +1,57 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+# What is Deployment?
+
+Deployment refers to the process of making the assessments available to participants.
+
+:::warning
+
+Deployment documentation is still under construction and not yet complete!
+
+:::
+
+Assessments made with m2c2kit can be deployed to 
+- Desktop browsers
+- Mobile browsers
+- Native apps (iOS, Android)
+
+You can easily deploy these assessments to browsers using a [static website](https://en.wikipedia.org/wiki/Static_web_page). With a static website, a set of files (HTML, CSS, JavaScript, images, fonts) tells a participant's browser how to run the assessment. These files are sent to the browser through a server, but the server simply sends these files and does not do any processing. Because the server only sends files, static websites are extremely simple to deploy and very inexpensive to run.
+
+
+Deploying in native apps is more complex, but it can be easy when working with a partner, like [MetricWire](https://metricwire.com/).
+
+We'll first discuss deployment of existing m2c2kit assessments. Then we'll cover how to deploy new m2c2kit assessments you have created.
+
+## Prerequisites
+
+Install the following software. You will need administrative permissions for your computer.
+
+- [Node.js](https://nodejs.org/en/download) (version >=18; version 20 LTS recommended). **Required**.
+- [Visual Studio Code](https://code.visualstudio.com/download). Recommended.
+- [Google Chrome](https://www.google.com/chrome). Recommended.
+- [Git](https://git-scm.com/downloads). Recommended.
+
+
+## Installing the Command Line Interface (CLI)
+
+m2c2kit provides a CLI to make deployment easier.
+
+It is convenient if you install the CLI globally. You need to do this only once. From your command line:
+
+```
+npm install -g @m2c2kit/cli
+```
+
+<details style={{ backgroundColor: '#fdf6f6', border: '1px solid #f0b2b2' }}>
+    <summary>😕 Problems?</summary>
+    <p>If you saw a message similar to <code>Command 'npm' not found</code> or <code>'npm' is not recognized as an internal or external command, operable program or batch file.</code>, make sure you installed <a href="https://nodejs.org/en/download">Node.js</a>.</p>
+</details>
+
+If you ever need to upgrade the CLI to its latest version, you can run:
+
+```
+npm install -g @m2c2kit/cli@latest
+```

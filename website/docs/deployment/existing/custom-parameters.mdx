@@ -1,0 +1,34 @@
+---
+sidebar_position: 6
+hide_table_of_contents: true
+---
+
+# Custom parameters
+
+## `parameters` will change the assessment defaults
+
+The `parameters` property allows you to change the default assessment parameters to fit your needs. 
+
+Below, Symbol Search has been configured to have 4 trials and not show the quit button.
+
+```js
+{
+  name: "@m2c2kit/assessment-symbol-search",
+  versions: ">=0.8.19",
+  parameters: {
+    number_of_trials: 4,
+    show_quit_button: false
+  }
+}
+```
+
+For assessments authored by the m2c2 team, all assessment parameters (also referred to as **game parameters**) are documented in our [schema reference](../../schemas/what-is-schema).
+
+:::warning
+
+You can change a parameter to any value, but not all values will be scientifically valid for your use case.
+
+Check with the research literature or the m2c2 team for recommended values.
+
+:::
+

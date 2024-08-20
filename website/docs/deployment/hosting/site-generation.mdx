@@ -1,0 +1,49 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+# Static site generation
+
+In the context of a static website, hosting refers to storing and serving the files that make up the static site. But before the static site can be hosted, its files must be generated.
+
+
+## Generating the static site with the CLI
+
+The m2c2kit CLI will create the static site from the configuration file, which by default was named `site-config.mjs`. To generate the site:
+
+```
+m2 static-site --config=site-config.mjs
+```
+
+The CLI will display information about assessment packages that were downloaded and files that were created
+
+:::tip
+
+The many lines of information output by the static site generation can be ignored; they are there for debugging if things go wrong!
+
+:::
+
+## Testing the static site
+
+To test that the static site is working, you must serve these files locally on your computer. You cannot directly open them with your browser.
+
+A convenient way to serve these files is the [`http-server`](https://www.npmjs.com/package/http-server) package. To install this:
+
+```
+npm install -g http-server
+```
+
+To use this package to test the static site:
+
+- Change to the directory where the static site was generated, e.g., `cd dist`
+- Run the server: `http-server`
+- Open your browser at the address where `http-server` is serving. By default it will be `http://127.0.0.1:8080`
+
+Once you open your browser to the appropriate location, you will see... **nothing**!
+
+:::info
+
+This blank web page is not an error! Please read on to the next section!
+
+:::

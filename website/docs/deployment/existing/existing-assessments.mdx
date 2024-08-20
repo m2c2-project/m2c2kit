@@ -1,0 +1,58 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+---
+
+# Assessment packages
+
+Existing assessments are m2c2kit assessments that have been programmed by others, such as [these](../../category/examples/). Assessments authored by the m2c2 project are distributed in the form of packages on [NPM](https://www.npmjs.com/), the world's largest software registry.
+
+The first step in deploying existing assessments is to decide what assessments you want to use. Specifically, for each assessment, you need its **package name** and **version**.
+
+## Assessment package name
+
+Each assessment has a unique package name. Our assessment package names take the format of `@m2c2kit/assessment-<name of the assessment>`. 
+
+| Assessment      | Package name                            |
+| :---------------| :-------------------------------------- |
+| Symbol Search   | `@m2c2kit/assessment-symbol-search`     |
+| Grid Memory     | `@m2c2kit/assessment-grid-memory`       |
+| Color Shapes    | `@m2c2kit/assessment-color-shapes`      |
+| Color Dots      | `@m2c2kit/assessment-color-dots`        |
+
+To list the m2c2kit assessments and versions available on NPM, make sure you have [installed](../what-is-deployment#installing-the-command-line-interface-cli) the m2c2kit CLI. Then:
+
+```
+m2 static-site --list
+```
+
+You will see output similar to this:
+
+```
+@m2c2kit/assessment-symbol-search:
+  description: A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can
+  latest version: 0.8.19 (2024-08-16T19:21:09.927Z)
+  versions: 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7, 0.8.8, 0.8.9, 0.8.10, 0.8.11, 0.8.12, 0.8.13, 0.8.14, 0.8.15, 0.8.16, 0.8.17, 0.8.18, 0.8.19
+
+@m2c2kit/assessment-grid-memory:
+  description: A visuospatial working memory task, with delayed free recall. After a brief exposure and short distraction phase, participants report the location of dots on a grid
+  latest version: 0.8.19 (2024-08-16T19:21:10.035Z)
+  versions: 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7, 0.8.8, 0.8.9, 0.8.10, 0.8.11, 0.8.12, 0.8.13, 0.8.14, 0.8.15, 0.8.16, 0.8.17, 0.8.18, 0.8.19
+
+@m2c2kit/assessment-color-shapes:
+  description: A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli
+  latest version: 0.8.19 (2024-08-16T19:21:10.044Z)
+  versions: 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7, 0.8.8, 0.8.9, 0.8.10, 0.8.11, 0.8.12, 0.8.13, 0.8.14, 0.8.15, 0.8.16, 0.8.17, 0.8.18, 0.8.19
+
+@m2c2kit/assessment-color-dots:
+  description: A cued-recall, item-location memory binding task, where after viewing 3 dots for a brief period of time, participants report: (1) the color at a cued location; (2) the location of a cued color
+  latest version: 0.8.19 (2024-08-16T19:21:10.046Z)
+  versions: 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7, 0.8.8, 0.8.9, 0.8.10, 0.8.11, 0.8.12, 0.8.13, 0.8.14, 0.8.15, 0.8.16, 0.8.17, 0.8.18, 0.8.19
+```
+
+## Assessment versions
+
+Assessments on NPM are immutable: once a package is published with a name and version, it cannot be changed. Thus, NPM provides excellent reproducibility. Even if an assessment is updated at a later date, it must be given a new version. The prior version will remain available.
+
+Unless you have a special reason, it's best to use the latest version of a package.
+
