@@ -21,6 +21,11 @@
       "description": "Creates a new static site configuration file, site-config.mjs",
       "type": "boolean",
       "default": false
+    },
+    "list": {
+      "description": "Lists what m2c2kit assessment packages are available for use in the static site.",
+      "type": "boolean",
+      "default": false
     }
   }
 }
