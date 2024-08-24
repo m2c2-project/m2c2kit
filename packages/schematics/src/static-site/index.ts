@@ -218,7 +218,11 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
       );
     }
 
-    const importMaps: { [key: string]: string } = {};
+    /**
+     * import maps that will be used by all assessments. These are the
+     * dependencies specified config.dependencies.
+     */
+    const commonImportMaps: { [key: string]: string } = {};
 
     if (config.dependencies) {
       // currently only ESM packages are supported
@@ -268,7 +272,7 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
             );
           }
         }
-        importMaps[name] = `../../../modules/${name}@${version}/${entry}`;
+        commonImportMaps[name] = `../../../modules/${name}@${version}/${entry}`;
       }
     }
 
@@ -495,6 +499,14 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
      * the index.js and index.html files for each specific assessment.
      */
     for (const assessmentConfiguration of assessmentConfigurations) {
+      /**
+       * this assessment configuration's import maps start with the common
+       * import maps from config.dependencies
+       */
+      const importMaps: { [key: string]: string } = JSON.parse(
+        JSON.stringify(commonImportMaps),
+      );
+
       let moduleName: string;
       if (assessmentConfiguration.extends) {
         moduleName = assessmentConfiguration.extends.name;
