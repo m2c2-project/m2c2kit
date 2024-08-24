@@ -6,6 +6,8 @@ export interface StaticSiteConfig {
   configVersion: string;
   /** Output directory for the m2c2kit static website. */
   outDir: string;
+  /** If an assessment has a schemas.json file, include it in the static site. Default is false. */
+  includeSchemasJson?: boolean;
   /** Assessments to be included in the static website. */
   assessments: Array<
     RegistryAssessment | ExtendedAssessment | TarballAssessment

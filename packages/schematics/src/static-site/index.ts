@@ -490,6 +490,48 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
       throw new Error("No assessments found in configuration file.");
     }
 
+    /**
+     * Copy the files from the `TarballAssessment` to the modules directory.
+     * At this point, only tarball assessments are in the decompressedTgzFiles
+     * object.
+     */
+    for (const [assessment, files] of Object.entries(decompressedTgzFiles)) {
+      for (const file of files) {
+        const filepath = file.filepath.replace("package/", "");
+        // assessment already has the version in the name
+        tree.create(
+          config.outDir + `/modules/${assessment}/${filepath}`,
+          file.buffer,
+        );
+      }
+    }
+
+    /**
+     * Download all the RegistryAssessment packages and create the modules
+     * directory where they are stored. Also add these downloaded packages to
+     * the decompressedTgzFiles object.
+     */
+    for (const pkg of packagesToDownload) {
+      const buffer = await fetchPackage(pkg.url, pkg.tokenEnvironmentVariable);
+      console.log(
+        `downloaded ${pkg.name}@${pkg.version} (${buffer.byteLength} bytes) from ${pkg.url}`,
+      );
+
+      const files = await decompressTgzArchive(buffer);
+      decompressedTgzFiles[`${pkg.name}@${pkg.version}`] = files;
+      for (const file of files) {
+        /**
+         * filepath is file.path, but with the leading "package/" removed from
+         * it. Packed npm packages have a "package/" prefix in the file path.
+         */
+        const filepath = file.filepath.replace("package/", "");
+        tree.create(
+          config.outDir + `/modules/${pkg.name}@${pkg.version}/${filepath}`,
+          file.buffer,
+        );
+      }
+    }
+
     const exampleAssessment = assessmentConfigurations[0];
     const exampleQueryString = `/index.html?assessment=${exampleAssessment.name}@${exampleAssessment.version}&number_of_trials=6`;
     const hostedAssessmentPaths = new Array<string>();
@@ -666,43 +708,22 @@ session.initialize();`;
       hostedAssessmentPaths.push(
         `/assessments/${assessmentConfiguration.name}@${assessmentConfiguration.version}/index.html`,
       );
-    }
 
-    /**
-     * Download all the RegistryAssessment packages and create the modules
-     * directory where they are stored.
-     */
-    for (const pkg of packagesToDownload) {
-      const buffer = await fetchPackage(pkg.url, pkg.tokenEnvironmentVariable);
-      console.log(
-        `downloaded ${pkg.name}@${pkg.version} (${buffer.byteLength} bytes) from ${pkg.url}`,
-      );
-
-      const files = await decompressTgzArchive(buffer);
-      for (const file of files) {
+      if (config.includeSchemasJson === true) {
+        const schemasFile = decompressedTgzFiles[
+          `${assessmentConfiguration.name}@${assessmentConfiguration.version}`
+        ].find((f) => f.filepath === "package/schemas.json");
         /**
-         * filepath is file.path, but with the leading "package/" removed from
-         * it. Packed npm packages have a "package/" prefix in the file path.
+         * If the assessment has a schemas.json file, copy it to the
+         * assessment's directory.
          */
-        const filepath = file.filepath.replace("package/", "");
-        tree.create(
-          config.outDir + `/modules/${pkg.name}@${pkg.version}/${filepath}`,
-          file.buffer,
-        );
-      }
-    }
-
-    /**
-     * Copy the files from the `TarballAssessment` to the modules directory
-     */
-    for (const [assessment, files] of Object.entries(decompressedTgzFiles)) {
-      for (const file of files) {
-        const filepath = file.filepath.replace("package/", "");
-        // assessment already has the version in the name
-        tree.create(
-          config.outDir + `/modules/${assessment}/${filepath}`,
-          file.buffer,
-        );
+        if (schemasFile) {
+          tree.create(
+            config.outDir +
+              `/assessments/${assessmentConfiguration.name}@${assessmentConfiguration.version}/schemas.json`,
+            schemasFile.buffer,
+          );
+        }
       }
     }
 
