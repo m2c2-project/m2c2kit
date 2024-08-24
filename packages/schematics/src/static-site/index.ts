@@ -660,6 +660,7 @@ session.initialize();`;
         indexJs,
       );
 
+      const dotMin = config.minified !== false ? ".min" : "";
       for (const [dep, ver] of Object.entries(
         assessmentConfiguration.requiredPackages,
       )) {
@@ -668,7 +669,7 @@ session.initialize();`;
          * do real semver resolution.
          */
         importMaps[dep] =
-          `../../../modules/${dep}@${(ver as string).replace("^", "")}/dist/index.min.js`;
+          `../../../modules/${dep}@${(ver as string).replace("^", "")}/dist/index${dotMin}.js`;
       }
       let indexHtml = assessmentIndexHtmlTemplate.replace(
         "<%- importMaps %>",
