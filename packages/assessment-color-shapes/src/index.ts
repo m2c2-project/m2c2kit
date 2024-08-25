@@ -78,6 +78,12 @@ class ColorShapes extends Game {
         description: "How many shapes to show on the grid at one time.",
         type: "integer",
       },
+      number_of_shapes_changing_color: {
+        default: 2,
+        description:
+          "If a different color trial, how many shapes should change color (minimum is 2, because changes are swaps with other shapes).",
+        type: "integer",
+      },
       shapes_presented_duration_ms: {
         default: 2000,
         description: "How long the shapes are shown, milliseconds.",
@@ -98,8 +104,7 @@ class ColorShapes extends Game {
       number_of_different_colors_trials: {
         default: 2,
         type: "integer",
-        description:
-          "Number of trials where the shapes have different colors. If shapes have different colors in a trial, anywhere from 2 to (number of shapes) will be given different colors.",
+        description: "Number of trials where the shapes have different colors.",
       },
       number_of_trials: {
         default: 4,
@@ -250,11 +255,6 @@ class ColorShapes extends Game {
             },
           },
         },
-      },
-      number_of_different_shapes: {
-        type: ["integer", "null"],
-        description:
-          "Number of shapes shown with different colors in the response phase.",
       },
       response_time_duration_ms: {
         type: ["number", "null"],
@@ -718,10 +718,14 @@ phases.`,
       const differentColorTrial = differentColorsTrialIndexes.includes(i);
 
       if (differentColorTrial) {
-        const numberOfShapesToChange = RandomDraws.SingleFromRange(
-          2,
-          numberOfShapesShown,
+        const numberOfShapesToChange = game.getParameter<number>(
+          "number_of_shapes_changing_color",
         );
+        if (numberOfShapesToChange > numberOfShapesShown) {
+          throw new Error(
+            `number_of_shapes_changing_color is ${numberOfShapesToChange}, but it must be less than or equal to number_of_shapes_shown (which is ${numberOfShapesShown}).`,
+          );
+        }
         const shapesToChangeIndexes = RandomDraws.FromRangeWithoutReplacement(
           numberOfShapesToChange,
           0,
@@ -943,10 +947,6 @@ phases.`,
       );
       const trialConfiguration = trialConfigurations[game.trialIndex];
       game.addTrialData("response_time_duration_ms", rt);
-      game.addTrialData(
-        "number_of_different_shapes",
-        trialConfiguration.numberOfShapesWithDifferentColors,
-      );
       game.addTrialData(
         "user_response",
         differentPressed ? "different" : "same",
