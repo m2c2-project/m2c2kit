@@ -19,13 +19,26 @@ do
 done
 echo "container registry has @m2c2kit/core, @m2c2kit/session, @m2c2kit/addons, @m2c2kit/cli, @m2c2kit/schematics, @m2c2kit/build-helpers, @m2c2kit/schema-util"
 
-s="$(npm install -g @m2c2kit/cli 2>&1)"
-while [ $(contains "$s" "ERR!") -eq 0 ]
+# sometimes, the packages will return in the search results but npm install will fail because the packages are not yet ready
+# so we will retry npm install a few times. Typically only 1 retry is needed, but we will retry up to 10 times.
+max_retries=10
+retries=0
+while [ $retries -lt $max_retries ]
 do
-    echo "published packages not yet ready in container registry"
+    npm install -g @m2c2kit/cli
+    exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        break
+    fi
+    echo "published packages not yet ready in container registry ('npm install -g @m2c2kit/cli' failed). Retrying..."
     sleep 2
-    s="$(npm install -g @m2c2kit/cli 2>&1)"    
+    retries=$((retries + 1))
 done
+
+if [ $retries -ge $max_retries ]; then
+    echo "Max retries reached for 'npm install -g @m2c2kit/cli'. Exiting."
+    exit 1
+fi
 
 git config --global init.defaultBranch main
 git config --global user.email "ci@example.com"
