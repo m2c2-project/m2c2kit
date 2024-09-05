@@ -4,6 +4,133 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.22] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.21] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.4] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.9] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.21] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.21] - 2024-09-05
+
+### Added
+
+- In the static-site configuration file, `minified` option determines whether to use the minified versions of m2c2kit packages. Default is true.
+- In the static-site configuration file, `includeSchemasJson` option will include an assessment's `schemas.json` in the static site, alongside the assessment's `index.html`. Default is false.
+
+### Fixed
+
+- When using static-site schematic, import maps for each assessment's index.html had some extra, unused import maps. This had no impact on behavior.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.15] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.18] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.16] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.16] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.12] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.1] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.20] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.20] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.20] - 2024-09-05
+
+### Fixed
+
+- In a change trial, the number of shapes changing color is a parameter (`number_of_shapes_changing_color`), whose default is 2, because by default the `number_of_shapes_shown` parameter is 3. This is the correct behavior for this assessment.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.20] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.16] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.18] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.16] - 2024-09-05
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/cli` [0.3.20] - 2024-08-20
 
 ### Changed

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schema-util",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Utility tool to extract the schema used in m2c2kit assessment TypeScript source files",
   "type": "module",
   "main": "index.js",

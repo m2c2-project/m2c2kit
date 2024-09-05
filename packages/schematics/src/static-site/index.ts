@@ -855,7 +855,7 @@ const newConfig = `/**
  * @type {StaticSiteConfig}
  */
 export default {
-  configVersion: "0.1.20",
+  configVersion: "0.1.21",
   outDir: "./dist",
   assessments: [
     {
