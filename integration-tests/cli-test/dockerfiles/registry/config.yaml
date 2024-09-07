@@ -88,10 +88,10 @@ packages:
     # and three keywords: "$all", "$anonymous", "$authenticated"
     access: $all
 
-    # Allow all known users to publish/publish packages
-    # (anyone can register by default, remember?)
-    publish: $authenticated
-    unpublish: $authenticated
+    # Allow all users (including non-authenticated users) to
+    # publish and un-publish packages
+    publish: $anonymous
+    unpublish: $anonymous
 
     # if package is not available locally, proxy requests to 'npmjs' registry
     proxy: npmjs

@@ -12,6 +12,7 @@ services:
       - m2c2kit
       - registry
 
+  # to test the m2 new command
   testapp:
     build:
       context: ./integration-tests/cli-test/dockerfiles/testapp
@@ -21,8 +22,19 @@ services:
     depends_on:
       - publish
 
+  # to test the m2 static-site command
+  testmodule:
+    build:
+      context: ./integration-tests/cli-test/dockerfiles/testmodule
+    ports:
+      - "8080:8080"
+    depends_on:
+      - publish
+
   m2c2kit:
     build:
       context: .
       dockerfile: Dockerfile
-    command: scripts/wait-for-it.sh -t 240 testapp:3000 -- npm run test -w cli-test
+    # chain two wait-for-it commands to wait for both testapp and testmodule to be ready
+    # because cli-test runs tests against both of them
+    command: scripts/wait-for-it.sh -t 240 testapp:3000 -- scripts/wait-for-it.sh -t 240 testmodule:8080 -- npm run test -w cli-test

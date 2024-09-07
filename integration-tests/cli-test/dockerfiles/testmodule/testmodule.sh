@@ -44,8 +44,34 @@ git config --global init.defaultBranch main
 git config --global user.email "ci@example.com"
 git config --global user.name "ci"
 
-m2 new testapp
-cd testapp
-# localhost did not work in container on windows host, but 0.0.0.0 did
-sed -i 's|host: "localhost"|host: "0.0.0.0"|' rollup.config.mjs
-npm run serve
+# npm requires an authToken header, even if it's not used.
+# see https://github.com/verdaccio/verdaccio/issues/212
+npm config set //registry:4873/:_authToken="none"
+
+m2 new testmodule --module
+cd testmodule
+npm run build
+sed -i 's|"private": true|"private": false|' package.json
+npm publish
+
+cd ..
+mkdir static-site
+cd static-site
+cat <<EOF > site-config.mjs
+export default {
+  configVersion: "0.1.21",
+  outDir: "./dist",
+  assessments: [
+    {
+      name: "testmodule",
+      versions: ">=1.0.0",
+      registryUrl: "http://registry:4873",
+    },
+  ]  
+};
+EOF
+
+m2 static-site --config=site-config.mjs
+cd dist
+npm install -g http-server
+http-server

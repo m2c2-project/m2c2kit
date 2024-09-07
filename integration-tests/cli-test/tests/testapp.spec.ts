@@ -3,7 +3,8 @@ import { PNG, PNGWithMetadata } from "pngjs";
 import pixelmatch from "pixelmatch";
 import * as fs from "fs";
 
-test.describe("m2c2 cli integration test", () => {
+test.describe("m2c2 cli new integration test", () => {
+  const url = "http://testapp:3000";
   test.beforeAll(async () => {
     console.log("Waiting 4s before starting playwright tests...");
     await new Promise((r) => setTimeout(r, 4000));
@@ -12,7 +13,7 @@ test.describe("m2c2 cli integration test", () => {
   test("starter app creates canvas 400px wide, 800px high", async ({
     browser,
   }) => {
-    const canvas = await getM2c2Canvas(browser);
+    const canvas = await getM2c2Canvas(browser, url);
     expect(await canvas.getAttribute("width")).toBe("400");
     expect(await canvas.getAttribute("height")).toBe("800");
   });
@@ -20,7 +21,7 @@ test.describe("m2c2 cli integration test", () => {
   test("starter app creates a scene1 that pixel matches our reference scene1", async ({
     browser,
   }) => {
-    const canvas = await getM2c2Canvas(browser);
+    const canvas = await getM2c2Canvas(browser, url);
     const buffer = await canvas.screenshot();
     // uncomment to save a new reference image
     //fs.writeFileSync("scene1.png", buffer);
@@ -32,7 +33,7 @@ test.describe("m2c2 cli integration test", () => {
   test("starter app advances to next page and create a scene2 that pixel matches our reference scene2", async ({
     browser,
   }) => {
-    const canvas = await getM2c2Canvas(browser);
+    const canvas = await getM2c2Canvas(browser, url);
     /**
      * { x, y } position to click is OFFSETS from TOP LEFT of canvas
      * Thus, { x: 310, y: 692 } is in the hit area of the NEXT button
@@ -47,7 +48,25 @@ test.describe("m2c2 cli integration test", () => {
   });
 });
 
-async function getM2c2Canvas(browser: Browser): Promise<Locator> {
+test.describe("m2c2 cli static-site integration test", () => {
+  const url = "http://testmodule:8080/index.html?assessment=testmodule@1.0.0";
+  test.beforeAll(async () => {
+    console.log("Waiting 4s before starting playwright tests...");
+    await new Promise((r) => setTimeout(r, 4000));
+  });
+
+  test("static site creates a test module scene1 that pixel matches our reference scene1", async ({
+    browser,
+  }) => {
+    const canvas = await getM2c2Canvas(browser, url);
+    const buffer = await canvas.screenshot();
+    const canvasPng = PNG.sync.read(buffer);
+    const scene1Png = readPngFromFile("./images/testModuleScene1.png");
+    expect(diffPixelCount(canvasPng, scene1Png)).toBe(0);
+  });
+});
+
+async function getM2c2Canvas(browser: Browser, url: string): Promise<Locator> {
   const page = await browser.newPage({
     viewport: { width: 1200, height: 1200 },
   });
@@ -61,7 +80,7 @@ async function getM2c2Canvas(browser: Browser): Promise<Locator> {
    */
   await Promise.all([
     page.waitForEvent("console", (msg) =>
-      msg.text().includes("started activity")
+      msg.text().includes("started activity"),
     ),
     /**
      * Both the m2c2 test app being served AND the playwright tests will be
@@ -70,7 +89,7 @@ async function getM2c2Canvas(browser: Browser): Promise<Locator> {
      * the test app service name as defined within docker-compose.yaml,
      * NOT localhost.
      */
-    page.goto("http://testapp:3000"),
+    page.goto(url),
   ]);
   // wait, because the canvas may not yet be sized and ready
   await page.waitForTimeout(500);
@@ -85,7 +104,7 @@ function diffPixelCount(png1: PNGWithMetadata, png2: PNGWithMetadata): number {
     diff.data,
     png1.width,
     png1.height,
-    { threshold: 0 }
+    { threshold: 0 },
   );
   return numDiffPixels;
 }

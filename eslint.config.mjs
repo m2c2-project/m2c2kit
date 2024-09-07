@@ -32,6 +32,7 @@ export default [
       "examples/no-js-bundler-development/lib/",
       "packages/build-helpers/src/__tests__/dist-test",
       "website/static/m2c2kit/modules",
+      "integration-tests/cli-test/tests/*",
       // ignore these to avoid typescript-eslint warnings about too many
       // out of project default files
       "scripts/*.mjs",
