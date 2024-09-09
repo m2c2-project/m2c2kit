@@ -302,12 +302,20 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
           }
           dependencyTree[assessment.name][version] = dependencies;
 
-          // TODO: this is a temporary fix to add @m2c2kit/session as a dependency
-          // we should scan the assessment's package.json dependencies and
-          // devDependencies for @m2c2kit/session and add the appropriate version
+          /**
+           * for m2c2kit modules, @m2c2kit/session should be a devDependency
+           * but it may appear in the dependencies list (or not at all) in
+           * older versions of modules
+           */
           if (!dependencyTree[assessment.name][version]["@mc2kit/session"]) {
+            // TODO: find a way to use latest, rather than hardcoding a version
+            const sessionDependency =
+              packageMetadata.versions[version].devDependencies[
+                "@m2c2kit/session"
+              ] ?? "0.3.4";
             dependencyTree[assessment.name][version]["@m2c2kit/session"] =
-              "0.3.3";
+              sessionDependency;
+            dependencies["@m2c2kit/session"] = sessionDependency;
           }
           const url = packageMetadata.versions[version].dist.tarball;
           packagesToDownload.push({
@@ -347,11 +355,19 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
               continue;
             }
             const packageData = await getNpmPackageMetadata(
-              // dependencies are always retrieved from the default registry
-              DEFAULT_REGISTRY_URL,
+              assessment.assessmentDependenciesRegistryUrl ??
+                config.assessmentDependenciesRegistryUrl ??
+                DEFAULT_REGISTRY_URL,
               dependency,
+              // typically, dependencies are retrieved from the default registry
+              // and we will not need a token for this
               assessment.tokenEnvironmentVariable,
             );
+            if (!packageData.versions[dependencyVersion]) {
+              throw new Error(
+                `Could not find version ${dependencyVersion} of ${dependency} in the registry.`,
+              );
+            }
             const dependencyUrl =
               packageData.versions[dependencyVersion].dist.tarball;
             packagesToDownload.push({
@@ -430,11 +446,17 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
       }
       dependencyTree[name][version] = dependencies;
 
-      // TODO: this is a temporary fix to add @m2c2kit/session as a dependency
-      // we should scan the assessment's package.json dependencies and
-      // devDependencies for @m2c2kit/session and add the appropriate version
+      /**
+       * for m2c2kit modules, @m2c2kit/session should be a devDependency
+       * but it may appear in the dependencies list (or not at all) in
+       * older versions of modules
+       */
       if (!dependencyTree[name][version]["@mc2kit/session"]) {
-        dependencyTree[name][version]["@m2c2kit/session"] = "0.3.3";
+        // TODO: find a way to use latest, rather than hardcoding a version
+        const sessionDependency =
+          packageJson.devDependencies["@m2c2kit/session"] ?? "0.3.4";
+        dependencyTree[name][version]["@m2c2kit/session"] = sessionDependency;
+        dependencies["@m2c2kit/session"] = sessionDependency;
       }
 
       assessmentConfigurations.push({
@@ -470,11 +492,19 @@ export function staticSite(options: m2StaticSiteOptions): Rule {
           continue;
         }
         const packageData = await getNpmPackageMetadata(
-          // dependencies are always retrieved from the default registry
-          DEFAULT_REGISTRY_URL,
+          assessment.assessmentDependenciesRegistryUrl ??
+            config.assessmentDependenciesRegistryUrl ??
+            DEFAULT_REGISTRY_URL,
           dependency,
-          //assessment.tokenEnvironmentVariable,
+          // typically, dependencies are retrieved from the default registry
+          // and we will not need a token for this
+          assessment.tokenEnvironmentVariable,
         );
+        if (!packageData.versions[dependencyVersion]) {
+          throw new Error(
+            `Could not find version ${dependencyVersion} of ${dependency} in the registry.`,
+          );
+        }
         const dependencyUrl =
           packageData.versions[dependencyVersion].dist.tarball;
         packagesToDownload.push({

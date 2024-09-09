@@ -22,6 +22,8 @@ export interface StaticSiteConfig {
   entry?: Entry;
   /** Load es-module-shims script to polyfill import maps? Default is true. @remarks see https://github.com/guybedford/es-module-shims */
   esModuleShims?: boolean;
+  /** URL from which to pull the assessment's dependencies. Default is `https://registry.npmjs.org`. It will be overridden if it is also defined by an assessment. @remarks Most users should not set this value. */
+  assessmentDependenciesRegistryUrl?: string;
   /** Map of ESM package name and exact version number to make available to setup, configure, and entry code. Package will be downloaded from the public NPM registry.
    * @remarks Assessment packages must be specified in `assessments`. This `dependencies` property is for additional ESM packages that are not assessments.
    * Currently, only ESM packages are supported. The entry point for the ESM package will be resolved in the following order:
@@ -31,7 +33,7 @@ export interface StaticSiteConfig {
    *
    * Note that a missing `module` field may mean that the package is not ESM, and the package may not work as expected.
    * @example
-   * esmDependencies: {
+   * dependencies: {
    *   "@m2c2kit/embedding": "1.0.13",
    *   "canvas-confetti": "1.9.3",
    * }
@@ -154,6 +156,8 @@ export interface Assessment {
   configure?: Configure;
   /** An {@link Entry} for this assessment. If not supplied, the site-wide entry will be used, if it exists. @remarks Using this option requires a deep understanding of the internals of m2c2kit and is not recommended for most users. */
   entry?: Entry;
+  /** URL from which to pull the assessment's dependencies. Default is `https://registry.npmjs.org`. @remarks Most users should not set this value. */
+  assessmentDependenciesRegistryUrl?: string;
 }
 
 /**
@@ -211,4 +215,6 @@ export interface ExtendedAssessment extends Assessment {
 export interface TarballAssessment extends Assessment {
   /** Path to the `.tgz` file containing the assessment */
   tarball: string;
+  /** Environment variable that holds the authorization token for the registry, if required. Note: For a `TarballAssessment`, the assessment comes from a file, but in rare cases it could be that a m2c2kit dependency is coming from a private registry. */
+  tokenEnvironmentVariable?: string;
 }

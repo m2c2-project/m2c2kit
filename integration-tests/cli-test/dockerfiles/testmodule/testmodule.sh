@@ -66,6 +66,7 @@ export default {
       name: "testmodule",
       versions: ">=1.0.0",
       registryUrl: "http://registry:4873",
+      assessmentDependenciesRegistryUrl: "http://registry:4873",
     },
   ]  
 };
