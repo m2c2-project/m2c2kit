@@ -1,3 +1,3 @@
-FROM verdaccio/verdaccio:5.32.1
+FROM verdaccio/verdaccio:6.0.0
 
 COPY config.yaml /verdaccio/conf/config.yaml

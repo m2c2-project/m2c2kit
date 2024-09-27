@@ -31,14 +31,14 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "26.0.1",
-    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-commonjs": "28.0.0",
+    "@rollup/plugin-node-resolve": "15.3.0",
     "rimraf": "6.0.1",
-    "rollup": "4.21.2",
+    "rollup": "4.22.5",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-esbuild": "6.1.1",
-    "typescript": "5.5.4"
+    "typescript": "5.6.2"
   },
   "dependencies": {
     "@m2c2kit/core": "^0.3.20",

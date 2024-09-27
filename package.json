@@ -47,22 +47,19 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
     "@types/semver": "7.5.8",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
-    "concurrently": "8.2.2",
+    "concurrently": "9.0.1",
     "cpy-cli": "4.2.0",
-    "eslint": "^9.9.1",
+    "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "find-up": "7.0.0",
-    "husky": "9.1.5",
+    "husky": "9.1.6",
     "linkinator": "6.1.1",
     "lint-staged": "^15.2.10",
     "prettier": "3.3.3",
     "semver": "7.6.3",
     "syncpack": "13.0.0",
-    "typescript-eslint": "^8.4.0"
+    "typescript-eslint": "^8.7.0"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
