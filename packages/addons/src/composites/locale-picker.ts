@@ -465,8 +465,16 @@ export class LocalePicker extends Composite {
             text: this.LEFT_SELECTION_INDICATOR,
             fontSize: this.fontSize,
             fontColor: this.fontColor,
+            /**
+             * We subtract half the fontSize from the x position via
+             * "- this.fontSize / 2" so that the left selection indicator is
+             * positioned slightly to the left of the svg text. Half the font
+             * size seems to be a good amount to make the left selection
+             * indicator appear before the text, and it will scale with font
+             * size changes (unlike a hard-coded value).
+             */
             position: {
-              x: sceneCenter.x - localeOption.svg.width / 2,
+              x: sceneCenter.x - localeOption.svg.width / 2 - this.fontSize / 2,
               y:
                 sceneCenter.y +
                 i * lineHeight -
@@ -483,7 +491,8 @@ export class LocalePicker extends Composite {
             fontSize: this._fontSize,
             fontColor: this.fontColor,
             position: {
-              x: sceneCenter.x + localeOption.svg.width / 2,
+              // see above explanation of "- this.fontSize / 2"
+              x: sceneCenter.x + localeOption.svg.width / 2 + this.fontSize / 2,
               y:
                 sceneCenter.y +
                 i * lineHeight -
