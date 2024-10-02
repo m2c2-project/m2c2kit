@@ -321,6 +321,33 @@ positions.",
         TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
         TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
       },
+      "jp-JP": {
+        localeName: "Japanese",
+        localeSvg: {
+          svgString:
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396.43 133.77"><path d="M0 9.22h93.45v121.25H83.37v-8.64H9.94v9.5H0zm83.37 9.79H9.94v41.33h73.44V19.01ZM9.94 112.03h73.44V69.84H9.94zM247.82 40.9h-52.56c12.38 25.63 33.98 49.39 57.46 60.62-2.45 2.02-5.62 5.76-7.34 8.5-22.61-12.24-43.06-35.28-56.3-61.34v47.23h28.8v9.79h-28.8v27.94H179V105.7h-29.23v-9.79H179V48.97c-13.68 26.06-34.27 48.67-56.02 61.34-1.73-2.45-4.75-6.05-6.91-7.92 22.61-11.66 44.21-35.85 56.74-61.49h-51.98v-9.79h58.18V0l12.96.72c-.14 1.01-.86 1.73-2.88 2.02v28.37h58.75v9.79Zm13.25-8.21v-8.21h52.85v8.21zm48.24 51.69v42.34h-33.12v6.77h-8.5v-49.1h41.62Zm-.43-39.74v7.92h-41.04v-7.92zm-41.04 27.79v-7.92h41.04v7.92zm40.61-67.39v7.92h-39.74V5.04zm-7.78 87.55h-24.48v25.92h24.48zm81.36-31.97h14.4v8.78h-82.08v-8.78h19.73c1.3-6.34 2.74-13.82 4.18-21.74h-15.84v-8.64h17.28c.86-5.47 1.73-11.09 2.59-16.13h-22.75V5.47h71.57v8.64h-39.46l-2.45 16.13h32.83zm-56.3 73.15V81.35h60.62v51.55h-9.36v-5.76h-42.05v6.62h-9.22Zm51.26-43.63h-42.05v28.08h42.05zm-4.32-51.26h-24.91c-1.3 7.78-2.74 15.41-4.03 21.74h28.94z"/></svg>',
+          width: 65,
+          height: 22,
+        },
+        fontName: "noto-sans-japanese",
+        INSTRUCTIONS_TITLE: "記号探し」。",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "画面の上部と下部に記号のペアが表示されます。",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "指示があったら、上に表示されているペアとまったく同じペアを下から選んでタッチしてください。",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "できるだけ速く、そして正確に行ってください。",
+        START_BUTTON_TEXT: "スタート",
+        NEXT_BUTTON_TEXT: "次へ",
+        BACK_BUTTON_TEXT: "戻る",
+        GET_READY_COUNTDOWN_TEXT: "準備してください！",
+        WHICH_MATCHES_TEXT: "どれが上のペアと一致しますか？",
+        OR_TEXT: "または",
+        TRIALS_COMPLETE_SCENE_TEXT: "このテストは完了しました。",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "終了",
+      },
       // cSpell:enable
     };
 
@@ -366,6 +393,11 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         {
           fontName: "roboto",
           url: "fonts/roboto/Roboto-Regular.ttf",
+        },
+        {
+          fontName: "noto-sans-japanese",
+          url: "fonts/noto-sans-japanese/NotoSansJP-Regular.ttf",
+          lazy: true,
         },
       ],
       bodyBackgroundColor: WebColors.White,
