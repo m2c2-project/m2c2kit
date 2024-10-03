@@ -52,7 +52,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="a library for cross-platform cognitive assessments"
+      description="an open-source library for cross-platform cognitive assessments"
     >
       <HomepageHeader />
       <main>

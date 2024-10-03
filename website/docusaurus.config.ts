@@ -26,7 +26,7 @@ const url =
 
 const config: Config = {
   title: "m2c2kit",
-  tagline: "a library for cross-platform cognitive assessments",
+  tagline: "an open-source library for cross-platform cognitive assessments",
   url: url,
   baseUrl: baseUrl,
   onBrokenLinks: "throw",
@@ -126,6 +126,11 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+    },
+    colorMode: {
+      defaultMode: "light",
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
     },
   } satisfies Preset.ThemeConfig,
 

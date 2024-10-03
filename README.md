@@ -2,7 +2,7 @@
 <img style="margin-right: 16px;" src=".github/images/m2c2.svg" width="128" />
 <h1>m2c2kit</h1>
 
-_a library for cross-platform cognitive assessments_
+_an open-source library for cross-platform cognitive assessments_
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)

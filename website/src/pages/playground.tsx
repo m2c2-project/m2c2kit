@@ -115,7 +115,7 @@ export default function Home(): JSX.Element {
     <>
       <Layout
         title={`${siteConfig.title}`}
-        description="a library for cross-platform cognitive assessments"
+        description="an open-source library for cross-platform cognitive assessments"
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>

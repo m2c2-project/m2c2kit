@@ -70,6 +70,14 @@ jobs:
         # only packages explicitly named in scripts/publish-updated-packages.mjs will be published
         run: npm run publish-updated
         # publish-updated will set an environment variable PUBLIC_PACKAGES_OK to indicate if there were no errors with the public packages
+      - name: Trigger static site deployment workflow
+        if: ${{ env.PUBLIC_PACKAGES_OK=='true' }}
+        run: |
+          curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.ORG_NPM_TOKEN }}" \
+          https://api.github.com/repos/m2c2-project/static-site-approach/dispatches \
+          -d '{"event_type":"package-published"}'
       - name: Build docs
         if: env.PUBLIC_PACKAGES_OK=='true'
         run: npm run build -w website
