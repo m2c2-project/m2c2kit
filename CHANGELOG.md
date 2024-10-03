@@ -4,6 +4,132 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.23] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.22] - 2024-10-03
+
+### Fixed
+
+- Corrected spacing of selection indicators (double angle quotes) for LocalePicker when using a LocaleSvg.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.5] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.10] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.22] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.22] - 2024-10-03
+
+### Added
+
+- Added `assessmentDependenciesRegistryUrl` property in static-site configuration file to optionally specify the registry to use for downloading m2c2kit library dependencies.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.16] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.19] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.17] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.17] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.13] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.2] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.21] - 2024-10-03
+
+### Added
+
+- Support for jp-JP locale.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.21] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.21] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.21] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.17] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.19] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.17] - 2024-10-03
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.22] - 2024-09-05
 
 ### Changed
