@@ -41,6 +41,7 @@ export class TextLine
   private tryMissingTranslationPaint = false;
   private textForDraw = "";
   private fontForDraw?: M2Font;
+  private localizedFontSize: number | undefined;
   private localizedFontName: string | undefined;
   private localizedFontNames: Array<string> = [];
 
@@ -55,7 +56,7 @@ export class TextLine
     super(options);
     handleInterfaceOptions(this, options);
 
-    this.size.height = this.fontSize;
+    this.size.height = this.localizedFontSize ?? this.fontSize;
     // width is merely for bounds when checking onTap
     // TextLine will be drawn without regards to the setting for width
     // TODO: explore using ShapedText in canvas.drawText(), because
@@ -84,6 +85,7 @@ export class TextLine
         this.interpolation,
       );
       this.textForDraw = textLocalization.text;
+      this.localizedFontSize = textLocalization.fontSize;
       this.localizedFontName = textLocalization.fontName;
       this.localizedFontNames = textLocalization.fontNames ?? [];
       if (textLocalization.isFallbackOrMissingTranslation) {
@@ -187,7 +189,7 @@ export class TextLine
     }
     this.font = new this.canvasKit.Font(
       this.typeface,
-      this.fontSize * m2c2Globals.canvasScale,
+      (this.localizedFontSize ?? this.fontSize) * m2c2Globals.canvasScale,
     );
   }
 

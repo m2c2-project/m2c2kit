@@ -48,6 +48,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   private builder?: ParagraphBuilder;
   private _fontPaint?: Paint;
   private _backgroundPaint?: Paint;
+  private localizedFontSize: number | undefined;
   private localizedFontName: string | undefined;
   private localizedFontNames: Array<string> = [];
 
@@ -130,6 +131,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
         this.interpolation,
       );
       textForParagraph = textLocalization.text;
+      this.localizedFontSize = textLocalization.fontSize;
       this.localizedFontName = textLocalization.fontName;
       this.localizedFontNames = textLocalization.fontNames ?? [];
       if (
@@ -218,7 +220,8 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this.builder.pushPaintStyle(
       {
         fontFamilies: requiredFonts.map((font) => font.fontName),
-        fontSize: this.fontSize * m2c2Globals.canvasScale,
+        fontSize:
+          (this.localizedFontSize ?? this.fontSize) * m2c2Globals.canvasScale,
         // set default values for below properties as well.
         fontStyle: {
           weight: this.canvasKit.FontWeight.Normal,

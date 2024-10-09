@@ -16,6 +16,7 @@ export interface TranslationOptions {
 
 export interface TextLocalizationResult {
   text: string;
+  fontSize?: number;
   fontName?: string;
   fontNames?: string[];
   isFallbackOrMissingTranslation: boolean;
@@ -187,6 +188,7 @@ export class I18n {
 
     return {
       text: localizedText,
+      fontSize: tf?.fontSize,
       fontName: tf?.fontName,
       fontNames: tf?.fontNames,
       isFallbackOrMissingTranslation: isFallbackOrMissingTranslation,
@@ -220,7 +222,6 @@ export class I18n {
    * ```
    */
   t(key: string, options?: TranslationOptions) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { useFallbackLocale, ...interpolationMap } = options ?? {};
 
     if (useFallbackLocale !== true) {
@@ -260,7 +261,6 @@ export class I18n {
    * current locale, or undefined if the key is not found
    */
   tf(key: string, options?: TranslationOptions): TextAndFont | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { useFallbackLocale, ...interpolationMap } = options ?? {};
 
     if (useFallbackLocale !== true) {
@@ -306,6 +306,7 @@ export class I18n {
     t: string | TextWithFontCustomization,
     locale: string,
   ): TextAndFont {
+    let fontSize: number | undefined = undefined;
     let fontNames = new Array<string>();
     if (this.isString(this.translation[locale]?.fontName)) {
       fontNames.push(this.translation[locale].fontName as string);
@@ -317,6 +318,7 @@ export class I18n {
     let text: string | undefined;
     if (this.isTextWithFontCustomization(t)) {
       text = t.text;
+      fontSize = t.fontSize;
       if (this.isString(t.additionalFontName)) {
         fontNames.push(t.additionalFontName);
       }
@@ -340,11 +342,11 @@ export class I18n {
 
     switch (fontNames.length) {
       case 0:
-        return { text: text };
+        return { text: text, fontSize: fontSize };
       case 1:
-        return { text: text, fontName: fontNames[0] };
+        return { text: text, fontSize: fontSize, fontName: fontNames[0] };
       default:
-        return { text: text, fontNames: fontNames };
+        return { text: text, fontSize: fontSize, fontNames: fontNames };
     }
   }
 

@@ -34,7 +34,8 @@
  * `OK_BUTTON` uses the game's default font for all locales. Because hi-IN
  * specified a font name, the `overrideFontName` property with a value of
  * `default` is used to specify that the game's default font should be used
- * instead of the locale's font, devanagari.
+ * instead of the locale's font, devanagari. In addition, hi-IN specifies a
+ * different font size for the `OK_BUTTON` text.
  *
  * `BYE` uses interpolation. `{{name}}` is a placeholder that will be replaced,
  * at runtime, with the value of the `name` key in the `options` object passed
@@ -85,6 +86,7 @@
  *     },
  *     "OK_BUTTON": {
  *       text: "OK",
+ *       fontSize: 12,
  *       overrideFontName: "default"
  *     },
  *    "BYE": "अलविदा {{name}}."
@@ -148,6 +150,8 @@ type LocaleTranslationMap = {
 export interface TextWithFontCustomization {
   /** The translated string. */
   text: string;
+  /** Font size to use when displaying the text. */
+  fontSize?: number;
   /** Font name(s) to _add to_ the locale's font name(s) when displaying text. */
   additionalFontName?: string | Array<string>;
   /** Font name(s) to use _in place of_ the locale's font name(s) when
@@ -159,6 +163,8 @@ export interface TextWithFontCustomization {
 export interface TextAndFont {
   /** The translated string. */
   text?: string;
+  /** Font size to use when displaying the text. */
+  fontSize?: number;
   /** Font name to use when displaying the text. */
   fontName?: string;
   /** Font names to use when displaying the text. */
