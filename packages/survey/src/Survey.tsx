@@ -755,6 +755,7 @@ export class Survey implements Activity {
       newDataSchema: {},
       data: data,
       dataSchema: {},
+      dataType: "Survey",
       activityConfiguration: {},
       activityConfigurationSchema: {},
       ...M2c2KitHelpers.createTimestamps(),

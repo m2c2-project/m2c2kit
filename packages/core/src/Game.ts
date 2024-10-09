@@ -1918,6 +1918,7 @@ export class Game implements Activity {
       /** data is all the data collected so far in the game */
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
+      dataType: "Trial",
       activityConfiguration: this.makeGameActivityConfiguration(
         this.options.parameters ?? {},
       ),
@@ -2127,6 +2128,7 @@ export class Game implements Activity {
     const results: ActivityResults = {
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
+      dataType: "Trial",
       activityConfiguration: this.makeGameActivityConfiguration(
         this.options.parameters ?? {},
       ),
@@ -2157,6 +2159,7 @@ export class Game implements Activity {
     const results: ActivityResults = {
       data: this.data,
       dataSchema: this.makeGameDataSchema(),
+      dataType: "Trial",
       activityConfiguration: this.makeGameActivityConfiguration(
         this.options.parameters ?? {},
       ),
