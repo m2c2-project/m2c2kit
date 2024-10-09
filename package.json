@@ -50,16 +50,16 @@
     "@types/semver": "7.5.8",
     "concurrently": "9.0.1",
     "cpy-cli": "4.2.0",
-    "eslint": "^9.11.1",
+    "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
     "find-up": "7.0.0",
     "husky": "9.1.6",
-    "linkinator": "6.1.1",
+    "linkinator": "6.1.2",
     "lint-staged": "^15.2.10",
     "prettier": "3.3.3",
     "semver": "7.6.3",
     "syncpack": "13.0.0",
-    "typescript-eslint": "^8.8.0"
+    "typescript-eslint": "^8.8.1"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"

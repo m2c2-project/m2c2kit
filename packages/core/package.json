@@ -43,7 +43,7 @@
     "@webgpu/types": "0.1.48",
     "canvas": "2.11.2",
     "cross-env": "7.0.3",
-    "del-cli": "5.1.0",
+    "del-cli": "6.0.0",
     "env-cmd": "10.1.0",
     "findup-sync": "5.0.0",
     "jest": "29.7.0",
@@ -58,7 +58,7 @@
     "ts-jest": "29.2.5",
     "ts-jest-mock-import-meta": "1.2.0",
     "ts-node": "10.9.2",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "engines": {
     "node": ">=18"
