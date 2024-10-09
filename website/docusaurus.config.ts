@@ -120,6 +120,10 @@ const config: Config = {
           label: "Reference",
           to: "/docs/category/api-reference",
         },
+        {
+          label: "Contact",
+          to: "/docs/intro#contact",
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} m2c2kit. Built with Docusaurus.`,
     },
