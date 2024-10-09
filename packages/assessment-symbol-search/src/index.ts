@@ -330,7 +330,7 @@ positions.",
           height: 22,
         },
         fontName: "noto-sans-japanese",
-        INSTRUCTIONS_TITLE: "記号探し」。",
+        INSTRUCTIONS_TITLE: "記号探し",
         // Short instructions need to be translated.
         // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
         INSTRUCTIONS_TEXT_PAGE_1:
@@ -342,7 +342,8 @@ positions.",
         START_BUTTON_TEXT: "スタート",
         NEXT_BUTTON_TEXT: "次へ",
         BACK_BUTTON_TEXT: "戻る",
-        GET_READY_COUNTDOWN_TEXT: "準備してください！",
+        // Other locales use 50, but jp-JP uses 40 to fit on one line.
+        GET_READY_COUNTDOWN_TEXT: { text: "準備してください！", fontSize: 40 },
         WHICH_MATCHES_TEXT: "どれが上のペアと一致しますか？",
         OR_TEXT: "または",
         TRIALS_COMPLETE_SCENE_TEXT: "このテストは完了しました。",
