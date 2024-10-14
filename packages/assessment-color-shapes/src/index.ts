@@ -131,7 +131,7 @@ class ColorShapes extends Game {
       },
       show_quit_button: {
         type: "boolean",
-        default: true,
+        default: false,
         description: "Should the activity quit button be shown?",
       },
       show_fps: {
