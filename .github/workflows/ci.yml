@@ -78,6 +78,14 @@ jobs:
           -H "Authorization: token ${{ secrets.ORG_NPM_TOKEN }}" \
           https://api.github.com/repos/m2c2-project/static-site-approach/dispatches \
           -d '{"event_type":"package-published"}'
+      - name: Trigger m2c2kit docs website deployment workflow
+        if: ${{ env.PUBLIC_PACKAGES_OK=='true' }}
+        run: |
+          curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.ORG_NPM_TOKEN }}" \
+          https://api.github.com/repos/m2c2-project/m2c2kit-docs/dispatches \
+          -d '{"event_type":"package-published"}'
       - name: Build docs
         if: env.PUBLIC_PACKAGES_OK=='true'
         run: npm run build -w website
