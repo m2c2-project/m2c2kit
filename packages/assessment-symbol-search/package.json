@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npm run clean && tsc && rollup -c && npm run schemas",
     "serve": "concurrently \"rollup -c rollup.config.runner.mjs --watch --configServe\" \"tsc --project tsconfig.runner.json --watch\" --names rollup,typescript --prefix-colors auto,red",
-    "schemas": "schema-util list --schema=all --files=src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > schemas.json",
+    "schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > schemas.json",
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo"
   },
   "main": "./dist/index.js",
