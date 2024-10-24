@@ -4,6 +4,166 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.24] - 2024-10-24
+
+### Added
+
+- `dataType` property to `ActivityResults` and new `ScoringSchema` interface to support assessments creating their own scored data.
+- In internationalization, a specific translation key can optionally specify a font size to use only for that locale's translated text of the key. See the `TextWithFontCustomization` interface.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.23] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.6] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.11] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.23] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.23] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.17] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.20] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.18] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.18] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.14] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.3] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.22] - 2024-10-24
+
+### Added
+
+- `locales` array to `m2c2kit` property in `package.json`.
+
+### Fixed
+
+- `schema-util` was not being called properly in the `package.json` script.
+
+### Changed
+
+- Updated dependencies.
+- Updated jp-JP localization based on feedback.
+- In `GameParameters`, `show_quit_button` now defaults to `false`.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.22] - 2024-10-24
+
+### Added
+
+- `locales` array to `m2c2kit` property in `package.json`.
+
+### Fixed
+
+- `schema-util` was not being called properly in the `package.json` script.
+
+### Changed
+
+- Updated dependencies.
+- In `GameParameters`, `show_quit_button` now defaults to `false`.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.22] - 2024-10-24
+
+### Added
+
+- `locales` array to `m2c2kit` property in `package.json`.
+
+### Fixed
+
+- `schema-util` was not being called properly in the `package.json` script.
+
+### Changed
+
+- Updated dependencies.
+- In `GameParameters`, `show_quit_button` now defaults to `false`.
+
+## `@m2c2kit/assessment-color-dots` [0.8.22] - 2024-10-24
+
+### Added
+
+- `locales` array to `m2c2kit` property in `package.json`.
+
+### Fixed
+
+- `schema-util` was not being called properly in the `package.json` script.
+
+### Changed
+
+- Updated dependencies.
+- In `GameParameters`, `show_quit_button` now defaults to `false`.
+
+## `@m2c2kit/assessments-demo` [0.8.18] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.20] - 2024-10-24
+
+### Fixed
+
+- `schema-util` was not being called properly in the `package.json` script.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.18] - 2024-10-24
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.23] - 2024-10-03
 
 ### Changed

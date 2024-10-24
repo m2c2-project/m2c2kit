@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schema-util",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Utility tool to extract the schema used in m2c2kit assessment TypeScript source files",
   "type": "module",
   "main": "index.js",
@@ -12,7 +12,7 @@
   ],
   "devDependencies": {
     "@types/findup-sync": "4.0.5",
-    "@types/node": "22.7.7",
+    "@types/node": "22.7.9",
     "esbuild": "0.24.0"
   },
   "scripts": {

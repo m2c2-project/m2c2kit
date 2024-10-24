@@ -1,8 +1,12 @@
 {
   "name": "@m2c2kit/assessment-color-dots",
-  "version": "0.8.21",
+  "version": "0.8.22",
   "m2c2kit": {
-    "assessmentId": "color-dots"
+    "assessmentId": "color-dots",
+    "locales": [
+      "en-US",
+      "es-MX"
+    ]
   },
   "description": "A cued-recall, item-location memory binding task, where after viewing 3 dots for a brief period of time, participants report: (1) the color at a cued location; (2) the location of a cued color",
   "scripts": {
@@ -38,13 +42,13 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.22",
-    "@m2c2kit/core": "0.3.23"
+    "@m2c2kit/addons": "0.3.23",
+    "@m2c2kit/core": "0.3.24"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.19",
-    "@m2c2kit/schema-util": "0.1.13",
-    "@m2c2kit/session": "0.3.5",
+    "@m2c2kit/build-helpers": "0.3.20",
+    "@m2c2kit/schema-util": "0.1.14",
+    "@m2c2kit/session": "0.3.6",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
     "concurrently": "9.0.1",

@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.3.23",
+  "version": "0.3.24",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -34,11 +34,11 @@
     "canvaskit-wasm": "0.39.1"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.19",
+    "@m2c2kit/build-helpers": "0.3.20",
     "@rollup/plugin-commonjs": "28.0.1",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
-    "@types/jest": "29.5.13",
+    "@types/jest": "29.5.14",
     "@types/jsdom": "21.1.7",
     "@webgpu/types": "0.1.49",
     "canvas": "2.11.2",

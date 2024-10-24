@@ -1,8 +1,15 @@
 {
   "name": "@m2c2kit/assessment-symbol-search",
-  "version": "0.8.21",
+  "version": "0.8.22",
   "m2c2kit": {
-    "assessmentId": "symbol-search"
+    "assessmentId": "symbol-search",
+    "locales": [
+      "en-US",
+      "es-MX",
+      "fr-FR",
+      "de-DE",
+      "jp-JP"
+    ]
   },
   "description": "A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can",
   "scripts": {
@@ -38,13 +45,13 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.22",
-    "@m2c2kit/core": "0.3.23"
+    "@m2c2kit/addons": "0.3.23",
+    "@m2c2kit/core": "0.3.24"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.19",
-    "@m2c2kit/schema-util": "0.1.13",
-    "@m2c2kit/session": "0.3.5",
+    "@m2c2kit/build-helpers": "0.3.20",
+    "@m2c2kit/schema-util": "0.1.14",
+    "@m2c2kit/session": "0.3.6",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
     "concurrently": "9.0.1",
