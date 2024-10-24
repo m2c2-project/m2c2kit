@@ -86,18 +86,3 @@ jobs:
           -H "Authorization: token ${{ secrets.ORG_NPM_TOKEN }}" \
           https://api.github.com/repos/m2c2-project/m2c2kit-docs/dispatches \
           -d '{"event_type":"package-published"}'
-      - name: Build docs
-        if: env.PUBLIC_PACKAGES_OK=='true'
-        run: npm run build -w website
-      - name: Setup Pages
-        if: env.PUBLIC_PACKAGES_OK=='true'
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        if: env.PUBLIC_PACKAGES_OK=='true'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: website/build
-      - name: Deploy to GitHub Pages
-        if: env.PUBLIC_PACKAGES_OK=='true'
-        id: deployment
-        uses: actions/deploy-pages@v4
