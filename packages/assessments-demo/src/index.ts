@@ -16,6 +16,11 @@ const a4 = new SymbolSearch();
 const a5 = new CliStarter();
 const survey = new Survey(surveyJson);
 
+a1.setParameters({ show_quit_button: true });
+a2.setParameters({ show_quit_button: true });
+a3.setParameters({ show_quit_button: true });
+a4.setParameters({ show_quit_button: true });
+
 const activities = [a1, a2, a3, a4, a5, survey];
 
 const db = new LocalDatabase();
