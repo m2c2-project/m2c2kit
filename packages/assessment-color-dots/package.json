@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-dots",
-  "version": "0.8.22",
+  "version": "0.8.23",
   "m2c2kit": {
     "assessmentId": "color-dots",
     "locales": [
@@ -42,13 +42,13 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.23",
-    "@m2c2kit/core": "0.3.24"
+    "@m2c2kit/addons": "0.3.24",
+    "@m2c2kit/core": "0.3.25"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.20",
-    "@m2c2kit/schema-util": "0.1.14",
-    "@m2c2kit/session": "0.3.6",
+    "@m2c2kit/build-helpers": "0.3.21",
+    "@m2c2kit/schema-util": "0.1.15",
+    "@m2c2kit/session": "0.3.7",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
     "concurrently": "9.1.0",
