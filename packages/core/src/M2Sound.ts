@@ -2,6 +2,7 @@ export interface M2Sound {
   soundName: string;
   data: ArrayBuffer | undefined;
   audioBuffer: AudioBuffer | undefined;
+  audioBufferSource: AudioBufferSourceNode | undefined;
   url: string;
   status: M2SoundStatus;
 }

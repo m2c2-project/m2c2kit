@@ -87,6 +87,7 @@ export class SoundManager {
         soundName: sound.soundName,
         data: undefined,
         audioBuffer: undefined,
+        audioBufferSource: undefined,
         url,
         status: sound.lazy ? M2SoundStatus.Deferred : M2SoundStatus.WillFetch,
       };

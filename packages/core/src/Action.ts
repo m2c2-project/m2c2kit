@@ -590,9 +590,10 @@ export abstract class Action {
     if (!playAction.started) {
       const m2Sound = soundManager.getSound(soundPlayer.soundName);
       if (m2Sound.audioBuffer) {
-        const source = soundManager.audioContext.createBufferSource();
-        source.buffer = m2Sound.audioBuffer;
-        source.onended = () => {
+        m2Sound.audioBufferSource =
+          soundManager.audioContext.createBufferSource();
+        m2Sound.audioBufferSource.buffer = m2Sound.audioBuffer;
+        m2Sound.audioBufferSource.onended = () => {
           playAction.running = false;
           playAction.completed = true;
           /**
@@ -609,8 +610,10 @@ export abstract class Action {
            */
           action.duration.assign(knownDuration);
         };
-        source.connect(soundManager.audioContext.destination);
-        source.start();
+        m2Sound.audioBufferSource.connect(
+          soundManager.audioContext.destination,
+        );
+        m2Sound.audioBufferSource.start();
         playAction.started = true;
       } else {
         if (m2Sound.status === M2SoundStatus.Error) {
