@@ -34,7 +34,7 @@
     "@rollup/plugin-commonjs": "28.0.1",
     "@rollup/plugin-node-resolve": "15.3.0",
     "rimraf": "6.0.1",
-    "rollup": "4.24.4",
+    "rollup": "4.27.2",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-esbuild": "6.1.1",
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@m2c2kit/core": "^0.3.20",
-    "dexie": "4.0.9"
+    "dexie": "4.0.10"
   },
   "engines": {
     "node": ">=18"
