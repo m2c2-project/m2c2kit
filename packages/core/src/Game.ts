@@ -3280,7 +3280,6 @@ export class Game implements Activity {
       node.pressed = false;
       node.pressedAndWithinHitArea = false;
       this.raiseM2DragEndEvent(node, nodeEvent, domPointerEvent);
-      nodeEvent.handled = true;
       return;
     }
 
@@ -3373,7 +3372,6 @@ export class Game implements Activity {
         x: domPointerEvent.offsetX,
         y: domPointerEvent.offsetY,
       };
-      nodeEvent.handled = true;
       if (firstMoveOfDrag) {
         this.raiseM2DragStartEvent(node, nodeEvent, domPointerEvent);
       } else {
