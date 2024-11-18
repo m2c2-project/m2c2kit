@@ -4,6 +4,126 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.26] - 2024-11-18
+
+### Changed
+
+- Previously, if the user was actively dragging a node, the DOM pointer move and pointer up events would be processed by the node's dragging logic, but then marked as handled so that these DOM events would not propagate to other nodes. This no longer the case: now, DOM events on dragging nodes will be passed on and processed by other nodes.
+- Updated dependencies.
+
+### Fixed
+
+- When a running Play action was removed from a `SoundPlayer` node, it did not stop the audio playback. This is now fixed.
+- DOM pointer events (pointer up, move, leave, down) are processed on child nodes according to `zPosition`. However, if two overlapping child nodes had the same `zPosition`, the earlier child in the array (which would have been drawn "under" the later child in the array) would incorrectly receive the pointer event first. This is now fixed so that among child nodes with the same `zPosition`, the child that is visually "on top" (the one with the later position in the child array) receives the pointer event first.
+
+## `@m2c2kit/addons` [0.3.25] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.8] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.13] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.25] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.25] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.19] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.22] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.20] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.20] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.16] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.5] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.24] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.24] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.24] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.24] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.20] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.22] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.20] - 2024-11-18
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.25] - 2024-11-08
 
 ### Changed

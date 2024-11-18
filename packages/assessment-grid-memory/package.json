@@ -1,7 +1,7 @@
 {
   "name": "@m2c2kit/assessment-grid-memory",
   "description": "A visuospatial working memory task, with delayed free recall. After a brief exposure and short distraction phase, participants report the location of dots on a grid",
-  "version": "0.8.23",
+  "version": "0.8.24",
   "m2c2kit": {
     "assessmentId": "grid-memory",
     "locales": [
@@ -43,13 +43,13 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.24",
-    "@m2c2kit/core": "0.3.25"
+    "@m2c2kit/addons": "0.3.25",
+    "@m2c2kit/core": "0.3.26"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.21",
-    "@m2c2kit/schema-util": "0.1.15",
-    "@m2c2kit/session": "0.3.7",
+    "@m2c2kit/build-helpers": "0.3.22",
+    "@m2c2kit/schema-util": "0.1.16",
+    "@m2c2kit/session": "0.3.8",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
     "concurrently": "9.1.0",

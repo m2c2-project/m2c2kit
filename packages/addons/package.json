@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/addons",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "Additions to m2c2kit core functionality, such as button, grid, and instructions",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -30,10 +30,10 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/core": "0.3.25"
+    "@m2c2kit/core": "0.3.26"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.21",
+    "@m2c2kit/build-helpers": "0.3.22",
     "@rollup/plugin-replace": "6.0.1",
     "rimraf": "6.0.1",
     "rollup": "4.27.3",
