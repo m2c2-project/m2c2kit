@@ -3255,11 +3255,20 @@ export class Game implements Activity {
         // only drawables have z-position
         .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
-        .sort(
-          (a, b) =>
+        .sort((a, b) => {
+          const zDiff =
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition,
-        )
+            (a as unknown as IDrawable).zPosition;
+          if (zDiff !== 0) {
+            return zDiff;
+          }
+          /**
+           * If zPosition is the same, process the one later in the array
+           * first, because it is drawn on top of the other one and thus
+           * should receive the event first.
+           */
+          return node.children.indexOf(b) - node.children.indexOf(a);
+        })
         .forEach((node) =>
           this.processDomPointerDown(node, nodeEvent, domPointerEvent),
         );
@@ -3333,11 +3342,20 @@ export class Game implements Activity {
         // only drawables have z-position
         .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
-        .sort(
-          (a, b) =>
+        .sort((a, b) => {
+          const zDiff =
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition,
-        )
+            (a as unknown as IDrawable).zPosition;
+          if (zDiff !== 0) {
+            return zDiff;
+          }
+          /**
+           * If zPosition is the same, process the one later in the array
+           * first, because it is drawn on top of the other one and thus
+           * should receive the event first.
+           */
+          return node.children.indexOf(b) - node.children.indexOf(a);
+        })
         .forEach((node) =>
           this.processDomPointerUp(node, nodeEvent, domPointerEvent),
         );
@@ -3425,11 +3443,20 @@ export class Game implements Activity {
         // only drawables have z-position
         .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
-        .sort(
-          (a, b) =>
+        .sort((a, b) => {
+          const zDiff =
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition,
-        )
+            (a as unknown as IDrawable).zPosition;
+          if (zDiff !== 0) {
+            return zDiff;
+          }
+          /**
+           * If zPosition is the same, process the one later in the array
+           * first, because it is drawn on top of the other one and thus
+           * should receive the event first.
+           */
+          return node.children.indexOf(b) - node.children.indexOf(a);
+        })
         .forEach((node) =>
           this.processDomPointerMove(node, nodeEvent, domPointerEvent),
         );
@@ -3503,11 +3530,20 @@ export class Game implements Activity {
         // only drawables have z-position
         .filter((node) => node.isDrawable)
         // process taps on children by zPosition order
-        .sort(
-          (a, b) =>
+        .sort((a, b) => {
+          const zDiff =
             (b as unknown as IDrawable).zPosition -
-            (a as unknown as IDrawable).zPosition,
-        )
+            (a as unknown as IDrawable).zPosition;
+          if (zDiff !== 0) {
+            return zDiff;
+          }
+          /**
+           * If zPosition is the same, process the one later in the array
+           * first, because it is drawn on top of the other one and thus
+           * should receive the event first.
+           */
+          return node.children.indexOf(b) - node.children.indexOf(a);
+        })
         .forEach((node) =>
           this.processDomPointerLeave(node, nodeEvent, domPointerEvent),
         );
