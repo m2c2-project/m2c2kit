@@ -62,6 +62,16 @@ export class SoundRecorder
 
   override initialize(): void {}
 
+  /**
+   * Starts recording audio from the microphone.
+   *
+   * @remarks If the `SoundRecorder` is already recording, an error will be
+   * thrown. If permission to use the microphone has not been granted, the
+   * browser will prompt the user to allow or deny access. Denial of access
+   * will result in an error being thrown. To avoid this, use the
+   * `queryPermission()` and `requestPermission()` methods to check and request
+   * permission, respectively, and handle the results accordingly.
+   */
   async start() {
     if (this.isRecording) {
       throw new Error(
@@ -91,7 +101,7 @@ export class SoundRecorder
         audio: this.audioTrackConstraints ? this.audioTrackConstraints : true,
       });
     } catch (error) {
-      throw new Error("Error getting user media.");
+      throw new Error(`Error getting user media: ${error}.`);
     }
     if (!stream) {
       throw new Error("no stream.");
@@ -123,6 +133,16 @@ export class SoundRecorder
     this._isPaused = false;
   }
 
+  /**
+   * Stops recording audio from the microphone.
+   *
+   * @remarks If the `stop()` method is not awaited, the method returns a
+   * Promise and the useable data will be lost.
+   *
+   * @returns A promise that resolves to a {@link SoundRecorderResults} object.
+   * The `audioBase64` property of the object contains the recorded audio as a
+   * base64 string.
+   */
   async stop(): Promise<SoundRecorderResults> {
     if (!this.isRecording) {
       throw new Error("cannot stop SoundRecorder because it has not started.");
@@ -183,6 +203,59 @@ export class SoundRecorder
     this.mediaRecorder?.resume();
     this._isPaused = false;
     Timer.start(this.timerUuid);
+  }
+
+  /**
+   * Checks if the microphone permission is granted.
+   *
+   * @remarks This does not request permission from the user. It only queries
+   * the current microphone permission state.
+   *
+   * @returns The `state` property ("granted", "denied", or "prompt") of
+   * `PermissionStatus` or undefined if the browser does not support the
+   * "microphone" permission.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus/state
+   */
+  async queryPermission(): Promise<string | undefined> {
+    try {
+      const status = await navigator.permissions.query({
+        /**
+         * We use a type assertion here because the PermissionName type
+         * does not include "microphone" in the TypeScript type definitions.
+         */
+        name: "microphone" as PermissionName,
+      });
+      return status.state;
+    } catch (error) {
+      /**
+       * Some older browsers may not support navigator.permissions.query() or
+       * the "microphone" permission, so return undefined.
+       */
+      console.warn(
+        `Error calling navigator.permissions.query({ name: "microphone" }): ${error}.`,
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Requests permission to use the microphone, and possibly prompts the user
+   * to allow or deny access.
+   *
+   * @returns true if the microphone permission is granted, false if denied.
+   */
+  async requestPermission() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: this.audioTrackConstraints ? this.audioTrackConstraints : true,
+      });
+      // Stop the stream immediately since we only need permission
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch (error) {
+      console.warn(`Microphone access denied: ${error}`);
+      return false;
+    }
   }
 
   /** Is the `SoundRecorder` currently recording? */
