@@ -69,6 +69,10 @@ export class SoundRecorder
       );
     }
 
+    // Clear data from prior recording, if present.
+    this.audioChunks = [];
+    this.endIso8601Timestamp = undefined;
+
     const supportedMimeTypes = this.getMediaRecorderSupportedAudioMimeTypes();
     if (supportedMimeTypes.length === 0) {
       throw new Error(
