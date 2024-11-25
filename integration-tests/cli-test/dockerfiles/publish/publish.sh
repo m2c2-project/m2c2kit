@@ -30,4 +30,12 @@ echo "npm publish to container registry complete: @m2c2kit/core, \
 @m2c2kit/assessment-color-shapes, @m2c2kit/assessment-grid-memory, \
 @m2c2kit/assessment-symbol-search, @m2c2kit/assessment-cli-starter"
 
+# let the verdaccio registry settle down for a few seconds
+sleep 5
+
+# messages the testapp and testmodule containers to let them know that the packages have been published
+# and they can now install m2c2kit packages
+echo -n "packages-published" | nc -q 0 testapp 80
+echo -n "packages-published" | nc -q 0 testmodule 80
+
 sleep 100000
