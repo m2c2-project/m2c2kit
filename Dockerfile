@@ -13,7 +13,6 @@ RUN apt-get update && \
     apt-get install -y nodejs && \
     # Feature-parity with node.js base images.
     apt-get install -y --no-install-recommends git openssh-client && \
-    apt-get install -y netcat-traditional && \
     npm install -g yarn && \
     # clean apt cache
     rm -rf /var/lib/apt/lists/*
