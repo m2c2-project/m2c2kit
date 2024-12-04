@@ -4,6 +4,128 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.27] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.26] - 2024-12-04
+
+### Added
+
+- The `SoundRecorder` methods `queryPermission()` and `requestPermission()` allow the microphone permissions to be checked and requested before recording audio.
+
+### Fixed
+
+- If a `SoundRecorder` was used multiple times, the data from prior recordings were not cleared.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.9] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.14] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.26] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.26] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.20] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.23] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.21] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.21] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.17] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.6] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.25] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.25] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.25] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.25] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.21] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.23] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.21] - 2024-12-04
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.26] - 2024-11-18
 
 ### Changed
