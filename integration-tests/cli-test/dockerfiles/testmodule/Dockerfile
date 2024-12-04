@@ -2,7 +2,7 @@ FROM node:22
 
 WORKDIR /usr/src
 
-RUN apt-get update && apt-get install -y netcat-openbsd
+RUN apt-get update && apt-get install -y netcat-traditional
 
 COPY testmodule.sh /usr/local/bin/testmodule.sh
 RUN chmod +x /usr/local/bin/testmodule.sh
