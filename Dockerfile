@@ -25,7 +25,7 @@ COPY . .
 ENV NODE_OPTIONS=--max_old_space_size=4096
 
 RUN npm ci
-# RUN npx playwright install --with-deps chromium
+RUN npx playwright install --with-deps chromium
 
 # Outside of a container, the next two lines are not needed. When running in
 # this container, however, we need to build the schema-util package and
