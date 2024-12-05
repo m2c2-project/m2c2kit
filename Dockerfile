@@ -11,6 +11,7 @@ RUN apt-get update && \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" >> /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
     apt-get install -y nodejs && \
+    apt-get install -y netcat-openbsd && \
     # Feature-parity with node.js base images.
     apt-get install -y --no-install-recommends git openssh-client && \
     npm install -g yarn && \
@@ -24,7 +25,7 @@ COPY . .
 ENV NODE_OPTIONS=--max_old_space_size=4096
 
 RUN npm ci
-RUN npx playwright install --with-deps chromium
+# RUN npx playwright install --with-deps chromium
 
 # Outside of a container, the next two lines are not needed. When running in
 # this container, however, we need to build the schema-util package and
