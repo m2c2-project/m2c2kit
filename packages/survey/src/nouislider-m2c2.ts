@@ -43,7 +43,7 @@ export function initnouisliderm2c2() {
         {
           name: "start:number",
           category: "slider",
-          default: 50,
+          default: 51,
         },
         {
           name: "pipsMode",
