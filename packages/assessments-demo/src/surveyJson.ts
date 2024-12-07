@@ -108,7 +108,7 @@ export const surveyJson = {
           title: "How is your overall MOOD?",
           rangeMin: 0,
           rangeMax: 100,
-          start: 30,
+          start: 40,
           tooltips: true,
           pipsDensity: -1,
           showOnlyPipsWithPipsText: true,
