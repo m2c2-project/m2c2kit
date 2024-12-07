@@ -21,7 +21,7 @@ export function initnouisliderm2c2() {
         "nouislider-m2c2",
         [],
         undefined,
-        "empty"
+        "empty",
       );
       Survey.JsonObject.metaData.addProperties("nouislider-m2c2", [
         {
@@ -39,6 +39,11 @@ export function initnouisliderm2c2() {
           name: "rangeMax:number",
           category: "slider",
           default: 100,
+        },
+        {
+          name: "start:number",
+          category: "slider",
+          default: 50,
         },
         {
           name: "pipsMode",
@@ -96,19 +101,19 @@ export function initnouisliderm2c2() {
       }
       const slider = noUiSlider.create(el, {
         start:
-          question.rangeMin <= question.value &&
-          question.value <= question.rangeMax
-            ? question.value
+          question.rangeMin <= question.start &&
+          question.start <= question.rangeMax
+            ? question.start
             : (question.rangeMin + question.rangeMax) / 2,
         //connect: [true, false],
         step: question.step,
-        // tooltips: question.tooltips,
+        tooltips: question.tooltips,
         pips: {
           mode: question.pipsMode || "positions",
           filter: (value: any, type: any) => {
             if (question.showOnlyPipsWithPipsText) {
               const pipsProvidedValues = question.pipsText.map(
-                (p: { value: string }) => p.value
+                (p: { value: string }) => p.value,
               );
               if (pipsProvidedValues.includes(value)) {
                 return 1;
@@ -165,16 +170,16 @@ export function initnouisliderm2c2() {
           {
             step: question.step,
             start:
-              question.rangeMin <= question.value &&
-              question.value <= question.rangeMax
-                ? getStart(question.value)
+              question.rangeMin <= question.start &&
+              question.start <= question.rangeMax
+                ? getStart(question.start)
                 : getStart((question.rangeMin + question.rangeMax) / 2),
             range: {
               min: question.rangeMin,
               max: question.rangeMax,
             },
           },
-          true
+          true,
         );
         // slider.pips(
         //   { mode: question.pipsMode || "positions",
@@ -213,10 +218,12 @@ export function initnouisliderm2c2() {
           "step",
           "rangeMin",
           "rangeMax",
+          "start",
+          "tooltips",
           "pipsMode",
           "pipsDensity",
         ],
-        question.updateSliderProperties
+        question.updateSliderProperties,
       );
       question.valueChangedCallback = updateValueHandler;
       question.readOnlyChangedCallback = function () {
@@ -243,17 +250,19 @@ export function initnouisliderm2c2() {
           "step",
           "rangeMin",
           "rangeMax",
+          "start",
+          "tooltips",
           "pipsMode",
           "pipsDensity",
         ],
-        question.updateSliderProperties
+        question.updateSliderProperties,
       );
       question.updateSliderProperties = undefined;
     },
     pdfRender: function (_: any, options: any) {
       if (options.question.getType() === "nouislider-m2c2") {
         const point = options.module.SurveyHelper.createPoint(
-          options.module.SurveyHelper.mergeRects.apply(null, options.bricks)
+          options.module.SurveyHelper.mergeRects.apply(null, options.bricks),
         );
         point.xLeft += options.controller.unitWidth;
         point.yTop +=
@@ -261,7 +270,7 @@ export function initnouisliderm2c2() {
           options.module.FlatQuestion.CONTENT_GAP_VERT_SCALE;
         const rect = options.module.SurveyHelper.createTextFieldRect(
           point,
-          options.controller
+          options.controller,
         );
         const textboxBrick = new options.module.TextFieldBrick(
           options.question,
@@ -273,7 +282,7 @@ export function initnouisliderm2c2() {
           "",
           options.question.isReadOnly,
           false,
-          "text"
+          "text",
         );
         options.bricks.push(textboxBrick);
       }
