@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/survey` [0.3.22] - 2024-12-09
+
+### Added
+
+- The `nouislider-m2c2` widget now supports `start` and `tooltips` options. By default, `tooltips` is `true`; set it to `false` to hide the tooltips and preserve previous behavior.
+
+## `@m2c2kit/assessments-demo` [0.8.22] - 2024-12-09
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.27] - 2024-12-04
 
 ### Changed

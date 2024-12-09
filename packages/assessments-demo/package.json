@@ -1,7 +1,7 @@
 {
   "name": "@m2c2kit/assessments-demo",
   "description": "A demo of several m2c2kit assessments",
-  "version": "0.8.21",
+  "version": "0.8.22",
   "scripts": {
     "serve": "concurrently \"rollup -c --watch --configServe\" \"tsc --watch\" --names rollup,typescript --prefix-colors auto,red",
     "build": "npm run clean && tsc && rollup -c --configProd",
@@ -33,7 +33,7 @@
     "@m2c2kit/db": "0.3.21",
     "@m2c2kit/embedding": "1.0.20",
     "@m2c2kit/session": "0.3.9",
-    "@m2c2kit/survey": "0.3.21"
+    "@m2c2kit/survey": "0.3.22"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.23",
