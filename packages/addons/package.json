@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.23",
-    "@rollup/plugin-replace": "6.0.1",
     "rimraf": "6.0.1",
     "rollup": "4.28.0",
     "rollup-plugin-copy": "3.5.0",
