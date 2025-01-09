@@ -67,7 +67,7 @@ As long as you do not modify the folder structure, you do not need to modify the
 Import maps are a newer feature of the web platform. They are not supported by some older browsers. To support import maps on older browsers, you can use a [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/Polyfill). Before the import maps, the `index.html` file has a script tag that loads the polyfill:
 
 ```
-<script async src="https://ga.jspm.io/npm:es-module-shims@1.8.2/dist/es-module-shims.js"></script>
+<script async src="https://ga.jspm.io/npm:es-module-shims@2.0.0/dist/es-module-shims.js"></script>
 ```
 
 It is recommended to keep this polyfill. If the code runs on a browser that supports import maps, it will be ignored.
