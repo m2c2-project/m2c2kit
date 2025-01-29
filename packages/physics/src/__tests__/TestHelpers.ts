@@ -45,6 +45,15 @@ export class TestHelpers {
       configurable: true,
       value: 1200,
     });
+
+    /**
+     * node-canvas (the npm "canvas" package) is no longer a dependency, so
+     * the getContext method will throw an error. This is caught, but it
+     * generates lots of console messages. The result of getContext is not
+     * used in the tests, so mock it to return null and avoid these
+     * distracting errors.
+     */
+    jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
   }
 
   static perfCounter = 0;
