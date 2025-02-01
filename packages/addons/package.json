@@ -35,7 +35,7 @@
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.23",
     "rimraf": "6.0.1",
-    "rollup": "4.32.1",
+    "rollup": "4.34.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-esbuild": "6.1.1",

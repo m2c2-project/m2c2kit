@@ -47,7 +47,7 @@
     "@m2c2kit/session": "0.3.9",
     "@rollup/plugin-node-resolve": "16.0.0",
     "rimraf": "6.0.1",
-    "rollup": "4.32.1",
+    "rollup": "4.34.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.1.1",
     "typescript": "5.7.3"
