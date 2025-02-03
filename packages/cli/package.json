@@ -27,7 +27,7 @@
   "dependencies": {
     "@angular-devkit/core": "^19.1.5",
     "@angular-devkit/schematics": "^19.1.5",
-    "@inquirer/prompts": "7.2.4",
+    "@inquirer/prompts": "7.3.1",
     "@m2c2kit/schematics": "0.1.26",
     "@schematics/angular": "^19.1.5",
     "ansi-colors": "4.1.3",
