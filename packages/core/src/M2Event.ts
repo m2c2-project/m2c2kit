@@ -145,6 +145,8 @@ export const M2EventType = {
   PointerUp: "PointerUp",
   PointerMove: "PointerMove",
   PointerLeave: "PointerLeave",
+  KeyDown: "KeyDown",
+  KeyUp: "KeyUp",
   Drag: "Drag",
   DragStart: "DragStart",
   DragEnd: "DragEnd",

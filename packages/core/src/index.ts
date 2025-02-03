@@ -34,6 +34,7 @@ export * from "./FontAsset";
 export * from "./M2c2KitHelpers";
 export * from "./M2Event";
 export * from "./M2EventListener";
+export * from "./M2KeyboardEvent";
 export * from "./FontData";
 export * from "./FontManager";
 export * from "./Game";

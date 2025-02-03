@@ -79,6 +79,7 @@ import { EventStore, EventStoreMode } from "./EventStore";
 import { M2NodeFactory } from "./M2NodeFactory";
 import { EventMaterializer } from "./EventMaterializer";
 import { Easings } from "./Easings";
+import { M2KeyboardEvent } from "./M2KeyboardEvent";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -2402,6 +2403,15 @@ export class Game implements Activity {
       "pointerleave",
       this.htmlCanvasPointerLeaveHandler.bind(this),
     );
+    /**
+     * Listen for key events on the document, not just the canvas, because
+     * canvas may not have focus.
+     */
+    document.addEventListener(
+      "keydown",
+      this.documentKeyDownHandler.bind(this),
+    );
+    document.addEventListener("keyup", this.documentKeyUpHandler.bind(this));
   }
 
   private loop(canvas: Canvas): void {
@@ -3213,6 +3223,57 @@ export class Game implements Activity {
     this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
   }
 
+  private documentKeyDownHandler(domKeyboardEvent: KeyboardEvent): void {
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+    /**
+     * Built-in keyboard events are not tied to a specific m2c2 node.
+     * Because a target is required in M2NodeEvent, use the current scene,
+     * as it is the parent of all nodes in a scene.
+     */
+    const nodeEvent: M2NodeEvent = {
+      target: scene,
+      type: M2EventType.KeyDown,
+      handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
+    };
+    this.raiseEventOnListeningNodes<M2KeyboardEvent>(
+      this.freeNodesScene,
+      nodeEvent,
+      domKeyboardEvent,
+    );
+    this.raiseEventOnListeningNodes<M2KeyboardEvent>(
+      scene,
+      nodeEvent,
+      domKeyboardEvent,
+    );
+  }
+
+  private documentKeyUpHandler(domKeyboardEvent: KeyboardEvent): void {
+    const scene = this.currentScene;
+    if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
+      return;
+    }
+    const nodeEvent: M2NodeEvent = {
+      target: scene,
+      type: M2EventType.KeyUp,
+      handled: false,
+      ...M2c2KitHelpers.createTimestamps(),
+    };
+    this.raiseEventOnListeningNodes<M2KeyboardEvent>(
+      this.freeNodesScene,
+      nodeEvent,
+      domKeyboardEvent,
+    );
+    this.raiseEventOnListeningNodes<M2KeyboardEvent>(
+      scene,
+      nodeEvent,
+      domKeyboardEvent,
+    );
+  }
+
   /**
    * Determines if/how m2c2kit nodes respond to the DOM PointerDown event
    *
@@ -3902,6 +3963,31 @@ export class Game implements Activity {
               (nodeEvent as M2PointerEvent).buttons = (
                 domEvent as PointerEvent
               ).buttons;
+              listener.callback(nodeEvent as T);
+              break;
+            case M2EventType.KeyDown:
+            case M2EventType.KeyUp:
+              (nodeEvent as M2KeyboardEvent).key = (
+                domEvent as KeyboardEvent
+              ).key;
+              (nodeEvent as M2KeyboardEvent).code = (
+                domEvent as KeyboardEvent
+              ).code;
+              (nodeEvent as M2KeyboardEvent).shiftKey = (
+                domEvent as KeyboardEvent
+              ).shiftKey;
+              (nodeEvent as M2KeyboardEvent).ctrlKey = (
+                domEvent as KeyboardEvent
+              ).ctrlKey;
+              (nodeEvent as M2KeyboardEvent).metaKey = (
+                domEvent as KeyboardEvent
+              ).metaKey;
+              (nodeEvent as M2KeyboardEvent).altKey = (
+                domEvent as KeyboardEvent
+              ).altKey;
+              (nodeEvent as M2KeyboardEvent).repeat = (
+                domEvent as KeyboardEvent
+              ).repeat;
               listener.callback(nodeEvent as T);
               break;
             case M2EventType.TapDown:

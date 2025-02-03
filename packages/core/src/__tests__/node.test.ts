@@ -1,5 +1,5 @@
 import { TestHelpers } from "./TestHelpers";
-import { Game, GameOptions, Scene, Label, Shape } from "..";
+import { Game, GameOptions, Scene, Label, Shape, M2KeyboardEvent } from "..";
 
 TestHelpers.createM2c2KitMock();
 
@@ -295,5 +295,63 @@ describe("test zRotation", () => {
     });
     scene1.addChild(newLabel);
     expect(newLabel.zRotation).toEqual(Math.PI / 2);
+  });
+});
+
+describe("test built-in keyboard events", () => {
+  it("keydown event is received by scene", async () => {
+    /**
+     * Once a session is started, labels require a font to be loaded before
+     * they can be drawn. Remove labels to avoid loading a font in testing.
+     */
+    scene1.removeChild(label1);
+    scene1.removeChild(label2);
+    /**
+     * m2c2kit events will not be handled until the game is started,
+     * so we must run some frames.
+     */
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 5;
+    await g1.start();
+
+    let event: M2KeyboardEvent | undefined;
+    const keyDownEvent = new window.KeyboardEvent("keydown", {
+      key: "1",
+    });
+    scene1.onKeyDown((e) => {
+      event = e;
+    });
+    document.dispatchEvent(keyDownEvent);
+
+    expect(event?.key).toBe("1");
+  });
+
+  it("keyup event is received by scene", async () => {
+    /**
+     * Once a session is started, labels require a font to be loaded before
+     * they can be drawn. Remove labels to avoid loading a font in testing.
+     */
+    scene1.removeChild(label1);
+    scene1.removeChild(label2);
+    /**
+     * m2c2kit events will not be handled until the game is started,
+     * so we must run some frames.
+     */
+    TestHelpers.perfCounter = 0;
+    TestHelpers.requestedFrames = 0;
+    TestHelpers.maxRequestedFrames = 5;
+    await g1.start();
+
+    let event: M2KeyboardEvent | undefined;
+    const keyUpEvent = new window.KeyboardEvent("keyup", {
+      key: "a",
+    });
+    scene1.onKeyUp((e) => {
+      event = e;
+    });
+    document.dispatchEvent(keyUpEvent);
+
+    expect(event?.key).toBe("a");
   });
 });

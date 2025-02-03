@@ -12,6 +12,8 @@ import { M2NodeEvent } from "./M2NodeEvent";
 import { CallbackOptions } from "./CallbackOptions";
 import { Equal } from "./Equal";
 import { Point } from "./Point";
+import { M2KeyboardEvent } from "./M2KeyboardEvent";
+import { M2EventType } from "./M2Event";
 
 export class Scene extends M2Node implements IDrawable, SceneOptions {
   readonly type = M2NodeType.Scene;
@@ -206,6 +208,46 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     options?: CallbackOptions,
   ): void {
     this.addEventListener("SceneAppear", callback, options);
+  }
+
+  /**
+   * Code that will be called after a key is pressed on the device's
+   * built-in keyboard.
+   *
+   * @remarks The built-in keyboard is defined as the hardware keyboard on a
+   * desktop/laptop or the built-in soft keyboard on a tablet or phone. The
+   * latter is not used in m2c2kit. On tablet or phone, the `VirtualKeyboard`
+   * in the `@m2c2kit/addons` package should be used for key events.
+   * @remarks Key events can occur only on a `Scene` node.
+   *
+   * @param callback - function to execute
+   * @param options - {@link CallbackOptions}
+   */
+  onKeyDown(
+    callback: (m2KeyboardEvent: M2KeyboardEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener(M2EventType.KeyDown, callback, options);
+  }
+
+  /**
+   * Code that will be called after a key is released on the device's
+   * built-in keyboard.
+   *
+   * @remarks The built-in keyboard is defined as the hardware keyboard on a
+   * desktop/laptop or the built-in soft keyboard on a tablet or phone. The
+   * latter is not used in m2c2kit. On tablet or phone, the `VirtualKeyboard`
+   * in the `@m2c2kit/addons` package should be used for key events.
+   * @remarks Key events can occur only on a `Scene` node.
+   *
+   * @param callback - function to execute
+   * @param options - {@link CallbackOptions}
+   */
+  onKeyUp(
+    callback: (m2KeyboardEvent: M2KeyboardEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener(M2EventType.KeyUp, callback, options);
   }
 
   override update(): void {
