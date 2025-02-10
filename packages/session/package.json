@@ -40,10 +40,10 @@
     "@m2c2kit/build-helpers": "0.3.23",
     "@rollup/plugin-node-resolve": "16.0.0",
     "rimraf": "6.0.1",
-    "rollup": "4.34.3",
+    "rollup": "4.34.6",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-dts": "6.1.1",
-    "rollup-plugin-esbuild": "6.1.1",
+    "rollup-plugin-esbuild": "6.2.0",
     "typescript": "5.7.3"
   }
 }
