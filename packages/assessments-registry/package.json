@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessments-registry",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A registry of m2c2kit assessments and their locations",
   "main": "dist/index.js",
   "module": "dist/index.js",

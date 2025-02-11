@@ -4,6 +4,128 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.28] - 2025-02-11
+
+### Added
+
+- A `Scene` now has event handlers for KeyDown and KeyUp events fired by the device's built-in keyboard (the hardware keyboard on a laptop/desktop or the soft keyboard for tablet/phone).
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.27] - 2025-02-11
+
+### Added
+
+- Experimental support for `Slider`.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.10] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.15] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.27] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.27] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.21] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.24] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.22] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.23] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.18] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.7] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.26] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.26] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.26] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.26] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.23] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.24] - 2025-02-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/sage-research` [0.3.21] - 2025-02-11
+
+### Removed
+
+- This package is deprecated and has been removed.
+
 ## `@m2c2kit/survey` [0.3.22] - 2024-12-09
 
 ### Added

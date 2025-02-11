@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/embedding",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Utility functions for embedding m2c2kit assessments in other delivery mechanisms, such as native apps and services",
   "main": "dist/index.js",
   "module": "dist/index.js",

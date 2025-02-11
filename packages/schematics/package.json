@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/schematics",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "Rules for the m2c2kit CLI to generate new apps",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -39,8 +39,8 @@
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^19.1.6",
-    "@m2c2kit/core": "0.3.27",
-    "@m2c2kit/session": "0.3.9",
+    "@m2c2kit/core": "0.3.28",
+    "@m2c2kit/session": "0.3.10",
     "@types/archiver": "6.0.3",
     "@types/js-beautify": "1.14.3",
     "@types/semver": "7.5.8",
