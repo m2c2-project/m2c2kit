@@ -63,7 +63,6 @@ const packageOrder = [
   "@m2c2kit/assessment-color-dots",
   "@m2c2kit/assessments-demo",
   "@m2c2kit/assessment-cli-starter",
-  "@m2c2kit/sage-research",
 ];
 
 pkgJsonFiles = pkgJsonFiles.sort((a, b) => {

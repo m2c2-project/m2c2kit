@@ -109,7 +109,6 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 - [`@m2c2kit/assessment-symbol-search`](packages/assessment-symbol-search) - Symbol Search is a speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can.
 - [`@m2c2kit/assessment-color-shapes`](packages/assessment-color-shapes) - Color Shapes is a visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli.
 - [`@m2c2kit/assessment-cli-starter`](packages/assessment-cli-starter) - The assessment that is created when the CLI scaffolds a new app. It is a simple implementation of a [Stroop](https://en.wikipedia.org/wiki/Stroop_effect) assessment.
-- [`@m2c2kit/sage-research`](packages/sage-research) - Utility functions for embedding m2c2kit assessments in iOS and Android apps developed by [Sage Bionetworks](https://sagebionetworks.org/). End users will not need to install this.
 - [`@m2c2kit/build-helpers`](packages/build-helpers) - Utility functions for building m2c2kit apps. End users will not need to install this explicitly. It is automatically installed by the CLI as a dependency.
 - [`@m2c2kit/schema-util`](packages/schema-util) - Utility tool to extract the schema used in m2c2kit assessment TypeScript source files. End users do not need this.
 
