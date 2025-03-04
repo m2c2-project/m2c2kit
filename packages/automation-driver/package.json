@@ -20,5 +20,5 @@
   "dependencies": {
     "@m2c2kit/core": "0.3.28"
   },
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

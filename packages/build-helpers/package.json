@@ -37,7 +37,7 @@
     "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/build-helpers"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": {
     "name": "Scott T. Yabiku",
     "email": "syabiku@gmail.com"

@@ -1,6 +1,6 @@
 # @m2c2kit/assessment-color-dots
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@m2c2kit/assessment-color-dots.svg)](https://www.npmjs.com/package/@m2c2kit/assessment-color-dots)
 

@@ -19,7 +19,7 @@
     "clean": "rimraf dist/ && rimraf build/",
     "copy-files": "copyfiles -f build/src/*.js dist"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "ws": "8.18.1"
   },

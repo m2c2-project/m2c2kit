@@ -5,7 +5,7 @@
 _an open-source library for cross-platform cognitive assessments_
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
 [![CI/CD](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml/badge.svg)](https://github.com/m2c2-project/m2c2kit/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/m2c2-project/m2c2kit.svg?style=social)](https://GitHub.com/m2c2-project/m2c2kit/stargazers/)
 [![GitHub watchers](https://img.shields.io/github/watchers/m2c2-project/m2c2kit.svg?style=social)](https://GitHub.com/m2c2-project/m2c2kit/watchers/)
@@ -154,4 +154,4 @@ m2c2kit is flexible and can be integrated into many use cases:
 
 ---
 
-MIT
+Apache-2.0

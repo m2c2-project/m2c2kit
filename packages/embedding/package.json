@@ -32,7 +32,7 @@
     "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": {
     "name": "Scott T. Yabiku",
     "email": "syabiku@gmail.com"

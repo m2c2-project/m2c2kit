@@ -16,7 +16,7 @@
     "build": "node scripts/copy-es-module-shims.mjs && tsc -p tsconfig.json && node ./scripts/add-version-string.mjs && npx cpy StaticSiteConfig.d.ts ../../types --cwd=src/static-site --rename=index.d.ts",
     "test": "npm run build && jasmine src/**/*_spec.js"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": {
     "name": "Scott T. Yabiku",
     "email": "syabiku@gmail.com"

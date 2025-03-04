@@ -33,4 +33,4 @@ schema-util list --schema=TrialSchema --files=packages/assessment-grid-memory/sr
 schema-util list --schema=all --files=packages/assessment-symbol-search/src/index.ts --format=json-schema --title="Configurable game parameters for Grid Memory version __VERSION__" > symbol-search-schemas.json
 ```
 
-License: MIT
+License: Apache-2.0
