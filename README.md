@@ -40,7 +40,7 @@ m2c2kit is written in Typescript and leverages Google's [canvaskit-wasm](https:/
 
 ---
 
-See m2c2kit assessments in your browser at https://m2c2-project.github.io/m2c2kit/docs/category/examples
+See m2c2kit assessments in your browser at https://m2c2-project.github.io/m2c2kit-docs/docs/category/examples
 
 ![m2c2kit-examples](.github/images/m2c2kit-examples.gif)
 
@@ -48,7 +48,9 @@ See m2c2kit assessments in your browser at https://m2c2-project.github.io/m2c2ki
 
 ---
 
-Documentation, including live tutorials, is available at https://m2c2-project.github.io/m2c2kit. The repository [change log](CHANGELOG.md) documents notable changes.
+Documentation, including live tutorials, is available at https://m2c2-project.github.io/m2c2kit-docs. The documentation explains how to use the various game primitives (e.g., shapes, interactivity, actions), develop your own novel assessments of cognition, and deploy them across various platforms for research (e.g., REDCap, Qualtrics, Metricwire).
+
+The repository [change log](CHANGELOG.md) documents notable changes.
 
 ## Installation
 
@@ -56,13 +58,13 @@ Documentation, including live tutorials, is available at https://m2c2-project.gi
 
 ### No-install quickstart
 
-Go to the m2c2kit [playground](https://m2c2-project.github.io/m2c2kit/playground/) to modify assessments (or create new ones) in your browser.
+Go to the m2c2kit [playground](https://m2c2-project.github.io/m2c2kit-docs/playground/) to modify assessments (or create new ones) in your browser.
 
 ![m2c2kit-playground](.github/images/m2c2kit-playground.gif)
 
 ### Local install
 
-Make sure you have installed [Node.js](https://nodejs.org) (version >=18; version 20 LTS recommended). The CLI can quickly scaffold a demo app and serve it on your local machine:
+Make sure you have installed [Node.js](https://nodejs.org) (version >=20; version 22 LTS recommended). The CLI can quickly scaffold a demo app and serve it on your local machine:
 
 ```
 npm install -g @m2c2kit/cli
@@ -116,7 +118,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 
 ---
 
-Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core), [`@m2c2kit/session`](packages/session), [`@m2c2kit/physics`](packages/physics), [`@m2c2kit/survey`](packages/survey), and [`@m2c2kit/build-helpers`](packages/build-helpers) packages. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs, [node-canvas](https://www.npmjs.com/package/canvas), and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
+Using [Jest](https://jestjs.io/), some unit tests have been written to provide initial test coverage of the [`@m2c2kit/core`](packages/core), [`@m2c2kit/session`](packages/session), [`@m2c2kit/physics`](packages/physics), [`@m2c2kit/survey`](packages/survey), and [`@m2c2kit/build-helpers`](packages/build-helpers) packages. The [canvaskit-wasm](https://www.npmjs.com/package/canvaskit-wasm) dependency is mocked (with a combination of stubs and [jsdom](https://www.npmjs.com/package/jsdom)) so tests can run without invoking this dependency.
 
 To run the tests, execute the following from the repository root:
 
@@ -131,6 +133,8 @@ To run the containerized integration tests, execute the following from the repos
 ```
 npm run integration-test
 ```
+
+On a push to the `main` branch, a GitHub Action begins a CI/CD workflow. This workflow includes building the packages, running both unit and integration tests, and, if all tests pass, publishing updated packages to npm. Additionally, the workflow initiates the build and deployment of the documentation.
 
 ## Integrations
 
@@ -147,6 +151,8 @@ m2c2kit is flexible and can be integrated into many use cases:
 ## Contributing
 
 ---
+
+If you need support, found a bug, or want to improve the software, please open an [issue](https://github.com/m2c2-project/m2c2kit/issues).
 
 [Prettier](https://prettier.io/) has been configured to automatically run on each commit. It will format TypeScript, JavaScript, HTML, and JSON to [uniform coding styles](https://prettier.io/docs/en/why-prettier.html).
 
