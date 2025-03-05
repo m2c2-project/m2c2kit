@@ -55,10 +55,10 @@
     "husky": "9.1.7",
     "linkinator": "6.1.2",
     "lint-staged": "^15.4.3",
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "semver": "7.7.1",
     "syncpack": "13.0.2",
-    "typescript-eslint": "^8.25.0"
+    "typescript-eslint": "^8.26.0"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
