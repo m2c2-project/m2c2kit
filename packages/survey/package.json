@@ -44,8 +44,8 @@
     "surveyjs-widgets": "1.9.47"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "28.0.2",
-    "@rollup/plugin-node-resolve": "16.0.0",
+    "@rollup/plugin-commonjs": "28.0.3",
+    "@rollup/plugin-node-resolve": "16.0.1",
     "@types/bootstrap-datepicker": "1.10.0",
     "@types/bootstrap-slider": "11.0.6",
     "@types/jest": "29.5.14",
@@ -57,9 +57,9 @@
     "jest-environment-jsdom": "29.7.0",
     "jsdom": "26.0.0",
     "rimraf": "6.0.1",
-    "rollup": "4.34.9",
+    "rollup": "4.36.0",
     "rollup-plugin-copy": "3.5.0",
-    "rollup-plugin-dts": "6.1.1",
+    "rollup-plugin-dts": "6.2.0",
     "rollup-plugin-esbuild": "6.2.1",
     "ts-jest": "29.2.6",
     "ts-jest-mock-import-meta": "1.2.1",

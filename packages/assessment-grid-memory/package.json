@@ -50,10 +50,10 @@
     "@m2c2kit/build-helpers": "0.3.24",
     "@m2c2kit/schema-util": "0.1.18",
     "@m2c2kit/session": "0.3.10",
-    "@rollup/plugin-node-resolve": "16.0.0",
+    "@rollup/plugin-node-resolve": "16.0.1",
     "concurrently": "9.1.2",
     "rimraf": "6.0.1",
-    "rollup": "4.34.9",
+    "rollup": "4.36.0",
     "rollup-plugin-copy": "3.5.0",
     "rollup-plugin-esbuild": "6.2.1",
     "typescript": "5.8.2"
