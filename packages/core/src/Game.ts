@@ -958,11 +958,18 @@ export class Game implements Activity {
   /**
    * Adds a scene to the game.
    *
-   * @remarks A scene, and its children nodes, cannot be presented unless it has been added to the game object.
+   * @remarks A scene, and its children nodes, cannot be presented unless it
+   * has been added to the game object. A scene can be added to the game
+   * only once.
    *
    * @param scene
    */
   addScene(scene: Scene): void {
+    if (this.scenes.includes(scene)) {
+      console.warn(
+        `Game.addScene(): scene ${scene.toString()} has already been added to the game. This will cause unpredictable behavior. This warning will become an error in a future release.`,
+      );
+    }
     scene.game = this;
     scene.needsInitialization = true;
     this.scenes.push(scene);
