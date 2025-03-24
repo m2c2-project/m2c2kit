@@ -19,6 +19,7 @@ const packagesToPublish = [
   "@m2c2kit/addons",
   "@m2c2kit/session",
   "@m2c2kit/physics",
+  "@m2c2kit/data-calc",
   "@m2c2kit/embedding",
   "@m2c2kit/db",
   "@m2c2kit/cli",

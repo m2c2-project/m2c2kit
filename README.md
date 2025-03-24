@@ -100,6 +100,7 @@ This will build all packages. Optional: see [`BUILDNOTES.md`](BUILDNOTES.md) for
 - [`@m2c2kit/session`](packages/session) - The session runner for m2c2kit activities.
 - [`@m2c2kit/addons`](packages/addons) - Convenience elements, such as buttons, grids, dialog boxes, a virtual keyboard, and instructions, constructed out of the core primitives.
 - [`@m2c2kit/survey`](packages/survey) - Survey functionality that can be added to m2c2kit apps, using the MIT-licensed [survey-js](https://www.npmjs.com/package/surveyjs) library.
+- [`@m2c2kit/data-calc`](packages/data-calc) - Library for transformation and calculation of m2c2kit data.
 - [`@m2c2kit/cli`](packages/cli) - Command line interface for scaffolding new m2c2kit apps.
 - [`@m2c2kit/schematics`](packages/schematics) - Rules for the m2c2kit CLI to generate new apps. End users will not need to install this explicitly. It is automatically installed by the CLI as a dependency.
 - [`@m2c2kit/db`](packages/db) - A local database for storing m2c2kit data on the device.

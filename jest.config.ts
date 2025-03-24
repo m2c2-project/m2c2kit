@@ -9,6 +9,9 @@ const jestConfig: JestConfigWithTsJest = {
     "packages/session/src/**/*.{js,jsx,ts,tsx}",
     "packages/survey/src/**/*.{js,jsx,ts,tsx}",
     "packages/physics/src/**/*.{js,jsx,ts,tsx}",
+    "packages/data-calc/src/**/*.{js,jsx,ts,tsx}",
+    // This re-exports from other files in the package, no need to test
+    "!packages/data-calc/src/index.ts",
     /**
      * The next two files are excluded from coverage because they are
      * related to how the physics package does module augmentation of
@@ -170,6 +173,29 @@ const jestConfig: JestConfigWithTsJest = {
                 },
               ],
             },
+          },
+        ],
+      },
+      testEnvironment: "jsdom",
+      moduleNameMapper: {
+        "@m2c2kit/(.*)$": "<rootDir>/packages/$1/src",
+      },
+    },
+    {
+      displayName: { name: "@m2c2kit/data-calc", color: "black" },
+      roots: ["<rootDir>/packages/data-calc"],
+      moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
+      testMatch: [
+        "<rootDir>/packages/data-calc/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
+      ],
+      testPathIgnorePatterns: [".rollup.cache", "build"],
+      transform: {
+        "^.+\\.tsx?$": [
+          "ts-jest",
+          {
+            useESM: true,
+            testLocationInResults: false,
+            tsconfig: "tsconfig.json",
           },
         ],
       },

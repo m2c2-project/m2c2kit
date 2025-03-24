@@ -11,6 +11,7 @@ const packages = [
   "session",
   "addons",
   "physics",
+  "data-calc",
   "survey",
   "embedding",
   "db",

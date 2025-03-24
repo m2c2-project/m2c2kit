@@ -1,8 +1,16 @@
-import { Action, ActivityType, Game, Scene, WebColors } from "@m2c2kit/core";
+import {
+  Action,
+  ActivityType,
+  Game,
+  Scene,
+  WebColors,
+  Timer,
+} from "@m2c2kit/core";
 import { Session } from "@m2c2kit/session";
 import { Survey } from "@m2c2kit/survey";
 import { Button } from "@m2c2kit/addons";
 import { SymbolSearch } from "@m2c2kit/assessment-symbol-search";
+import { DataCalc, max, mean, min, n } from "@m2c2kit/data-calc";
 
 /**
  * Example of how to use the SymbolSearch assessment.
@@ -18,7 +26,13 @@ class NoBundler extends Game {
   constructor() {
     const defaultParameters = {};
 
-    const starterTrialSchema = {};
+    const NoBundlerTrialSchema = {
+      click_duration_ms: {
+        type: "number",
+        description:
+          "Duration elapsed, in milliseconds, between each button click.",
+      },
+    };
 
     const options = {
       name: "No JavaScript Bundler Development Example",
@@ -28,7 +42,7 @@ class NoBundler extends Game {
       showFps: false,
       width: 400,
       height: 800,
-      trialSchema: starterTrialSchema,
+      trialSchema: NoBundlerTrialSchema,
       parameters: defaultParameters,
       bodyBackgroundColor: WebColors.WhiteSmoke,
       fonts: [
@@ -49,6 +63,10 @@ class NoBundler extends Game {
     const sceneOne = new Scene();
     game.addScene(sceneOne);
 
+    sceneOne.onAppear(() => {
+      Timer.startNew("buttonTimer");
+    });
+
     const pushMeButton = new Button({
       text: "Click me",
       position: { x: 200, y: 200 },
@@ -57,7 +75,12 @@ class NoBundler extends Game {
     sceneOne.addChild(pushMeButton);
 
     pushMeButton.onTapDown(() => {
+      const elapsedDuration = Timer.elapsed("buttonTimer");
+      Timer.startNew("buttonTimer");
+      game.addTrialData("click_duration_ms", elapsedDuration);
+      game.trialComplete();
       console.log("I've been clicked!");
+
       pushMeButton.run(
         Action.sequence([
           Action.custom({
@@ -87,6 +110,19 @@ class NoBundler extends Game {
     });
     sceneOne.addChild(nextButton);
     nextButton.onTapDown(() => {
+      const dc = new DataCalc(game.data.trials);
+
+      const stats = dc.summarize({
+        n: n(),
+        mean_rt: mean("click_duration_ms"),
+        min_rt: min("click_duration_ms"),
+        max_rt: max("click_duration_ms"),
+      });
+      console.log("number of trials: " + stats.pull("n"));
+      console.log("mean response time: " + stats.pull("mean_rt"));
+      console.log("min response time: " + stats.pull("min_rt"));
+      console.log("max response time: " + stats.pull("max_rt"));
+
       game.end();
     });
   }

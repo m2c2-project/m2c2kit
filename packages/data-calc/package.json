@@ -1,0 +1,44 @@
+{
+  "name": "@m2c2kit/data-calc",
+  "version": "0.8.0",
+  "description": "A library for transformation and calculation of m2c2kit data",
+  "main": "index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc --build && rollup -c",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/data-calc"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "0.3.24",
+    "esbuild": "0.25.1",
+    "rimraf": "6.0.1",
+    "rollup": "4.36.0",
+    "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-dts": "6.2.0",
+    "rollup-plugin-esbuild": "6.2.1"
+  },
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/data-calc"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

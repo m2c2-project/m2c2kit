@@ -30,6 +30,7 @@
     "CANVASKITWASM",
     "checkmarks",
     "dasherize",
+    "dplyr",
     "drawables",
     "Embind",
     "eruda",
@@ -46,6 +47,8 @@
     "subdirs",
     "subfiles",
     "tseslint",
+    "Ungroup",
+    "Ungroups",
     "Unpremul",
     "unshifted",
     "Vercel"
