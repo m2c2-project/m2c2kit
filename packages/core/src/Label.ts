@@ -5,6 +5,7 @@ import {
   ParagraphStyle,
   ParagraphBuilder,
   Paint,
+  TextStyle,
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { IDrawable } from "./IDrawable";
@@ -21,6 +22,39 @@ import { FontManager } from "./FontManager";
 import { StringInterpolationMap } from "./StringInterpolationMap";
 import { Equal } from "./Equal";
 import { Point } from "./Point";
+
+/** Style segment with styles */
+interface StyleSegment {
+  /** Start index in plain text */
+  start: number;
+  /** End index in plain text */
+  end: number;
+  /** Active styles for this segment ('b', 'i', 'u') */
+  styles: Set<string>;
+}
+
+/** Parsed text result */
+interface ParsedText {
+  /** Text with formatting tags removed */
+  plainText: string;
+  /** Array of text segments with style info */
+  styleSegments: StyleSegment[];
+}
+
+/** TextStyle from canvaskit, with underline added */
+interface ExtendedTextStyle extends TextStyle {
+  /** Custom property for tracking underlines */
+  underline?: boolean;
+}
+
+/**
+ * Supported tag names for text formatting.
+ */
+const TAG_NAME = {
+  UNDERLINE: "u",
+  ITALIC: "i",
+  BOLD: "b",
+} as const;
 
 export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   readonly type = M2NodeType.Label;
@@ -48,14 +82,20 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   private builder?: ParagraphBuilder;
   private _fontPaint?: Paint;
   private _backgroundPaint?: Paint;
+  private _underlinePaint?: Paint;
   private localizedFontSize: number | undefined;
   private localizedFontName: string | undefined;
   private localizedFontNames: Array<string> = [];
+  private plainText = "";
+  private styleSegments: StyleSegment[] = [];
+  private underlinedRanges: Array<{ start: number; end: number }> = [];
+  private currentBuilderPosition = 0;
 
   /**
    * Single or multi-line text formatted and rendered on the screen.
    *
-   * @remarks Label (in contrast to TextLine) has enhanced text support for line wrapping, centering/alignment, and background colors.
+   * @remarks Label (in contrast to TextLine) has enhanced text support for
+   * line wrapping, centering/alignment, and background colors.
    *
    * @param options - {@link LabelOptions}
    */
@@ -123,14 +163,15 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       this.fontColor[3],
     );
 
-    let textForParagraph: string;
+    /** Text, including any localization, if provided. */
+    let textAfterLocalization: string;
     const i18n = this.game.i18n;
     if (i18n && this.localize !== false) {
       const textLocalization = i18n.getTextLocalization(
         this.text,
         this.interpolation,
       );
-      textForParagraph = textLocalization.text;
+      textAfterLocalization = textLocalization.text;
       this.localizedFontSize = textLocalization.fontSize;
       this.localizedFontName = textLocalization.fontName;
       this.localizedFontNames = textLocalization.fontNames ?? [];
@@ -146,8 +187,15 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
         );
       }
     } else {
-      textForParagraph = this.text;
+      // if no localization, then textAfterLocalization is the same as the original text
+      textAfterLocalization = this.text;
     }
+
+    this.currentBuilderPosition = 0;
+    this.underlinedRanges = [];
+    const parsedText = this.parseFormattedText(textAfterLocalization);
+    this.plainText = parsedText.plainText;
+    this.styleSegments = parsedText.styleSegments;
 
     if (this.fontName && this.fontNames) {
       throw new Error("cannot specify both fontName and fontNames");
@@ -211,36 +259,46 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       this.backgroundPaint.setColor(this.canvasKit.Color(0, 0, 0, 0));
     }
 
+    if (!this._underlinePaint) {
+      this._underlinePaint = new this.canvasKit.Paint();
+    }
+    this.underlinePaint.setColor(this.fontPaint.getColor());
+    this.underlinePaint.setAlphaf(this.absoluteAlpha);
+    this.underlinePaint.setStyle(this.canvasKit.PaintStyle.Fill);
+    this.underlinePaint.setAntiAlias(true);
+
     /**
      * fontFamilies and fontSize are the properties that we must set because
      * we are not using the defaults. However, there are other properties
      * that we must set as well, otherwise we get errors. So we set them to
      * the defaults.
      */
+    const defaultStyle: ExtendedTextStyle = {
+      fontFamilies: requiredFonts.map((font) => font.fontName),
+      fontSize:
+        (this.localizedFontSize ?? this.fontSize) * m2c2Globals.canvasScale,
+      fontStyle: {
+        weight: this.canvasKit.FontWeight.Normal,
+        width: this.canvasKit.FontWidth.Normal,
+        slant: this.canvasKit.FontSlant.Upright,
+      }, // Normal font style
+      decoration: 0, // No decoration
+      decorationThickness: 1.0, // Default decoration thickness
+      decorationStyle: this.canvasKit.DecorationStyle.Solid,
+      heightMultiplier: -1, // Providing -1, rather than 1.0, gives default height multiplier
+      halfLeading: false,
+      letterSpacing: 0.0,
+      wordSpacing: 0.0,
+    };
+
+    // Apply default style to builder
     this.builder.pushPaintStyle(
-      {
-        fontFamilies: requiredFonts.map((font) => font.fontName),
-        fontSize:
-          (this.localizedFontSize ?? this.fontSize) * m2c2Globals.canvasScale,
-        // set default values for below properties as well.
-        fontStyle: {
-          weight: this.canvasKit.FontWeight.Normal,
-          width: this.canvasKit.FontWidth.Normal,
-          slant: this.canvasKit.FontSlant.Oblique,
-        }, // Normal font style
-        decoration: 0, // No decoration
-        decorationThickness: 1.0, // Default decoration thickness
-        decorationStyle: this.canvasKit.DecorationStyle.Solid, // Solid decoration style
-        heightMultiplier: -1, // Providing -1, rather than 1.0, gives default height multiplier
-        halfLeading: false, // Default half leading
-        letterSpacing: 0.0, // Default letter spacing
-        wordSpacing: 0.0, // Default word spacing
-      },
+      defaultStyle,
       this.fontPaint,
       this.backgroundPaint,
     );
+    this.addTextWithStylesToParagraphBuilder(defaultStyle);
 
-    this.builder.addText(textForParagraph);
     if (this.paragraph) {
       this.paragraph.delete();
     }
@@ -287,6 +345,262 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   }
 
   /**
+   * Parses text with formatting tags and returns plain text and style segments.
+   * Supports <b> for bold, <i> for italics, and <u> for underline.
+   * Properly handles nested tags like <b><u>bold and underlined</u></b>.
+   * Throws errors for malformed tags, but treats unknown tags as plain text.
+   *
+   * @param text - The text with formatting tags
+   * @returns The parsed text result
+   * @throws Error if tags are improperly nested or unclosed
+   */
+  private parseFormattedText(text: string): ParsedText {
+    let plainText = "";
+
+    // Track style changes at each position
+    interface StyleChange {
+      position: number;
+      style: string;
+      isStart: boolean;
+    }
+
+    const styleChanges: StyleChange[] = [];
+    const tagStack: string[] = []; // Stack to track open tags for validation
+    const validTags: Set<string> = new Set([
+      TAG_NAME.UNDERLINE,
+      TAG_NAME.BOLD,
+      TAG_NAME.ITALIC,
+    ]);
+
+    // Simple regex-based parser for tags
+    const tagPattern = /<\/?([^>]+)>/g;
+    let lastIndex = 0;
+    let plainIndex = 0;
+    let match: boolean | RegExpExecArray | null = null;
+
+    // Calculate line and column for error messages
+    const getPosition = (index: number): string => {
+      let line = 1;
+      let column = 1;
+      for (let i = 0; i < index; i++) {
+        if (text[i] === "\n") {
+          line++;
+          column = 1;
+        } else {
+          column++;
+        }
+      }
+      return `line ${line}, column ${column}`;
+    };
+
+    while ((match = tagPattern.exec(text)) !== null) {
+      const fullTag = match[0];
+      const tagName = match[1];
+      const isClosing = fullTag.charAt(1) === "/";
+      const position = getPosition(match.index);
+
+      // If it's not a valid tag, treat it as plain text
+      if (!validTags.has(tagName)) {
+        // Add the text before this tag
+        const beforeTag = text.substring(lastIndex, match.index);
+        plainText += beforeTag;
+        plainIndex += beforeTag.length;
+
+        // Add the tag itself as plain text
+        plainText += fullTag;
+        plainIndex += fullTag.length;
+
+        // Update lastIndex to continue after this tag
+        lastIndex = match.index + fullTag.length;
+        continue;
+      }
+
+      // Add text before the tag
+      const beforeTag = text.substring(lastIndex, match.index);
+      plainText += beforeTag;
+      plainIndex += beforeTag.length;
+
+      if (isClosing) {
+        // Check for closing tag without matching opening tag
+        if (tagStack.length === 0) {
+          throw new Error(
+            `Label has closing tag </${tagName}> at ${position} without matching opening tag. Text is: ${text}`,
+          );
+        }
+
+        // Check for improperly nested tags
+        const lastOpenTag = tagStack.pop();
+        if (lastOpenTag !== tagName) {
+          throw new Error(
+            `Label has improperly nested tags at ${position}. Expected </${lastOpenTag}> but found </${tagName}>. Tags must be properly nested. Text is: ${text}`,
+          );
+        }
+
+        // Record this style change
+        styleChanges.push({
+          position: plainIndex,
+          style: tagName,
+          isStart: false,
+        });
+      } else {
+        // Opening tag
+        tagStack.push(tagName);
+
+        // Record this style change
+        styleChanges.push({
+          position: plainIndex,
+          style: tagName,
+          isStart: true,
+        });
+      }
+
+      lastIndex = match.index + fullTag.length;
+    }
+
+    // Add remaining text
+    plainText += text.substring(lastIndex);
+
+    // Check for unclosed tags
+    if (tagStack.length > 0) {
+      throw new Error(
+        `Label has unclosed format tags: <${tagStack.join(">, <")}>. All tags must be closed. Text is: ${text}`,
+      );
+    }
+
+    // Build segments with styling from the recorded changes
+    const activeStyles = new Set<string>();
+    const segments: StyleSegment[] = [];
+    let lastPosition = 0;
+
+    // Sort style changes by position
+    styleChanges.sort((a, b) => a.position - b.position);
+
+    // Process each style change to build segments
+    for (const change of styleChanges) {
+      // If styles changed since last position, create a segment
+      if (change.position > lastPosition && activeStyles.size > 0) {
+        segments.push({
+          start: lastPosition,
+          end: change.position,
+          styles: new Set(activeStyles), // Create a copy of the current styles
+        });
+      }
+
+      // Update active styles
+      if (change.isStart) {
+        activeStyles.add(change.style);
+      } else {
+        activeStyles.delete(change.style);
+      }
+
+      lastPosition = change.position;
+    }
+
+    return {
+      plainText,
+      styleSegments: segments,
+    };
+  }
+
+  private addTextWithStylesToParagraphBuilder(defaultStyle: ExtendedTextStyle) {
+    // If there are no style segments, add the entire text
+    if (this.styleSegments.length === 0) {
+      if (!this.builder) {
+        throw new Error("ParagraphBuilder is undefined");
+      }
+      this.builder.addText(this.plainText);
+    } else {
+      // Process text by segments with consistent styling
+      let lastIndex = 0;
+
+      for (const segment of this.styleSegments) {
+        // Add any unstyled text before this segment
+        if (segment.start > lastIndex) {
+          this.addTextWithStyle(
+            this.plainText.substring(lastIndex, segment.start),
+            defaultStyle,
+          );
+        }
+
+        // Prepare style modifiers for this segment
+        const styleModifiers: ExtendedTextStyle = {};
+
+        if (segment.styles.has(TAG_NAME.BOLD)) {
+          styleModifiers.fontStyle = {
+            ...defaultStyle.fontStyle,
+            weight: this.canvasKit.FontWeight.Bold,
+          };
+        }
+
+        if (segment.styles.has(TAG_NAME.ITALIC)) {
+          // Combine with existing fontStyle if it exists
+          styleModifiers.fontStyle = {
+            ...(styleModifiers.fontStyle || defaultStyle.fontStyle),
+            slant: this.canvasKit.FontSlant.Italic,
+          };
+        }
+
+        // For underline, track it separately for manual drawing
+        if (segment.styles.has(TAG_NAME.UNDERLINE)) {
+          styleModifiers.underline = true;
+        }
+
+        // Add the styled text segment
+        this.addTextWithStyle(
+          this.plainText.substring(segment.start, segment.end),
+          defaultStyle,
+          styleModifiers,
+        );
+
+        lastIndex = segment.end;
+      }
+
+      // Add any remaining unstyled text
+      if (lastIndex < this.plainText.length) {
+        this.addTextWithStyle(
+          this.plainText.substring(lastIndex),
+          defaultStyle,
+        );
+      }
+    }
+  }
+
+  // Helper to apply style and add text
+  private addTextWithStyle(
+    text: string,
+    defaultStyle: ExtendedTextStyle,
+    styleModifiers: ExtendedTextStyle = {},
+  ) {
+    if (!text) return;
+
+    // Create modified style with default values and overrides
+    const style = {
+      ...defaultStyle,
+      ...styleModifiers,
+    };
+
+    // Track underlined ranges separately rather than using decoration
+    if (styleModifiers.underline) {
+      // Store the range that needs an underline
+      const currentPosition = this.currentBuilderPosition;
+      this.underlinedRanges.push({
+        start: currentPosition,
+        end: currentPosition + text.length,
+      });
+    }
+
+    if (!this.builder) {
+      throw new Error("ParagraphBuilder is undefined");
+    }
+
+    this.builder.pushPaintStyle(style, this.fontPaint, this.backgroundPaint);
+    this.builder.addText(text);
+    // Update our position tracker after adding text
+    this.currentBuilderPosition += text.length;
+    this.builder.pop(); // Remove the style
+  }
+
+  /**
    * Determines the M2Font objects that need to be ready in order to draw
    * the Label.
    *
@@ -329,6 +643,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       this.builder,
       this._fontPaint, // use backing field since it may be undefined
       this._backgroundPaint, // use backing field since it may be undefined
+      this._underlinePaint, // use backing field since it may be undefined
     ]);
     // Note: ParagraphStyle has no delete() method, so nothing to dispose
   }
@@ -535,6 +850,16 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this._fontPaint = fontPaint;
   }
 
+  private get underlinePaint(): Paint {
+    if (!this._underlinePaint) {
+      throw new Error("underlinePaint cannot be undefined");
+    }
+    return this._underlinePaint;
+  }
+  private set underlinePaint(underlinePaint: Paint) {
+    this._underlinePaint = underlinePaint;
+  }
+
   /**
    * Duplicates a node using deep copy.
    *
@@ -606,10 +931,73 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       }
 
       canvas.drawParagraph(this.paragraph, x, y);
+      if (this.underlinedRanges.length > 0) {
+        this.drawUnderlines(canvas, this.paragraph, x, y);
+      }
+
       canvas.restore();
     }
 
     super.drawChildren(canvas);
+  }
+
+  private drawUnderlines(
+    canvas: Canvas,
+    paragraph: Paragraph,
+    x: number,
+    y: number,
+  ) {
+    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
+
+    for (const range of this.underlinedRanges) {
+      const positions = paragraph.getRectsForRange(
+        range.start,
+        range.end,
+        this.canvasKit.RectHeightStyle.Max,
+        this.canvasKit.RectWidthStyle.Tight,
+      );
+
+      for (const rect of positions) {
+        /**
+         * Height of the rectangle that encloses the text. We use this for
+         * scaling and positioning the underline, rather than the font
+         * size, because font size does not scale proportionally with the
+         * text rectangle.
+         */
+        const rectHeight = rect.rect[3] - rect.rect[1];
+
+        /**
+         * The underline will be drawn below the text. The
+         * paragraph.getRectsForRange() method returns the rectangle
+         * that encloses the text. But if we draw the underline along
+         * the bottom bounds of this rectangle, it is too far below the
+         * text. This offset is a negative value to raise the underline
+         * up a little bit. After trial and error, we found that 8%
+         * of the height is a good offset.
+         */
+        const underlineVerticalOffset =
+          -rectHeight * 0.08 * drawScale * this.absoluteScale;
+
+        /**
+         * The underline is a thin rectangle below the text. Scale the
+         * rectangle thickness with the height of the text rectangle. After
+         * trial and error, we found that 4% of height is a good thickness
+         * for the underline.
+         */
+        const lineThickness =
+          rectHeight * 0.04 * drawScale * this.absoluteScale;
+
+        canvas.drawRect(
+          [
+            x + rect.rect[0], // left
+            y + rect.rect[3] + underlineVerticalOffset, // bottom of text + offset
+            x + rect.rect[2], // right
+            y + rect.rect[3] + underlineVerticalOffset + lineThickness, // bottom of text + offset + thickness
+          ],
+          this.underlinePaint,
+        );
+      }
+    }
   }
 
   warmup(canvas: Canvas): void {

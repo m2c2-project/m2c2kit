@@ -8,6 +8,8 @@ export interface LabelOptions
   extends M2NodeOptions,
     DrawableOptions,
     TextOptions {
+  /** Text to be displayed. Tags for bold, italic, and underline are supported, e.g., `<b><u>Bold and underline</u></b>`. */
+  text?: string;
   /** Horizontal alignment of label text. see {@link LabelHorizontalAlignmentMode}. Default is LabelHorizontalAlignmentMode.center  */
   horizontalAlignmentMode?: LabelHorizontalAlignmentMode;
   /** Maximum width of label text before wrapping occurs. Default is the canvas width */
