@@ -19,7 +19,7 @@
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/data-calc"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.24",
+    "@m2c2kit/build-helpers": "0.3.25",
     "esbuild": "0.25.1",
     "rimraf": "6.0.1",
     "rollup": "4.37.0",

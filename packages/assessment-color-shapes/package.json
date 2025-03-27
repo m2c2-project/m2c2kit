@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/assessment-color-shapes",
-  "version": "0.8.26",
+  "version": "0.8.27",
   "m2c2kit": {
     "assessmentId": "color-shapes",
     "locales": [
@@ -43,13 +43,13 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/addons": "0.3.27",
-    "@m2c2kit/core": "0.3.28"
+    "@m2c2kit/addons": "0.3.28",
+    "@m2c2kit/core": "0.3.29"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.24",
-    "@m2c2kit/schema-util": "0.1.18",
-    "@m2c2kit/session": "0.3.10",
+    "@m2c2kit/build-helpers": "0.3.25",
+    "@m2c2kit/schema-util": "0.1.19",
+    "@m2c2kit/session": "0.3.11",
     "@rollup/plugin-node-resolve": "16.0.1",
     "concurrently": "9.1.2",
     "rimraf": "6.0.1",

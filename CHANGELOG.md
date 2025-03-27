@@ -4,6 +4,143 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.29] - 2025-03-27
+
+### Added
+
+- A warning will show in the console when a scene is added to the game more than once (doing this will cause unpredictable behavior). In the future, the warning will become an error.
+- `Label` text supports tags to make the text appear bold, italic, and/or underlined. Tags can be nested, e.g., `<b><i>bold italic</i></b>`.
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/addons` [0.3.28] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/session` [0.3.11] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/physics` [0.1.16] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/data-calc` [0.8.0] - 2025-03-27
+
+### Added
+
+- This is a new package for transformation and calculation of m2c2kit data. The purpose is to provide a simple and intuitive interface for assessments to score and summarize their own data. It is not meant for data analysis or statistical modeling. The idiomatic approach is based on the dplyr R package.
+
+## `@m2c2kit/cli` [0.3.28] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/schematics` [0.1.28] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/embedding` [1.0.22] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/build-helpers` [0.3.25] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/db` [0.3.23] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/survey` [0.3.24] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/schema-util` [0.1.19] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessments-registry` [0.1.8] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.27] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.27] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.27] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessment-color-dots` [0.8.27] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessments-demo` [0.8.24] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.25] - 2025-03-27
+
+### Changed
+
+- Updated dependencies.
+- License changed to Apache-2.0.
+
 ## `@m2c2kit/core` [0.3.28] - 2025-02-11
 
 ### Added
