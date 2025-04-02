@@ -12,8 +12,8 @@
   ],
   "devDependencies": {
     "@types/findup-sync": "4.0.5",
-    "@types/node": "22.13.13",
-    "esbuild": "0.25.1"
+    "@types/node": "22.13.17",
+    "esbuild": "0.25.2"
   },
   "scripts": {
     "build": "node esbuild.mjs",
