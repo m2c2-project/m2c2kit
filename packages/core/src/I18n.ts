@@ -22,6 +22,20 @@ export interface TextLocalizationResult {
   isFallbackOrMissingTranslation: boolean;
 }
 
+interface TranslatePlaceholderResult {
+  text: string;
+  isFallback: boolean;
+}
+
+interface FontPropertiesSets {
+  size: Set<number>;
+  name: Set<string>;
+  names: Set<string>;
+}
+
+const STRING_INTERPOLATION_CHARACTERS = "{{}}";
+const TRANSLATION_INTERPOLATION_CHARACTERS = "[[]]";
+
 export class I18n {
   private _translation: Translation;
   locale = "";
@@ -160,39 +174,268 @@ export class I18n {
   }
 
   /**
+   * Returns the localized text and font information for the given key in the
+   * current locale.
    *
    * @param key - Translation key
    * @param interpolation - Interpolation keys and values to replace
-   * placeholders in the translated text
-   * @returns a `TextLocalizationResult` object with the localized text, font
-   * information, and whether the translation is a fallback.
+   * string interpolation placeholders in the translated text
+   * @returns object with the localized text, font information, and whether the
+   * translation is a fallback.
    */
-  getTextLocalization(key: string, interpolation?: StringInterpolationMap) {
-    let localizedText = "";
-    let isFallbackOrMissingTranslation = false;
+  getTextLocalization(
+    key: string,
+    interpolation?: StringInterpolationMap,
+  ): TextLocalizationResult {
+    // First, try to get translation in current locale
+    const primaryResult = this.attemptTranslation(key, interpolation);
+
+    // It may be that "key" is not a missing translation key, but a string
+    // with placeholders that are themselves the keys for translation. In this
+    // case, we need to check if the text contains any placeholder keys to be
+    // translated, e.g., "The translated word is [[RED]]", and RED is a key
+    // for translation. Note that the key's translation value may contain
+    // interpolation placeholders itself, so we need to handle that as well.
+    if (primaryResult.isFallbackOrMissingTranslation) {
+      const placeholdersResult = this.handleTranslationPlaceholders(
+        key,
+        primaryResult,
+        interpolation,
+      );
+      if (placeholdersResult) {
+        if (interpolation !== undefined) {
+          placeholdersResult.text = this.insertInterpolations(
+            STRING_INTERPOLATION_CHARACTERS,
+            placeholdersResult.text,
+            interpolation,
+          );
+        }
+        return placeholdersResult;
+      }
+    }
+
+    return primaryResult;
+  }
+
+  /**
+   *
+   * @param key - Translation key to be translated
+   * @param interpolation - String interpolation keys and values to replace
+   * @returns result object with the localized text, font
+   */
+  private attemptTranslation(
+    key: string,
+    interpolation?: StringInterpolationMap,
+  ): TextLocalizationResult {
+    // Try with current locale
     let tf = this.tf(key, interpolation);
-    if (tf?.text !== undefined) {
-      localizedText = tf.text;
-    } else {
+    let isFallbackOrMissingTranslation = false;
+
+    // If not found, try with fallback locale
+    if (tf?.text === undefined) {
       tf = this.tf(key, {
         useFallbackLocale: true,
         ...interpolation,
       });
-      if (tf === undefined || tf.text === undefined) {
-        localizedText = key;
-      } else {
-        localizedText = tf.text;
-      }
       isFallbackOrMissingTranslation = true;
     }
 
+    // Handle case when translation is missing entirely
+    const text = tf?.text ?? key;
+
     return {
-      text: localizedText,
+      text,
       fontSize: tf?.fontSize,
       fontName: tf?.fontName,
       fontNames: tf?.fontNames,
-      isFallbackOrMissingTranslation: isFallbackOrMissingTranslation,
-    } as TextLocalizationResult;
+      isFallbackOrMissingTranslation,
+    };
+  }
+
+  /**
+   * Handles translation placeholders in a string.
+   *
+   * @remarks The value of a translation placeholder (text within `[[]]`)
+   * may also contain string interpolation placeholders (`{{}}`), so we need
+   * to handle that as well.
+   *
+   * @param key - Translation key for the string to be localized
+   * @param initialResult - Initial translation result for the string
+   * @param interpolation - Interpolation keys and values to replace
+   * interpolation placeholders in the translated text
+   * @returns result object with the localized text,
+   */
+  private handleTranslationPlaceholders(
+    key: string,
+    initialResult: TextLocalizationResult,
+    interpolation?: StringInterpolationMap,
+  ): TextLocalizationResult | null {
+    const placeholders = this.getTranslationPlaceholders(key);
+    if (placeholders.length === 0) {
+      return null;
+    }
+
+    // we will collect font properties from the placeholders
+    // in sets, so that we can warn about conflicting properties, e.g.,
+    // when a set size is greater than 1, it means that multiple
+    // placeholders specified different font sizes, font names, or font names
+    // arrays.
+    const fontProps: FontPropertiesSets = {
+      size: new Set<number>(),
+      name: new Set<string>(),
+      names: new Set<string>(),
+    };
+
+    const interpolationMap: StringInterpolationMap = {};
+    let isFallbackOrMissingTranslation = false;
+
+    // Process each translation placeholder
+    placeholders.forEach((placeholderKey) => {
+      const placeholderResult = this.translatePlaceholder(
+        placeholderKey,
+        fontProps,
+        interpolation,
+      );
+      interpolationMap[placeholderKey] = placeholderResult.text;
+      isFallbackOrMissingTranslation =
+        isFallbackOrMissingTranslation || placeholderResult.isFallback;
+    });
+
+    this.warnConflictingFontProperties(key, fontProps);
+
+    const text = this.insertInterpolations(
+      TRANSLATION_INTERPOLATION_CHARACTERS,
+      key,
+      interpolationMap,
+    );
+    const fontSize =
+      initialResult.fontSize ||
+      (fontProps.size.size > 0 ? [...fontProps.size][0] : undefined);
+    const fontName =
+      initialResult.fontName ||
+      (fontProps.name.size > 0 ? [...fontProps.name][0] : undefined);
+    const fontNames =
+      initialResult.fontNames ||
+      (fontProps.names.size > 0
+        ? [...fontProps.names][0].split(",")
+        : undefined);
+
+    return {
+      text,
+      fontSize,
+      fontName,
+      fontNames,
+      isFallbackOrMissingTranslation,
+    };
+  }
+
+  /**
+   * Translates a translation placeholder key to its text and collects font properties.
+   *
+   * @param placeholderKey - Translation key for the placeholder
+   * @param fontProps - Font properties sets to collect font information
+   * @param interpolation - Interpolation keys and values to replace
+   * string interpolation placeholders in the translated text
+   * @returns result object with the translated text and whether it is a fallback translation
+   */
+  private translatePlaceholder(
+    placeholderKey: string,
+    fontProps: FontPropertiesSets,
+    interpolation?: StringInterpolationMap,
+  ): TranslatePlaceholderResult {
+    // Try current locale
+    let tf = this.tf(placeholderKey, interpolation);
+    let isFallback = false;
+
+    if (tf?.text === undefined) {
+      // Try fallback locale
+      tf = this.tf(placeholderKey, {
+        useFallbackLocale: true,
+        ...interpolation,
+      });
+      isFallback = true;
+    }
+
+    // Collect font properties
+    if (tf?.fontSize !== undefined) {
+      fontProps.size.add(tf.fontSize);
+    }
+
+    if (tf?.fontName !== undefined) {
+      fontProps.name.add(tf.fontName);
+    }
+
+    if (tf?.fontNames !== undefined) {
+      fontProps.names.add(tf.fontNames.sort().join(","));
+    }
+
+    return {
+      text: tf?.text ?? placeholderKey,
+      isFallback,
+    };
+  }
+
+  /**
+   * Extracts translation key placeholders from a string.
+   *
+   * @remarks Translation key placeholders are denoted by double square brackets,
+   * e.g., "The translated word is [[RED]]", and RED is a key for translation.
+   *
+   * @param s - string to search for placeholders
+   * @returns an array of placeholders found in the string, without the square
+   * brackets
+   */
+  private getTranslationPlaceholders(s: string): string[] {
+    const [open, close] = [
+      TRANSLATION_INTERPOLATION_CHARACTERS.slice(0, 2),
+      TRANSLATION_INTERPOLATION_CHARACTERS.slice(2),
+    ];
+
+    // Escape special characters for safe use in regex
+    const escapedOpen = open.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedClose = close.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const regex = new RegExp(`${escapedOpen}(.*?)${escapedClose}`, "g");
+    const matches = s.match(regex);
+
+    if (!matches) {
+      return [];
+    }
+
+    return matches.map((placeholder) =>
+      placeholder.slice(open.length, -close.length).trim(),
+    );
+  }
+
+  /**
+   * Logs warnings if the string to be localized has conflicting font
+   * properties.
+   *
+   * @remarks This can happen due to multiple placeholders in the string
+   * that specify different font sizes, font names, or font names arrays.
+   *
+   * @param key - Translation key for which the string is being localized
+   * @param fontProps - font properties sets collected from the placeholders
+   */
+  private warnConflictingFontProperties(
+    key: string,
+    fontProps: FontPropertiesSets,
+  ) {
+    if (fontProps.size.size > 1) {
+      console.warn(
+        `i18n: placeholders set multiple different font sizes in string to be localized. Only one will be used. String: ${key}`,
+      );
+    }
+    if (fontProps.name.size > 1) {
+      console.warn(
+        `i18n: placeholders set multiple different font names within string to be localized. Only one will be used. String: ${key}`,
+      );
+    }
+    if (fontProps.names.size > 1) {
+      console.warn(
+        `i18n: placeholders set multiple different font names arrays within string to be localized. Only one will be used. String: ${key}`,
+      );
+    }
   }
 
   /**
@@ -228,6 +471,7 @@ export class I18n {
       const t = this.translation[this.locale]?.[key];
       if (this.isStringOrTextWithFontCustomization(t)) {
         return this.insertInterpolations(
+          STRING_INTERPOLATION_CHARACTERS,
           this.getKeyText(t),
           interpolationMap as StringInterpolationMap,
         );
@@ -238,6 +482,7 @@ export class I18n {
     const fallbackT = this.translation[this.fallbackLocale]?.[key];
     if (this.isStringOrTextWithFontCustomization(fallbackT)) {
       return this.insertInterpolations(
+        STRING_INTERPOLATION_CHARACTERS,
         this.getKeyText(fallbackT),
         interpolationMap as StringInterpolationMap,
       );
@@ -269,6 +514,7 @@ export class I18n {
         const tf = this.getKeyTextAndFont(t, this.locale);
         if (tf.text) {
           tf.text = this.insertInterpolations(
+            STRING_INTERPOLATION_CHARACTERS,
             tf.text,
             interpolationMap as StringInterpolationMap,
           );
@@ -286,6 +532,7 @@ export class I18n {
       );
       if (tf.text) {
         tf.text = this.insertInterpolations(
+          STRING_INTERPOLATION_CHARACTERS,
           tf.text,
           interpolationMap as StringInterpolationMap,
         );
@@ -351,13 +598,22 @@ export class I18n {
   }
 
   private insertInterpolations(
+    specialChars: string,
     text: string,
     options?: StringInterpolationMap,
   ): string {
     if (!options) {
       return text;
     }
-    return text.replace(/\{\{(.*?)\}\}/g, (_match, key) => {
+
+    const [open, close] = [specialChars.slice(0, 2), specialChars.slice(2)]; // Extract "{{" and "}}" or "[[", "]]"
+
+    // Escape special characters for safe use in regex
+    const escapedOpen = open.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedClose = close.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`${escapedOpen}(.*?)${escapedClose}`, "g"); // Create regex dynamically
+
+    return text.replace(regex, (_match, key) => {
       if (Object.prototype.hasOwnProperty.call(options, key)) {
         return options[key];
       } else {
