@@ -90,10 +90,10 @@ describe("I18n locale detection", () => {
   });
 
   it("specifies locale and fallback locales", async () => {
-    g1.setParameters({ locale: "es-MX", fallbackLocale: "en-US" });
+    g1.setParameters({ locale: "es-MX", fallback_locale: "hi-IN" });
     await g1.initialize();
     expect(g1.i18n?.locale).toBe("es-MX");
-    expect(g1.i18n?.fallbackLocale).toBe("en-US");
+    expect(g1.i18n?.fallbackLocale).toBe("hi-IN");
   });
 
   it("returns mocked es-MX locale on auto, and base locale en-us as fallback locale", async () => {
@@ -210,8 +210,8 @@ describe("I18n switchToLocale", () => {
     TestHelpers.setupDomAndGlobals();
   });
 
-  it("returns translated text for locale", async () => {
-    g1.setParameters({ locale: "es-MX", fallbackLocale: "en-US" });
+  it("switches locale", async () => {
+    g1.setParameters({ locale: "es-MX", fallback_locale: "en-US" });
     await g1.initialize();
     g1.i18n?.switchToLocale("en-US");
     expect(g1.i18n?.locale).toEqual("en-US");
@@ -224,27 +224,126 @@ describe("I18n getTextLocalization", () => {
     TestHelpers.setupDomAndGlobals();
   });
 
-  it("returns translated text for locale", async () => {
-    g1.setParameters({ locale: "es-MX", fallbackLocale: "en-US" });
+  it("returns translated text and fonts for en-US", async () => {
+    g1.setParameters({ locale: "en-US" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("NEXT_BUTTON");
+    expect(textLocalization?.text).toBe("Next");
+    expect(textLocalization?.fontName).toBe(undefined);
+    expect(textLocalization?.fontNames).toBe(undefined);
+  });
+
+  it("returns translated text and fonts with font customization for en-US", async () => {
+    g1.setParameters({ locale: "en-US" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("EMOJI_WELCOME");
+    expect(textLocalization?.text).toBe("👋 Hello");
+    expect(textLocalization?.fontName).toBe("emoji");
+    const textLocalizationWithPlaceholder = g1.i18n?.getTextLocalization(
+      "Result: [[EMOJI_WELCOME]]",
+    );
+    expect(textLocalizationWithPlaceholder?.text).toBe("Result: 👋 Hello");
+    expect(textLocalizationWithPlaceholder?.fontName).toBe("emoji");
+  });
+
+  it("returns translated text for es-MX", async () => {
+    g1.setParameters({ locale: "es-MX", fallback_locale: "en-US" });
     await g1.initialize();
     const textLocalization = g1.i18n?.getTextLocalization("NEXT_BUTTON");
     expect(textLocalization?.text).toEqual("Siguiente");
+    expect(textLocalization?.fontName).toEqual(undefined);
+    expect(textLocalization?.fontNames).toEqual(undefined);
+    expect(g1.i18n?.getTextLocalization("[[NEXT_BUTTON]]").text).toBe(
+      "Siguiente",
+    );
+  });
+
+  it("returns translated text and fonts with font customization for es-MX", async () => {
+    g1.setParameters({ locale: "es-MX" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("EMOJI_WELCOME");
+    expect(textLocalization?.text).toBe("👋 Hola");
+    expect(textLocalization?.fontName).toBe("emoji");
+  });
+
+  it("returns translated text for hi-IN", async () => {
+    g1.setParameters({ locale: "hi-IN", fallback_locale: "en-US" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("NEXT_BUTTON");
+    expect(textLocalization?.text).toBe("अगला");
+    expect(textLocalization?.fontName).toBe("devanagari");
+    expect(textLocalization?.fontNames).toBe(undefined);
+  });
+
+  it("returns translated text and fonts with font customization for hi-IN", async () => {
+    g1.setParameters({ locale: "hi-IN" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("EMOJI_WELCOME");
+    expect(textLocalization?.text).toBe("👋 नमस्कार");
+    expect(textLocalization?.fontName).toBe(undefined);
+    expect(textLocalization?.fontNames).toEqual(["devanagari", "emoji"]);
   });
 
   it("returns fallback text when translation missing", async () => {
-    g1.setParameters({ locale: "hi-IN", fallbackLocale: "en-US" });
+    g1.setParameters({ locale: "hi-IN", fallback_locale: "en-US" });
     await g1.initialize();
     const textLocalization = g1.i18n?.getTextLocalization("ERROR");
     expect(textLocalization?.text).toEqual("Error");
     expect(textLocalization?.isFallbackOrMissingTranslation).toBe(true);
+    expect(g1.i18n?.getTextLocalization("[[ERROR]]").text).toBe("Error");
   });
 
   it("returns key when translation and fallback missing", async () => {
-    g1.setParameters({ locale: "hi-IN", fallbackLocale: "en-US" });
+    g1.setParameters({ locale: "hi-IN", fallback_locale: "en-US" });
     await g1.initialize();
     const textLocalization = g1.i18n?.getTextLocalization("LOGIN");
     expect(textLocalization?.text).toEqual("LOGIN");
     expect(textLocalization?.isFallbackOrMissingTranslation).toBe(true);
+    expect(g1.i18n?.getTextLocalization("[[LOGIN]]").text).toBe("LOGIN");
+  });
+
+  it("returns translated text for en-US with interpolation", async () => {
+    g1.setParameters({ locale: "en-US" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("BYE", {
+      name: "Jim",
+    });
+    expect(textLocalization?.text).toEqual("Goodbye, Jim.");
+  });
+
+  it("returns translated text for en-US using interpolation and placeholders that themselves also contain interpolation", async () => {
+    g1.setParameters({ locale: "en-US" });
+    await g1.initialize();
+    // BYE is a key that has a placeholder for name
+    const textLocalization = g1.i18n?.getTextLocalization(
+      "Result for {{name}}: [[BYE]]",
+      {
+        name: "Jim",
+      },
+    );
+    expect(textLocalization?.text).toEqual("Result for Jim: Goodbye, Jim.");
+  });
+
+  it("returns translated text for es-MX with interpolation", async () => {
+    g1.setParameters({ locale: "es-MX", fallback_locale: "en-US" });
+    await g1.initialize();
+    const textLocalization = g1.i18n?.getTextLocalization("BYE", {
+      name: "Jim",
+    });
+    expect(textLocalization?.text).toEqual("Adiós, Jim.");
+  });
+
+  it("throws error when interpolations not provided to a key using placeholders", async () => {
+    g1.setParameters({ locale: "en-US" });
+    await g1.initialize();
+    const t = () => g1.i18n?.getTextLocalization("BYE");
+    expect(t).toThrow();
+  });
+
+  it("when missing locale de-DE is specified, it returns fallback text", async () => {
+    g1.setParameters({ locale: "de-DE", fallback_locale: "es-MX" });
+    await g1.initialize();
+    expect(g1.i18n?.getTextLocalization("NEXT_BUTTON").text).toBe("Siguiente");
   });
 });
 
@@ -260,104 +359,9 @@ describe("I18n t method", () => {
     expect(g1.i18n?.t("NEXT_BUTTON")).toBe("Next");
   });
 
-  it("returns translated text and interpolation for en-US", async () => {
-    g1.setParameters({ locale: "en-US" });
-    await g1.initialize();
-    expect(g1.i18n?.t("BYE", { name: "Jim" })).toBe("Goodbye, Jim.");
-  });
-
-  it("throws error when interpolations not provided to a key using placeholders", async () => {
-    g1.setParameters({ locale: "en-US" });
-    await g1.initialize();
-    const t = () => g1.i18n?.t("BYE");
-    expect(t).toThrow();
-  });
-
-  it("returns translated text for es-MX", async () => {
-    g1.setParameters({ locale: "es-MX" });
-    await g1.initialize();
-    expect(g1.i18n?.t("NEXT_BUTTON")).toBe("Siguiente");
-  });
-
-  it("returns translated text for hi-IN", async () => {
-    g1.setParameters({ locale: "hi-IN" });
-    await g1.initialize();
-    expect(g1.i18n?.t("NEXT_BUTTON")).toBe("अगला");
-  });
-
   it("when missing locale de-DE is specified, it returns undefined", async () => {
     g1.setParameters({ locale: "de-DE", fallbackLocale: "en-US" });
     await g1.initialize();
     expect(g1.i18n?.t("NEXT_BUTTON")).toBe(undefined);
-  });
-});
-
-describe("I18n tf method", () => {
-  beforeEach(async () => {
-    g1 = new Game1();
-    TestHelpers.setupDomAndGlobals();
-  });
-
-  it("returns translated text and fonts for en-US", async () => {
-    g1.setParameters({ locale: "en-US" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.text).toBe("Next");
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontName).toBe(undefined);
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontNames).toBe(undefined);
-  });
-
-  it("returns translated text and fonts and interpolation for en-US", async () => {
-    g1.setParameters({ locale: "en-US" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("BYE", { name: "Jim" })?.text).toBe("Goodbye, Jim.");
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontName).toBe(undefined);
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontNames).toBe(undefined);
-  });
-
-  it("returns translated text and fonts with font customization for en-US", async () => {
-    g1.setParameters({ locale: "en-US" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.text).toBe("👋 Hello");
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.fontName).toBe("emoji");
-  });
-
-  it("returns translated text and fonts for es-MX", async () => {
-    g1.setParameters({ locale: "es-MX" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.text).toBe("Siguiente");
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontName).toBe(undefined);
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontNames).toBe(undefined);
-  });
-
-  it("returns translated text and fonts with font customization for es-MX", async () => {
-    g1.setParameters({ locale: "es-MX" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.text).toBe("👋 Hola");
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.fontName).toBe("emoji");
-  });
-
-  it("returns translated text and fonts for hi-IN", async () => {
-    g1.setParameters({ locale: "hi-IN" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.text).toBe("अगला");
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontName).toBe("devanagari");
-    expect(g1.i18n?.tf("NEXT_BUTTON")?.fontNames).toBe(undefined);
-  });
-
-  it("returns translated text and fonts with font customization for hi-IN", async () => {
-    g1.setParameters({ locale: "hi-IN" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.text).toBe("👋 नमस्कार");
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.fontName).toBe(undefined);
-    expect(g1.i18n?.tf("EMOJI_WELCOME")?.fontNames).toEqual([
-      "devanagari",
-      "emoji",
-    ]);
-  });
-
-  it("when missing locale de-DE is specified, it returns undefined", async () => {
-    g1.setParameters({ locale: "de-DE", fallbackLocale: "en-US" });
-    await g1.initialize();
-    expect(g1.i18n?.tf("NEXT_BUTTON")).toBe(undefined);
   });
 });
