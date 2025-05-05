@@ -36,20 +36,44 @@ describe("sd tests", () => {
     ).toBeCloseTo(4.112987559751022); // SD of [1, 0, 9, 5]
   });
 
-  it("throws an error if column not found", () => {
+  it("calculates the standard deviation of a column of numbers from a filtered dataset", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        sdX: sd("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          sdA: sd(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("sdA"),
+    ).toBeCloseTo(6.363961);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          sdA: sd(dc.filter((obs) => obs.b > 100).pull("a")),
+        })
+        .pull("sdA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          sdX: sd("x"),
+        })
+        .pull("sdX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        sdA: sd("a"),
+        sdC: sd("c"),
       }),
     ).toThrow();
   });
@@ -87,6 +111,17 @@ describe("sd tests", () => {
     ).toEqual(null);
   });
 
+  it("returns null if provided a single number", () => {
+    const dc = new DataCalc(d_2);
+    expect(
+      dc
+        .summarize({
+          sdA: sd(24),
+        })
+        .pull("sdA"),
+    ).toEqual(null);
+  });
+
   it("coerces booleans to numbers if coerceBooleans is true", () => {
     const dc = new DataCalc(d_1);
     expect(
@@ -98,11 +133,11 @@ describe("sd tests", () => {
     ).toBeCloseTo(0.5773502691896257); // SD of [1, 0, 1, 0]
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        sdA: sd("a"),
+        sdA: sd("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

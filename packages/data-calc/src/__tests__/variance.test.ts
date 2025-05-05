@@ -36,20 +36,44 @@ describe("variance tests", () => {
     ).toBeCloseTo(16.916666666666668); // Variance of [1, 0, 9, 5]
   });
 
-  it("throws an error if column not found", () => {
+  it("calculates the variance of a column of numbers from a filtered dataset", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        varX: variance("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          varA: variance(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("varA"),
+    ).toBeCloseTo(40.5);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          varA: variance(dc.filter((obs) => obs.b > 100).pull("a")),
+        })
+        .pull("varA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          varX: variance("x"),
+        })
+        .pull("varX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        varA: variance("a"),
+        varC: variance("c"),
       }),
     ).toThrow();
   });
@@ -60,6 +84,28 @@ describe("variance tests", () => {
       dc
         .summarize({
           varB: variance("b"),
+        })
+        .pull("varB"),
+    ).toEqual(null);
+  });
+
+  it("returns null if provided a single observation", () => {
+    const dc = new DataCalc(d_2);
+    expect(
+      dc
+        .summarize({
+          varB: variance(dc.pull("b")),
+        })
+        .pull("varB"),
+    ).toEqual(null);
+  });
+
+  it("returns null if provided a single number", () => {
+    const dc = new DataCalc(d_1);
+    expect(
+      dc
+        .summarize({
+          varB: variance(14),
         })
         .pull("varB"),
     ).toEqual(null);
@@ -98,11 +144,22 @@ describe("variance tests", () => {
     ).toBeCloseTo(0.3333333333333333); // Variance of [1, 0, 1, 0]
   });
 
-  it("throws an error if column has booleans", () => {
+  it("coerces boolean direct values to numbers if coerceBooleans is true", () => {
+    const dc = new DataCalc(d_1);
+    expect(
+      dc
+        .summarize({
+          varA: variance([1, 0, true, false], { coerceBooleans: true }),
+        })
+        .pull("varA"),
+    ).toBeCloseTo(0.3333333333333333); // Variance of [1, 0, 1, 0]
+  });
+
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        varA: variance("a"),
+        varA: variance("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

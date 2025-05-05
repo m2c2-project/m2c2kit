@@ -71,11 +71,9 @@ describe("pull tests", () => {
     ]);
   });
 
-  it("handles empty datasets", () => {
+  it("handles empty datasets by returning null", () => {
     const dc = new DataCalc(d_empty);
-    expect(() => {
-      dc.pull("a");
-    }).toThrow(); // Should throw since there are no variables to verify
+    expect(dc.pull("a")).toBeNull();
   });
 
   it("works with grouped data", () => {

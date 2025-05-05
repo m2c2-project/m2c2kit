@@ -33,22 +33,49 @@ describe("max tests", () => {
     ).toEqual(9); // Max of [1, 0, 9, 5]
   });
 
-  it("throws an error if column not found", () => {
+  it("finds the maximum value of a single number", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        maxX: max("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          maxA: max(4),
+        })
+        .pull("maxA"),
+    ).toEqual(4);
   });
 
-  it("throws an error if column is not numeric", () => {
-    const dc = new DataCalc(d_1);
-    expect(() =>
-      dc.summarize({
-        maxA: max("a"),
-      }),
-    ).toThrow();
+  it("finds the maximum value in a column of numbers from a filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          maxA: max(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("maxA"),
+    ).toEqual(9);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .filter((obs) => obs.b > 100)
+        .summarize({
+          maxA: max("a"),
+        })
+        .pull("maxA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          maxX: max("x"),
+        })
+        .pull("maxX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column has undefined values", () => {
@@ -71,11 +98,11 @@ describe("max tests", () => {
     ).toEqual(1); // Max of [1, 0, 1, 0]
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        maxA: max("a"),
+        maxA: max("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

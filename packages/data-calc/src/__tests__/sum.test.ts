@@ -33,20 +33,56 @@ describe("sum tests", () => {
     ).toEqual(15);
   });
 
-  it("throws an error if column not found", () => {
+  it("sums a column of numbers from a filtered dataset", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        sumX: sum("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          sumA: sum(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("sumA"),
+    ).toEqual(9);
+  });
+
+  it("sums a single number", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          sumA: sum(29),
+        })
+        .pull("sumA"),
+    ).toEqual(29);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .filter((obs) => obs.b > 100)
+        .summarize({
+          sumA: sum("a"),
+        })
+        .pull("sumA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          sumX: sum("x"),
+        })
+        .pull("sumX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        sumA: sum("a"),
+        sumC: sum("c"),
       }),
     ).toThrow();
   });
@@ -84,11 +120,11 @@ describe("sum tests", () => {
     ).toEqual(2);
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        sumA: sum("a"),
+        sumA: sum("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

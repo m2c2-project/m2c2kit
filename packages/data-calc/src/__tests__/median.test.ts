@@ -51,7 +51,7 @@ describe("median tests", () => {
     ).toEqual(3); // Median of [0, 1, 5, 9]
   });
 
-  it("calculates the median of a single value", () => {
+  it("calculates the median of a single observation", () => {
     const dc = new DataCalc(d_2);
     expect(
       dc
@@ -62,20 +62,56 @@ describe("median tests", () => {
     ).toEqual(5); // Median of [5]
   });
 
-  it("throws an error if column not found", () => {
+  it("calculates the median of a single value", () => {
+    const dc = new DataCalc(d_2);
+    expect(
+      dc
+        .summarize({
+          medianA: median(10),
+        })
+        .pull("medianA"),
+    ).toEqual(10);
+  });
+
+  it("calculates the median of a column of numbers from a filtered dataset", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        medianX: median("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          medianA: median(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("medianA"),
+    ).toBeCloseTo(4.5);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .filter((obs) => obs.b > 100)
+        .summarize({
+          medianA: median("a"),
+        })
+        .pull("medianA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          medianX: median("x"),
+        })
+        .pull("medianX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        medianA: median("a"),
+        medianC: median("c"),
       }),
     ).toThrow();
   });
@@ -113,11 +149,11 @@ describe("median tests", () => {
     ).toEqual(0.5); // Median of [0, 0, 1, 1]
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        medianA: median("a"),
+        medianA: median("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

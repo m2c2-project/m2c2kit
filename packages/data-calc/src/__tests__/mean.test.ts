@@ -33,20 +33,56 @@ describe("mean tests", () => {
     ).toBeCloseTo(3.75);
   });
 
-  it("throws an error if column not found", () => {
+  it("calculates the mean of a single number", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        meanX: mean("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          meanA: mean(5),
+        })
+        .pull("meanA"),
+    ).toBeCloseTo(5);
+  });
+
+  it("calculates the mean of a column of numbers from a filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          meanA: mean(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("meanA"),
+    ).toBeCloseTo(4.5);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .filter((obs) => obs.b > 100)
+        .summarize({
+          meanA: mean("a"),
+        })
+        .pull("meanA"),
+    ).toBeNull();
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          meanX: mean("x"),
+        })
+        .pull("meanX"),
+    ).toEqual(null);
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        meanA: mean("a"),
+        meanC: mean("c"),
       }),
     ).toThrow();
   });
@@ -84,11 +120,11 @@ describe("mean tests", () => {
     ).toBeCloseTo(0.5); // (1 + 0 + 1 + 0) / 4 = 0.5
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        meanA: mean("a"),
+        meanA: mean("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });

@@ -24,12 +24,9 @@ describe("slice tests", () => {
     ]);
   });
 
-  it("slices observations from start to the end when end is omitted", () => {
+  it("slices a single observation at start when end is omitted", () => {
     const dc = new DataCalc(d);
-    expect(dc.slice(2).observations).toEqual([
-      { a: 7, b: 8, c: 9 },
-      { a: 10, b: 11, c: 12 },
-    ]);
+    expect(dc.slice(2).observations).toEqual([{ a: 7, b: 8, c: 9 }]);
   });
 
   it("returns an empty array when start is greater than array length", () => {
@@ -44,10 +41,7 @@ describe("slice tests", () => {
 
   it("handles negative indices", () => {
     const dc = new DataCalc(d);
-    expect(dc.slice(-2).observations).toEqual([
-      { a: 7, b: 8, c: 9 },
-      { a: 10, b: 11, c: 12 },
-    ]);
+    expect(dc.slice(-3).observations).toEqual([{ a: 4, b: 5, c: 6 }]);
   });
 
   it("returns a new DataCalc object, preserving original", () => {

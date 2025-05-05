@@ -150,11 +150,9 @@ describe("summarize tests", () => {
     expect(result.observations).toEqual([{ count: 0 }]);
   });
 
-  it("throws an error for invalid variable names", () => {
+  it("returns null for invalid variable name used in summarize operation", () => {
     const dc = new DataCalc(d);
-    expect(() => {
-      dc.summarize({ meanX: mean("x") });
-    }).toThrow();
+    expect(dc.summarize({ meanX: mean("x") }).pull("meanX")).toBeNull();
   });
 
   it("handles all summary operation types", () => {

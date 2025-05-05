@@ -33,20 +33,56 @@ describe("min tests", () => {
     ).toEqual(0); // Min of [1, 0, 9, 5]
   });
 
-  it("throws an error if column not found", () => {
+  it("finds the minimum value of a single number", () => {
     const dc = new DataCalc(d);
-    expect(() =>
-      dc.summarize({
-        minX: min("x"),
-      }),
-    ).toThrow();
+    expect(
+      dc
+        .summarize({
+          minA: min(-5),
+        })
+        .pull("minA"),
+    ).toEqual(-5);
+  });
+
+  it("finds the minimum value in a column of numbers from a filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          minA: min(dc.filter((obs) => obs.b > 2).pull("a")),
+        })
+        .pull("minA"),
+    ).toEqual(0);
+  });
+
+  it("returns null from empty filtered dataset", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .filter((obs) => obs.b > 100)
+        .summarize({
+          minA: min("a"),
+        })
+        .pull("minA"),
+    ).toEqual(null);
+  });
+
+  it("returns null if column not found", () => {
+    const dc = new DataCalc(d);
+    expect(
+      dc
+        .summarize({
+          minX: min("x"),
+        })
+        .pull("minX"),
+    ).toBeNull();
   });
 
   it("throws an error if column is not numeric", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        minA: min("a"),
+        minC: min("c"),
       }),
     ).toThrow();
   });
@@ -71,11 +107,11 @@ describe("min tests", () => {
     ).toEqual(0); // Min of [1, 0, 1, 0]
   });
 
-  it("throws an error if column has booleans", () => {
+  it("throws an error if column has booleans and coerce booleans is false", () => {
     const dc = new DataCalc(d_1);
     expect(() =>
       dc.summarize({
-        minA: min("a"),
+        minA: min("a", { coerceBooleans: false }),
       }),
     ).toThrow();
   });
