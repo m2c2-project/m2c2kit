@@ -2,7 +2,7 @@ import { DataCalcOptions } from "./DataCalcOptions";
 import { DataValue } from "./DataValue";
 import { Mutations } from "./Mutations";
 import { Observation } from "./Observation";
-import { Summarizations } from "./Summarizations";
+import { SummarizeOperation } from "./SummarizeOperation";
 
 export class DataCalc {
   private _observations: Array<Observation>;
@@ -117,7 +117,13 @@ export class DataCalc {
    */
   pull(variable: string): DataValue | DataValue[] {
     if (this._observations.length === 0) {
-      throw new Error("Cannot pull variables from an empty dataset");
+      // Instead of throwing an error, we return null and log a warning. When
+      // filtering datasets, it is common to end up with no observations. Thus,
+      // throwing an error would be too disruptive.
+      console.warn(
+        `DataCalc.pull(): No observations available to pull variable "${variable}" from. Returning null.`,
+      );
+      return null;
     }
     this.verifyObservationsContainVariable(variable);
     const values = this._observations.map((o) => o[variable]);
@@ -274,6 +280,8 @@ export class DataCalc {
    * @param summarizations - An object where the keys are the names of the new
    * variables and the values are `DataCalc` summary functions: `sum()`,
    * `mean()`, `median()`, `variance()`, `sd()`, `min()`, `max()`, or `n()`.
+   * The summary functions take a variable name as a string, or alternatively,
+   * a value or array of values to summarize.
    * @returns A new `DataCalc` object with the new summary variables.
    *
    * @example
@@ -293,19 +301,38 @@ export class DataCalc {
    *   }).observations
    * );
    * // [ { meanA: 3.75, varA: 16.916666666666668, totalB: 14 } ]
+   *
+   * console.log(
+   *   dc.summarize({
+   *    filteredTotalC: sum(dc.filter(obs => obs.b > 2).pull("c"))
+   *  }).observations
+   * );
+   * // [ { filteredTotalC: 10 } ]
    * ```
    */
-  summarize(summarizations: Summarizations): DataCalc {
+  summarize(summarizations: {
+    [newVariable: string]: SummarizeOperation | DataValue;
+  }): DataCalc {
     if (this._groups.length === 0) {
       const obs: Observation = {};
-      for (const [newVariable, summarizeOperation] of Object.entries(
-        summarizations,
-      )) {
-        obs[newVariable] = summarizeOperation.summarizeFunction(
-          this,
-          summarizeOperation.parameters,
-          summarizeOperation.options,
-        );
+      for (const [newVariable, value] of Object.entries(summarizations)) {
+        // Check if the value is a SummarizeOperation
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          "summarizeFunction" in value
+        ) {
+          // It's a SummarizeOperation
+          const summarizeOperation = value as SummarizeOperation;
+          obs[newVariable] = summarizeOperation.summarizeFunction(
+            this,
+            summarizeOperation.parameters,
+            summarizeOperation.options,
+          );
+        } else {
+          // It's a direct value
+          obs[newVariable] = value;
+        }
       }
       return new DataCalc([obs], { groups: this._groups });
     }
@@ -314,7 +341,9 @@ export class DataCalc {
     return this.summarizeByGroups(summarizations);
   }
 
-  private summarizeByGroups(summarizations: Summarizations): DataCalc {
+  private summarizeByGroups(summarizations: {
+    [newVariable: string]: SummarizeOperation | DataValue;
+  }): DataCalc {
     const groupMap = new Map<string, Array<Observation>>();
 
     this._observations.forEach((obs) => {
@@ -372,14 +401,24 @@ export class DataCalc {
       // Calculate summaries for this group
       const groupDataCalc = new DataCalc(groupObs);
 
-      for (const [newVariable, summarizeOperation] of Object.entries(
-        summarizations,
-      )) {
-        summaryObj[newVariable] = summarizeOperation.summarizeFunction(
-          groupDataCalc,
-          summarizeOperation.parameters,
-          summarizeOperation.options,
-        );
+      for (const [newVariable, value] of Object.entries(summarizations)) {
+        // Check if the value is a SummarizeOperation
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          "summarizeFunction" in value
+        ) {
+          // It's a SummarizeOperation
+          const summarizeOperation = value as SummarizeOperation;
+          summaryObj[newVariable] = summarizeOperation.summarizeFunction(
+            groupDataCalc,
+            summarizeOperation.parameters,
+            summarizeOperation.options,
+          );
+        } else {
+          // It's a direct value
+          summaryObj[newVariable] = value;
+        }
       }
 
       summarizedObservations.push(summaryObj);
@@ -1024,9 +1063,14 @@ export class DataCalc {
   /**
    * Slice observations by position.
    *
-   * @param start - Starting position (0-based)
+   * @param start - Starting position (0-based). Negative values count from
+   * the end.
    * @param end - Ending position (exclusive)
    * @returns A new DataCalc object with sliced observations
+   *
+   * @remarks If `end` is not provided, it will return a single observation at
+   * `start` position. If `start` is beyond the length of observations,
+   * it will return an empty DataCalc.
    *
    * @example
    * ```js
@@ -1039,6 +1083,8 @@ export class DataCalc {
    * const dc = new DataCalc(d);
    * console.log(dc.slice(1, 3).observations);
    * // [ { a: 3, b: 4 }, { a: 5, b: 6 } ]
+   * console.log(dc.slice(0).observations);
+   * // [ { a: 1, b: 2 } ]
    * ```
    */
   slice(start: number, end?: number): DataCalc {
@@ -1047,7 +1093,20 @@ export class DataCalc {
         `slice() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
-    const sliced = this._observations.slice(start, end);
+
+    let sliced: Observation[];
+
+    if (start >= this._observations.length) {
+      // If start is beyond the length of observations, return empty DataCalc
+      return new DataCalc([], { groups: this._groups });
+    }
+    if (end === undefined) {
+      // return a single observation at start position
+      const index = start < 0 ? this._observations.length + start : start;
+      sliced = [this._observations[index]];
+    } else {
+      sliced = this._observations.slice(start, end);
+    }
     return new DataCalc(sliced, { groups: this._groups });
   }
 
@@ -1160,6 +1219,21 @@ export class DataCalc {
         `Variable ${variable} does not exist for each item (row) in the data array.`,
       );
     }
+  }
+
+  /**
+   * Checks if the variable exists for at least one observation in the data.
+   *
+   * @remarks This is not meant to be called by users of the library, but
+   * is used internally.
+   * @internal
+   *
+   * @param variable - The variable to check for
+   * @returns true if the variable exists in at least one observation, false
+   * otherwise
+   */
+  variableExists(variable: string): boolean {
+    return this._observations.some((observation) => variable in observation);
   }
 
   /**
