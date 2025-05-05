@@ -19,7 +19,7 @@ const survey = new Survey(surveyJson);
 a1.setParameters({ show_quit_button: true });
 a2.setParameters({ show_quit_button: true });
 a3.setParameters({ show_quit_button: true });
-a4.setParameters({ show_quit_button: true });
+a4.setParameters({ show_quit_button: true, scoring: true });
 
 const activities = [a1, a2, a3, a4, a5, survey];
 
@@ -54,9 +54,17 @@ const session = new Session({
  * Currently, only games generate schema.
  */
 session.onActivityData((ev) => {
-  if (ev.target.type === ActivityType.Game) {
+  if (ev.target.type === ActivityType.Game && ev.dataType === "Trial") {
     console.log(`✅ trial completed:`);
-  } else if (ev.target.type === ActivityType.Survey) {
+  } else if (
+    ev.target.type === ActivityType.Game &&
+    ev.dataType === "Scoring"
+  ) {
+    console.log(`☑️ scoring completed:`);
+  } else if (
+    ev.target.type === ActivityType.Survey &&
+    ev.dataType === "Survey"
+  ) {
     console.log(`✅ survey response completed:`);
   }
   console.log("  newData: " + JSON.stringify(ev.newData));

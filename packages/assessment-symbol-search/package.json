@@ -46,7 +46,8 @@
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
     "@m2c2kit/addons": "0.3.28",
-    "@m2c2kit/core": "0.3.29"
+    "@m2c2kit/core": "0.3.29",
+    "@m2c2kit/data-calc": "0.8.0"
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "0.3.25",

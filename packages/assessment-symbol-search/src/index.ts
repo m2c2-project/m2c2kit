@@ -16,6 +16,9 @@ import {
   Easings,
   Constants,
   Translation,
+  ScoringProvider,
+  ActivityKeyValueData,
+  ScoringSchema,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -25,13 +28,14 @@ import {
   LocalePicker,
   InstructionsOptions,
 } from "@m2c2kit/addons";
+import { DataCalc, median } from "@m2c2kit/data-calc";
 
 /**
  * Symbol Search is a speeded continuous performance test of conjunctive
  * feature search in which respondents identify matching symbol pairs as
  * quickly and as accurately as they can.
  */
-class SymbolSearch extends Game {
+class SymbolSearch extends Game implements ScoringProvider {
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
@@ -132,6 +136,20 @@ positions.",
         default: false,
         description:
           "Should the icon that allows the participant to switch the locale be shown?",
+      },
+      scoring: {
+        type: "boolean",
+        default: false,
+        description: "Should scoring data be generated? Default is false.",
+      },
+      scoring_filter_response_time_duration_ms: {
+        type: "array",
+        items: {
+          type: "number",
+        },
+        default: [100, 10000],
+        description:
+          "When scoring, values of response_time_duration_ms less than the lower bound or greater than the upper bound are discarded. This array contains two numbers, the lower and upper bounds.",
       },
     };
 
@@ -234,6 +252,79 @@ positions.",
       quit_button_pressed: {
         type: "boolean",
         description: "Was the quit button pressed?",
+      },
+    };
+
+    const symbolSearchScoringSchema: ScoringSchema = {
+      activity_begin_iso8601_timestamp: {
+        type: "string",
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the game activity.",
+      },
+      first_trial_begin_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the first trial. Null if no trials were completed.",
+      },
+      last_trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the end of the last trial. Null if no trials were completed.",
+      },
+      n_trials: {
+        type: "integer",
+        description: "Number of trials completed.",
+      },
+      n_trials_lure: {
+        type: "integer",
+        description: "Number of lure trials completed.",
+      },
+      n_trials_normal: {
+        type: "integer",
+        description: "Number of normal trials completed.",
+      },
+      flag_trials_match_expected: {
+        type: "integer",
+        description:
+          "Does the number of completed and expected trials match? 1 = true, 0 = false.",
+      },
+      n_trials_correct: {
+        type: "integer",
+        description: "Number of correct trials.",
+      },
+      n_trials_incorrect: {
+        type: "integer",
+        description: "Number of incorrect trials.",
+      },
+      median_response_time_overall: {
+        type: ["number", "null"],
+        description: "Median response time for all trials.",
+      },
+      median_response_time_filtered: {
+        type: ["number", "null"],
+        description:
+          "Median response time for trials within the specified filter response time filter.",
+      },
+      response_time_filter_lower_bound: {
+        type: "number",
+        description:
+          "Response times less than this lower bound were discarded when calculating filtered response times.",
+      },
+      response_time_filter_upper_bound: {
+        type: "number",
+        description:
+          "Response times greater than this upper bound were discarded when calculating filtered response times.",
+      },
+      median_response_time_correct: {
+        type: ["number", "null"],
+        description: "Median response time for correct trials.",
+      },
+      median_response_time_incorrect: {
+        type: ["number", "null"],
+        description: "Median response time for incorrect trials.",
       },
     };
 
@@ -389,6 +480,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       width: 400,
       height: 800,
       trialSchema: symbolSearchTrialSchema,
+      scoringSchema: symbolSearchScoringSchema,
       parameters: defaultParameters,
       fonts: [
         {
@@ -618,6 +710,22 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
         game.trialComplete();
+        if (game.getParameter<boolean>("scoring")) {
+          // Score the data only if user does not quit. If user quits, pass
+          // empty data to calculateScores so a "blank" set of scores is
+          // generated.
+          const scores = game.calculateScores([], {
+            rtLowerBound: game.getParameter<Array<number>>(
+              "scoring_filter_response_time_duration_ms",
+            )[0],
+            rtUpperBound: game.getParameter<Array<number>>(
+              "scoring_filter_response_time_duration_ms",
+            )[1],
+            numberOfTrials: game.getParameter<number>("number_of_trials"),
+          });
+          game.addScoringData(scores);
+          game.scoringComplete();
+        }
         game.cancel();
       });
     }
@@ -1166,6 +1274,20 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
             );
           }
         } else {
+          if (game.getParameter<boolean>("scoring")) {
+            const scores = game.calculateScores(game.data.trials, {
+              rtLowerBound: game.getParameter<Array<number>>(
+                "scoring_filter_response_time_duration_ms",
+              )[0],
+              rtUpperBound: game.getParameter<Array<number>>(
+                "scoring_filter_response_time_duration_ms",
+              )[1],
+              numberOfTrials: game.getParameter<number>("number_of_trials"),
+            });
+            game.addScoringData(scores);
+            game.scoringComplete();
+          }
+
           questionLabel.hidden = false;
           game.removeFreeNode("questionLabelFree");
           if (game.getParameter("show_trials_complete_scene")) {
@@ -1241,6 +1363,65 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
       // no need to have cancel button, because we're done
       game.removeAllFreeNodes();
     });
+  }
+
+  calculateScores(
+    data: ActivityKeyValueData[],
+    extras: {
+      rtLowerBound: number;
+      rtUpperBound: number;
+      numberOfTrials: number;
+    },
+  ) {
+    const dc = new DataCalc(data);
+    const scores = dc.summarize({
+      activity_begin_iso8601_timestamp: this.beginIso8601Timestamp,
+      first_trial_begin_iso8601_timestamp: dc
+        .arrange("trial_begin_iso8601_timestamp")
+        .slice(0)
+        .pull("trial_begin_iso8601_timestamp"),
+      last_trial_end_iso8601_timestamp: dc
+        .arrange("-trial_end_iso8601_timestamp")
+        .slice(0)
+        .pull("trial_end_iso8601_timestamp"),
+      n_trials: dc.length,
+      flag_trials_match_expected: dc.length === extras.numberOfTrials ? 1 : 0,
+      n_trials_lure: dc.filter((obs) => obs.trial_type === "lure").length,
+      n_trials_normal: dc.filter((obs) => obs.trial_type === "normal").length,
+      n_trials_correct: dc.filter(
+        (obs) => obs.user_response_index === obs.correct_response_index,
+      ).length,
+      n_trials_incorrect: dc.filter(
+        (obs) => obs.user_response_index !== obs.correct_response_index,
+      ).length,
+      median_response_time_overall: median("response_time_duration_ms"),
+      median_response_time_filtered: median(
+        dc
+          .filter(
+            (obs) =>
+              obs.response_time_duration_ms >= extras.rtLowerBound &&
+              obs.response_time_duration_ms <= extras.rtUpperBound,
+          )
+          .pull("response_time_duration_ms"),
+      ),
+      median_response_time_correct: median(
+        dc
+          .filter(
+            (obs) => obs.user_response_index === obs.correct_response_index,
+          )
+          .pull("response_time_duration_ms"),
+      ),
+      median_response_time_incorrect: median(
+        dc
+          .filter(
+            (obs) => obs.user_response_index !== obs.correct_response_index,
+          )
+          .pull("response_time_duration_ms"),
+      ),
+      response_time_filter_lower_bound: extras.rtLowerBound,
+      response_time_filter_upper_bound: extras.rtUpperBound,
+    });
+    return scores.observations;
   }
 
   /**
