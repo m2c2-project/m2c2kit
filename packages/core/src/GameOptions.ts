@@ -6,6 +6,7 @@ import { FontAsset } from "./FontAsset";
 import { ModuleMetadata } from "./ModuleMetadata";
 import { SoundAsset } from "./SoundAsset";
 import { LocalizationOptions } from "./LocalizationOptions";
+import { ScoringSchema } from "./ScoringSchema";
 
 /**
  * Options to specify HTML canvas, set game canvas size, and load game assets.
@@ -35,6 +36,8 @@ export interface GameOptions extends LocalizationOptions {
   stretch?: boolean;
   /** Schema of trial data; JSON object where key is variable name, value is data type */
   trialSchema?: TrialSchema;
+  /** Schema of scoring data; JSON object where key is variable name, value is data type */
+  scoringSchema?: ScoringSchema;
   /** Default game parameters; JSON object where key is the game parameter, value is default value */
   parameters?: GameParameters;
   /** Font assets to use. The first element will be the default font */

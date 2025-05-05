@@ -80,6 +80,8 @@ import { M2NodeFactory } from "./M2NodeFactory";
 import { EventMaterializer } from "./EventMaterializer";
 import { Easings } from "./Easings";
 import { M2KeyboardEvent } from "./M2KeyboardEvent";
+import { ActivityKeyValueData } from "./ActivityKeyValueData";
+import { ScoringSchema } from "./ScoringSchema";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -175,6 +177,9 @@ export class Game implements Activity {
     }
     if (!this.options.trialSchema) {
       this.options.trialSchema = {};
+    }
+    if (!this.options.scoringSchema) {
+      this.options.scoringSchema = {};
     }
     if (options.moduleMetadata) {
       this.moduleMetadata = options.moduleMetadata;
@@ -834,6 +839,7 @@ export class Game implements Activity {
   public entryScene?: Scene | string;
   public data: GameData = {
     trials: new Array<TrialData>(),
+    scoring: {},
   };
   /** The 0-based index of the current trial */
   public trialIndex = 0;
@@ -1658,16 +1664,21 @@ export class Game implements Activity {
     this.trialIndex = 0;
     this.data = {
       trials: new Array<TrialData>(),
+      scoring: {},
     };
     const trialSchema = this.options.trialSchema ?? {};
+    const scoringSchema = this.options.scoringSchema ?? {};
 
-    const variables = Object.entries(trialSchema);
+    this.validateSchema(trialSchema);
+    this.validateSchema(scoringSchema);
+  }
 
+  private validateSchema(schema: TrialSchema | ScoringSchema) {
+    const variables = Object.entries(schema);
     for (const [variableName, propertySchema] of variables) {
       if (
         propertySchema.type !== undefined &&
         !this.propertySchemaDataTypeIsValid(propertySchema.type)
-        //!validDataTypes.includes(propertySchema.type)
       ) {
         throw new Error(
           `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`,
@@ -1745,10 +1756,10 @@ export class Game implements Activity {
   /**
    * Adds data to the game's TrialData object.
    *
-   * @remarks The variableName must be previously defined in the trialSchema
-   * object passed in during game initialization through
-   * {@link GameInitOptions.trialSchema}. The type of the value must match
-   * what was defined in the trialSchema, otherwise an error is thrown.
+   * @remarks `variableName` must be previously defined in the
+   * {@link TrialSchema} object in {@link GameOptions}. The type of the value
+   * must match what was defined in the trial schema, otherwise an error is
+   * thrown.
    *
    * @param variableName - variable to be set
    * @param value - value of the variable to set
@@ -1770,6 +1781,7 @@ export class Game implements Activity {
         emptyTrial[variableName] = null;
       }
       this.data.trials.push({
+        data_type: "trial",
         document_uuid: Uuid.generate(),
         study_id: this.studyId ?? null,
         study_uuid: this.studyUuid ?? null,
@@ -1825,6 +1837,143 @@ export class Game implements Activity {
       );
     }
     this.data.trials[this.trialIndex][variableName] = value;
+  }
+
+  /**
+   * Adds data to the game's scoring data.
+   *
+   * @remarks The variable name (or object property names) must be previously
+   * defined in the {@link ScoringSchema} object in {@link GameOptions}.
+   * The type of the value must match what was defined in the scoring schema,
+   * otherwise an error is thrown.
+   *
+   * @param variableNameOrObject - Either a variable name (string) or an object
+   * containing multiple key-value pairs to add all at once.
+   * @param value - Value of the variable to set (only used when
+   * variableNameOrObject is a variable name string).
+   */
+  addScoringData(
+    variableNameOrObject:
+      | string
+      | Record<string, JsonSchemaDataTypeScriptTypes>
+      | Array<Record<string, JsonSchemaDataTypeScriptTypes>>,
+    value?: JsonSchemaDataTypeScriptTypes,
+  ): void {
+    if (!this.options.scoringSchema) {
+      throw new Error(
+        "no scoring schema were provided in GameOptions. cannot add scoring data",
+      );
+    }
+
+    // Initialize scoring data structure if empty
+    if (Object.keys(this.data.scoring).length === 0) {
+      const emptyScoring: ActivityKeyValueData = {
+        data_type: "scoring",
+        document_uuid: Uuid.generate(),
+        study_id: this.studyId ?? null,
+        study_uuid: this.studyUuid ?? null,
+        session_uuid: this.sessionUuid,
+        activity_uuid: this.uuid,
+        activity_id: this.options.id,
+        activity_publish_uuid: this.options.publishUuid,
+        activity_version: this.options.version,
+        device_timezone:
+          Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? "",
+        device_timezone_offset_minutes: new Date().getTimezoneOffset(),
+        locale: this.i18n?.locale ?? null,
+        device_metadata: this.getDeviceMetadata(),
+      };
+      const variables = Object.entries(this.options.scoringSchema);
+      for (const [variableName] of variables) {
+        emptyScoring[variableName] = null;
+      }
+      this.data.scoring = emptyScoring;
+    }
+
+    // Handle bulk add (object of key-value pairs)
+    if (typeof variableNameOrObject === "object") {
+      let scoringObject: Record<string, JsonSchemaDataTypeScriptTypes>;
+      if (Array.isArray(variableNameOrObject)) {
+        if (variableNameOrObject.length !== 1) {
+          console.warn(
+            `Array of objects passed to addScoringData() is length ${variableNameOrObject.length}. This is likely an error in the assessment's code for calculateScores().`,
+          );
+        }
+        scoringObject = variableNameOrObject[0];
+      } else {
+        scoringObject = variableNameOrObject;
+      }
+      for (const [key, val] of Object.entries(scoringObject)) {
+        this.validateAndSetScoringVariable(key, val);
+      }
+      return;
+    }
+
+    // Handle single variable
+    const variableName = variableNameOrObject;
+    if (value === undefined) {
+      throw new Error(
+        "Value must be provided when adding a single scoring variable",
+      );
+    }
+    this.validateAndSetScoringVariable(variableName, value);
+  }
+
+  /**
+   * Helper method to validate and set a single scoring variable
+   *
+   * @param variableName - Name of the variable to set
+   * @param value - Value to set
+   * @private
+   */
+  private validateAndSetScoringVariable(
+    variableName: string,
+    value: JsonSchemaDataTypeScriptTypes,
+  ): void {
+    if (!this.options.scoringSchema) {
+      throw new Error(
+        "no scoring schema were provided in GameOptions. cannot add scoring data",
+      );
+    }
+
+    if (!(variableName in this.options.scoringSchema)) {
+      throw new Error(`scoring variable ${variableName} not defined in schema`);
+    }
+
+    let expectedDataTypes: string[];
+
+    if (Array.isArray(this.options.scoringSchema[variableName].type)) {
+      expectedDataTypes = this.options.scoringSchema[variableName]
+        .type as Array<JsonSchemaDataType>;
+    } else {
+      expectedDataTypes = [
+        this.options.scoringSchema[variableName].type as string,
+      ];
+    }
+
+    let providedDataType = typeof value as string;
+    // Check if object is actually an array
+    if (providedDataType === "object") {
+      if (Object.prototype.toString.call(value) === "[object Array]") {
+        providedDataType = "array";
+      }
+    }
+    if (value === undefined || value === null) {
+      providedDataType = "null";
+    }
+    if (
+      !expectedDataTypes.includes(providedDataType) &&
+      !(
+        providedDataType === "number" &&
+        Number.isInteger(value) &&
+        expectedDataTypes.includes("integer")
+      )
+    ) {
+      throw new Error(
+        `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`,
+      );
+    }
+    this.data.scoring[variableName] = value;
   }
 
   /**
@@ -1939,10 +2088,113 @@ export class Game implements Activity {
   }
 
   /**
+   * Marks scoring as complete.
+   *
+   * @remarks This method must be called after the game has finished adding
+   * scores using addScoringData(). Calling will trigger the onActivityResults
+   * callback function, if one was provided in SessionOptions. This is how the
+   * game communicates scoring data to the parent session, which can then save
+   * or process the data. It is the responsibility of the the game programmer
+   * to call this at the appropriate time. It is not triggered automatically.
+   */
+  scoringComplete(): void {
+    const resultsEvent: ActivityResultsEvent = {
+      type: M2EventType.ActivityData,
+      ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+      target: this,
+      newData: this.data.scoring,
+      newDataSchema: this.makeScoringDataSchema(),
+      data: this.data.scoring,
+      dataSchema: this.makeScoringDataSchema(),
+      dataType: "Scoring",
+      activityConfiguration: this.makeGameActivityConfiguration(
+        this.options.parameters ?? {},
+      ),
+      activityConfigurationSchema: this.makeGameActivityConfigurationSchema(
+        this.options.parameters ?? {},
+      ),
+      activityMetrics: this.gameMetrics,
+    };
+    this.raiseActivityEventOnListeners(resultsEvent);
+  }
+
+  /**
+   * The m2c2kit engine will automatically include these schema and their
+   * values in the scoring data.
+   */
+  private readonly automaticScoringSchema: ScoringSchema = {
+    data_type: {
+      type: "string",
+      description: "Type of data.",
+    },
+    study_id: {
+      type: ["string", "null"],
+      description:
+        "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity.",
+    },
+    study_uuid: {
+      type: ["string", "null"],
+      format: "uuid",
+      description:
+        "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity.",
+    },
+    document_uuid: {
+      type: "string",
+      format: "uuid",
+      description: "Unique identifier for this data document.",
+    },
+    session_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts.",
+    },
+    activity_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts.",
+    },
+    activity_id: {
+      type: "string",
+      description: "Human-readable identifier of the activity.",
+    },
+    activity_publish_uuid: {
+      type: "string",
+      format: "uuid",
+      description:
+        "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions.",
+    },
+    activity_version: {
+      type: "string",
+      description: "Version of the activity.",
+    },
+    device_timezone: {
+      type: "string",
+      description:
+        "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone.",
+    },
+    device_timezone_offset_minutes: {
+      type: "integer",
+      description:
+        "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset().",
+    },
+    locale: {
+      type: ["string", "null"],
+      description:
+        "Locale of the trial. null if the activity does not support localization.",
+    },
+  };
+
+  /**
    * The m2c2kit engine will automatically include these schema and their
    * values in the trial data.
    */
   private readonly automaticTrialSchema: TrialSchema = {
+    data_type: {
+      type: "string",
+      description: "Type of data.",
+    },
     study_id: {
       type: ["string", "null"],
       description:
@@ -2115,6 +2367,22 @@ export class Game implements Activity {
       type: "object",
       properties: result,
     } as JsonSchema;
+  }
+
+  private makeScoringDataSchema(): JsonSchema {
+    // return schema as JSON Schema draft 2019-09
+    const scoringDataSchema: JsonSchema = {
+      description: `Scoring data and metadata from the assessment ${this.name}.`,
+      $comment: `Activity identifier: ${this.options.id}, version: ${this.options.version}.`,
+      $schema: "https://json-schema.org/draft/2019-09/schema",
+      type: "object",
+      properties: {
+        ...this.automaticScoringSchema,
+        ...this.options.scoringSchema,
+        device_metadata: deviceMetadataSchema,
+      },
+    };
+    return scoringDataSchema;
   }
 
   /**

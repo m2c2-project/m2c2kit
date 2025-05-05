@@ -73,6 +73,7 @@ export * from "./ScaleActionOptions";
 export * from "./Scene";
 export * from "./SceneOptions";
 export * from "./ScoringSchema";
+export * from "./ScoringProvider";
 export * from "./Shape";
 export * from "./ShapeOptions";
 export * from "./ShapeType";

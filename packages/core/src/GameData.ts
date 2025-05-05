@@ -3,4 +3,5 @@ import { TrialData } from "./Game";
 
 export interface GameData extends ActivityKeyValueData {
   trials: Array<TrialData>;
+  scoring: ActivityKeyValueData;
 }

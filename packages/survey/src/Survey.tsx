@@ -734,6 +734,7 @@ export class Survey implements Activity {
 
   private makeAutomaticSurveyDataProperties(): AutomaticSurveyDataProperties {
     return {
+      data_type: "survey",
       document_uuid: Uuid.generate(),
       study_id: this.studyId ?? null,
       study_uuid: this.studyUuid ?? null,
