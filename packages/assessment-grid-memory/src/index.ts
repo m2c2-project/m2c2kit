@@ -17,6 +17,9 @@ import {
   Sprite,
   Constants,
   Translation,
+  ScoringProvider,
+  ActivityKeyValueData,
+  ScoringSchema,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -26,13 +29,14 @@ import {
   InstructionsOptions,
   LocalePicker,
 } from "@m2c2kit/addons";
+import { DataCalc, median, sum } from "@m2c2kit/data-calc";
 
 /**
  * Grid Memory is a visuospatial working memory task, with delayed free
  * recall. After a brief exposure, and a short distraction phase,
  * participants report the location of dots on a grid.
  */
-class GridMemory extends Game {
+class GridMemory extends Game implements ScoringProvider {
   constructor() {
     /**
      * These are configurable game parameters and their defaults.
@@ -116,6 +120,11 @@ class GridMemory extends Game {
         default: false,
         description:
           "Should the icon that allows the participant to switch the locale be shown?",
+      },
+      scoring: {
+        type: "boolean",
+        default: false,
+        description: "Should scoring data be generated? Default is false.",
       },
     };
 
@@ -290,6 +299,51 @@ class GridMemory extends Game {
       },
     };
 
+    const gridMemoryScoringSchema: ScoringSchema = {
+      activity_begin_iso8601_timestamp: {
+        type: "string",
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the game activity.",
+      },
+      first_trial_begin_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the beginning of the first trial. Null if no trials were completed.",
+      },
+      last_trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description:
+          "ISO 8601 timestamp at the end of the last trial. Null if no trials were completed.",
+      },
+      n_trials: {
+        type: "integer",
+        description: "Number of trials completed.",
+      },
+      n_trials_exact_targets: {
+        type: "integer",
+        description:
+          "Number of trials in which the user selected the exact target cells without error.",
+      },
+      flag_trials_match_expected: {
+        type: "integer",
+        description:
+          "Does the number of completed and expected trials match? 1 = true, 0 = false.",
+      },
+      distance_hausdorff_median: {
+        type: "number",
+        description:
+          "Median across all trials of the Hausdorff distance between the presented and selected cells within a trial.",
+      },
+      sum_exact_targets: {
+        type: "integer",
+        description:
+          "Sum of the number of exact targets across all trials. An exact target is a target that was selected in the correct location.",
+      },
+    };
+
     const translation: Translation = {
       configuration: {
         baseLocale: "en-US",
@@ -413,6 +467,7 @@ phase, participants report the location of dots on a grid.",
       width: 400,
       height: 800,
       trialSchema: gridMemoryTrialSchema,
+      scoringSchema: gridMemoryScoringSchema,
       parameters: defaultParameters,
       fonts: [
         {
@@ -497,6 +552,17 @@ phase, participants report the location of dots on a grid.",
         game.presentScene(blankScene);
         game.addTrialData("quit_button_pressed", true);
         game.trialComplete();
+        if (game.getParameter<boolean>("scoring")) {
+          // Score the data only if user does not quit. If user quits, pass
+          // empty data to calculateScores so a "blank" set of scores is
+          // generated.
+          const scores = game.calculateScores([], {
+            numberOfDots: game.getParameter<number>("number_of_dots"),
+            numberOfTrials: game.getParameter<number>("number_of_trials"),
+          });
+          game.addScoringData(scores);
+          game.scoringComplete();
+        }
         game.cancel();
       });
     }
@@ -1085,6 +1151,15 @@ phase, participants report the location of dots on a grid.",
         game.addTrialData("trial_index", game.trialIndex);
         game.trialComplete();
         if (game.trialIndex === game.getParameter("number_of_trials")) {
+          if (game.getParameter<boolean>("scoring")) {
+            const scores = game.calculateScores(game.data.trials, {
+              numberOfDots: game.getParameter<number>("number_of_dots"),
+              numberOfTrials: game.getParameter<number>("number_of_trials"),
+            });
+            game.addScoringData(scores);
+            game.scoringComplete();
+          }
+
           const nextScreenTransition = Transition.slide({
             direction: TransitionDirection.Left,
             duration: 500,
@@ -1129,6 +1204,74 @@ phase, participants report the location of dots on a grid.",
       game.removeAllFreeNodes();
     });
   }
+
+  calculateScores(
+    data: ActivityKeyValueData[],
+    extras: {
+      numberOfDots: number;
+      numberOfTrials: number;
+    },
+  ) {
+    const dc = new DataCalc(data);
+
+    const distances = data.map((obs) => {
+      const presentedCells = obs.presented_cells as Array<Cell>;
+      const selectedCells = obs.selected_cells as Array<Cell>;
+      return {
+        hausdorff_distance: hausdorffDistance(presentedCells, selectedCells),
+      };
+    });
+
+    const scores = dc.summarize({
+      activity_begin_iso8601_timestamp: this.beginIso8601Timestamp,
+      first_trial_begin_iso8601_timestamp: dc
+        .arrange("trial_begin_iso8601_timestamp")
+        .slice(0)
+        .pull("trial_begin_iso8601_timestamp"),
+      last_trial_end_iso8601_timestamp: dc
+        .arrange("-trial_end_iso8601_timestamp")
+        .slice(0)
+        .pull("trial_end_iso8601_timestamp"),
+      n_trials: dc.length,
+      flag_trials_match_expected: dc.length === extras.numberOfTrials ? 1 : 0,
+      distance_hausdorff_median: median(
+        new DataCalc(distances).pull("hausdorff_distance"),
+      ),
+      n_trials_exact_targets: dc.filter(
+        (obs) => obs.number_of_correct_dots === extras.numberOfDots,
+      ).length,
+      sum_exact_targets: sum("number_of_correct_dots"),
+    });
+    return scores.observations;
+  }
+}
+
+interface Cell {
+  row: number;
+  column: number;
+}
+
+function hausdorffDistance(setA: Cell[], setB: Cell[]): number {
+  function euclideanDistance(cell1: Cell, cell2: Cell): number {
+    const rowDiff = cell1.row - cell2.row;
+    const columnDiff = cell1.column - cell2.column;
+    return Math.sqrt(rowDiff * rowDiff + columnDiff * columnDiff);
+  }
+
+  function maxMinDistance(fromSet: Cell[], toSet: Cell[]): number {
+    return fromSet.reduce((maxMinDist, cellA) => {
+      const minDist = toSet.reduce((minDist, cellB) => {
+        const dist = euclideanDistance(cellA, cellB);
+        return dist < minDist ? dist : minDist;
+      }, Infinity);
+      return minDist > maxMinDist ? minDist : maxMinDist;
+    }, 0);
+  }
+
+  const distanceAB = maxMinDistance(setA, setB);
+  const distanceBA = maxMinDistance(setB, setA);
+
+  return Math.max(distanceAB, distanceBA);
 }
 
 export { GridMemory };
