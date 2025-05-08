@@ -11,6 +11,7 @@ import { M2NodeConstructor } from "./M2NodeConstructor";
 import { Timer } from "./Timer";
 import { Constants } from "./Constants";
 import { JsonSchemaDataType } from "./JsonSchema";
+import { M2Error } from "./M2Error";
 
 interface RotationTransform {
   /** Counterclockwise radians of the rotation */
@@ -103,7 +104,7 @@ export class M2c2KitHelpers {
       if (typeof value === "boolean") {
         return value.toString();
       }
-      throw new Error(`Error parsing "${value}" as a string.`);
+      throw new M2Error(`Error parsing "${value}" as a string.`);
     }
 
     function canBeNumber(value: unknown) {
@@ -125,11 +126,11 @@ export class M2c2KitHelpers {
         return value;
       }
       if (typeof value !== "string") {
-        throw new Error(`Error parsing "${value}" as a number.`);
+        throw new M2Error(`Error parsing "${value}" as a number.`);
       }
       const n = parseFloat(value);
       if (Number.isNaN(n)) {
-        throw new Error(`Error parsing "${value}" as a number.`);
+        throw new M2Error(`Error parsing "${value}" as a number.`);
       }
       return n;
     }
@@ -153,11 +154,11 @@ export class M2c2KitHelpers {
         return value;
       }
       if (typeof value !== "string") {
-        throw new Error(`Error parsing "${value}" as an integer.`);
+        throw new M2Error(`Error parsing "${value}" as an integer.`);
       }
       const n = parseInt(value);
       if (Number.isNaN(n)) {
-        throw new Error(`Error parsing "${value}" as an integer.`);
+        throw new M2Error(`Error parsing "${value}" as an integer.`);
       }
       return n;
     }
@@ -177,7 +178,7 @@ export class M2c2KitHelpers {
         return value;
       }
       if (value !== "true" && value !== "false") {
-        throw new Error(`Error parsing "${value}" as a boolean.`);
+        throw new M2Error(`Error parsing "${value}" as a boolean.`);
       }
       return value === "true";
     }
@@ -208,7 +209,7 @@ export class M2c2KitHelpers {
         return value;
       }
       if (typeof value !== "string") {
-        throw new Error(`Error parsing "${value}" as an array.`);
+        throw new M2Error(`Error parsing "${value}" as an array.`);
       }
       try {
         const a = JSON.parse(value);
@@ -221,7 +222,7 @@ export class M2c2KitHelpers {
           return a;
         }
       }
-      throw new Error(`Error parsing "${value}" as an array.`);
+      throw new M2Error(`Error parsing "${value}" as an array.`);
     }
 
     function canBeObject(value: unknown): boolean {
@@ -258,7 +259,7 @@ export class M2c2KitHelpers {
         return value;
       }
       if (typeof value !== "string") {
-        throw new Error(`Error parsing "${value}" as an object.`);
+        throw new M2Error(`Error parsing "${value}" as an object.`);
       }
       try {
         const o = JSON.parse(value);
@@ -271,7 +272,7 @@ export class M2c2KitHelpers {
           return o;
         }
       }
-      throw new Error(`Error parsing "${value}" as an object.`);
+      throw new M2Error(`Error parsing "${value}" as an object.`);
     }
 
     function canBeNull(value: unknown): boolean {
@@ -283,7 +284,7 @@ export class M2c2KitHelpers {
 
     function asNull(value: unknown) {
       if (value !== "null" && value !== null) {
-        throw new Error(`Error parsing "${value}" as null.`);
+        throw new M2Error(`Error parsing "${value}" as null.`);
       }
       return null;
     }
@@ -317,14 +318,14 @@ export class M2c2KitHelpers {
     };
 
     if (type === undefined) {
-      throw new Error(`Error with "${value}" as a target type.`);
+      throw new M2Error(`Error with "${value}" as a target type.`);
     }
 
     if (!Array.isArray(type)) {
       if (typeCheckers[type](value)) {
         return typeConverters[type](value);
       }
-      throw new Error(`Error parsing "${value}" as a ${type}.`);
+      throw new M2Error(`Error parsing "${value}" as a ${type}.`);
     }
 
     for (const t of type) {
@@ -333,7 +334,7 @@ export class M2c2KitHelpers {
       }
     }
 
-    throw new Error(`Error parsing "${value}" as one of ${type}.`);
+    throw new M2Error(`Error parsing "${value}" as one of ${type}.`);
   }
 
   /**
@@ -685,7 +686,7 @@ export class M2c2KitHelpers {
    */
   static isPointInsideRectangle(point: Point, rect: Point[]): boolean {
     if (rect.length !== 4) {
-      throw new Error("Invalid input: expected an array of four points");
+      throw new M2Error("Invalid input: expected an array of four points");
     }
     /**
      * The point is inside the rectangle if and only if it is on the same
@@ -758,7 +759,7 @@ export class M2c2KitHelpers {
    */
   static findCentroid(points: Point[]): Point {
     if (points.length !== 4) {
-      throw new Error("Invalid input: expected an array of four points");
+      throw new M2Error("Invalid input: expected an array of four points");
     }
 
     // Calculate the sum of the x and y coordinates of the points
@@ -901,7 +902,7 @@ function rotateRectangle(
   center: Point,
 ): Point[] {
   if (rect.length !== 4) {
-    throw new Error("Invalid input: expected an array of four points");
+    throw new M2Error("Invalid input: expected an array of four points");
   }
 
   const rotated: Point[] = [];

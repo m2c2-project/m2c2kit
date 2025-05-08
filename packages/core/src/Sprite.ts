@@ -8,6 +8,7 @@ import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Equal } from "./Equal";
 import { Point } from "./Point";
+import { M2Error } from "./M2Error";
 
 export class Sprite extends M2Node implements IDrawable, SpriteOptions {
   readonly type = M2NodeType.Sprite;
@@ -50,7 +51,7 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
   override initialize(): void {
     this.m2Image = this.game.imageManager.getImage(this._imageName);
     if (!this.m2Image) {
-      throw new Error(
+      throw new M2Error(
         `could not create sprite. the image named ${this._imageName} has not been loaded`,
       );
     }
@@ -128,7 +129,7 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
   }
   private get paint(): Paint {
     if (!this._paint) {
-      throw new Error(
+      throw new M2Error(
         `in paint getter: Sprite node ${this.toString()} paint is undefined.`,
       );
     }
@@ -205,7 +206,7 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
             this.game.imageManager.prepareDeferredImage(this.m2Image);
           }
           if (this.m2Image.status === M2ImageStatus.Error) {
-            throw new Error(
+            throw new M2Error(
               `error status on image ${this.m2Image.imageName} for Sprite node ${this.toString()}`,
             );
           }
@@ -221,12 +222,12 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     if (this.m2Image?.status === M2ImageStatus.Ready) {
       this.initialize();
       if (!this.m2Image) {
-        throw new Error(
+        throw new M2Error(
           `in Sprite.warmup(): Sprite node ${this.toString()}: image not loaded.`,
         );
       }
       if (!this.m2Image.canvaskitImage) {
-        throw new Error(
+        throw new M2Error(
           `in Sprite.warmup(): Sprite node ${this.toString()} image ${this.m2Image.imageName} is undefined.`,
         );
       }

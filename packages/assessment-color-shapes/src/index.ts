@@ -17,6 +17,7 @@ import {
   Sprite,
   Constants,
   Translation,
+  M2Error,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -527,7 +528,7 @@ phases.`,
           break;
         }
         default: {
-          throw new Error("invalid value for instruction_type");
+          throw new M2Error("invalid value for instruction_type");
         }
       }
     }
@@ -722,7 +723,7 @@ phases.`,
           "number_of_shapes_changing_color",
         );
         if (numberOfShapesToChange > numberOfShapesShown) {
-          throw new Error(
+          throw new M2Error(
             `number_of_shapes_changing_color is ${numberOfShapesToChange}, but it must be less than or equal to number_of_shapes_shown (which is ${numberOfShapesShown}).`,
           );
         }

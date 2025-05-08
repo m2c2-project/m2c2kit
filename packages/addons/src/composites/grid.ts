@@ -12,6 +12,7 @@ import {
   Equal,
   M2NodeConstructor,
   EventStoreMode,
+  M2Error,
 } from "@m2c2kit/core";
 
 export interface GridOptions extends CompositeOptions {
@@ -72,25 +73,25 @@ export class Grid extends Composite implements GridOptions {
     if (options.size) {
       this.size = options.size;
     } else {
-      throw new Error("grid size must be specified");
+      throw new M2Error("grid size must be specified");
     }
     if (options.rows) {
       if (options.rows >= 1) {
         this.rows = options.rows;
       } else {
-        throw new Error("grid rows must be at least 1");
+        throw new M2Error("grid rows must be at least 1");
       }
     } else {
-      throw new Error("grid rows must be specified");
+      throw new M2Error("grid rows must be specified");
     }
     if (options.columns) {
       if (options.columns >= 1) {
         this.columns = options.columns;
       } else {
-        throw new Error("grid columns must be at least 1");
+        throw new M2Error("grid columns must be at least 1");
       }
     } else {
-      throw new Error("grid columns must be specified");
+      throw new M2Error("grid columns must be specified");
     }
     if (options.backgroundColor) {
       this.gridBackgroundColor = options.backgroundColor;
@@ -205,7 +206,7 @@ export class Grid extends Composite implements GridOptions {
     if (this.gridChildren.length > 0) {
       this.gridChildren.forEach((gridChild) => {
         if (!this.cellWidth || !this.cellHeight || !this.gridBackground) {
-          throw new Error(
+          throw new M2Error(
             "cellWidth, cellHeight, or gridBackground undefined or null",
           );
         }
@@ -230,7 +231,7 @@ export class Grid extends Composite implements GridOptions {
               n.uuid === (gridChild as unknown as SerializedGridChild).node,
           );
           if (!childNode) {
-            throw new Error("grid: child node not found");
+            throw new M2Error("grid: child node not found");
           }
           childNode?.parent?.removeChild(childNode);
           this.cellContainers[gridChild.row][gridChild.column].addChild(
@@ -250,7 +251,7 @@ export class Grid extends Composite implements GridOptions {
 
   private get gridBackground(): Shape {
     if (!this._gridBackground) {
-      throw new Error("gridBackground is null or undefined");
+      throw new M2Error("gridBackground is null or undefined");
     }
     return this._gridBackground;
   }

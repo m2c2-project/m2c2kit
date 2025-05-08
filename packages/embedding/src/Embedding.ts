@@ -1,4 +1,4 @@
-import { M2EventType, ActivityEvent } from "@m2c2kit/core";
+import { M2EventType, ActivityEvent, M2Error } from "@m2c2kit/core";
 import { Session, SessionEvent, SessionEventType } from "@m2c2kit/session";
 import { EmbeddingOptions } from "./EmbeddingOptions";
 
@@ -105,7 +105,7 @@ export class Embedding {
         return;
       }
       default: {
-        throw new Error(`Unknown embedding host: ${options.host}`);
+        throw new M2Error(`Unknown embedding host: ${options.host}`);
       }
     }
   }
@@ -221,7 +221,7 @@ export class Embedding {
         break;
       }
       default:
-        throw new Error(
+        throw new M2Error(
           `attempt to send unknown event ${event.type} to Android`,
         );
     }

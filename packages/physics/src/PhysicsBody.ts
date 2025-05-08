@@ -1,4 +1,4 @@
-import { M2Node, Point, Shape, WebColors } from "@m2c2kit/core";
+import { M2Error, M2Node, Point, Shape, WebColors } from "@m2c2kit/core";
 import Matter from "matter-js";
 import { Physics } from "./Physics";
 import { Vector } from "./Vector";
@@ -34,7 +34,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
     } else if (this.options.edgeLoop) {
       this.body = this.createEdgeLoopBody(this.options);
     } else {
-      throw new Error(
+      throw new M2Error(
         "PhysicsBodyOptions are invalid; must specify either circleOfRadius, rect, or edgeLoop",
       );
     }
@@ -44,7 +44,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
     }
     if (this.options.edgeLoop) {
       if (this.options.isDynamic) {
-        throw new Error(
+        throw new M2Error(
           "PhysicsBodyOptions are invalid; edgeLoop bodies must be static",
         );
       }
@@ -133,7 +133,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   private createCircleBody(options: PhysicsBodyOptions) {
     if (!options.circleOfRadius) {
-      throw new Error(
+      throw new M2Error(
         "PhysicsBody.createCircleBody requires options.circleOfRadius",
       );
     }
@@ -161,7 +161,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   private createRectBody(options: PhysicsBodyOptions) {
     if (!options.rect) {
-      throw new Error("PhysicsBody.createRectBody requires options.rect");
+      throw new M2Error("PhysicsBody.createRectBody requires options.rect");
     }
 
     if (this.physics.options.showsPhysics) {
@@ -191,7 +191,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   private createEdgeLoopBody(options: PhysicsBodyOptions) {
     if (!options.edgeLoop) {
-      throw new Error(
+      throw new M2Error(
         "PhysicsBody.createEdgeLoopBody requires options.edgeLoop",
       );
     }
@@ -327,7 +327,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   get physics() {
     if (!this._physics) {
-      throw new Error("PhysicsBody.physics is undefined");
+      throw new M2Error("PhysicsBody.physics is undefined");
     }
     return this._physics;
   }
@@ -338,7 +338,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   get body() {
     if (!this._body) {
-      throw new Error("PhysicsBody.node is undefined");
+      throw new M2Error("PhysicsBody.node is undefined");
     }
     return this._body;
   }
@@ -354,7 +354,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   set velocity(velocity: Vector) {
     if (!this.isDynamic) {
-      throw new Error(
+      throw new M2Error(
         "PhysicsBody.velocity cannot be set when PhysicsBody.isDynamic is false",
       );
     }
@@ -366,7 +366,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   get node() {
     if (!this._node) {
-      throw new Error("PhysicsBody.node is undefined");
+      throw new M2Error("PhysicsBody.node is undefined");
     }
     return this._node;
   }
@@ -377,7 +377,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
 
   set isDynamic(isDynamic: boolean) {
     if (this.options.edgeLoop) {
-      throw new Error(
+      throw new M2Error(
         "PhysicsBody.isDynamic cannot be set after the PhysicsBody edgeLoop has been created.",
       );
     }
@@ -481,7 +481,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
   get categoryBitMask() {
     if (this.body.collisionFilter.category === undefined) {
       // default is 1, so this should never happen
-      throw new Error("PhysicsBody.categoryBitMask is undefined");
+      throw new M2Error("PhysicsBody.categoryBitMask is undefined");
     }
     return this.body.collisionFilter.category;
   }
@@ -493,7 +493,7 @@ export class PhysicsBody implements PhysicsBodyOptions {
   get collisionBitMask() {
     if (this.body.collisionFilter.mask === undefined) {
       // default is 0xFFFFFFFF, so this should never happen
-      throw new Error("PhysicsBody.collisionBitMask is undefined");
+      throw new M2Error("PhysicsBody.collisionBitMask is undefined");
     }
     return this.body.collisionFilter.mask;
   }

@@ -1,5 +1,5 @@
 import Dexie from "dexie";
-import { ActivityResultsEvent, IDataStore } from "@m2c2kit/core";
+import { ActivityResultsEvent, IDataStore, M2Error } from "@m2c2kit/core";
 import { IActivityResultsTable } from "./IActivityResultsTable";
 import { IKeyValueStoreTable } from "./IKeyValueStoreTable";
 
@@ -25,7 +25,7 @@ export class LocalDatabase extends Dexie implements IDataStore {
   saveActivityResults(ev: ActivityResultsEvent) {
     const document_uuid = ev.newData["document_uuid"];
     if (typeof document_uuid !== "string") {
-      throw new Error(
+      throw new M2Error(
         "ActivityResultsEvents.newData is missing the document_uuid property",
       );
     }

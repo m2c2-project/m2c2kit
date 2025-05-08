@@ -8,6 +8,7 @@ import { GameBaseUrls } from "./GameBaseUrls";
 import { M2NodeType } from "./M2NodeType";
 import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { BrowserImageDataReadyEvent, M2EventType } from "./M2Event";
+import { M2Error } from "./M2Error";
 
 /**
  * Fetches, loads, and provides images to the game.
@@ -167,7 +168,7 @@ export class ImageManager {
   private localizeImageUrl(url: string, locale: string) {
     const extensionIndex = url.lastIndexOf(".");
     if (extensionIndex === -1) {
-      throw new Error("URL does not have an extension");
+      throw new M2Error("URL does not have an extension");
     }
     const localizedUrl =
       url.slice(0, extensionIndex) + `.${locale}` + url.slice(extensionIndex);
@@ -199,7 +200,7 @@ export class ImageManager {
       browserImages.map((i) => i.imageName),
     );
     if (duplicateImageNames.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `image names must be unique. these image names are duplicated within a game ${this.game.id}: ` +
           duplicateImageNames.join(", "),
       );
@@ -234,7 +235,7 @@ export class ImageManager {
             if (error instanceof Error) {
               throw error;
             } else {
-              throw new Error(
+              throw new M2Error(
                 `prepareDeferredImage(): unable to render image named ${image.imageName}. image source was ${image.svgString ? "svgString" : `url: ${image.url}`}`,
               );
             }
@@ -264,7 +265,7 @@ export class ImageManager {
       resolve: (value: void | PromiseLike<void>) => void,
     ) => {
       if (!this.scratchCanvas || !this.ctx || !this.scale) {
-        throw new Error("image manager not set up");
+        throw new M2Error("image manager not set up");
       }
 
       this.scratchCanvas.width = image.width * this.scale;
@@ -294,14 +295,14 @@ export class ImageManager {
 
       this.scratchCanvas.toBlob((blob) => {
         if (!blob) {
-          throw new Error(
+          throw new M2Error(
             `renderM2Image(): blob is undefined for ${image.imageName}`,
           );
         }
         blob.arrayBuffer().then((buffer) => {
           const canvaskitImage = this.canvasKit.MakeImageFromEncoded(buffer);
           if (!canvaskitImage) {
-            throw new Error(
+            throw new M2Error(
               `could not create image with name "${image.imageName}."`,
             );
           }
@@ -346,12 +347,12 @@ export class ImageManager {
       };
 
       if (!image.svgString && !image.url) {
-        throw new Error(
+        throw new M2Error(
           `no svgString or url provided for image named ${image.imageName}`,
         );
       }
       if (image.svgString && image.url) {
-        throw new Error(
+        throw new M2Error(
           `provide svgString or url. both were provided for image named ${image.imageName}`,
         );
       }
@@ -481,7 +482,9 @@ export class ImageManager {
 
       const context2d = this._scratchCanvas.getContext("2d");
       if (context2d === null) {
-        throw new Error("could not get 2d canvas context from scratch canvas");
+        throw new M2Error(
+          "could not get 2d canvas context from scratch canvas",
+        );
       }
       this.ctx = context2d;
       this.scale = window.devicePixelRatio;

@@ -6,6 +6,7 @@ import { ConstraintType } from "./ConstraintType";
 import { Constraints } from "./Constraints";
 import { ImageManager } from "./ImageManager";
 import { I18n } from "./I18n";
+import { M2Error } from "./M2Error";
 
 /**
  * Event store mode.
@@ -195,7 +196,7 @@ export class EventStore {
     ) {
       const event = this.events.shift();
       if (!event) {
-        throw new Error("EventStore.dequeueEvents(): undefined event");
+        throw new M2Error("EventStore.dequeueEvents(): undefined event");
       }
       if (
         event.sequence !== undefined &&
@@ -221,7 +222,7 @@ export class EventStore {
   private sortEventStore(events: Array<M2Event<M2EventTarget>>) {
     events.sort((a, b) => {
       if (a.sequence === undefined || b.sequence === undefined) {
-        throw new Error("EventStore.sortEventStore(): undefined sequence");
+        throw new M2Error("EventStore.sortEventStore(): undefined sequence");
       }
       if (a.sequence !== b.sequence) {
         return a.sequence - b.sequence;

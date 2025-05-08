@@ -16,6 +16,7 @@ import {
   M2NodeEventListener,
   M2EventType,
   M2NodeEvent,
+  M2Error,
 } from "@m2c2kit/core";
 
 export interface CountdownTimerOptions extends CompositeOptions {
@@ -164,12 +165,12 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       });
       this.addChild(this.timerShapeNode);
     } else {
-      throw new Error("Invalid timer shape options.");
+      throw new M2Error("Invalid timer shape options.");
     }
 
     this.size = this.timerShapeNode.size;
     if (this.milliseconds % 1000 !== 0) {
-      throw new Error(
+      throw new M2Error(
         "CountdownTimer milliseconds must be a multiple of 1000.",
       );
     }
@@ -283,10 +284,10 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
    */
   start() {
     if (this.isRunning) {
-      throw new Error("CountdownTimer: cannot start. It is already running.");
+      throw new M2Error("CountdownTimer: cannot start. It is already running.");
     }
     if (this.hasStopped) {
-      throw new Error(
+      throw new M2Error(
         "CountdownTimer: It has stopped. You cannot start a stopped CountdownTimer. Instead, create a new CountdownTimer or call CountdownTimer.reset() before starting.",
       );
     }
@@ -340,7 +341,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
 
   override handleCompositeEvent(event: CountdownTimerEvent): void {
     if (!this.timerNumberLabel) {
-      throw new Error("Timer number label not found.");
+      throw new M2Error("Timer number label not found.");
     }
 
     switch (event.compositeEventType) {
@@ -355,7 +356,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
         break;
       }
       default:
-        throw new Error(
+        throw new M2Error(
           `Invalid TimerCountdown event type: ${event.compositeEventType}`,
         );
     }
@@ -534,7 +535,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
    * provided, name will be the new uuid
    */
   duplicate(newName?: string | undefined): CountdownTimer {
-    throw new Error(`Method not implemented. ${newName}`);
+    throw new M2Error(`Method not implemented. ${newName}`);
   }
 
   update(): void {

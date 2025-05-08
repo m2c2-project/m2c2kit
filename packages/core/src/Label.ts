@@ -22,6 +22,7 @@ import { FontManager } from "./FontManager";
 import { StringInterpolationMap } from "./StringInterpolationMap";
 import { Equal } from "./Equal";
 import { Point } from "./Point";
+import { M2Error } from "./M2Error";
 
 /** Style segment with styles */
 interface StyleSegment {
@@ -137,7 +138,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
         ckTextAlign = this.canvasKit.TextAlign.Right;
         break;
       default:
-        throw new Error("unknown horizontalAlignmentMode");
+        throw new M2Error("unknown horizontalAlignmentMode");
     }
 
     if (!this.text) {
@@ -189,7 +190,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     this.styleSegments = parsedText.styleSegments;
 
     if (this.fontName && this.fontNames) {
-      throw new Error("cannot specify both fontName and fontNames");
+      throw new M2Error("cannot specify both fontName and fontNames");
     }
     const fontManager = this.game.fontManager;
     const requiredFonts = this.getRequiredLabelFonts(fontManager);
@@ -299,7 +300,9 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       // match parent
       // TODO: implement match parent on more properties
       if (this.parent === undefined) {
-        throw new Error("width is set to match parent, but node has no parent");
+        throw new M2Error(
+          "width is set to match parent, but node has no parent",
+        );
       }
       const marginStart = this.layout.marginStart ?? 0;
       const marginEnd = this.layout.marginEnd ?? 0;
@@ -412,7 +415,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
       if (isClosing) {
         // Check for closing tag without matching opening tag
         if (tagStack.length === 0) {
-          throw new Error(
+          throw new M2Error(
             `Label has closing tag </${tagName}> at ${position} without matching opening tag. Text is: ${text}`,
           );
         }
@@ -420,7 +423,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
         // Check for improperly nested tags
         const lastOpenTag = tagStack.pop();
         if (lastOpenTag !== tagName) {
-          throw new Error(
+          throw new M2Error(
             `Label has improperly nested tags at ${position}. Expected </${lastOpenTag}> but found </${tagName}>. Tags must be properly nested. Text is: ${text}`,
           );
         }
@@ -451,7 +454,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
 
     // Check for unclosed tags
     if (tagStack.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `Label has unclosed format tags: <${tagStack.join(">, <")}>. All tags must be closed. Text is: ${text}`,
       );
     }
@@ -566,7 +569,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
           TAG_NAME.OVERLINE,
         ].filter((tag) => segment.styles.has(tag)).length;
         if (numberOfDecorations > 1) {
-          throw new Error(
+          throw new M2Error(
             `Label does not support multiple text decorations (underline, overline, or strikethrough) on a single text segment. Text is: ${this.textAfterLocalization}`,
           );
         }
@@ -653,7 +656,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     } else if (this.fontNames !== undefined && this.fontNames.length > 0) {
       requiredFonts = this.fontNames.map((font) => fontManager.fonts[font]);
     } else {
-      throw new Error("cannot determine required fonts");
+      throw new M2Error("cannot determine required fonts");
     }
     return requiredFonts;
   }
@@ -852,7 +855,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
 
   private get backgroundPaint(): Paint {
     if (!this._backgroundPaint) {
-      throw new Error("backgroundPaint cannot be undefined");
+      throw new M2Error("backgroundPaint cannot be undefined");
     }
     return this._backgroundPaint;
   }
@@ -862,7 +865,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
 
   private get fontPaint(): Paint {
     if (!this._fontPaint) {
-      throw new Error("fontPaint cannot be undefined");
+      throw new M2Error("fontPaint cannot be undefined");
     }
     return this._fontPaint;
   }
@@ -937,7 +940,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
         drawScale;
 
       if (this.paragraph === undefined) {
-        throw new Error("no paragraph");
+        throw new M2Error("no paragraph");
       }
 
       canvas.drawParagraph(this.paragraph, x, y);
@@ -975,7 +978,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     }
     this.initialize();
     if (!this.paragraph) {
-      throw new Error(
+      throw new M2Error(
         `warmup Label node ${this.toString()}: paragraph is undefined`,
       );
     }

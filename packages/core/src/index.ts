@@ -21,6 +21,7 @@ export * from "./Dimensions";
 export * from "./DrawableOptions";
 export * from "./Easings";
 export * from "./EventStore";
+export * from "./M2Error";
 export * from "./M2Node";
 export * from "./M2NodeConstructor";
 export * from "./M2NodeEvent";

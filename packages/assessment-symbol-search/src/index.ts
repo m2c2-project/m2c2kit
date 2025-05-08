@@ -19,6 +19,7 @@ import {
   ScoringProvider,
   ActivityKeyValueData,
   ScoringSchema,
+  M2Error,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -833,7 +834,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           break;
         }
         default: {
-          throw new Error(
+          throw new M2Error(
             `invalid value for instruction_type: ${game.getParameter(
               "instruction_type",
             )}`,
@@ -979,7 +980,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         break;
       }
       default: {
-        throw new Error(
+        throw new M2Error(
           `invalid value for lure_position_on_card: ${game.getParameter(
             "lure_position_on_card",
           )}`,
@@ -1055,7 +1056,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
 
         const lurePosition = lurePositions.shift();
         if (lurePosition === undefined) {
-          throw new Error("lurePositions is empty");
+          throw new M2Error("lurePositions is empty");
         }
         // top = position 0, bottom = position 1
         if (lurePosition === 0) {
@@ -1101,7 +1102,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           break;
         }
         default: {
-          throw new Error(
+          throw new M2Error(
             "valid values for number_of_top_pairs are 2, 3, or 4 cards",
           );
         }
@@ -1134,7 +1135,7 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
           gridLineColor: WebColors.Transparent,
         });
       } else {
-        throw new Error("invalid number_of_top_pairs");
+        throw new M2Error("invalid number_of_top_pairs");
       }
       chooseCardScene.addChild(topCardGrid);
 

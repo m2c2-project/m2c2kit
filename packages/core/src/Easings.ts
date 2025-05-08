@@ -1,3 +1,5 @@
+import { M2Error } from "./M2Error";
+
 export type EasingFunction = (
   /** elapsed time since start of action */
   t: number,
@@ -323,7 +325,7 @@ export class Easings {
         return "CircularInOut";
       }
       default: {
-        throw new Error("Easings.toTypeAsString(): Unknown easing function");
+        throw new M2Error("Easings.toTypeAsString(): Unknown easing function");
       }
     }
   }
@@ -400,7 +402,7 @@ export class Easings {
         return Easings.circularInOut;
       }
       default: {
-        throw new Error(
+        throw new M2Error(
           `Easings.fromTypeAsString(): Unknown easing function type ${easingType}`,
         );
       }

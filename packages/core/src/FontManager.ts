@@ -5,6 +5,7 @@ import { CanvasKitHelpers } from "./CanvasKitHelpers";
 import { M2Font, M2FontStatus } from "./M2Font";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { GameBaseUrls } from "./GameBaseUrls";
+import { M2Error } from "./M2Error";
 
 /**
  * Fetches, loads, and provides fonts to the game.
@@ -116,7 +117,7 @@ export class FontManager {
   private async fetchFontAsArrayBuffer(font: M2Font) {
     const response = await fetch(font.url);
     if (!response.ok) {
-      throw new Error(
+      throw new M2Error(
         `cannot fetch font ${font.fontName} at url ${font.url}: ${response.statusText}`,
       );
     }
@@ -129,7 +130,7 @@ export class FontManager {
     const typeface =
       this.canvasKit.Typeface.MakeFreeTypeFaceFromData(arrayBuffer);
     if (!typeface) {
-      throw new Error(
+      throw new M2Error(
         `cannot make typeface for font ${font.fontName} at url ${font.url}`,
       );
     }
@@ -168,7 +169,7 @@ export class FontManager {
   getDefaultFont(): M2Font {
     const defaultFont = Object.values(this.fonts).find((font) => font.default);
     if (!defaultFont) {
-      throw new Error(
+      throw new M2Error(
         `no default font found; please make sure at least one font is loaded`,
       );
     }
@@ -202,7 +203,7 @@ export class FontManager {
   getTypeface(fontName: string): Typeface {
     const typeface = this.fonts[fontName]?.typeface;
     if (!typeface) {
-      throw new Error(`font ${fontName} not found`);
+      throw new M2Error(`font ${fontName} not found`);
     }
     return typeface;
   }

@@ -14,6 +14,7 @@ import { Equal } from "./Equal";
 import { Point } from "./Point";
 import { M2KeyboardEvent } from "./M2KeyboardEvent";
 import { M2EventType } from "./M2Event";
+import { M2Error } from "./M2Error";
 
 export class Scene extends M2Node implements IDrawable, SceneOptions {
   readonly type = M2NodeType.Scene;
@@ -83,7 +84,7 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
    */
   get game(): Game {
     if (this._game === undefined) {
-      throw new Error(`Scene ${this} has not been added to a game.`);
+      throw new M2Error(`Scene ${this} has not been added to a game.`);
     }
     return this._game;
   }
@@ -263,7 +264,7 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     M2c2KitHelpers.rotateCanvasForDrawableNode(canvas, this);
 
     if (!this.backgroundPaint) {
-      throw new Error(`in Scene ${this}, background paint is undefined.`);
+      throw new M2Error(`in Scene ${this}, background paint is undefined.`);
     }
 
     if (this.absoluteAlphaChange !== 0) {
@@ -293,7 +294,7 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     if (!this.backgroundPaint) {
-      throw new Error(`in Scene ${this}, background paint is undefined.`);
+      throw new M2Error(`in Scene ${this}, background paint is undefined.`);
     }
     canvas.drawRect(
       [

@@ -20,6 +20,7 @@ import {
   ScoringProvider,
   ActivityKeyValueData,
   ScoringSchema,
+  M2Error,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -585,7 +586,7 @@ phase, participants report the location of dots on a grid.",
       instructionsScenes = Instructions.create(customInstructions);
     } else {
       if (!this.i18n) {
-        throw new Error("No i18n object found.");
+        throw new M2Error("No i18n object found.");
       }
       instructionsScenes = Instructions.create({
         instructionScenes: [

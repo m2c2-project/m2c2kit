@@ -3,6 +3,7 @@ import { DataValue } from "./DataValue";
 import { SummarizeOperation } from "./SummarizeOperation";
 import { SummarizeFunction } from "./SummarizeFunction";
 import { SummarizeOptions } from "./SummarizeOptions";
+import { M2Error } from "./M2Error";
 
 /**
  * Default options for summarize operations
@@ -69,7 +70,7 @@ function processNumericValues<T>(
     }
 
     // For non-numeric, non-missing values that can't be coerced
-    throw new Error(
+    throw new M2Error(
       `${errorPrefix}: variable ${variable} has non-numeric value ${o[variable]} in this observation: ${JSON.stringify(o)}`,
     );
   });
@@ -107,7 +108,7 @@ function processDirectValues<T>(
     ) {
       containsMissing = true;
     } else {
-      throw new Error(`${errorPrefix}: has non-numeric value ${value}`);
+      throw new M2Error(`${errorPrefix}: has non-numeric value ${value}`);
     }
   }
 
@@ -136,7 +137,7 @@ function processSingleValue(
   ) {
     return { value: 0, isMissing: true };
   } else {
-    throw new Error(`${errorPrefix}: has non-numeric value ${value}`);
+    throw new M2Error(`${errorPrefix}: has non-numeric value ${value}`);
   }
 }
 
@@ -426,7 +427,7 @@ const varianceInternal: SummarizeFunction = (
       ) {
         containsMissing = true;
       } else {
-        throw new Error(`variance(): has non-numeric value ${value}`);
+        throw new M2Error(`variance(): has non-numeric value ${value}`);
       }
     }
 
@@ -718,7 +719,7 @@ const medianInternal: SummarizeFunction = (
       } else if (dataCalc.isMissingNumeric(o[variable])) {
         containsMissing = true;
       } else {
-        throw new Error(
+        throw new M2Error(
           `median(): variable ${variable} has non-numeric value ${o[variable]} in this observation: ${JSON.stringify(o)}`,
         );
       }
@@ -757,7 +758,7 @@ const medianInternal: SummarizeFunction = (
       ) {
         containsMissing = true;
       } else {
-        throw new Error(`median(): has non-numeric value ${value}`);
+        throw new M2Error(`median(): has non-numeric value ${value}`);
       }
     }
 

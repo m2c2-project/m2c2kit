@@ -1,3 +1,4 @@
+import { M2Error } from "./M2Error";
 import { M2Node } from "./M2Node";
 import { M2NodeType } from "./M2NodeType";
 import { SoundRecorderOptions } from "./SoundRecorderOptions";
@@ -74,7 +75,7 @@ export class SoundRecorder
    */
   async start() {
     if (this.isRecording) {
-      throw new Error(
+      throw new M2Error(
         "cannot start SoundRecorder because it is already started.",
       );
     }
@@ -85,7 +86,7 @@ export class SoundRecorder
 
     const supportedMimeTypes = this.getMediaRecorderSupportedAudioMimeTypes();
     if (supportedMimeTypes.length === 0) {
-      throw new Error(
+      throw new M2Error(
         "SoundRecorder found no supported MIME types for MediaRecorder.",
       );
     }
@@ -101,10 +102,10 @@ export class SoundRecorder
         audio: this.audioTrackConstraints ? this.audioTrackConstraints : true,
       });
     } catch (error) {
-      throw new Error(`Error getting user media: ${error}.`);
+      throw new M2Error(`Error getting user media: ${error}.`);
     }
     if (!stream) {
-      throw new Error("no stream.");
+      throw new M2Error("no stream.");
     }
 
     const audioTracks = stream.getAudioTracks();
@@ -121,7 +122,7 @@ export class SoundRecorder
        * MediaRecorderErrorEvent is now deprecated, but may still be used. Or
        * the error event may be an ErrorEvent. Try to show both messages.
        */
-      throw new Error(
+      throw new M2Error(
         `MediaRecorder error: ${event?.error?.message} ${event?.message}`,
       );
     };
@@ -145,15 +146,17 @@ export class SoundRecorder
    */
   async stop(): Promise<SoundRecorderResults> {
     if (!this.isRecording) {
-      throw new Error("cannot stop SoundRecorder because it has not started.");
+      throw new M2Error(
+        "cannot stop SoundRecorder because it has not started.",
+      );
     }
     return new Promise<SoundRecorderResults>((resolve) => {
       if (!this.mediaRecorder) {
-        throw new Error("no media recorder");
+        throw new M2Error("no media recorder");
       }
       this.mediaRecorder.onstop = async () => {
         if (!this.mimeType) {
-          throw new Error("no mimeType");
+          throw new M2Error("no mimeType");
         }
         this._isRecording = false;
         this._isPaused = false;
@@ -181,10 +184,12 @@ export class SoundRecorder
 
   pause() {
     if (!this.isRecording) {
-      throw new Error("cannot pause SoundRecorder because it is not started.");
+      throw new M2Error(
+        "cannot pause SoundRecorder because it is not started.",
+      );
     }
     if (this.isPaused) {
-      throw new Error(
+      throw new M2Error(
         "cannot pause SoundRecorder because it is already paused.",
       );
     }
@@ -195,10 +200,14 @@ export class SoundRecorder
 
   resume() {
     if (!this.isRecording) {
-      throw new Error("cannot resume SoundRecorder because it is not started.");
+      throw new M2Error(
+        "cannot resume SoundRecorder because it is not started.",
+      );
     }
     if (!this.isPaused) {
-      throw new Error("cannot resume SoundRecorder because it is not paused.");
+      throw new M2Error(
+        "cannot resume SoundRecorder because it is not paused.",
+      );
     }
     this.mediaRecorder?.resume();
     this._isPaused = false;
@@ -379,7 +388,7 @@ export class SoundRecorder
          */
         const base64WithoutPrefix = reader.result?.toString().split(",").pop();
         if (base64WithoutPrefix === undefined) {
-          throw new Error("base64WithoutPrefix is undefined.");
+          throw new M2Error("base64WithoutPrefix is undefined.");
         }
         resolve(base64WithoutPrefix);
       };
@@ -418,6 +427,6 @@ export class SoundRecorder
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): SoundRecorder {
-    throw new Error(`Method not implemented. ${newName}`);
+    throw new M2Error(`Method not implemented. ${newName}`);
   }
 }

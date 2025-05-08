@@ -13,6 +13,7 @@ import {
   M2EventType,
   CallbackOptions,
   Timer,
+  M2Error,
 } from "@m2c2kit/core";
 import { Button } from "./button";
 
@@ -288,7 +289,7 @@ export class Dialog extends Composite {
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): Dialog {
-    throw new Error(`duplicate not implemented. ${newName}`);
+    throw new M2Error(`duplicate not implemented. ${newName}`);
     // const dest = new Dialog({
     //   ...this.getNodeOptions(),
     //   ...this.getDrawableOptions(),

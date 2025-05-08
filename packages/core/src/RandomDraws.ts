@@ -1,3 +1,5 @@
+import { M2Error } from "./M2Error";
+
 export class RandomDraws {
   /**
    * Draws a single random integer from a uniform distribution of integers in
@@ -32,7 +34,7 @@ export class RandomDraws {
     maximumInclusive: number,
   ): Array<number> {
     if (n > maximumInclusive - minimumInclusive + 1) {
-      throw new Error(
+      throw new M2Error(
         `number of requested draws (n = ${n}) is greater than number of integers in range [ ${minimumInclusive}, ${maximumInclusive}]`,
       );
     }

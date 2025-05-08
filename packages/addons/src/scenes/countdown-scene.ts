@@ -9,6 +9,7 @@ import {
   SceneOptions,
   RgbaColor,
   WebColors,
+  M2Error,
 } from "@m2c2kit/core";
 import { TimerShape } from "../composites/countdown-timer";
 
@@ -61,7 +62,7 @@ export class CountdownScene extends Scene {
       options?.transitionDurationMilliseconds !== undefined &&
       options?.transition
     ) {
-      throw new Error(
+      throw new M2Error(
         "Both transition and transitionDurationMilliseconds options were provided. Only one should be provided. If using a custom transition, then the duration of that transition must be specified within the custom transition.",
       );
     }
@@ -107,7 +108,7 @@ export class CountdownScene extends Scene {
       });
       this.addChild(timerShape);
     } else {
-      throw new Error("Invalid timer shape options.");
+      throw new M2Error("Invalid timer shape options.");
     }
 
     const timerInitialNumber = Math.floor(options.milliseconds / 1000);

@@ -14,6 +14,7 @@ import { I18n } from "./I18n";
 import { StringInterpolationMap } from "./StringInterpolationMap";
 import { Equal } from "./Equal";
 import { Point } from "./Point";
+import { M2Error } from "./M2Error";
 
 export class TextLine
   extends M2Node
@@ -127,7 +128,7 @@ export class TextLine
           this.localizedFontNames.length !== 0) ||
         this.localizedFontNames.length > 1
       ) {
-        throw new Error(
+        throw new M2Error(
           `TextLine supports only one font, but multiple fonts are specified in translation.`,
         );
       }
@@ -371,7 +372,7 @@ export class TextLine
         drawScale;
 
       if (this.paint === undefined || this.font === undefined) {
-        throw new Error(
+        throw new M2Error(
           `in TextLine node ${this}, Paint or Font is undefined.`,
         );
       }
@@ -406,7 +407,7 @@ export class TextLine
     }
     this.initialize();
     if (this.paint === undefined || this.font === undefined) {
-      throw new Error(
+      throw new M2Error(
         `warmup TextLine node ${this.toString()}: Paint or Font is undefined.`,
       );
     }

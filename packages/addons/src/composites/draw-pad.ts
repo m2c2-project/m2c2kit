@@ -15,6 +15,7 @@ import {
   IDrawable,
   M2c2KitHelpers,
   M2NodeConstructor,
+  M2Error,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -146,7 +147,7 @@ export class DrawPad extends Composite {
       this.isUserInteractionEnabled = true;
     }
     if (!options.size) {
-      throw new Error("DrawPad size must be specified");
+      throw new M2Error("DrawPad size must be specified");
     }
     this.size = options.size;
 
@@ -245,7 +246,7 @@ export class DrawPad extends Composite {
   private handleTapDown(e: TapEvent) {
     if (this.isUserInteractionEnabled) {
       if (!this.drawShape?.path) {
-        throw new Error("DrawPad.handleTapDown(): no drawShape.path");
+        throw new M2Error("DrawPad.handleTapDown(): no drawShape.path");
       }
       const path = this.drawShape.path as MutablePath;
 
@@ -301,7 +302,9 @@ export class DrawPad extends Composite {
     );
 
     if (!this.drawShape?.path) {
-      throw new Error("DrawPad.addInterpolatedStrokeMove(): no drawShape.path");
+      throw new M2Error(
+        "DrawPad.addInterpolatedStrokeMove(): no drawShape.path",
+      );
     }
     const path = this.drawShape.path as MutablePath;
     path.addLine(interpolatedPoint);
@@ -402,7 +405,7 @@ export class DrawPad extends Composite {
   private handlePointerMove(e: M2PointerEvent) {
     if (this.isUserInteractionEnabled && this.isDrawingPointerDown) {
       if (!this.drawShape?.path) {
-        throw new Error("DrawPad.handlePointerMove(): no drawShape.path");
+        throw new M2Error("DrawPad.handlePointerMove(): no drawShape.path");
       }
       const path = this.drawShape.path as MutablePath;
       if (
@@ -466,7 +469,7 @@ export class DrawPad extends Composite {
    */
   clear(): void {
     if (!this.drawShape?.path) {
-      throw new Error("DrawPad.clear(): no drawShape.path");
+      throw new M2Error("DrawPad.clear(): no drawShape.path");
     }
     const path = this.drawShape.path as MutablePath;
     path.clear();
@@ -681,7 +684,7 @@ export class DrawPad extends Composite {
   takeScreenshot() {
     const drawArea = this.drawArea;
     if (!drawArea) {
-      throw new Error("DrawPad.takeScreenshot(): no drawArea");
+      throw new M2Error("DrawPad.takeScreenshot(): no drawArea");
     }
     const sx =
       (drawArea.absolutePosition.x - drawArea.size.width / 2) *
@@ -706,11 +709,11 @@ export class DrawPad extends Composite {
       pixelData.length / sh,
     );
     if (!croppedImage) {
-      throw new Error("DrawPad.takeScreenshot(): no croppedImage");
+      throw new M2Error("DrawPad.takeScreenshot(): no croppedImage");
     }
     const bytes = croppedImage.encodeToBytes();
     if (!bytes) {
-      throw new Error(
+      throw new M2Error(
         "DrawPad.takeScreenshot(): croppedImage.encodeToBytes() failed",
       );
     }
@@ -883,7 +886,9 @@ export class DrawPad extends Composite {
   }
 
   override duplicate(newName?: string): DrawPad {
-    throw new Error(`DrawPad.duplicate(): Method not implemented. ${newName}`);
+    throw new M2Error(
+      `DrawPad.duplicate(): Method not implemented. ${newName}`,
+    );
   }
 }
 

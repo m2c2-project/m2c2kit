@@ -1,3 +1,5 @@
+import { M2Error } from "./M2Error";
+
 /**
  * A class for for working with numeric values that may be currently unknown,
  * but may be known in the future.
@@ -61,7 +63,7 @@ export class Futurable {
    */
   private pushToExpression(value: number | Futurable | Operator) {
     if (value === this) {
-      throw new Error(
+      throw new M2Error(
         "Cannot add, subtract, or assign a Futurable with itself.",
       );
     }

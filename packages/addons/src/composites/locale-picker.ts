@@ -16,6 +16,7 @@ import {
   IDrawable,
   Timer,
   CompositeEvent,
+  M2Error,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -235,7 +236,7 @@ export class LocalePicker extends Composite {
     }
 
     if (this.localeOptions.length === 0) {
-      throw new Error("No locales available for LocalePicker");
+      throw new M2Error("No locales available for LocalePicker");
     }
 
     /**
@@ -734,6 +735,6 @@ export class LocalePicker extends Composite {
    * provided, name will be the new uuid
    */
   override duplicate(newName?: string): LocalePicker {
-    throw new Error(`duplicate not implemented. ${newName}`);
+    throw new M2Error(`duplicate not implemented. ${newName}`);
   }
 }

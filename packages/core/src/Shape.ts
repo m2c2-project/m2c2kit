@@ -15,6 +15,7 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { Equal } from "./Equal";
 import { Size } from "./Size";
 import { Point } from "./Point";
+import { M2Error } from "./M2Error";
 
 export class Shape extends M2Node implements IDrawable, ShapeOptions {
   readonly type = M2NodeType.Shape;
@@ -74,7 +75,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
       if (this.shapeIsSvgStringPath()) {
         if (options.size !== undefined) {
-          throw new Error(
+          throw new M2Error(
             "Size cannot be specified when path is SVG string path",
           );
         }
@@ -87,7 +88,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         this.svgPathRequestedHeight !== undefined &&
         this.svgPathRequestedWidth !== undefined
       ) {
-        throw new Error(
+        throw new M2Error(
           "Cannot specify both width and height for SVG string path.",
         );
       }
@@ -99,7 +100,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         this.lineWidth = Constants.DEFAULT_PATH_LINE_WIDTH;
       }
       if (options.circleOfRadius || options.rect) {
-        throw new Error(
+        throw new M2Error(
           "Shape must specify only one of: path, circleOfRadius, or rect",
         );
       }
@@ -109,10 +110,10 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
       this.circleOfRadius = options.circleOfRadius;
       this.shapeType = ShapeType.Circle;
       if (options.size !== undefined) {
-        throw new Error("Size cannot be specified for circle shape");
+        throw new M2Error("Size cannot be specified for circle shape");
       }
       if (options.path || options.rect) {
-        throw new Error(
+        throw new M2Error(
           "Shape must specify only one of: path, circleOfRadius, or rect",
         );
       }
@@ -141,7 +142,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
       }
       this.shapeType = ShapeType.Rectangle;
       if (options.size !== undefined) {
-        throw new Error("Size cannot be specified for rectangle shape");
+        throw new M2Error("Size cannot be specified for rectangle shape");
       }
     }
 
@@ -202,7 +203,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
           (this.path as SvgStringPath).pathString ??
           (this.path as SvgStringPath).svgPathString;
         if (!pathString) {
-          throw new Error("SVG Path string is null/undefined");
+          throw new M2Error("SVG Path string is null/undefined");
         }
         if ((this.path as SvgStringPath).svgPathString !== undefined) {
           console.warn(
@@ -212,7 +213,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
         this.ckPath = this.canvasKit.Path.MakeFromSVGString(pathString);
         if (!this.ckPath) {
-          throw new Error("could not make CanvasKit Path from SVG string");
+          throw new M2Error("could not make CanvasKit Path from SVG string");
         }
 
         const bounds = this.ckPath.getBounds();
@@ -244,7 +245,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         this.size.width === undefined ||
         this.size.height === undefined
       ) {
-        throw new Error(
+        throw new M2Error(
           "Size of shape must have non-zero height and width when path is M2Path",
         );
       }
@@ -481,7 +482,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
             }
           }
           if (paint === undefined) {
-            throw new Error("paint is undefined");
+            throw new M2Error("paint is undefined");
           }
 
           canvas.drawLine(
@@ -912,7 +913,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
   public get fillColorPaintAntialiased(): Paint {
     if (!this._fillColorPaintAntialiased) {
-      throw new Error("fillColorPaintAntiAliased is undefined");
+      throw new M2Error("fillColorPaintAntiAliased is undefined");
     }
     return this._fillColorPaintAntialiased;
   }
@@ -922,7 +923,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
   public get strokeColorPaintAntialiased(): Paint {
     if (!this._strokeColorPaintAntialiased) {
-      throw new Error("strokeColorPaintAntiAliased is undefined");
+      throw new M2Error("strokeColorPaintAntiAliased is undefined");
     }
     return this._strokeColorPaintAntialiased;
   }
@@ -932,7 +933,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
   public get fillColorPaintNotAntialiased(): Paint {
     if (!this._fillColorPaintNotAntialiased) {
-      throw new Error("fillColorPaintNotAntiAliased is undefined");
+      throw new M2Error("fillColorPaintNotAntiAliased is undefined");
     }
     return this._fillColorPaintNotAntialiased;
   }
@@ -942,7 +943,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
   public get strokeColorPaintNotAntialiased(): Paint {
     if (!this._strokeColorPaintNotAntialiased) {
-      throw new Error("strokeColorPaintNotAntiAliased is undefined");
+      throw new M2Error("strokeColorPaintNotAntiAliased is undefined");
     }
     return this._strokeColorPaintNotAntialiased;
   }

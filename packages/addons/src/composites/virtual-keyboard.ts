@@ -19,6 +19,7 @@ import {
   CompositeEvent,
   EventStoreMode,
   TapEvent,
+  M2Error,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -509,7 +510,7 @@ export class VirtualKeyboard extends Composite {
   }
 
   duplicate(newName?: string | undefined): M2Node {
-    throw new Error(`Method not implemented. ${newName}`);
+    throw new M2Error(`Method not implemented. ${newName}`);
   }
 
   private handleKeyShapeTapDown(
@@ -702,7 +703,7 @@ export class VirtualKeyboard extends Composite {
     );
     const keyShape = this.keyShapes.find((k) => k.userData.code === event.code);
     if (!keyShape) {
-      throw new Error("keyShape is not defined");
+      throw new M2Error("keyShape is not defined");
     }
 
     this.shiftActivated = event.shiftKey;
@@ -721,7 +722,7 @@ export class VirtualKeyboard extends Composite {
         break;
       }
       default: {
-        throw new Error(
+        throw new M2Error(
           `Unknown VirtualKeyboardEvent: ${event.compositeEventType}`,
         );
       }
@@ -745,13 +746,13 @@ export class VirtualKeyboard extends Composite {
       keyShape.fillColor = this.keyDownColor;
       if (this.showKeyDownPreview) {
         if (!this.letterCircle || !this.letterCircleLabel) {
-          throw new Error("letterCircle is not defined");
+          throw new M2Error("letterCircle is not defined");
         }
         this.letterCircle.hidden = false;
         const keyBox = keyShape.parent as Shape;
         this.letterCircle.position.x = keyBox.position.x;
         if (keyShape.rect?.size?.height === undefined) {
-          throw new Error("keyShape.rect.height is undefined");
+          throw new M2Error("keyShape.rect.height is undefined");
         }
         this.letterCircle.position.y =
           keyBox.position.y - keyShape.rect.size.height * 1.2;
@@ -761,7 +762,7 @@ export class VirtualKeyboard extends Composite {
           );
         const key = keyboard.flat().find((k) => k.code === event.code);
         if (!key) {
-          throw new Error("key is not defined");
+          throw new M2Error("key is not defined");
         }
         if (this.shiftActivated) {
           this.letterCircleLabel.text = key.labelTextShifted ?? key.code;
@@ -798,7 +799,7 @@ export class VirtualKeyboard extends Composite {
 
     keyShape.fillColor = this.keyColor;
     if (!this.letterCircle) {
-      throw new Error("letterCircle is not defined");
+      throw new M2Error("letterCircle is not defined");
     }
     this.letterCircle.hidden = true;
 
@@ -831,7 +832,7 @@ export class VirtualKeyboard extends Composite {
     }
     keyShape.fillColor = this.keyColor;
     if (!this.letterCircle) {
-      throw new Error("letterCircle is not defined");
+      throw new M2Error("letterCircle is not defined");
     }
     this.letterCircle.hidden = true;
   }
@@ -859,7 +860,7 @@ export class VirtualKeyboard extends Composite {
       .forEach((k) => {
         const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
         if (!keyLabel) {
-          throw new Error("keyLabel is not defined");
+          throw new M2Error("keyLabel is not defined");
         }
         if (keyLabel.text !== undefined) {
           keyLabel.text = k.labelTextShifted ?? "";
@@ -890,7 +891,7 @@ export class VirtualKeyboard extends Composite {
       .forEach((k) => {
         const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
         if (!keyLabel) {
-          throw new Error("keyLabel is not defined");
+          throw new M2Error("keyLabel is not defined");
         }
         if (keyLabel.text !== undefined) {
           keyLabel.text = k.labelText ?? "";

@@ -13,6 +13,7 @@ import {
   M2NodeEvent,
   M2EventType,
   M2c2KitHelpers,
+  M2Error,
 } from "@m2c2kit/core";
 import { Canvas } from "canvaskit-wasm";
 
@@ -56,7 +57,7 @@ export class Slider extends Composite implements SliderOptions {
 
   private get thumbShape() {
     if (this._thumbShape === undefined) {
-      throw new Error("thumbShape is not defined.");
+      throw new M2Error("thumbShape is not defined.");
     }
     return this._thumbShape;
   }
@@ -380,7 +381,7 @@ export class Slider extends Composite implements SliderOptions {
    * provided, name will be the new uuid
    */
   duplicate(newName?: string | undefined): Slider {
-    throw new Error(`Method not implemented. ${newName}`);
+    throw new M2Error(`Method not implemented. ${newName}`);
   }
 
   update(): void {

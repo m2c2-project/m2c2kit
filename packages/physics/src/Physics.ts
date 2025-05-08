@@ -7,6 +7,7 @@ import {
   CallbackOptions,
   Plugin,
   M2c2KitHelpers,
+  M2Error,
 } from "@m2c2kit/core";
 import { Vector } from "./Vector";
 import { PhysicsOptions } from "./PhysicsOptions";
@@ -126,7 +127,7 @@ export class Physics implements Plugin {
       while (this.applyForceQueue.length > 0) {
         const item = this.applyForceQueue.shift();
         if (item === undefined) {
-          throw new Error("apply force queue item is undefined");
+          throw new M2Error("apply force queue item is undefined");
         }
         Matter.Body.applyForce(
           item.body,
@@ -268,19 +269,19 @@ export class Physics implements Plugin {
       (e) => e.uuid === event.pairs[0].bodyA.label,
     ) as M2NodeExtended | undefined;
     if (!nodeA) {
-      throw new Error("bodyA node not found");
+      throw new M2Error("bodyA node not found");
     }
     if (!nodeA.physicsBody) {
-      throw new Error("bodyA node does not have a physicsBody");
+      throw new M2Error("bodyA node does not have a physicsBody");
     }
     const nodeB = this.game.nodes.find(
       (e) => e.uuid === event.pairs[0].bodyB.label,
     ) as M2NodeExtended | undefined;
     if (!nodeB) {
-      throw new Error("bodyB node not found");
+      throw new M2Error("bodyB node not found");
     }
     if (!nodeB.physicsBody) {
-      throw new Error("bodyB node does not have a physicsBody");
+      throw new M2Error("bodyB node does not have a physicsBody");
     }
     return { bodyA: nodeA.physicsBody, bodyB: nodeB.physicsBody };
   }
@@ -447,7 +448,7 @@ export class Physics implements Plugin {
 
   get game(): Game {
     if (!this._game) {
-      throw new Error("Physics(): game not set");
+      throw new M2Error("Physics(): game not set");
     }
     return this._game;
   }

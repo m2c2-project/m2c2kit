@@ -34,6 +34,7 @@ import { Composite } from "./Composite";
 import { Timer } from "./Timer";
 import { Equal } from "./Equal";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
+import { M2Error } from "./M2Error";
 
 function handleDrawableOptions(
   drawable: IDrawable,
@@ -192,11 +193,11 @@ export abstract class M2Node implements M2NodeOptions {
 
   // we will override this in each derived class. This method will never be called.
   initialize(): void {
-    throw new Error("initialize() called in abstract base class Node.");
+    throw new M2Error("initialize() called in abstract base class Node.");
   }
 
   protected get completeNodeOptions(): M2NodeOptions {
-    throw new Error(
+    throw new M2Error(
       "get completeNodeOptions() called in abstract base class Node.",
     );
   }
@@ -277,7 +278,7 @@ export abstract class M2Node implements M2NodeOptions {
   get game(): Game {
     const findParentScene = (node: M2Node): Scene => {
       if (!node.parent) {
-        throw new Error(`Node ${this} has not been added to a scene.`);
+        throw new M2Error(`Node ${this} has not been added to a scene.`);
       } else if (node.parent.type === M2NodeType.Scene) {
         return node.parent as Scene;
       } else {
@@ -347,14 +348,14 @@ export abstract class M2Node implements M2NodeOptions {
     const suppressEvents = this.suppressEvents || child.suppressEvents;
     // Do not allow a child to be added to itself
     if (child === this) {
-      throw new Error(
+      throw new M2Error(
         `Cannot add node ${child.toString()} as a child to itself.`,
       );
     }
 
     // Do not allow a scene to be child of another node.
     if (child.type == M2NodeType.Scene) {
-      throw new Error(
+      throw new M2Error(
         `Cannot add scene ${child.toString()} as a child to node ${this.toString()}. A scene cannot be the child of a node. A scene can only be added to a game object.`,
       );
     }
@@ -368,7 +369,7 @@ export abstract class M2Node implements M2NodeOptions {
         .map((c) => c.name)
         .includes(child.name)
     ) {
-      throw new Error(
+      throw new M2Error(
         `Cannot add child node ${child.toString()} to parent node ${this.toString()}. A child with name "${
           child.name
         }" already exists on this parent.`,
@@ -413,12 +414,12 @@ export abstract class M2Node implements M2NodeOptions {
     const firstOtherParent = otherParents.find(Boolean);
 
     if (firstOtherParent === this) {
-      throw new Error(
+      throw new M2Error(
         `Cannot add child node ${child.toString()} to parent node ${this.toString()}. This child already exists on this parent. The child cannot be added again.`,
       );
     }
 
-    throw new Error(
+    throw new M2Error(
       `Cannot add child node ${child.toString()} to parent node ${this.toString()}. This child already exists on other parent node: ${firstOtherParent?.toString()}}. Remove the child from the other parent first.`,
     );
   }
@@ -461,7 +462,7 @@ export abstract class M2Node implements M2NodeOptions {
       child.parent = undefined;
       this.children = this.children.filter((c) => c !== child);
     } else {
-      throw new Error(
+      throw new M2Error(
         `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
       );
     }
@@ -487,7 +488,7 @@ export abstract class M2Node implements M2NodeOptions {
   removeChildren(children: Array<M2Node>): void {
     children.forEach((child) => {
       if (!this.children.includes(child)) {
-        throw new Error(
+        throw new M2Error(
           `cannot remove node ${child} from parent ${this} because the node is not currently a child of the parent`,
         );
       }
@@ -509,7 +510,7 @@ export abstract class M2Node implements M2NodeOptions {
       .filter((child) => child.name === name)
       .find(Boolean);
     if (descendant === undefined) {
-      throw new Error(
+      throw new M2Error(
         `descendant with name ${name} not found on parent ${this.toString()}`,
       );
     }
@@ -817,7 +818,7 @@ export abstract class M2Node implements M2NodeOptions {
         }
 
         if (node === undefined) {
-          throw new Error(
+          throw new M2Error(
             "could not find sibling node for constraint" +
               additionalExceptionMessage,
           );
@@ -1096,7 +1097,7 @@ export abstract class M2Node implements M2NodeOptions {
           }
 
           if (siblingConstraint === undefined) {
-            throw new Error(
+            throw new M2Error(
               "error getting uuid of sibling constraint" +
                 additionalExceptionMessage,
             );
@@ -1134,7 +1135,7 @@ export abstract class M2Node implements M2NodeOptions {
           .filter((c) => c.uuid === uuid)
           .find(Boolean);
         if (child === undefined) {
-          throw new Error("error in dag topological sort");
+          throw new M2Error("error in dag topological sort");
         }
         childrenInUpdateOrder.push(child);
       });
@@ -1230,7 +1231,7 @@ export abstract class M2Node implements M2NodeOptions {
 
   protected getDrawableOptions(): DrawableOptions {
     if (!this.isDrawable) {
-      throw new Error(
+      throw new M2Error(
         "getDrawableOptions() called object that is not IDrawable",
       );
     }
@@ -1243,7 +1244,7 @@ export abstract class M2Node implements M2NodeOptions {
 
   protected getTextOptions(): TextOptions {
     if (!this.isText) {
-      throw new Error("getTextOptions() called object that is not IText");
+      throw new M2Error("getTextOptions() called object that is not IText");
     }
 
     const textOptions = {
@@ -1262,7 +1263,7 @@ export abstract class M2Node implements M2NodeOptions {
    */
   // get parentScene(): Scene {
   //   if (this.type === M2NodeType.scene) {
-  //     throw new Error(
+  //     throw new M2Error(
   //       `Node ${this} is a scene and cannot have a parent scene`
   //     );
   //   }
@@ -1271,7 +1272,7 @@ export abstract class M2Node implements M2NodeOptions {
   //   } else if (this.parent) {
   //     return this.parent.parentScene;
   //   }
-  //   throw new Error(`Node ${this} has not been added to a scene`);
+  //   throw new M2Error(`Node ${this} has not been added to a scene`);
   // }
 
   get canvasKit(): CanvasKit {
@@ -1280,14 +1281,16 @@ export abstract class M2Node implements M2NodeOptions {
 
   get parentSceneAsNode(): M2Node {
     if (this.type === M2NodeType.Scene) {
-      throw new Error(`Node ${this} is a scene and cannot have a parent scene`);
+      throw new M2Error(
+        `Node ${this} is a scene and cannot have a parent scene`,
+      );
     }
     if (this.parent && this.parent.type === M2NodeType.Scene) {
       return this.parent;
     } else if (this.parent) {
       return this.parent.parentSceneAsNode;
     }
-    throw new Error(`Node ${this} has not been added to a scene`);
+    throw new M2Error(`Node ${this} has not been added to a scene`);
   }
 
   get size(): Size {
@@ -1455,7 +1458,7 @@ export abstract class M2Node implements M2NodeOptions {
         if (inDegree.has(edge)) {
           const inDegreeCount = inDegree.get(edge);
           if (inDegreeCount === undefined) {
-            throw new Error(`Could not find inDegree for edge ${edge}`);
+            throw new M2Error(`Could not find inDegree for edge ${edge}`);
           }
           inDegree.set(edge, inDegreeCount + 1);
         } else {
@@ -1486,7 +1489,7 @@ export abstract class M2Node implements M2NodeOptions {
         adjList.get(current)?.forEach((edge) => {
           const inDegreeCount = inDegree.get(edge);
           if (inDegreeCount === undefined) {
-            throw new Error(`Could not find inDegree for edge ${edge}`);
+            throw new M2Error(`Could not find inDegree for edge ${edge}`);
           }
           if (inDegree.has(edge) && inDegreeCount > 0) {
             // Decrease the inDegree for the adjacent vertex

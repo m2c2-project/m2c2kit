@@ -3,6 +3,7 @@ import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { GameBaseUrls } from "./GameBaseUrls";
 import { M2Sound, M2SoundStatus } from "./M2Sound";
 import { SoundAsset } from "./SoundAsset";
+import { M2Error } from "./M2Error";
 
 /**
  * Fetches, loads, and provides sounds to the game.
@@ -23,7 +24,7 @@ export class SoundManager {
   get audioContext(): AudioContext {
     if (!this._audioContext) {
       if (!navigator.userActivation.hasBeenActive) {
-        throw new Error(
+        throw new M2Error(
           "AudioContext cannot be created until user has interacted with the page",
         );
       }
@@ -108,7 +109,7 @@ export class SoundManager {
         return fetch(m2Sound.url).then((response) => {
           if (!response.ok) {
             m2Sound.status = M2SoundStatus.Error;
-            throw new Error(
+            throw new M2Error(
               `cannot fetch sound ${m2Sound.soundName} at url ${m2Sound.url}: ${response.statusText}`,
             );
           }
@@ -181,7 +182,7 @@ export class SoundManager {
    */
   private async decodeSound(sound: M2Sound) {
     if (!sound.data) {
-      throw new Error(
+      throw new M2Error(
         `data is undefined for sound ${sound.soundName} (url ${sound.url})`,
       );
     }
@@ -197,7 +198,7 @@ export class SoundManager {
     } catch {
       // Set status to Error. An exception will also be thrown by the play action.
       sound.status = M2SoundStatus.Error;
-      throw new Error(
+      throw new M2Error(
         `error decoding sound ${sound.soundName} (url: ${sound.url})`,
       );
     }
@@ -218,7 +219,7 @@ export class SoundManager {
   getSound(soundName: string): M2Sound {
     const sound = this.sounds[soundName];
     if (!sound) {
-      throw new Error(`getSound(): sound ${soundName} not found`);
+      throw new M2Error(`getSound(): sound ${soundName} not found`);
     }
     return sound;
   }

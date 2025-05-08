@@ -1,6 +1,7 @@
 import { Game } from "./Game";
 import { GameParameters } from "./GameParameters";
 import { LocalizationOptions } from "./LocalizationOptions";
+import { M2Error } from "./M2Error";
 import { RgbaColor } from "./RgbaColor";
 import { StringInterpolationMap } from "./StringInterpolationMap";
 import {
@@ -617,7 +618,7 @@ export class I18n {
       if (Object.prototype.hasOwnProperty.call(options, key)) {
         return options[key];
       } else {
-        throw new Error(
+        throw new M2Error(
           `insertInterpolations(): placeholder "${key}" not found. Text was ${text}, provided interpolation was ${JSON.stringify(options)}`,
         );
       }

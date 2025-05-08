@@ -19,6 +19,7 @@ import { Futurable } from "./Futurable";
 import { RepeatingActionContainer } from "./RepeatingActionContainer";
 import { RepeatActionOptions } from "./RepeatActionOptions";
 import { RepeatForeverActionOptions } from "./RepeatForeverActionOptions";
+import { M2Error } from "./M2Error";
 
 /**
  * The Action class has static methods for creating actions to be executed by
@@ -382,7 +383,7 @@ export abstract class Action {
         Action.evaluateRotateAction(action, node, elapsed, dt);
         break;
       default:
-        throw new Error(`Action type not recognized: ${action.type}`);
+        throw new M2Error(`Action type not recognized: ${action.type}`);
     }
   }
 
@@ -415,7 +416,7 @@ export abstract class Action {
         action.restartAction(action, now);
       } else {
         if (action.type === ActionType.RepeatForever) {
-          throw new Error("RepeatForever action should never complete");
+          throw new M2Error("RepeatForever action should never complete");
         }
         /**
          * The repeat action has completed all repetitions. Assign the
@@ -581,7 +582,7 @@ export abstract class Action {
 
   private static evaluatePlayAction(node: M2Node, action: Action) {
     if (node.type !== M2NodeType.SoundPlayer) {
-      throw new Error("Play action can only be used with a SoundPlayer");
+      throw new M2Error("Play action can only be used with a SoundPlayer");
     }
     const playAction = action as PlayAction;
     const soundPlayer = node as SoundPlayer;
@@ -617,7 +618,7 @@ export abstract class Action {
         playAction.started = true;
       } else {
         if (m2Sound.status === M2SoundStatus.Error) {
-          throw new Error(
+          throw new M2Error(
             `error loading sound ${m2Sound.soundName} (url ${m2Sound.url})`,
           );
         }
@@ -814,16 +815,20 @@ export abstract class Action {
    */
   public static rotate(options: RotateActionOptions) {
     if (options.byAngle !== undefined && options.toAngle !== undefined) {
-      throw new Error("rotate Action: cannot specify both byAngle and toAngle");
+      throw new M2Error(
+        "rotate Action: cannot specify both byAngle and toAngle",
+      );
     }
     if (options.byAngle === undefined && options.toAngle === undefined) {
-      throw new Error("rotate Action: must specify either byAngle or toAngle");
+      throw new M2Error(
+        "rotate Action: must specify either byAngle or toAngle",
+      );
     }
     if (
       options.toAngle === undefined &&
       options.shortestUnitArc !== undefined
     ) {
-      throw new Error(
+      throw new M2Error(
         "rotate Action: shortestUnitArc can only be specified when toAngle is provided",
       );
     }
@@ -1030,7 +1035,7 @@ export class RepeatAction extends Action implements RepeatingActionContainer {
   override clone(): RepeatAction {
     if (this.children.length !== 1) {
       // Should never happen, but check anyway, and throw an error.
-      throw new Error("Repeat action must have exactly one child");
+      throw new M2Error("Repeat action must have exactly one child");
     }
     const clonedAction = Action.repeat({
       // RepeatAction always has exactly one child
@@ -1098,7 +1103,7 @@ export class RepeatForeverAction extends RepeatAction {
   override clone(): RepeatForeverAction {
     if (this.children.length !== 1) {
       // Should never happen, but check anyway, and throw an error.
-      throw new Error("RepeatForever action must have exactly one child");
+      throw new M2Error("RepeatForever action must have exactly one child");
     }
     const clonedAction = Action.repeatForever({
       // RepeatForeverAction always has exactly one child

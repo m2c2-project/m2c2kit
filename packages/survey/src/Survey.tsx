@@ -11,6 +11,7 @@ import {
   ActivityEvent,
   ActivityResultsEvent,
   M2c2KitHelpers,
+  M2Error,
 } from "@m2c2kit/core";
 import React from "react";
 import Modal from "react-modal";
@@ -287,7 +288,7 @@ export class Survey implements Activity {
   private renderSurveyJs() {
     const surveyDiv = document.getElementById("m2c2kit-survey-div");
     if (!surveyDiv) {
-      throw new Error(
+      throw new M2Error(
         "renderSurveyJs(): m2c2kit-survey-div not found in DOM. cannot start survey.",
       );
     }
@@ -611,7 +612,7 @@ export class Survey implements Activity {
     elementName: string,
   ): SurveyVariables {
     if (!this.IsSurveyJsVariableMultipleResponse(elementName)) {
-      throw new Error(
+      throw new M2Error(
         `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} is not a multiple response variable.`,
       );
     }
@@ -641,7 +642,7 @@ export class Survey implements Activity {
       }
       selectedValues = checkbox.value;
     } else {
-      throw new Error(
+      throw new M2Error(
         `makeDummiesFromMultipleResponse(): surveyJs element ${elementName} has unexpected structure.`,
       );
     }
@@ -712,7 +713,7 @@ export class Survey implements Activity {
       (e) => e.name === elementName,
     );
     if (!surveyJsElement) {
-      throw new Error(
+      throw new M2Error(
         `getSurveyJsElementByName(): surveyJs element ${elementName} not found.`,
       );
     }
@@ -810,7 +811,7 @@ export class Survey implements Activity {
 
   private get survey(): SurveyReact.Model {
     if (!this._survey) {
-      throw new Error("survey (SurveyReact.Model) is undefined");
+      throw new M2Error("survey (SurveyReact.Model) is undefined");
     }
     return this._survey;
   }

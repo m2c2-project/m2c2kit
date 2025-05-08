@@ -20,6 +20,7 @@ import {
   Constants,
   Translation,
   LabelHorizontalAlignmentMode,
+  M2Error,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -522,7 +523,7 @@ appeared.",
           break;
         }
         default: {
-          throw new Error("invalid value for instruction_type");
+          throw new M2Error("invalid value for instruction_type");
         }
       }
     }
@@ -808,7 +809,7 @@ appeared.",
           Action.custom({
             callback: () => {
               if (!selectedRgba) {
-                throw new Error("no selected color");
+                throw new M2Error("no selected color");
               }
               const colorSelectedName = dotColors.filter((d) =>
                 Equal.rgbaColor(d.rgbaColor, selectedRgba),
@@ -1086,7 +1087,7 @@ appeared.",
       );
 
       if (!selectedRgba) {
-        throw new Error("no selected color!");
+        throw new M2Error("no selected color!");
       }
       priorColorSelectedDot.fillColor = selectedRgba;
 

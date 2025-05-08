@@ -1,3 +1,5 @@
+import { M2Error } from "./M2Error";
+
 /**
  * A class to create, start, and stop named timers that measure elapsed time in milliseconds.
  */
@@ -77,12 +79,12 @@ export class Timer {
   public static start(name: string): void {
     const timer = this._timers.filter((t) => t.name === name).find(Boolean);
     if (timer === undefined) {
-      throw new Error(
+      throw new M2Error(
         `can't start timer. timer with name ${name} does not exist.`,
       );
     } else {
       if (timer.stopped === false) {
-        throw new Error(
+        throw new M2Error(
           `can't start timer. timer with name ${name} is already started.`,
         );
       }
@@ -104,13 +106,13 @@ export class Timer {
   public static stop(name: string): void {
     const timer = this._timers.filter((t) => t.name === name).find(Boolean);
     if (timer === undefined) {
-      throw new Error(
+      throw new M2Error(
         `can't stop timer. timer with name ${name} does not exist.`,
       );
     }
 
     if (timer.stopped === true) {
-      throw new Error(
+      throw new M2Error(
         `can't stop timer. timer with name ${name} is already stopped.`,
       );
     }
@@ -134,7 +136,7 @@ export class Timer {
   static elapsed(name: string): number {
     const timer = this._timers.filter((t) => t.name === name).find(Boolean);
     if (timer === undefined) {
-      throw new Error(
+      throw new M2Error(
         `can't get elapsed time. timer with name ${name} does not exist.`,
       );
     }
@@ -160,7 +162,7 @@ export class Timer {
   static remove(name: string): void {
     const timer = this._timers.filter((t) => t.name === name).find(Boolean);
     if (timer === undefined) {
-      throw new Error(
+      throw new M2Error(
         `can't remove timer. timer with name ${name} does not exist.`,
       );
     }

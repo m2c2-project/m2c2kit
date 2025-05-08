@@ -1,5 +1,6 @@
 import { DataCalcOptions } from "./DataCalcOptions";
 import { DataValue } from "./DataValue";
+import { M2Error } from "./M2Error";
 import { Mutations } from "./Mutations";
 import { Observation } from "./Observation";
 import { SummarizeOperation } from "./SummarizeOperation";
@@ -31,7 +32,7 @@ export class DataCalc {
   constructor(data: Array<Observation>, options?: DataCalcOptions) {
     // Validate that data is an array
     if (!Array.isArray(data)) {
-      throw new Error(
+      throw new M2Error(
         "DataCalc constructor expects an array of observations as first argument",
       );
     }
@@ -43,7 +44,7 @@ export class DataCalc {
         typeof data[i] !== "object" ||
         Array.isArray(data[i])
       ) {
-        throw new Error(
+        throw new M2Error(
           `DataCalc constructor expects all elements to be objects (observations). Element at index ${i} is ${typeof data[i]}. Element: ${JSON.stringify(data[i])}`,
         );
       }
@@ -174,7 +175,7 @@ export class DataCalc {
    */
   filter(predicate: (observation: Observation) => boolean) {
     if (this._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `filter() cannot be used on grouped data. The data are currently grouped by ${this._groups.join(
           ", ",
         )}. Ungroup the data first using ungroup().`,
@@ -253,7 +254,7 @@ export class DataCalc {
    */
   mutate(mutations: Mutations): DataCalc {
     if (this._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `mutate() cannot be used on grouped data. The data are currently grouped by ${this._groups.join(
           ", ",
         )}. Ungroup the data first using ungroup().`,
@@ -386,7 +387,7 @@ export class DataCalc {
           try {
             summaryObj[group] = JSON.parse(valueStr);
           } catch {
-            throw new Error(
+            throw new M2Error(
               `Failed to parse group value ${valueStr} as JSON for group ${group}`,
             );
             // alternative approach would be to swallow the error and keep as string
@@ -517,7 +518,7 @@ export class DataCalc {
    */
   arrange(...variables: string[]): DataCalc {
     if (this._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `arrange() cannot be used on grouped data. The data are currently grouped by ${this._groups.join(
           ", ",
         )}. Ungroup the data first using ungroup().`,
@@ -535,7 +536,7 @@ export class DataCalc {
         }
 
         if (!(varName in a) || !(varName in b)) {
-          throw new Error(
+          throw new M2Error(
             `arrange(): variable ${varName} does not exist in all observations`,
           );
         }
@@ -608,7 +609,7 @@ export class DataCalc {
    */
   rename(renames: { [newName: string]: string }): DataCalc {
     if (this._observations.length === 0) {
-      throw new Error("Cannot rename variables on an empty dataset");
+      throw new M2Error("Cannot rename variables on an empty dataset");
     }
 
     Object.values(renames).forEach((oldName) => {
@@ -666,7 +667,7 @@ export class DataCalc {
    */
   innerJoin(other: DataCalc, by: string[]): DataCalc {
     if (this._groups.length > 0 || other._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `innerJoin() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
@@ -755,7 +756,7 @@ export class DataCalc {
    */
   leftJoin(other: DataCalc, by: string[]): DataCalc {
     if (this._groups.length > 0 || other._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `leftJoin() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
@@ -848,7 +849,7 @@ export class DataCalc {
    */
   rightJoin(other: DataCalc, by: string[]): DataCalc {
     if (this._groups.length > 0 || other._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `rightJoin() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
@@ -968,7 +969,7 @@ export class DataCalc {
    */
   fullJoin(other: DataCalc, by: string[]): DataCalc {
     if (this._groups.length > 0 || other._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `fullJoin() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
@@ -1089,7 +1090,7 @@ export class DataCalc {
    */
   slice(start: number, end?: number): DataCalc {
     if (this._groups.length > 0) {
-      throw new Error(
+      throw new M2Error(
         `slice() cannot be used on grouped data. Ungroup the data first using ungroup().`,
       );
     }
@@ -1215,7 +1216,7 @@ export class DataCalc {
    */
   verifyObservationsContainVariable(variable: string): void {
     if (!this._observations.every((observation) => variable in observation)) {
-      throw new Error(
+      throw new M2Error(
         `Variable ${variable} does not exist for each item (row) in the data array.`,
       );
     }

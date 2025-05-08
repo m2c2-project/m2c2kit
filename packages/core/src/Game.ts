@@ -82,6 +82,7 @@ import { Easings } from "./Easings";
 import { M2KeyboardEvent } from "./M2KeyboardEvent";
 import { ActivityKeyValueData } from "./ActivityKeyValueData";
 import { ScoringSchema } from "./ScoringSchema";
+import { M2Error } from "./M2Error";
 
 export interface TrialData {
   [key: string]: string | number | boolean | object | undefined | null;
@@ -138,7 +139,7 @@ export class Game implements Activity {
    */
   constructor(options: GameOptions) {
     if (!options.id || options.id.trim() === "") {
-      throw new Error("id is required in GameOptions");
+      throw new M2Error("id is required in GameOptions");
     }
     if (!Uuid.isValid(options.publishUuid)) {
       const providedPublishUuid = options.publishUuid
@@ -221,7 +222,7 @@ export class Game implements Activity {
     const regex = new RegExp(`^.*${packageName}[^\\/]*`);
     const matches = moduleUrl.match(regex);
     if (!matches || matches.length === 0) {
-      throw new Error(
+      throw new M2Error(
         `Could not calculate imported assessment package base URL. Package name: ${packageName}, module URL: ${moduleUrl}`,
       );
     }
@@ -327,7 +328,7 @@ export class Game implements Activity {
        * locate the CanvasKit wasm binary.
        */
       if (isImportedModule) {
-        throw new Error(
+        throw new M2Error(
           `the package ${game.moduleMetadata.name} has been imported from a module URL (${moduleUrl}), but the @m2c2kit/core package module URL could not be determined.`,
         );
       }
@@ -342,7 +343,7 @@ export class Game implements Activity {
   private async configureI18n(localizationOptions: LocalizationOptions) {
     this.i18n = new I18n(this, localizationOptions);
     if (!this.i18n) {
-      throw new Error("I18n object is undefined");
+      throw new M2Error("I18n object is undefined");
     }
     await this.i18n.initialize();
     this.eventStore.addEvent({
@@ -402,7 +403,7 @@ export class Game implements Activity {
       try {
         this.canvasKit = await this.loadCanvasKit(manifestCanvasKitWasmUrl);
       } catch (err) {
-        throw new Error(
+        throw new M2Error(
           `game ${this.id} could not load canvaskit wasm file from ${manifestCanvasKitWasmUrl}`,
         );
       }
@@ -456,12 +457,12 @@ export class Game implements Activity {
        * 404. Must check response.ok
        */
       if (!manifestResponse.ok) {
-        throw new Error(
+        throw new M2Error(
           `Error ${manifestResponse.status} on GET manifest.json from ${manifestJsonUrl}.`,
         );
       }
     } catch {
-      throw new Error(
+      throw new M2Error(
         `Network error on GET manifest.json from ${manifestJsonUrl}.`,
       );
     }
@@ -469,13 +470,13 @@ export class Game implements Activity {
     try {
       return (await manifestResponse.json()) as Manifest;
     } catch {
-      throw new Error(`Error parsing manifest.json from ${manifestJsonUrl}.`);
+      throw new M2Error(`Error parsing manifest.json from ${manifestJsonUrl}.`);
     }
   }
 
   get fontManager(): FontManager {
     if (!this._fontManager) {
-      throw new Error("fontManager is undefined");
+      throw new M2Error("fontManager is undefined");
     }
     return this._fontManager;
   }
@@ -486,7 +487,7 @@ export class Game implements Activity {
 
   get imageManager(): ImageManager {
     if (!this._imageManager) {
-      throw new Error("imageManager is undefined");
+      throw new M2Error("imageManager is undefined");
     }
     return this._imageManager;
   }
@@ -497,7 +498,7 @@ export class Game implements Activity {
 
   get soundManager(): SoundManager {
     if (!this._soundManager) {
-      throw new Error("soundManager is undefined");
+      throw new M2Error("soundManager is undefined");
     }
     return this._soundManager;
   }
@@ -508,7 +509,7 @@ export class Game implements Activity {
 
   get eventMaterializer(): EventMaterializer {
     if (!this._eventMaterializer) {
-      throw new Error("eventMaterializer is undefined");
+      throw new M2Error("eventMaterializer is undefined");
     }
     return this._eventMaterializer;
   }
@@ -534,7 +535,7 @@ export class Game implements Activity {
     if (this.studyId && this.studyUuid) {
       k = this.studyId.concat(":", this.studyUuid, ":");
     } else if (this.studyId || this.studyUuid) {
-      throw new Error(
+      throw new M2Error(
         `study_id and study_uuid must both be set or unset. Values are study_id: ${this.studyId}, study_uuid: ${this.studyUuid}`,
       );
     }
@@ -679,7 +680,7 @@ export class Game implements Activity {
 
   get dataStores(): IDataStore[] {
     if (!this._dataStores) {
-      throw new Error("dataStores is undefined");
+      throw new M2Error("dataStores is undefined");
     }
     return this._dataStores;
   }
@@ -723,7 +724,7 @@ export class Game implements Activity {
     );
 
     if (locale === "") {
-      throw new Error(
+      throw new M2Error(
         "Empty string in locale. Leave locale undefined or null to prevent localization.",
       );
     }
@@ -804,7 +805,7 @@ export class Game implements Activity {
               this.options.parameters[key].type,
             );
           } catch (e: unknown) {
-            throw new Error(
+            throw new M2Error(
               "Error setting parameter " + key + ": " + (e as Error).message,
             );
           }
@@ -826,7 +827,7 @@ export class Game implements Activity {
 
   get canvasKit(): CanvasKit {
     if (!this._canvasKit) {
-      throw new Error("canvaskit is undefined");
+      throw new M2Error("canvaskit is undefined");
     }
     return this._canvasKit;
   }
@@ -912,7 +913,7 @@ export class Game implements Activity {
         .filter((child) => child.name === node)
         .find(Boolean);
       if (!child) {
-        throw new Error(
+        throw new M2Error(
           `cannot remove free node named "${node}" because it is not currently part of the game's free nodes. `,
         );
       }
@@ -1023,7 +1024,7 @@ export class Game implements Activity {
       if (this.scenes.includes(scene)) {
         this.scenes = this.scenes.filter((s) => s !== scene);
       } else {
-        throw new Error(
+        throw new M2Error(
           `cannot remove scene ${scene} from game because the scene is not currently added to the game`,
         );
       }
@@ -1031,7 +1032,7 @@ export class Game implements Activity {
       if (this.scenes.map((s) => s.name).includes(scene)) {
         this.scenes = this.scenes.filter((s) => s.name !== scene);
       } else {
-        throw new Error(
+        throw new M2Error(
           `cannot remove scene named "${scene}" from game because the scene is not currently added to the game`,
         );
       }
@@ -1061,11 +1062,11 @@ export class Game implements Activity {
           .find(Boolean);
       }
       if (incomingScene === undefined) {
-        throw new Error(`scene ${scene} not found`);
+        throw new M2Error(`scene ${scene} not found`);
       }
     } else {
       if (!this.scenes.some((scene_) => scene_ === scene)) {
-        throw new Error(
+        throw new M2Error(
           `scene ${scene} exists, but it has not been added to the game object`,
         );
       }
@@ -1120,7 +1121,7 @@ export class Game implements Activity {
     ) {
       return this.options.parameters[parameterName].default as T;
     } else {
-      throw new Error(`game parameter ${parameterName} not found`);
+      throw new M2Error(`game parameter ${parameterName} not found`);
     }
   }
 
@@ -1217,14 +1218,14 @@ export class Game implements Activity {
     }
 
     if (startingScene === undefined) {
-      throw new Error(
+      throw new M2Error(
         "cannot start game. entry scene has not been added to the game object.",
       );
     }
 
     this.presentScene(startingScene);
     if (this.surface === undefined) {
-      throw new Error("CanvasKit surface is undefined");
+      throw new M2Error("CanvasKit surface is undefined");
     }
 
     if (this.options.timeStepping) {
@@ -1497,7 +1498,7 @@ export class Game implements Activity {
     }
 
     if (!this.surface) {
-      throw new Error("surface is undefined");
+      throw new M2Error("surface is undefined");
     }
     const surfaceWidth = this.surface.width();
     const surfaceHeight = this.surface.height();
@@ -1619,7 +1620,7 @@ export class Game implements Activity {
           if (images[imageName].status === M2ImageStatus.Ready) {
             const image = images[imageName].canvaskitImage;
             if (!image) {
-              throw new Error(`image ${imageName} is undefined`);
+              throw new M2Error(`image ${imageName} is undefined`);
             }
             canvas.drawImage(image, 0, 0);
           }
@@ -1630,7 +1631,7 @@ export class Game implements Activity {
     const whitePaint = new this.canvasKit.Paint();
     whitePaint.setColor(this.canvasKit.Color(255, 255, 255, 1));
     if (!this.surface) {
-      throw new Error("surface is undefined");
+      throw new M2Error("surface is undefined");
     }
     canvas.drawRect(
       [0, 0, this.surface.width(), this.surface.height()],
@@ -1680,7 +1681,7 @@ export class Game implements Activity {
         propertySchema.type !== undefined &&
         !this.propertySchemaDataTypeIsValid(propertySchema.type)
       ) {
-        throw new Error(
+        throw new M2Error(
           `invalid schema. variable ${variableName} is type ${propertySchema.type}. type must be number, string, boolean, object, or array`,
         );
       }
@@ -1710,7 +1711,7 @@ export class Game implements Activity {
         }
       });
     } else {
-      throw new Error(`Invalid data type: ${propertySchemaType}`);
+      throw new M2Error(`Invalid data type: ${propertySchemaType}`);
     }
     return dataTypeIsValid;
   }
@@ -1769,7 +1770,7 @@ export class Game implements Activity {
     value: JsonSchemaDataTypeScriptTypes,
   ): void {
     if (!this.options.trialSchema) {
-      throw new Error(
+      throw new M2Error(
         "no trial schema were provided in GameOptions. cannot add trial data",
       );
     }
@@ -1799,7 +1800,7 @@ export class Game implements Activity {
       });
     }
     if (!(variableName in this.options.trialSchema)) {
-      throw new Error(`trial variable ${variableName} not defined in schema`);
+      throw new M2Error(`trial variable ${variableName} not defined in schema`);
     }
 
     let expectedDataTypes: string[];
@@ -1832,7 +1833,7 @@ export class Game implements Activity {
         expectedDataTypes.includes("integer")
       )
     ) {
-      throw new Error(
+      throw new M2Error(
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`,
       );
     }
@@ -1860,7 +1861,7 @@ export class Game implements Activity {
     value?: JsonSchemaDataTypeScriptTypes,
   ): void {
     if (!this.options.scoringSchema) {
-      throw new Error(
+      throw new M2Error(
         "no scoring schema were provided in GameOptions. cannot add scoring data",
       );
     }
@@ -1912,7 +1913,7 @@ export class Game implements Activity {
     // Handle single variable
     const variableName = variableNameOrObject;
     if (value === undefined) {
-      throw new Error(
+      throw new M2Error(
         "Value must be provided when adding a single scoring variable",
       );
     }
@@ -1931,13 +1932,15 @@ export class Game implements Activity {
     value: JsonSchemaDataTypeScriptTypes,
   ): void {
     if (!this.options.scoringSchema) {
-      throw new Error(
+      throw new M2Error(
         "no scoring schema were provided in GameOptions. cannot add scoring data",
       );
     }
 
     if (!(variableName in this.options.scoringSchema)) {
-      throw new Error(`scoring variable ${variableName} not defined in schema`);
+      throw new M2Error(
+        `scoring variable ${variableName} not defined in schema`,
+      );
     }
 
     let expectedDataTypes: string[];
@@ -1969,7 +1972,7 @@ export class Game implements Activity {
         expectedDataTypes.includes("integer")
       )
     ) {
-      throw new Error(
+      throw new M2Error(
         `type for variable ${variableName} (value: ${value}) is "${providedDataType}". Based on schema for this variable, expected type was "${expectedDataTypes}"`,
       );
     }
@@ -1990,7 +1993,7 @@ export class Game implements Activity {
     const keys = Object.keys(schema);
     keys.forEach((key) => {
       if (!this.options.trialSchema) {
-        throw new Error("trial schema is undefined");
+        throw new M2Error("trial schema is undefined");
       }
       this.options.trialSchema[key] = schema[key];
     });
@@ -2026,10 +2029,10 @@ export class Game implements Activity {
     value: JsonSchemaDataTypeScriptTypes,
   ) {
     if (!this.options.trialSchema) {
-      throw new Error("trial schema is undefined");
+      throw new M2Error("trial schema is undefined");
     }
     if (this.options.trialSchema[variableName] === undefined) {
-      throw new Error(`trial variable ${variableName} not defined in schema`);
+      throw new M2Error(`trial variable ${variableName} not defined in schema`);
     }
     this.staticTrialSchema[variableName] = value;
   }
@@ -2468,7 +2471,7 @@ export class Game implements Activity {
       );
 
       if (canvases.length === 0) {
-        throw new Error("no html canvas tag was found in the html");
+        throw new M2Error("no html canvas tag was found in the html");
       }
       const m2c2kitCanvas = canvases.filter(
         (c) => c.id === "m2c2kit-canvas",
@@ -2487,7 +2490,7 @@ export class Game implements Activity {
     } else {
       htmlCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (htmlCanvas === undefined) {
-        throw new Error(
+        throw new M2Error(
           `could not find canvas HTML element with id "${canvasId}"`,
         );
       }
@@ -2519,7 +2522,7 @@ export class Game implements Activity {
 
   private setupCanvasKitSurface(): void {
     if (this.htmlCanvas === undefined) {
-      throw new Error("main html canvas is undefined");
+      throw new M2Error("main html canvas is undefined");
     }
 
     // @ts-expect-error type error when adding property to window object
@@ -2535,7 +2538,7 @@ export class Game implements Activity {
 
     const surface = this.canvasKit.MakeWebGLCanvasSurface(this.htmlCanvas);
     if (surface === null) {
-      throw new Error(
+      throw new M2Error(
         `could not make CanvasKit surface from canvas HTML element`,
       );
     }
@@ -2648,7 +2651,7 @@ export class Game implements Activity {
 
   private setupCanvasDomEventHandlers(): void {
     if (this.htmlCanvas === undefined) {
-      throw new Error("main html canvas is undefined");
+      throw new M2Error("main html canvas is undefined");
     }
     // When the callback is executed, within the execution of the callback code
     // we want 'this' to be this game object, not the html canvas to which the event listener is attached.
@@ -2691,7 +2694,7 @@ export class Game implements Activity {
 
   private loop(canvas: Canvas): void {
     if (!this.surface) {
-      throw new Error("surface is undefined");
+      throw new M2Error("surface is undefined");
     }
 
     if (this.warmupFunctionQueue.length > 0) {
@@ -2742,7 +2745,9 @@ export class Game implements Activity {
         this.incomingSceneTransitions.length === 0 &&
         this.eventStore.mode !== EventStoreMode.Replay
       ) {
-        throw new Error("Can not run game without a current or incoming scene");
+        throw new M2Error(
+          "Can not run game without a current or incoming scene",
+        );
       }
 
       this.updateGameTime();
@@ -2831,7 +2836,7 @@ export class Game implements Activity {
       const incomingSceneTransition = incomingSceneTransitions.shift();
       if (incomingSceneTransition === undefined) {
         // should not happen; checked this.incomingSceneTransitions.length > 0
-        throw new Error("no incoming scene transition");
+        throw new M2Error("no incoming scene transition");
       }
 
       const incomingScene = incomingSceneTransition.scene;
@@ -2853,7 +2858,7 @@ export class Game implements Activity {
       // screenshot of the current scene.
       this.currentSceneSnapshot = this.snapshots.shift();
       if (!this.currentSceneSnapshot) {
-        throw new Error("No snapshot available for outgoing scene");
+        throw new M2Error("No snapshot available for outgoing scene");
       }
       const outgoingScene = this.createOutgoingScene(this.currentSceneSnapshot);
       outgoingScene._active = true;
@@ -2929,7 +2934,7 @@ export class Game implements Activity {
    */
   async registerPlugin(plugin: Plugin) {
     if (plugin.type !== ActivityType.Game) {
-      throw new Error(
+      throw new M2Error(
         `registerPlugin(): plugin ${plugin.id} is not a game plugin. It is a ${plugin.type} plugin.`,
       );
     }
@@ -2937,7 +2942,7 @@ export class Game implements Activity {
       this.plugins.includes(plugin) ||
       this.plugins.map((p) => p.id).includes(plugin.id)
     ) {
-      throw new Error(
+      throw new M2Error(
         `registerPlugin(): plugin ${plugin.id} already registered.`,
       );
     }
@@ -3039,14 +3044,14 @@ export class Game implements Activity {
 
   private takeCurrentSceneSnapshot(): Image {
     if (this.surface === undefined) {
-      throw new Error("CanvasKit surface is undefined");
+      throw new M2Error("CanvasKit surface is undefined");
     }
     return this.surface.makeImageSnapshot();
   }
 
   private handlePendingScreenshot(pendingScreenshot: PendingScreenshot) {
     if (!this.surface) {
-      throw new Error("no surface");
+      throw new M2Error("no surface");
     }
     let image: Image;
     if (pendingScreenshot.rect.length == 4) {
@@ -3086,7 +3091,7 @@ export class Game implements Activity {
     sh?: number,
   ): Promise<Uint8Array | null> {
     if (!this.surface) {
-      throw new Error("no canvaskit surface. unable to take screenshot.");
+      throw new M2Error("no canvaskit surface. unable to take screenshot.");
     }
 
     const missingParametersCount = [sx, sy, sw, sh]
@@ -3316,12 +3321,12 @@ export class Game implements Activity {
             );
             break;
           default:
-            throw new Error("unknown transition direction");
+            throw new M2Error("unknown transition direction");
         }
         break;
       }
       default:
-        throw new Error("unknown transition type");
+        throw new M2Error("unknown transition type");
     }
   }
 
@@ -3330,7 +3335,7 @@ export class Game implements Activity {
     const drawScale = m2c2Globals.canvasScale;
     canvas.scale(1 / drawScale, 1 / drawScale);
     if (!this.fpsTextFont || !this.fpsTextPaint) {
-      throw new Error("fps font or paint is undefined");
+      throw new M2Error("fps font or paint is undefined");
     }
     canvas.drawText(
       "FPS: " + this.fpsRate.toFixed(2),
@@ -3366,13 +3371,13 @@ export class Game implements Activity {
     }
     const node = nodes.filter((node) => node.name === nodeName).find(Boolean);
     if (node === undefined) {
-      throw new Error(
+      throw new M2Error(
         `could not create event listener. node with name ${nodeName} could not be found in the game node tree`,
       );
     }
 
     if (!Object.values(M2EventType).includes(type)) {
-      throw new Error(
+      throw new M2Error(
         `game ${this.id}: could not create event listener. event type ${type} is not known`,
       );
     }
@@ -3416,7 +3421,7 @@ export class Game implements Activity {
     }
 
     if (!this.htmlCanvas) {
-      throw new Error("main html canvas is undefined");
+      throw new M2Error("main html canvas is undefined");
     }
     const domPointerDownEvent: DomPointerDownEvent = {
       type: "DomPointerDown",

@@ -3,6 +3,7 @@ import { M2NodeType } from "./M2NodeType";
 import { SoundPlayerOptions } from "./SoundPlayerOptions";
 import { ActionType } from "./ActionType";
 import { PlayAction } from "./Action";
+import { M2Error } from "./M2Error";
 
 export class SoundPlayer extends M2Node implements SoundPlayerOptions {
   readonly type = M2NodeType.SoundPlayer;
@@ -88,6 +89,6 @@ export class SoundPlayer extends M2Node implements SoundPlayerOptions {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override duplicate(newName?: string): SoundPlayer {
-    throw new Error("Method not implemented.");
+    throw new M2Error("Method not implemented.");
   }
 }

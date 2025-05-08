@@ -6,6 +6,7 @@ import { TextLine } from "./TextLine";
 import { Sprite } from "./Sprite";
 import { M2c2KitHelpers } from "./M2c2KitHelpers";
 import { M2NodeClassRegistry } from "./M2NodeClassRegistry";
+import { M2Error } from "./M2Error";
 
 export class M2NodeFactory {
   /**
@@ -36,11 +37,11 @@ export class M2NodeFactory {
   ) {
     const classNameToCreate = compositeType ? compositeType : type;
     if (!this.hasClassRegistration(classNameToCreate)) {
-      throw new Error(`Unknown node type: ${classNameToCreate}`);
+      throw new M2Error(`Unknown node type: ${classNameToCreate}`);
     }
 
     if (!m2c2Globals.m2NodeClassRegistry) {
-      throw new Error("Node class registry is not initialized.");
+      throw new M2Error("Node class registry is not initialized.");
     }
 
     const classToInstantiate = (

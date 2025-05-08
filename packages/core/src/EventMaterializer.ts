@@ -24,6 +24,7 @@ import { Shape } from "./Shape";
 import { WebColors } from "./WebColors";
 import { M2NodeType } from "./M2NodeType";
 import { Composite } from "./Composite";
+import { M2Error } from "./M2Error";
 
 interface EventMaterializerOptions {
   game: Game;
@@ -153,7 +154,7 @@ export class EventMaterializer {
       if (node.type === M2NodeType.Composite) {
         (node as Composite).handleCompositeEvent(event as CompositeEvent);
       } else {
-        throw new Error(
+        throw new M2Error(
           `EventMaterializer: node was expected to be composite, but was of type ${node.type}`,
         );
       }
@@ -187,7 +188,7 @@ export class EventMaterializer {
       (n) => n.uuid === nodePropertyChangeEvent.uuid,
     );
     if (!node) {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: node with uuid ${nodePropertyChangeEvent.uuid} not found`,
       );
     }
@@ -200,7 +201,7 @@ export class EventMaterializer {
       (node as any)[nodePropertyChangeEvent.property] =
         nodePropertyChangeEvent.value;
     } else {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: on node ${node.name}, type ${node.type}, nodePropertyChangeEvent tried to set unknown property ${nodePropertyChangeEvent.property} to value ${JSON.stringify(nodePropertyChangeEvent.value)}`,
       );
     }
@@ -211,7 +212,7 @@ export class EventMaterializer {
       (n) => n.uuid === nodeAddChildEvent.uuid,
     );
     if (!parent) {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: parent node with uuid ${nodeAddChildEvent.uuid} not found`,
       );
     }
@@ -219,7 +220,7 @@ export class EventMaterializer {
       (n) => n.uuid === nodeAddChildEvent.childUuid,
     );
     if (!child) {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: child node with uuid ${nodeAddChildEvent.childUuid} not found`,
       );
     }
@@ -233,7 +234,7 @@ export class EventMaterializer {
       (n) => n.uuid === nodeRemoveChildEvent.uuid,
     );
     if (!parent) {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: parent node with uuid ${nodeRemoveChildEvent.uuid} not found`,
       );
     }
@@ -241,7 +242,7 @@ export class EventMaterializer {
       (n) => n.uuid === nodeRemoveChildEvent.childUuid,
     );
     if (!child) {
-      throw new Error(
+      throw new M2Error(
         `EventMaterializer: child node with uuid ${nodeRemoveChildEvent.childUuid} not found`,
       );
     }
@@ -320,17 +321,17 @@ export class EventMaterializer {
     let transition: Transition = Transition.none();
     if (scenePresentEvent.transitionType === TransitionType.Slide) {
       if (scenePresentEvent.direction === undefined) {
-        throw new Error(
+        throw new M2Error(
           "EventMaterializer: ScenePresentEvent direction is undefined for slide transition",
         );
       }
       if (scenePresentEvent.duration === undefined) {
-        throw new Error(
+        throw new M2Error(
           "EventMaterializer: ScenePresentEvent duration is undefined for slide transition",
         );
       }
       if (scenePresentEvent.easingType === undefined) {
-        throw new Error(
+        throw new M2Error(
           "EventMaterializer: ScenePresentEvent easingType is undefined for slide transition",
         );
       }
@@ -339,7 +340,7 @@ export class EventMaterializer {
         (s) => s.uuid === scenePresentEvent.uuid,
       );
       if (!incomingScene) {
-        throw new Error(
+        throw new M2Error(
           `EventMaterializer: Scene with uuid ${scenePresentEvent.uuid} not found`,
         );
       }
