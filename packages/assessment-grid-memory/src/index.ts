@@ -334,12 +334,12 @@ class GridMemory extends Game implements ScoringProvider {
           "Does the number of completed and expected trials match? 1 = true, 0 = false.",
       },
       distance_hausdorff_median: {
-        type: "number",
+        type: ["number", "null"],
         description:
           "Median across all trials of the Hausdorff distance between the presented and selected cells within a trial.",
       },
       sum_exact_targets: {
-        type: "integer",
+        type: ["integer", "null"],
         description:
           "Sum of the number of exact targets across all trials. An exact target is a target that was selected in the correct location.",
       },
@@ -1218,6 +1218,15 @@ phase, participants report the location of dots on a grid.",
     const distances = data.map((obs) => {
       const presentedCells = obs.presented_cells as Array<Cell>;
       const selectedCells = obs.selected_cells as Array<Cell>;
+      // If there are no presented cells or selected cells, score the
+      // Hausdorff distance as null. This can happen if the user
+      // quits the game before placing any dots or before beginning
+      // a trial.
+      if (presentedCells.length === 0 || selectedCells.length === 0) {
+        return {
+          hausdorff_distance: null,
+        };
+      }
       return {
         hausdorff_distance: hausdorffDistance(presentedCells, selectedCells),
       };
@@ -1253,6 +1262,10 @@ interface Cell {
 }
 
 function hausdorffDistance(setA: Cell[], setB: Cell[]): number {
+  if (setA.length === 0 || setB.length === 0) {
+    return Infinity;
+  }
+
   function euclideanDistance(cell1: Cell, cell2: Cell): number {
     const rowDiff = cell1.row - cell2.row;
     const columnDiff = cell1.column - cell2.column;
