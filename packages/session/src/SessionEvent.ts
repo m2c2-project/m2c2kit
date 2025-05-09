@@ -10,6 +10,7 @@ export const SessionEventType = {
   SessionInitialize: "SessionInitialize",
   SessionStart: "SessionStart",
   SessionEnd: "SessionEnd",
+  SessionData: "SessionData",
 } as const;
 
 export type SessionEventType =

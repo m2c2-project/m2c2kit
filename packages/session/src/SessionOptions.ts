@@ -29,6 +29,8 @@ export interface SessionOptions {
   rootElementId?: string;
   /** Optional style sheet (CSS) to apply to the document instead of the default m2c2kit CSS. It is recommended to use the default CSS. */
   styleSheet?: string;
+  /** Should the session implement diagnostics that capture error events, show the user an error dialog, and stop the session if an m2c2kit error occurs? Default is false. @remarks URL params will override this setting. */
+  diagnostics?: boolean;
   /** NOT IMPLEMENTED YET: Orientation the screen should be locked to for this session. Value will be passed into the ScreenOrientation.lock() Web API. */
   orientation?:
     | "natural"

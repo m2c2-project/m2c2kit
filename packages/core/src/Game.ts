@@ -752,6 +752,16 @@ export class Game implements Activity {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.keys(additionalParameters as any).forEach((key) => {
       /**
+       * The parameter "diagnostics" is a special case. It is for setting the
+       * diagnostics reporting, and it will not be added to the game's
+       * parameters. It is processed by the Session class and not used by the
+       * game.
+       */
+      if (key === "diagnostics") {
+        return;
+      }
+
+      /**
        * The parameter "eruda" is a special case. It is for loading the eruda
        * debugging console, and it will not be added to the game's parameters.
        */

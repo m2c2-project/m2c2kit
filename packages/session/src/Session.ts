@@ -14,12 +14,15 @@ import {
   M2EventListener,
   Game,
   M2c2KitHelpers,
+  M2Error,
 } from "@m2c2kit/core";
 import { DomHelper } from "./DomHelper";
 import { SessionOptions } from "./SessionOptions";
 import { SessionLifecycleEvent } from "./SessionLifecycleEvent";
 import { SessionEvent, SessionEventType } from "./SessionEvent";
 import { m2c2kitCss } from "./m2c2kitCss";
+import { SessionDataEvent } from "./SessionDataEvent";
+import { DiagnosticsReporter } from "./DiagnosticsReporter";
 
 export class Session {
   options: SessionOptions;
@@ -31,6 +34,7 @@ export class Session {
   >();
   private sessionDictionary = new Map<string, SessionDictionaryValues>();
   private initialized = false;
+  private diagnosticsReporter?: DiagnosticsReporter;
 
   /**
    * A Session contains one or more activities. The session manages the start
@@ -51,15 +55,29 @@ export class Session {
   /**
    * Adds debugging tools to the session.
    *
-   * @remarks These tools can be added by appending query parameters to the
-   * URL or by setting game parameters via the Game.SetParameters() method.
+   * @remarks These tools can be activated by appending query parameters to the
+   * URL or by setting game parameters via the `Game.SetParameters()` method
+   * (only eruda and scripts can be set with `Game.SetParameters()`).
    */
   private addDebuggingTools() {
-    if (/eruda=true/.test(window.location.href)) {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const diagnosticsUrlParam = urlParams.get("diagnostics");
+    if (diagnosticsUrlParam !== null) {
+      // URL parameter exists - it overrides session options
+      if (diagnosticsUrlParam === "true") {
+        this.startDiagnostics();
+      }
+      // If "false", don't start diagnostics regardless of session options
+    } else if (this.options.diagnostics === true) {
+      // No URL parameter - fall back to session options
+      this.startDiagnostics();
+    }
+
+    if (urlParams.get("eruda") === "true") {
       M2c2KitHelpers.loadEruda();
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
     const scriptsParam = urlParams.get("scripts");
     if (scriptsParam) {
       try {
@@ -73,6 +91,23 @@ export class Session {
         );
       }
     }
+  }
+
+  /**
+   * Starts the diagnostics reporter.
+   */
+  private startDiagnostics() {
+    if (this.diagnosticsReporter) {
+      this.diagnosticsReporter.stop();
+    }
+
+    this.diagnosticsReporter = new DiagnosticsReporter({
+      getSessionUuid: () => this.uuid,
+      getCurrentActivity: () => this.currentActivity,
+      dispatchEvent: this.raiseEventOnListeners.bind(this),
+      onErrorDialogConfirm: this.end.bind(this),
+    });
+    this.diagnosticsReporter.start();
   }
 
   /**
@@ -116,6 +151,22 @@ export class Session {
     options?: CallbackOptions,
   ): void {
     this.addEventListener(SessionEventType.SessionEnd, callback, options);
+  }
+
+  /**
+   * Executes a callback when the session generates data.
+   *
+   * @remarks Currently, this is used only for capturing diagnostics data on
+   * exceptions.
+   *
+   * @param callback - function to execute.
+   * @param options - options for the callback.
+   */
+  onData(
+    callback: (sessionDataEvent: SessionDataEvent) => void,
+    options?: CallbackOptions,
+  ): void {
+    this.addEventListener(SessionEventType.SessionData, callback, options);
   }
 
   /**
@@ -163,11 +214,29 @@ export class Session {
         ...(extra as any),
       };
     }
+    // To maintain loose coupling, the DiagnosticReporter does not
+    // depend on the Session class. Instead, it uses the event system to
+    // communicate with the session. Thus, we need to check if the event is
+    // a SessionDataEvent and if the target is not set. If it is not set,
+    // we set it to this session.
+    if (this.eventIsSessionDataEventMissingTarget(event)) {
+      event.target = this;
+    }
     this.eventListeners
       .filter((listener) => listener.type === event.type)
       .forEach((listener) => {
         listener.callback(event);
       });
+  }
+
+  private eventIsSessionDataEventMissingTarget(
+    event: SessionEvent | ActivityEvent,
+  ): boolean {
+    return (
+      event.type === SessionEventType.SessionData &&
+      (event as SessionDataEvent).dataType === "Diagnostics" &&
+      !event.target
+    );
   }
 
   private async sessionActivityStartHandler(event: ActivityLifecycleEvent) {
@@ -223,7 +292,7 @@ export class Session {
       return;
     }
 
-    throw new Error("unknown activity lifecycle event type");
+    throw new M2Error("unknown activity lifecycle event type");
   }
 
   private activityResultsEventHandler(event: ActivityResultsEvent) {
@@ -274,7 +343,7 @@ export class Session {
 
     for (const activity of this.options.activities) {
       if (this.options.activities.filter((a) => a === activity).length > 1) {
-        throw new Error(
+        throw new M2Error(
           `error in SessionOptions.activities: an instance of the activity named "${activity.name}" has been added more than once to the session. If you want to repeat the same activity, create separate instances of it.`,
         );
       }
@@ -310,7 +379,7 @@ export class Session {
       this.options.rootElementId ?? Constants.DEFAULT_ROOT_ELEMENT_ID;
     const root = document.getElementById(rootId);
     if (!root) {
-      throw new Error(
+      throw new M2Error(
         `Session.initialize(): root element with id ${rootId} not found. The index.html should have: <div id="${rootId}"></div>.`,
       );
     }
@@ -322,7 +391,7 @@ export class Session {
 
     this.dataStores = this.options.dataStores;
     if (this.dataStores?.length === 0) {
-      throw new Error(
+      throw new M2Error(
         "Session.initialize(): dataStores must be undefined or a non-zero array of datastores.",
       );
     }
@@ -530,6 +599,11 @@ export class Session {
       ...M2c2KitHelpers.createTimestamps(),
     };
     this.raiseEventOnListeners(sessionEndEvent);
+
+    if (this.diagnosticsReporter) {
+      this.diagnosticsReporter.stop();
+      this.diagnosticsReporter = undefined;
+    }
   }
 
   private stop(): void {
@@ -556,7 +630,7 @@ export class Session {
       .filter((activity) => activity.id === options.id)
       .find(Boolean);
     if (!nextActivity) {
-      throw new Error(
+      throw new M2Error(
         `Error in goToActivity(): Session does not contain an activity with id ${options.id}.`,
       );
     }
@@ -643,10 +717,12 @@ export class Session {
    */
   async goToNextActivity(): Promise<void> {
     if (!this.currentActivity) {
-      throw new Error("error in advanceToNextActivity(): no current activity");
+      throw new M2Error(
+        "error in advanceToNextActivity(): no current activity",
+      );
     }
     if (!this.nextActivity) {
-      throw new Error("error in advanceToNextActivity(): no next activity");
+      throw new M2Error("error in advanceToNextActivity(): no next activity");
     }
     this.currentActivity.stop();
     this.currentActivity = this.nextActivity;
@@ -671,7 +747,7 @@ export class Session {
    */
   get nextActivity(): Activity | undefined {
     if (!this.currentActivity) {
-      throw new Error("error in get nextActivity(): no current activity");
+      throw new M2Error("error in get nextActivity(): no current activity");
     }
     const index = this.options.activities.indexOf(this.currentActivity);
     if (index === this.options.activities.length - 1) {
@@ -771,12 +847,49 @@ export class Session {
 
   get uuid(): string {
     if (!this._uuid) {
-      throw new Error("Session.uuid is undefined.");
+      // A UUID is generated in the initialize() method, and this is okay
+      // in most cases because the UUID will not be used until the session
+      // is initialized. However, there is an edge case. If there is an
+      // exception before the session is initialized, the DiagnosticsReporter
+      // class will need a session UUID to report the error. In that case,
+      // use the empty UUID.
+      console.warn("Session.uuid is undefined. Returning empty UUID.");
+      return "00000000-0000-0000-0000-000000000000";
     }
     return this._uuid;
   }
   set uuid(value: string) {
     this._uuid = value;
+  }
+
+  /**
+   * Sets the value of a variable that will be the same for all diagnostic data.
+   *
+   * @remarks This is useful for custom variables to appear in the diagnostic
+   * data. For example, you might save the subject's participant ID, or some
+   * other identifier that is not typically part of the diagnostic data. In
+   * the example below, if an exception occurs, the `participant_id` variable
+   * will be saved with the value `12345` within the diagnostic data.
+   * 
+   * @example
+   * ```
+   * session.addStaticDiagnosticData("participant_id", "12345");
+   *```
+
+   * @param key - key (variable name) for the static diagnostic data
+   * @param value - value for the data
+   */
+  addStaticDiagnosticData(
+    key: string,
+    value: string | number | boolean | object | undefined | null,
+  ) {
+    if (this.diagnosticsReporter) {
+      this.diagnosticsReporter.addStaticDiagnosticData(key, value);
+    } else {
+      console.warn(
+        `Session.addStaticDiagnosticData(): diagnostics reporter has not been created.`,
+      );
+    }
   }
 }
 

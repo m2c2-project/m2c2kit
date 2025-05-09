@@ -1,4 +1,4 @@
-import { Activity, ActivityType } from "@m2c2kit/core";
+import { Activity, ActivityType, M2Error } from "@m2c2kit/core";
 
 export class DomHelper {
   /**
@@ -40,7 +40,7 @@ export class DomHelper {
   static addLoadingElements(): void {
     const canvasDiv = document.getElementById("m2c2kit-canvas-div");
     if (!canvasDiv) {
-      throw new Error("Could not find container element");
+      throw new M2Error("Could not find container element");
     }
 
     let overlayDiv = document.getElementById("m2c2kit-canvas-overlay-div");
