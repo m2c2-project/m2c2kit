@@ -2,7 +2,7 @@
 /**
  * The code in this file is adapted from a reference CLI implementation from
  * the Angular devkit repository:
- *   https://github.com/angular/angular-cli/blob/a7f466a5fa87c51b914441524bd0dff5b3957ced/packages/angular_devkit/schematics_cli/bin/schematics.ts
+ *   https://github.com/angular/angular-cli/blob/cccd35e6f31906870e0761136884cb715c9afca8/packages/angular_devkit/schematics_cli/bin/schematics.ts
  * The license for that code is as follows:
  * @license
  * Copyright Google LLC All Rights Reserved.

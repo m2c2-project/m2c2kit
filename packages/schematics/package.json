@@ -28,9 +28,9 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@angular-devkit/core": "^19.2.10",
-    "@angular-devkit/schematics": "^19.2.10",
-    "@schematics/angular": "^19.2.10",
+    "@angular-devkit/core": "^19.2.11",
+    "@angular-devkit/schematics": "^19.2.11",
+    "@schematics/angular": "^19.2.11",
     "archiver": "7.0.1",
     "es-module-shims": "2.4.1",
     "findup-sync": "5.0.0",
@@ -38,7 +38,7 @@
     "tar-stream": "3.1.7"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^19.2.10",
+    "@angular-devkit/schematics-cli": "^19.2.11",
     "@m2c2kit/core": "0.3.29",
     "@m2c2kit/session": "0.3.11",
     "@types/archiver": "6.0.3",
