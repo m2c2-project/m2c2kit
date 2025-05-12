@@ -53,29 +53,70 @@ yargs(hideBin(process.argv))
           f,
         )} (${assessmentVersion})`;
 
-        let trialSchema: M2c2Schema | undefined = undefined;
-        let parametersSchema: M2c2Schema | undefined = undefined;
+        let trialSchema: M2c2Schema | undefined | null = undefined;
+        let parametersSchema: M2c2Schema | undefined | null = undefined;
+        let scoringSchema: M2c2Schema | undefined | null = undefined;
 
         if (
           argv.schema === "TrialSchema" ||
           (argv.schema as string).toLowerCase() === "all"
         ) {
           trialSchema = getSchemaFromSourceFile(f, "TrialSchema");
+          if (trialSchema === null) {
+            // no TrialSchema is a fatal error
+            process.stderr.write(
+              `No declaration for variable of type TrialSchema found in ${f}` +
+                EOL,
+            );
+            process.exit(1);
+          }
           let automaticTrialSchema: object;
           if (!argv["game-class"]) {
-            automaticTrialSchema = getAutomaticTrialSchemaFromCorePackage();
+            automaticTrialSchema = getAutomaticSchemaFromCorePackage("Trial");
           } else {
-            automaticTrialSchema = getAutomaticTrialSchemaFromSourceFile(
+            automaticTrialSchema = getAutomaticSchemaFromSourceFile(
               argv["game-class"].toString(),
+              "Trial",
             );
           }
           trialSchema = { ...automaticTrialSchema, ...trialSchema };
+        }
+        if (
+          argv.schema === "ScoringSchema" ||
+          (argv.schema as string).toLowerCase() === "all"
+        ) {
+          scoringSchema = getSchemaFromSourceFile(f, "ScoringSchema");
+          if (scoringSchema) {
+            let automaticScoringSchema: object;
+            if (!argv["game-class"]) {
+              automaticScoringSchema =
+                getAutomaticSchemaFromCorePackage("Scoring");
+            } else {
+              automaticScoringSchema = getAutomaticSchemaFromSourceFile(
+                argv["game-class"].toString(),
+                "Scoring",
+              );
+            }
+            scoringSchema = { ...automaticScoringSchema, ...scoringSchema };
+          } else {
+            // no ScoringSchema is not a fatal error, because not all assessments
+            // have scoring
+            scoringSchema = undefined;
+          }
         }
         if (
           argv.schema === "GameParameters" ||
           (argv.schema as string).toLowerCase() === "all"
         ) {
           parametersSchema = getSchemaFromSourceFile(f, "GameParameters");
+          if (parametersSchema === null) {
+            // no GameParameters is a fatal error
+            process.stderr.write(
+              `No declaration for variable of type GameParameters found in ${f}` +
+                EOL,
+            );
+            process.exit(1);
+          }
         }
 
         if (outputFormat === "json") {
@@ -85,7 +126,10 @@ yargs(hideBin(process.argv))
             );
             process.exit(1);
           }
-          dataJson.push(trialSchema ?? parametersSchema ?? {});
+          const schema = trialSchema ?? parametersSchema ?? scoringSchema;
+          if (schema !== undefined) {
+            dataJson.push(schema);
+          }
           return;
         }
 
@@ -100,12 +144,15 @@ yargs(hideBin(process.argv))
 
           if (
             argv.schema === "TrialSchema" ||
-            argv.schema === "GameParameters"
+            argv.schema === "GameParameters" ||
+            argv.schema === "ScoringSchema"
           ) {
             if (argv.schema === "TrialSchema") {
               description = "Trial data schema";
             } else if (argv.schema === "GameParameters") {
               description = "Game parameters schema";
+            } else if (argv.schema === "ScoringSchema") {
+              description = "Scoring data schema";
             }
 
             jsonSchema = {
@@ -113,7 +160,8 @@ yargs(hideBin(process.argv))
               title: title,
               type: "object",
               description: description,
-              properties: trialSchema ?? parametersSchema ?? {},
+              properties:
+                trialSchema ?? parametersSchema ?? scoringSchema ?? undefined,
             };
             return;
           }
@@ -135,6 +183,14 @@ yargs(hideBin(process.argv))
                 description: "Trial data schema",
                 properties: trialSchema,
               },
+              ScoringSchema:
+                scoringSchema !== undefined
+                  ? {
+                      type: "object",
+                      description: "Scoring data schema",
+                      properties: scoringSchema,
+                    }
+                  : undefined,
             },
           };
           return;
@@ -148,7 +204,7 @@ yargs(hideBin(process.argv))
           process.exit(1);
         }
 
-        const schema = trialSchema ?? parametersSchema ?? {};
+        const schema = trialSchema ?? parametersSchema ?? scoringSchema ?? {};
         Object.keys(schema).forEach((k) => {
           const type = schema[k].type;
           let typeString;
@@ -164,30 +220,18 @@ yargs(hideBin(process.argv))
           } else {
             enumString = _enum;
           }
-          if (argv.schema === "GameParameters") {
-            data.push({
-              schema: argv.schema,
-              assessment: assessmentName,
-              property: k,
-              type: typeString,
-              default: schema[k].default,
-              format: schema[k].format,
-              enum: enumString,
-              description: schema[k].description,
-              json: JSON.stringify(schema[k]),
-            });
-          } else {
-            data.push({
-              schema: argv.schema,
-              assessment: assessmentName,
-              property: k,
-              type: typeString,
-              format: schema[k].format,
-              enum: enumString,
-              description: schema[k].description,
-              json: JSON.stringify(schema[k]),
-            });
-          }
+          data.push({
+            schema: argv.schema,
+            assessment: assessmentName,
+            property: k,
+            type: typeString,
+            default:
+              argv.schema === "GameParameters" ? schema[k].default : undefined,
+            format: schema[k].format,
+            enum: enumString,
+            description: schema[k].description,
+            json: JSON.stringify(schema[k]),
+          });
         });
       });
 
@@ -207,7 +251,7 @@ yargs(hideBin(process.argv))
   .option("schema", {
     type: "string",
     description:
-      "schema type: TrialSchema, GameParameters, or all (all valid only for json-schema output)",
+      "schema type: TrialSchema, GameParameters, ScoringSchema or all (all valid only for json-schema output)",
     demandOption: true,
   })
   .option("files", {
@@ -233,7 +277,18 @@ yargs(hideBin(process.argv))
   .demandCommand(1, "You need at least one command")
   .parse();
 
-function getAutomaticTrialSchemaFromCorePackage() {
+/**
+ * Gets automatic schema from the core package
+ *
+ * @param schemaType - The type of schema to retrieve: `Trial` or `Scoring`.
+ * `GameParameters` do not have automatic schema.
+ * @returns The schema object
+ */
+function getAutomaticSchemaFromCorePackage(
+  schemaType: "Trial" | "Scoring",
+): object {
+  const propertyName = `automatic${schemaType}Schema`;
+
   const coreBundle = findupSync("node_modules/@m2c2kit/core/dist/index.js");
   if (!coreBundle) {
     process.stderr.write(
@@ -255,11 +310,11 @@ function getAutomaticTrialSchemaFromCorePackage() {
 
   const binaryExpression = gameClass
     .getDescendantsOfKind(SyntaxKind.BinaryExpression)
-    .filter((d) => d.getLeft().getText() === "this.automaticTrialSchema")
+    .filter((d) => d.getLeft().getText() === `this.${propertyName}`)
     .find(Boolean);
   if (!binaryExpression) {
     process.stderr.write(
-      "No automaticTrialSchema property found in file " + coreBundle,
+      `No ${propertyName} property found in file ${coreBundle}`,
     );
     process.exit(1);
   }
@@ -272,12 +327,24 @@ function getAutomaticTrialSchemaFromCorePackage() {
   }
 
   process.stderr.write(
-    `Could not get automaticTrialSchema from file ${coreBundle}` + EOL,
+    `Could not get ${propertyName} from file ${coreBundle}` + EOL,
   );
   process.exit(1);
 }
 
-function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
+/**
+ * Gets automatic schema from a source file
+ *
+ * @param sourceFile - Path to the Game.ts source file
+ * @param schemaType - The type of schema to retrieve: `Trial` or `Scoring`.
+ * `GameParameters` do not have automatic schema.
+ * @returns The schema object
+ */
+function getAutomaticSchemaFromSourceFile(
+  sourceFile: string,
+  schemaType: "Trial" | "Scoring",
+): object {
+  const propertyName = `automatic${schemaType}Schema`;
   const project = new Project();
   const file = project.addSourceFileAtPath(sourceFile);
   const gameClass = file
@@ -288,27 +355,34 @@ function getAutomaticTrialSchemaFromSourceFile(sourceFile: string) {
     process.stderr.write(`No Game class found in ${sourceFile}` + EOL);
     process.exit(1);
   }
-  const automaticTrialSchemaDeclaration = gameClass
+  const schemaDeclaration = gameClass
     .getChildrenOfKind(SyntaxKind.PropertyDeclaration)
-    .filter((d) => d.getName() === "automaticTrialSchema")
+    .filter((d) => d.getName() === propertyName)
     .find(Boolean);
-  if (!automaticTrialSchemaDeclaration) {
+  if (!schemaDeclaration) {
     process.stderr.write(
-      "No automaticTrialSchema property found in Game class at " + sourceFile,
+      `No ${propertyName} property found in Game class at ${sourceFile}`,
     );
     process.exit(1);
   }
-  const schemaString = automaticTrialSchemaDeclaration
+  const schemaString = schemaDeclaration
     .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
     .getText();
   const schema = eval("(" + schemaString + ")");
   return schema as object;
 }
 
+/**
+ * Gets schema from a source file.
+ *
+ * @param sourceFile - Path to the TypeScript source file
+ * @param schemaName - The name of the schema to retrieve
+ * @returns The schema object or null if not found
+ */
 function getSchemaFromSourceFile(
   sourceFile: string,
-  schemaName: string,
-): M2c2Schema {
+  schemaName: "TrialSchema" | "GameParameters" | "ScoringSchema",
+): M2c2Schema | null {
   const project = new Project();
   const file = project.addSourceFileAtPath(sourceFile);
   const gameClass = file
@@ -328,8 +402,7 @@ function getSchemaFromSourceFile(
     (f) => f.getTypeNode()?.getText() === schemaName,
   );
   if (!declaration) {
-    process.stderr.write(`No declaration found in ${sourceFile}` + EOL);
-    process.exit(1);
+    return null;
   }
   const schemaString = declaration
     .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)

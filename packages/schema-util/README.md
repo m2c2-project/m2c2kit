@@ -7,7 +7,7 @@ It is convenient if this tool is installed globally, i.e., `npm install -g @m2c2
 ## Usage
 
 - Output format is specified with `--format` option and can be `csv` (default), `json`, or `json-schema`.
-- The requested schema is specified with `--schema` and can be `GameParameters`, `TrialSchema`, or `all`. Note: `all` is supported only for format `json-schema`.
+- The requested schema is specified with `--schema` and can be `GameParameters`, `TrialSchema`, `ScoringSchema`, or `all`. Note: `all` is supported only for format `json-schema`.
 - The source file(s) to be analyzed are specified with `--files` option. Multiple files can be specified separated by commas. Note: multiple source files are not supported for format `json-schema`.
 - The `--title` option specifies the title of the schema when used with format `json-schema`. The string `__VERSION__` in the title will be replaced by the actual version from the assessment's `package.json`.
 
@@ -27,10 +27,10 @@ schema-util list --schema=GameParameters --files=packages/assessment-symbol-sear
 schema-util list --schema=TrialSchema --files=packages/assessment-grid-memory/src/index.ts,packages/assessment-symbol-search/src/index.ts,packages/assessment-color-shapes/src/index.ts,packages/assessment-color-dots/src/index.ts > schemas.csv
 ```
 
-- Extract both GameParameters and TrialSchema (`--schema=all`) from an assessment to a single file as JSON schema. Include the version in the title:
+- Extract GameParameters, TrialSchema, and ScoringSchema (`--schema=all`) from an assessment to a single file as JSON schema. Include the version in the title:
 
 ```
-schema-util list --schema=all --files=packages/assessment-symbol-search/src/index.ts --format=json-schema --title="Configurable game parameters for Grid Memory version __VERSION__" > symbol-search-schemas.json
+schema-util list --schema=all --files=packages/assessment-symbol-search/src/index.ts --format=json-schema --title="Symbol Search version __VERSION__" > symbol-search-schemas.json
 ```
 
 License: Apache-2.0
