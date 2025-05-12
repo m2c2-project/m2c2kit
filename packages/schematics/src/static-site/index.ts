@@ -11,6 +11,8 @@ import { extractMethodBodyFromArrowFunctionString } from "./extractMethodBodyFro
 import { loadEsmModule } from "./loadEsmModule";
 import { getFilesRecursive } from "./getFilesRecursive";
 import { Configure, Entry, Setup, StaticSiteConfig } from "./StaticSiteConfig";
+import { Constants } from "../constants";
+
 /**
  * @m2c2kit/core and @m2c2kit/session are included only for their type
  * definitions. Thus, these are devDependencies in the package.json file.
@@ -776,6 +778,25 @@ session.initialize();`;
         .replace("<%- exampleQueryString %>", `"${exampleQueryString}"`),
     );
 
+    if (config.demo) {
+      if (config.demo.enabled) {
+        const defaultParams = config.demo.defaultParams ?? "";
+        tree.create(config.outDir + `/demo/index.html`, demoIndexHtml);
+        tree.create(
+          config.outDir + `/demo/index.js`,
+          demoIndexJs
+            .replace(
+              "<%- assessmentPaths %>",
+              `[` +
+                hostedAssessmentPaths.map((path) => `"${path}"`).join(",") +
+                `];`,
+            )
+            .replace("<%- defaultParams %>", `"${defaultParams}"`),
+        );
+        tree.create(config.outDir + `/demo/styles.css`, demoStylesCss);
+      }
+    }
+
     if (options.dockerfile) {
       const f = tree.get("Dockerfile");
       if (f) {
@@ -885,30 +906,35 @@ const newConfig = `/**
  * @type {StaticSiteConfig}
  */
 export default {
-  configVersion: "0.1.21",
+  configVersion: "${Constants.M2C2KIT_SCHEMATICS_PACKAGE_VERSION}",
   outDir: "./dist",
+  demo: {
+    // set this true to include the demo page
+    enabled: false,
+  },
+  // set this true to include the schemas.json file in each assessment's directory
+  includeSchemasJson: false,
   assessments: [
     {
       name: "@m2c2kit/assessment-symbol-search",
-      versions: ">=0.8.19",
+      versions: ">=0.8.26",
       // by setting the parameters property, the game's parameters can be
       // changed from the defaults built into the game. for game parameters,
-      // see https://m2c2-project.github.io/m2c2kit/docs/schemas/what-is-schema/
+      // see https://m2c2-project.github.io/m2c2kit-docs/docs/schemas/what-is-schema/
       // note that if game parameters are passed in through URL parameters,
       // they will override these.
       parameters: {
         number_of_trials: 4,
-        show_quit_button: false,
+        show_quit_button: true,
       },
     },
     {
       name: "@m2c2kit/assessment-grid-memory",
-      versions: ">=0.8.19",
+      versions: ">=0.8.26",
       parameters: {
         number_of_trials: 2,
-        show_quit_button: false,
       },
-    }    
+    }
   ],
   configure: (context, session, assessment) => {
     console.log(\`configuring assessment \${assessment.options.name} version \${assessment.options.version}\`)
@@ -929,4 +955,216 @@ export default {
     // });
   }  
 };
+`;
+
+const demoIndexHtml = `<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Assessment demos</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="index.js" defer></script>
+</head>
+
+<body>
+  <h1>Assessment demos</h1>
+  <label for="assessmentDropdown">Choose an assessment</label>
+  <select id="assessmentDropdown"></select>
+  <div><strong>Selected:</strong></div>
+  <div id="details"></div>
+  <label for="urlParams">Parameters:</label>
+  <input type="text" id="urlParams" placeholder="URL parameters" />
+  <button id="startButton">Start</button>
+</body>
+
+</html>
+`;
+
+// There are backticks within backticks, so we escape them with
+// String.fromCharCode(96)
+// the regex code line was originally this:
+//   const regexString = "\\/assessments\\/(@?[^@\\/]+(?:\\/[^@\\/]+)?)@([\\d.]+)\\/index\\.html$";
+// but below it appears differently due to escaping
+const demoIndexJs = `const hostedAssessmentPaths = <%- assessmentPaths %>;
+
+function compareSemver(semver1, semver2) {
+  const [major1 = 0, minor1 = 0, patch1 = 0] = semver1.split('.').map(Number);
+  const [major2 = 0, minor2 = 0, patch2 = 0] = semver2.split('.').map(Number);
+
+  if (major1 !== major2) return major1 > major2 ? 1 : -1;
+  if (minor1 !== minor2) return minor1 > minor2 ? 1 : -1;
+  if (patch1 !== patch2) return patch1 > patch2 ? 1 : -1;
+
+  return 0;
+}
+
+function extractLatestAssessments(paths) {
+  const assessments = {};
+
+  paths.forEach((path) => {
+    // the regex captures the assessment name and version from the path in the format:
+    //   /assessments/name@version/index.html.
+    // name may contain an npm namespace, e.g., @m2c2kit/assessment-symbol-search
+    // version is a sequence of digits and dots (e.g. 0.8.19).
+    const regexString =
+      "\\\\/assessments\\\\/(@?[^@\\\\/]+(?:\\\\/[^@\\\\/]+)?)@([\\\\d.]+)\\\\/index\\\\.html$";
+
+    const match = path.match(new RegExp(regexString));
+    if (match) {
+      const assessment = match[1];
+      const version = match[2];
+      if (
+        !assessments[assessment] ||
+        compareSemver(version, assessments[assessment].version) > 0
+      ) {
+        assessments[assessment] = { version, path };
+      }
+    }
+  });
+
+  return Object.entries(assessments).map(([assessment, props]) => ({
+    assessment,
+    latest: props.version,
+    path: props.path,
+  }));
+}
+
+const assessments = extractLatestAssessments(hostedAssessmentPaths);
+const dropdown = document.getElementById("assessmentDropdown");
+const details = document.getElementById("details");
+const urlParamsInput = document.getElementById("urlParams");
+const startButton = document.getElementById("startButton");
+
+const defaultParams = <%- defaultParams %>;
+urlParamsInput.value = defaultParams;
+
+assessments.forEach((item, index) => {
+  const option = document.createElement("option");
+  option.value = index;
+  option.textContent = item.assessment;
+  dropdown.appendChild(option);
+});
+
+dropdown.addEventListener("change", () => {
+  const selectedIndex = dropdown.value;
+  const selectedAssessment = assessments[selectedIndex];
+  if (selectedAssessment) {
+    const schemasPath = selectedAssessment.path.replace(
+      "/index.html",
+      "/schemas.json"
+    );  
+    details.innerHTML = ${String.fromCharCode(96)}
+      <p>\${selectedAssessment.assessment}</p>
+      <p>Latest version: \${selectedAssessment.latest}</p>
+      <p>Schemas, if provided: <a href="\${schemasPath}" title="This will return a 404 not found error if the site was not configured to provide schemas">schemas.json</a></p>          
+    ${String.fromCharCode(96)};      
+  } else {
+    details.innerHTML = "<p>No assessment selected.</p>";
+  }
+});
+
+startButton.addEventListener("click", () => {
+  const selectedIndex = dropdown.value;
+  const selectedAssessment = assessments[selectedIndex];
+  const urlParams = urlParamsInput.value.trim();
+
+  if (selectedAssessment) {
+    let url = ${String.fromCharCode(96)}/?assessment=\${selectedAssessment.assessment}@\${selectedAssessment.latest}${String.fromCharCode(96)};
+    if (urlParams) {
+      url += ${String.fromCharCode(96)}&\${urlParams}${String.fromCharCode(96)};
+    }
+    window.location.href = url;
+  } else {
+    alert("Please select an assessment first.");
+  }
+});
+
+// Trigger change event initially to display details of the first option
+dropdown.dispatchEvent(new Event("change"));`;
+
+const demoStylesCss = `:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --background-color: #f8f9fa;
+  --text-color: #343a40;
+  --button-hover-color: #0056b3;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding: 40px;
+  }
+
+  select, input[type="text"] {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+body {
+  font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  text-align: left;
+  color: var(--primary-color);
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+select, input[type="text"] {
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  border: 1px solid var(--secondary-color);
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Add subtle hover effects to inputs */
+input[type="text"]:hover,
+select:hover {
+  border-color: var(--primary-color);
+}
+
+#details {
+  margin-bottom: 15px;
+}
+
+#details p {
+  font-size: 16px;
+  text-indent: 20px;
+  margin: 5px 0;
+}
+
+button {
+  display: block;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
+  width: auto;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+button:hover {
+  background-color: var(--button-hover-color);
+}
 `;

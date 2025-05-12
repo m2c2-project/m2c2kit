@@ -10,6 +10,13 @@ export interface StaticSiteConfig {
   minified?: boolean;
   /** If an assessment has a schemas.json file, include it in the static site. Default is false. */
   includeSchemasJson?: boolean;
+  /** Configuration for a page at /demo/index.html where assessments can be run for demonstration purposes. If omitted, then no page will be created. */
+  demo?: {
+    /** Should the demo page be enabled? */
+    enabled: boolean;
+    /** Default assessment parameters to be pre-filled in the demo UI for all assessments. */
+    defaultParams?: string;
+  };
   /** Assessments to be included in the static website. */
   assessments: Array<
     RegistryAssessment | ExtendedAssessment | TarballAssessment
