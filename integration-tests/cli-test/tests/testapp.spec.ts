@@ -64,6 +64,25 @@ test.describe("m2c2 cli static-site integration test", () => {
     const scene1Png = readPngFromFile("./images/testModuleScene1.png");
     expect(diffPixelCount(canvasPng, scene1Png)).toBe(0);
   });
+
+  test("static site creates demo page", async ({ browser }) => {
+    const page = await browser.newPage();
+    await page.goto("http://testmodule:8080/demo/index.html");
+    const content = await page.content();
+    expect(content).toContain("Assessment demos");
+  });
+
+  test("static site copies testmodule schemas.json to assessment folder", async ({
+    browser,
+  }) => {
+    const page = await browser.newPage();
+    const url =
+      "http://testmodule:8080/assessments/testmodule@1.0.0/schemas.json";
+    const response = await page.goto(url);
+    expect(response?.ok()).toBeTruthy();
+    const content = await page.content();
+    expect(content).toContain(`"$schema"`);
+  });
 });
 
 async function getM2c2Canvas(browser: Browser, url: string): Promise<Locator> {

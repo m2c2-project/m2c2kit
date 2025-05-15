@@ -32,8 +32,12 @@ mkdir static-site
 cd static-site
 cat <<EOF > site-config.mjs
 export default {
-  configVersion: "0.1.21",
+  configVersion: "0.1.28",
   outDir: "./dist",
+  includeSchemasJson: true,
+  demo: {
+    enabled: true,
+  },
   assessments: [
     {
       name: "testmodule",
