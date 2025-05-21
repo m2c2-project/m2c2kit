@@ -12,7 +12,7 @@
   ],
   "devDependencies": {
     "@types/findup-sync": "4.0.5",
-    "@types/node": "22.15.17",
+    "@types/node": "22.15.21",
     "esbuild": "0.25.4"
   },
   "scripts": {
@@ -33,7 +33,7 @@
   "dependencies": {
     "csv": "6.3.11",
     "findup-sync": "5.0.0",
-    "ts-morph": "25.0.1",
+    "ts-morph": "26.0.0",
     "yargs": "17.7.2"
   },
   "engines": {
