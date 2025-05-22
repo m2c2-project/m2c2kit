@@ -4,6 +4,159 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.30] - 2025-05-22
+
+### Added
+
+- Strikethrough and overline decoration support in label text. Tags for this are `s` and `o`
+- In localization, the label text can contain keys for translation, which are specified within opening `[[` and closing `]]`. The keys will be replaced with translated text, as specified in the game's translation object for the current locale.
+- A game can calculate its own scores from assessment data. To do this, implement the `ScoringProvider` interface, which is the `calculateScores()` method. In addition, scoring schema must be specified in the game options; `calculateScores()` simply generates the scores. To propagate them back to the host session, `addScoringData()` adds them to the game, and `scoringComplete()` marks the scoring as complete and triggers a callback to send the scoring data to the session.
+- When errors are thrown within the m2c2kit framework, throw an error of type `M2Error`, rather than `Error`, so we can identify it as coming from the m2c2kit framework. `M2Error` extends the standard `Error` class, so it behaves the same as `Error`, and the only difference is that its name property is `M2Error`.
+
+### Fixed
+
+- Previously, underlining within label text was done by manually drawing a line beneath the text segment. This caused some visual inconsistencies. Now, the underline decoration native to canvaskit is used.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.29] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.12] - 2025-05-22
+
+### Added
+
+- To track uncaught exceptions, a `DiagnosticsReporter` adds global error handlers. These errors can be acted upon (e.g., logged) by providing code to the new `onData()` method on `Session` and checking if the event has `dataType` equal to `Diagnostics`. Currently, this diagnostics reporter will be activated only if the diagnostics option in `SessionOptions` or the `diagnostics` url parameter is set to true. Diagnostics reporting is experimental and will change in the future.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.17] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/data-calc` [0.8.1] - 2025-05-22
+
+### Added
+
+- Summarize operations can also accept arguments for values and arrays of values, not just a variable name in the current `DataCalc` object.
+- The `slice` method now supports negative indexes.
+
+### Changed
+
+- Option `coerceBooleans` defaults to true.
+- When passing only the start argument to the `slice` method, it returns a single observation at the 0-based start index.
+- Passing into the `pull` method a variable name that is not present in the `DataCalc` object now returns null, rather than throwing an error.
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.29] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.29] - 2025-05-22
+
+### Added
+
+- Option in `StaticSiteConfig` so that a demo endpoint is created for running assessments.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.23] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.26] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.24] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.25] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.20] - 2025-05-22
+
+### Added
+
+- Output `ScoringSchema`, if present.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.9] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.28] - 2025-05-22
+
+### Added
+
+- Once a participant completes all trials, game generates scores that summarize the trials. Scores are generated only if the game parameter `scoring` is set to true.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.28] - 2025-05-22
+
+### Added
+
+- Once a participant completes all trials, game generates scores that summarize the trials. Scores are generated only if the game parameter `scoring` is set to true. Scoring for this assessment is not completely implemented yet.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.28] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.28] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.25] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.26] - 2025-05-22
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.29] - 2025-03-27
 
 ### Added
