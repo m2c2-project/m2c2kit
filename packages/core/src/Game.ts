@@ -3105,14 +3105,19 @@ export class Game implements Activity {
     }
 
     const missingParametersCount = [sx, sy, sw, sh]
-      .map((x) => (x ? 0 : 1) as number)
+      .map((x) => (x === undefined ? 1 : 0) as number)
       .reduce((a, b) => a + b);
 
     return new Promise((resolve, reject) => {
       switch (missingParametersCount) {
         case 0: {
-          if (!sx || !sy || !sw || !sh) {
-            // should never get here because case is 0 missing parameters
+          if (
+            sx === undefined ||
+            sy === undefined ||
+            sw === undefined ||
+            sh === undefined
+          ) {
+            // should never get here because this case is 0 missing parameters
             reject("missing values in arguments for takeScreenshot()");
             return;
           }
