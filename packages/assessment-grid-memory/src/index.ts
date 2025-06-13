@@ -413,6 +413,26 @@ class GridMemory extends Game implements ScoringProvider {
         TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
         TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
       },
+      "it-IT": {
+        localeName: "Italiano",
+        INSTRUCTIONS_TITLE: "Griglia di memoria",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Per questa attività, cerca di ricordare la posizione di {{NUMBER_OF_DOTS}} punti.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Prima di piazzare i {{NUMBER_OF_DOTS}} punti al loro posto, dovrai toccare delle lettere 'F' sullo schermo, il più velocemente possibile.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Premi INIZIA per cominciare!",
+        GET_READY: "PREPARATI",
+        REMEMBER_LOCATIONS: "Ricorda la posizione dei punti!",
+        TOUCH_INTERFERENCE: "Tocca le F!",
+        DONE_BUTTON_TEXT: "Fatto",
+        WHERE_WERE: "Dove erano i punti?",
+        MUST_SELECT: "Devi selezionare tutte le {{NUMBER_OF_DOTS}} posizioni!",
+        START_BUTTON_TEXT: "INIZIA",
+        NEXT_BUTTON_TEXT: "Avanti",
+        BACK_BUTTON_TEXT: "Indietro",
+        TRIALS_COMPLETE_SCENE_TEXT: "Attività completata.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
       // cSpell:enable
     };
 
