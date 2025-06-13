@@ -11,4 +11,4 @@ RUN chmod +x /usr/local/bin/testmodule.sh
 # 80 is listening for the "packages-published" message
 EXPOSE 8080 80
 
-CMD testmodule.sh
+CMD ["testmodule.sh"]

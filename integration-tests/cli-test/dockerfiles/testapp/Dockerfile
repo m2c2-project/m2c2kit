@@ -11,4 +11,4 @@ RUN chmod +x /usr/local/bin/testapp.sh
 # 80 is listening for the "packages-published" message
 EXPOSE 3000 35729 80
 
-CMD testapp.sh
+CMD ["testapp.sh"]

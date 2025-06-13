@@ -722,12 +722,12 @@ session.initialize();`;
           tree.create(treeFilename, buffer);
         }
         /**
-         * below integrity is for es-module-shims 2.5.1. It will have to be
+         * below integrity is for es-module-shims 2.6.0. It will have to be
          * updated when a new version is released.
          */
         indexHtml = indexHtml.replace(
           "<%- esModuleShims %>",
-          '\n  <script async src="../../../modules/es-module-shims/dist/es-module-shims.js" integrity="sha384-63hbO2xG0GqYsHgwd+K/Ws8nW7G6OcmM0gMdzrawyC2ePt418SAyAH8iD25DCvx7"></script>',
+          '\n  <script async src="../../../modules/es-module-shims/dist/es-module-shims.js" integrity="sha384-37KzzHAPP/K8RpdxApkRGiI4fVu98Vqw5HAKOnbBOjBPp7T+T3pnHe+PqGA2pQMq"></script>',
         );
       } else {
         indexHtml = indexHtml.replace("<%- esModuleShims %>", "");

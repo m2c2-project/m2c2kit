@@ -13,7 +13,7 @@
   "devDependencies": {
     "@types/findup-sync": "4.0.5",
     "@types/node": "22.15.21",
-    "esbuild": "0.25.4"
+    "esbuild": "0.25.5"
   },
   "scripts": {
     "build": "node esbuild.mjs",
@@ -34,7 +34,7 @@
     "csv": "6.3.11",
     "findup-sync": "5.0.0",
     "ts-morph": "26.0.0",
-    "yargs": "17.7.2"
+    "yargs": "18.0.0"
   },
   "engines": {
     "node": ">=18"

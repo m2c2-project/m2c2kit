@@ -1,13 +1,13 @@
 import { hashM2c2kitAssets } from "..";
-import cpy from "cpy";
 import { rimrafSync } from "rimraf";
+import { copy } from "fs-extra";
 import * as fs from "fs";
 
 describe("hashM2c2kitAssets rollup plugin", () => {
   beforeAll(async () => {
     rimrafSync("packages/build-helpers/src/__tests__/dist");
-    await cpy(
-      "packages/build-helpers/src/__tests__/dist-test/**/*",
+    await copy(
+      "packages/build-helpers/src/__tests__/dist-test",
       "packages/build-helpers/src/__tests__/dist",
     );
   });
