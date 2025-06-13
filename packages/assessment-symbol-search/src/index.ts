@@ -413,6 +413,26 @@ positions.",
         TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
         TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
       },
+      "it-IT": {
+        localeName: "Italiano",
+        INSTRUCTIONS_TITLE: "Ricerca di simboli",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1:
+          "Obiettivo: Tocca il più velocemente e accuratamente possibile il gruppo in basso che è esattamente uguale al gruppo in alto.",
+        INSTRUCTIONS_TEXT_PAGE_1:
+          "Vedrai gruppi di simboli nella parte alta e nella parte bassa del tuo schermo.",
+        INSTRUCTIONS_TEXT_PAGE_2:
+          "Quando richiesto, tocca il gruppo in basso che è esattamente uguale al gruppo in alto.",
+        INSTRUCTIONS_TEXT_PAGE_3:
+          "Per favore, cerca di essere il più veloce ed accurato possibile.",
+        START_BUTTON_TEXT: "INIZIA",
+        NEXT_BUTTON_TEXT: "Avanti",
+        BACK_BUTTON_TEXT: "Indietro",
+        GET_READY_COUNTDOWN_TEXT: "PREPARATI!",
+        WHICH_MATCHES_TEXT: "Quali di questi corrisponde al gruppo in alto?",
+        OR_TEXT: "oppure",
+        TRIALS_COMPLETE_SCENE_TEXT: "Attività completata.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK",
+      },
       "jp-JP": {
         localeName: "Japanese",
         localeSvg: {
