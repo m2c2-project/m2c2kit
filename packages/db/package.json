@@ -31,7 +31,7 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "28.0.3",
+    "@rollup/plugin-commonjs": "28.0.5",
     "@rollup/plugin-node-resolve": "16.0.1",
     "rimraf": "6.0.1",
     "rollup": "4.43.0",
