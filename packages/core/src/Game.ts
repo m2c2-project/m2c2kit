@@ -218,15 +218,66 @@ export class Game implements Activity {
     this.eventStore.addEvent(freeNodesSceneNewEvent);
   }
 
-  private getImportedModuleBaseUrl(packageName: string, moduleUrl: string) {
-    const regex = new RegExp(`^.*${packageName}[^\\/]*`);
-    const matches = moduleUrl.match(regex);
-    if (!matches || matches.length === 0) {
-      throw new M2Error(
-        `Could not calculate imported assessment package base URL. Package name: ${packageName}, module URL: ${moduleUrl}`,
+  /**
+   * Returns the base URL of an imported module.
+   *
+   * @remarks Previously, a regex was used:
+   * `const regex = new RegExp(`^.*${packageName}[^\\/]*`);`
+   * but this triggered irrelevant warnings for ReDoS in some overly
+   * sensitive package scanners, so now we use URL and pathname parsing.
+   * Also: trailing slashes are removed from the returned base URL.
+   *
+   * @param packageName - the name of the imported package module, like
+   * `@m2c2kit/assessment-symbol-search`
+   * @param moduleUrl - the full URL of the module's entrypoint, possibly
+   * including a version suffix, like `https://cdn.com/@m2c2kit/assessment-symbol-search@0.8.13/dist/index.js`
+   * @returns - the base URL of the imported module, without the entrypoint,
+   * like `https://cdn.com/@m2c2kit/assessment-symbol-search@0.8.13`
+   */
+  private getImportedModuleBaseUrl(
+    packageName: string,
+    moduleUrl: string,
+  ): string {
+    const url = new URL(moduleUrl);
+    const segments = url.pathname.split("/").filter(Boolean);
+    let lastMatchIndex = -1;
+
+    for (let i = 0; i < segments.length - 1; i++) {
+      if (packageName.startsWith("@")) {
+        const nameParts = packageName.split("/");
+        if (nameParts.length === 2) {
+          const scopePart = nameParts[0]; // e.g., "@scope"
+          const namePart = nameParts[1]; // e.g., "name"
+          for (let i = 0; i < segments.length - 1; i++) {
+            if (
+              segments[i] === scopePart &&
+              (segments[i + 1] === namePart ||
+                segments[i + 1].startsWith(`${namePart}@`))
+            ) {
+              lastMatchIndex = i + 1;
+            }
+          }
+        }
+        // If nameParts.length !== 2, it's a malformed scoped package name,
+        // lastMatchIndex will remain -1, and an error will be thrown, which is appropriate.
+      } else {
+        if (
+          segments[i] === packageName ||
+          segments[i].startsWith(`${packageName}@`)
+        ) {
+          lastMatchIndex = i;
+        }
+      }
+    }
+
+    if (lastMatchIndex === -1) {
+      throw new Error(
+        `Could not locate base URL for package "${packageName}" in "${moduleUrl}"`,
       );
     }
-    return matches[0];
+
+    const basePath = segments.slice(0, lastMatchIndex + 1).join("/");
+    return `${url.origin}/${basePath}`.replace(/\/*$/, "");
   }
 
   private addLocalizationParametersToGameParameters(): void {

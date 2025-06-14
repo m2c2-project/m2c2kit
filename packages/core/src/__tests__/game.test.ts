@@ -1122,3 +1122,75 @@ describe("custom trial schema", () => {
     expect(g3.data.trials[1].dog_age).toBe(13);
   });
 });
+
+describe("getImportedModuleBaseUrl", () => {
+  let g1: Game1;
+
+  beforeAll(() => {
+    g1 = new Game1();
+  });
+
+  const testCases = [
+    {
+      description: "Scoped package with version suffix",
+      packageName: "@m2c2kit/assessment-symbol-search",
+      moduleUrl:
+        "https://cdn.jsdelivr.net/npm/@m2c2kit/assessment-symbol-search@0.8.13/dist/index.js",
+      expected:
+        "https://cdn.jsdelivr.net/npm/@m2c2kit/assessment-symbol-search@0.8.13",
+    },
+    {
+      description: "Scoped package without version",
+      packageName: "@scope/abc-def",
+      moduleUrl: "https://cdn.com/libs/@scope/abc-def/index.js",
+      expected: "https://cdn.com/libs/@scope/abc-def",
+    },
+    {
+      description: "Unscoped package with version suffix",
+      packageName: "abc",
+      moduleUrl: "https://cdn.com/libs/abc@2.1.0/index.js",
+      expected: "https://cdn.com/libs/abc@2.1.0",
+    },
+    {
+      description: "Unscoped package exact match",
+      packageName: "abc",
+      moduleUrl: "https://cdn.com/libs/abc/index.js",
+      expected: "https://cdn.com/libs/abc",
+    },
+    {
+      description: "Scoped package not present",
+      packageName: "@ghost/pkg",
+      moduleUrl: "https://cdn.com/libs/@scope/abc/index.js",
+      expected: "[error]",
+    },
+    {
+      description: "Unscoped package not present",
+      packageName: "puppy",
+      moduleUrl: "https://cdn.com/libs/@scope/abc/index.js",
+      expected: "[error]",
+    },
+    {
+      description: "Scoped package similar but not a match",
+      packageName: "@foo/bar",
+      moduleUrl: "https://cdn.com/libs/@foo/bar-extra@1.0/dist/index.js",
+      expected: "[error]",
+    },
+  ];
+
+  test.each(testCases)(
+    "$description",
+    ({ packageName, moduleUrl, expected }) => {
+      if (expected === "[error]") {
+        expect(() =>
+          // @ts-expect-error accessing private method for testing
+          g1.getImportedModuleBaseUrl(packageName, moduleUrl),
+        ).toThrow();
+      } else {
+        expect(
+          // @ts-expect-error accessing private method for testing
+          g1.getImportedModuleBaseUrl(packageName, moduleUrl),
+        ).toBe(expected);
+      }
+    },
+  );
+});

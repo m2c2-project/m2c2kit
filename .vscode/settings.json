@@ -25,6 +25,7 @@
    */
   "jest.jestCommandLine": "npx env-cmd -f .env.jest jest",
   "jest.runMode": "on-demand",
+  "jest.useJest30": true,
   "cSpell.words": [
     "Alphaf",
     "CANVASKITWASM",
