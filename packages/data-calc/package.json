@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/data-calc",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "A library for transformation and calculation of m2c2kit data",
   "main": "index.js",
   "module": "dist/index.js",
@@ -19,7 +19,7 @@
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/data-calc"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.26",
+    "@m2c2kit/build-helpers": "0.3.27",
     "esbuild": "0.25.5",
     "rimraf": "6.0.1",
     "rollup": "4.43.0",

@@ -18,7 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@m2c2kit/core": "0.3.30"
+    "@m2c2kit/core": "0.3.31"
   },
   "license": "Apache-2.0"
 }

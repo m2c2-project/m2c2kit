@@ -4,6 +4,132 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.31] - 2025-06-14
+
+### Fixed
+
+- Bug checking for missing parameters in `Game.takeScreenshot()`.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/addons` [0.3.30] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.13] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.18] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/data-calc` [0.8.2] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.30] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.30] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.24] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.27] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.25] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.26] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.21] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.10] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.29] - 2025-06-14
+
+### Added
+
+- Italian translation.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.29] - 2025-06-14
+
+### Added
+
+- Italian translation.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.29] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.29] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.26] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.27] - 2025-06-14
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.30] - 2025-05-22
 
 ### Added
