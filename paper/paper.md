@@ -7,12 +7,12 @@ tags:
   - dynamics
   - time-series data
 authors:
-  - name: Nelson Roque
+  - name: Nelson A. Roque
     orcid: 0000-0003-1184-202X
     equal-contrib: true
     corresponding: true
     affiliation: "1, 2, 3"
-  - name: Scott Yabiku
+  - name: Scott T. Yabiku
     orcid: 0000-0002-3780-0349
     equal-contrib: true
     affiliation: 4
