@@ -53,5 +53,6 @@
     "Unpremul",
     "unshifted",
     "Vercel"
-  ]
+  ],
+  "sarif-viewer.connectToGithubCodeScanning": "on"
 }
