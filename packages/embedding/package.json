@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build build-nobundler dist .rollup.cache tsconfig.tsbuildinfo",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "Apache-2.0",

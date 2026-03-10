@@ -37,27 +37,6 @@ export default [
         sourcemap: true,
         plugins: [prependToBundle("index.js", codeToPrepend)],
       },
-      {
-        file: "./build-nobundler/m2c2kit.survey.esm.js",
-        format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.js",
-        },
-        sourcemap: false,
-        plugins: [prependToBundle("m2c2kit.survey.esm.js", codeToPrepend)],
-      },
-      {
-        file: "./build-nobundler/m2c2kit.survey.esm.min.js",
-        format: "es",
-        paths: {
-          "@m2c2kit/core": "./m2c2kit.core.esm.min.js",
-        },
-        sourcemap: false,
-        plugins: [
-          minify(),
-          prependToBundle("m2c2kit.survey.esm.min.js", codeToPrepend),
-        ],
-      },
     ],
     plugins: [nodeResolve(), commonjs(), esbuild()],
   },
@@ -81,16 +60,6 @@ export default [
           {
             src: "build/index.js*",
             dest: "dist",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.survey.esm.d.ts",
-          },
-          {
-            src: "dist/index.d.ts",
-            dest: "build-nobundler/",
-            rename: () => "m2c2kit.survey.esm.min.d.ts",
           },
           {
             src: [
