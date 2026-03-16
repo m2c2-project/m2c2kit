@@ -336,7 +336,7 @@ function extractSchemaFromClass(
     .find(Boolean);
   if (!binaryExpression) {
     return {
-      error: "No ${propertyName} property found in file ",
+      error: `No ${propertyName} property found in file `,
     };
   }
 

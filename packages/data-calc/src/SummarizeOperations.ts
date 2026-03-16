@@ -230,7 +230,7 @@ const nInternal: SummarizeFunction = (
   if (Array.isArray(variableOrValues)) return variableOrValues.length;
 
   // If a single scalar value was provided, treat non-missing as 1, missing as 0
-  if (variableOrValues === null || variableOrValues === undefined) return 0;
+  if (variableOrValues === null) return 0;
   return 1;
 };
 /**

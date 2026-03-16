@@ -126,7 +126,7 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
   }
 
   override initialize(): void {
-    let ckTextAlign: EmbindEnumEntity = this.canvasKit.TextAlign.Center;
+    let ckTextAlign: EmbindEnumEntity;
     switch (this.horizontalAlignmentMode) {
       case LabelHorizontalAlignmentMode.Center:
         ckTextAlign = this.canvasKit.TextAlign.Center;

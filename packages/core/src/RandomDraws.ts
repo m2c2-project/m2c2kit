@@ -206,7 +206,7 @@ export class RandomDraws {
     let loopCounter = 0;
 
     let i = 0;
-    let replacementCell = NaN;
+    let replacementCell: number;
     while (i < n) {
       const column = draws[i] % columns;
       const row = (draws[i] - column) / columns;

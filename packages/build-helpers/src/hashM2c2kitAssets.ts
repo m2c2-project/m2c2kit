@@ -90,7 +90,7 @@ export function hashM2c2kitAssets(rootDir: string, cwd = ""): Plugin {
         const filePaths = await getFilePathsRecursive(path.join(cwd, rootDir));
         for (const filePath of filePaths) {
           let skipRename = false;
-          if (filePath.endsWith(".html") || filePath.endsWith(".html")) {
+          if (filePath.endsWith(".html") || filePath.endsWith(".htm")) {
             skipRename = true;
           }
           // skip js files that are not index.js

@@ -1,6 +1,5 @@
 import { DataCalc } from "../DataCalc";
 import { Observation } from "../Observation";
-import { n } from "../SummarizeOperations";
 
 let d: Array<Observation>;
 let d_empty: Array<Observation>;
