@@ -108,7 +108,7 @@ export class Survey implements Activity {
             CONFIRM_SKIP_TEXT = message["default"] ?? "MISSING DEFAULT TEXT";
           } else {
             CONFIRM_SKIP_TEXT =
-              message[locale] ?? message["default"] ?? "MISSING ${locale} TEXT";
+              message[locale] ?? message["default"] ?? `MISSING ${locale} TEXT`;
           }
         }
       }
@@ -125,7 +125,7 @@ export class Survey implements Activity {
             CONFIRM_SKIP_AFFIRMATIVE =
               affirmativeText[locale] ??
               affirmativeText["default"] ??
-              "MISSING ${locale} TEXT";
+              `MISSING ${locale} TEXT`;
           }
         }
       }
@@ -141,7 +141,7 @@ export class Survey implements Activity {
             CONFIRM_SKIP_NEGATIVE =
               negativeText[locale] ??
               negativeText["default"] ??
-              "MISSING ${locale} TEXT";
+              `MISSING ${locale} TEXT`;
           }
         }
       }
@@ -368,7 +368,9 @@ export class Survey implements Activity {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {this.confirmationSkipModal.paragraphs?.map((line) => <p>{line}</p>)}
+          {this.confirmationSkipModal.paragraphs?.map((line) => (
+            <p>{line}</p>
+          ))}
           <div
             style={{
               display: "flex",
