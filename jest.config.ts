@@ -4,11 +4,9 @@ import { jsWithTsESM } from "ts-jest/presets/index.js";
 const isCI = process.env.CI === "true";
 
 const jestConfig: JestConfigWithTsJest = {
-  // Set maxWorkers to a lower value and workerIdleMemoryLimit to 512MB for
-  // CI environments to prevent CPU overload and out of memory errors in
-  // GitHub Actions.
+  // Set maxWorkers to a lower value for CI environments to prevent CPU
+  // overload in GitHub Actions.
   maxWorkers: isCI ? 3 : "50%",
-  workerIdleMemoryLimit: isCI ? "512MB" : "1GB",
 
   extensionsToTreatAsEsm: [".ts"],
   collectCoverage: true,

@@ -51,6 +51,8 @@ jobs:
               - '**/dist-webview/**'
               - '**/build/**'
               - '**/test/**'
+              # these committed build artifacts are used in tests of hashing and should be ignored by CodeQL
+              - 'packages/build-helpers/src/__tests__/dist-test/**'
               - '**/assets/**'
               - '**/coverage/**'
               - 'docs/**'
@@ -67,9 +69,8 @@ jobs:
         run: npm run build
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
-      # No need to run tests here because they will be run as part of the "Integration test" next step (see repo root Dockerfile, "RUN npm test")
-      # - name: Test
-      #   run: npm run test
+      - name: Test
+        run: npm run test
       - name: Integration test
         run: npm run integration-test
         timeout-minutes: 15

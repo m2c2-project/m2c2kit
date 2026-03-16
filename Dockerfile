@@ -43,7 +43,6 @@ RUN npm run build -w @m2c2kit/schema-util
 RUN npm install -E -D @m2c2kit/schema-util
 
 RUN npm run build
-RUN npm test
 RUN chmod +x scripts/wait-for-it.sh
 
 CMD ["/bin/bash"]
