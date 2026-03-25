@@ -27,9 +27,9 @@
     "fs-extra": "11.3.4",
     "magic-string": "0.30.21",
     "rimraf": "6.1.3",
-    "rollup": "4.59.0",
+    "rollup": "4.60.0",
     "rollup-plugin-copy": "3.5.0",
-    "rollup-plugin-dts": "6.4.0",
+    "rollup-plugin-dts": "6.4.1",
     "rollup-plugin-esbuild": "6.2.1",
     "semver": "7.7.4",
     "typescript": "5.9.3"
@@ -52,11 +52,11 @@
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
     "ansi-colors": "4.1.3",
-    "css-select": "6.0.0",
-    "dom-serializer": "2.0.0",
-    "domhandler": "5.0.3",
+    "css-select": "7.0.0",
+    "dom-serializer": "3.0.0",
+    "domhandler": "6.0.1",
     "find-up": "8.0.0",
-    "htmlparser2": "10.1.0",
+    "htmlparser2": "12.0.0",
     "resolve": "1.22.11"
   },
   "engines": {

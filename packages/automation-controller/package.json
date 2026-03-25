@@ -21,7 +21,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "ws": "8.19.0"
+    "ws": "8.20.0"
   },
   "devDependencies": {
     "@types/ws": "8.18.1"
