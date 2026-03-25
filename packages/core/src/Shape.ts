@@ -213,7 +213,9 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
         this.ckPath = this.canvasKit.Path.MakeFromSVGString(pathString);
         if (!this.ckPath) {
-          throw new M2Error("could not make CanvasKit Path from SVG string");
+          throw new M2Error(
+            `could not make CanvasKit Path from SVG string: ${pathString.substring(0, 100)}...`,
+          );
         }
 
         const bounds = this.ckPath.getBounds();
@@ -558,7 +560,16 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
       const pathScale =
         drawScale * this.svgPathScaleForResizing * m2c2Globals.rootScale;
       const matrix = this.calculateTransformationMatrix(pathScale, x, y);
-      this.ckPath = this.ckPath.transform(matrix);
+      const path = new this.canvasKit.PathBuilder(this.ckPath)
+        .transform(matrix)
+        .detachAndDelete();
+      if (!path) {
+        throw new M2Error(
+          "could not create transformed path for shape from SVG string",
+        );
+      }
+      this.ckPath.delete();
+      this.ckPath = path;
       this.saveSvgPathAbsolutePosition(x, y);
     }
 
