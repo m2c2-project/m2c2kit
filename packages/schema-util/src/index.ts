@@ -2,7 +2,12 @@
 
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { SyntaxKind, Project, ClassDeclaration } from "ts-morph";
+import {
+  SyntaxKind,
+  Project,
+  ClassDeclaration,
+  ClassExpression,
+} from "ts-morph";
 import { stringify, Input } from "csv-stringify/sync";
 import { M2c2Schema } from "./schemas.js";
 import path from "path";
@@ -290,10 +295,32 @@ function getAutomaticSchemaFromCorePackage(
   const file = project.addSourceFileAtPath(coreBundle);
   // Originally, both automatic schemas were in the Game class, but they moved
   // to the DataManager class. Check both classes, for backwards compatibility.
-  const gameClass = file
+  // First check for a class declaration, e.g. `class Game {}`
+  let gameClass = file
     .getClasses()
     .filter((c) => c.getName() === "Game")
-    .find(Boolean);
+    .find(Boolean) as ClassDeclaration | undefined;
+
+  // If bundler instead emitted a class expression assigned to a variable
+  // (e.g. `var Game = class { }`) search variable declarations too.
+  if (!gameClass) {
+    const varDecl = file
+      .getVariableDeclarations()
+      .find(
+        (v) =>
+          v.getName() === "Game" &&
+          v.getInitializer()?.getKind() === SyntaxKind.ClassExpression,
+      );
+    if (varDecl) {
+      const classExpr = varDecl.getInitializerIfKind(
+        SyntaxKind.ClassExpression,
+      ) as ClassExpression | undefined;
+      if (classExpr) {
+        gameClass = classExpr as unknown as ClassDeclaration;
+      }
+    }
+  }
+
   if (gameClass) {
     const result = extractSchemaFromClass(gameClass, propertyName);
     if (result.schema !== undefined) {
@@ -301,10 +328,28 @@ function getAutomaticSchemaFromCorePackage(
     }
   }
 
-  const dataManagerClass = file
+  let dataManagerClass = file
     .getClasses()
     .filter((c) => c.getName() === "DataManager")
-    .find(Boolean);
+    .find(Boolean) as ClassDeclaration | undefined;
+
+  if (!dataManagerClass) {
+    const varDecl = file
+      .getVariableDeclarations()
+      .find(
+        (v) =>
+          v.getName() === "DataManager" &&
+          v.getInitializer()?.getKind() === SyntaxKind.ClassExpression,
+      );
+    if (varDecl) {
+      const classExpr = varDecl.getInitializerIfKind(
+        SyntaxKind.ClassExpression,
+      ) as ClassExpression | undefined;
+      if (classExpr) {
+        dataManagerClass = classExpr as unknown as ClassDeclaration;
+      }
+    }
+  }
 
   if (!dataManagerClass) {
     process.stderr.write(
@@ -327,7 +372,7 @@ interface ExtractionResult {
 }
 
 function extractSchemaFromClass(
-  classDeclaration: ClassDeclaration,
+  classDeclaration: ClassDeclaration | ClassExpression,
   propertyName: string,
 ): ExtractionResult {
   const binaryExpression = classDeclaration
