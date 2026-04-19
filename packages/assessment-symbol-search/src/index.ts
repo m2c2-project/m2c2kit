@@ -20,6 +20,7 @@ import {
   ActivityKeyValueData,
   ScoringSchema,
   M2Error,
+  M2c2KitHelpers,
 } from "@m2c2kit/core";
 import {
   Button,
@@ -1103,10 +1104,11 @@ Mogle, Jinshil Hyun, Elizabeth Munoz, Joshua M. Smyth, and Richard B. Lipton. \
         /**
          * the bottom card lure symbol cannot be part of the correct card
          */
-        const potentialLureSymbols = topCards
-          .filter((c) => c != correctCard)
-          .map((c) => [c.top, c.bottom])
-          .flat();
+        const potentialLureSymbols = M2c2KitHelpers.flat(
+          topCards
+            .filter((c) => c != correctCard)
+            .map((c) => [c.top, c.bottom]),
+        );
         const lureSymbolIndex = RandomDraws.fromRangeWithoutReplacement(
           1,
           0,
