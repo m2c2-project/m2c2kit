@@ -891,6 +891,42 @@ export class M2c2KitHelpers {
 
     return rotationTransforms;
   }
+
+  /**
+   * Flattens an array up to the specified depth.
+   *
+   * This method is an implementation of the `Array.prototype.flat()` method,
+   * which is not present in environments prior to ES2019.
+   *
+   * @param arr - The array to flatten.
+   * @param depthArg - The depth level specifying how deep a nested array structure should be flattened. Defaults to 1.
+   * @returns A new array with the sub-array elements concatenated into it.
+   */
+  static flat<A extends readonly unknown[], D extends number = 1>(
+    arr: A,
+    depthArg?: D,
+  ): FlatArray<A, D>[] {
+    if (arr == null) {
+      throw new TypeError("Array to flatten is null or not defined");
+    }
+
+    const source = Object(arr);
+    // Added a fallback to 0 to prevent undefined >>> 0 in strict environments
+    const sourceLen = (source.length || 0) >>> 0;
+
+    // To integer or infinity
+    let depth = depthArg === undefined ? 1 : Number(depthArg);
+    if (!Number.isFinite(depth)) {
+      depth = depth === Infinity ? Infinity : 0;
+    } else {
+      depth = Math.max(0, Math.trunc(depth));
+    }
+
+    const target = arraySpeciesCreate(source, 0);
+    flattenIntoArray(target, source, sourceLen, 0, depth);
+    // Cast the output to leverage TypeScript's recursive type inference
+    return target as FlatArray<A, D>[];
+  }
 }
 
 /**
@@ -945,4 +981,96 @@ function rotateRectangle(
     rotated.push(M2c2KitHelpers.rotatePoint(p, radians, center));
   }
   return rotated;
+}
+
+/**
+ * Interface to safely type the constructor when checking for Symbol.species.
+ */
+interface SpeciesConstructor {
+  new (...args: unknown[]): unknown;
+  (...args: unknown[]): unknown;
+  [Symbol.species]?: unknown;
+}
+
+/**
+ * Internal implementation of the abstract operation ArraySpeciesCreate.
+ * * This determines the constructor of the result array. It respects the
+ * Symbol.species property, allowing subclasses of Array to return
+ * instances of themselves rather than a base Array.
+ * @param original - The source array-like object.
+ * @param length - The initial length of the array to create.
+ * @returns A new array instance (potentially a subclass).
+ */
+function arraySpeciesCreate<T = unknown>(
+  original: unknown,
+  length: number,
+): T[] {
+  if (Array.isArray(original)) {
+    const C = original.constructor as SpeciesConstructor | undefined;
+
+    if (typeof C === "function") {
+      const species = C[Symbol.species];
+
+      if (species === null || species === undefined) {
+        return new Array<T>(length);
+      }
+
+      if (typeof species === "function") {
+        const Species = species as new (len: number) => T[];
+        return new Species(length);
+      }
+
+      throw new TypeError("Symbol.species is not a constructor");
+    }
+  }
+
+  return new Array<T>(length);
+}
+
+/**
+ * Internal recursive implementation of the abstract operation FlattenIntoArray.
+ *
+ * This function handles the heavy lifting of moving elements from the source
+ * to the target. It correctly handles sparse arrays by checking if an index
+ * exists in the source before copying.
+ *
+ * @param target - The destination array being populated.
+ * @param source - The source array-like object to flatten.
+ * @param sourceLen - The length of the source.
+ * @param start - The starting index in the target array.
+ * @param depth - Remaining levels of recursion.
+ * @returns The next available index in the target array.
+ */
+function flattenIntoArray<T>(
+  target: T[],
+  source: ArrayLike<T>,
+  sourceLen: number,
+  start: number,
+  depth: number,
+): number {
+  let targetIndex = start;
+
+  for (let i = 0; i < sourceLen; i++) {
+    // Spec: "If exists is true..." (Handles holes in sparse arrays)
+    if (i in source) {
+      const element = source[i];
+
+      // Spec: "If depth > 0 and shouldFlatten is true..."
+      // Note: flat() strictly uses IsArray, not IsConcatSpreadable.
+      if (depth > 0 && Array.isArray(element)) {
+        const elementLen = element.length >>> 0;
+        targetIndex = flattenIntoArray(
+          target,
+          element,
+          elementLen,
+          targetIndex,
+          depth - 1,
+        );
+      } else {
+        target[targetIndex++] = element;
+      }
+    }
+  }
+
+  return targetIndex;
 }
