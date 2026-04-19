@@ -13,6 +13,7 @@ npm set registry http://registry:4873/
 
 npm install -g @m2c2kit/cli
 
+# m2 new requires git to be configured
 git config --global init.defaultBranch main
 git config --global user.email "ci@example.com"
 git config --global user.name "ci"

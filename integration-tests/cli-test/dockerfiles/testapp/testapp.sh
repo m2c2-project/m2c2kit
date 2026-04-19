@@ -13,12 +13,13 @@ npm set registry http://registry:4873/
 
 npm install -g @m2c2kit/cli
 
+# m2 new requires git to be configured
 git config --global init.defaultBranch main
 git config --global user.email "ci@example.com"
 git config --global user.name "ci"
 
 m2 new testapp
 cd testapp
-# localhost did not work in container on windows host, but 0.0.0.0 did
-sed -i 's|host: "localhost"|host: "0.0.0.0"|' rollup.config.mjs
+# Must bind to 0.0.0.0 to be accessible from another container running the tests
+sed -i 's|host: "localhost"|host: "0.0.0.0"|' rolldown.config.mjs
 npm run serve
