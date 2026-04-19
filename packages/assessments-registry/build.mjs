@@ -84,12 +84,12 @@ async function getNpmPackageMetadata(registryUrl, packageName) {
       return data;
     } catch (error) {
       throw new Error(
-        `Error parsing metadata for ${packageName} from ${url}: ${error.message}. Got: ${await response.text()}`,
+        `Error parsing metadata for ${packageName} from ${url}: ${/** @type {Error} */ (error).message}. Got: ${await response.text()}`,
       );
     }
   } catch (error) {
     throw new Error(
-      `Error fetching metadata for ${packageName} from ${url}: ${error.message}`,
+      `Error fetching metadata for ${packageName} from ${url}: ${/** @type {Error} */ (error).message}`,
     );
   }
 }
