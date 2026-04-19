@@ -3,9 +3,11 @@ import globals from "globals";
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
+import { defineConfig } from "eslint/config";
 
-export default [
-  ...tseslint.config(eslint.configs.recommended, ...tseslint.configs.strict),
+export default defineConfig([
+  eslint.configs.recommended,
+  ...tseslint.configs.strict,
   eslintConfigPrettier,
   {
     files: ["**/*.mjs", "**/*.js", "**/*.ts", "**/*.tsx"],
@@ -28,7 +30,6 @@ export default [
       "**/dist/",
       "**/dist-webview/",
       "**/build/",
-      "**/.rollup.cache",
       "examples/no-js-bundler-development/lib/",
       "packages/build-helpers/src/__tests__/dist-test",
       "website/static/m2c2kit/modules",
@@ -42,4 +43,4 @@ export default [
       "packages/schematics/scripts/*.mjs",
     ],
   },
-];
+]);
