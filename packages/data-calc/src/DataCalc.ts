@@ -404,7 +404,7 @@ export class DataCalc {
           // It's a direct value — but allow concatenated serialized chain placeholders
           if (typeof value === "string") {
             const re = /__CHAIN_EXPR__\[(.*?)\]/g;
-            const matches = Array.from(value.matchAll(re));
+            const matches = Array.from(Helpers.matchAll(value, re));
             if (matches.length > 0) {
               // Evaluate each serialized chain on this DataCalc and sum numeric results
               let sum = 0;
@@ -579,7 +579,7 @@ export class DataCalc {
           // It's a direct value — allow concatenated serialized chain placeholders
           if (typeof value === "string") {
             const re = /__CHAIN_EXPR__\[(.*?)\]/g;
-            const matches = Array.from(value.matchAll(re));
+            const matches = Array.from(Helpers.matchAll(value, re));
             if (matches.length > 0) {
               let sum = 0;
               for (const m of matches) {
@@ -1681,3 +1681,55 @@ export class DataCalc {
     return keys.some((key) => obs[key] === null || obs[key] === undefined);
   }
 }
+
+const Helpers = {
+  /**
+   * Returns an iterator of all results matching a string against a regular expression.
+   * ES2020-compliant matchAll utility, Target: ES2017 minimum
+   *
+   * @param str - The string to search for matches.
+   * @param regexp - A regular expression object (must have the 'g' flag) or a string.
+   * @returns An iterator yielding RegExp match arrays.
+   */
+  matchAll: function* (
+    str: string,
+    regexp: RegExp | string,
+  ): IterableIterator<RegExpMatchArray> {
+    if (str == null) {
+      throw new TypeError("String is null or not defined");
+    }
+
+    const stringValue = String(str);
+    let matcher: RegExp;
+
+    if (regexp instanceof RegExp) {
+      if (!regexp.global) {
+        throw new TypeError(
+          "matchAll called with a non-global RegExp argument",
+        );
+      }
+      matcher = new RegExp(regexp.source, regexp.flags);
+    } else {
+      matcher = new RegExp(regexp, "g");
+    }
+
+    let match: RegExpExecArray | null;
+
+    while ((match = matcher.exec(stringValue)) !== null) {
+      yield match;
+
+      // Prevent infinite loops on zero-width matches
+      if (match[0].length === 0) {
+        // Handle Unicode surrogate pairs if the 'u' flag is present
+        if (matcher.unicode) {
+          const charCode = stringValue.charCodeAt(matcher.lastIndex);
+          // Check if it's a high surrogate (start of a surrogate pair)
+          if (charCode >= 0xd800 && charCode <= 0xdbff) {
+            matcher.lastIndex++;
+          }
+        }
+        matcher.lastIndex++;
+      }
+    }
+  },
+};
