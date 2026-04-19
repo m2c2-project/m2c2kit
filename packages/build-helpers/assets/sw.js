@@ -60,7 +60,7 @@ const addResourcesToCache = async (resources) => {
   self.addEventListener('install', (event) => {
     event.waitUntil(
       addResourcesToCache([
-        "/", "index.html", "_-_ADDITIONAL_RESOURCES_TO_CACHE_-_"
+        "/", "_-_ADDITIONAL_RESOURCES_TO_CACHE_-_"
       ])
     );
   });
