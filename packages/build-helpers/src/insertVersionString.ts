@@ -1,7 +1,6 @@
-import replace from "@rollup/plugin-replace";
 import { readFileSync } from "fs";
-import child_process from "child_process";
-import { Plugin } from "rollup";
+import { execSync } from "child_process";
+import type { Plugin } from "rolldown";
 
 /**
  * Replaces the string `__PACKAGE_JSON_VERSION__` with version information.
@@ -14,14 +13,25 @@ import { Plugin } from "rollup";
 export const insertVersionString = (): Plugin => {
   const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
 
-  const shortCommitHash = child_process
-    .execSync("git rev-parse HEAD")
+  const shortCommitHash = execSync("git rev-parse HEAD")
     .toString()
     .trim()
     .slice(0, 8);
 
-  return replace({
-    __PACKAGE_JSON_VERSION__: `${pkg.version} (${shortCommitHash})`,
-    preventAssignment: true,
-  });
+  const replacementValue = `${pkg.version} (${shortCommitHash})`;
+  const targetTag = "__PACKAGE_JSON_VERSION__";
+
+  return {
+    name: "insert-version-string",
+    transform(code) {
+      if (!code.includes(targetTag)) {
+        return null;
+      }
+      const transformedCode = code.replaceAll(targetTag, replacementValue);
+      return {
+        code: transformedCode,
+        map: null,
+      };
+    },
+  };
 };

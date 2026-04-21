@@ -4,9 +4,9 @@ This project was generated with the m2c2kit CLI schematics version <%= schematic
 
 ## Development server
 
-Run `npm run serve` from the command line for a development server. Browse to `http://localhost:3000/`. The app will automatically compile and reload when you change source files. If you get an error on the reload, edit `rollup.config.mjs` and increase the delay parameter (unit is milliseconds) in this line:
+Run `npm run serve` from the command line for a development server. Browse to `http://localhost:3000/`. The app will automatically compile and reload when you change source files. If you get an error on the reload, edit `rolldown.config.mjs` and add a delay parameter (unit is milliseconds) in this line:
 
-    livereload({ watch: "build", delay: 250 })
+    livereload({ watch: `./${outputFolder}`, delay: 250 })
 
 ## Debugging
 
@@ -18,7 +18,9 @@ Run `npm run build` from the command line to build the project. Build artifacts 
 
 The build process adds hashes to filenames to minimize browser cache issues in deployment. To build without filename hashes, run `npm run build:no-hash`.
 
-To minify the JavaScript files, add `-- --configMinify`, e.g., `npm run build -- --configMinify` or `npm run build:no-hash -- --configMinify`.
+To minify the JavaScript files, use `cross-env` to set the `MINIFY` environment variable to `true`:
+
+    npx cross-env MINIFY=true npm run serve
 
 ## Publishing to npm
 

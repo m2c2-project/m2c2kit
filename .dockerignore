@@ -1,7 +1,6 @@
 **/node_modules/
 **/build
 **/dist
-**/.rollup.cache
 **/tsconfig.tsbuildinfo
 **/.gradle
 **/.angular

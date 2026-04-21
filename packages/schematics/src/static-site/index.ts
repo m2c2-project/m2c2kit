@@ -3,22 +3,27 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import { pathToFileURL } from "url";
 import { satisfies } from "semver";
-import * as beautify from "js-beautify";
-import { decompressTgzArchive, ExtractedFile } from "./decompressTgzArchive";
-import { fetchPackage } from "./fetchPackage";
-import { getNpmPackageMetadata } from "./getNpmPackageMetadata";
-import { extractMethodBodyFromArrowFunctionString } from "./extractMethodBodyFromArrowFunctionString";
-import { loadEsmModule } from "./loadEsmModule";
-import { getFilesRecursive } from "./getFilesRecursive";
-import { Configure, Entry, Setup, StaticSiteConfig } from "./StaticSiteConfig";
-import { Constants } from "../constants";
+import beautify from "js-beautify";
+import { decompressTgzArchive, ExtractedFile } from "./decompressTgzArchive.js";
+import { fetchPackage } from "./fetchPackage.js";
+import { getNpmPackageMetadata } from "./getNpmPackageMetadata.js";
+import { extractMethodBodyFromArrowFunctionString } from "./extractMethodBodyFromArrowFunctionString.js";
+import { loadEsmModule } from "./loadEsmModule.js";
+import { getFilesRecursive } from "./getFilesRecursive.js";
+import {
+  Configure,
+  Entry,
+  Setup,
+  StaticSiteConfig,
+} from "./StaticSiteConfig.js";
+import { Constants } from "../constants.js";
 
 /**
  * @m2c2kit/core and @m2c2kit/session are included only for their type
  * definitions. Thus, these are devDependencies in the package.json file.
  */
 import { Game } from "@m2c2kit/core";
-import { AssessmentsRegistry } from "./AssessmentsRegistry";
+import { AssessmentsRegistry } from "./AssessmentsRegistry.js";
 
 const DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
 
@@ -745,7 +750,7 @@ session.initialize();`;
       );
       if (config.esModuleShims !== false && !esModuleShimsAdded) {
         esModuleShimsAdded = true;
-        const schematicDir = __dirname.replace(/\\/g, "/");
+        const schematicDir = import.meta.dirname.replace(/\\/g, "/");
         const filenames = getFilesRecursive(
           schematicDir + "/files/es-module-shims",
         );

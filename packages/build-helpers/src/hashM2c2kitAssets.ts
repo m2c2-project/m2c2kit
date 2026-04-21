@@ -7,7 +7,7 @@ import { parseDocument } from "htmlparser2";
 import { selectAll } from "css-select";
 import { render } from "dom-serializer";
 import { Element } from "domhandler";
-import { Plugin } from "rollup";
+import { Plugin } from "rolldown";
 import MagicString from "magic-string";
 
 /** We use MD5 for hashing, but keep only the first 16 characters. */

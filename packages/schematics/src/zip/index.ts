@@ -1,6 +1,6 @@
 import { Rule, Tree } from "@angular-devkit/schematics";
 import { Observable } from "rxjs";
-import * as archiver from "archiver";
+import archiver from "archiver";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { mkdtemp } from "node:fs/promises";

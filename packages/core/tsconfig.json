@@ -3,6 +3,14 @@
   "include": ["src"],
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2017",
+      // to avoid type errors in the M2c2KitHelpers.flat() method, which uses
+      // the FlatArray type
+      "ES2019.Array"
+    ]
   }
 }

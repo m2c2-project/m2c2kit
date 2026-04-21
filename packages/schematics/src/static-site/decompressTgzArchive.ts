@@ -1,6 +1,6 @@
 import * as tar from "tar-stream";
 import * as zlib from "zlib";
-import { isSafePath } from "./isSafePath";
+import { isSafePath } from "./isSafePath.js";
 
 export interface ExtractedFile {
   /** Filepath as stored in the archive. */

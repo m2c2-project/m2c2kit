@@ -71,28 +71,20 @@ function replacePatternWithDependencyVersion(
 
 const dependencyReplacePatterns = [
   {
-    pattern: "__ROLLUP_PLUGIN_NODE_RESOLVE_VERSION__",
-    dependencyName: "@rollup/plugin-node-resolve",
-  },
-  {
     pattern: "__CONCURRENTLY_VERSION__",
     dependencyName: "concurrently",
   },
   {
-    pattern: "__ESBUILD_VERSION__",
-    dependencyName: "esbuild",
+    pattern: "__CROSSENV_VERSION__",
+    dependencyName: "cross-env",
   },
   {
     pattern: "__RIMRAF_VERSION__",
     dependencyName: "rimraf",
   },
   {
-    pattern: "__ROLLUP_VERSION__",
-    dependencyName: "rollup",
-  },
-  {
-    pattern: "__ROLLUP_PLUGIN_ESBUILD_VERSION__",
-    dependencyName: "rollup-plugin-esbuild",
+    pattern: "__ROLLDOWN_VERSION__",
+    dependencyName: "rolldown",
   },
   {
     pattern: "__ROLLUP_PLUGIN_LIVERELOAD_VERSION__",

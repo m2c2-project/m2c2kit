@@ -14,10 +14,10 @@
   },
   "description": "A speeded continuous performance test of conjunctive feature search in which respondents identify matching symbol pairs as quickly and as accurately as they can",
   "scripts": {
-    "build": "npm run clean && tsc && rollup -c && npm run schemas",
-    "serve": "concurrently \"rollup -c rollup.config.runner.mjs --watch --configServe\" \"tsc --project tsconfig.runner.json --watch\" --names rollup,typescript --prefix-colors auto,red",
-    "schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > schemas.json",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo",
+    "build": "npm run clean && tsc --build && rolldown -c && npm run schemas",
+    "serve": "concurrently \"rolldown -c rolldown.config.runner.mjs --watch\" \"tsc --project tsconfig.runner.json --watch\" --names rolldown,typescript --prefix-colors auto,red",
+    "schemas": "node ../schema-util/dist/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Symbol Search version __VERSION__\" > schemas.json",
+    "clean": "rimraf build dist *.tsbuildinfo schemas.json --glob",
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/assessment-symbol-search"
   },
   "main": "./dist/index.js",
@@ -26,8 +26,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -55,12 +56,10 @@
     "@m2c2kit/build-helpers": "0.3.32",
     "@m2c2kit/schema-util": "0.1.26",
     "@m2c2kit/session": "0.3.18",
-    "@rollup/plugin-node-resolve": "16.0.3",
     "concurrently": "9.2.1",
     "rimraf": "6.1.3",
-    "rollup": "4.60.0",
-    "rollup-plugin-copy": "3.5.0",
-    "rollup-plugin-esbuild": "6.2.1",
+    "rolldown": "1.0.0-rc.16",
+    "rolldown-plugin-dts": "0.23.2",
     "typescript": "5.9.3"
   },
   "engines": {

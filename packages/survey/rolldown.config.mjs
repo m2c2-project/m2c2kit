@@ -1,66 +1,40 @@
-import esbuild from "rollup-plugin-esbuild";
-import { minify } from "rollup-plugin-esbuild";
+import { defineConfig } from "rolldown";
+import { dts } from "rolldown-plugin-dts";
 import copy from "rollup-plugin-copy";
-import dts from "rollup-plugin-dts";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
 import findUp from "findup-sync";
 
-/**
- * @m2c2kit/survey uses SurveyJS's react-based library. React uses
- * process.env.NODE_ENV to determine the production environment. This will not
- * be available in the browser, so shim it.
- * see https://github.com/rollup/rollup/issues/487
- */
-function prependToBundle(filename, content) {
-  return {
-    name: "prepend-to-bundle",
-    generateBundle: (_options, bundle) => {
-      if (bundle[filename]?.type === "chunk") {
-        bundle[filename].code = content + bundle[filename].code;
-      } else {
-        throw new Error(`bundle named ${filename} not found.`);
-      }
-    },
-  };
-}
-const codeToPrepend = `let process={env:{NODE_ENV:'production'}};`;
-
-export default [
+export default defineConfig([
   {
-    input: ["./src/index.ts"],
+    input: "./src/index.ts",
     external: ["@m2c2kit/core"],
+    platform: "browser",
     output: [
       {
-        file: "./build/index.js",
+        file: "./dist/index.js",
         format: "es",
         sourcemap: true,
-        plugins: [prependToBundle("index.js", codeToPrepend)],
+        // @m2c2kit/survey uses SurveyJS's react-based library. React uses
+        // process.env.NODE_ENV to determine the production environment. This will not
+        // be available in the browser, so shim it.
+        banner: `let process={env:{NODE_ENV:'production'}};`,
+      },
+      {
+        file: "./dist/index.min.js",
+        format: "es",
+        sourcemap: false,
+        banner: `let process={env:{NODE_ENV:'production'}};`,
+        minify: true,
       },
     ],
-    plugins: [nodeResolve(), commonjs(), esbuild()],
   },
   {
-    /**
-     * Bundle all declaration files in build and place the declaration bundles
-     * in dist; copy output files from build to dist.
-     *
-     * As part of the build script in package.json, before rollup is run, tsc is
-     * run to generate the declaration files used by rollup-plugin-dts.
-     */
     input: "./build/index.d.ts",
+    external: ["@m2c2kit/core", "survey-react"],
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [
       dts(),
       copy({
-        // hook must be 'closeBundle' because we need dist/index.d.ts to
-        // be created before we can copy it
-        hook: "closeBundle",
         targets: [
-          {
-            src: "build/index.js*",
-            dest: "dist",
-          },
           {
             src: [
               /**
@@ -129,4 +103,4 @@ export default [
       }),
     ],
   },
-];
+]);

@@ -1,4 +1,4 @@
-import { Plugin } from "rollup";
+import { Plugin } from "rolldown";
 import { readFile } from "fs/promises";
 import MagicString from "magic-string";
 

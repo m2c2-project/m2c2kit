@@ -7,7 +7,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -15,8 +17,8 @@
     "assets/**"
   ],
   "scripts": {
-    "build": "npm run clean && tsc && rollup -c",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc && rolldown -c",
+    "clean": "rimraf build dist tsconfig.tsbuildinfo",
     "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/survey"
   },
   "license": "Apache-2.0",
@@ -44,18 +46,14 @@
     "surveyjs-widgets": "1.9.47"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "29.0.2",
-    "@rollup/plugin-node-resolve": "16.0.3",
     "@types/bootstrap-datepicker": "1.10.0",
     "@types/bootstrap-slider": "11.0.6",
     "@types/react-dom": "18.3.1",
     "@types/react-modal": "3.16.3",
     "@types/sortablejs": "1.15.8",
     "rimraf": "6.1.3",
-    "rollup": "4.60.0",
+    "rolldown": "1.0.0-rc.16",
     "rollup-plugin-copy": "3.5.0",
-    "rollup-plugin-dts": "6.4.1",
-    "rollup-plugin-esbuild": "6.2.1",
     "typescript": "5.9.3"
   },
   "engines": {

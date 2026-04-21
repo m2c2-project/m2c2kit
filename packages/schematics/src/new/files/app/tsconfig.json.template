@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6", "dom"],
-    "module": "es6",
+    "target": "es2017",
+    "module": "es2015",
+    "lib": ["dom", "dom.iterable", "es2017"],
     "moduleResolution": "bundler",
     "allowJs": true,
     "esModuleInterop": true,
-    "downlevelIteration": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,    
     "forceConsistentCasingInFileNames": true,
@@ -14,8 +13,9 @@
     "outDir": "build",
     "rootDir": "src",    
     "skipLibCheck": true,
-    // esbuild will build the module; tsc will type check and generate the declaration files
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "emitDeclarationOnly": true,
   },
   "include": ["./src/**/*.ts", "./src/**/*.js"]

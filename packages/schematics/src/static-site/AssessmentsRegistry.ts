@@ -1,4 +1,4 @@
-import { RegistryAssessmentPackage } from "./RegistryAssessmentPackage";
+import { RegistryAssessmentPackage } from "./RegistryAssessmentPackage.js";
 
 export interface AssessmentsRegistry {
   /** Version of the assessment registry file */

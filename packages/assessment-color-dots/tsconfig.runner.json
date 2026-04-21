@@ -6,5 +6,5 @@
     "sourceMap": true
   },
   // remove the exclusion of runner.ts (from base tsconfig.json)
-  "exclude": []
+  "exclude": ["src/__tests__"]
 }

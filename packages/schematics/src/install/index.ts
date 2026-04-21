@@ -1,5 +1,9 @@
-import { Rule, SchematicContext, Tree } from "@angular-devkit/schematics";
-import { NodePackageInstallTask } from "@angular-devkit/schematics/tasks";
+import {
+  Rule,
+  SchematicContext,
+  Tree,
+} from "@angular-devkit/schematics/index.js";
+import { NodePackageInstallTask } from "@angular-devkit/schematics/tasks/index.js";
 import {
   NodeDependency,
   NodeDependencyType,
@@ -22,7 +26,7 @@ export function npmInstall(options: NpmInstallOptions): Rule {
           options.dependencies.length !== 1 ? "dependencies" : "dependency"
         }: ${options.dependencies
           .map((d) => d.name + ` (${d.version})`)
-          .join(", ")}`
+          .join(", ")}`,
       );
     }
 
@@ -31,7 +35,7 @@ export function npmInstall(options: NpmInstallOptions): Rule {
     if (options.packageJsonContents) {
       tree.create(
         path.join(directory, "package.json"),
-        options.packageJsonContents
+        options.packageJsonContents,
       );
     }
 
@@ -45,7 +49,7 @@ export function npmInstall(options: NpmInstallOptions): Rule {
         quiet: false,
         hideOutput: false,
       }),
-      []
+      [],
     );
     return tree;
   };

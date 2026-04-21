@@ -1,5 +1,4 @@
-import esbuild from "rollup-plugin-esbuild";
-import nodeResolve from "@rollup/plugin-node-resolve";
+import { defineConfig } from "rolldown";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import {
@@ -8,29 +7,35 @@ import {
   copyAssets,
 } from "@m2c2kit/build-helpers";
 
-export default (commandLineArgs) => {
-  const isDebug = commandLineArgs.configServe ? true : false;
-  const port = commandLineArgs.configPort || 3000;
+export default defineConfig(() => {
+  const port = process.env?.PORT || 3000;
+  const openBrowser = process.env?.OPEN == "true";
+  const isDebug = process.env?.SERVE == "true";
+  const isProd = process.env?.PROD == "true";
+  const noHash = process.env?.NO_HASH == "true";
+  const useServiceWorker = process.env?.SERVICE_WORKER == "true";
+  const minify = process.env?.MINIFY == "true";
 
   let outputFolder = "build";
-  if (commandLineArgs.configProd) {
+  if (isProd) {
     outputFolder = "dist";
   }
 
-  const finalConfig = [
+  return [
     {
       input: "./src/index.ts",
+      platform: "browser",
       output: [
         {
           file: `./${outputFolder}/index.js`,
           format: "es",
           sourcemap: isDebug,
+          minify: minify,
         },
       ],
       plugins: [
-        nodeResolve(),
-        esbuild(),
         copyAssets({
+          verbose: false,
           package: [
             "@m2c2kit/assessment-color-dots",
             "@m2c2kit/assessment-grid-memory",
@@ -60,37 +65,34 @@ export default (commandLineArgs) => {
           ],
           outputFolder,
         }),
-        commandLineArgs.configProd &&
-          !commandLineArgs.configNoHash &&
-          hashM2c2kitAssets(outputFolder),
-        commandLineArgs.configProd &&
-          !commandLineArgs.configNoHash &&
-          commandLineArgs.configServiceWorker &&
-          makeM2c2kitServiceWorker(outputFolder, ["data.html", "data.js"]),
-        commandLineArgs.configServe &&
+        isProd && !noHash && hashM2c2kitAssets(outputFolder),
+        isProd &&
+          !noHash &&
+          useServiceWorker &&
+          makeM2c2kitServiceWorker(outputFolder),
+        isDebug &&
           serve({
             /**
-             * Start development server and automatically open browser with
-             *   npm run serve -- --configOpen
+             * Default is 3000, but to start development server on 8080 and
+             * automatically open browser:
+             *   npx cross-env PORT=8080 OPEN=true npm run serve
              * However, to debug and hit breakpoints, you must launch
              * the browser through vs code.
              */
-            open: commandLineArgs.configOpen && true,
+            open: openBrowser,
             verbose: true,
             contentBase: [`./${outputFolder}`],
             historyApiFallback: true,
             host: "localhost",
             port: port,
           }),
-        commandLineArgs.configServe &&
+        isDebug &&
           /**
-           * Try a shorter delay for quicker reloads, but increase it if
-           * the browser reloads before the new build is fully ready.
+           * Add a small delay, such as `delay: 250`, if the browser reloads
+           * before the new build is fully ready.
            */
-          livereload({ watch: "build", delay: 250 }),
+          livereload({ watch: `./${outputFolder}` }),
       ],
     },
   ];
-
-  return finalConfig;
-};
+});

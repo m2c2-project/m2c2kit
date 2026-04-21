@@ -1,5 +1,5 @@
 import { Rule, SchematicContext, Tree } from "@angular-devkit/schematics";
-import { NodePackageInstallTask } from "@angular-devkit/schematics/tasks";
+import { NodePackageInstallTask } from "@angular-devkit/schematics/tasks/index.js";
 import {
   NodeDependency,
   NodeDependencyType,
@@ -25,7 +25,7 @@ export function add(options: any): Rule {
 
     addPackageJsonDependency(tree, dep);
     console.log(
-      getPackageJsonDependency(tree, "@m2c2kit/assessment-symbol-search")
+      getPackageJsonDependency(tree, "@m2c2kit/assessment-symbol-search"),
     );
     //context.addTask(new NodePackageInstallTask(), []);
 

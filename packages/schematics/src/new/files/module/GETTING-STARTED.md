@@ -6,7 +6,7 @@ This repository has been set up to develop an assessment for m2c2kit in the form
 
 ## Development server
 
-Run `npm run serve` from the command line for a development server. Browse to `http://localhost:3000/`. The app will automatically compile and reload when you change source files. If you get an error on the reload, edit `rollup.config.runner.mjs` and increase the delay parameter (unit is milliseconds) in this line:
+Run `npm run serve` from the command line for a development server. Browse to `http://localhost:3000/`. The app will automatically compile and reload when you change source files. If you get an error on the reload, edit `rolldown.config.runner.mjs` and increase the delay parameter (unit is milliseconds) in this line:
 
     livereload({ watch: "build", delay: 250 })
 

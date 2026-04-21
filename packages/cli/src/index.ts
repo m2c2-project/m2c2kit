@@ -17,7 +17,7 @@ import {
   UnsuccessfulWorkflowExecution,
   strings,
 } from "@angular-devkit/schematics";
-import { NodeWorkflow } from "@angular-devkit/schematics/tools";
+import { NodeWorkflow } from "@angular-devkit/schematics/tools/index.js";
 import ansiColors from "ansi-colors";
 import { existsSync } from "node:fs";
 import * as path from "node:path";
@@ -238,7 +238,6 @@ function getPackageManagerName() {
   return "npm";
 }
 
-// eslint-disable-next-line max-lines-per-function
 export async function main({
   args,
   stdout = process.stdout,

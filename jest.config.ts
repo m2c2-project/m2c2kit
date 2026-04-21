@@ -44,7 +44,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/core/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
+      testPathIgnorePatterns: ["build", "TestHelpers.ts"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -91,7 +91,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/session/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
+      testPathIgnorePatterns: ["build", "TestHelpers.ts"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -127,7 +127,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/survey/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
+      testPathIgnorePatterns: ["build", "TestHelpers.ts"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -163,7 +163,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/physics/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build", "TestHelpers.ts"],
+      testPathIgnorePatterns: ["build", "TestHelpers.ts"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -199,7 +199,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/data-calc/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build"],
+      testPathIgnorePatterns: ["build"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -241,7 +241,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/assessment-color-shapes/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build"],
+      testPathIgnorePatterns: ["build"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -277,7 +277,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/assessment-symbol-search/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build"],
+      testPathIgnorePatterns: ["build"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -313,7 +313,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/assessment-grid-memory/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build"],
+      testPathIgnorePatterns: ["build"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",
@@ -349,7 +349,7 @@ const jestConfig: JestConfigWithTsJest = {
       testMatch: [
         "<rootDir>/packages/assessment-color-dots/src/__tests__/**/*.(spec|test).(ts|tsx|js)",
       ],
-      testPathIgnorePatterns: [".rollup.cache", "build"],
+      testPathIgnorePatterns: ["build"],
       transform: {
         "^.+\\.tsx?$": [
           "ts-jest",

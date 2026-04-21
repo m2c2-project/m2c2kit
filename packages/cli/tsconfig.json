@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "isolatedModules": true,
+    "declaration": false,
+    "noEmit": true,
+    "types": ["node"],
     "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "noFallthroughCasesInSwitch": true,

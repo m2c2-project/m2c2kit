@@ -13,14 +13,14 @@ import {
   applyTemplates,
   template,
 } from "@angular-devkit/schematics";
-import { RepositoryInitializerTask } from "@angular-devkit/schematics/tasks";
-import { CommitOptions } from "@angular-devkit/schematics/tasks/repo-init/init-task";
-import findup = require("findup-sync");
-import fs = require("fs");
-import path = require("path");
-import { NpmInstallOptions } from "../install";
+import { RepositoryInitializerTask } from "@angular-devkit/schematics/tasks/index.js";
+import { CommitOptions } from "@angular-devkit/schematics/tasks/repo-init/init-task.js";
+import findup from "findup-sync";
+import fs from "node:fs";
+import path from "node:path";
+import { NpmInstallOptions } from "../install/index.js";
 import { lastValueFrom } from "rxjs";
-import { Constants } from "../constants";
+import { Constants } from "../constants.js";
 
 interface m2NewOptions {
   name?: string;
@@ -111,7 +111,7 @@ export function m2New(options: m2NewOptions): Rule {
     /**
      * Third, copy index.html from @m2c2kit/session package.
      * Other assets, such as wasm and CSS files, will be copied during the
-     * build process by rollup and the copyAssets plugin. We copy index.html
+     * build process by rolldown and the copyAssets plugin. We copy index.html
      * here, rather than in the build process, because we don't want it
      * overwritten every time we build (the user may have made changes to it).
      * Wasm and CSS, however, should be copied every time we build, in case
@@ -184,10 +184,10 @@ function generateAppPackageJson(name: string) {
   "name": "${strings.dasherize(name)}",
   "version": "1.0.0",
   "scripts": {
-    "serve": "concurrently \\"rollup -c --watch --configServe\\" \\"tsc --watch\\" --names rollup,typescript --prefix-colors auto,red",
-    "build": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd",
-    "build:no-hash": "npm run clean && tsc --noEmit --emitDeclarationOnly false && rollup -c --configProd --configNoHash",
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo"
+    "serve": "concurrently \\"rolldown -c --watch --environment SERVE:true\\" \\"tsc --watch\\" --names rolldown,typescript --prefix-colors auto,red",
+    "build": "npm run clean && tsc && rolldown -c --environment PROD:true",
+    "build:no-hash": "npm run clean && tsc && rolldown -c --environment PROD:true,NO_HASH:true",
+    "clean": "rimraf build dist *.tsbuildinfo schemas.json --glob"
   },
   "private": true,
   "dependencies": {
@@ -197,12 +197,10 @@ function generateAppPackageJson(name: string) {
   },
   "devDependencies": {
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
-    "@rollup/plugin-node-resolve": "${Constants.ROLLUP_PLUGIN_NODE_RESOLVE_VERSION}",
     "concurrently": "${Constants.CONCURRENTLY_VERSION}",
-    "esbuild": "${Constants.ESBUILD_VERSION}",
+    "cross-env": "${Constants.CROSSENV_VERSION}",
     "rimraf": "${Constants.RIMRAF_VERSION}",
-    "rollup": "${Constants.ROLLUP_VERSION}",
-    "rollup-plugin-esbuild": "${Constants.ROLLUP_PLUGIN_ESBUILD_VERSION}",
+    "rolldown": "${Constants.ROLLDOWN_VERSION}",
     "rollup-plugin-livereload": "${Constants.ROLLUP_PLUGIN_LIVERELOAD_VERSION}",
     "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
     "typescript": "${Constants.TYPESCRIPT_VERSION}"
@@ -220,10 +218,10 @@ function generateModulePackageJson(name: string) {
   },
   "private": true,
   "scripts": {
-    "serve": "concurrently \\"rollup -c rollup.config.runner.mjs --watch --configServe\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rollup,typescript --prefix-colors auto,red",
-    "build": "npm run clean && tsc && rollup -c --configProd --configNoHash && npm run schemas",
+    "serve": "concurrently \\"rolldown -c rolldown.config.runner.mjs --watch --environment SERVE:true\\" \\"tsc --project tsconfig.runner.json --watch\\" --names rolldown,typescript --prefix-colors auto,red",
+    "build": "npm run clean && tsc && rolldown -c --environment PROD:true,NOHASH:true && npm run schemas",
     "schemas": "schema-util list --schema=all --files=src/index.ts --format=json-schema --title=\\"${strings.dasherize(name)} version __VERSION__\\" > schemas.json",    
-    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo"
+    "clean": "rimraf build dist *.tsbuildinfo schemas.json --glob"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -248,12 +246,10 @@ function generateModulePackageJson(name: string) {
     "@m2c2kit/session": "${Constants.M2C2KIT_SESSION_PACKAGE_VERSION}",
     "@m2c2kit/build-helpers": "${Constants.M2C2KIT_BUILD_HELPERS_PACKAGE_VERSION}",
     "@m2c2kit/schema-util": "${Constants.M2C2KIT_SCHEMA_UTIL_PACKAGE_VERSION}",
-    "@rollup/plugin-node-resolve": "${Constants.ROLLUP_PLUGIN_NODE_RESOLVE_VERSION}",
     "concurrently": "${Constants.CONCURRENTLY_VERSION}",
-    "esbuild": "${Constants.ESBUILD_VERSION}",
+    "cross-env": "${Constants.CROSSENV_VERSION}",
     "rimraf": "${Constants.RIMRAF_VERSION}",
-    "rollup": "${Constants.ROLLUP_VERSION}",
-    "rollup-plugin-esbuild": "${Constants.ROLLUP_PLUGIN_ESBUILD_VERSION}",
+    "rolldown": "${Constants.ROLLDOWN_VERSION}",
     "rollup-plugin-livereload": "${Constants.ROLLUP_PLUGIN_LIVERELOAD_VERSION}",
     "rollup-plugin-serve": "${Constants.ROLLUP_PLUGIN_SERVE_VERSION}",
     "typescript": "${Constants.TYPESCRIPT_VERSION}"

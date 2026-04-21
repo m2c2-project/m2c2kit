@@ -4,7 +4,8 @@
   "compilerOptions": {
     "outDir": "build",
     "rootDir": "src",
-    "target": "es2020",
-    "module": "es2020"
+    "target": "es2021",
+    "module": "es2020",
+    "lib": ["ES2021"]
   }
 }

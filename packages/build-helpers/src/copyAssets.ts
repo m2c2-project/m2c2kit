@@ -2,7 +2,7 @@ import resolve from "resolve";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
 import cpy from "cpy";
-import { Plugin } from "rollup";
+import { Plugin } from "rolldown";
 import path from "node:path";
 import c from "ansi-colors";
 import { satisfies } from "semver";
@@ -352,7 +352,7 @@ export function copyAssets(options: CopyAssetsOptions): Plugin {
       options.outputFolder,
     );
     await cpy(
-      path.join(resolvedPackage.packageJsonDirectory, "data.html*"),
+      path.join(resolvedPackage.packageJsonDirectory, "assets", "data.html*"),
       options.outputFolder,
     );
   }
@@ -550,7 +550,7 @@ async function resolvePackage(
         },
       })
       .replace(/\\/g, "/");
-  } catch (error) {
+  } catch {
     return undefined;
   }
   const regex = new RegExp(`^.*${options.packageName}`);
