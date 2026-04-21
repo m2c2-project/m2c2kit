@@ -561,13 +561,42 @@ export abstract class M2Node implements M2NodeOptions {
    * @returns true if part of active action affecting appearance
    */
   involvedInActionAffectingAppearance(): boolean {
-    const nodes = this.ancestors.concat(this);
-    const actions = nodes.flatMap((node) => node.actions);
-    return actions.some(
-      (action) =>
-        action.running &&
-        (action.type === ActionType.Move || action.type === ActionType.Scale),
-    );
+    // Earlier version of this code used flatMap, but that could cause performance
+    // issues because it creates intermediate arrays that are garbage collected.
+    // Now it uses for loops.
+    for (let i = 0; i < this.actions.length; i++) {
+      // skip holes if sparse arrays
+      if (i in this.actions) {
+        const action = this.actions[i];
+        if (
+          action.running &&
+          (action.type === ActionType.Move || action.type === ActionType.Scale)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    // Check ancestors' actions
+    for (let i = 0; i < this.ancestors.length; i++) {
+      if (i in this.ancestors) {
+        const ancestorActions = this.ancestors[i].actions;
+        for (let j = 0; j < ancestorActions.length; j++) {
+          if (j in ancestorActions) {
+            const action = ancestorActions[j];
+            if (
+              action.running &&
+              (action.type === ActionType.Move ||
+                action.type === ActionType.Scale)
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
