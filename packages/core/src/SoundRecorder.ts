@@ -5,6 +5,7 @@ import { SoundRecorderOptions } from "./SoundRecorderOptions";
 import { SoundRecorderResults } from "./SoundRecorderResults";
 import { Timer } from "./Timer";
 import { Uuid } from "./Uuid";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 export class SoundRecorder
   extends M2Node
@@ -349,14 +350,16 @@ export class SoundRecorder
 
     return [
       ...new Set(
-        containers.flatMap((ext) =>
-          mediaTypes.flatMap((mediaType) => [`${mediaType}/${ext}`]),
+        M2c2KitHelpers.flatMap(containers, (ext) =>
+          M2c2KitHelpers.flatMap(mediaTypes, (mediaType) => [
+            `${mediaType}/${ext}`,
+          ]),
         ),
       ),
       ...new Set(
-        containers.flatMap((ext) =>
-          codecs.flatMap((codec) =>
-            mediaTypes.flatMap((mediaType) => [
+        M2c2KitHelpers.flatMap(containers, (ext) =>
+          M2c2KitHelpers.flatMap(codecs, (codec) =>
+            M2c2KitHelpers.flatMap(mediaTypes, (mediaType) => [
               // NOTE: 'codecs:' will always be true (false positive)
               `${mediaType}/${ext};codecs=${codec}`,
             ]),
@@ -364,10 +367,10 @@ export class SoundRecorder
         ),
       ),
       ...new Set(
-        containers.flatMap((ext) =>
-          codecs.flatMap((codec1) =>
-            codecs.flatMap((codec2) =>
-              mediaTypes.flatMap((mediaType) => [
+        M2c2KitHelpers.flatMap(containers, (ext) =>
+          M2c2KitHelpers.flatMap(codecs, (codec1) =>
+            M2c2KitHelpers.flatMap(codecs, (codec2) =>
+              M2c2KitHelpers.flatMap(mediaTypes, (mediaType) => [
                 `${mediaType}/${ext};codecs="${codec1}, ${codec2}"`,
               ]),
             ),

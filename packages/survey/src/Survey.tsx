@@ -708,9 +708,10 @@ export class Survey implements Activity {
   }
 
   private getSurveyJsElementByName(elementName: string): IElement {
-    const surveyJsElements = (
-      this.survey.pages as SurveyReact.PageModel[]
-    ).flatMap((p) => p.elements as SurveyReact.IElement[]);
+    const surveyJsElements = M2c2KitHelpers.flatMap(
+      this.survey.pages as SurveyReact.PageModel[],
+      (p) => p.elements as SurveyReact.IElement[],
+    );
     const surveyJsElement = surveyJsElements.find(
       (e) => e.name === elementName,
     );
@@ -723,9 +724,15 @@ export class Survey implements Activity {
   }
 
   private getCheckboxNoneChoiceName(elementName: string): string | undefined {
-    const surveyJsElementsUntyped = (
-      (this._surveyJson as any)?.pages as Array<any>
-    )?.flatMap((p) => p.elements as Array<any>);
+    const surveyJsPagesUntyped = (this._surveyJson as any)?.pages as
+      | Array<any>
+      | undefined;
+    const surveyJsElementsUntyped = surveyJsPagesUntyped
+      ? M2c2KitHelpers.flatMap(
+          surveyJsPagesUntyped,
+          (p) => p.elements as Array<any>,
+        )
+      : undefined;
     const surveyJsElementUntyped = surveyJsElementsUntyped?.find(
       (e) => e.name === elementName,
     );

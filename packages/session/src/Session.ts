@@ -495,23 +495,25 @@ export class Session {
   }
 
   private fetchSharedFontData(games: Game[]) {
-    const fontFiles = games
-      .flatMap(
-        (game) => game.options.fonts?.filter((f) => f.lazy !== true) ?? [],
-      )
-      .map((fontAsset) => this.getFilenameFromUrl(fontAsset.url));
+    const fontFiles = M2c2KitHelpers.flatMap(
+      games,
+      (game) => game.options.fonts?.filter((f) => f.lazy !== true) ?? [],
+    ).map((fontAsset) => this.getFilenameFromUrl(fontAsset.url));
     const sharedFontFiles = this.getDuplicates(fontFiles);
 
-    const allGameFonts: Array<GameFontAsset> = games.flatMap((game) => {
-      return (game.options.fonts ?? []).map((fontAsset) => {
-        return {
-          game: game,
-          fontAsset: fontAsset,
-          filename: this.getFilenameFromUrl(fontAsset.url),
-          data: undefined,
-        };
-      });
-    });
+    const allGameFonts: Array<GameFontAsset> = M2c2KitHelpers.flatMap(
+      games,
+      (game) => {
+        return (game.options.fonts ?? []).map((fontAsset) => {
+          return {
+            game: game,
+            fontAsset: fontAsset,
+            filename: this.getFilenameFromUrl(fontAsset.url),
+            data: undefined,
+          };
+        });
+      },
+    );
 
     const fontPromises = sharedFontFiles.map(async (sharedFontFile) => {
       const gameFontAsset = allGameFonts.filter(
@@ -529,16 +531,16 @@ export class Session {
 
       const response = await fetch(fontUrl);
       const fontData = await response.arrayBuffer();
-      games
-        .flatMap((game) => game.options.fonts ?? [])
-        .forEach((fontAsset) => {
+      M2c2KitHelpers.flatMap(games, (game) => game.options.fonts ?? []).forEach(
+        (fontAsset) => {
           if (this.getFilenameFromUrl(fontAsset.url) === sharedFontFile) {
             fontAsset.sharedFont = {
               url: fontUrl,
               data: fontData,
             };
           }
-        });
+        },
+      );
     });
     return fontPromises;
   }

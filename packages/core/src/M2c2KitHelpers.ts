@@ -927,6 +927,61 @@ export class M2c2KitHelpers {
     // Cast the output to leverage TypeScript's recursive type inference
     return target as FlatArray<A, D>[];
   }
+
+  /**
+   * Maps each element using a transformation function and flattens the result by one level.
+   *
+   * This provides a spec-compliant implementation of `Array.prototype.flatMap` for
+   * environments that lack native support. It handles sparse arrays correctly by
+   * skipping "holes" and respects `Symbol.species` for array construction.
+   *
+   * @template T The type of elements in the input array.
+   * @template U The type of elements in the resulting flattened array.
+   * @param arr - The array-like object to map and flatten.
+   * @param callback - Function that produces an element (or array of elements) of the new Array.
+   * @param thisArg - Value to use as `this` when executing `callback`.
+   * @returns A new array with each element being the result of the callback and flattened by a depth of 1.
+   * @throws {TypeError} If `arr` is null or undefined.
+   */
+  static flatMap<T, U>(
+    arr: readonly T[] | null | undefined,
+    callback: (
+      value: T,
+      index: number,
+      array: readonly T[],
+    ) => U | readonly U[],
+    thisArg?: unknown,
+  ): U[] {
+    if (arr == null) {
+      throw new TypeError("Array to flatMap is null or not defined");
+    }
+
+    const source = Object(arr);
+    const sourceLen = source.length >>> 0;
+
+    // Create the result array once.
+    // Note: We start with length 0 because we don't know the final flattened length.
+    const result = arraySpeciesCreate(source, 0) as U[];
+
+    for (let i = 0; i < sourceLen; i++) {
+      if (i in source) {
+        const a = arr as readonly T[];
+        const val = a[i];
+        const mappedValue = callback.call(thisArg, val, i, a);
+
+        // Flatten one level deep
+        if (Array.isArray(mappedValue)) {
+          for (let j = 0; j < mappedValue.length; j++) {
+            if (j in mappedValue) result.push(mappedValue[j]);
+          }
+        } else {
+          result.push(mappedValue as U);
+        }
+      }
+    }
+
+    return result;
+  }
 }
 
 /**
