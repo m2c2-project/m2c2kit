@@ -464,7 +464,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
       let paint: Paint | undefined;
       for (let s = 0; s < subpaths.length; s++) {
         const subpath = subpaths[s];
-        const points = subpath.flat();
+        const points = M2c2KitHelpers.flat(subpath);
         for (let i = 0; i < points.length - 1; i++) {
           if (
             linePresentations[lp].subpathIndex === s &&
@@ -522,7 +522,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
 
       const subpaths = (this.path as M2Path).subpaths;
       for (const subpath of subpaths) {
-        const points = subpath.flat();
+        const points = M2c2KitHelpers.flat(subpath);
         for (let i = 0; i < points.length - 1; i++) {
           canvas.drawLine(
             pathOriginX + points[i].x * m2c2Globals.canvasScale,

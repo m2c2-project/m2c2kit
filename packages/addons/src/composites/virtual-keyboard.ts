@@ -133,8 +133,7 @@ export interface KeyTapMetadata {
  * object.
  */
 interface KeyConfigurationWithShape
-  extends KeyConfiguration,
-    Omit<KeyConfiguration, "keyIconShapeOptions"> {
+  extends KeyConfiguration, Omit<KeyConfiguration, "keyIconShapeOptions"> {
   /** Icon to show on the key. */
   keyIcon?: Shape;
 }
@@ -760,7 +759,9 @@ export class VirtualKeyboard extends Composite {
           this.internalKeyboardRowsToInternalKeyboardConfiguration(
             this.keyboardRows,
           );
-        const key = keyboard.flat().find((k) => k.code === event.code);
+        const key = M2c2KitHelpers.flat(keyboard).find(
+          (k) => k.code === event.code,
+        );
         if (!key) {
           throw new M2Error("key is not defined");
         }
@@ -847,7 +848,7 @@ export class VirtualKeyboard extends Composite {
     });
 
     // if shift keys have icons, change fill to black
-    const shiftKeys = keyboard.flat().filter((k) => k.isShift);
+    const shiftKeys = M2c2KitHelpers.flat(keyboard).filter((k) => k.isShift);
     shiftKeys.forEach((k) => {
       if (k.keyIcon) {
         k.keyIcon.fillColor = WebColors.Black;
@@ -855,17 +856,15 @@ export class VirtualKeyboard extends Composite {
     });
 
     // change key labels to shifted text
-    keyboard
-      .flatMap((k) => k)
-      .forEach((k) => {
-        const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
-        if (!keyLabel) {
-          throw new M2Error("keyLabel is not defined");
-        }
-        if (keyLabel.text !== undefined) {
-          keyLabel.text = k.labelTextShifted ?? "";
-        }
-      });
+    M2c2KitHelpers.flat(keyboard).forEach((k) => {
+      const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
+      if (!keyLabel) {
+        throw new M2Error("keyLabel is not defined");
+      }
+      if (keyLabel.text !== undefined) {
+        keyLabel.text = k.labelTextShifted ?? "";
+      }
+    });
   }
 
   private showKeyboardNotShifted(keyboard: InternalKeyboardConfiguration) {
@@ -878,7 +877,7 @@ export class VirtualKeyboard extends Composite {
     });
 
     // if shift keys have icons, change fill back to transparent
-    const shiftKeys = keyboard.flat().filter((k) => k.isShift);
+    const shiftKeys = M2c2KitHelpers.flat(keyboard).filter((k) => k.isShift);
     shiftKeys.forEach((k) => {
       if (k.keyIcon) {
         k.keyIcon.fillColor = WebColors.Transparent;
@@ -886,17 +885,15 @@ export class VirtualKeyboard extends Composite {
     });
 
     // change key labels to regular text
-    keyboard
-      .flatMap((k) => k)
-      .forEach((k) => {
-        const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
-        if (!keyLabel) {
-          throw new M2Error("keyLabel is not defined");
-        }
-        if (keyLabel.text !== undefined) {
-          keyLabel.text = k.labelText ?? "";
-        }
-      });
+    M2c2KitHelpers.flat(keyboard).forEach((k) => {
+      const keyLabel = this.keyLabels.find((l) => l.userData.code === k.code);
+      if (!keyLabel) {
+        throw new M2Error("keyLabel is not defined");
+      }
+      if (keyLabel.text !== undefined) {
+        keyLabel.text = k.labelText ?? "";
+      }
+    });
   }
 
   private createDefaultKeyboardRows() {

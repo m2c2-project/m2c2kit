@@ -1,4 +1,5 @@
 import { M2Error } from "./M2Error";
+import { M2c2KitHelpers } from "./M2c2KitHelpers";
 
 /**
  * A class for for working with numeric values that may be currently unknown,
@@ -146,7 +147,7 @@ export class Futurable {
    */
   get value(): number {
     let result = 0;
-    const terms = this.expression.flat(Infinity);
+    const terms = M2c2KitHelpers.flat(this.expression, Infinity);
     let sign = 1;
     for (let i = 0; i < terms.length; i++) {
       if (typeof terms[i] === "number") {
