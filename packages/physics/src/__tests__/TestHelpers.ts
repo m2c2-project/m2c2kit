@@ -1,6 +1,5 @@
 import { Game } from "@m2c2kit/core";
 import { jest } from "@jest/globals";
-import { CanvasKit } from "canvaskit-wasm";
 import { DomHelper } from "@m2c2kit/session";
 
 export class TestHelpers {
@@ -59,6 +58,7 @@ export class TestHelpers {
   static perfCounter = 0;
   static requestedFrames = 0;
   static maxRequestedFrames = 0;
+  static FRAME_DURATION_MS = 16.66666666666667;
 
   static performance = {
     now: () => this.perfCounter,
@@ -81,7 +81,7 @@ export class TestHelpers {
     };
 
     const requestAnimationFrame = (callback: (canvas: object) => void) => {
-      this.perfCounter = this.perfCounter + 16.66666666666667;
+      this.perfCounter = this.perfCounter + this.FRAME_DURATION_MS;
       if (TestHelpers.requestedFrames < TestHelpers.maxRequestedFrames) {
         TestHelpers.requestedFrames++;
         callback(skiaCanvas);
@@ -89,7 +89,7 @@ export class TestHelpers {
       return undefined;
     };
 
-    Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+    jest.spyOn(Game.prototype, "loadCanvasKit").mockReturnValue(
       Promise.resolve({
         PaintStyle: {
           Fill: undefined,
@@ -173,7 +173,26 @@ export class TestHelpers {
           Make: () => undefined,
           registerFont: () => undefined,
         },
-      }),
-    ) as (canvasKitWasmUrl: string) => Promise<CanvasKit>;
+      } as any),
+    );
+  }
+
+  static teardownDomAndGlobals({ games }: { games?: Game[] } = {}): void {
+    games?.forEach((game) => {
+      if (game) {
+        game.stop();
+        game = null!;
+      }
+    });
+
+    document.documentElement.innerHTML = "";
+    document.body.innerHTML = "";
+    document.head.innerHTML = "";
+    // JSDOM reuses the window object across tests in the same file, so
+    // clean up the global window properties we defined
+    delete (window as any).performance;
+    delete (window as any).innerWidth;
+    delete (window as any).innerHeight;
+    jest.clearAllMocks();
   }
 }

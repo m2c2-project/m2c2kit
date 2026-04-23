@@ -1589,11 +1589,17 @@ export class Game implements Activity {
    * end-user must not call this. FOR INTERNAL USE ONLY.
    */
   dispose(): void {
-    this.inputManager.dispose();
+    // When unit-testing, the input manager may not have been initialized, so
+    // check before disposing.
+    if (this._inputManager) {
+      this.inputManager.dispose();
+    }
     this.nodes
       .filter((e) => e.isDrawable)
       .forEach((e) => (e as unknown as IDrawable).dispose());
-    this.fontManager.dispose();
+    if (this._fontManager) {
+      this.fontManager.dispose();
+    }
   }
 
   /**

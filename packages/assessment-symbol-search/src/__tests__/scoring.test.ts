@@ -63,6 +63,9 @@ describe("Symbol Search scoring tests", () => {
         jsSummary,
         schema: assessment.options.scoringSchema,
       });
+
+      pyResult.destroy();
+      pyodide.globals.delete("trials");
     }
   });
 });

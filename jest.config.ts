@@ -7,6 +7,7 @@ const jestConfig: JestConfigWithTsJest = {
   // Set maxWorkers to a lower value for CI environments to prevent CPU
   // overload in GitHub Actions.
   maxWorkers: isCI ? 3 : "50%",
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 
   extensionsToTreatAsEsm: [".ts"],
   collectCoverage: true,

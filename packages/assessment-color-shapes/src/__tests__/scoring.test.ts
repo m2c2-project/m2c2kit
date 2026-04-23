@@ -59,6 +59,9 @@ describe("Color Shapes scoring tests", () => {
         jsSummary,
         schema: assessment.options.scoringSchema,
       });
+
+      pyResult.destroy();
+      pyodide.globals.delete("trials");
     }
   });
 });

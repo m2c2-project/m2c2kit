@@ -107,6 +107,9 @@ describe("FontManager", () => {
     TestHelpers.setupDomAndGlobals();
     await g1.initialize();
   });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1] });
+  });
 
   it("creates a FontManager", () => {
     expect(g1.fontManager).toBeInstanceOf(FontManager);
@@ -118,6 +121,9 @@ describe("ImageManager", () => {
     g1 = new Game1();
     TestHelpers.setupDomAndGlobals();
     await g1.initialize();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1] });
   });
 
   it("creates an ImageManager", () => {
@@ -160,6 +166,9 @@ describe("parameters", () => {
     g4 = new Game4();
     TestHelpers.setupDomAndGlobals();
     await g4.initialize();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g4] });
   });
 
   it("setParameters sets a game parameter", () => {
@@ -206,6 +215,9 @@ describe("scene add/remove", () => {
   beforeEach(async () => {
     g1 = new Game1();
     await g1.initialize();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1] });
   });
 
   it("addScene adds a scene", () => {
@@ -266,6 +278,9 @@ describe("presentScene", () => {
     g1 = new Game1();
     await g1.initialize();
   });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1] });
+  });
 
   it("presentScene throws error if non-added scene is presented by name", () => {
     const t = () => g1.presentScene("not added scene");
@@ -287,6 +302,9 @@ describe("actions", () => {
     g2 = new Game2();
     TestHelpers.setupDomAndGlobals();
     await g1.initialize();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
   });
 
   it("shape completes move from 200, 200 to 50, 50", async () => {
@@ -770,6 +788,9 @@ describe("Game start", () => {
     await g1.initialize();
     await g2.initialize();
   });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+  });
 
   it("throws error if entryScene as object has not been added to game", async () => {
     g1.entryScene = new Scene();
@@ -822,6 +843,9 @@ describe("free nodes", () => {
     g1.addFreeNode(new Shape({ circleOfRadius: 10, name: "the-circle" }));
     TestHelpers.setupDomAndGlobals();
     await g1.initialize();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
   });
 
   it("removes all free nodes", () => {
@@ -931,6 +955,9 @@ describe("addTrialData", () => {
     TestHelpers.setupDomAndGlobals();
     await g3.initialize();
     await g3.start();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g3] });
   });
 
   it("adds boolean data", () => {
@@ -1042,6 +1069,9 @@ describe("time stepping", () => {
     await g5.initialize();
     await g5.start();
   });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g3, g5] });
+  });
 
   it("adds time stepping controls", () => {
     expect(document.getElementById("m2c2kit-time-stepping-div")).not.toBeNull();
@@ -1058,6 +1088,9 @@ describe("custom trial schema", () => {
   beforeEach(async () => {
     g3 = new Game3();
     TestHelpers.setupDomAndGlobals();
+  });
+  afterEach(() => {
+    TestHelpers.teardownDomAndGlobals();
   });
 
   it("addTrialSchema adds custom trial schema", async () => {
@@ -1129,6 +1162,9 @@ describe("getImportedModuleBaseUrl", () => {
 
   beforeAll(() => {
     g1 = new Game1();
+  });
+  afterAll(() => {
+    TestHelpers.teardownDomAndGlobals({ games: [g1] });
   });
 
   const testCases = [

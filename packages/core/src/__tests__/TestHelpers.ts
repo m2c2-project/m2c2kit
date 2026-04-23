@@ -1,6 +1,5 @@
 import { Game } from "..";
 import { jest } from "@jest/globals";
-import { CanvasKit } from "canvaskit-wasm";
 import { DomHelper } from "@m2c2kit/session";
 
 export class TestHelpers {
@@ -99,7 +98,7 @@ export class TestHelpers {
       return undefined;
     };
 
-    Game.prototype.loadCanvasKit = jest.fn().mockReturnValue(
+    jest.spyOn(Game.prototype, "loadCanvasKit").mockReturnValue(
       Promise.resolve({
         PaintStyle: {
           Fill: undefined,
@@ -183,7 +182,26 @@ export class TestHelpers {
           Make: () => undefined,
           registerFont: () => undefined,
         },
-      }),
-    ) as (canvasKitWasmUrl: string) => Promise<CanvasKit>;
+      } as any),
+    );
+  }
+
+  static teardownDomAndGlobals({ games }: { games?: Game[] } = {}): void {
+    games?.forEach((game) => {
+      if (game) {
+        game.stop();
+        game = null!;
+      }
+    });
+
+    document.documentElement.innerHTML = "";
+    document.body.innerHTML = "";
+    document.head.innerHTML = "";
+    // JSDOM reuses the window object across tests in the same file, so
+    // clean up the global window properties we defined
+    delete (window as any).performance;
+    delete (window as any).innerWidth;
+    delete (window as any).innerHeight;
+    jest.clearAllMocks();
   }
 }

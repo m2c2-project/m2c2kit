@@ -72,6 +72,9 @@ beforeEach(async () => {
   session = new Session(options);
   TestHelpers.setupDomAndGlobals();
 });
+afterEach(() => {
+  TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+});
 
 describe("Session init", () => {
   it("executes", async () => {
