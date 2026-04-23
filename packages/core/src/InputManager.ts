@@ -35,18 +35,18 @@ export class InputManager {
     }
     // When the callback is executed, within the execution of the callback code
     // we want 'this' to be this InputManager object, not the html canvas to which the event listener is attached.
-    // Thus, we use "this.htmlCanvasPointerDownHandler.bind(this)" instead of the usual "htmlCanvasPointerDownHandler"
+    // By using arrow functions for the handlers, they are automatically bound to this object.
     this.htmlCanvas.addEventListener(
       "pointerdown",
-      this.htmlCanvasPointerDownHandler.bind(this),
+      this.htmlCanvasPointerDownHandler,
     );
     this.htmlCanvas.addEventListener(
       "pointerup",
-      this.htmlCanvasPointerUpHandler.bind(this),
+      this.htmlCanvasPointerUpHandler,
     );
     this.htmlCanvas.addEventListener(
       "pointermove",
-      this.htmlCanvasPointerMoveHandler.bind(this),
+      this.htmlCanvasPointerMoveHandler,
     );
     /**
      * on some (all?) mobile devices, even if the page is has no scrollable
@@ -54,52 +54,44 @@ export class InputManager {
      * interfere will some of our events, such as trail making. Thus, we
      * prevent this.
      */
-    this.htmlCanvas.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-    });
+    this.htmlCanvas.addEventListener("touchstart", this.touchStartHandler);
     this.htmlCanvas.addEventListener(
       "pointerleave",
-      this.htmlCanvasPointerLeaveHandler.bind(this),
+      this.htmlCanvasPointerLeaveHandler,
     );
     /**
      * Listen for key events on the document, not just the canvas, because
      * canvas may not have focus.
      */
-    document.addEventListener(
-      "keydown",
-      this.documentKeyDownHandler.bind(this),
-    );
-    document.addEventListener("keyup", this.documentKeyUpHandler.bind(this));
+    document.addEventListener("keydown", this.documentKeyDownHandler);
+    document.addEventListener("keyup", this.documentKeyUpHandler);
   }
 
   private removeEventListeners(): void {
     this.htmlCanvas.removeEventListener(
       "pointerdown",
-      this.htmlCanvasPointerDownHandler.bind(this),
+      this.htmlCanvasPointerDownHandler,
     );
     this.htmlCanvas.removeEventListener(
       "pointerup",
-      this.htmlCanvasPointerUpHandler.bind(this),
+      this.htmlCanvasPointerUpHandler,
     );
     this.htmlCanvas.removeEventListener(
       "pointermove",
-      this.htmlCanvasPointerMoveHandler.bind(this),
+      this.htmlCanvasPointerMoveHandler,
     );
     this.htmlCanvas.removeEventListener(
       "pointerleave",
-      this.htmlCanvasPointerLeaveHandler.bind(this),
+      this.htmlCanvasPointerLeaveHandler,
     );
     this.htmlCanvas.removeEventListener("touchstart", this.touchStartHandler);
-    document.removeEventListener(
-      "keydown",
-      this.documentKeyDownHandler.bind(this),
-    );
-    document.removeEventListener("keyup", this.documentKeyUpHandler.bind(this));
+    document.removeEventListener("keydown", this.documentKeyDownHandler);
+    document.removeEventListener("keyup", this.documentKeyUpHandler);
   }
 
-  private touchStartHandler(e: TouchEvent): void {
+  private touchStartHandler = (e: TouchEvent): void => {
     e.preventDefault();
-  }
+  };
 
   /**
    * Receives callback from DOM PointerDown event
@@ -107,7 +99,9 @@ export class InputManager {
    * @param domPointerEvent - PointerEvent from the DOM
    * @returns
    */
-  private htmlCanvasPointerDownHandler(domPointerEvent: PointerEvent): void {
+  private htmlCanvasPointerDownHandler = (
+    domPointerEvent: PointerEvent,
+  ): void => {
     domPointerEvent.preventDefault();
     const scene = this.game.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
@@ -143,9 +137,11 @@ export class InputManager {
       domPointerEvent,
     );
     this.processDomPointerDown(scene, nodeEvent, domPointerEvent);
-  }
+  };
 
-  private htmlCanvasPointerUpHandler(domPointerEvent: PointerEvent): void {
+  private htmlCanvasPointerUpHandler = (
+    domPointerEvent: PointerEvent,
+  ): void => {
     domPointerEvent.preventDefault();
     const scene = this.game.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
@@ -163,9 +159,11 @@ export class InputManager {
       domPointerEvent,
     );
     this.processDomPointerUp(scene, nodeEvent, domPointerEvent);
-  }
+  };
 
-  private htmlCanvasPointerMoveHandler(domPointerEvent: PointerEvent): void {
+  private htmlCanvasPointerMoveHandler = (
+    domPointerEvent: PointerEvent,
+  ): void => {
     domPointerEvent.preventDefault();
     const scene = this.game.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
@@ -183,9 +181,11 @@ export class InputManager {
       domPointerEvent,
     );
     this.processDomPointerMove(scene, nodeEvent, domPointerEvent);
-  }
+  };
 
-  private htmlCanvasPointerLeaveHandler(domPointerEvent: PointerEvent): void {
+  private htmlCanvasPointerLeaveHandler = (
+    domPointerEvent: PointerEvent,
+  ): void => {
     if (!this.game.currentScene) {
       return;
     }
@@ -207,9 +207,9 @@ export class InputManager {
       domPointerEvent,
     );
     this.processDomPointerLeave(scene, nodeEvent, domPointerEvent);
-  }
+  };
 
-  private documentKeyDownHandler(domKeyboardEvent: KeyboardEvent): void {
+  private documentKeyDownHandler = (domKeyboardEvent: KeyboardEvent): void => {
     const scene = this.game.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
@@ -235,9 +235,9 @@ export class InputManager {
       nodeEvent,
       domKeyboardEvent,
     );
-  }
+  };
 
-  private documentKeyUpHandler(domKeyboardEvent: KeyboardEvent): void {
+  private documentKeyUpHandler = (domKeyboardEvent: KeyboardEvent): void => {
     const scene = this.game.currentScene;
     if (!scene || !this.sceneCanReceiveUserInteraction(scene)) {
       return;
@@ -258,7 +258,7 @@ export class InputManager {
       nodeEvent,
       domKeyboardEvent,
     );
-  }
+  };
 
   /**
    * Determines if/how m2c2kit nodes respond to the DOM PointerDown event
