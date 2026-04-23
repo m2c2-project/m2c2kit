@@ -1,10 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "build",
-    "declarationMap": true,
-    "sourceMap": true
+    "outDir": "build"
   },
-  // remove the exclusion of runner.ts (from base tsconfig.json)
-  "exclude": []
+  // remove the exclusion of runner.ts (from extended tsconfig.json)
+  "exclude": ["src/__tests__"]
 }

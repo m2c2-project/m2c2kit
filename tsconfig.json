@@ -1,31 +1,26 @@
 {
-  "exclude": [
-    "**/node_modules",
-    "**/dist",
-    "**/build",
-    "**/__tests__",
-    "**/*.test*",
-    "**/*.spec*",
-    "**/coverage",
-    "**/website/static"
-  ],
-  "compilerOptions": {
-    "target": "es2017",
-    "module": "es2015",
-    "lib": ["dom", "dom.iterable", "es2017"],
-    "moduleResolution": "bundler",
-    "skipLibCheck": true,
-    "jsx": "react",
-    "strict": true,
-    "removeComments": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "emitDeclarationOnly": true,
-    "forceConsistentCasingInFileNames": true,
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
-  }
+  "files": [],
+  "references": [
+    { "path": "./packages/addons" },
+    { "path": "./packages/assessment-cli-starter" },
+    { "path": "./packages/assessment-color-dots" },
+    { "path": "./packages/assessment-color-shapes" },
+    { "path": "./packages/assessment-grid-memory" },
+    { "path": "./packages/assessment-symbol-search" },
+    { "path": "./packages/assessments-demo" },
+    { "path": "./packages/automation-controller" },
+    { "path": "./packages/automation-driver" },
+    { "path": "./packages/build-helpers" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/core" },
+    { "path": "./packages/data-calc" },
+    { "path": "./packages/db" },
+    { "path": "./packages/embedding" },
+    { "path": "./packages/physics" },
+    { "path": "./packages/schema-util" },
+    { "path": "./packages/schematics" },
+    { "path": "./packages/session" },
+    { "path": "./packages/survey" },
+    { "path": "./packages/test-helpers" }
+  ]
 }

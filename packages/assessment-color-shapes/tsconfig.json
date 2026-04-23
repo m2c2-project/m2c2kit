@@ -1,12 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "references": [
     { "path": "../core" },
     { "path": "../addons" },
-    { "path": "../test-helpers" }
+    { "path": "../data-calc" }
   ],
   "include": ["src"],
-  "exclude": ["src/runner.ts", "src/__tests__"],
+  "exclude": ["src/runner.ts", "src/__tests__/**/*"],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"

@@ -51,7 +51,7 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig: "<rootDir>/packages/core/src/__tests__/tsconfig.json",
             /**
              * @m2c2kit/core uses import.meta, and this is not supported
              * easily in jest. To avoid errors, we use the
@@ -98,7 +98,7 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig: "<rootDir>/packages/session/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -134,7 +134,7 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig: "<rootDir>/packages/survey/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -170,7 +170,7 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig: "<rootDir>/packages/physics/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -206,7 +206,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/data-calc/src/__tests__/tsconfig.json",
           },
         ],
       },
@@ -229,7 +230,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "./packages/build-helpers/tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/build-helpers/src/__tests__/tsconfig.json",
           },
         ],
       },
@@ -248,7 +250,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/assessment-color-shapes/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -284,7 +287,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/assessment-symbol-search/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -320,7 +324,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/assessment-grid-memory/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
@@ -356,7 +361,8 @@ const jestConfig: JestConfigWithTsJest = {
           {
             useESM: true,
             testLocationInResults: false,
-            tsconfig: "tsconfig.json",
+            tsconfig:
+              "<rootDir>/packages/assessment-color-dots/src/__tests__/tsconfig.json",
             diagnostics: {
               ignoreCodes: [1343],
             },
