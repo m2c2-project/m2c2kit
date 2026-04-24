@@ -232,7 +232,11 @@ export class SoundManager {
    * @remarks This will be done automatically by the m2c2kit library; the
    * end-user must not call this.
    */
-  dispose(): void {}
+  dispose(): void {
+    this._audioContext?.close();
+    this._audioContext = undefined;
+    this.sounds = {};
+  }
 
   /**
    * Gets names of sounds entered in the `SoundManager`.

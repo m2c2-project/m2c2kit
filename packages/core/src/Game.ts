@@ -1589,17 +1589,37 @@ export class Game implements Activity {
    * end-user must not call this. FOR INTERNAL USE ONLY.
    */
   dispose(): void {
-    // When unit-testing, the input manager may not have been initialized, so
-    // check before disposing.
     if (this._inputManager) {
       this.inputManager.dispose();
     }
     this.nodes
       .filter((e) => e.isDrawable)
       .forEach((e) => (e as unknown as IDrawable).dispose());
-    if (this._fontManager) {
-      this.fontManager.dispose();
+    try {
+      let nodesWithChildren = this.nodes.filter((n) => n.children.length > 0);
+      while (nodesWithChildren.length > 0) {
+        nodesWithChildren
+          .sort((a, b) => b.ancestors.length - a.ancestors.length)
+          .forEach((n) => {
+            if (n.children.length > 0) {
+              n.removeAllChildren();
+            }
+          });
+        nodesWithChildren = this.nodes.filter((n) => n.children.length > 0);
+      }
+    } catch (e) {
+      console.warn(
+        "Error removing node children during Game.dispose(): " +
+          (e instanceof Error ? e.message : String(e)),
+      );
     }
+
+    this.sceneManager.dispose();
+    // these managers may be undefined in unit-tests. Call the backing objects
+    // directly to avoid the getter which throws if the manager is undefined
+    this._fontManager?.dispose();
+    this._imageManager?.dispose();
+    this._soundManager?.dispose();
   }
 
   /**

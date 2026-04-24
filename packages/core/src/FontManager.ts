@@ -187,6 +187,7 @@ export class FontManager {
   dispose(): void {
     const typefaces = Object.entries(this.fonts).map(([, val]) => val.typeface);
     CanvasKitHelpers.Dispose([...typefaces, this.provider]);
+    this.fonts = {};
   }
 
   /**

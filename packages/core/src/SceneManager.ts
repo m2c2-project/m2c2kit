@@ -689,4 +689,21 @@ export class SceneManager {
       this.freeNodesScene.children.pop();
     }
   }
+
+  /**
+   * Frees up resources allocated by the SceneManager.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks This will be done automatically by the m2c2kit library; the
+   * end-user must not call this.
+   */
+  dispose(): void {
+    this.scenes = [];
+    this.freeNodesScene.removeAllChildren();
+    this.clearCurrentScene();
+    this.snapshots.filter((s) => !s.isDeleted()).forEach((s) => s.delete());
+    this.snapshots = [];
+    this.incomingSceneTransitions = [];
+  }
 }

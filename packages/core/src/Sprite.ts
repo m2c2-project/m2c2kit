@@ -65,7 +65,9 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
 
   dispose(): void {
     // use paint backing field since it may be undefined
-    CanvasKitHelpers.Dispose([this.m2Image?.canvaskitImage, this._paint]);
+    // Do not dispose of the sprite's image here because the image may be
+    // used by other sprites. Images are disposed of in the ImageManager.
+    CanvasKitHelpers.Dispose([this._paint]);
   }
 
   get imageName(): string {

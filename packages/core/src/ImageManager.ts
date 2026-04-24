@@ -466,6 +466,27 @@ export class ImageManager {
   }
 
   /**
+   * Frees up resources allocated by the ImageManager.
+   *
+   * @internal For m2c2kit library use only
+   *
+   * @remarks This will be done automatically by the m2c2kit library; the
+   * end-user must not call this.
+   */
+  dispose(): void {
+    Object.values(this.images)
+      .filter((image) => !image.canvaskitImage?.isDeleted())
+      .forEach((image) => {
+        image.canvaskitImage?.delete();
+      });
+    this.images = {};
+    this.removeScratchCanvas();
+    if (this.missingLocalizationImagePaint) {
+      this.missingLocalizationImagePaint.delete();
+    }
+  }
+
+  /**
    * Returns the scratchCanvas, which is an extra, non-visible canvas in the
    * DOM we use so the native browser can render images like svg, png, jpg,
    * that we later will convert to CanvasKit Image.
