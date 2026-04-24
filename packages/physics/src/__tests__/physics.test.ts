@@ -55,6 +55,7 @@ describe("physics gravity", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("logs physics stats to console", async () => {
@@ -231,6 +232,7 @@ describe("physics collision", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("shape with PhysicsBody collides with edge loop", async () => {
@@ -310,6 +312,7 @@ describe("physics gravity changed", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("shape with PhysicsBody and no gravity set after initialization does not change position", async () => {
@@ -410,6 +413,7 @@ describe("allows rotation", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("does not rotate when constructed with allowsRotation: false", async () => {

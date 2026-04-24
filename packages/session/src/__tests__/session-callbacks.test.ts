@@ -68,6 +68,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   TestHelpers.teardownDomAndGlobals({ games: [g1] });
+  g1 = null!;
 });
 
 describe("Session event handlers", () => {

@@ -74,6 +74,8 @@ beforeEach(async () => {
 });
 afterEach(() => {
   TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+  g1 = null!;
+  g2 = null!;
 });
 
 describe("Session init", () => {

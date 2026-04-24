@@ -109,6 +109,7 @@ describe("FontManager", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("creates a FontManager", () => {
@@ -124,6 +125,7 @@ describe("ImageManager", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("creates an ImageManager", () => {
@@ -169,6 +171,7 @@ describe("parameters", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g4] });
+    g4 = null!;
   });
 
   it("setParameters sets a game parameter", () => {
@@ -218,6 +221,7 @@ describe("scene add/remove", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("addScene adds a scene", () => {
@@ -280,6 +284,7 @@ describe("presentScene", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   it("presentScene throws error if non-added scene is presented by name", () => {
@@ -305,6 +310,8 @@ describe("actions", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+    g1 = null!;
+    g2 = null!;
   });
 
   it("shape completes move from 200, 200 to 50, 50", async () => {
@@ -790,6 +797,8 @@ describe("Game start", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+    g1 = null!;
+    g2 = null!;
   });
 
   it("throws error if entryScene as object has not been added to game", async () => {
@@ -846,6 +855,8 @@ describe("free nodes", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1, g2] });
+    g1 = null!;
+    g2 = null!;
   });
 
   it("removes all free nodes", () => {
@@ -958,6 +969,7 @@ describe("addTrialData", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g3] });
+    g3 = null!;
   });
 
   it("adds boolean data", () => {
@@ -1071,6 +1083,8 @@ describe("time stepping", () => {
   });
   afterEach(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g3, g5] });
+    g3 = null!;
+    g5 = null!;
   });
 
   it("adds time stepping controls", () => {
@@ -1090,7 +1104,8 @@ describe("custom trial schema", () => {
     TestHelpers.setupDomAndGlobals();
   });
   afterEach(() => {
-    TestHelpers.teardownDomAndGlobals();
+    TestHelpers.teardownDomAndGlobals({ games: [g3] });
+    g3 = null!;
   });
 
   it("addTrialSchema adds custom trial schema", async () => {
@@ -1165,6 +1180,7 @@ describe("getImportedModuleBaseUrl", () => {
   });
   afterAll(() => {
     TestHelpers.teardownDomAndGlobals({ games: [g1] });
+    g1 = null!;
   });
 
   const testCases = [
