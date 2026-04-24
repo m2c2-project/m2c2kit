@@ -112,6 +112,7 @@ export class TestHelpers {
             makeImageSnapshot: () => {
               return {
                 delete: () => undefined,
+                isDeleted: () => undefined,
               };
             },
             requestAnimationFrame: (callback: (canvas: object) => void) => {
@@ -134,6 +135,7 @@ export class TestHelpers {
             makeImageSnapshot: () => {
               return {
                 delete: () => undefined,
+                isDeleted: () => undefined,
               };
             },
             requestAnimationFrame: (callback: (canvas: object) => void) => {
@@ -190,7 +192,6 @@ export class TestHelpers {
     games?.forEach((game) => {
       if (game) {
         game.stop();
-        game = null!;
       }
     });
 
