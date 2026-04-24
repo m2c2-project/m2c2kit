@@ -5,7 +5,7 @@ import { SummarizeOperation } from "./SummarizeOperation";
 import { SummarizeFunction, LazyValue } from "./SummarizeFunction";
 import { SummarizeOptions } from "./SummarizeOptions";
 import { M2Error } from "./M2Error";
-import { getChainOps, clearChainOps } from "./ChainBuilder";
+import { getChainOps } from "./ChainBuilder";
 
 /**
  * Default options for summarize operations
@@ -210,7 +210,7 @@ const nInternal: SummarizeFunction = (
   }
 
   // Resolve lazy parameters (DataCalc => value/array) and other scalar forms
-  let variableOrValues = resolveLazy(rawParam as any, dataCalc);
+  const variableOrValues = resolveLazy(rawParam as any, dataCalc);
 
   // No parameter: return row count
   if (variableOrValues === undefined) return dataCalc.length;
@@ -1034,10 +1034,6 @@ const scalarInternal: SummarizeFunction = (
           evaluated = current instanceof DataCalc ? current.length : NaN;
         if (!Number.isNaN(evaluated)) v = evaluated;
         else v = null;
-        // clean up registry
-        try {
-          clearChainOps(payload as string);
-        } catch {}
       }
     }
   }

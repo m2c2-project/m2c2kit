@@ -4,7 +4,7 @@ import { M2Error } from "./M2Error";
 import { Mutations } from "./Mutations";
 import { Observation } from "./Observation";
 import { SummarizeOperation } from "./SummarizeOperation";
-import { getChainOps, clearChainOps } from "./ChainBuilder";
+import { getChainOps } from "./ChainBuilder";
 
 export class DataCalc {
   private _observations: Array<Observation>;
@@ -465,12 +465,6 @@ export class DataCalc {
               if (!Number.isNaN(leftoverNum)) sum += leftoverNum;
 
               obs[newVariable] = sum;
-              // Clean up registry entries that were created when the chain placeholders
-              // were generated. It's safe to delete these after they've been evaluated
-              // for this summarize() invocation.
-              for (const m of matches) {
-                clearChainOps(m[1]);
-              }
               continue;
             }
           }
@@ -639,10 +633,6 @@ export class DataCalc {
               if (!Number.isNaN(leftoverNum)) sum += leftoverNum;
 
               summaryObj[newVariable] = sum;
-              // Clean up registry entries created for these chain placeholders.
-              for (const m of matches) {
-                clearChainOps(m[1]);
-              }
               continue;
             }
           }

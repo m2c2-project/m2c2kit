@@ -1,5 +1,5 @@
 import { DataCalc } from "./DataCalc";
-import { getChainOps, clearChainOps } from "./ChainBuilder";
+import { getChainOps } from "./ChainBuilder";
 import { SummarizeOptions } from "./SummarizeOptions";
 import { DataValue } from "./DataValue";
 import { SummarizeFunction, LazyValue } from "./SummarizeFunction";
@@ -46,9 +46,6 @@ export class SummarizeOperation {
 
   // token stream representing expression: operand (op operand)*
   private tokens: Token[];
-  // During evaluation collect chain ids used so registry entries can be cleaned
-  // up after the evaluation completes.
-  private _usedChainIds?: Set<string>;
 
   // Expose summarizeFunction property so DataCalc.summarize detects it.
   // It delegates to evaluate(dc).
@@ -238,8 +235,6 @@ export class SummarizeOperation {
 
   // Evaluate an operand token to a number (returns NaN for non-numeric)
   private evaluateOperandToNumber(opd: any, dc: DataCalc): number {
-    // initialize used id set for this top-level evaluation
-    if (!this._usedChainIds) this._usedChainIds = new Set<string>();
     // Handle numeric literal
     if (typeof opd === "number") return opd;
 
@@ -251,7 +246,6 @@ export class SummarizeOperation {
         const payload = m[1];
         // Try to resolve via registry first
         let ops: any[] | undefined = getChainOps(payload as string);
-        if (ops) this._usedChainIds?.add(payload as string);
         if (!ops) {
           // Fallback to legacy encoded JSON payloads
           try {
@@ -365,19 +359,10 @@ export class SummarizeOperation {
 
     const final = operands[0];
     if (typeof final === "number") {
-      // Clean up any chain entries that were referenced during this evaluation
-      if (this._usedChainIds) {
-        for (const id of this._usedChainIds) clearChainOps(id);
-        this._usedChainIds = undefined;
-      }
       return final;
     }
     // If it's still a SummarizeOperation (unlikely), evaluate it
     const res = this.evaluateOperandToNumber(final as Operand, dc);
-    if (this._usedChainIds) {
-      for (const id of this._usedChainIds) clearChainOps(id);
-      this._usedChainIds = undefined;
-    }
     return res;
   }
 

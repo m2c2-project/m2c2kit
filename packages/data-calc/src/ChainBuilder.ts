@@ -9,6 +9,9 @@ type OpRecord = { name: string; args: any[] };
 // returned from the `length` accessor so `DataCalc.summarize` can resolve
 // and replay the original operations.
 const CHAIN_REGISTRY = new Map<string, OpRecord[]>();
+// Limit the registry size to avoid memory leaks. 10,000 entries should be
+// plenty for typical browser-based assessment data analysis.
+const MAX_CHAIN_REGISTRY_SIZE = 10000;
 let CHAIN_COUNTER = 0;
 
 export function getChainOps(id: string): OpRecord[] | undefined {
@@ -108,6 +111,17 @@ function makeChainFn(): ChainFn {
           id,
           (fn.ops || []).map((o) => ({ ...o })),
         );
+
+        // Enforce maximum size of the registry to prevent memory leaks.
+        // Since Map preserves insertion order, deleting the first key
+        // will remove the oldest entry.
+        if (CHAIN_REGISTRY.size > MAX_CHAIN_REGISTRY_SIZE) {
+          const firstKey = CHAIN_REGISTRY.keys().next().value;
+          if (firstKey) {
+            CHAIN_REGISTRY.delete(firstKey);
+          }
+        }
+
         return `__CHAIN_EXPR__[${id}]`;
       } catch (err) {
         return undefined;
