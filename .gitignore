@@ -5,6 +5,7 @@
 .rollup.cache
 build/
 build-nobundler/
+.turbo
 
 packages/core/assets/canvaskit*.wasm
 

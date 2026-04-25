@@ -37,6 +37,8 @@ jobs:
         with:
           node-version: 24.x
           cache: npm
+      - name: Enable Corepack
+        run: corepack enable
       - name: Install dependencies
         run: npm ci
       - name: Initialize CodeQL

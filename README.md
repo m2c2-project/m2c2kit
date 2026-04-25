@@ -83,9 +83,12 @@ See the [`@m2c2kit/cli`](packages/cli) package for more information on using the
 
 The installation steps above are all you need to start using m2c2kit and creating assessments.
 
-To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. After you have installed the prerequisites for building and testing the repository ([Node.js](https://nodejs.org), [Git](https://git-scm.com/), and [Docker](https://www.docker.com/)), execute the following from the repository root:
+To explore m2c2kit in depth, build the library from source. m2c2kit is a mono repository. After you have installed the prerequisites for building and testing the repository ([Node.js](https://nodejs.org), [Git](https://git-scm.com/), and [Docker](https://www.docker.com/)), you must enable Corepack.
+
+Because m2c2kit enforces strict package manager determinism for its build pipeline, enabling Corepack ensures your machine automatically uses the exact version of npm required by the repository. Execute the following from the repository root:
 
 ```
+corepack enable
 npm install
 npm run build
 ```

@@ -2,6 +2,7 @@
   "name": "m2c2kit",
   "version": "0.9.0",
   "description": "A library for cross-platform cognitive assessments",
+  "packageManager": "npm@11.12.1",
   "workspaces": [
     "packages/addons",
     "packages/assessment-cli-starter",
@@ -28,8 +29,7 @@
     "packages/test-helpers"
   ],
   "scripts": {
-    "build": "node scripts/build-all.mjs",
-    "build-concurrent": "concurrently --kill-others-on-fail \"npm run build -w @m2c2kit/build-helpers\" && concurrently \"npm run build -w @m2c2kit/core\" \"npm run build -w @m2c2kit/cli\" \"npm run build -w @m2c2kit/schema-util\" \"npm run build -w @m2c2kit/data-calc\" \"npm run build -w @m2c2kit/test-helpers\" && concurrently \"npm run build -w @m2c2kit/session\" \"npm run build -w @m2c2kit/addons\" \"npm run build -w @m2c2kit/physics\" \"npm run build -w @m2c2kit/survey\" \"npm run build -w @m2c2kit/db\" && concurrently \"npm run build -w @m2c2kit/schematics\" \"npm run build -w @m2c2kit/embedding\" \"npm run build -w @m2c2kit/assessment-grid-memory\" \"npm run build -w @m2c2kit/assessment-symbol-search\" \"npm run build -w @m2c2kit/assessment-color-dots\" \"npm run build -w @m2c2kit/assessment-color-shapes\" \"npm run build -w @m2c2kit/assessment-cli-starter\" && concurrently \"npm run build-webview -w @m2c2kit/assessments-demo\" && concurrently \"npm run build -w @m2c2kit/assessments-demo\" \"npm run build -w @m2c2kit/assessments-registry\" \"npm run copy-modules\"",
+    "build": "turbo run build build-webview copy-modules --filter=!@m2c2kit/automation-controller --filter=!@m2c2kit/automation-driver",
     "test": "npx env-cmd -f .env.jest -- jest",
     "integration-test": "docker compose down && docker compose build m2c2kit registry testapp testmodule --pull && docker compose build publish && docker compose up --exit-code-from m2c2kit",
     "copy-modules": "rimraf examples/no-js-bundler-development/modules && node scripts/copy-m2c2kit-modules.mjs",
@@ -71,6 +71,7 @@
     "ts-jest": "29.4.9",
     "ts-jest-mock-import-meta": "1.3.2",
     "ts-node": "10.9.2",
+    "turbo": "2.9.6",
     "typescript-eslint": "^8.59.0"
   },
   "lint-staged": {

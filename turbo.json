@@ -1,0 +1,80 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  // Global dependencies invalidate the entire cache if changed.
+  "globalDependencies": ["tsconfig.base.json"],
+  "tasks": {
+    "build": {
+      // Caret (^) means this task depends on the build of its dependencies.
+      "dependsOn": ["^build"],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        // Packages contain versioned assets (WASM, images, fonts, CSS)
+        // that must be cached so the copyAssets plugin can find them.
+        "assets/**",
+        // Assessment packages generate JSON schemas for data export.
+        "schemas.json",
+        // Restoring tsbuildinfo keeps incremental tsc builds healthy.
+        "tsconfig.tsbuildinfo"
+      ],
+      // env variables that affect build output (e.g., minification).
+      "env": [
+        "NODE_ENV",
+        "PROD",
+        "SERVE",
+        "MINIFY",
+        "NO_HASH",
+        "SERVICE_WORKER"
+      ]
+    },
+    "@m2c2kit/schematics#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        // Only track source files as inputs to avoid "input-output" collision
+        "src/**/*.ts",
+        "src/**/files/**/*",
+        "src/**/schema.json",
+        "src/collection.json",
+        "scripts/**",
+        "package.json",
+        "tsconfig.json",
+        // Cross-package version tracking for constants.js injection.
+        "../../packages/core/package.json",
+        "../../packages/addons/package.json",
+        "../../packages/session/package.json",
+        "../../packages/build-helpers/package.json",
+        "../../packages/schema-util/package.json",
+        "../../packages/assessments-demo/package.json"
+      ],
+      "outputs": [
+        // Schematics builds in-place into src/. Capturing all JS and types.
+        "src/**/*.js",
+        "src/**/*.js.map",
+        "src/**/*.d.ts",
+        "src/**/files/**/*",
+        "src/**/schema.json",
+        "src/collection.json",
+        "types/**",
+        "tsconfig.tsbuildinfo"
+      ],
+      "env": ["NODE_ENV", "PROD"]
+    },
+    "build-webview": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist-webview/**", "tsconfig.tsbuildinfo"],
+      "env": [
+        "NODE_ENV",
+        "PROD",
+        "SERVE",
+        "MINIFY",
+        "NO_HASH",
+        "SERVICE_WORKER"
+      ]
+    },
+    "copy-modules": {
+      // Aggregation task: waits for ALL workspace builds to finish.
+      "dependsOn": ["^build", "^build-webview"],
+      "cache": false
+    }
+  }
+}
