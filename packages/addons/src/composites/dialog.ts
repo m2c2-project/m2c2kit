@@ -1,4 +1,4 @@
-import { Paint, Canvas } from "canvaskit-wasm";
+import { Canvas } from "canvaskit-wasm";
 import {
   M2NodeEvent,
   WebColors,
@@ -57,7 +57,6 @@ export class Dialog extends Composite {
   negativeButtonText = "";
 
   private _fontColor = WebColors.White;
-  private backgroundPaint?: Paint;
 
   // todo: add getters/setters so button can respond to changes in its options
   // todo: add default "behaviors" (?) like button click animation?

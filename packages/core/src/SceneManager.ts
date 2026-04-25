@@ -700,7 +700,7 @@ export class SceneManager {
    */
   dispose(): void {
     this.scenes = [];
-    this.freeNodesScene.removeAllChildren();
+    this.freeNodesScene.dispose();
     this.clearCurrentScene();
     this.snapshots.filter((s) => !s.isDeleted()).forEach((s) => s.delete());
     this.snapshots = [];

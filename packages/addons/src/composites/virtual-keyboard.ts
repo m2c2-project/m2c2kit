@@ -213,7 +213,7 @@ export class VirtualKeyboard extends Composite {
           if (key instanceof Object && !Array.isArray(key)) {
             const internalKeyConfig = key as KeyConfigurationWithShape;
             if (key.keyIconShapeOptions) {
-              key.keyIconShapeOptions.suppressEvents = true;
+              key.keyIconShapeOptions.isPartOfComposite = true;
               internalKeyConfig.keyIcon = new Shape(key.keyIconShapeOptions);
               (internalKeyConfig as KeyConfiguration).keyIconShapeOptions =
                 undefined;
@@ -271,7 +271,7 @@ export class VirtualKeyboard extends Composite {
     const keyboardRectangle = new Shape({
       rect: { size: this.size },
       fillColor: this.backgroundColor,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     this.addChild(keyboardRectangle);
 
@@ -350,7 +350,7 @@ export class VirtualKeyboard extends Composite {
               r * keyBoxHeight +
               keyBoxHeight / 2,
           },
-          suppressEvents: true,
+          isPartOfComposite: true,
         });
 
         const keyWidth =
@@ -366,7 +366,7 @@ export class VirtualKeyboard extends Composite {
           fillColor: this.keyColor,
           lineWidth: 0,
           isUserInteractionEnabled: this.isUserInteractionEnabled,
-          suppressEvents: true,
+          isPartOfComposite: true,
         });
         // so we can reference keyShape by key code in handleCompositeEvent()
         keyShape.userData = { code: key.code };
@@ -377,7 +377,7 @@ export class VirtualKeyboard extends Composite {
           text: key.labelText,
           fontSize: this.fontSize,
           fontNames: this.fontNames,
-          suppressEvents: true,
+          isPartOfComposite: true,
         });
         // so we can reference keyLabel by key code in handleCompositeEvent()
         keyLabel.userData = { code: key.code };
@@ -408,14 +408,14 @@ export class VirtualKeyboard extends Composite {
       circleOfRadius: 28,
       fillColor: WebColors.Silver,
       hidden: true,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     keyboardRectangle.addChild(this.letterCircle);
     this.letterCircleLabel = new Label({
       text: "",
       fontSize: this.fontSize,
       fontNames: this.fontNames,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     this.letterCircle.addChild(this.letterCircleLabel);
 
@@ -941,7 +941,7 @@ export class VirtualKeyboard extends Composite {
       lineWidth: 2,
       strokeColor: WebColors.Black,
       fillColor: WebColors.Transparent,
-      suppressEvents: true,
+      isPartOfComposite: true,
     };
     const backspaceShapeOptions: ShapeOptions = {
       path: {
@@ -953,7 +953,7 @@ export class VirtualKeyboard extends Composite {
       lineWidth: 1,
       strokeColor: WebColors.Black,
       fillColor: WebColors.Red,
-      suppressEvents: true,
+      isPartOfComposite: true,
     };
     const row3: InternalKeyboardRow = [
       {

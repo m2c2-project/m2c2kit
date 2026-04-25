@@ -1592,28 +1592,9 @@ export class Game implements Activity {
     if (this._inputManager) {
       this.inputManager.dispose();
     }
-    this.nodes
-      .filter((e) => e.isDrawable)
-      .forEach((e) => (e as unknown as IDrawable).dispose());
-    try {
-      let nodesWithChildren = this.nodes.filter((n) => n.children.length > 0);
-      while (nodesWithChildren.length > 0) {
-        nodesWithChildren
-          .sort((a, b) => b.ancestors.length - a.ancestors.length)
-          .forEach((n) => {
-            if (n.children.length > 0) {
-              n.removeAllChildren();
-            }
-          });
-        nodesWithChildren = this.nodes.filter((n) => n.children.length > 0);
-      }
-    } catch (e) {
-      console.warn(
-        "Error removing node children during Game.dispose(): " +
-          (e instanceof Error ? e.message : String(e)),
-      );
-    }
-
+    this.scenes.forEach((scene) => scene.dispose());
+    this.materializedNodes.forEach((node) => node.dispose());
+    this.materializedNodes = [];
     this.sceneManager.dispose();
     // these managers may be undefined in unit-tests. Call the backing objects
     // directly to avoid the getter which throws if the manager is undefined

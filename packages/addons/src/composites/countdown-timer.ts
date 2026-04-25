@@ -150,7 +150,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
       this.timerShapeNode = new Shape({
         circleOfRadius: this.timerShape.circle?.radius ?? 100,
         fillColor: this.timerShape?.fillColor ?? WebColors.RoyalBlue,
-        suppressEvents: true,
+        isPartOfComposite: true,
       });
       this.addChild(this.timerShapeNode);
     } else if (this.timerShape?.rectangle !== undefined) {
@@ -161,7 +161,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
         },
         cornerRadius: this.timerShape?.rectangle?.cornerRadius,
         fillColor: this.timerShape?.fillColor ?? WebColors.RoyalBlue,
-        suppressEvents: true,
+        isPartOfComposite: true,
       });
       this.addChild(this.timerShapeNode);
     } else {
@@ -190,7 +190,7 @@ export class CountdownTimer extends Composite implements CountdownTimerOptions {
           verticalBias: this.textVerticalBias,
         },
       },
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     this.timerShapeNode.addChild(this.timerNumberLabel);
 

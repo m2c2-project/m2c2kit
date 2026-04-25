@@ -142,7 +142,7 @@ export class Grid extends Composite implements GridOptions {
       strokeColor: this.gridLineColor,
       lineWidth: this.gridLineWidth,
       isUserInteractionEnabled: this.isUserInteractionEnabled,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     super.addChild(this.gridBackground);
     this.gridBackground.isUserInteractionEnabled =
@@ -156,7 +156,7 @@ export class Grid extends Composite implements GridOptions {
           origin: { x: -this.size.width / 2 + this.cellWidth * col, y: 0 },
         },
         fillColor: this.gridLineColor,
-        suppressEvents: true,
+        isPartOfComposite: true,
       });
       this.gridBackground.addChild(verticalLine);
     }
@@ -169,7 +169,7 @@ export class Grid extends Composite implements GridOptions {
           origin: { x: 0, y: -this.size.height / 2 + this.cellHeight * row },
         },
         fillColor: this.gridLineColor,
-        suppressEvents: true,
+        isPartOfComposite: true,
       });
       this.gridBackground.addChild(horizontalLine);
     }
@@ -196,7 +196,7 @@ export class Grid extends Composite implements GridOptions {
           },
           fillColor: WebColors.Transparent,
           lineWidth: 0,
-          suppressEvents: true,
+          isPartOfComposite: true,
         });
         this.gridBackground.addChild(cellContainer);
         this.cellContainers[row][col] = cellContainer;
@@ -319,11 +319,6 @@ export class Grid extends Composite implements GridOptions {
     this._gridLineColor = gridLineColor;
     this.needsInitialization = true;
   }
-
-  // all nodes that make up grid are added as children, so they
-  // have their own dispose methods
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  override dispose(): void {}
 
   /**
    * Duplicates a node using deep copy.

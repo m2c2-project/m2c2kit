@@ -120,6 +120,7 @@ export class Slider extends Composite implements SliderOptions {
       },
       cornerRadius: 8,
       fillColor: this.trackColor,
+      isPartOfComposite: true,
     });
     this.addChild(trackShape);
 
@@ -139,6 +140,7 @@ export class Slider extends Composite implements SliderOptions {
           this.trackSize.width / 2,
         y: 0,
       },
+      isPartOfComposite: true,
     });
     trackShape.addChild(this.thumbShape);
 
@@ -153,6 +155,7 @@ export class Slider extends Composite implements SliderOptions {
       alpha: 0,
       isUserInteractionEnabled: true,
       zPosition: 0,
+      isPartOfComposite: true,
     });
     trackShape.addChild(trackZoneShape);
     trackZoneShape.onTapDown((e) => {
@@ -178,6 +181,7 @@ export class Slider extends Composite implements SliderOptions {
       // alpha: 0.008,
       alpha: 0,
       isUserInteractionEnabled: true,
+      isPartOfComposite: true,
     });
     this.addChild(thumbZoneShape);
     thumbZoneShape.onPointerMove(() => {
@@ -243,6 +247,7 @@ export class Slider extends Composite implements SliderOptions {
     if (!this.thumbLabel) {
       this.thumbLabel = new Label({
         text: value.toString(),
+        isPartOfComposite: true,
       });
       this.addChild(this.thumbLabel);
     }

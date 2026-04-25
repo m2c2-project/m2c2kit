@@ -1,6 +1,5 @@
-import { Paint, Canvas } from "canvaskit-wasm";
+import { Canvas } from "canvaskit-wasm";
 import {
-  CanvasKitHelpers,
   WebColors,
   Composite,
   CompositeOptions,
@@ -46,7 +45,6 @@ export class Button extends Composite implements IText, ButtonOptions {
   private _fontNames: Array<string> | undefined;
   private _interpolation: StringInterpolationMap = {};
   private _localize = true;
-  private backgroundPaint?: Paint;
 
   // TODO: add default "behaviors" (?) like button click animation?
 
@@ -113,23 +111,12 @@ export class Button extends Composite implements IText, ButtonOptions {
   override initialize(): void {
     this.removeAllChildren();
 
-    this.backgroundPaint = new this.canvasKit.Paint();
-    this.backgroundPaint.setColor(
-      this.canvasKit.Color(
-        this.backgroundColor[0],
-        this.backgroundColor[1],
-        this.backgroundColor[2],
-        this.backgroundColor[3],
-      ),
-    );
-    this.backgroundPaint.setStyle(this.canvasKit.PaintStyle.Fill);
-
     const buttonRectangle = new Shape({
       name: "__" + this.name + "-buttonRectangle",
       rect: { size: this.size },
       cornerRadius: this.cornerRadius,
       fillColor: this._backgroundColor,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     this.addChild(buttonRectangle);
 
@@ -142,15 +129,11 @@ export class Button extends Composite implements IText, ButtonOptions {
       fontNames: this.fontNames,
       fontSize: this.fontSize,
       fontColor: this.fontColor,
-      suppressEvents: true,
+      isPartOfComposite: true,
     });
     buttonRectangle.addChild(buttonLabel);
 
     this.needsInitialization = false;
-  }
-
-  override dispose(): void {
-    CanvasKitHelpers.Dispose([this.backgroundPaint]);
   }
 
   get text(): string {

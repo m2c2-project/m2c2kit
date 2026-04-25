@@ -320,7 +320,8 @@ export class TextLine
     this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
-  dispose(): void {
+  override dispose(): void {
+    super.dispose();
     CanvasKitHelpers.Dispose([this.font, this.typeface, this.paint]);
   }
 

@@ -243,7 +243,7 @@ export class LocalePicker extends Composite {
      * Rather than `this.removeAllChildren()`, we remove all children except
      * the icon. Otherwise, the icon will flicker when the dialog is shown.
      */
-    this.children
+    [...this.children]
       .filter((child) => child.name !== "localePickerIcon")
       .forEach((child) => this.removeChild(child));
 
@@ -265,6 +265,7 @@ export class LocalePicker extends Composite {
         imageName: "__localePickerIcon",
         position: this.iconPosition,
         isUserInteractionEnabled: true,
+        isPartOfComposite: true,
       });
       this.addChild(this.iconSprite);
 
@@ -307,6 +308,7 @@ export class LocalePicker extends Composite {
       zPosition: -1,
       isUserInteractionEnabled: true,
       hidden: true,
+      isPartOfComposite: true,
     });
     overlay.onTapUp((e) => {
       e.handled = true;
@@ -373,6 +375,7 @@ export class LocalePicker extends Composite {
       fillColor: this.backgroundColor,
       isUserInteractionEnabled: true,
       hidden: true,
+      isPartOfComposite: true,
     });
     localeDialog.onTapDown((e) => {
       e.handled = true;
@@ -417,6 +420,7 @@ export class LocalePicker extends Composite {
           hidden: true,
           // do not localize the text of each language option
           localize: false,
+          isPartOfComposite: true,
         });
         text.onTapUp((e) => {
           e.handled = true;
@@ -458,6 +462,7 @@ export class LocalePicker extends Composite {
           isUserInteractionEnabled: true,
           zPosition: 1,
           hidden: true,
+          isPartOfComposite: true,
         });
         this.addChild(localeSprite);
 
@@ -485,6 +490,7 @@ export class LocalePicker extends Composite {
             hidden: true,
             // do not localize the left selection indicator
             localize: false,
+            isPartOfComposite: true,
           });
           this.addChild(leftSelectionIndicator);
           const rightSelectionIndicator = new Label({
@@ -503,6 +509,7 @@ export class LocalePicker extends Composite {
             hidden: true,
             // do not localize the left selection indicator
             localize: false,
+            isPartOfComposite: true,
           });
           this.addChild(rightSelectionIndicator);
         }

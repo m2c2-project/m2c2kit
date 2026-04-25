@@ -602,7 +602,7 @@ export class InputManager {
     nodeEvent: M2NodeEvent,
     domEvent: Event,
   ): void {
-    node.eventListeners
+    [...node.eventListeners]
       .filter((listener) => listener.type === nodeEvent.type)
       .forEach((listener) => {
         if (listener.nodeUuid === node.uuid) {
@@ -677,7 +677,7 @@ export class InputManager {
               listener.callback(nodeEvent as T);
               break;
           }
-          if (!node.suppressEvents) {
+          if (!node.isPartOfComposite) {
             this.game.eventStore.addEvent(nodeEvent);
           }
         }

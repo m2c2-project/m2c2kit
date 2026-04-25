@@ -76,9 +76,6 @@ export abstract class Composite extends M2Node implements IDrawable {
     this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  dispose(): void {}
-
   update(): void {
     super.update();
   }

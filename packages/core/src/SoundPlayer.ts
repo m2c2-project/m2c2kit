@@ -75,8 +75,6 @@ export class SoundPlayer extends M2Node implements SoundPlayerOptions {
     }
   }
 
-  dispose(): void {}
-
   /**
    * Duplicates a node using deep copy.
    *

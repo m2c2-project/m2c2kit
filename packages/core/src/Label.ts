@@ -660,8 +660,8 @@ export class Label extends M2Node implements IDrawable, IText, LabelOptions {
     }
     return requiredFonts;
   }
-
-  dispose(): void {
+  override dispose(): void {
+    super.dispose();
     CanvasKitHelpers.Dispose([
       this.paragraph,
       this.builder,

@@ -331,7 +331,8 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     this.savePropertyChangeEvent("zPosition", zPosition);
   }
 
-  dispose(): void {
+  override dispose(): void {
+    super.dispose();
     // Build an explicit array of colorful path paints
     const colorfulPathPaintsToDispose: Paint[] = [];
     for (const p of this.colorfulPathPaints.values()) {

@@ -70,7 +70,8 @@ export class Scene extends M2Node implements IDrawable, SceneOptions {
     this.needsInitialization = false;
   }
 
-  dispose(): void {
+  override dispose(): void {
+    super.dispose();
     CanvasKitHelpers.Dispose([this.backgroundPaint]);
   }
 

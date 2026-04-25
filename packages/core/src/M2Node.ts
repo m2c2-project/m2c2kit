@@ -87,7 +87,7 @@ export abstract class M2Node implements M2NodeOptions {
   isDrawable = false;
   isShape = false;
   isText = false;
-  private _suppressEvents = false;
+  private _isPartOfComposite = false;
   options: M2NodeOptions;
   constructionTimeStamp: number;
   constructionIso8601TimeStamp: string;
@@ -143,12 +143,12 @@ export abstract class M2Node implements M2NodeOptions {
 
   constructor(options: M2NodeOptions = {}) {
     /**
-     * suppressEvents *must* be set early in the constructor because it
+     * isPartOfComposite *must* be set early in the constructor because it
      * determines if other properties set in the constructor are saved as
      * property change events.
      */
-    if (options.suppressEvents !== undefined) {
-      this.suppressEvents = options.suppressEvents;
+    if (options.isPartOfComposite !== undefined) {
+      this.isPartOfComposite = options.isPartOfComposite;
     }
     this.constructionTimeStamp =
       Number.isNaN(m2c2Globals?.now) || m2c2Globals?.now === undefined
@@ -206,7 +206,7 @@ export abstract class M2Node implements M2NodeOptions {
    * Save the node's construction event in the event store.
    */
   protected saveNodeNewEvent(): void {
-    if (this.suppressEvents) {
+    if (this.isPartOfComposite) {
       return;
     }
 
@@ -236,7 +236,7 @@ export abstract class M2Node implements M2NodeOptions {
     property: string,
     value: string | number | boolean | object | null | undefined,
   ): void {
-    if (this.suppressEvents) {
+    if (this.isPartOfComposite) {
       return;
     }
     const nodePropertyChangeEvent: M2NodePropertyChangeEvent = {
@@ -345,7 +345,7 @@ export abstract class M2Node implements M2NodeOptions {
    * @param child - The child node to add
    */
   addChild(child: M2Node): void {
-    const suppressEvents = this.suppressEvents || child.suppressEvents;
+    const suppressEvents = this.isPartOfComposite || child.isPartOfComposite;
     // Do not allow a child to be added to itself
     if (child === this) {
       throw new M2Error(
@@ -447,7 +447,7 @@ export abstract class M2Node implements M2NodeOptions {
    * Removes all children from the node.
    */
   removeAllChildren(): void {
-    this.children.forEach((child) => this.removeChild(child));
+    [...this.children].forEach((child) => this.removeChild(child));
   }
 
   /**
@@ -457,7 +457,7 @@ export abstract class M2Node implements M2NodeOptions {
    * @param child
    */
   removeChild(child: M2Node): void {
-    const suppressEvents = this.suppressEvents || child.suppressEvents;
+    const suppressEvents = this.isPartOfComposite || child.isPartOfComposite;
     if (this.children.includes(child)) {
       child.parent = undefined;
       this.children = this.children.filter((c) => c !== child);
@@ -1175,6 +1175,33 @@ export abstract class M2Node implements M2NodeOptions {
   }
 
   /**
+   * Frees up resources and breaks parent/child links.
+   *
+   * @remarks This should be overridden by derived classes to clean up
+   * specific resources (like Skia objects), and they should call super.dispose().
+   */
+  dispose(): void {
+    // iterate over a copy of the children array because the original array
+    // will be modified during the recursive disposal as each child removes
+    // itself from this.children
+    [...this.children].forEach((child) => child.dispose());
+
+    // Break link to parent
+    if (this.parent) {
+      const index = this.parent.children.indexOf(this);
+      if (index > -1) {
+        this.parent.children.splice(index, 1);
+      }
+      this.parent = undefined;
+    }
+
+    // Cleanup internal state
+    this.eventListeners = [];
+    this.nodeEvents = [];
+    this.actions = [];
+  }
+
+  /**
    * Draws each child node that is Drawable and is not hidden, by zPosition
    * order (highest zPosition on top).
    *
@@ -1459,11 +1486,11 @@ export abstract class M2Node implements M2NodeOptions {
     this.savePropertyChangeEvent("draggable", draggable);
   }
 
-  get suppressEvents(): boolean {
-    return this._suppressEvents;
+  get isPartOfComposite(): boolean {
+    return this._isPartOfComposite;
   }
-  set suppressEvents(value: boolean) {
-    this._suppressEvents = value;
+  set isPartOfComposite(value: boolean) {
+    this._isPartOfComposite = value;
   }
 
   // from https://medium.com/@konduruharish/topological-sort-in-typescript-and-c-6d5ecc4bad95

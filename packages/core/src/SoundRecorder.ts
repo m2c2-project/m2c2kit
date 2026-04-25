@@ -417,8 +417,6 @@ export class SoundRecorder
     return undefined;
   }
 
-  dispose(): void {}
-
   /**
    * Duplicates a node using deep copy.
    *

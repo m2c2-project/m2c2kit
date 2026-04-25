@@ -63,7 +63,8 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
     this.needsInitialization = false;
   }
 
-  dispose(): void {
+  override dispose(): void {
+    super.dispose();
     // use paint backing field since it may be undefined
     // Do not dispose of the sprite's image here because the image may be
     // used by other sprites. Images are disposed of in the ImageManager.

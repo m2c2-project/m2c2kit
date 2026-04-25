@@ -202,6 +202,7 @@ export class DrawPad extends Composite {
       this.drawShape = new Shape({
         path: mutablePath,
         size: this.size,
+        isPartOfComposite: true,
       });
       this.addChild(this.drawShape);
     }
@@ -214,7 +215,7 @@ export class DrawPad extends Composite {
       this.drawArea = new Shape({
         rect: { size: this.size },
         isUserInteractionEnabled: true,
-        suppressEvents: true,
+        isPartOfComposite: true,
       });
       this.addChild(this.drawArea);
 
