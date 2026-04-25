@@ -54,19 +54,21 @@ export class DataCalc {
 
     this._observations = this.deepCopy(data);
 
-    // Collect all unique variable names across observations
-    const allVariables = new Set<string>();
-    for (const observation of data) {
-      for (const key of Object.keys(observation)) {
-        allVariables.add(key);
+    if (!options?.skipNormalization) {
+      // Collect all unique variable names across observations
+      const allVariables = new Set<string>();
+      for (const observation of data) {
+        for (const key of Object.keys(observation)) {
+          allVariables.add(key);
+        }
       }
-    }
 
-    // Ensure all observations have all variables, and assign null if missing
-    for (const observation of this._observations) {
-      for (const variable of allVariables) {
-        if (!(variable in observation)) {
-          observation[variable] = null;
+      // Ensure all observations have all variables, and assign null if missing
+      for (const observation of this._observations) {
+        for (const variable of allVariables) {
+          if (!(variable in observation)) {
+            observation[variable] = null;
+          }
         }
       }
     }
@@ -194,7 +196,11 @@ export class DataCalc {
       this._observations.filter(
         predicate as (observation: Observation) => boolean,
       ),
-      { groups: this._groups, warnings: this._warnings },
+      {
+        groups: this._groups,
+        warnings: this._warnings,
+        skipNormalization: true,
+      },
     );
   }
 
@@ -238,7 +244,10 @@ export class DataCalc {
         }
       }
     });
-    return new DataCalc(this._observations, { groups });
+    return new DataCalc(this._observations, {
+      groups,
+      skipNormalization: true,
+    });
   }
 
   /**
@@ -247,7 +256,7 @@ export class DataCalc {
    * @returns A new DataCalc object with the observations ungrouped
    */
   ungroup(): DataCalc {
-    return new DataCalc(this._observations);
+    return new DataCalc(this._observations, { skipNormalization: true });
   }
 
   /**
@@ -784,6 +793,7 @@ export class DataCalc {
     return new DataCalc(sortedObservations, {
       groups: this._groups,
       warnings: this._warnings,
+      skipNormalization: true,
     });
   }
 
@@ -819,6 +829,7 @@ export class DataCalc {
     return new DataCalc(uniqueObs, {
       groups: this._groups,
       warnings: this._warnings,
+      skipNormalization: true,
     });
   }
 
@@ -1361,6 +1372,7 @@ export class DataCalc {
       return new DataCalc([], {
         groups: this._groups,
         warnings: this._warnings,
+        skipNormalization: true,
       });
     }
     if (end === undefined) {
@@ -1373,6 +1385,7 @@ export class DataCalc {
     return new DataCalc(sliced, {
       groups: this._groups,
       warnings: this._warnings,
+      skipNormalization: true,
     });
   }
 
