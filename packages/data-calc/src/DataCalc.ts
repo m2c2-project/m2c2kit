@@ -145,6 +145,73 @@ export class DataCalc {
   }
 
   /**
+   * Returns a single variable value from the data, throwing an error if more than one row exists.
+   *
+   * @remarks If the variable length is 1, the value is returned. If the
+   * variable has length > 1, an error is thrown. If an empty dataset is
+   * provided, `null` is returned and a warning is logged.
+   *
+   * @param variable - Name of variable to pull from the data
+   * @returns the value of the variable
+   *
+   * @example
+   * ```js
+   * const d = [{ a: 1, b: 2, c: 3 }];
+   * const dc = new DataCalc(d);
+   * console.log(
+   *   dc.pullScalar("c")
+   * ); // 3
+   * ```
+   */
+  pullScalar(variable: string): DataValue {
+    if (this._observations.length === 0) {
+      if (this._warnings) {
+        console.warn(
+          `DataCalc.pullScalar(): No observations available to pull variable "${variable}" from. Returning null.`,
+        );
+      }
+      return null;
+    }
+    if (this._observations.length > 1) {
+      throw new M2Error(
+        `DataCalc.pullScalar(): Expected 1 observation, but found ${this._observations.length}. Use pull() or pullArray() instead.`,
+      );
+    }
+    this.verifyObservationsContainVariable(variable);
+    return this._observations[0][variable];
+  }
+
+  /**
+   * Returns a variable from the data as an array, even if there is only one row.
+   *
+   * @remarks If an empty dataset is provided, `null` is returned and a warning is logged.
+   *
+   * @param variable - Name of variable to pull from the data
+   * @returns an array of values for the variable
+   *
+   * @example
+   * ```js
+   * const d = [{ a: 1, b: 2, c: 3 }];
+   * const dc = new DataCalc(d);
+   * console.log(
+   *   dc.pullArray("c")
+   * ); // [3]
+   * ```
+   */
+  pullArray(variable: string): DataValue[] | null {
+    if (this._observations.length === 0) {
+      if (this._warnings) {
+        console.warn(
+          `DataCalc.pullArray(): No observations available to pull variable "${variable}" from. Returning null.`,
+        );
+      }
+      return null;
+    }
+    this.verifyObservationsContainVariable(variable);
+    return this._observations.map((o) => o[variable]);
+  }
+
+  /**
    * Returns the number of observations in the data.
    *
    * @example

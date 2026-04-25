@@ -95,4 +95,62 @@ describe("pull tests", () => {
     expect(grouped.pull("a")).toEqual([1, 2, 3]);
     expect(grouped.pull("b")).toEqual(["hello", "world", "test"]);
   });
+
+  describe("pullScalar", () => {
+    it("returns a single value when there is exactly one observation", () => {
+      const dc = new DataCalc(d_single);
+      expect(dc.pullScalar("a")).toBe(42);
+    });
+
+    it("throws an error when there are multiple observations", () => {
+      const dc = new DataCalc(d);
+      expect(() => dc.pullScalar("a")).toThrow(
+        /DataCalc.pullScalar\(\): Expected 1 observation, but found 3/,
+      );
+    });
+
+    it("handles empty datasets by returning null", () => {
+      const dc = new DataCalc(d_empty);
+      expect(dc.pullScalar("a")).toBeNull();
+    });
+
+    it("logs a warning when pulling from empty dataset and warnings enabled", () => {
+      const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const dc = new DataCalc(d_empty, { warnings: true });
+      expect(dc.pullScalar("a")).toBeNull();
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0]).toMatch(
+        /DataCalc.pullScalar\(\): No observations available to pull variable "a" from. Returning null\./,
+      );
+      spy.mockRestore();
+    });
+  });
+
+  describe("pullArray", () => {
+    it("returns an array when there is exactly one observation", () => {
+      const dc = new DataCalc(d_single);
+      expect(dc.pullArray("a")).toEqual([42]);
+    });
+
+    it("returns an array when there are multiple observations", () => {
+      const dc = new DataCalc(d);
+      expect(dc.pullArray("a")).toEqual([1, 2, 3]);
+    });
+
+    it("handles empty datasets by returning null", () => {
+      const dc = new DataCalc(d_empty);
+      expect(dc.pullArray("a")).toBeNull();
+    });
+
+    it("logs a warning when pulling from empty dataset and warnings enabled", () => {
+      const spy = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const dc = new DataCalc(d_empty, { warnings: true });
+      expect(dc.pullArray("a")).toBeNull();
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0]).toMatch(
+        /DataCalc.pullArray\(\): No observations available to pull variable "a" from. Returning null\./,
+      );
+      spy.mockRestore();
+    });
+  });
 });
