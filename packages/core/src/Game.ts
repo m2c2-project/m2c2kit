@@ -9,7 +9,6 @@ import CanvasKitInit, {
 } from "canvaskit-wasm";
 import { Constants } from "./Constants";
 import { M2NodeEvent } from "./M2NodeEvent";
-import { IDrawable } from "./IDrawable";
 import { M2Node } from "./M2Node";
 import { M2NodeType } from "./M2NodeType";
 import { RgbaColor } from "./RgbaColor";
@@ -102,6 +101,16 @@ export class Game implements Activity {
   private _eventMaterializer?: EventMaterializer;
   /** Nodes created during event replay */
   materializedNodes = new Array<M2Node>();
+  private resizeTimeout: number | undefined;
+  private isResizing = false;
+  private loopRunning = false;
+  private resizeObserver: ResizeObserver | undefined;
+  private canvasContainer: HTMLElement | undefined;
+  private webGlContextAcquired = false;
+  private isStarted = false;
+  private lastViewportWidth = 0;
+  private lastViewportHeight = 0;
+  private lastDevicePixelRatio = 0;
 
   /**
    * The base class for all games. New games should extend this class.
@@ -810,6 +819,17 @@ export class Game implements Activity {
         return;
       }
 
+      // stretch is a special case; it is passed to GameOptions, not
+      // GameOptions.parameters, to determine sizing nehavior.
+      if (key === "stretch") {
+        this.options.stretch =
+          (sanitizedParams as { [key: string]: boolean | string })[key] ===
+            true ||
+          (sanitizedParams as { [key: string]: boolean | string })[key] ===
+            "true";
+        return;
+      }
+
       /**
        * The parameter "eruda" is a special case. It is for loading the eruda
        * debugging console, and it will not be added to the game's parameters.
@@ -1126,6 +1146,27 @@ export class Game implements Activity {
     this.setupFpsFont();
     this.setupInputManager();
 
+    this.canvasContainer =
+      this.htmlCanvas?.parentElement ?? (this.htmlCanvas as HTMLElement);
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.handleResize();
+    });
+    this.resizeObserver.observe(this.canvasContainer);
+
+    /**
+     * We also listen to DPI changes via matchMedia as ResizeObserver
+     * might not catch all resolution-only shifts on some browsers.
+     */
+    const dpiQuery = window.matchMedia(
+      `(resolution: ${window.devicePixelRatio}dppx)`,
+    );
+    dpiQuery.addEventListener("change", () => {
+      this.handleResize();
+    });
+
+    window.addEventListener("resize", this.handleResize);
+
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
 
@@ -1192,6 +1233,7 @@ export class Game implements Activity {
       warmupFunction: this.warmupShadersWithScenes,
     });
 
+    this.loopRunning = true;
     this.surface.requestAnimationFrame(this.loop.bind(this));
 
     const activityStartEvent: ActivityLifecycleEvent = {
@@ -1200,6 +1242,8 @@ export class Game implements Activity {
       ...M2c2KitHelpers.createFrameUpdateTimestamps(),
     };
     this.raiseActivityEventOnListeners(activityStartEvent);
+
+    this.isStarted = true;
   }
 
   playEventsHandler(mouseEvent: MouseEvent) {
@@ -1578,6 +1622,8 @@ export class Game implements Activity {
       this.currentScene._active = false;
     }
     this.gameStopRequested = true;
+    this.loopRunning = false;
+    this.isStarted = false;
     Timer.removeAll();
     this.dispose();
   }
@@ -1589,6 +1635,14 @@ export class Game implements Activity {
    * end-user must not call this. FOR INTERNAL USE ONLY.
    */
   dispose(): void {
+    window.removeEventListener("resize", this.handleResize);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
+    if (this.resizeTimeout) {
+      window.clearTimeout(this.resizeTimeout);
+    }
     if (this._inputManager) {
       this.inputManager.dispose();
     }
@@ -1914,14 +1968,98 @@ export class Game implements Activity {
     this.raiseActivityEventOnListeners(activityCancelEvent, results);
   }
 
+  /**
+   * Handles window resize and DPI changes.
+   *
+   * @remarks This method is debounced to avoid expensive surface recreations
+   * during active resizing. It sets `isResizing = true` to pause the game
+   * loop, which prevents a canvaskit-wasm crash caused by drawing on a deleted
+   * surface. It re-initializes all scenes, nodes, and images to ensure
+   * physical pixel alignments, cached font sizes, and layouts are correctly
+   * recalculated for the new DPI and scale.
+   */
+  private handleResize = (): void => {
+    if (!this.isStarted) {
+      return;
+    }
+
+    /**
+     * Skip the resize if the environment (viewport or DPI) hasn't actually changed.
+     * This prevents the initial ResizeObserver trigger from pausing the loop.
+     */
+    if (
+      window.innerWidth === this.lastViewportWidth &&
+      window.innerHeight === this.lastViewportHeight &&
+      window.devicePixelRatio === this.lastDevicePixelRatio
+    ) {
+      return;
+    }
+
+    this.isResizing = true;
+    if (this.resizeTimeout) {
+      window.clearTimeout(this.resizeTimeout);
+    }
+    this.resizeTimeout = window.setTimeout(async () => {
+      this.applyCanvasScaling();
+      if (this.surface) {
+        // with surface.delete(), the surface object is immediately destroyed
+        // in WASM memory. However, because surface.requestAnimationFrame ties
+        // a callback to a specific surface instance, a pending animation frame
+        // for the old surface could still fire, and CanvasKit's internal
+        // wrapper would still attempt to call flush() on that surface pointer,
+        // and since the pointer is now invalid, it triggers an error. Thus, use
+        // deleteLater().
+        this.surface.deleteLater();
+      }
+      this.setupCanvasKitSurface();
+      this.setupFpsFont();
+
+      await this.imageManager.reinitializeAllImages();
+
+      this.scenes.forEach((scene) => {
+        scene.scale = m2c2Globals.rootScale;
+        /**
+         * Force re-initialization of all scenes and their descendants
+         * to ensure all coordinates, sizes, and fonts are recalculated
+         * for the new scale and DPI.
+         */
+        scene.needsInitialization = true;
+        scene.descendants.forEach((node) => {
+          node.needsInitialization = true;
+        });
+      });
+      this.sceneManager.freeNodesScene.scale = m2c2Globals.rootScale;
+      this.sceneManager.freeNodesScene.needsInitialization = true;
+      this.sceneManager.freeNodesScene.descendants.forEach((node) => {
+        node.needsInitialization = true;
+      });
+
+      this.resizeTimeout = undefined;
+      this.isResizing = false;
+      if (this.surface) {
+        this.surface.requestAnimationFrame(this.loop.bind(this));
+      }
+    }, Constants.RESIZE_DEBOUNCE_MS);
+  };
+
   private setupHtmlCanvases(
     canvasId: string | undefined,
     width: number,
     height: number,
     stretch: boolean | undefined,
   ): void {
-    m2c2Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
+    this.htmlCanvas = this.findHtmlCanvas(canvasId);
+    this.canvasCssWidth = width;
+    this.canvasCssHeight = height;
+    this.options.stretch = stretch;
 
+    m2c2Globals.canvasCssWidth = width;
+    m2c2Globals.canvasCssHeight = height;
+
+    this.applyCanvasScaling();
+  }
+
+  private findHtmlCanvas(canvasId: string | undefined): HTMLCanvasElement {
     let htmlCanvas: HTMLCanvasElement | undefined;
     if (canvasId === undefined) {
       const canvasCollection = document.getElementsByTagName("canvas");
@@ -1959,29 +2097,64 @@ export class Game implements Activity {
         );
       }
     }
+    return htmlCanvas;
+  }
 
-    if (stretch || window.innerWidth < width || window.innerHeight < height) {
-      const requestedAspectRatio = height / width;
-      const actualAspectRatio = window.innerHeight / window.innerWidth;
-
-      if (actualAspectRatio < requestedAspectRatio) {
-        m2c2Globals.rootScale = window.innerHeight / height;
-      } else {
-        m2c2Globals.rootScale = window.innerWidth / width;
-      }
+  /**
+   * Recalculates the game's rootScale and physical canvas dimensions.
+   *
+   * @remarks This method determines how the game should fit in the current
+   * viewport while respecting the `stretch` option. It updates
+   * `m2c2Globals.canvasScale` (DPI) and `m2c2Globals.rootScale` (aspect-ratio
+   * fit). Physical canvas attributes (width/height) are rounded to ensure
+   * perfect alignment with the browser's physical pixel grid, which prevents
+   * visual distortion during monitor transitions.
+   */
+  private applyCanvasScaling(): void {
+    if (this.htmlCanvas === undefined) {
+      throw new M2Error("main html canvas is undefined");
     }
 
-    htmlCanvas.style.width = m2c2Globals.rootScale * width + "px";
-    htmlCanvas.style.height = m2c2Globals.rootScale * height + "px";
-    htmlCanvas.width = m2c2Globals.rootScale * width * m2c2Globals.canvasScale;
-    htmlCanvas.height =
-      m2c2Globals.rootScale * height * m2c2Globals.canvasScale;
-    this.htmlCanvas = htmlCanvas;
-    this.canvasCssWidth = width;
-    this.canvasCssHeight = height;
+    const width = this.canvasCssWidth;
+    const height = this.canvasCssHeight;
+    const stretch = this.options.stretch === true;
 
-    m2c2Globals.canvasCssWidth = width;
-    m2c2Globals.canvasCssHeight = height;
+    m2c2Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const dpr = window.devicePixelRatio;
+
+    this.lastViewportWidth = viewportWidth;
+    this.lastViewportHeight = viewportHeight;
+    this.lastDevicePixelRatio = dpr;
+
+    if (viewportWidth === 0 || viewportHeight === 0) {
+      return;
+    }
+
+    const requestedAspectRatio = height / width;
+    const actualAspectRatio = viewportHeight / viewportWidth;
+
+    const calculatedScale =
+      actualAspectRatio < requestedAspectRatio
+        ? viewportHeight / height
+        : viewportWidth / width;
+
+    if (stretch) {
+      m2c2Globals.rootScale = calculatedScale;
+    } else {
+      m2c2Globals.rootScale = Math.min(1.0, calculatedScale);
+    }
+
+    this.htmlCanvas.style.width = m2c2Globals.rootScale * width + "px";
+    this.htmlCanvas.style.height = m2c2Globals.rootScale * height + "px";
+    this.htmlCanvas.width = Math.round(
+      m2c2Globals.rootScale * width * m2c2Globals.canvasScale,
+    );
+    this.htmlCanvas.height = Math.round(
+      m2c2Globals.rootScale * height * m2c2Globals.canvasScale,
+    );
   }
 
   private setupCanvasKitSurface(): void {
@@ -1989,10 +2162,13 @@ export class Game implements Activity {
       throw new M2Error("main html canvas is undefined");
     }
 
-    // @ts-expect-error type error when adding property to window object
-    window.logWebGl = this.options.logWebGl;
-    WebGlInfo.interceptWebGlCalls(this.htmlCanvas);
-    this.dataManager.queryWebGlRendererInfo();
+    if (!this.webGlContextAcquired) {
+      // @ts-expect-error type error when adding property to window object
+      window.logWebGl = this.options.logWebGl;
+      WebGlInfo.interceptWebGlCalls(this.htmlCanvas);
+      this.dataManager.queryWebGlRendererInfo();
+      this.webGlContextAcquired = true;
+    }
 
     const surface = this.canvasKit.MakeWebGLCanvasSurface(this.htmlCanvas);
     if (surface === null) {
@@ -2036,8 +2212,11 @@ export class Game implements Activity {
   }
 
   private loop(canvas: Canvas): void {
+    if (!this.loopRunning || this.isResizing) {
+      return;
+    }
     if (!this.surface) {
-      throw new M2Error("surface is undefined");
+      return;
     }
 
     if (this.warmupFunctionQueue.length > 0) {

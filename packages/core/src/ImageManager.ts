@@ -193,6 +193,25 @@ export class ImageManager {
     });
   }
 
+  /**
+   * Re-renders all images using the current device pixel ratio.
+   *
+   * @remarks This is necessary when moving the game between monitors with
+   * different DPI settings, as the physical pixel representation of the
+   * images needs to be updated for sharpness and correct scaling.
+   */
+  async reinitializeAllImages(): Promise<void> {
+    this.scale = window.devicePixelRatio;
+    const imagesToReRender = Object.values(this.images).filter(
+      (image) =>
+        image.status === M2ImageStatus.Ready &&
+        (image.url !== undefined || image.svgString !== undefined),
+    );
+    for (const image of imagesToReRender) {
+      await this.renderM2Image(image);
+    }
+  }
+
   private checkImageNamesForDuplicates(browserImages: BrowserImage[]) {
     const findDuplicates = (arr: string[]) =>
       arr.filter((item, index) => arr.indexOf(item) != index);
@@ -309,6 +328,12 @@ export class ImageManager {
           console.log(
             `image loaded. name: ${image.imageName}, w: ${image.width}, h: ${image.height}`,
           );
+          if (
+            this.images[image.imageName].canvaskitImage &&
+            !this.images[image.imageName].canvaskitImage?.isDeleted()
+          ) {
+            this.images[image.imageName].canvaskitImage?.delete();
+          }
           this.images[image.imageName].canvaskitImage = canvaskitImage;
           this.images[image.imageName].status = M2ImageStatus.Ready;
           const sprites = this.game.nodes.filter(

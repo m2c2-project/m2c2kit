@@ -17,7 +17,6 @@ export class DomHelper {
 
     const canvas = document.createElement("canvas");
     canvas.setAttribute("id", "m2c2kit-canvas");
-    canvas.className = "m2c2kit-full-viewport";
     canvasDiv.appendChild(canvas);
 
     rootElement.appendChild(canvasDiv);

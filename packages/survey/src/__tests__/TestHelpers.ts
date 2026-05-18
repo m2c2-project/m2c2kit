@@ -49,6 +49,45 @@ export class TestHelpers {
       value: TestHelpers.performance,
     });
 
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
+    global.ResizeObserver = class ResizeObserver {
+      private callback: ResizeObserverCallback;
+
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+      }
+
+      observe = (target: Element) => {
+        this.callback(
+          [
+            {
+              target,
+              contentRect: target.getBoundingClientRect
+                ? target.getBoundingClientRect()
+                : { width: 0, height: 0 },
+            } as ResizeObserverEntry,
+          ],
+          this,
+        );
+      };
+
+      unobserve = () => {};
+      disconnect = () => {};
+    };
+
     /**
      * node-canvas (the npm "canvas" package) is no longer a dependency, so
      * the getContext method will throw an error. This is caught, but it

@@ -46,4 +46,5 @@ export class Constants {
     "https://cdn.jsdelivr.net/npm/eruda@3.4.3/eruda.js";
   public static readonly ERUDA_SRI =
     "sha384-weDBY9jeIj4NqaiZF9f6PMAMMY4lIu+0CAI+TjBIE73RctCQOxDoEHltYnstRszI";
+  public static readonly RESIZE_DEBOUNCE_MS = 250;
 }
