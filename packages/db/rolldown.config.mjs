@@ -5,6 +5,9 @@ import { isAbsolute } from "node:path";
 export default defineConfig([
   {
     input: "./src/index.ts",
+    transform: {
+      target: "es2017",
+    },
     external: ["@m2c2kit/core"],
     platform: "browser",
     output: [
@@ -18,6 +21,9 @@ export default defineConfig([
   },
   {
     input: "./src/data.ts",
+    transform: {
+      target: "es2017",
+    },
     platform: "browser",
     output: [{ file: "./dist/data.js", format: "es", sourcemap: true }],
   },

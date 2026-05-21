@@ -4,6 +4,9 @@ import { addModuleMetadata, insertVersionString } from "@m2c2kit/build-helpers";
 export default defineConfig([
   {
     input: "./src/index.ts",
+    transform: {
+      target: "es2017",
+    },
     external: ["@m2c2kit/core", "@m2c2kit/addons"],
     platform: "browser",
     output: [

@@ -10,6 +10,9 @@ export default defineConfig(() => {
   return [
     {
       input: "./src/runner.ts",
+      transform: {
+        target: "es2017",
+      },
       platform: "browser",
       output: [{ file: "./build/index.js", format: "es", sourcemap: true }],
       plugins: [

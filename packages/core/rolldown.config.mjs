@@ -14,6 +14,9 @@ if (!canvasKitWasmVersion) {
 export default defineConfig([
   {
     input: "./src/index.ts",
+    transform: {
+      target: "es2017",
+    },
     platform: "browser",
     output: [
       { file: "./dist/index.js", format: "es", sourcemap: true },

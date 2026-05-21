@@ -5,6 +5,9 @@ import { insertVersionString } from "@m2c2kit/build-helpers";
 export default defineConfig([
   {
     input: "./src/index.ts",
+    transform: {
+      target: "es2017",
+    },
     external: ["@m2c2kit/core"],
     platform: "browser",
     output: [

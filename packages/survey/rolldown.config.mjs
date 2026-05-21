@@ -6,6 +6,9 @@ import findUp from "findup-sync";
 export default defineConfig([
   {
     input: "./src/index.ts",
+    transform: {
+      target: "es2017",
+    },
     external: ["@m2c2kit/core"],
     platform: "browser",
     output: [

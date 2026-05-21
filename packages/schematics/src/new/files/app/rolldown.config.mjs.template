@@ -24,6 +24,9 @@ export default defineConfig(() => {
   return [
     {
       input: "./src/index.ts",
+      transform: {
+        target: "es2017",
+      },
       platform: "browser",
       output: [
         {
