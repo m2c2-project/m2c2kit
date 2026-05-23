@@ -125,18 +125,80 @@ export class Grid extends Composite implements GridOptions {
     /**
      * Remove all existing children, and recursively remove each child's
      * children so we can start fresh.
+     *
+     * Special case: once we reach the `cellContainers` (the array of Shape
+     * containers created for each grid cell), we should remove the immediate
+     * child of that cell container but NOT recurse into that child's
+     * descendants, i.e., stop recursion at cell container children (the grid
+     * children). This is because if we are reinitializing the grid, we do not
+     * want to remove any children from a grid child's subtree.
      */
-    this.descendants.forEach((d) => {
-      if (d.parent === this) {
-        // to avoid triggering the warning in Grid.removeChild(), below
-        super.removeChild(d);
-      } else {
-        d.parent?.removeChild(d);
-      }
-    });
+    const isCellContainer = (node: M2Node) =>
+      // compare by name pattern we assigned when creating containers
+      node.name.startsWith(
+        "__" + this.name + this.uuid + "-gridCellContainer-",
+      );
 
+    const removeNodeRecursive = (
+      node: M2Node,
+      stopAtCellContainerChild = false,
+    ) => {
+      // If this node is a cell container, remove its direct children but do
+      // not recurse into those children's descendants.
+      if (isCellContainer(node)) {
+        // copy array because removeChild mutates children
+        [...node.children].forEach((child) => {
+          // remove the child from the container but do not recurse further
+          node.removeChild(child);
+        });
+        return;
+      }
+
+      // If we were instructed to stop at this node (it is a child of a
+      // cell container), remove it but do not recurse into its children.
+      if (stopAtCellContainerChild) {
+        node.parent?.removeChild(node);
+        return;
+      }
+
+      // For regular nodes: recurse into children first (bottom-up), then
+      // remove the node itself from its parent (or super for direct children).
+      [...node.children].forEach((child) => {
+        // If this child is a cell container, tell the remover to stop at
+        // the cell container handling inside the next call.
+        removeNodeRecursive(child);
+      });
+
+      if (node.parent) {
+        // If this node is a direct child of the Grid instance, call super
+        // to avoid the Grid.removeChild warning; otherwise remove via its
+        // parent.
+        if (node.parent === this) {
+          super.removeChild(node);
+        } else {
+          node.parent.removeChild(node);
+        }
+      }
+    };
+
+    // Start removal on each direct child of this grid.
+    [...this.children].forEach((child) => removeNodeRecursive(child));
+
+    // At this point:
+    // - Grid children have been removed from their cell containers (orphaned)
+    // - The entire gridBackground tree has been discarded
+    // - gridChildren array still holds references to those orphaned nodes
+    // Below, we create a fresh gridBackground with new structures, and then
+    // re-add the grid children to the new cell containers.
+
+    // Below, we include both the grid name and the uuid in the name of these
+    // grid pieces. This is important for the cell containers, which we need
+    // to be able to reliably find when reinitializing the grid, and which may
+    // have the same name if there are multiple nested grids in which the user
+    // assigned the same name to the grid (e.g. "myGrid"). By including the
+    // uuid in the name, we ensure uniqueness.
     this.gridBackground = new Shape({
-      name: "__" + this.name + "-gridRectangle",
+      name: "__" + this.name + this.uuid + "-gridRectangle",
       rect: { size: this.size },
       fillColor: this.gridBackgroundColor,
       strokeColor: this.gridLineColor,
@@ -150,7 +212,7 @@ export class Grid extends Composite implements GridOptions {
 
     for (let col = 1; col < this.columns; col++) {
       const verticalLine = new Shape({
-        name: "__" + this.name + "-gridVerticalLine-" + (col - 1),
+        name: "__" + this.name + this.uuid + "-gridVerticalLine-" + (col - 1),
         rect: {
           size: { width: this.gridLineWidth, height: this.size.height },
           origin: { x: -this.size.width / 2 + this.cellWidth * col, y: 0 },
@@ -163,7 +225,7 @@ export class Grid extends Composite implements GridOptions {
 
     for (let row = 1; row < this.rows; row++) {
       const horizontalLine = new Shape({
-        name: "__" + this.name + "-gridHorizontalLine-" + (row - 1),
+        name: "__" + this.name + this.uuid + "-gridHorizontalLine-" + (row - 1),
         rect: {
           size: { width: this.size.width, height: this.gridLineWidth },
           origin: { x: 0, y: -this.size.height / 2 + this.cellHeight * row },
@@ -180,7 +242,14 @@ export class Grid extends Composite implements GridOptions {
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
         const cellContainer = new Shape({
-          name: "__" + this.name + "-gridCellContainer-" + row + "-" + col,
+          name:
+            "__" +
+            this.name +
+            this.uuid +
+            "-gridCellContainer-" +
+            row +
+            "-" +
+            col,
           rect: {
             size: { width: this.cellWidth, height: this.cellHeight },
             origin: {
