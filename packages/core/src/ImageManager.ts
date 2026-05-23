@@ -144,10 +144,9 @@ export class ImageManager {
         this.missingLocalizationImagePaint = CanvasKitHelpers.makePaint(
           this.canvasKit,
           this.game.i18n.missingLocalizationColor,
-          this.canvasKit.PaintStyle.Stroke,
+          this.canvasKit.PaintStyle.Fill,
           true,
         );
-        this.missingLocalizationImagePaint.setStrokeWidth(4);
       }
     }
   }

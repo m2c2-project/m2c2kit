@@ -244,13 +244,13 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
   }
 
   /**
-   * Draws a rectangle border around the image to indicate that a fallback
+   * Draws a filled rectangle at the image's position to indicate that a fallback
    * image is being used.
    *
-   * @remarks The size of the rectangle is the same as the image, but because
-   * the stroke width of the paint is wider than 1 pixel (see method
-   * `configureImageLocalization()` in `ImageManager.ts`), the rectangle will
-   * be larger than the image and thus be visible.
+   * @remarks The rectangle is expanded by a fixed number of pixels on all sides
+   * and filled with the missing localization color. Since the rectangle is larger
+   * than the image, it will be visible behind the image. The border scales with
+   * the sprite's scale.
    *
    * @param canvas - CanvasKit canvas to draw on
    */
@@ -260,21 +260,22 @@ export class Sprite extends M2Node implements IDrawable, SpriteOptions {
       return;
     }
     const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
+    const borderPixels = 4;
+    const expandedWidth = this.size.width + borderPixels;
+    const expandedHeight = this.size.height + borderPixels;
     const rect = this.canvasKit.RRectXY(
       this.canvasKit.LTRBRect(
         (this.absolutePosition.x -
-          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          this.anchorPoint.x * expandedWidth * this.absoluteScale) *
           drawScale,
         (this.absolutePosition.y -
-          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          this.anchorPoint.y * expandedHeight * this.absoluteScale) *
           drawScale,
         (this.absolutePosition.x +
-          this.size.width * this.absoluteScale -
-          this.anchorPoint.x * this.size.width * this.absoluteScale) *
+          (1 - this.anchorPoint.x) * expandedWidth * this.absoluteScale) *
           drawScale,
         (this.absolutePosition.y +
-          this.size.height * this.absoluteScale -
-          this.anchorPoint.y * this.size.height * this.absoluteScale) *
+          (1 - this.anchorPoint.y) * expandedHeight * this.absoluteScale) *
           drawScale,
       ),
       0,

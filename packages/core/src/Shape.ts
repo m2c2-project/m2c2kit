@@ -516,7 +516,7 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
       this.strokeColorPaintAntialiased &&
       this.lineWidth
     ) {
-      // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
+      // may change due to scale action, thus we must call setStrokeWidth() on every draw cycle
       this.strokeColorPaintAntialiased.setStrokeWidth(
         this.lineWidth * m2c2Globals.canvasScale,
       );
@@ -756,9 +756,9 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
         : this.strokeColorPaintNotAntialiased;
     }
 
-    // draw scale may change due to scaling, thus we must call setStrokeWidth() on every draw cycle
-    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
-    paint.setStrokeWidth(lineWidth * drawScale);
+    //  may change due to scale action, thus we must call setStrokeWidth() on every draw cycle
+    paint.setStrokeWidth(lineWidth * m2c2Globals.canvasScale);
+
     return paint;
   }
 
@@ -808,11 +808,12 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
     if (!this.lineWidth || !this.circleOfRadius) {
       return;
     }
-    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
-    this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
+    this.strokeColorPaintAntialiased.setStrokeWidth(
+      this.lineWidth * m2c2Globals.canvasScale,
+    );
     this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
-      this.lineWidth * drawScale,
+      this.lineWidth * m2c2Globals.canvasScale,
     );
     this.drawCircleWithCanvasKit(canvas, this.strokeColorPaintNotAntialiased);
   }
@@ -823,14 +824,15 @@ export class Shape extends M2Node implements IDrawable, ShapeOptions {
   }
 
   private warmupStrokedRectangle(canvas: Canvas) {
-    if (!this.lineWidth || !this.circleOfRadius) {
+    if (!this.lineWidth) {
       return;
     }
-    const drawScale = m2c2Globals.canvasScale / this.absoluteScale;
-    this.strokeColorPaintAntialiased.setStrokeWidth(this.lineWidth * drawScale);
+    this.strokeColorPaintAntialiased.setStrokeWidth(
+      this.lineWidth * m2c2Globals.canvasScale,
+    );
     this.drawRectangleWithCanvasKit(canvas, this.strokeColorPaintAntialiased);
     this.strokeColorPaintNotAntialiased.setStrokeWidth(
-      this.lineWidth * drawScale,
+      this.lineWidth * m2c2Globals.canvasScale,
     );
     this.drawRectangleWithCanvasKit(
       canvas,
