@@ -395,32 +395,52 @@ export class ImageManager {
         this.game.eventStore.addEvent(browserImageDataReady);
       } else if (image.url) {
         /**
-         * Originally, below was a single line: imgElement.src = m2Image.url
-         * This worked, but this prevented us from intercepting this image
-         * request and modifying the url (we do this by patching the
-         * fetch function in some use cases, such as in the playground).
-         * So, now we fetch the image ourselves and set the image src
-         * to a constructed data url.
+         * Check if we have a cached data URL from a previous load.
+         * This avoids re-fetching and re-converting during reinitialize operations.
          */
-        fetch(image.url)
-          .then((response) => response.arrayBuffer())
-          .then((data) => {
-            this.arrayBufferToBase64Async(data).then((base64String) => {
-              const subtype = this.inferImageSubtypeFromUrl(image.url);
-              imgElement.src =
-                "data:image/" + subtype + ";base64," + base64String;
-              const browserImageDataReady: BrowserImageDataReadyEvent = {
-                type: M2EventType.BrowserImageDataReady,
-                target: this,
-                imageName: image.imageName,
-                width: image.width,
-                height: image.height,
-                dataUrl: imgElement.src,
-                ...M2c2KitHelpers.createFrameUpdateTimestamps(),
-              };
-              this.game.eventStore.addEvent(browserImageDataReady);
+        if (image.dataUrl) {
+          imgElement.src = image.dataUrl;
+          const browserImageDataReady: BrowserImageDataReadyEvent = {
+            type: M2EventType.BrowserImageDataReady,
+            target: this,
+            imageName: image.imageName,
+            width: image.width,
+            height: image.height,
+            dataUrl: image.dataUrl,
+            ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+          };
+          this.game.eventStore.addEvent(browserImageDataReady);
+        } else {
+          /**
+           * Originally, below was a single line: imgElement.src = m2Image.url
+           * This worked, but this prevented us from intercepting this image
+           * request and modifying the url (we do this by patching the
+           * fetch function in some use cases, such as in the playground).
+           * So, now we fetch the image ourselves and set the image src
+           * to a constructed data url.
+           */
+          fetch(image.url)
+            .then((response) => response.arrayBuffer())
+            .then((data) => {
+              this.arrayBufferToBase64Async(data).then((base64String) => {
+                const subtype = this.inferImageSubtypeFromUrl(image.url);
+                const dataUrl =
+                  "data:image/" + subtype + ";base64," + base64String;
+                image.dataUrl = dataUrl; // Cache the data URL
+                imgElement.src = dataUrl;
+                const browserImageDataReady: BrowserImageDataReadyEvent = {
+                  type: M2EventType.BrowserImageDataReady,
+                  target: this,
+                  imageName: image.imageName,
+                  width: image.width,
+                  height: image.height,
+                  dataUrl: dataUrl,
+                  ...M2c2KitHelpers.createFrameUpdateTimestamps(),
+                };
+                this.game.eventStore.addEvent(browserImageDataReady);
+              });
             });
-          });
+        }
       }
     });
   }

@@ -26,6 +26,8 @@ export interface M2Image {
   svgString?: string;
   /** Try to localize the image by fetching a locale-specific image? Default is false. */
   localize: boolean;
+  /** For an image that was fetched from a URL, this is the cached data URL (base64-encoded) generated after first load. Used to avoid re-fetching during reinitialize operations. */
+  dataUrl?: string;
 }
 
 export const M2ImageStatus = {
