@@ -62,6 +62,12 @@ interface WarmupFunctionQueue {
   positionOffset?: number;
 }
 
+interface ResizeEnvironment {
+  viewportWidth: number;
+  viewportHeight: number;
+  devicePixelRatio: number;
+}
+
 export class Game implements Activity {
   readonly type = ActivityType.Game;
   _canvasKit?: CanvasKit;
@@ -102,12 +108,22 @@ export class Game implements Activity {
   /** Nodes created during event replay */
   materializedNodes = new Array<M2Node>();
   private resizeTimeout: number | undefined;
-  private isResizing = false;
+  private renderLoopPausedForResize = false;
+  /** Prevents overlapping async resize processing. */
+  private resizeProcessing = false;
+  /** Tracks whether a resize event occurred while no resize pass has handled it yet. */
+  private resizePending = false;
   private loopRunning = false;
   private resizeObserver: ResizeObserver | undefined;
   private canvasContainer: HTMLElement | undefined;
   private webGlContextAcquired = false;
   private isStarted = false;
+  /**
+   * The viewport/DPR state for the last resize that completed successfully.
+   * These values are intentionally not updated when a resize starts because
+   * surface creation or image re-rendering can still fail. Treating an attempt
+   * as complete would make a later retry with the same dimensions get skipped.
+   */
   private lastViewportWidth = 0;
   private lastViewportHeight = 0;
   private lastDevicePixelRatio = 0;
@@ -927,6 +943,13 @@ export class Game implements Activity {
   }
   private htmlCanvas?: HTMLCanvasElement;
   surface?: Surface;
+  /**
+   * Incremented each time a CanvasKit surface is installed. CanvasKit RAF
+   * callbacks are tied to the surface that scheduled them, and those callbacks
+   * can arrive after a resize has replaced the surface. The generation lets the
+   * loop reject callbacks from old surfaces before they update or draw.
+   */
+  private surfaceGeneration = 0;
   private showFps?: boolean;
   bodyBackgroundColor?: RgbaColor;
 
@@ -1234,7 +1257,7 @@ export class Game implements Activity {
     });
 
     this.loopRunning = true;
-    this.surface.requestAnimationFrame(this.loop.bind(this));
+    this.requestNextFrame();
 
     const activityStartEvent: ActivityLifecycleEvent = {
       target: this,
@@ -1972,11 +1995,13 @@ export class Game implements Activity {
    * Handles window resize and DPI changes.
    *
    * @remarks This method is debounced to avoid expensive surface recreations
-   * during active resizing. It sets `isResizing = true` to pause the game
-   * loop, which prevents a canvaskit-wasm crash caused by drawing on a deleted
-   * surface. It re-initializes all scenes, nodes, and images to ensure
-   * physical pixel alignments, cached font sizes, and layouts are correctly
-   * recalculated for the new DPI and scale.
+   * during active resizing. It sets `renderLoopPausedForResize = true` to pause
+   * the game loop, which prevents a canvaskit-wasm crash caused by drawing on a deleted
+   * surface. Resize work is serialized so that mobile rotation bursts do not
+   * start overlapping surface reinitializations. It re-initializes all scenes
+   * and nodes to ensure physical pixel alignments, cached font sizes, and
+   * layouts are correctly recalculated for the new DPI and scale. Images are
+   * reinitialized only when DPR changes.
    */
   private handleResize = (): void => {
     if (!this.isStarted) {
@@ -1987,60 +2012,156 @@ export class Game implements Activity {
      * Skip the resize if the environment (viewport or DPI) hasn't actually changed.
      * This prevents the initial ResizeObserver trigger from pausing the loop.
      */
-    if (
-      window.innerWidth === this.lastViewportWidth &&
-      window.innerHeight === this.lastViewportHeight &&
-      window.devicePixelRatio === this.lastDevicePixelRatio
-    ) {
+    if (this.currentResizeEnvironmentMatchesLastApplied()) {
       return;
     }
 
-    this.isResizing = true;
+    this.resizePending = true;
+    this.renderLoopPausedForResize = true;
+    if (this.resizeProcessing) {
+      return;
+    }
     if (this.resizeTimeout) {
       window.clearTimeout(this.resizeTimeout);
     }
-    this.resizeTimeout = window.setTimeout(async () => {
-      this.applyCanvasScaling();
+    this.resizeTimeout = window.setTimeout(() => {
+      this.resizeTimeout = undefined;
+      void this.processPendingResize().catch((error: unknown) => {
+        console.error("Error while resizing game", error);
+      });
+    }, Constants.RESIZE_DEBOUNCE_MS);
+  };
+
+  private async processPendingResize(): Promise<void> {
+    if (this.resizeProcessing) {
+      return;
+    }
+
+    this.resizeProcessing = true;
+    let resizeCompleted = false;
+    try {
+      while (this.resizePending) {
+        this.resizePending = false;
+        if (this.currentResizeEnvironmentMatchesLastApplied()) {
+          continue;
+        }
+        await this.resizeGame();
+      }
+      resizeCompleted = true;
+    } finally {
+      this.resizeProcessing = false;
+      if (resizeCompleted) {
+        this.renderLoopPausedForResize = false;
+      }
+      /**
+       * If resize failed, keep the loop paused and do not request another frame.
+       * A pending requestAnimationFrame from the old CanvasKit surface may still
+       * fire after the failure, and the pause prevents that callback from drawing
+       * with a stale canvas argument or a partially rebuilt surface. On success,
+       * requestNextFrame() captures the new surface generation so late callbacks
+       * from the old surface are rejected at loop entry.
+       */
+      if (resizeCompleted) {
+        this.requestNextFrame();
+      }
+    }
+  }
+
+  private async resizeGame(): Promise<void> {
+    const targetResizeEnvironment = this.getCurrentResizeEnvironment();
+    const devicePixelRatioChanged =
+      targetResizeEnvironment.devicePixelRatio !== this.lastDevicePixelRatio;
+
+    try {
+      /**
+       * Do not commit lastViewportWidth/Height/DPR here. The canvas dimensions
+       * and globals can be updated before CanvasKit has accepted the new surface;
+       * the resize is only safe to skip in the future after every dependent
+       * resource below has been rebuilt successfully.
+       */
+      this.applyCanvasScaling(false);
+
       if (this.surface) {
-        // with surface.delete(), the surface object is immediately destroyed
-        // in WASM memory. However, because surface.requestAnimationFrame ties
-        // a callback to a specific surface instance, a pending animation frame
-        // for the old surface could still fire, and CanvasKit's internal
-        // wrapper would still attempt to call flush() on that surface pointer,
-        // and since the pointer is now invalid, it triggers an error. Thus, use
-        // deleteLater().
-        this.surface.deleteLater();
+        const oldSurface = this.surface;
+        /**
+         * Clear this.surface before scheduling deletion. If new surface creation
+         * throws, the finally block in processPendingResize() must not restart
+         * the loop against a surface that CanvasKit is about to delete.
+         *
+         * with surface.delete(), the surface object is immediately destroyed
+         * in WASM memory. However, because surface.requestAnimationFrame ties
+         * a callback to a specific surface instance, a pending animation frame
+         * for the old surface could still fire, and CanvasKit's internal
+         * wrapper would still attempt to call flush() on that surface pointer,
+         * and since the pointer is now invalid, it triggers an error. Thus, use
+         * deleteLater().
+         */
+        this.surface = undefined;
+        oldSurface.deleteLater();
       }
       this.setupCanvasKitSurface();
       this.setupFpsFont();
 
-      await this.imageManager.reinitializeAllImages();
+      if (devicePixelRatioChanged) {
+        await this.imageManager.reinitializeAllImages();
+      }
 
-      this.scenes.forEach((scene) => {
-        scene.scale = m2c2Globals.rootScale;
-        /**
-         * Force re-initialization of all scenes and their descendants
-         * to ensure all coordinates, sizes, and fonts are recalculated
-         * for the new scale and DPI.
-         */
-        scene.needsInitialization = true;
-        scene.descendants.forEach((node) => {
-          node.needsInitialization = true;
-        });
-      });
-      this.sceneManager.freeNodesScene.scale = m2c2Globals.rootScale;
-      this.sceneManager.freeNodesScene.needsInitialization = true;
-      this.sceneManager.freeNodesScene.descendants.forEach((node) => {
+      this.markAllScenesForInitialization();
+      this.commitResizeEnvironment(targetResizeEnvironment);
+    } catch (error) {
+      /**
+       * Keep the previous lastViewportWidth/Height/DPR values. They represent
+       * the last resize that actually completed, so preserving them ensures a
+       * future resize event with the same target dimensions will retry instead
+       * of being skipped as "already handled."
+       */
+      this.resizePending = true;
+      throw error;
+    }
+  }
+
+  private markAllScenesForInitialization(): void {
+    this.scenes.forEach((scene) => {
+      scene.scale = m2c2Globals.rootScale;
+      /**
+       * Force re-initialization of all scenes and their descendants
+       * to ensure all coordinates, sizes, and fonts are recalculated
+       * for the new scale and DPI.
+       */
+      scene.needsInitialization = true;
+      scene.descendants.forEach((node) => {
         node.needsInitialization = true;
       });
+    });
+    this.sceneManager.freeNodesScene.scale = m2c2Globals.rootScale;
+    this.sceneManager.freeNodesScene.needsInitialization = true;
+    this.sceneManager.freeNodesScene.descendants.forEach((node) => {
+      node.needsInitialization = true;
+    });
+  }
 
-      this.resizeTimeout = undefined;
-      this.isResizing = false;
-      if (this.surface) {
-        this.surface.requestAnimationFrame(this.loop.bind(this));
-      }
-    }, Constants.RESIZE_DEBOUNCE_MS);
-  };
+  private getCurrentResizeEnvironment(): ResizeEnvironment {
+    return {
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio,
+    };
+  }
+
+  private currentResizeEnvironmentMatchesLastApplied(): boolean {
+    const resizeEnvironment = this.getCurrentResizeEnvironment();
+    return (
+      resizeEnvironment.viewportWidth === this.lastViewportWidth &&
+      resizeEnvironment.viewportHeight === this.lastViewportHeight &&
+      resizeEnvironment.devicePixelRatio === this.lastDevicePixelRatio
+    );
+  }
+
+  private commitResizeEnvironment(resizeEnvironment: ResizeEnvironment): void {
+    this.lastViewportWidth = resizeEnvironment.viewportWidth;
+    this.lastViewportHeight = resizeEnvironment.viewportHeight;
+    this.lastDevicePixelRatio = resizeEnvironment.devicePixelRatio;
+  }
 
   private setupHtmlCanvases(
     canvasId: string | undefined,
@@ -2109,8 +2230,13 @@ export class Game implements Activity {
    * fit). Physical canvas attributes (width/height) are rounded to ensure
    * perfect alignment with the browser's physical pixel grid, which prevents
    * visual distortion during monitor transitions.
+   *
+   * @param commitResizeEnvironment - If true, record this viewport/DPR as the
+   * last applied resize state. Resize handling passes false because CanvasKit
+   * surface creation and image re-rendering still have to succeed before this
+   * environment can be considered handled.
    */
-  private applyCanvasScaling(): void {
+  private applyCanvasScaling(commitResizeEnvironment = true): void {
     if (this.htmlCanvas === undefined) {
       throw new M2Error("main html canvas is undefined");
     }
@@ -2121,25 +2247,27 @@ export class Game implements Activity {
 
     m2c2Globals.canvasScale = Math.round(window.devicePixelRatio * 100) / 100;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const dpr = window.devicePixelRatio;
+    const resizeEnvironment = this.getCurrentResizeEnvironment();
 
-    this.lastViewportWidth = viewportWidth;
-    this.lastViewportHeight = viewportHeight;
-    this.lastDevicePixelRatio = dpr;
+    if (commitResizeEnvironment) {
+      this.commitResizeEnvironment(resizeEnvironment);
+    }
 
-    if (viewportWidth === 0 || viewportHeight === 0) {
+    if (
+      resizeEnvironment.viewportWidth === 0 ||
+      resizeEnvironment.viewportHeight === 0
+    ) {
       return;
     }
 
     const requestedAspectRatio = height / width;
-    const actualAspectRatio = viewportHeight / viewportWidth;
+    const actualAspectRatio =
+      resizeEnvironment.viewportHeight / resizeEnvironment.viewportWidth;
 
     const calculatedScale =
       actualAspectRatio < requestedAspectRatio
-        ? viewportHeight / height
-        : viewportWidth / width;
+        ? resizeEnvironment.viewportHeight / height
+        : resizeEnvironment.viewportWidth / width;
 
     if (stretch) {
       m2c2Globals.rootScale = calculatedScale;
@@ -2177,6 +2305,7 @@ export class Game implements Activity {
       );
     }
     this.surface = surface;
+    this.surfaceGeneration++;
     console.log(
       `⚪ CanvasKit surface is backed by ${
         this.surface.reportBackendTypeIsGPU() ? "GPU" : "CPU"
@@ -2211,8 +2340,28 @@ export class Game implements Activity {
     this.inputManager = new InputManager(this, this.htmlCanvas);
   }
 
-  private loop(canvas: Canvas): void {
-    if (!this.loopRunning || this.isResizing) {
+  private requestNextFrame(): void {
+    if (!this.surface || !this.loopRunning) {
+      return;
+    }
+
+    /**
+     * The callback's canvas belongs to the surface that schedules it. Capture
+     * the current generation so loop() can ignore this callback if a resize
+     * replaces the surface before the browser/CanvasKit invokes it.
+     */
+    const surfaceGeneration = this.surfaceGeneration;
+    this.surface.requestAnimationFrame((canvas) => {
+      this.loop(canvas, surfaceGeneration);
+    });
+  }
+
+  private loop(canvas: Canvas, surfaceGeneration: number): void {
+    if (
+      !this.loopRunning ||
+      this.renderLoopPausedForResize ||
+      surfaceGeneration !== this.surfaceGeneration
+    ) {
       return;
     }
     if (!this.surface) {
@@ -2222,7 +2371,7 @@ export class Game implements Activity {
     if (this.warmupFunctionQueue.length > 0) {
       const warmup = this.warmupFunctionQueue.shift();
       warmup?.warmupFunction.call(this, canvas, warmup.positionOffset);
-      this.surface.requestAnimationFrame(this.loop.bind(this));
+      this.requestNextFrame();
       return;
     }
 
@@ -2238,7 +2387,7 @@ export class Game implements Activity {
         ...M2c2KitHelpers.createFrameUpdateTimestamps(),
       };
       this.raiseActivityEventOnListeners(gameWarmupEndEvent);
-      this.surface.requestAnimationFrame(this.loop.bind(this));
+      this.requestNextFrame();
       return;
     }
 
@@ -2300,7 +2449,7 @@ export class Game implements Activity {
     }
 
     this.priorUpdateTime = m2c2Globals.now;
-    this.surface.requestAnimationFrame(this.loop.bind(this));
+    this.requestNextFrame();
   }
 
   private updateGameTime(): void {
