@@ -1,7 +1,7 @@
 {
   "name": "@m2c2kit/assessments-demo",
   "description": "A demo of several m2c2kit assessments",
-  "version": "0.8.31",
+  "version": "0.8.32",
   "scripts": {
     "serve": "concurrently \"rolldown -c --watch --environment SERVE:true\" \"tsc --watch\" --names rolldown,typescript --prefix-colors auto,red",
     "build": "npm run clean && tsc && rolldown -c --environment PROD:true",
@@ -23,20 +23,20 @@
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "private": true,
   "dependencies": {
-    "@m2c2kit/addons": "0.3.35",
-    "@m2c2kit/assessment-cli-starter": "0.8.32",
-    "@m2c2kit/assessment-color-dots": "0.8.34",
-    "@m2c2kit/assessment-color-shapes": "0.8.34",
-    "@m2c2kit/assessment-grid-memory": "0.8.34",
-    "@m2c2kit/assessment-symbol-search": "0.8.34",
-    "@m2c2kit/core": "0.3.36",
-    "@m2c2kit/db": "0.3.30",
-    "@m2c2kit/embedding": "1.0.29",
-    "@m2c2kit/session": "0.3.18",
-    "@m2c2kit/survey": "0.3.31"
+    "@m2c2kit/addons": "0.3.36",
+    "@m2c2kit/assessment-cli-starter": "0.8.33",
+    "@m2c2kit/assessment-color-dots": "0.8.35",
+    "@m2c2kit/assessment-color-shapes": "0.8.35",
+    "@m2c2kit/assessment-grid-memory": "0.8.35",
+    "@m2c2kit/assessment-symbol-search": "0.8.35",
+    "@m2c2kit/core": "0.3.37",
+    "@m2c2kit/db": "0.3.31",
+    "@m2c2kit/embedding": "1.0.30",
+    "@m2c2kit/session": "0.3.19",
+    "@m2c2kit/survey": "0.3.32"
   },
   "devDependencies": {
-    "@m2c2kit/build-helpers": "0.3.32",
+    "@m2c2kit/build-helpers": "0.3.33",
     "concurrently": "10.0.3",
     "cross-env": "10.1.0",
     "rimraf": "6.1.3",

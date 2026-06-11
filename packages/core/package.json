@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/core",
-  "version": "0.3.36",
+  "version": "0.3.37",
   "description": "The m2c2kit core functionality",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -36,8 +36,8 @@
     "canvaskit-wasm": "0.41.1"
   },
   "devDependencies": {
-    "@eslint/js": "10.0.1",
-    "@m2c2kit/build-helpers": "0.3.32",
+    "@eslint/js": "^10.0.1",
+    "@m2c2kit/build-helpers": "0.3.33",
     "@types/jest": "30.0.0",
     "findup-sync": "5.0.0",
     "rimraf": "6.1.3",

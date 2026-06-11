@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/cli",
-  "version": "0.3.35",
+  "version": "0.3.36",
   "description": "Command line interface to create new m2c2kit apps",
   "files": [
     "dist/**"
@@ -29,7 +29,7 @@
     "@angular-devkit/core": "^22.0.0",
     "@angular-devkit/schematics": "^22.0.0",
     "@inquirer/prompts": "8.5.2",
-    "@m2c2kit/schematics": "0.1.35",
+    "@m2c2kit/schematics": "0.1.36",
     "ansi-colors": "4.1.3",
     "yargs-parser": "22.0.0"
   },

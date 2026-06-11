@@ -4,6 +4,168 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## `@m2c2kit/core` [0.3.37] - 2026-06-11
+
+### Added
+
+- `GameOptions.dynamicSizing` to control whether games resize when the viewport or device pixel ratio changes. The default is `true`. This can also be set with the `dynamic_sizing` parameter.
+- `M2c2KitHelpers.flat()` and `M2c2KitHelpers.flatMap()` helper methods to enable targeting older ES versions.
+
+### Changed
+
+- A breaking change is that `M2NodeOptions.suppressEvents` is renamed to `M2NodeOptions.isPartOfComposite`, but this is only used internally.
+- Updated dependencies.
+
+### Fixed
+
+- Shape stroke widths and fallback localization image borders scale correctly.
+- Cleanup of game resources when a game is stopped.
+
+## `@m2c2kit/addons` [0.3.36] - 2026-06-11
+
+### Fixed
+
+- `Grid` preserves descendants of grid children when it is reinitialized.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/session` [0.3.19] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/physics` [0.1.24] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/data-calc` [0.8.8] - 2026-06-11
+
+### Added
+
+- `DataCalc.pullScalar()` and `DataCalc.pullArray()` methods for explicit scalar and array extraction.
+
+### Fixed
+
+- Memory growth in chained summarize expressions.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/cli` [0.3.36] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schematics` [0.1.36] - 2026-06-11
+
+### Changed
+
+- Scaffolded app and module projects now use Rolldown-based build and serve configuration.
+- Updated dependencies.
+
+## `@m2c2kit/embedding` [1.0.30] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/build-helpers` [0.3.33] - 2026-06-11
+
+### Removed
+
+- `restoreImportMeta` helper since it is no longer needed in Rolldown-based build.
+
+### Fixed
+
+- Service worker generation and cache entries.
+- `copyAssets()` copies `data.html` from package assets.
+- Asset hashing no longer hashes `.htm` files.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/db` [0.3.31] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/survey` [0.3.32] - 2026-06-11
+
+### Fixed
+
+- Missing-locale fallback text in skip confirmation dialogs now includes the actual locale.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/schema-util` [0.1.27] - 2026-06-11
+
+### Fixed
+
+- Automatic schema extraction now works when bundled code emits `Game` or `DataManager` as class expressions.
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-registry` [0.1.16] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-symbol-search` [0.8.35] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-grid-memory` [0.8.35] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-shapes` [0.8.35] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-color-dots` [0.8.35] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessments-demo` [0.8.32] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/assessment-cli-starter` [0.8.33] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
+## `@m2c2kit/test-helpers` [0.1.0] - 2026-06-11
+
+### Changed
+
+- Updated dependencies.
+
 ## `@m2c2kit/core` [0.3.36] - 2026-03-10
 
 ### Changed

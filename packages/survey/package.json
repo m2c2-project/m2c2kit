@@ -1,6 +1,6 @@
 {
   "name": "@m2c2kit/survey",
-  "version": "0.3.31",
+  "version": "0.3.32",
   "description": "Survey functionality that can be added to m2c2kit apps, using survey-js",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://m2c2-project.github.io/m2c2kit",
   "dependencies": {
-    "@m2c2kit/core": "0.3.36",
+    "@m2c2kit/core": "0.3.37",
     "bootstrap-datepicker": "1.9.0",
     "bootstrap-slider": "10.6.2",
     "nouislider": "15.7.1",
