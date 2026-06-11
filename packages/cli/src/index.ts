@@ -2,7 +2,7 @@
 /**
  * The code in this file is adapted from a reference CLI implementation from
  * the Angular devkit repository:
- *   https://github.com/angular/angular-cli/blob/91b9d281fc88a242aa6e5dd5495e275990d926ef/packages/angular_devkit/schematics_cli/bin/schematics.ts
+ *   https://github.com/angular/angular-cli/blob/df985bf3d7ef1facc10f365aff221c1bc3582d1a/packages/angular_devkit/schematics_cli/bin/schematics.ts
  * The license for that code is as follows:
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -12,7 +12,6 @@
  */
 
 import { JsonValue, logging, schema } from "@angular-devkit/core";
-import { ProcessOutput, createConsoleLogger } from "@angular-devkit/core/node";
 import {
   UnsuccessfulWorkflowExecution,
   strings,
@@ -62,8 +61,8 @@ function removeLeadingSlash(value: string): string {
 
 export interface MainOptions {
   args: string[];
-  stdout?: ProcessOutput;
-  stderr?: ProcessOutput;
+  stdout?: NodeJS.WritableStream;
+  stderr?: NodeJS.WritableStream;
 }
 
 function _listSchematics(
@@ -221,7 +220,7 @@ function findUp(names: string | string[], from: string) {
 }
 
 /**
- * return package manager' name by lock file
+ * return package manager's name by lock file
  */
 function getPackageManagerName() {
   // order by check priority
@@ -238,6 +237,37 @@ function getPackageManagerName() {
   return "npm";
 }
 
+function createLogger(
+  verbose: boolean,
+  stdout: NodeJS.WritableStream,
+  stderr: NodeJS.WritableStream,
+): logging.Logger {
+  const logger = new logging.IndentLogger("schematics");
+  const colorLevels: Record<string, (message: string, stream: NodeJS.WritableStream) => string> = {
+    info: (s) => s,
+    debug: (s) => s,
+    warn: (s, stream) => styleText(["bold", "yellow"], s, { stream }),
+    error: (s, stream) => styleText(["bold", "red"], s, { stream }),
+    fatal: (s, stream) => styleText(["bold", "red"], s, { stream }),
+  };
+
+  logger.subscribe((entry) => {
+    if (entry.level === "debug" && !verbose) {
+      return;
+    }
+
+    const output =
+      entry.level === "warn" || entry.level === "fatal" || entry.level === "error"
+        ? stderr
+        : stdout;
+    const color = colorLevels[entry.level];
+    const message = color ? color(entry.message, output) : entry.message;
+    output.write(message + "\n");
+  });
+
+  return logger;
+}
+
 export async function main({
   args,
   stdout = process.stdout,
@@ -245,14 +275,7 @@ export async function main({
 }: MainOptions): Promise<0 | 1> {
   const { cliOptions, schematicOptions, _ } = parseOptions(args);
 
-  /** Create the DevKit Logger used through the CLI. */
-  const logger = createConsoleLogger(!!cliOptions.verbose, stdout, stderr, {
-    info: (s) => s,
-    debug: (s) => s,
-    warn: (s) => styleText(["bold", "yellow"], s),
-    error: (s) => styleText(["bold", "red"], s),
-    fatal: (s) => styleText(["bold", "red"], s),
-  });
+  const logger = createLogger(!!cliOptions.verbose, stdout, stderr);
 
   if (cliOptions.help) {
     logger.info(getUsage());
@@ -473,7 +496,6 @@ interface Options {
 }
 
 /** Parse the command line. */
-
 function parseOptions(args: string[]): Options {
   const { values, tokens } = parseArgs({
     args,

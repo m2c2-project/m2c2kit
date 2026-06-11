@@ -27,6 +27,7 @@ COPY . .
 
 ENV NODE_OPTIONS=--max_old_space_size=3072
 ENV CI=true
+ENV DO_NOT_TRACK=1
 
 RUN npm ci
 RUN npx playwright install --with-deps chromium

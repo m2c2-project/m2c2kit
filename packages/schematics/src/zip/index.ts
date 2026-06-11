@@ -1,6 +1,6 @@
 import { Rule, Tree } from "@angular-devkit/schematics";
 import { Observable } from "rxjs";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { mkdtemp } from "node:fs/promises";
@@ -114,7 +114,7 @@ export function zip(): Rule {
 }
 
 function zipFiles(sourceFiles: string[], outFile: string): Promise<void> {
-  const archive = archiver("zip", { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const stream = fs.createWriteStream(outFile);
   sourceFiles.forEach((file) => {
     archive.append(fs.createReadStream(file), { name: file });
