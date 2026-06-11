@@ -116,6 +116,10 @@ export class Game implements Activity {
   private loopRunning = false;
   private resizeObserver: ResizeObserver | undefined;
   private canvasContainer: HTMLElement | undefined;
+  private dpiQuery: MediaQueryList | undefined;
+  private dpiQueryListener = () => {
+    this.handleResize();
+  };
   private webGlContextAcquired = false;
   private isStarted = false;
   /**
@@ -835,8 +839,19 @@ export class Game implements Activity {
         return;
       }
 
+      // dynamic_sizing is a special case; it is passed to GameOptions, not
+      // GameOptions.parameters, to determine sizing behavior.
+      if (key === "dynamic_sizing") {
+        this.options.dynamicSizing =
+          (sanitizedParams as { [key: string]: boolean | string })[key] ===
+            true ||
+          (sanitizedParams as { [key: string]: boolean | string })[key] ===
+            "true";
+        return;
+      }
+
       // stretch is a special case; it is passed to GameOptions, not
-      // GameOptions.parameters, to determine sizing nehavior.
+      // GameOptions.parameters, to determine sizing behavior.
       if (key === "stretch") {
         this.options.stretch =
           (sanitizedParams as { [key: string]: boolean | string })[key] ===
@@ -1169,26 +1184,26 @@ export class Game implements Activity {
     this.setupFpsFont();
     this.setupInputManager();
 
-    this.canvasContainer =
-      this.htmlCanvas?.parentElement ?? (this.htmlCanvas as HTMLElement);
+    if (this.isDynamicSizingEnabled) {
+      this.canvasContainer =
+        this.htmlCanvas?.parentElement ?? (this.htmlCanvas as HTMLElement);
 
-    this.resizeObserver = new ResizeObserver(() => {
-      this.handleResize();
-    });
-    this.resizeObserver.observe(this.canvasContainer);
+      this.resizeObserver = new ResizeObserver(() => {
+        this.handleResize();
+      });
+      this.resizeObserver.observe(this.canvasContainer);
 
-    /**
-     * We also listen to DPI changes via matchMedia as ResizeObserver
-     * might not catch all resolution-only shifts on some browsers.
-     */
-    const dpiQuery = window.matchMedia(
-      `(resolution: ${window.devicePixelRatio}dppx)`,
-    );
-    dpiQuery.addEventListener("change", () => {
-      this.handleResize();
-    });
+      /**
+       * We also listen to DPI changes via matchMedia as ResizeObserver
+       * might not catch all resolution-only shifts on some browsers.
+       */
+      this.dpiQuery = window.matchMedia(
+        `(resolution: ${window.devicePixelRatio}dppx)`,
+      );
+      this.dpiQuery.addEventListener("change", this.dpiQueryListener);
 
-    window.addEventListener("resize", this.handleResize);
+      window.addEventListener("resize", this.handleResize);
+    }
 
     this.beginTimestamp = Timer.now();
     this.beginIso8601Timestamp = new Date().toISOString();
@@ -1663,6 +1678,10 @@ export class Game implements Activity {
       this.resizeObserver.disconnect();
       this.resizeObserver = undefined;
     }
+    if (this.dpiQuery) {
+      this.dpiQuery.removeEventListener("change", this.dpiQueryListener);
+      this.dpiQuery = undefined;
+    }
     if (this.resizeTimeout) {
       window.clearTimeout(this.resizeTimeout);
     }
@@ -2004,7 +2023,7 @@ export class Game implements Activity {
    * reinitialized only when DPR changes.
    */
   private handleResize = (): void => {
-    if (!this.isStarted) {
+    if (!this.isStarted || !this.isDynamicSizingEnabled) {
       return;
     }
 
@@ -2031,6 +2050,10 @@ export class Game implements Activity {
       });
     }, Constants.RESIZE_DEBOUNCE_MS);
   };
+
+  private get isDynamicSizingEnabled(): boolean {
+    return this.options.dynamicSizing !== false;
+  }
 
   private async processPendingResize(): Promise<void> {
     if (this.resizeProcessing) {

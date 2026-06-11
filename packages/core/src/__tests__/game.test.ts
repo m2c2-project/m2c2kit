@@ -842,6 +842,101 @@ describe("Game start", () => {
     await g2.start();
     expect(m2c2Globals.rootScale).toBe(1.5);
   });
+
+  it("registers dynamic sizing resize listeners by default", async () => {
+    const addEventListenerSpy = jest.spyOn(window, "addEventListener");
+    const removeDpiListener = jest.fn();
+    (window.matchMedia as jest.Mock).mockImplementationOnce((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: removeDpiListener,
+      dispatchEvent: jest.fn(),
+    }));
+
+    await g1.start();
+
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "resize",
+      expect.any(Function),
+    );
+    expect(window.matchMedia).toHaveBeenCalledWith(
+      `(resolution: ${window.devicePixelRatio}dppx)`,
+    );
+
+    g1.stop();
+
+    expect(removeDpiListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+    );
+
+    addEventListenerSpy.mockRestore();
+  });
+
+  it("does not register dynamic sizing resize listeners when disabled", async () => {
+    class StaticSizingGame extends Game {
+      constructor() {
+        const gameOptions: GameOptions = {
+          name: "staticSizingGame",
+          id: "staticSizingGame",
+          publishUuid: "00000000-0000-0000-0000-000000000000",
+          version: "0.1",
+          width: 400,
+          height: 800,
+          dynamicSizing: false,
+        };
+
+        super(gameOptions);
+      }
+
+      async initialize() {
+        await super.initialize();
+        const scene = new Scene({
+          name: "staticSizingScene",
+        });
+        this.addScene(scene);
+        this.entryScene = scene;
+      }
+    }
+
+    const addEventListenerSpy = jest.spyOn(window, "addEventListener");
+    const staticSizingGame = new StaticSizingGame();
+
+    try {
+      await staticSizingGame.initialize();
+      await staticSizingGame.start();
+
+      expect(addEventListenerSpy).not.toHaveBeenCalledWith(
+        "resize",
+        expect.any(Function),
+      );
+      expect(window.matchMedia).not.toHaveBeenCalled();
+    } finally {
+      staticSizingGame.stop();
+      addEventListenerSpy.mockRestore();
+    }
+  });
+
+  it("does not register dynamic sizing resize listeners when disabled by parameter", async () => {
+    const addEventListenerSpy = jest.spyOn(window, "addEventListener");
+
+    try {
+      g1.setParameters({ dynamic_sizing: false });
+      await g1.start();
+
+      expect(addEventListenerSpy).not.toHaveBeenCalledWith(
+        "resize",
+        expect.any(Function),
+      );
+      expect(window.matchMedia).not.toHaveBeenCalled();
+    } finally {
+      addEventListenerSpy.mockRestore();
+    }
+  });
 });
 
 describe("free nodes", () => {

@@ -64,6 +64,8 @@ export interface GameOptions extends LocalizationOptions {
   logWebGl?: boolean;
   /** Should games within a session share wasm and font assets that have identical filenames, in order to reduce bandwidth? Default is true. */
   shareAssets?: boolean;
+  /** Should the game dynamically resize to fit the viewport and respond to DPI changes? Default is true */
+  dynamicSizing?: boolean;
   /** Game's module name, version, and dependencies. @internal For m2c2kit library use only */
   moduleMetadata?: ModuleMetadata;
 }
